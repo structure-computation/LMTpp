@@ -1,6 +1,6 @@
 import sys, re, string
 from formal_lf import *
-
+# gro toto
 def print_gauss_point_for_order(e):
     print 'inline const double *gauss_point_for_order(unsigned order, const %s &elem) { /// order -> degre du polynome a integrer exactement' % e.name
     print '    static const unsigned offset[] = {',
