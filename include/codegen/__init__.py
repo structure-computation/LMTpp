@@ -1,0 +1,88 @@
+from codegen import *
+
+def matrix(l):
+    if ( len(l)==0 ):
+        return ExMatrix( 0, 0 )
+    
+    res = ExMatrix( len(l), len(l[0]) )
+    for i in range(len(l)):
+        for j in range(len(l[0])):
+            res[i,j] = l[i][j]
+    return res
+
+def vector(l):
+    res = ExVector( len(l) )
+    for i in range(len(l)):
+        res[i] = l[i]
+    return res
+
+def mat_sym_to_vec_col(m):
+  res = []
+  
+  if m.nb_rows()==2:
+    res=[ m[0,0], m[1,1], m[1,0] ]
+  elif m.nb_rows()==3:
+    res=[ m[0,0], m[1,1], m[2,2], m[0,1], m[0,2], m[1,2] ] # as abaqus
+  #for d in range(m.nb_rows()):
+      #for e in range(m.nb_rows()-d):
+         #res.append( m[e,d+e] )
+#   for i in range(m.nb_rows()):
+#     res.append( m[i,i] )
+#   
+#   for i in range(m.nb_rows()):
+#     for j in range(i):
+#       res.append( m[i,j] )
+  return vector(res)
+
+def vec_col_to_mat_sym(v):
+   res = []
+   if v.size()==3:
+      res=matrix([[v[0],v[2]],[v[2],v[1]]])
+   elif v.size()==6:
+      res=matrix([ [v[0],v[3],v[4]] , [v[3],v[1],v[5]] , [v[4],v[5],v[2]] ])
+   return res
+      
+def mul(A,B):
+  if isinstance(B,ExVector):
+    res = []
+    for i in range(A.nb_rows()):
+      tmp = 0.0
+      for j in range(A.nb_cols()):
+        tmp += A[i,j] * B[j]
+      res.append( tmp )
+    return vector( res )
+    
+  assert A.nb_cols()==B.nb_rows()
+  res = [ [ 0.0 for j in range(B.nb_cols()) ] for i in range(A.nb_rows()) ]
+  for i in range(A.nb_rows()):
+    for j in range(B.nb_cols()):
+      for k in range(A.nb_cols()):
+        res[i][j] += A[i,k] * B[k,j]
+  return matrix( res )
+
+def vectorial_product(v1,v2):
+  if v1.size()==2: return vector([ v1[1]*v2, -v1[0]*v2 ])
+  if v2.size()==2: return vector([ -v1*v2[1], v1*v2[0] ])
+  # 3 D
+  return vector([
+    v1[1]*v2[2] - v1[2]*v2[1],
+    v1[2]*v2[0] - v1[0]*v2[2],
+    v1[0]*v2[1] - v1[1]*v2[0]
+  ])
+
+def trace_sym_col(sigma,epstest):
+    res = 0
+    dim = (sigma.size()+1)/2
+    for i in range(dim): res += sigma[i] * epstest[i]
+    for i in range(dim,epstest.size()): res += 2 * sigma[i] * epstest[i]
+    return res
+
+## procedure recursive pour 
+#def multivariate_poly( coeffs, variables, cpt_variable = 0 ):
+    #res = Ex(0)
+
+    #degree,cpt = 0,0
+    ##while cpt < len( coeffs ):
+        
+
+

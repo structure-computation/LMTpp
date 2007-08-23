@@ -1,0 +1,9 @@
+Import('env')
+
+src = [
+    'ldl.c',
+]
+
+lib = env.Library('LMT_LDL', src, CPPFLAGS = '-DDINT' )
+
+Return('lib')

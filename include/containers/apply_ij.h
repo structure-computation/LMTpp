@@ -1,0 +1,229 @@
+//
+// C++ Interface: apply_ij
+//
+// Description: 
+//
+//
+// Author: Hugo LECLERC <leclerc@lmt.ens-cachan.fr>, (C) 2005
+//
+// Copyright: See COPYING file that comes with this distribution
+//
+//
+#ifndef LMT_apply_ij_HEADER
+#define LMT_apply_ij_HEADER
+
+#include "number.h"
+
+namespace LMT {
+
+namespace LMTPRIVATE {
+    struct Apply_IJB {
+        template<class T2,class T1,class Op> void operator()(const T2 &t2,const T1 &t1,const Op &op) { op(t1,i,t2,j++); }
+        template<class T2,class T1,class Op> void operator()(const T2 &t2,const T1 &t1,Op &op) { op(t1,i,t2,j++); }
+        template<class T2,class T1,class Op> void operator()(const T2 &t2,T1 &t1,const Op &op) { op(t1,i,t2,j++); }
+        template<class T2,class T1,class Op> void operator()(const T2 &t2,T1 &t1,Op &op) { op(t1,i,t2,j++); }
+        template<class T2,class T1,class Op> void operator()(T2 &t2,const T1 &t1,const Op &op) { op(t1,i,t2,j++); }
+        template<class T2,class T1,class Op> void operator()(T2 &t2,const T1 &t1,Op &op) { op(t1,i,t2,j++); }
+        template<class T2,class T1,class Op> void operator()(T2 &t2,T1 &t1,const Op &op) { op(t1,i,t2,j++); }
+        template<class T2,class T1,class Op> void operator()(T2 &t2,T1 &t1,Op &op) { op(t1,i,t2,j++); }
+        
+        template<class T2,class T1,class Op,class P0> void operator()(const T2 &t2,const T1 &t1,const Op &op,const P0 &p0) { op(t1,i,t2,j++,p0); }
+        template<class T2,class T1,class Op,class P0> void operator()(const T2 &t2,const T1 &t1,Op &op,const P0 &p0) { op(t1,i,t2,j++,p0); }
+        template<class T2,class T1,class Op,class P0> void operator()(const T2 &t2,T1 &t1,const Op &op,const P0 &p0) { op(t1,i,t2,j++,p0); }
+        template<class T2,class T1,class Op,class P0> void operator()(const T2 &t2,T1 &t1,Op &op,const P0 &p0) { op(t1,i,t2,j++,p0); }
+        template<class T2,class T1,class Op,class P0> void operator()(T2 &t2,const T1 &t1,const Op &op,const P0 &p0) { op(t1,i,t2,j++,p0); }
+        template<class T2,class T1,class Op,class P0> void operator()(T2 &t2,const T1 &t1,Op &op,const P0 &p0) { op(t1,i,t2,j++,p0); }
+        template<class T2,class T1,class Op,class P0> void operator()(T2 &t2,T1 &t1,const Op &op,const P0 &p0) { op(t1,i,t2,j++,p0); }
+        template<class T2,class T1,class Op,class P0> void operator()(T2 &t2,T1 &t1,Op &op,const P0 &p0) { op(t1,i,t2,j++,p0); }
+        
+        template<class T2,class T1,class Op,class P0> void operator()(const T2 &t2,const T1 &t1,const Op &op,P0 &p0) { op(t1,i,t2,j++,p0); }
+        template<class T2,class T1,class Op,class P0> void operator()(const T2 &t2,const T1 &t1,Op &op,P0 &p0) { op(t1,i,t2,j++,p0); }
+        template<class T2,class T1,class Op,class P0> void operator()(const T2 &t2,T1 &t1,const Op &op,P0 &p0) { op(t1,i,t2,j++,p0); }
+        template<class T2,class T1,class Op,class P0> void operator()(const T2 &t2,T1 &t1,Op &op,P0 &p0) { op(t1,i,t2,j++,p0); }
+        template<class T2,class T1,class Op,class P0> void operator()(T2 &t2,const T1 &t1,const Op &op,P0 &p0) { op(t1,i,t2,j++,p0); }
+        template<class T2,class T1,class Op,class P0> void operator()(T2 &t2,const T1 &t1,Op &op,P0 &p0) { op(t1,i,t2,j++,p0); }
+        template<class T2,class T1,class Op,class P0> void operator()(T2 &t2,T1 &t1,const Op &op,P0 &p0) { op(t1,i,t2,j++,p0); }
+        template<class T2,class T1,class Op,class P0> void operator()(T2 &t2,T1 &t1,Op &op,P0 &p0) { op(t1,i,t2,j++,p0); }
+        unsigned i,j;
+    };
+    struct Apply_IJ {
+        Apply_IJ() { a.i=0; }
+        //
+        template<class T1,class HET2,class Op> void operator()(const T1 &t1,const HET2 &het2,const Op &op) { a.j=0; apply(het2,a,t1,op); ++a.i; }
+        template<class T1,class HET2,class Op> void operator()(const T1 &t1,const HET2 &het2,Op &op) { a.j=0; apply(het2,a,t1,op); ++a.i; }
+        template<class T1,class HET2,class Op> void operator()(const T1 &t1,HET2 &het2,const Op &op) { a.j=0; apply(het2,a,t1,op); ++a.i; }
+        template<class T1,class HET2,class Op> void operator()(const T1 &t1,HET2 &het2,Op &op) { a.j=0; apply(het2,a,t1,op); ++a.i; }
+        template<class T1,class HET2,class Op> void operator()(T1 &t1,const HET2 &het2,const Op &op) { a.j=0; apply(het2,a,t1,op); ++a.i; }
+        template<class T1,class HET2,class Op> void operator()(T1 &t1,const HET2 &het2,Op &op) { a.j=0; apply(het2,a,t1,op); ++a.i; }
+        template<class T1,class HET2,class Op> void operator()(T1 &t1,HET2 &het2,const Op &op) { a.j=0; apply(het2,a,t1,op); ++a.i; }
+        template<class T1,class HET2,class Op> void operator()(T1 &t1,HET2 &het2,Op &op) { a.j=0; apply(het2,a,t1,op); ++a.i; }
+        //
+        template<class T1,class HET2,class Op,class P0> void operator()(const T1 &t1,const HET2 &het2,const Op &op,const P0 &p0) { a.j=0; apply(het2,a,t1,op,p0); ++a.i; }
+        template<class T1,class HET2,class Op,class P0> void operator()(const T1 &t1,const HET2 &het2,Op &op,const P0 &p0) { a.j=0; apply(het2,a,t1,op,p0); ++a.i; }
+        template<class T1,class HET2,class Op,class P0> void operator()(const T1 &t1,HET2 &het2,const Op &op,const P0 &p0) { a.j=0; apply(het2,a,t1,op,p0); ++a.i; }
+        template<class T1,class HET2,class Op,class P0> void operator()(const T1 &t1,HET2 &het2,Op &op,const P0 &p0) { a.j=0; apply(het2,a,t1,op,p0); ++a.i; }
+        template<class T1,class HET2,class Op,class P0> void operator()(T1 &t1,const HET2 &het2,const Op &op,const P0 &p0) { a.j=0; apply(het2,a,t1,op,p0); ++a.i; }
+        template<class T1,class HET2,class Op,class P0> void operator()(T1 &t1,const HET2 &het2,Op &op,const P0 &p0) { a.j=0; apply(het2,a,t1,op,p0); ++a.i; }
+        template<class T1,class HET2,class Op,class P0> void operator()(T1 &t1,HET2 &het2,const Op &op,const P0 &p0) { a.j=0; apply(het2,a,t1,op,p0); ++a.i; }
+        template<class T1,class HET2,class Op,class P0> void operator()(T1 &t1,HET2 &het2,Op &op,const P0 &p0) { a.j=0; apply(het2,a,t1,op,p0); ++a.i; }
+        //
+        template<class T1,class HET2,class Op,class P0> void operator()(const T1 &t1,const HET2 &het2,const Op &op,P0 &p0) { a.j=0; apply(het2,a,t1,op,p0); ++a.i; }
+        template<class T1,class HET2,class Op,class P0> void operator()(const T1 &t1,const HET2 &het2,Op &op,P0 &p0) { a.j=0; apply(het2,a,t1,op,p0); ++a.i; }
+        template<class T1,class HET2,class Op,class P0> void operator()(const T1 &t1,HET2 &het2,const Op &op,P0 &p0) { a.j=0; apply(het2,a,t1,op,p0); ++a.i; }
+        template<class T1,class HET2,class Op,class P0> void operator()(const T1 &t1,HET2 &het2,Op &op,P0 &p0) { a.j=0; apply(het2,a,t1,op,p0); ++a.i; }
+        template<class T1,class HET2,class Op,class P0> void operator()(T1 &t1,const HET2 &het2,const Op &op,P0 &p0) { a.j=0; apply(het2,a,t1,op,p0); ++a.i; }
+        template<class T1,class HET2,class Op,class P0> void operator()(T1 &t1,const HET2 &het2,Op &op,P0 &p0) { a.j=0; apply(het2,a,t1,op,p0); ++a.i; }
+        template<class T1,class HET2,class Op,class P0> void operator()(T1 &t1,HET2 &het2,const Op &op,P0 &p0) { a.j=0; apply(het2,a,t1,op,p0); ++a.i; }
+        template<class T1,class HET2,class Op,class P0> void operator()(T1 &t1,HET2 &het2,Op &op,P0 &p0) { a.j=0; apply(het2,a,t1,op,p0); ++a.i; }
+        
+        Apply_IJB a;
+    };
+    template<bool eq> struct Apply_ISJ {
+        Apply_ISJ() { a.i=0; }
+        //
+        template<class T1,class HET2,class Op> void operator()(const T1 &t1,const HET2 &het2,const Op &op) { a.j=0; unsigned cpt=a.i+eq; apply_range(het2,0,cpt,a,t1,op); ++a.i; }
+        template<class T1,class HET2,class Op> void operator()(const T1 &t1,const HET2 &het2,Op &op) { a.j=0; unsigned cpt=a.i+eq; apply_range(het2,0,cpt,a,t1,op); ++a.i; }
+        template<class T1,class HET2,class Op> void operator()(const T1 &t1,HET2 &het2,const Op &op) { a.j=0; unsigned cpt=a.i+eq; apply_range(het2,0,cpt,a,t1,op); ++a.i; }
+        template<class T1,class HET2,class Op> void operator()(const T1 &t1,HET2 &het2,Op &op) { a.j=0; unsigned cpt=a.i+eq; apply_range(het2,0,cpt,a,t1,op); ++a.i; }
+        template<class T1,class HET2,class Op> void operator()(T1 &t1,const HET2 &het2,const Op &op) { a.j=0; unsigned cpt=a.i+eq; apply_range(het2,0,cpt,a,t1,op); ++a.i; }
+        template<class T1,class HET2,class Op> void operator()(T1 &t1,const HET2 &het2,Op &op) { a.j=0; unsigned cpt=a.i+eq; apply_range(het2,0,cpt,a,t1,op); ++a.i; }
+        template<class T1,class HET2,class Op> void operator()(T1 &t1,HET2 &het2,const Op &op) { a.j=0; unsigned cpt=a.i+eq; apply_range(het2,0,cpt,a,t1,op); ++a.i; }
+        template<class T1,class HET2,class Op> void operator()(T1 &t1,HET2 &het2,Op &op) { a.j=0; unsigned cpt=a.i+eq; apply_range(het2,0,cpt,a,t1,op); ++a.i; }
+        //
+        template<class T1,class HET2,class Op,class P0> void operator()(const T1 &t1,const HET2 &het2,const Op &op,const P0 &p0) { a.j=0; unsigned cpt=a.i+eq; apply_range(het2,0,cpt,a,t1,op,p0); ++a.i; }
+        template<class T1,class HET2,class Op,class P0> void operator()(const T1 &t1,const HET2 &het2,Op &op,const P0 &p0) { a.j=0; unsigned cpt=a.i+eq; apply_range(het2,0,cpt,a,t1,op,p0); ++a.i; }
+        template<class T1,class HET2,class Op,class P0> void operator()(const T1 &t1,HET2 &het2,const Op &op,const P0 &p0) { a.j=0; unsigned cpt=a.i+eq; apply_range(het2,0,cpt,a,t1,op,p0); ++a.i; }
+        template<class T1,class HET2,class Op,class P0> void operator()(const T1 &t1,HET2 &het2,Op &op,const P0 &p0) { a.j=0; unsigned cpt=a.i+eq; apply_range(het2,0,cpt,a,t1,op,p0); ++a.i; }
+        template<class T1,class HET2,class Op,class P0> void operator()(T1 &t1,const HET2 &het2,const Op &op,const P0 &p0) { a.j=0; unsigned cpt=a.i+eq; apply_range(het2,0,cpt,a,t1,op,p0); ++a.i; }
+        template<class T1,class HET2,class Op,class P0> void operator()(T1 &t1,const HET2 &het2,Op &op,const P0 &p0) { a.j=0; unsigned cpt=a.i+eq; apply_range(het2,0,cpt,a,t1,op,p0); ++a.i; }
+        template<class T1,class HET2,class Op,class P0> void operator()(T1 &t1,HET2 &het2,const Op &op,const P0 &p0) { a.j=0; unsigned cpt=a.i+eq; apply_range(het2,0,cpt,a,t1,op,p0); ++a.i; }
+        template<class T1,class HET2,class Op,class P0> void operator()(T1 &t1,HET2 &het2,Op &op,const P0 &p0) { a.j=0; unsigned cpt=a.i+eq; apply_range(het2,0,cpt,a,t1,op,p0); ++a.i; }
+        //
+        template<class T1,class HET2,class Op,class P0> void operator()(const T1 &t1,const HET2 &het2,const Op &op,P0 &p0) { a.j=0; unsigned cpt=a.i+eq; apply_range(het2,0,cpt,a,t1,op,p0); ++a.i; }
+        template<class T1,class HET2,class Op,class P0> void operator()(const T1 &t1,const HET2 &het2,Op &op,P0 &p0) { a.j=0; unsigned cpt=a.i+eq; apply_range(het2,0,cpt,a,t1,op,p0); ++a.i; }
+        template<class T1,class HET2,class Op,class P0> void operator()(const T1 &t1,HET2 &het2,const Op &op,P0 &p0) { a.j=0; unsigned cpt=a.i+eq; apply_range(het2,0,cpt,a,t1,op,p0); ++a.i; }
+        template<class T1,class HET2,class Op,class P0> void operator()(const T1 &t1,HET2 &het2,Op &op,P0 &p0) { a.j=0; unsigned cpt=a.i+eq; apply_range(het2,0,cpt,a,t1,op,p0); ++a.i; }
+        template<class T1,class HET2,class Op,class P0> void operator()(T1 &t1,const HET2 &het2,const Op &op,P0 &p0) { a.j=0; unsigned cpt=a.i+eq; apply_range(het2,0,cpt,a,t1,op,p0); ++a.i; }
+        template<class T1,class HET2,class Op,class P0> void operator()(T1 &t1,const HET2 &het2,Op &op,P0 &p0) { a.j=0; unsigned cpt=a.i+eq; apply_range(het2,0,cpt,a,t1,op,p0); ++a.i; }
+        template<class T1,class HET2,class Op,class P0> void operator()(T1 &t1,HET2 &het2,const Op &op,P0 &p0) { a.j=0; unsigned cpt=a.i+eq; apply_range(het2,0,cpt,a,t1,op,p0); ++a.i; }
+        template<class T1,class HET2,class Op,class P0> void operator()(T1 &t1,HET2 &het2,Op &op,P0 &p0) { a.j=0; unsigned cpt=a.i+eq; apply_range(het2,0,cpt,a,t1,op,p0); ++a.i; }
+        
+        Apply_IJB a;
+    };
+};
+
+///
+template<class HET1,class HET2,class Op> void apply_ij(const HET1 &het1,const HET2 &het2,const Op &op) { LMTPRIVATE::Apply_IJ hva; apply(het1,hva,het2,op); }
+template<class HET1,class HET2,class Op> void apply_ij(const HET1 &het1,const HET2 &het2,Op &op) { LMTPRIVATE::Apply_IJ hva; apply(het1,hva,het2,op); }
+template<class HET1,class HET2,class Op> void apply_ij(const HET1 &het1,HET2 &het2,const Op &op) { LMTPRIVATE::Apply_IJ hva; apply(het1,hva,het2,op); }
+template<class HET1,class HET2,class Op> void apply_ij(const HET1 &het1,HET2 &het2,Op &op) { LMTPRIVATE::Apply_IJ hva; apply(het1,hva,het2,op); }
+template<class HET1,class HET2,class Op> void apply_ij(HET1 &het1,const HET2 &het2,const Op &op) { LMTPRIVATE::Apply_IJ hva; apply(het1,hva,het2,op); }
+template<class HET1,class HET2,class Op> void apply_ij(HET1 &het1,const HET2 &het2,Op &op) { LMTPRIVATE::Apply_IJ hva; apply(het1,hva,het2,op); }
+template<class HET1,class HET2,class Op> void apply_ij(HET1 &het1,HET2 &het2,const Op &op) { LMTPRIVATE::Apply_IJ hva; apply(het1,hva,het2,op); }
+template<class HET1,class HET2,class Op> void apply_ij(HET1 &het1,HET2 &het2,Op &op) { LMTPRIVATE::Apply_IJ hva; apply(het1,hva,het2,op); }
+///
+template<class HET1,class HET2,class Op,class P0> void apply_ij(const HET1 &het1,const HET2 &het2,const Op &op,const P0 &p0) { LMTPRIVATE::Apply_IJ hva; apply(het1,hva,het2,op,p0); }
+template<class HET1,class HET2,class Op,class P0> void apply_ij(const HET1 &het1,const HET2 &het2,Op &op,const P0 &p0) { LMTPRIVATE::Apply_IJ hva; apply(het1,hva,het2,op,p0); }
+template<class HET1,class HET2,class Op,class P0> void apply_ij(const HET1 &het1,HET2 &het2,const Op &op,const P0 &p0) { LMTPRIVATE::Apply_IJ hva; apply(het1,hva,het2,op,p0); }
+template<class HET1,class HET2,class Op,class P0> void apply_ij(const HET1 &het1,HET2 &het2,Op &op,const P0 &p0) { LMTPRIVATE::Apply_IJ hva; apply(het1,hva,het2,op,p0); }
+template<class HET1,class HET2,class Op,class P0> void apply_ij(HET1 &het1,const HET2 &het2,const Op &op,const P0 &p0) { LMTPRIVATE::Apply_IJ hva; apply(het1,hva,het2,op,p0); }
+template<class HET1,class HET2,class Op,class P0> void apply_ij(HET1 &het1,const HET2 &het2,Op &op,const P0 &p0) { LMTPRIVATE::Apply_IJ hva; apply(het1,hva,het2,op,p0); }
+template<class HET1,class HET2,class Op,class P0> void apply_ij(HET1 &het1,HET2 &het2,const Op &op,const P0 &p0) { LMTPRIVATE::Apply_IJ hva; apply(het1,hva,het2,op,p0); }
+template<class HET1,class HET2,class Op,class P0> void apply_ij(HET1 &het1,HET2 &het2,Op &op,const P0 &p0) { LMTPRIVATE::Apply_IJ hva; apply(het1,hva,het2,op,p0); }
+///
+template<class HET1,class HET2,class Op,class P0> void apply_ij(const HET1 &het1,const HET2 &het2,const Op &op,P0 &p0) { LMTPRIVATE::Apply_IJ hva; apply(het1,hva,het2,op,p0); }
+template<class HET1,class HET2,class Op,class P0> void apply_ij(const HET1 &het1,const HET2 &het2,Op &op,P0 &p0) { LMTPRIVATE::Apply_IJ hva; apply(het1,hva,het2,op,p0); }
+template<class HET1,class HET2,class Op,class P0> void apply_ij(const HET1 &het1,HET2 &het2,const Op &op,P0 &p0) { LMTPRIVATE::Apply_IJ hva; apply(het1,hva,het2,op,p0); }
+template<class HET1,class HET2,class Op,class P0> void apply_ij(const HET1 &het1,HET2 &het2,Op &op,P0 &p0) { LMTPRIVATE::Apply_IJ hva; apply(het1,hva,het2,op,p0); }
+template<class HET1,class HET2,class Op,class P0> void apply_ij(HET1 &het1,const HET2 &het2,const Op &op,P0 &p0) { LMTPRIVATE::Apply_IJ hva; apply(het1,hva,het2,op,p0); }
+template<class HET1,class HET2,class Op,class P0> void apply_ij(HET1 &het1,const HET2 &het2,Op &op,P0 &p0) { LMTPRIVATE::Apply_IJ hva; apply(het1,hva,het2,op,p0); }
+template<class HET1,class HET2,class Op,class P0> void apply_ij(HET1 &het1,HET2 &het2,const Op &op,P0 &p0) { LMTPRIVATE::Apply_IJ hva; apply(het1,hva,het2,op,p0); }
+template<class HET1,class HET2,class Op,class P0> void apply_ij(HET1 &het1,HET2 &het2,Op &op,P0 &p0) { LMTPRIVATE::Apply_IJ hva; apply(het1,hva,het2,op,p0); }
+
+
+///
+template<class HET1,class HET2,class Op> void apply_i_supeq_j(const HET1 &het1,const HET2 &het2,const Op &op) { LMTPRIVATE::Apply_ISJ<true> hva; apply(het1,hva,het2,op); }
+template<class HET1,class HET2,class Op> void apply_i_supeq_j(const HET1 &het1,const HET2 &het2,Op &op) { LMTPRIVATE::Apply_ISJ<true> hva; apply(het1,hva,het2,op); }
+template<class HET1,class HET2,class Op> void apply_i_supeq_j(const HET1 &het1,HET2 &het2,const Op &op) { LMTPRIVATE::Apply_ISJ<true> hva; apply(het1,hva,het2,op); }
+template<class HET1,class HET2,class Op> void apply_i_supeq_j(const HET1 &het1,HET2 &het2,Op &op) { LMTPRIVATE::Apply_ISJ<true> hva; apply(het1,hva,het2,op); }
+template<class HET1,class HET2,class Op> void apply_i_supeq_j(HET1 &het1,const HET2 &het2,const Op &op) { LMTPRIVATE::Apply_ISJ<true> hva; apply(het1,hva,het2,op); }
+template<class HET1,class HET2,class Op> void apply_i_supeq_j(HET1 &het1,const HET2 &het2,Op &op) { LMTPRIVATE::Apply_ISJ<true> hva; apply(het1,hva,het2,op); }
+template<class HET1,class HET2,class Op> void apply_i_supeq_j(HET1 &het1,HET2 &het2,const Op &op) { LMTPRIVATE::Apply_ISJ<true> hva; apply(het1,hva,het2,op); }
+template<class HET1,class HET2,class Op> void apply_i_supeq_j(HET1 &het1,HET2 &het2,Op &op) { LMTPRIVATE::Apply_ISJ<true> hva; apply(het1,hva,het2,op); }
+///
+template<class HET1,class HET2,class Op,class P0> void apply_i_supeq_j(const HET1 &het1,const HET2 &het2,const Op &op,const P0 &p0) { LMTPRIVATE::Apply_ISJ<true> hva; apply(het1,hva,het2,op,p0); }
+template<class HET1,class HET2,class Op,class P0> void apply_i_supeq_j(const HET1 &het1,const HET2 &het2,Op &op,const P0 &p0) { LMTPRIVATE::Apply_ISJ<true> hva; apply(het1,hva,het2,op,p0); }
+template<class HET1,class HET2,class Op,class P0> void apply_i_supeq_j(const HET1 &het1,HET2 &het2,const Op &op,const P0 &p0) { LMTPRIVATE::Apply_ISJ<true> hva; apply(het1,hva,het2,op,p0); }
+template<class HET1,class HET2,class Op,class P0> void apply_i_supeq_j(const HET1 &het1,HET2 &het2,Op &op,const P0 &p0) { LMTPRIVATE::Apply_ISJ<true> hva; apply(het1,hva,het2,op,p0); }
+template<class HET1,class HET2,class Op,class P0> void apply_i_supeq_j(HET1 &het1,const HET2 &het2,const Op &op,const P0 &p0) { LMTPRIVATE::Apply_ISJ<true> hva; apply(het1,hva,het2,op,p0); }
+template<class HET1,class HET2,class Op,class P0> void apply_i_supeq_j(HET1 &het1,const HET2 &het2,Op &op,const P0 &p0) { LMTPRIVATE::Apply_ISJ<true> hva; apply(het1,hva,het2,op,p0); }
+template<class HET1,class HET2,class Op,class P0> void apply_i_supeq_j(HET1 &het1,HET2 &het2,const Op &op,const P0 &p0) { LMTPRIVATE::Apply_ISJ<true> hva; apply(het1,hva,het2,op,p0); }
+template<class HET1,class HET2,class Op,class P0> void apply_i_supeq_j(HET1 &het1,HET2 &het2,Op &op,const P0 &p0) { LMTPRIVATE::Apply_ISJ<true> hva; apply(het1,hva,het2,op,p0); }
+///
+template<class HET1,class HET2,class Op,class P0> void apply_i_supeq_j(const HET1 &het1,const HET2 &het2,const Op &op,P0 &p0) { LMTPRIVATE::Apply_ISJ<true> hva; apply(het1,hva,het2,op,p0); }
+template<class HET1,class HET2,class Op,class P0> void apply_i_supeq_j(const HET1 &het1,const HET2 &het2,Op &op,P0 &p0) { LMTPRIVATE::Apply_ISJ<true> hva; apply(het1,hva,het2,op,p0); }
+template<class HET1,class HET2,class Op,class P0> void apply_i_supeq_j(const HET1 &het1,HET2 &het2,const Op &op,P0 &p0) { LMTPRIVATE::Apply_ISJ<true> hva; apply(het1,hva,het2,op,p0); }
+template<class HET1,class HET2,class Op,class P0> void apply_i_supeq_j(const HET1 &het1,HET2 &het2,Op &op,P0 &p0) { LMTPRIVATE::Apply_ISJ<true> hva; apply(het1,hva,het2,op,p0); }
+template<class HET1,class HET2,class Op,class P0> void apply_i_supeq_j(HET1 &het1,const HET2 &het2,const Op &op,P0 &p0) { LMTPRIVATE::Apply_ISJ<true> hva; apply(het1,hva,het2,op,p0); }
+template<class HET1,class HET2,class Op,class P0> void apply_i_supeq_j(HET1 &het1,const HET2 &het2,Op &op,P0 &p0) { LMTPRIVATE::Apply_ISJ<true> hva; apply(het1,hva,het2,op,p0); }
+template<class HET1,class HET2,class Op,class P0> void apply_i_supeq_j(HET1 &het1,HET2 &het2,const Op &op,P0 &p0) { LMTPRIVATE::Apply_ISJ<true> hva; apply(het1,hva,het2,op,p0); }
+template<class HET1,class HET2,class Op,class P0> void apply_i_supeq_j(HET1 &het1,HET2 &het2,Op &op,P0 &p0) { LMTPRIVATE::Apply_ISJ<true> hva; apply(het1,hva,het2,op,p0); }
+
+///
+template<class HET1,class HET2,class Op> void apply_i_sup_j(const HET1 &het1,const HET2 &het2,const Op &op) { LMTPRIVATE::Apply_ISJ<false> hva; apply(het1,hva,het2,op); }
+template<class HET1,class HET2,class Op> void apply_i_sup_j(const HET1 &het1,const HET2 &het2,Op &op) { LMTPRIVATE::Apply_ISJ<false> hva; apply(het1,hva,het2,op); }
+template<class HET1,class HET2,class Op> void apply_i_sup_j(const HET1 &het1,HET2 &het2,const Op &op) { LMTPRIVATE::Apply_ISJ<false> hva; apply(het1,hva,het2,op); }
+template<class HET1,class HET2,class Op> void apply_i_sup_j(const HET1 &het1,HET2 &het2,Op &op) { LMTPRIVATE::Apply_ISJ<false> hva; apply(het1,hva,het2,op); }
+template<class HET1,class HET2,class Op> void apply_i_sup_j(HET1 &het1,const HET2 &het2,const Op &op) { LMTPRIVATE::Apply_ISJ<false> hva; apply(het1,hva,het2,op); }
+template<class HET1,class HET2,class Op> void apply_i_sup_j(HET1 &het1,const HET2 &het2,Op &op) { LMTPRIVATE::Apply_ISJ<false> hva; apply(het1,hva,het2,op); }
+template<class HET1,class HET2,class Op> void apply_i_sup_j(HET1 &het1,HET2 &het2,const Op &op) { LMTPRIVATE::Apply_ISJ<false> hva; apply(het1,hva,het2,op); }
+template<class HET1,class HET2,class Op> void apply_i_sup_j(HET1 &het1,HET2 &het2,Op &op) { LMTPRIVATE::Apply_ISJ<false> hva; apply(het1,hva,het2,op); }
+///
+template<class HET1,class HET2,class Op,class P0> void apply_i_sup_j(const HET1 &het1,const HET2 &het2,const Op &op,const P0 &p0) { LMTPRIVATE::Apply_ISJ<false> hva; apply(het1,hva,het2,op,p0); }
+template<class HET1,class HET2,class Op,class P0> void apply_i_sup_j(const HET1 &het1,const HET2 &het2,Op &op,const P0 &p0) { LMTPRIVATE::Apply_ISJ<false> hva; apply(het1,hva,het2,op,p0); }
+template<class HET1,class HET2,class Op,class P0> void apply_i_sup_j(const HET1 &het1,HET2 &het2,const Op &op,const P0 &p0) { LMTPRIVATE::Apply_ISJ<false> hva; apply(het1,hva,het2,op,p0); }
+template<class HET1,class HET2,class Op,class P0> void apply_i_sup_j(const HET1 &het1,HET2 &het2,Op &op,const P0 &p0) { LMTPRIVATE::Apply_ISJ<false> hva; apply(het1,hva,het2,op,p0); }
+template<class HET1,class HET2,class Op,class P0> void apply_i_sup_j(HET1 &het1,const HET2 &het2,const Op &op,const P0 &p0) { LMTPRIVATE::Apply_ISJ<false> hva; apply(het1,hva,het2,op,p0); }
+template<class HET1,class HET2,class Op,class P0> void apply_i_sup_j(HET1 &het1,const HET2 &het2,Op &op,const P0 &p0) { LMTPRIVATE::Apply_ISJ<false> hva; apply(het1,hva,het2,op,p0); }
+template<class HET1,class HET2,class Op,class P0> void apply_i_sup_j(HET1 &het1,HET2 &het2,const Op &op,const P0 &p0) { LMTPRIVATE::Apply_ISJ<false> hva; apply(het1,hva,het2,op,p0); }
+template<class HET1,class HET2,class Op,class P0> void apply_i_sup_j(HET1 &het1,HET2 &het2,Op &op,const P0 &p0) { LMTPRIVATE::Apply_ISJ<false> hva; apply(het1,hva,het2,op,p0); }
+///
+template<class HET1,class HET2,class Op,class P0> void apply_i_sup_j(const HET1 &het1,const HET2 &het2,const Op &op,P0 &p0) { LMTPRIVATE::Apply_ISJ<false> hva; apply(het1,hva,het2,op,p0); }
+template<class HET1,class HET2,class Op,class P0> void apply_i_sup_j(const HET1 &het1,const HET2 &het2,Op &op,P0 &p0) { LMTPRIVATE::Apply_ISJ<false> hva; apply(het1,hva,het2,op,p0); }
+template<class HET1,class HET2,class Op,class P0> void apply_i_sup_j(const HET1 &het1,HET2 &het2,const Op &op,P0 &p0) { LMTPRIVATE::Apply_ISJ<false> hva; apply(het1,hva,het2,op,p0); }
+template<class HET1,class HET2,class Op,class P0> void apply_i_sup_j(const HET1 &het1,HET2 &het2,Op &op,P0 &p0) { LMTPRIVATE::Apply_ISJ<false> hva; apply(het1,hva,het2,op,p0); }
+template<class HET1,class HET2,class Op,class P0> void apply_i_sup_j(HET1 &het1,const HET2 &het2,const Op &op,P0 &p0) { LMTPRIVATE::Apply_ISJ<false> hva; apply(het1,hva,het2,op,p0); }
+template<class HET1,class HET2,class Op,class P0> void apply_i_sup_j(HET1 &het1,const HET2 &het2,Op &op,P0 &p0) { LMTPRIVATE::Apply_ISJ<false> hva; apply(het1,hva,het2,op,p0); }
+template<class HET1,class HET2,class Op,class P0> void apply_i_sup_j(HET1 &het1,HET2 &het2,const Op &op,P0 &p0) { LMTPRIVATE::Apply_ISJ<false> hva; apply(het1,hva,het2,op,p0); }
+template<class HET1,class HET2,class Op,class P0> void apply_i_sup_j(HET1 &het1,HET2 &het2,Op &op,P0 &p0) { LMTPRIVATE::Apply_ISJ<false> hva; apply(het1,hva,het2,op,p0); }
+
+
+///
+template<class Op>
+struct MinOp {
+    MinOp(const Op &o):op(o),init(false) {}
+    template<class TM> void operator()(const TM &t) {
+        if ( init ) res = min(op(t),res);
+        else { res = op(t); init = true; }
+    }
+    typename Op::T res;
+    const Op &op;
+    bool init;
+};
+///
+template<class Op>
+struct MaxOp {
+    MaxOp(const Op &o):op(o),init(false) {}
+    template<class TM> void operator()(const TM &t) {
+        if ( init ) res = max(op(t),res);
+        else { res = op(t); init = true; }
+    }
+    typename Op::T res;
+    const Op &op;
+    bool init;
+};
+
+
+};
+
+#endif // LMT_apply_ij_HEADER

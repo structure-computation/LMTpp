@@ -1,0 +1,232 @@
+import extrapolation, sys
+from LMT.include.codegen import *
+
+class Variable:
+  """ Class to manage Variables (unknowns or not, nodal, elementary or global) """
+  def __init__(self,unit,interpolation="nodal",unknown=False,nb_dim=[],nb_der=0,skin_var=False,default_value="",extr=extrapolation.Pol_extr,sup_nb_der=0,T=""):
+    self.interpolation = interpolation
+    self.nb_dim = nb_dim
+    self.nb_der = nb_der
+    self.skin_var = skin_var
+    self.unknown = unknown
+    self.default_value = default_value
+    self.sup_nb_der = sup_nb_der
+    self.extrapolation = extr
+    self.T = T
+    self.unit = unit
+
+  def extr(self,test_expr=False): return self.extrapolation( (self.nb_der+self.sup_nb_der)*(not test_expr) )
+    
+  def type_to_str(self,in_vec,vec_size):
+    if len(self.T): res = self.T
+    elif len(self.nb_dim)==1: res = "Vec<Tpos,"+str(self.nb_dim[0])+">"
+    elif len(self.nb_dim)==2: res = "Mat<Tpos,Gen<"+str(self.nb_dim[0])+","+str(self.nb_dim[1])+"> >"
+    else: res = "Tpos"
+    
+    if in_vec: res = 'Vec<' + res + ',' + str( vec_size ) + '>'
+    return res
+
+  def nb_elements(self):
+    res = 1
+    for i in self.nb_dim: res *= i
+    return res
+
+  def join(self, obj):
+    self.nb_der = max( self.nb_der, obj.nb_der )
+    obj.nb_der = max( self.nb_der, obj.nb_der )
+
+  def get_scalar_expr(self,name_var,interpolation,element,num_element,symbols,test_expr=False):
+    """ Fill gnagna.expr for all gnagna in variables """
+    map_sym = {}
+    cpt = 0
+    def append_s(beg,v,t,num_elem,num_t,in_vec):
+      """ t is type of var -> nodal, elem, ... """
+      ts = {'nodal':0,'elementary':1,'global':2,'skin_elementary':3}[t]
+      # get a new symbol
+      def s_sec_part(beg,i):
+        vec_access = ''
+        #sys.stderr.write( interpolation )
+        #sys.stderr.write( t )
+        if in_vec: vec_access += '['+str( num_t )+']'
+        vec_access += ('['+str(num_element)+']') * (len(self.nb_dim)!=0)
+        # normal
+        st = beg+'.'
+        if self.unknown:
+          st += ('old'+str(i)+'_')*(i!=0) + name_var
+        else:
+          st += ('der'+str(i)+'_')*(i!=0) + name_var
+        st += vec_access
+        # LaTeX
+        st_tex = name_var
+        st_tex += ('_{'+str(num_element)+'}') * (len(self.nb_dim)!=0)
+        st_tex += ('^{('+str(i)+')}')*(i!=0)
+        st_tex += '['+str(num_elem)+']'
+        return symbol( st, st_tex )
+      loc_sym = []
+      if self.unknown:
+        res = {}
+        extra = self.extr(test_expr)
+        for i in range(extra.order+1):
+          s = s_sec_part(beg,i)
+          res[ extrapolation.symbols[i] ] = s
+          loc_sym.append( s )
+        map_sym[ v ] = extra.form().subs(EM( res ))
+      elif test_expr==False:
+        res = s_sec_part(beg,0)
+        loc_sym.append( res )
+        fact = 1.0
+        for i in range(1,self.nb_der*(not test_expr)+1):
+          fact *= i
+          s = s_sec_part(beg,i)
+          POW = 1
+          for ii in range(i): POW *= extrapolation.time
+          res += s * POW * (1.0/fact)
+          loc_sym.append( s )
+        map_sym[ v ] = res
+      symbols.append( (ts, num_elem, num_element, loc_sym) )
+    for t,t_alt in zip(['nodal','elementary','global','skin_elementary'],['mega pouet','elem','(*f.m)','skin_elem']):
+      setattr(self,t+'_symbol',[])
+      nb_of_t = getattr(interpolation,'nb_'+t)
+      for num_t in range(nb_of_t):
+        if t=='nodal':
+          for i in range(element.nb_nodes):
+            append_s( 'PNODE('+str(i)+')', element.val[cpt], t, i, num_t, interpolation.in_vec )
+            cpt += 1
+        else:
+          append_s( t_alt, element.val[cpt], t, 0, num_t, interpolation.in_vec )
+          cpt += 1
+
+    return element.interpolation[self.interpolation].subs(EM( map_sym ))
+
+  def set_expr(self,name_var,interpolation,element):
+    self.element = element
+    self.name = name_var
+    self.interpolation_inst = interpolation
+    self.symbols = []
+    if len(self.nb_dim):
+      self.sub_expr = []
+      self.expr = ExVector(self.nb_elements())
+      for i in range(self.nb_elements()):
+        self.expr[i] = self.get_scalar_expr(self.name,interpolation,element,i,self.symbols)
+        self.sub_expr.append( self.expr[i] )
+
+      #print self.nb_elements()
+      #print len(self.symbols)
+      md = len(self.symbols) / self.nb_elements()
+      
+      self.expr_on_node = []
+      for i in range(md):
+          tmp = ExVector(self.nb_dim[0])
+          for d in range(self.nb_dim[0]): tmp[d] = self.symbols[i+md*d][3][0]
+          self.expr_on_node.append( tmp )
+    else:
+      self.expr = self.get_scalar_expr(self.name,interpolation,element,0,self.symbols)
+      self.sub_expr = [ self.expr ]
+    
+      md = len(self.symbols) / self.nb_elements()
+      self.expr_on_node = []
+      for i in range(md):
+          self.expr_on_node.append( self.symbols[i][3][0] )
+
+    # test symbols
+    self.test_symbols = []
+    if len(self.nb_dim):
+      self.sub_test_expr = []
+      self.test = ExVector(self.nb_elements())
+      for i in range(self.nb_elements()):
+        self.test[i] = self.get_scalar_expr( "T"+self.name, interpolation, element, i, self.test_symbols, True )
+        self.sub_test_expr.append( self.test[i] )
+      #print self.nb_elements()
+      #print len(self.test_symbols)
+      md = len(self.test_symbols) / self.nb_elements()
+      
+      if len(self.test_symbols[0][3]):
+        self.test_on_node = []
+        for i in range(md):
+          tmp = ExVector(self.nb_dim[0])
+          for d in range(self.nb_dim[0]): tmp[d] = self.test_symbols[i+md*d][3][0]
+          self.test_on_node.append( tmp )
+    else:
+      self.test = self.get_scalar_expr( "test_"+self.name, interpolation, element, 0, self.test_symbols, True )
+      self.sub_test_expr = [ self.test ]
+    
+      md = len(self.symbols) / self.nb_elements()
+      self.test_on_node = []
+      if self.unknown:
+          for i in range(md):
+              self.test_on_node.append( self.test_symbols[i][3][0] )
+    return self.test
+
+  def name_set_unknown(self,t,num_der,d):
+    TE = {'nodal':'node','elementary':'elem','global':'(*f.m)','skin_elementary':'skin_elem'}[ t ]
+    der = ('der'+str(num_der)+'_') * (num_der!=0)
+    res = TE+'.'+der+self.name + ('['+str(d)+']')*(d>=0)
+    return res
+
+  def __add__(self,other):  return self.expr + other
+  def __radd__(self,other): return other + self.expr
+  def __sub__(self,other):  return self.expr - other
+  def __rsub__(self,other): return other - self.expr
+  def __mul__(self,other):  return self.expr * other
+  def __rmul__(self,other): return other * self.expr
+  def __div__(self,other):  return self.expr / other
+  def __rdiv__(self,other): return other / self.expr
+  def __pow__(self,other):  return pow(self.expr,other)
+  def __rpow__(self,other): return pow(other,self.expr)
+  def __neg__(self): return - self.expr
+  def diff(self,x): return self.expr.diff(x)
+  def subs(self,x): return self.expr.subs(x)
+
+  
+  
+  
+class ISVariable:
+  """ Class to manage Variables on solids """
+  
+  def __init__(self,unit,nb_dim=[],nb_der=0,default_value="",T=""):
+    self.interpolation = "global"
+    self.nb_dim = nb_dim
+    self.nb_der = nb_der
+    self.default_value = default_value
+    self.T = T
+    self.unit = unit
+
+  def type_to_str(self,in_vec,vec_size):
+    if len(self.T): res = self.T
+    elif len(self.nb_dim)==1: res = "Vec<Tpos,"+str(self.nb_dim[0])+">"
+    elif len(self.nb_dim)==2: res = "Mat<Tpos,Gen<"+str(self.nb_dim[0])+","+str(self.nb_dim[1])+"> >"
+    else: res = "Tpos"
+    
+    if in_vec: res = 'Vec<' + res + ',' + str( vec_size ) + '>'
+    return res
+
+  def nb_elements(self):
+    res = 1
+    for i in self.nb_dim: res *= i
+    return res
+
+  def get_scalar_expr(self,name_var,num_element,symbols):
+    """ Fill gnagna.expr for all gnagna in variables """
+    if len(self.nb_dim)==0: # scalar
+      res = symbol( 'cd.data->%s'%name_var )
+      symbols.append( res )
+      return res
+    res = symbol( 'cd.data->%s[%i]'%(name_var,num_element) )
+    symbols.append( res )
+    return res
+
+  def set_expr(self,name_var):
+    self.name = name_var
+    self.symbols = []
+    if len(self.nb_dim):
+      self.sub_expr = [ self.get_scalar_expr(self.name,i,self.symbols) for i in range(self.nb_elements()) ]
+      self.expr = ExVector(len(self.sub_expr))
+      for i in range(len(self.sub_expr)): self.expr[i] = self.sub_expr[i]
+    else:
+      self.expr = self.get_scalar_expr(self.name,0,self.symbols)
+      self.sub_expr = [ self.expr ]
+    
+
+  def join(self, obj):
+    self.nb_der = max( self.nb_der, obj.nb_der )
+    obj.nb_der = max( self.nb_der, obj.nb_der )

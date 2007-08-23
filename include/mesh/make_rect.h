@@ -1,0 +1,460 @@
+#ifndef LMT_mesh_make_rect_HEADER
+#define LMT_mesh_make_rect_HEADER
+
+#include "util/rectilinear_iterator.h"
+
+namespace LMT {
+
+struct Bar;
+struct Triangle_6;
+struct Triangle;
+struct Quad;
+struct Quad_8;
+struct Quad_6;
+struct Quad_42;
+struct Hexa;
+struct Tetra;
+struct DefaultBehavior;
+struct Wedge;
+struct Hexa_20;
+
+/**
+ * Bar
+ * @param m 
+ * @param t 
+ * @param extent 
+ * @param nb_x 
+ * @param nb_y 
+ */
+template<class TM>
+void make_rect(TM &m,const Bar &t,typename TM::Pvec X0,typename TM::Pvec X1,typename TM::Pvec nb_points_) {
+    typedef typename TM::Pvec Pvec;
+    typedef typename TM::Tpos Tpos;
+    Vec<unsigned,TM::dim> nb_points(nb_points_); 
+
+    unsigned nb_x = (unsigned)nb_points[0], beg = m.node_list.size();
+    Pvec incr = (X1-X0)/(nb_points-1);
+    for(Rectilinear_iterator<Tpos,TM::dim> iter(X0,X1+(incr+(incr==0))*0.5,incr+(incr==0));iter;++iter)
+        m.add_node( iter.pos );
+    for(unsigned i=0;i<nb_x-1;++i) {
+        m.add_element( Bar(), DefaultBehavior(), beg+i, beg+i+1 );
+    }
+}
+/**
+ * Triangle
+ * @param m 
+ * @param t 
+ * @param extent 
+ * @param nb_x 
+ * @param nb_y 
+ */
+template<class TM>
+void make_rect(TM &m,const Triangle &t,typename TM::Pvec X0,typename TM::Pvec X1,Vec<unsigned,2> nb_points_) {
+    typedef typename TM::Pvec Pvec;
+    typedef typename TM::Tpos Tpos;
+    Vec<unsigned,TM::dim> nb_points(nb_points_); 
+
+    unsigned nb_x = (unsigned)nb_points[0], nb_y = (unsigned)nb_points[1], beg = m.node_list.size();
+    Pvec incr = (X1-X0)/(nb_points-1);
+    for(Rectilinear_iterator<Tpos,TM::dim> iter(X0,X1+(incr+(incr==0))*0.5,incr+(incr==0));iter;++iter)
+        m.add_node( iter.pos );
+    for(unsigned i=0;i<nb_y-1;++i) {
+        for(unsigned j=0;j<nb_x-1;++j) {
+            /**
+             1 3
+             0 2
+             */
+            unsigned pts[] = { i*nb_x+j, i*nb_x+j+1, i*nb_x+j+nb_x, i*nb_x+j+1+nb_x, };
+            m.add_element( Triangle(), DefaultBehavior(), beg+pts[1], beg+pts[2], beg+pts[0] );
+            m.add_element( Triangle(), DefaultBehavior(), beg+pts[1], beg+pts[3], beg+pts[2] );
+        }
+    }
+}
+/**
+ * Quad
+ * @param m 
+ * @param t 
+ * @param extent 
+ * @param nb_x 
+ * @param nb_y 
+ */
+template<class TM>
+void make_rect(TM &m,const Quad &t,typename TM::Pvec X0,typename TM::Pvec X1,typename TM::Pvec nb_points_) {
+    typedef typename TM::Pvec Pvec;
+    typedef typename TM::Tpos Tpos;
+    Vec<unsigned,TM::dim> nb_points(nb_points_); 
+
+    unsigned nb_x = (unsigned)nb_points[0], nb_y = (unsigned)nb_points[1], beg = m.node_list.size();
+    Pvec incr = (X1-X0)/(nb_points-1);
+    for(Rectilinear_iterator<Tpos,TM::dim> iter(X0,X1+(incr+(incr==0))*0.5,incr+(incr==0));iter;++iter)
+        m.add_node( iter.pos );
+
+    if ( incr[0] * incr[1] > 0 ) {
+        for(unsigned i=0;i<nb_y-1;++i)
+            for(unsigned j=0;j<nb_x-1;++j)
+                m.add_element( Quad(), DefaultBehavior(), beg+i*nb_x+j, beg+i*nb_x+j+1, beg+i*nb_x+j+1+nb_x, beg+i*nb_x+j+nb_x );
+    }
+    else {
+        for(unsigned i=0;i<nb_y-1;++i)
+            for(unsigned j=0;j<nb_x-1;++j)
+                m.add_element( Quad(), DefaultBehavior(), beg+i*nb_x+j+nb_x, beg+i*nb_x+j+1+nb_x, beg+i*nb_x+j+1, beg+i*nb_x+j );
+    }
+}
+
+/**
+ * Triangle_6
+ * @param m 
+ * @param t 
+ * @param extent 
+ * @param nb_x 
+ * @param nb_y 
+ */
+template<class TM>
+void make_rect(TM &m,const Triangle_6 &t,typename TM::Pvec X0,typename TM::Pvec X1,typename TM::Pvec nb_points_) {
+    typedef typename TM::Pvec Pvec;
+    typedef typename TM::Tpos Tpos;
+    Vec<unsigned,TM::dim> nb_points(nb_points_); 
+
+    unsigned nb_x = (unsigned)nb_points[0], nb_y = (unsigned)nb_points[1], beg = m.node_list.size();
+    Pvec incr = (X1-X0)/(nb_points-1)*.5;
+    for(Rectilinear_iterator<Tpos,TM::dim> iter(X0,X1+(incr+(incr==0))*0.5,incr+(incr==0));iter;++iter)
+        m.add_node( iter.pos );
+
+    for(unsigned i=0;i<nb_y-1;++i) {
+        for(unsigned j=0;j<nb_x-1;++j) {
+            /**
+            2 5 8
+            1 4 7
+            0 3 6
+            */
+            unsigned pts[] = {
+                                 2*i*(2*nb_x-1)+2*j, 2*i*(2*nb_x-1)+2*j+1, 2*i*(2*nb_x-1)+2*j+2,
+                                 2*i*(2*nb_x-1)+2*j+2*nb_x-1, 2*i*(2*nb_x-1)+2*j+1+2*nb_x-1, 2*i*(2*nb_x-1)+2*j+2+2*nb_x-1,
+                                 2*i*(2*nb_x-1)+2*j+4*nb_x-2, 2*i*(2*nb_x-1)+2*j+1+4*nb_x-2, 2*i*(2*nb_x-1)+2*j+2+4*nb_x-2,
+                             };                             
+             m.add_element( Triangle_6(), DefaultBehavior(), beg+pts[0], beg+pts[2], beg+pts[6], beg+pts[1], beg+pts[4], beg+pts[3] );
+             m.add_element( Triangle_6(), DefaultBehavior(), beg+pts[2], beg+pts[8], beg+pts[6], beg+pts[5], beg+pts[7], beg+pts[4] );
+        }
+    }
+}
+
+/**
+ * Hexa
+ * @param m 
+ * @param t 
+ * @param extent 
+ * @param nb_x 
+ * @param nb_y 
+ */
+template<class TM>
+void make_rect(TM &m,const Hexa &t,typename TM::Pvec X0,typename TM::Pvec X1,typename TM::Pvec nb_points_) {
+    typedef typename TM::Pvec Pvec;
+    typedef typename TM::Tpos Tpos;
+    Vec<unsigned,TM::dim> nb_points(nb_points_); 
+
+    unsigned nb_x = (unsigned)nb_points[0], nb_y = (unsigned)nb_points[1], nb_z = (unsigned)nb_points[2], beg = m.node_list.size();
+    Pvec incr = (X1-X0)/(nb_points-1);
+    for(Rectilinear_iterator<Tpos,3> iter(X0,X1+(incr+(incr==0))*0.5,incr+(incr==0));iter;++iter)
+        m.add_node( iter.pos );
+    for(unsigned i=0;i<nb_z-1;++i)
+        for(unsigned j=0;j<nb_y-1;++j)
+            for(unsigned k=0;k<nb_x-1;++k)
+                m.add_element( Hexa(), DefaultBehavior(),
+                               beg+i*nb_x*nb_y+j*nb_x+k,
+                               beg+i*nb_x*nb_y+j*nb_x+k+1,
+                               beg+i*nb_x*nb_y+j*nb_x+k+1+nb_x,
+                               beg+i*nb_x*nb_y+j*nb_x+k+nb_x,
+                               beg+(i+1)*nb_x*nb_y+j*nb_x+k,
+                               beg+(i+1)*nb_x*nb_y+j*nb_x+k+1,
+                               beg+(i+1)*nb_x*nb_y+j*nb_x+k+1+nb_x,
+                               beg+(i+1)*nb_x*nb_y+j*nb_x+k+nb_x
+                             );
+}
+
+/**
+ * Tetra
+ * @param m 
+ * @param t 
+ * @param extent 
+ * @param nb_x 
+ * @param nb_y 
+ */
+template<class TM>
+void make_rect(TM &m,const Tetra &t,typename TM::Pvec X0,typename TM::Pvec X1,typename TM::Pvec nb_points_) {
+    typedef typename TM::Pvec Pvec;
+    typedef typename TM::Tpos Tpos;
+    Vec<unsigned,TM::dim> nb_points(nb_points_); 
+
+    Pvec incr = (X1-X0)/(nb_points-1);
+    unsigned nb_x = (unsigned)nb_points[0], nb_y = (unsigned)nb_points[1], nb_z = (unsigned)nb_points[2], beg = m.node_list.size();
+    for(Rectilinear_iterator<Tpos,3> iter(X0,X1+(incr+(incr==0))*0.5,incr+(incr==0));iter;++iter)
+        m.add_node( iter.pos );
+    for(unsigned i=0;i<nb_z-1;++i) {
+        for(unsigned j=0;j<nb_y-1;++j) {
+            for(unsigned k=0;k<nb_x-1;++k) {
+//                 int lst[] = {
+//                                 3,6,5,7,
+//                                 0,4,5,6,
+//                                 0,5,3,6,
+//                                 0,1,3,5,
+//                                 0,3,2,6,
+//                             };
+                int lst[] = {
+                    0,1,2,4,
+                    1,2,3,5,
+                    1,2,4,5,
+                    2,4,5,6,
+                    2,3,5,6,
+                    3,5,6,7,
+                };
+                for(unsigned n=0;n<6;++n) {
+                    typename TM::TNode *vn[4];
+                    for(unsigned p=0;p<4;++p)
+                        vn[p] = &m.node_list[ beg+(i+(lst[n*4+p]&4)/4)*nb_x*nb_y+(j+(lst[n*4+p]&2)/2)*nb_x+(k+(lst[n*4+p]&1)/1) ];
+                    permutation_if_jac_neg( Tetra(), vn );
+                    m.add_element( Tetra(), DefaultBehavior(), vn );
+                }
+            }
+        }
+    }
+    
+}
+
+/**
+ * Quad_8
+ */
+template<class TM>
+void make_rect(TM &m,const Quad_8 &t,typename TM::Pvec X0,typename TM::Pvec X1,typename TM::Pvec nb_points_) {
+    typedef typename TM::Pvec Pvec;
+    typedef typename TM::Tpos Tpos;
+    Vec<unsigned,TM::dim> nb_points(nb_points_); 
+
+    // nodes
+    unsigned nb_x = (unsigned)nb_points[0], nb_y = (unsigned)nb_points[1];
+    unsigned nnx = 2*nb_x-1;
+    for(unsigned i=0;i<nnx;++i) // first line
+        m.add_node( X0 + Pvec(i*(X1[0]-X0[0])/(nnx-1),0.0) );
+    for(unsigned j=0;j<nb_y-1;++j) {
+        for(unsigned i=0;i<nb_x;++i) //
+            m.add_node( X0 + Pvec(i*(X1[0]-X0[0])/(nb_x-1),(j+0.5)*(X1[1]-X0[1])/(nb_y-1)) );
+        for(unsigned i=0;i<nnx;++i) //
+            m.add_node( X0 + Pvec(i*(X1[0]-X0[0])/(nnx-1),(j+1)*(X1[1]-X0[1])/(nb_y-1)) );
+    }
+    
+    // elements
+    unsigned inc_x = nnx + nb_x;
+    for(unsigned j=0;j<nb_y-1;++j) {
+        for(unsigned i=0;i<nb_x-1;++i) {
+            m.add_element( Quad_8(), DefaultBehavior(),
+                           (2*i  ) + (j  )*inc_x,
+                           (2*i+2) + (j  )*inc_x,
+                           (2*i+2) + (j+1)*inc_x,
+                           (2*i  ) + (j+1)*inc_x,
+                           (2*i+1) + (j  )*inc_x,
+                           (  i+1) + nnx+j*inc_x,
+                           (2*i+1) + (j+1)*inc_x,
+                           (  i  ) + nnx+j*inc_x
+                         );
+        }
+    }    
+}
+
+/**
+ * Quad_6
+ */
+template<class TM> void make_rect(TM &m,const Quad_6 &t,typename TM::Pvec X0,typename TM::Pvec X1,typename TM::Pvec nb_points_) {
+    typedef typename TM::Pvec Pvec;
+    typedef typename TM::Tpos Tpos;
+    Vec<unsigned,TM::dim> nb_points(nb_points_); 
+
+    unsigned nb_x = (unsigned)nb_points[0], nb_y = (unsigned)nb_points[1];
+    unsigned inc_x = 2*nb_x - 1, beg = m.node_list.size();
+
+    Pvec incr = X1 - X0;
+    incr[0] /= 2 * ( nb_points[0] - 1 );
+    incr[1] /= nb_points[1] - 1;
+    for(Rectilinear_iterator<Tpos,TM::dim> iter(X0,X1+(incr+(incr==0))*0.25,incr+(incr==0));iter;++iter)
+        m.add_node( iter.pos );
+
+    if ( incr[0] * incr[1] > 0 ) {
+        for(unsigned i=0;i<nb_y-1;++i)
+            for(unsigned j=0;j<nb_x-1;++j)
+                m.add_element( Quad_6(), DefaultBehavior(),
+                               beg + (i  )*inc_x + (2*j  ),
+                               beg + (i  )*inc_x + (2*j+2),
+                               beg + (i+1)*inc_x + (2*j+2),
+                               beg + (i+1)*inc_x + (2*j  ),
+                               beg + (i  )*inc_x + (2*j+1),
+                               beg + (i+1)*inc_x + (2*j+1)
+                             );
+    }
+    else {
+        for(unsigned i=0;i<nb_y-1;++i)
+            for(unsigned j=0;j<nb_x-1;++j)
+                m.add_element( Quad_6(), DefaultBehavior(),
+                               beg + (i+1)*inc_x + (2*j+1),
+                               beg + (i  )*inc_x + (2*j+1),
+                               beg + (i+1)*inc_x + (2*j  ),
+                               beg + (i+1)*inc_x + (2*j+2),
+                               beg + (i  )*inc_x + (2*j+2),
+                               beg + (i  )*inc_x + (2*j  )
+                             );
+    }
+}
+
+/**
+ * Quad_42
+ */
+template<class TM> void make_rect(TM &m,const Quad_42 &t,typename TM::Pvec X0,typename TM::Pvec X1,typename TM::Pvec nb_points_) {
+    typedef typename TM::Pvec Pvec;
+    typedef typename TM::Tpos Tpos;
+    Vec<unsigned,TM::dim> nb_points(nb_points_); 
+
+    unsigned nb_x = (unsigned)nb_points[0], nb_y = (unsigned)nb_points[1];
+    unsigned inc_x = 3*nb_x - 2, beg = m.node_list.size();
+
+    Pvec incr = X1 - X0;
+    incr[0] /= 3 * ( nb_points[0] - 1 );
+    incr[1] /= nb_points[1] - 1;
+    for(Rectilinear_iterator<Tpos,TM::dim> iter(X0,X1+(incr+(incr==0))*0.05,incr+(incr==0));iter;++iter)
+        m.add_node( iter.pos );
+
+    if ( incr[0] * incr[1] > 0 ) {
+        for(unsigned i=0;i<nb_y-1;++i)
+            for(unsigned j=0;j<nb_x-1;++j)
+                m.add_element( Quad_42(), DefaultBehavior(),
+                               beg + (i  )*inc_x + (3*j  ),
+                               beg + (i  )*inc_x + (3*j+3),
+                               beg + (i+1)*inc_x + (3*j+3),
+                               beg + (i+1)*inc_x + (3*j  ),
+                               
+                               beg + (i  )*inc_x + (3*j+1),
+                               beg + (i  )*inc_x + (3*j+2),
+                               beg + (i+1)*inc_x + (3*j+2),
+                               beg + (i+1)*inc_x + (3*j+1)
+                             );
+    }
+    else {
+        for(unsigned i=0;i<nb_y-1;++i)
+            for(unsigned j=0;j<nb_x-1;++j)
+                m.add_element( Quad_42(), DefaultBehavior(),
+                               beg + (i+1)*inc_x + (3*j+1),
+                               beg + (i  )*inc_x + (3*j+1),
+                               beg + (i+1)*inc_x + (3*j  ),
+                               beg + (i+1)*inc_x + (3*j+2),
+                               
+                               beg + (i+1)*inc_x + (3*j+1),
+                               beg + (i+1)*inc_x + (3*j+2),
+                               beg + (i  )*inc_x + (3*j+2),
+                               beg + (i  )*inc_x + (3*j+1)
+                             );
+    }
+}
+
+/**
+ * Wedge
+ * @param m
+ * @param t
+ * @param extent
+ * @param nb_x
+ * @param nb_y
+ */
+template<class TM> void make_rect(TM &m,const Wedge &t,typename TM::Pvec X0,typename TM::Pvec X1,typename TM::Pvec nb_points_) {
+    typedef typename TM::Pvec Pvec;
+    typedef typename TM::Tpos Tpos;
+    Vec<unsigned,TM::dim> nb_points(nb_points_); 
+
+    unsigned nb_x = (unsigned)nb_points[0], nb_y = (unsigned)nb_points[1], nb_z = (unsigned)nb_points[2], beg = m.node_list.size();
+    Pvec incr = (X1-X0)/(nb_points-1);
+    for(Rectilinear_iterator<Tpos,3> iter(X0,X1+(incr+(incr==0))*0.5,incr+(incr==0));iter;++iter)
+        m.add_node( iter.pos );
+    for(unsigned i=0;i<nb_z-1;++i) {
+        for(unsigned j=0;j<nb_y-1;++j) {
+            for(unsigned k=0;k<nb_x-1;++k) {
+                unsigned pts[] = { i*nb_x*nb_y+j*nb_x+k,
+                    i*nb_x*nb_y+j*nb_x+k+1,
+                    i*nb_x*nb_y+j*nb_x+k+1+nb_x,
+                    i*nb_x*nb_y+j*nb_x+k+nb_x,
+                    (i+1)*nb_x*nb_y+j*nb_x+k,
+                    (i+1)*nb_x*nb_y+j*nb_x+k+1,
+                    (i+1)*nb_x*nb_y+j*nb_x+k+1+nb_x,
+                    (i+1)*nb_x*nb_y+j*nb_x+k+nb_x,
+                };
+                m.add_element( Wedge(), DefaultBehavior(), beg+pts[0], beg+pts[2], beg+pts[3], beg+pts[4], beg+pts[6], beg+pts[7] );
+                m.add_element( Wedge(), DefaultBehavior(), beg+pts[0], beg+pts[1], beg+pts[2], beg+pts[4], beg+pts[5], beg+pts[6] );
+            }
+        }
+    }
+}
+
+template<class TM>
+struct BestialNodeAdder {
+    typedef typename TM::TNode TN;
+    typedef typename TM::Pvec Pvec;
+    typedef typename TM::Tpos T;
+    TN *get_node( const Pvec &pos ) {
+        for(unsigned i=0;i<m->node_list.size();++i)
+            if ( length( m->node_list[i].pos - pos ) < prec )
+                return &m->node_list[i];
+        return m->add_node( pos );
+    }
+    TM *m;
+    T prec;
+};
+
+/**
+ * Hexa_20
+//     7 ---14----6
+//    /|         /|
+//  15 |       13 |
+//  /  19      /  18
+// 4---|-12---5   |
+// |   |      |   |
+// |   3---10-|-- 2
+// 16 /      17  /
+// |11        | 9
+// |/         |/
+// 0-----8----1
+ */
+template<class TM>
+void make_rect(TM &m,const Hexa_20 &t,typename TM::Pvec X0,typename TM::Pvec X1,typename TM::Pvec nb_elements) {
+    typedef typename TM::Pvec Pvec;
+    typedef typename TM::Tpos Tpos;
+    //     Vec<unsigned,TM::dim> nb_points(nb_points_); 
+
+    BestialNodeAdder<TM> ban; ban.m = &m; ban.prec = min( (X1-X0)/nb_elements ) * 1e-6;
+    
+    Pvec step = (X1-X0) / nb_elements;
+    for(Rectilinear_iterator<Tpos,TM::dim> iter( X0, X1 + 0.1 * step, step ); iter; ++iter ) {
+        typename TM::TNode *n[20] = {
+            ban.get_node( iter.pos + step * Pvec(0.0,0.0,0.0) ),
+            ban.get_node( iter.pos + step * Pvec(1.0,0.0,0.0) ),
+            ban.get_node( iter.pos + step * Pvec(1.0,1.0,0.0) ),
+            ban.get_node( iter.pos + step * Pvec(0.0,1.0,0.0) ),
+            ban.get_node( iter.pos + step * Pvec(0.0,0.0,1.0) ),
+            ban.get_node( iter.pos + step * Pvec(1.0,0.0,1.0) ),
+            ban.get_node( iter.pos + step * Pvec(1.0,1.0,1.0) ),
+            ban.get_node( iter.pos + step * Pvec(0.0,1.0,1.0) ),
+                       
+            ban.get_node( iter.pos + step * Pvec(0.5,0.0,0.0) ),
+            ban.get_node( iter.pos + step * Pvec(1.0,0.5,0.0) ),
+            ban.get_node( iter.pos + step * Pvec(0.5,1.0,0.0) ),
+            ban.get_node( iter.pos + step * Pvec(0.0,0.5,0.0) ),
+            ban.get_node( iter.pos + step * Pvec(0.5,0.0,1.0) ),
+            ban.get_node( iter.pos + step * Pvec(1.0,0.5,1.0) ),
+            ban.get_node( iter.pos + step * Pvec(0.5,1.0,1.0) ),
+            ban.get_node( iter.pos + step * Pvec(0.0,0.5,1.0) ),
+            
+            ban.get_node( iter.pos + step * Pvec(0.0,0.0,0.5) ),
+            ban.get_node( iter.pos + step * Pvec(1.0,0.0,0.5) ),
+            ban.get_node( iter.pos + step * Pvec(1.0,1.0,0.5) ),
+            ban.get_node( iter.pos + step * Pvec(0.0,1.0,0.5) )
+        };
+        m.add_element( Hexa_20(), DefaultBehavior(), n );
+    }
+}
+
+
+}
+
+#endif // LMT_mesh_make_rect_HEADER

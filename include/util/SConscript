@@ -1,0 +1,13 @@
+Import('env')
+
+#solveLDL = env.Object( 'solveLDL.cpp', CXX='/opt/intel-8.1/bin/icpc' ) # 
+
+lib = env.Library('LMT_util', [
+    'solveLDL.cpp',
+    'solveLDL_semimorse.cpp',
+    'symrcm.cpp',
+    'symamd.cpp',
+  ]
+)
+
+Return('lib')

@@ -1,0 +1,319 @@
+//
+// C++ Interface: meshancestor
+//
+// Description: 
+//
+//
+// Author: Hugo LECLERC <leclerc@lmt.ens-cachan.fr>, (C) 2004
+//
+// Copyright: See COPYING file that comes with this distribution
+//
+//
+#ifndef LMT_meshancestor_HEADER
+#define LMT_meshancestor_HEADER
+
+#include "containers/vec.h"
+#include "containers/packedvectorofvector.h"
+#include "element.h"
+#include "meshdata.h"
+#include "node.h"
+#include "dynamicdata.h"
+#include "nodelist.h"
+#include "meshcarac.h"
+#include "elemlist.h"
+
+/** \defgroup maillages Définition et travail sur les maillages
+  \brief Classes et Fonctions utiliser pour d�inir ou travailler sur des maillages
+  \author Hugo LECLERC
+  
+  Pour utiliser la classe maillage il est n�essaire d'inclure le fichier mesh/mesh.h lors de la d�laration d'un maillage.
+  \code #include "mesh/mesh.h" \endcode 
+
+*/
+
+/** \ingroup maillages
+\brief Classe g��ique pour la d�laration d'un maillage.
+
+La classe Mesh est param�rable par une classe de caract�istiques d�inie et g��� �partir du fichier SConstruct.
+
+Dans tous les exemples le maillage est not�m.
+Supposons que la classe Mesh_carac_pb_elast existe, on d�inira le maillage par :
+\code Mesh<Mesh_carac_pb_elast<2,double> > m; \endcode
+On pourra poser :
+\code typedef Mesh<Mesh_carac_pb_elast<2,double> > TM ;
+TM m;
+\endcode
+*/
+
+namespace LMT {
+
+
+template<class Carac,unsigned nvi_to_subs,unsigned skin>
+class MeshAncestor : public Carac::GlobalStaticData {
+public:
+    static const unsigned dim = Carac::dim;
+    typedef typename Carac::Tpos Tpos;
+    typedef Vec<Tpos,dim> Pvec;
+    typedef typename Carac::NodalStaticData NodalStaticData;
+    typedef typename Carac::GlobalStaticData GlobalStaticData;
+    typedef Node<dim,Tpos,NodalStaticData> TNode;
+    typedef ElementAncestor<TNode> EA;
+    typedef Vec<VecNodeList<TNode,skin> > TNodeList;
+    typedef Vec<VecElemList<Carac,TNode,nvi_to_subs,skin> > TElemList;
+    template<class NE,class BE=DefaultBehavior> struct TElem { typedef typename TElemList::template TElem<NE,BE>::TE TE; };
+    MeshAncestor() {
+        date_last_connectivity_change = 1;
+        date_last_node_neighbours_update = 0;
+        date_last_node_parents_update = 0;
+        date_last_elem_neighbours_update = 0;
+        for(unsigned i=0;i<TElemList::nb_elem_type;++i) cpt_elem[i] = 0;
+    }
+
+    /// 
+    void update_node_neighbours();
+    /// 
+    void clear_node_neighbours() { node_neighbours.free(); --date_last_node_neighbours_update; }
+    /// get nodes connected through elements to num_node. Result is sorted in ascending order.
+    SimpleConstIterator<TNode *> get_node_neighbours(unsigned num_node) { return node_neighbours[num_node]; }
+    SimpleConstIterator<const TNode *>  get_node_neighbours(unsigned num_node) const { return node_neighbours[num_node]; }
+    /// 
+    void update_node_parents();
+    /// 
+    void clear_node_parents() { node_parents.free(); --date_last_node_parents_update; }
+    /// get elements connected to node
+    SimpleConstIterator<EA *> get_node_parents(unsigned num_node) { return node_parents[num_node]; }
+    SimpleConstIterator<const EA *> get_node_parents(unsigned num_node) const { return node_parents[num_node]; }
+    /// 
+    void update_elem_neighbours();
+    /// 
+    void clear_elem_neighbours() { for(unsigned i=0;i<TElemList::nb_elem_type;++i) elem_neighbours[i].free(); --date_last_elem_neighbours_update; }
+    /// get elements connected (directly) to element
+    template<class TE> SimpleConstIterator<EA *> get_elem_neighbours(const TE &e) { return elem_neighbours[TE::num_in_elem_list][e.number]; }
+    template<class TE> SimpleConstIterator<const EA *> get_elem_neighbours(const TE &e) const { return elem_neighbours[TE::num_in_elem_list][e.number]; }
+    SimpleConstIterator<EA *> get_elem_neighbours(const EA *e) { return elem_neighbours[e->num_in_elem_list_virtual()][e->number]; }
+    SimpleConstIterator<const EA *> get_elem_neighbours(const EA *e) const { return elem_neighbours[e->num_in_elem_list_virtual()][e->number]; }
+    
+    struct GetNodeAdresses { template<class N> void operator()(N &n,TNode** &res) const { *(res++) = &n; } };
+    void get_nodes_adresses(TNode **res) { apply( this->node_list, GetNodeAdresses(), res ); } /// fill vec with adresses of nodes
+    struct ChangeNodePointerInElems {
+        template<class TE> void operator()(TE &e,TNode **cor) const {
+             for(unsigned i=0;i<TE::nb_nodes;++i) e.nodes[i] = cor[e.nodes[i]->number_in_original_mesh()];
+        }
+    }; ///
+    void change_node_ptr_in_elements(TNode **correspondance) {
+        apply( this->elem_list, ChangeNodePointerInElems(), correspondance );
+        //for(unsigned i=0;i<this->node_list.size();++i)
+        //    this->node_list[i].number = i;
+    } /// used by remove_double (as example)
+    
+    struct GetTypeElements {
+        template<class TE> void operator()(const StructForType<TE> &st,Vec<std::string> &res) const {
+            res.push_back( TE::name() );
+        }
+    };
+    Vec<std::string> type_elements() const {
+        Vec<std::string> res;
+        elem_list.apply_static( GetTypeElements(), res );
+        return res;
+    }
+
+    ///    
+    TNodeList node_list;
+    ///    
+    TElemList elem_list;
+    ///
+    //GlobalStaticData data;
+protected:
+    ///
+    template<class NE,class BE,unsigned num_index>
+    typename TElem<NE,BE>::TE *add_element_(const NE &ne,const BE &be,TNode **n,const Number<num_index> &nn) {
+        typedef typename TElem<NE,BE>::TE TE;
+        TE *res = elem_list.hp.new_elem(StructForType<TE>()); // template 
+        for(unsigned i=0;i<NE::nb_nodes;++i) res->nodes[i] = n[i];
+        res->number = cpt_elem[ TE::num_in_elem_list ]++;
+        elem_list.push_back_dyn(TE::num_in_elem_list);
+        return res;
+    }
+    ///
+    template<class NE,class BE>
+    typename TElem<NE,BE>::TE *add_element_(const NE &ne,const BE &be,TNode **n,const Number<IndexOfMagicValue::res> &nn) {
+        std::cerr << NE::name() << " with behavior cannot be included in elem_list." << std::endl;
+        return (typename TElem<NE,BE>::TE *)NULL;
+    }
+    ///
+    template<class NE,class BE> typename TElem<NE,BE>::TE *add_element_(const NE &ne,const BE &be,TNode **n) {
+        return add_element_(ne,be,n,LMT::Number<TElemList::template IndexOf<NE,BE>::res>());
+    }
+    ///
+    void clear_elements() {
+        this->elem_list.free();
+        for(unsigned i=0;i<TElemList::nb_elem_type;++i)
+            cpt_elem[i] = 0;
+    }
+    ///
+    unsigned date_last_connectivity_change, 
+             date_last_node_neighbours_update, 
+             date_last_node_parents_update, 
+             date_last_elem_neighbours_update;
+
+    ///    
+    PackedVectorOfVector<TNode *> node_neighbours;
+    ///    
+    PackedVectorOfVector<EA *> node_parents;
+    ///    
+    PackedVectorOfVector<EA *> elem_neighbours[TElemList::nb_elem_type+(TElemList::nb_elem_type==0)];
+    ///
+    unsigned cpt_elem[TElemList::nb_elem_type+(TElemList::nb_elem_type==0)];
+    
+    struct AppendNodeNodeCon;
+    struct ResizeNodeConElem;
+};
+
+
+
+// ------------------------------------------------------------------------------------------
+template<class Carac,unsigned nvi_to_subs,unsigned skin>
+struct MeshAncestor<Carac,nvi_to_subs,skin>::AppendNodeNodeCon {
+    template<class TE,class TM> void operator()(TE &e,const TM &m) {
+        for(unsigned i=0;i<TE::nb_nodes;++i) {
+            unsigned ni = m.node_list.number(*e.node(i));
+            for(unsigned j=0;j<TE::nb_nodes;++j)
+                if ( i!=j )
+                    vv[ni].push_back_in_reserved( e.node(j) );
+        }
+    }
+    Vec<Vec<TNode *> > vv;
+};
+template<class Carac,unsigned nvi_to_subs,unsigned skin>
+struct MeshAncestor<Carac,nvi_to_subs,skin>::ResizeNodeConElem {
+    template<class TE,class TM> void operator()(const TE &e,const TM &m) {
+        for(unsigned i=0;i<TE::nb_nodes;++i) res[ m.node_list.number(*e.node(i)) ] += TE::nb_nodes-1;
+    }
+    Vec<unsigned> res;
+};
+
+template<class Carac,unsigned nvi_to_subs,unsigned skin>
+void MeshAncestor<Carac,nvi_to_subs,skin>::update_node_neighbours() {
+    if ( date_last_node_neighbours_update == date_last_connectivity_change )
+        return;
+    date_last_node_neighbours_update = date_last_connectivity_change;
+    
+    // get a first approx of nb nodes connected to each node
+    ResizeNodeConElem gne;
+    gne.res.resize( node_list.size(), (unsigned)0 );
+    apply(elem_list, gne,*this);
+
+    // get connections (neither sorted nor unique)
+    AppendNodeNodeCon amc;
+    amc.vv.resize( node_list.size() );
+    for(unsigned i=0;i<node_list.size();++i)
+        amc.vv[i].reserve( gne.res[i] );
+    apply(elem_list, amc,*this);
+
+    // update node_neighbours... tables
+    // sort and make unique
+    for(unsigned i=0;i<node_list.size();++i) {
+        TNode **be = amc.vv[i].begin(), **en = amc.vv[i].end();
+        std::sort( be, en, std::less<TNode *>() );
+        TNode **new_end = std::unique( be, en );
+        amc.vv[i].resize( new_end - be );
+    }
+    node_neighbours = amc.vv;
+}
+
+namespace LMTPRIVATE {
+    template<class EA> struct AppendNodeParents {
+        template<class TE,class TM> void operator()(TE &e,const TM &m) {
+            for(unsigned i=0;i<TE::nb_nodes;++i)
+                res[m.node_list.number(*e.node(i))].push_back( &e );
+        }
+        Vec<Vec<EA *> > res;
+    };
+};
+template<class Carac,unsigned nvi_to_subs,unsigned skin>
+void MeshAncestor<Carac,nvi_to_subs,skin>::update_node_parents() {
+    if ( date_last_node_parents_update == date_last_connectivity_change )
+        return;
+    date_last_node_parents_update = date_last_connectivity_change;
+    
+    LMTPRIVATE::AppendNodeParents<EA> anb;
+    anb.res.resize( node_list.size() );
+    apply( elem_list, anb, *this );
+    
+    // sort and make unique
+    for(unsigned i=0;i<node_list.size();++i) {
+        EA **be = anb.res[i].begin(), **en = anb.res[i].end();
+        std::sort( be, en, std::less<EA *>() );
+        EA **new_end = std::unique( be, en );
+        anb.res[i].resize( new_end - be );
+    }
+    node_parents = anb.res;
+}
+
+namespace LMTPRIVATE {
+    template<class TEN,class EA> struct UpdateElemNeighbour {
+        template<class TE> void operator()(const StructForType<TE> &st) {
+            for(unsigned i=0;i<res[TE::num_in_elem_list].size();++i) {
+                EA **be = res[TE::num_in_elem_list][i].begin(), **en = res[TE::num_in_elem_list][i].end();
+                std::sort( be, en, std::less<EA *>() );
+                EA **new_end = std::unique( be, en );
+                res[TE::num_in_elem_list][i].resize( new_end - be );
+            }
+            elem_neighbours[TE::num_in_elem_list] = res[TE::num_in_elem_list];
+        }
+        Vec<Vec<EA *> > *res;
+        TEN *elem_neighbours;
+    };
+};
+template<class Carac,unsigned nvi_to_subs,unsigned skin>
+void MeshAncestor<Carac,nvi_to_subs,skin>::update_elem_neighbours() {
+    if ( date_last_elem_neighbours_update == date_last_connectivity_change )
+        return;
+    date_last_elem_neighbours_update = date_last_connectivity_change;
+
+    //    
+    Vec<Vec<EA *> > res[TElemList::nb_elem_type];
+    unsigned s[TElemList::nb_elem_type];
+    elem_list.get_sizes(s);
+    for(unsigned i=0;i<TElemList::nb_elem_type;++i)
+        res[i].resize( s[i] );
+      
+    //  
+    update_node_parents();
+    for(unsigned i=0;i<node_list.size();++i) {
+        SimpleConstIterator<EA *> iter_par = get_node_parents(i);
+        EA * const *b = iter_par.begin(), * const *e = iter_par.end();
+        for(EA * const *e1=b;e1!=e;++e1)
+            for(EA * const *e2=b;e2!=e;++e2)
+                if ( e1 != e2 )
+                    res[(*e1)->num_in_elem_list_virtual()][(*e1)->number].push_back( *e2 );
+    }
+    // sort and make unique
+    LMTPRIVATE::UpdateElemNeighbour<PackedVectorOfVector<EA *>,EA> uen;
+    uen.res = res;
+    uen.elem_neighbours = elem_neighbours;
+    TElemList::apply_static(uen);
+}
+
+
+// template<class TM,class Op>
+// struct ApplyDS {
+//     template<class TE,class TM> void operator()( TE &e, TM &m ) const {
+//         
+// //         (*op)( e,  );
+//     }
+//     Op *op;
+// };
+
+// template<class TM,class Op> void apply_dS( TM &m, const Op &op ) {
+//     m.update_skin();
+//     ApplyDS<TM,Op> ads;
+//     ads.op = &op;
+//     apply( m.sub_mesh(Number<1>()), ads, m );
+// }
+
+
+};
+
+#endif // LMT_meshancestor_HEADER
+
