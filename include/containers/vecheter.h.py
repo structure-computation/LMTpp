@@ -208,8 +208,8 @@ public:
     void free() const {}
     void resize(const unsigned *s) const {}
     
-    template<class TO> void push_back(const TO &val) { DEBUGASSERTWC(0,type TO is not a registered subtype); } ///
-    template<class TO> TO *new_elem(const StructForType<TO> st=StructForType<TO>()) { DEBUGASSERTWC(0,type TO is not a registered subtype); } ///
+    template<class TO> void push_back(const TO &val) { std::cerr << "impossible to push type "; PRINTTYPE(typeid(TO)); DEBUGASSERTWC(0,type TO is not a registered subtype); } ///
+    template<class TO> TO *new_elem(const StructForType<TO> st=StructForType<TO>()) { std::cerr << "impossible to push type "; PRINTTYPE(typeid(TO)); DEBUGASSERTWC(0,type TO is not a registered subtype); } ///
     
     void remove_nb(unsigned num_list,unsigned num_in_sub_list) const { DEBUGASSERTWC(0,num_list is greater than number of sub list); } ///
     
@@ -241,16 +241,16 @@ print_apply_ext('apply_wi',TP,TV,'apply_wi(v.vec,op,PARALIST); apply_wi(v.next,o
 print_apply_ext('find' ,TP,TV,'if (find(v.vec,op,PARALIST)) return true; return find(v.next,op,PARALIST);',ret='bool')
 print_apply_ext(
     'apply_range',TP,TV,
-    'apply_range(v.vec,from,min(to,v.vec.size()),op,PARALIST); from -= min(from,v.size()); to -= min(to,v.size()); apply_range(v.next,from,to,op,PARALIST);',
-    suppar=['unsigned from','unsigned to']
+    'apply_range(v.vec,max(0,from),min(to,(int)v.vec.size()),op,PARALIST); from -= v.vec.size(); to -= v.vec.size(); if ( to > 0 ) apply_range(v.next,from,to,op,PARALIST);',
+    suppar=['int from','int to']
 )
 
 print_apply_ext('apply_ptr',TP,TV,'apply_ptr(v.vec,op,PARALIST); apply_ptr(v.next,op,PARALIST);')
 print_apply_ext('find_ptr' ,TP,TV,'if (find_ptr(v.vec,op,PARALIST)) return true; return find_ptr(v.next,op,PARALIST);',ret='bool')
 print_apply_ext(
     'apply_range_ptr',TP,TV,
-    'apply_range_ptr(v.vec,from,min(to,v.vec.size()),op,PARALIST); from -= min(from,v.size()); to -= min(to,v.size()); apply_range_ptr(v.next,from,to,op,PARALIST);',
-    suppar=['unsigned from','unsigned to']
+    'apply_range_ptr(v.vec,max(0,from),min(to,(int)v.vec.size()),op,PARALIST); from -= v.vec.size(); to -= v.vec.size(); if ( to > 0 ) apply_range_ptr(v.next,from,to,op,PARALIST);',
+    suppar=['int from','int to']
 )
 print_apply_ext('remove_if' ,TP,TV,'remove_if(v.vec,op,PARALIST); remove_if(v.next,op,PARALIST);',onlyfornonconstvec=True)
 
@@ -260,7 +260,7 @@ TV = 'Vec<Heterogeneous<Carac,nt,void>,s,int>'
 print_apply_ext('apply',TP,TV,'')
 print_apply_ext('apply_wi',TP,TV,'')
 print_apply_ext('find' ,TP,TV,'return false;',ret='bool')
-print_apply_ext('apply_range',TP,TV,'',suppar=['unsigned from','unsigned to'])
+print_apply_ext('apply_range',TP,TV,'',suppar=['int from','int to'])
 print_apply_ext('remove_if' ,TP,TV,'',onlyfornonconstvec=True)
 
 print '} // namespace LMT'

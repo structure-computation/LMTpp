@@ -56,6 +56,6 @@ TV = 'Vec<VecAppend<V0,const_v0,V1,const_v1>,s,int>'
 print_apply_ext('apply',TT,TV,'apply(*v.v0.val,op,PARALIST); apply(*v.v1.val,op,PARALIST);')
 print_apply_ext('apply_wi',TT,TV,'OpWithIncrement<Op,ONEIFCONSTOP> opi(op); apply(*v.v0.val,opi,PARALIST); apply(*v.v1.val,opi,PARALIST);')
 print_apply_ext('find',TT,TV,'return find(*v.v0.val,op,PARALIST) || find(*v.v1.val,op,PARALIST);',ret='bool')
-print_apply_ext('apply_range',TT,TV,'apply_range(*v.v0.val,op,from,to); from-=min(from,v.v0.val->size()); to-=min(to,v.v0.val->size()); apply_range(*v.v1.val,op,from,to);',suppar=['unsigned from','unsigned to'])
+print_apply_ext('apply_range',TT,TV,'apply_range(*v.v0.val,op,from,to); from-=min(from,v.v0.val->size()); to-=min(to,v.v0.val->size()); apply_range(*v.v1.val,op,from,to);',suppar=['int from','int to'])
 
 print '} // namespace LMT'

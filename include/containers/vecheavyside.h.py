@@ -58,11 +58,11 @@ print_apply_ext('apply'          ,TT,TV,'for(unsigned i=0;i<v.nn;op((TT)0,PARALI
 
 print_apply_ext('apply_nz'       ,TT,TV,'for(unsigned i=v.nn;i<v.size();op(v.val,PARALIST),++i);',onlyforconstvec=True)
 print_apply_ext('apply_nz_unique',TT,TV,'op(v.val,PARALIST);')
-print_apply_ext('apply_range'    ,TT,TV,'DEBUGASSERT(to<=v.size()); for(unsigned i=from;i<v.nn;op(0,PARALIST),++i); for(unsigned i=v.nn;i<to;op((TT)0,PARALIST), ++i);',suppar=['unsigned from','unsigned to'],onlyforconstvec=True)
+print_apply_ext('apply_range'    ,TT,TV,'DEBUGASSERT(to<=v.size()); for(unsigned i=from;i<v.nn;op(0,PARALIST),++i); for(unsigned i=v.nn;i<to;op((TT)0,PARALIST), ++i);',suppar=['int from','int to'],onlyforconstvec=True)
 
 print_apply_ext('apply_wi'       ,TT,TV,'for(unsigned i=0;i<v.nn;op(0,i,PARALIST),++i); for(unsigned i=v.nn;i<v.size();op((TT)0,i,PARALIST),++i);',onlyforconstvec=True)
 print_apply_ext('apply_nz_wi'    ,TT,TV,'for(unsigned i=v.nn;i<v.size();op(v.val,i,PARALIST),++i);',onlyforconstvec=True)
-print_apply_ext('apply_range_wi' ,TT,TV,'DEBUGASSERT(to<=v.size()); for(unsigned i=from;i<v.nn;op(0,i,PARALIST),++i); for(unsigned i=v.nn;i<to;op((TT)0,i,PARALIST), ++i);',suppar=['unsigned from','unsigned to'],onlyforconstvec=True)
+print_apply_ext('apply_range_wi' ,TT,TV,'DEBUGASSERT(to<=v.size()); for(unsigned i=from;i<v.nn;op(0,i,PARALIST),++i); for(unsigned i=v.nn;i<to;op((TT)0,i,PARALIST), ++i);',suppar=['int from','int to'],onlyforconstvec=True)
 
 print_apply_ext('find'           ,TT,TV,'return (v.nn>=1 && op((TT)0,PARALIST)) || op(v.val,PARALIST);',ret='bool',onlyforconstvec=True)
 

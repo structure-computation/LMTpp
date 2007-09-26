@@ -351,7 +351,7 @@ for ptr,e in zip(['','_ptr'],['','*']):
                 for(;jb<je;++jb)
                     op("""+e+""" v.atoms[ie]->data[jb],PARALIST);
             }
-    """,suppar=['unsigned from','unsigned to'])
+    """,suppar=['int from','int to'])
     print_apply_ext('apply_nz'+ptr,TP,TV,"""
             unsigned nf = v.nb_full_atoms(), sl = v.size_last_atom, cpt = 0;
             for(unsigned i=0;i<nf;++i,++cpt) for(unsigned j=0;j<atomic_size;++j) op("""+e+"""v.atoms[i]->data[j],cpt,PARALIST);

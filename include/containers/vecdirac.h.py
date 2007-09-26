@@ -63,11 +63,11 @@ TV = 'Vec<VecDirac<TT>,s,int>'
 print_apply_ext('apply'          ,TT,TV,'for(unsigned i=0;i<v.nn;op(0,PARALIST),++i); op(v.val,PARALIST); for(unsigned i=v.nn+1;i<v.size();op(0,PARALIST),++i);',onlyforconstvec=True)
 
 print_apply_ext('apply_nz'       ,TT,TV,'op(v.val,PARALIST);')
-print_apply_ext('apply_range'    ,TT,TV,'DEBUGASSERT(to<=v.size()); for(unsigned i=from;i<v.nn;op(0,PARALIST),++i); if (v.nn>=to && v.nn<from) op(v.val,PARALIST); for(unsigned i=v.nn+1;i<to;op(0,PARALIST), ++i);',suppar=['unsigned from','unsigned to'],onlyforconstvec=True)
+print_apply_ext('apply_range'    ,TT,TV,'DEBUGASSERT(to<=v.size()); for(unsigned i=from;i<v.nn;op(0,PARALIST),++i); if (v.nn>=to && v.nn<from) op(v.val,PARALIST); for(unsigned i=v.nn+1;i<to;op(0,PARALIST), ++i);',suppar=['int from','int to'],onlyforconstvec=True)
 
 print_apply_ext('apply_wi'       ,TT,TV,'for(unsigned i=0;i<v.nn;op(0,i,PARALIST),++i); op(v.val,v.nn,PARALIST); for(unsigned i=v.nn+1;i<v.size();op(0,i,PARALIST),++i);',onlyforconstvec=True)
 print_apply_ext('apply_nz_wi'    ,TT,TV,'op(v.val,v.nn,PARALIST);')
-print_apply_ext('apply_range_wi' ,TT,TV,'DEBUGASSERT(to<=v.size()); for(unsigned i=from;i<v.nn;op(0,i,PARALIST),++i); if (v.nn>=to && v.nn<from) op(v.val,v.nn,PARALIST); for(unsigned i=v.nn+1;i<to;op(0,i,PARALIST), ++i);',suppar=['unsigned from','unsigned to'],onlyforconstvec=True)
+print_apply_ext('apply_range_wi' ,TT,TV,'DEBUGASSERT(to<=v.size()); for(unsigned i=from;i<v.nn;op(0,i,PARALIST),++i); if (v.nn>=to && v.nn<from) op(v.val,v.nn,PARALIST); for(unsigned i=v.nn+1;i<to;op(0,i,PARALIST), ++i);',suppar=['int from','int to'],onlyforconstvec=True)
 
 print_apply_ext('find'           ,TT,TV,'return (v.size()>1 && op(0,PARALIST)) || op(0,PARALIST);',ret='bool',onlyforconstvec=True)
 

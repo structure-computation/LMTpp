@@ -234,7 +234,7 @@ print_apply_ext( 'apply_range',TT,TV,"""DEBUGASSERT(to<v.si.val);
             op(v.data[i],PARALIST);
         for(unsigned j=v.indices[i]+1;j<to;++j)
             op((TT)0,PARALIST);
-    }""",suppar=['unsigned from','unsigned to'] )
+    }""",suppar=['int from','int to'] )
     
 print_apply_ext( 'apply_range_wi',TT,TV,"""DEBUGASSERT(to<v.si.val);
     if ( v.indices.size()==0 )
@@ -256,7 +256,7 @@ print_apply_ext( 'apply_range_wi',TT,TV,"""DEBUGASSERT(to<v.si.val);
             op(v.data[i],v.indices[i],PARALIST);
         for(unsigned j=v.indices[i]+1;j<to;++j)
             op((TT)0,j,PARALIST);
-    }""",suppar=['unsigned from','unsigned to'] )
+    }""",suppar=['int from','int to'] )
     
 print_apply_ext('apply_nz',TT,TV,'for(unsigned i=0;i<v.indices.size();++i) op(v.data[i],PARALIST);')
 
