@@ -104,7 +104,7 @@ public:
         r = mat.r;
         Numeric = NULL; // mat.Numeric;
     }
-
+    
     /// creation of a matrix from a matrix
     void operator=(const Mat &mat) {
         Ap = mat.Ap;
@@ -138,14 +138,13 @@ public:
         Numeric = NULL;
         allocate( indices );
     }
-
-
+    
+    /// 
     void resize( const unsigned &size ) {
         // modifie la taille d'une matrice vide
         Ap.resize( size+1, 0 );
         r = size;
     }
-
 
     ///
     #ifdef WITH_UMFPACK

@@ -7,20 +7,21 @@ print 'namespace LMT {'
 for tt in ['void','int']:
     TT = ['class TT']
     TV = 'Vec<TT,s,'+tt+'>'
-    print_apply_ext('apply'          ,TT,TV,'for(unsigned i=0;i<v.size();++i) op(v[i],PARALIST);')
+    print_apply_ext('apply'             ,TT,TV,'for(unsigned i=0;i<v.size();++i) op(v[i],PARALIST);')
 
-    print_apply_ext('apply_nz'       ,TT,TV,'apply(v,op,PARALIST);')
-    print_apply_ext('apply_nz_unique',TT,TV,'apply_nz(v,op,PARALIST);')
-    print_apply_ext('apply_range'    ,TT,TV,'DEBUGASSERT(to<=v.size()); for(;from<to;++from) op(v[from],PARALIST);',suppar=['unsigned from','unsigned to'])
+    print_apply_ext('apply_nz'          ,TT,TV,'apply(v,op,PARALIST);')
+    print_apply_ext('apply_nz_unique'   ,TT,TV,'apply_nz(v,op,PARALIST);')
+    print_apply_ext('apply_range'       ,TT,TV,'DEBUGASSERT(to<=v.size()); for(;from<to;++from) op(v[from],PARALIST);',suppar=['unsigned from','unsigned to'])
+    print_apply_ext('apply_range_stride',TT,TV,'DEBUGASSERT(to<=v.size()); for(;from<to;from+=inc) op(v[from],PARALIST);',suppar=['unsigned from','unsigned to','unsigned inc'])
 
-    print_apply_ext('apply_wi'       ,TT,TV,'for(unsigned i=0;i<v.size();++i) op(v[i],i,PARALIST);')
-    print_apply_ext('apply_nz_wi'    ,TT,TV,'apply_wi(v,op,PARALIST);')
-    print_apply_ext('apply_range_wi' ,TT,TV,'DEBUGASSERT(to<=v.size()); for(;from<to;++from) op(v[from],from,PARALIST);',suppar=['unsigned from','unsigned to'])
+    print_apply_ext('apply_wi'          ,TT,TV,'for(unsigned i=0;i<v.size();++i) op(v[i],i,PARALIST);')
+    print_apply_ext('apply_nz_wi'       ,TT,TV,'apply_wi(v,op,PARALIST);')
+    print_apply_ext('apply_range_wi'    ,TT,TV,'DEBUGASSERT(to<=v.size()); for(;from<to;++from) op(v[from],from,PARALIST);',suppar=['unsigned from','unsigned to'])
 
-    print_apply_ext('find_w_wo_ind'  ,TT,TV,'return reduction( generate(v,op,PARALIST), Or() );',ret='bool',suppar=['const Number<0> &ni'])
-    print_apply_ext('find_w_wo_ind'  ,TT,TV,'for(unsigned i=0;i<v.size();++i) if (op(v[i],PARALIST)) return true; return false;',ret='bool',suppar=['const Number<1> &ni'])
+    print_apply_ext('find_w_wo_ind'     ,TT,TV,'return reduction( generate(v,op,PARALIST), Or() );',ret='bool',suppar=['const Number<0> &ni'])
+    print_apply_ext('find_w_wo_ind'     ,TT,TV,'for(unsigned i=0;i<v.size();++i) if (op(v[i],PARALIST)) return true; return false;',ret='bool',suppar=['const Number<1> &ni'])
     
-    print_apply_ext('find'           ,TT,TV,'return find_w_wo_ind(v,Number<HasIndexAccess<TT>::res>(),op,PARALIST);',ret='bool')
+    print_apply_ext('find'              ,TT,TV,'return find_w_wo_ind(v,Number<HasIndexAccess<TT>::res>(),op,PARALIST);',ret='bool')
     
     RET = 'typename '+TV+'::template SubType<0>::T'
     print_apply_ext( 'find_elem', TT, TV,

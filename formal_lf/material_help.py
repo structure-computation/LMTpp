@@ -149,32 +149,34 @@ def hooke_orthotrope_endommageable_th_3d(E1,E2,E3,nu12,nu13,nu23,G12,G13,G23,v1,
    
 #definition de la matrice de passage d'une base globale a une base locale : Tl= P*Tg
 def matrice_passage(v1,v2):
-   v3=vect_prod(v1,v2)
-   a1=v1[0]
-   a2=v1[1]
-   a3=v1[2]
-   b1=v2[0]
-   b2=v2[1]
-   b3=v2[2]
-   c1=v3[0]
-   c2=v3[1]
-   c3=v3[2]
+   v1 /= length( v1 )
+   v2 /= length( v2 )
+   v3 = vect_prod(v1,v2)
+   a1 = v1[0]
+   a2 = v1[1]
+   a3 = v1[2]
+   b1 = v2[0]
+   b2 = v2[1]
+   b3 = v2[2]
+   c1 = v3[0]
+   c2 = v3[1]
+   c3 = v3[2]
    P = matrix([
-      [a1*a1, a2*a2, a3*a3, 2*a1*a2,     2*a1*a3,     2*a2*a3	 ],
-      [b1*b1, b2*b2, b3*b3, 2*b1*b2,     2*b1*b3,     2*b2*b3	 ],
-      [c1*c1, c2*c2, c3*c3, 2*c1*c2,     2*c1*c3,     2*c2*c3	 ],
-      [b1*a1, b2*a2, b3*a3, b1*a2+b2*a1, b1*a3+b3*a1, b2*a3+b3*a2],
-      [c1*a1, c2*a2, c3*a3, c1*a2+c2*a1, a3*c1+c3*a1, c2*a3+c3*a2],      
-      [c1*b1, c2*b2, c3*b3, c1*b2+c2*b1, c1*b3+c3*b1, c2*b3+c3*b2],	 
-      ])
+      [ a1*a1, a2*a2, a3*a3, 2*a1*a2,     2*a1*a3,     2*a2*a3	   ],
+      [ b1*b1, b2*b2, b3*b3, 2*b1*b2,     2*b1*b3,     2*b2*b3	   ],
+      [ c1*c1, c2*c2, c3*c3, 2*c1*c2,     2*c1*c3,     2*c2*c3	   ],
+      [ b1*a1, b2*a2, b3*a3, b1*a2+b2*a1, b1*a3+b3*a1, b2*a3+b3*a2 ],
+      [ c1*a1, c2*a2, c3*a3, c1*a2+c2*a1, a3*c1+c3*a1, c2*a3+c3*a2 ],      
+      [ c1*b1, c2*b2, c3*b3, c1*b2+c2*b1, c1*b3+c3*b1, c2*b3+c3*b2 ],	 
+   ])
    Pinv = matrix([
-      [a1*a1, b1*b1, c1*c1, 2*a1*b1,     2*a1*c1,     2*b1*c1	 ],
-      [a2*a2, b2*b2, c2*c2, 2*a2*b2,     2*a2*c2,     2*b2*c2	 ],
-      [a3*a3, b3*b3, c3*c3, 2*a3*b3,     2*a3*c3,     2*b3*c3	 ],
-      [a2*a1, b2*b1, c2*c1, a2*b1+b2*a1, a2*c1+c2*a1, b2*c1+c2*b1],
-      [a3*a1, b3*b1, c3*c1, a3*b1+b3*a1, a3*c1+c3*a1, b3*c1+c3*b1],
-      [a3*a2, b3*b2, c3*c2, a3*b2+b3*a2, a3*c2+c3*a2, b3*c2+c3*b2],
-      ])
+      [ a1*a1, b1*b1, c1*c1, 2*a1*b1,     2*a1*c1,     2*b1*c1	   ],
+      [ a2*a2, b2*b2, c2*c2, 2*a2*b2,     2*a2*c2,     2*b2*c2	   ],
+      [ a3*a3, b3*b3, c3*c3, 2*a3*b3,     2*a3*c3,     2*b3*c3	   ],
+      [ a2*a1, b2*b1, c2*c1, a2*b1+b2*a1, a2*c1+c2*a1, b2*c1+c2*b1 ],
+      [ a3*a1, b3*b1, c3*c1, a3*b1+b3*a1, a3*c1+c3*a1, b3*c1+c3*b1 ],
+      [ a3*a2, b3*b2, c3*c2, a3*b2+b3*a2, a3*c2+c3*a2, b3*c2+c3*b2 ],
+   ])
    return P,Pinv
 
 def hooke_matrix_shell(E,nu,h,dim,type_behaviour='membrane'):
@@ -183,9 +185,9 @@ def hooke_matrix_shell(E,nu,h,dim,type_behaviour='membrane'):
     if dim==3:
         
         K = matrix([
-        [ 1 ,nu ,0 ],
-        [ nu ,1 ,0 ],
-        [ 0 , 0 ,(1 - nu) ],
+        [ 1 , nu, 0        ],
+        [ nu, 1 , 0        ],
+        [ 0 , 0 , (1 - nu) ],
         ])
         K *= E / ( 1 - nu * nu)
         

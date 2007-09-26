@@ -9,11 +9,12 @@
 // Copyright: See COPYING file that comes with this distribution
 //
 //
-#ifndef LMT_READ_GID_HEADER
-#define LMT_READ_GID_HEADER
+#ifndef LMT_READ_GID2_HEADER
+#define LMT_READ_GID2_HEADER
 
 #include "mesh/hexa.h"
 #include "mesh/tetra.h"
+#include "mesh/wedge.h"
 
 #include <fstream>
 #include <map>
@@ -25,7 +26,7 @@ namespace LMT {
 
 /// put gmsh mesh in m
 template<class TM>
-void read_msh_2 ( TM &m,std::istream &is ) throw ( std::runtime_error ) {
+void read_msh_2( TM &m,std::istream &is ) throw ( std::runtime_error ) {
     using namespace std;
     typedef typename TM::Pvec Pvec;
     typedef typename TM::TNode TNode;
@@ -82,7 +83,7 @@ void read_msh_2 ( TM &m,std::istream &is ) throw ( std::runtime_error ) {
             s >> number;
             unsigned type_elem;
             s >> type_elem;
-            LMT::Vec<unsigned, 19> nb_nodes_elem ( 2, 3, 4, 4, 8, 6, 5, 3, 6, 9, 10, 27, 18, 14, 1, 8, 20, 15, 13 );
+            unsigned nb_nodes_elem[] = { 2, 3, 4, 4, 8, 6, 5, 3, 6, 9, 10, 27, 18, 14, 1, 8, 20, 15, 13 };
             unsigned nb_nodes;
             nb_nodes = nb_nodes_elem[type_elem-1];
             unsigned nb_tags;
@@ -141,12 +142,12 @@ void read_msh_2 ( TM &m,std::istream &is ) throw ( std::runtime_error ) {
 
 /// put gid mesh in m
 template<class TM>
-void read_msh_2 ( TM &m,const std::string &fic_name ) throw ( std::runtime_error ) {
+void read_msh_2( TM &m,const std::string &fic_name ) throw ( std::runtime_error ) {
     // ouverture du fichier
-    std::ifstream my_file ( fic_name.c_str() );
+    std::ifstream my_file( fic_name.c_str() );
     if ( ! my_file.is_open() )
-        throw std::runtime_error ( "opening of "+fic_name+" has failed." );
-    return read_msh_2 ( m,my_file );
+        throw std::runtime_error( "opening of "+fic_name+" has failed." );
+    return read_msh_2( m,my_file );
 }
 
 

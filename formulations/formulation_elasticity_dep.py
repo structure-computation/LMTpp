@@ -31,7 +31,7 @@ integration_totale = False
 # --------------------------------------------------------------------------------------------------------------------------------
 def formulation():
     #
-    #dep_inf = dep.expr.subs( e.var_inter[dim-1], 0 )
+    #dep_inf = dep.expr.subs( e.var_inter[dim-1], 0 ) 
     #dep_sup = dep.expr.subs( e.var_inter[dim-1], 1 )
     #X = pos.expr.diff( e.var_inter[0] )
     #if dim == 3:
@@ -43,13 +43,16 @@ def formulation():
     #normale /= norm( normale )
     #salto_de_u = dot( dep_sup - dep_inf, normale )
     #return e.integration( res, 2, False ) * dJ * dEheavyside( fibres_matrice_level_set.expr )
+    #sys.stderr.write(str( grad( dep.expr ) ))
+    
+
+    
     E = elastic_modulus.expr # * ( 2 + cos( pos.expr[0] ) )
     epsilon = grad_sym_col(dep.expr)
-    #epsilno_p = grad_sym_col(dep.expr).diff(time)
     epstest = grad_sym_col(dep.test)
     sigma = mul( hooke_isotrope_th( E, poisson_ratio.expr,  dim, 0., options['behavior_simplification'] )[0] , epsilon )
         
-    res = density.expr * dot( dep.expr.diff(time).diff(time) - f_vol.expr * 0, dep.test )
+    res = density.expr * dot( dep.expr.diff(time).diff(time) - f_vol.expr, dep.test )
     for i in range(dim): res += sigma[i] * epstest[i]
     for i in range(dim,epsilon.size()): res += 2 * sigma[i] * epstest[i]
     #res.display_graphviz()

@@ -8,13 +8,11 @@ thermal_conductivity = Variable( interpolation='global', default_value='1.5', un
 H = Variable( interpolation='skin_elementary', default_value='0.0', unit='W/m^2/K' )
 t0 = Variable( interpolation='global', default_value='500', unit='K' )
 
-
 #epslopigh = Variable( interpolation='gauss', default_value='500', nb_dim=[6], unit='K' )
-
 
 left_time_integration = 0
 right_time_integration = 1
- 
+
 #
 def formulation():
   #sys.stderr.write( str( epslopigh.expr ) )
