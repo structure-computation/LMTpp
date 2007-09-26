@@ -149,8 +149,8 @@ def hooke_orthotrope_endommageable_th_3d(E1,E2,E3,nu12,nu13,nu23,G12,G13,G23,v1,
    
 #definition de la matrice de passage d'une base globale a une base locale : Tl= P*Tg
 def matrice_passage(v1,v2):
-   v1 /= length( v1 )
-   v2 /= length( v2 )
+   v1 /= norm( v1 )
+   v2 /= norm( v2 )
    v3 = vect_prod(v1,v2)
    a1 = v1[0]
    a2 = v1[1]
