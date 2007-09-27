@@ -18,21 +18,21 @@ def vector(l):
 
 def mat_sym_to_vec_col(m):
   res = []
-  
-  if m.nb_rows()==2:
-    res=[ m[0,0], m[1,1], m[1,0] ]
-  elif m.nb_rows()==3:
-    res=[ m[0,0], m[1,1], m[2,2], m[0,1], m[0,2], m[1,2] ] # as abaqus
-  #for d in range(m.nb_rows()):
-      #for e in range(m.nb_rows()-d):
+    
+    if m.nb_rows()==2:
+        res=[ m[0,0], m[1,1], m[1,0] ]
+    elif m.nb_rows()==3:
+        res=[ m[0,0], m[1,1], m[2,2], m[0,1], m[0,2], m[1,2] ] # as abaqus
+    #for d in range(m.nb_rows()):
+        #for e in range(m.nb_rows()-d):
          #res.append( m[e,d+e] )
-#   for i in range(m.nb_rows()):
-#     res.append( m[i,i] )
-#   
-#   for i in range(m.nb_rows()):
-#     for j in range(i):
-#       res.append( m[i,j] )
-  return vector(res)
+    #   for i in range(m.nb_rows()):
+    #     res.append( m[i,i] )
+    #   
+    #   for i in range(m.nb_rows()):
+    #     for j in range(i):
+    #       res.append( m[i,j] )
+    return vector(res)
 
 def vec_col_to_mat_sym(v):
    res = []

@@ -19,7 +19,7 @@ for static_size in [1,0]:
             args = string.join( [ 'const TT &v%i'%k for k in range(i) ], ',')
             sets = string.join( [ 'val[%i]=v%i;'%(k,k) for k in range(i) ] , ' ')
             if i>1:
-                constructors += '    Vec('+args+') { STATICASSERT(static_size_==%i); %s } /// static_size_ must == %i\n' % (i,sets,i)
+                constructors += '    Vec('+args+') { DEBUGASSERT(static_size_==%i); %s } /// static_size_ must == %i\n' % (i,sets,i)
             constructors += '    void assign_and_complete_with_last('+args+') { '+sets+' for(unsigned i='+str(i)+';i<size();++i) val[i]=v'+str(i-1)+'; }\n'
     else:
         constructors = '    Vec() { init(); }\n'
@@ -72,7 +72,7 @@ public:
         }
     };
             
-    template<class T2,int s1,class IO1> Vec(const Vec<T2,s1,IO1> &vec) { """+'STATICASSERT(s1<0 or s1==static_size); DEBUGASSERT((unsigned)static_size==vec.size());'*static_size+'init(); resize(vec.size());'*(1-static_size)+"""
+    template<class T2,int s1,class IO1> Vec(const Vec<T2,s1,IO1> &vec) { """+'DEBUGASSERT(s1<0 or s1==static_size); DEBUGASSERT((unsigned)static_size==vec.size());'*static_size+'init(); resize(vec.size());'*(1-static_size)+"""
          if ( static_size>=0 ) {
              for(unsigned i=0;i<min((unsigned)static_size,vec.size());++i)
                  val[i] = (TT)vec[i];
@@ -81,7 +81,7 @@ public:
             apply_simd_wi(vec,SetVal(),val);
     } /// copy constructor
     Vec(const Vec &vec) { init(); resize(vec.size()); for(unsigned i=0;i<size();++i) val[i] = vec[i]; } /// copy constructor
-    template<class T2,int s1> Vec &operator=(const Vec<T2,s1> &vec) { """+'STATICASSERT(s1<0 or s1==static_size); DEBUGASSERT((unsigned)static_size==vec.size());'*static_size+'resize(vec.size());'*(1-static_size)+"""
+    template<class T2,int s1> Vec &operator=(const Vec<T2,s1> &vec) { """+'DEBUGASSERT(s1<0 or s1==static_size); DEBUGASSERT((unsigned)static_size==vec.size());'*static_size+'resize(vec.size());'*(1-static_size)+"""
         if ( static_size>=0 ) {
             for(unsigned i=0;i<min((unsigned)static_size,vec.size());++i)
                 val[i] = (TT)vec[i];
