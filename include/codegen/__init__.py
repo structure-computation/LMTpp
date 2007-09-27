@@ -17,8 +17,7 @@ def vector(l):
     return res
 
 def mat_sym_to_vec_col(m):
-  res = []
-    
+    res = []
     if m.nb_rows()==2:
         res=[ m[0,0], m[1,1], m[1,0] ]
     elif m.nb_rows()==3:
