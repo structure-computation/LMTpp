@@ -247,6 +247,7 @@ template<class T,int s,int s2> void solve_using_lu_factorize( const Mat<T,Gen<s>
     //
     Vec<T,s2> tmpvec = res;
     while (nb_lines--) {
+        assert( mat.U[nb_lines].data.size() );
         T tmp = tmpvec[nb_lines] / mat.U[nb_lines].data.back();
         for(unsigned i=0;i<mat.U[nb_lines].data.size()-1;++i)
             tmpvec[ mat.U[nb_lines].indices[i] ] -= mat.U[nb_lines].data[i] * tmp;

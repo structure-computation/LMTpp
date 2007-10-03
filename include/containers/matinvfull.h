@@ -21,6 +21,7 @@ namespace LMT {
 */
 template<class TT,int s,class Sto,class IO,class TF>
 bool get_factorization( const Mat<TT,Gen<s,s>,Sto,IO> &m, TF &fact ) {
+    PRINT(__LINE__);
     typedef typename TF::first_type::T T;
     DEBUGASSERT( m.nb_rows()==m.nb_cols() );
     unsigned n = m.nb_rows();

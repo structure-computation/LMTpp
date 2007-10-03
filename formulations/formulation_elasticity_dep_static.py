@@ -18,7 +18,7 @@ def formulation():
   epsilon = grad_sym_col(dep.expr)
   epstest = grad_sym_col(dep.test)
   
-  sigma = mul( hooke_isotrope_th( elastic_modulus.expr, poisson_ratio.expr,  0., dim, options['behavior_simplification'] )[0] , epsilon )
+  sigma = mul( hooke_isotrope( elastic_modulus.expr, poisson_ratio.expr, dim, options['behavior_simplification'] )[0] , epsilon )
   
   res = density.expr * dot( f_vol.expr, dep.test )
   for i in range(dim): res += sigma[i] * epstest[i]
@@ -34,7 +34,7 @@ def formulation():
 def apply_on_elements_after_solve(unk_subs): # return a string
     epsilon = grad_sym_col(dep.expr)
     tr_epsilon = sum([ epsilon[i] for i in range(dim) ])
-    sigma = mul( hooke_isotrope_th( elastic_modulus.expr, poisson_ratio.expr,  0., dim, options['behavior_simplification'] )[0] , epsilon )
+    sigma = mul( hooke_isotrope( elastic_modulus.expr, poisson_ratio.expr, dim, options['behavior_simplification'] )[0] , epsilon )
     
     my_subs = unk_subs
     #my_subs[ time ] = time_steps[0]

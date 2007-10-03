@@ -70,6 +70,13 @@ public:
             L[i].data.pop_back();
         }
     }
+    template<class T2> Mat(const Mat<T2,Gen<>,SparseLine<> > &val) {
+        resize( val.nb_rows(), val.nb_cols() );
+        for(unsigned i=0;i<nb_rows();++i) {
+            for(unsigned j=0;j<val.data[i].indices.size();++j)
+                operator()( i, val.data[i].indices[j] ) = val.data[i].data[j];
+        }
+    }
     
     void resize(unsigned nr) { resize( nr, nr ); }
     void resize(unsigned nr,unsigned nc) { this->nr.set(nr); this->nc.set(nc);

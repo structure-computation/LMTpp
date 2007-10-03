@@ -41,6 +41,7 @@ public:
     template<unsigned n,unsigned inner=0> struct SubType { typedef TT T; };
     template<unsigned inner> struct SubType<1,inner> { typedef void T; };
     static const unsigned nb_sub_type = 1;
+    typedef int ST;
     
     static const int static_size = """+['-1','static_size_'][static_size]+""";
     static const bool fixed_size = """+['false','true'][static_size]+""";
@@ -188,6 +189,13 @@ public:
         r = ns;
     } /// Reserve room for new elements if ns > size. If ns is lesser than size, resize *this.
     void free() { allocator.free_mem(val); init(); }
+    TT *make_room_to_insert( ST from, ST n ) {
+        ST os = s;
+        resize( s + n );
+        for( ST i = os - 1; i >= from; --i )
+            val[ i + n ] = val[ i ];
+        return val + from;
+    }
     """*(1-static_size) + """
     inline void resize(unsigned s) const { DEBUGASSERT( static_size_==s ); }
     inline void resize(unsigned s,const TT &val) { DEBUGASSERT( static_size_==s ); *this = val; }
