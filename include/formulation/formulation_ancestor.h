@@ -31,12 +31,12 @@ public:
     virtual std::string get_name() const = 0; /// 
     virtual void set_mesh( void *m ) = 0; /// 
     
-    virtual bool solve(ScalarType iterative_criterium=0.0) = 0; ///  The all-in-one procedure -> allocate if necessary, assemble, solve, update_variables, call_after_solve
+    virtual bool solve(ScalarType iterative_criterium=0.0,bool disp_timing=false) = 0; ///  The all-in-one procedure -> allocate if necessary, assemble, solve, update_variables, call_after_solve
     virtual void allocate_matrices(bool amd=false) = 0; ///
     virtual void shift(int nb=1) = 0;
     virtual void unshift(int nb=1) = 0;
     virtual void assemble(bool assemble_mat=true,bool assemble_vec=true) = 0;
-    virtual bool solve_system(ScalarType iterative_criterium=0.0) = 0;
+    virtual bool solve_system(ScalarType iterative_criterium=0.0,bool disp_timing=false) = 0;
     
     virtual void assemble_clean_mat(bool assemble_mat=true,bool assemble_vec=true) = 0;
     virtual void assemble_constraints(bool assemble_mat=true,bool assemble_vec=true) = 0;

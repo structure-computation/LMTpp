@@ -119,7 +119,7 @@ template<> struct TypeInformation<long double> {
         static const bool float_type = TypeInformation<TT>::float_type;
     };
     template<class TT> struct SubComplex {
-        typedef typename TypeInformation<TT>::template Variant<typename SubComplex<typename TypeInformation<TT>::SubType>::T>::T T;
+        typedef TT T;
     };
     template<class TT> struct SubComplex<std::complex<TT> > {
         typedef TT T;

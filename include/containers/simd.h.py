@@ -123,6 +123,8 @@ for op,tp,sseop,sse2op in lst:
     fsop = op
     if op=='-': fsop = 'operator'+op
     
+    if op in ["conj","abs"]: op = "LMT::"+op
+    
     print 'template<class P1,unsigned s> '+tp+' '+fsop+'(const SimdVec<P1,s> &a) { '+tp \
         +' res; for(unsigned i=0;i<s;++i) res[i] = '+op+'(a[i]); return res; }'
     print 'template<> struct OpSupportSIMD<'+Op+'> { static const unsigned res = true; };'
@@ -213,6 +215,11 @@ print """
 namespace std {
     template<class T,unsigned n> struct numeric_limits<LMT::SimdVec<T,n> > {
         static LMT::SimdVec<T,n> max() { return numeric_limits<T>::max(); }
+    };
+}
+namespace LMT {
+    template<class TT,unsigned n> struct SubComplex<LMT::SimdVec<std::complex<TT>,n> > {
+        typedef LMT::SimdVec<TT,n> T;
     };
 }
 """

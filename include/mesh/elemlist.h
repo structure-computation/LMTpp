@@ -68,7 +68,7 @@ public:
     typedef ElementAncestor<TNode> EA;
 
     Vec() {
-        nb_hash_val = 64;
+        nb_hash_val = 256;
         has_elements_with_hash_val.resize(nb_hash_val);
     }
     struct RemetNousLesElementsDansLaTableDeHashageDeMaxPecas {
@@ -314,8 +314,8 @@ protected:
         for(unsigned i=0;i<dyn_data.size();++i) dyn_data[i]->free();
         for(unsigned i=0;i<nb_hash_val;++i) has_elements_with_hash_val[i].free();
         has_elements_with_hash_val.free();
-        has_elements_with_hash_val.resize(16);
-        nb_hash_val = 16;
+        has_elements_with_hash_val.resize(256);
+        nb_hash_val = 256;
     }
     /// internal use (protected exposure...)
     void pop_back_and_copy_to(DynamicDataAncestor *dda,unsigned i0,unsigned i1) const {

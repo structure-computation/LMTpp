@@ -84,6 +84,7 @@ public:
         initialized = false;
         user_want_pierre_precond = true;
         this->order_integration_when_integration_totale = 2;
+        assume_skin_not_needed = false;
     
         max_diag = 0;
         time_symbol = Codegen::symbol("time");
@@ -132,9 +133,6 @@ private:
         struct GetNZ {
             template<class TE> void operator()(const TE &e,Formulation &f,Vec<Vec<unsigned> > &v) const {
                 assert( (CaracFormulationForElement<NameFormulation,TE,NameVariant,ScalarType>::nb_elementary_unknowns) == 0 );
-                
-                
-                
                 if ( nb_nodal_unknowns ) {
                     for(unsigned i=0;i<TE::nb_nodes;++i) {
                         unsigned a = f.indice_noda[ f.m->node_list.number(*e.node(i)) ];
@@ -157,7 +155,7 @@ private:
             apply( f.m->elem_list, GetNZ(), f, v ); // loop on all elements to find non zero terms
             for(unsigned i=0;i<s;++i) std::sort( v[i].begin(), v[i].end() );
 
-            // std::cout << "size -> " << s << std::endl;
+            //             std::cout << "size -> " << s << std::endl;
             m.allocate(v);
             // m.resize(s,s);
         }
@@ -343,7 +341,7 @@ private:
             adsem( f, Number<true>(),Number<false>(), e, child_elem, nn, in );
         }
         template<class TE,unsigned n> void ass_skin_elem(const TE &e,unsigned *in,Formulation &f,const Number<n> &nn,const Number<n> &nn2) const {}
-        template<class TE> void operator()(const TE &e,const Vec<unsigned> &indice_noda,const Vec<unsigned> *indice_elem,Formulation &f) const {
+        template<class TE> void operator()(const TE &e,const Vec<unsigned> &indice_noda,const Vec<unsigned> *indice_elem,Formulation &f ) const {
             unsigned in[ TE::nb_nodes + 1 + nb_global_unknowns ];
             
             if ( nb_nodal_unknowns ) 
@@ -360,7 +358,8 @@ private:
             add_elem_matrix( f, Number<MatCarac<0>::symm>(), Number<assemble_mat>(), Number<assemble_vec>(), e, in );
             
             // skin elements
-            ass_skin_elem( e, in, f, Number<0>() , Number<NbChildrenElement<typename TE::NE,1>::res>() );
+            if ( not f.assume_skin_not_needed )
+                ass_skin_elem( e, in, f, Number<0>() , Number<NbChildrenElement<typename TE::NE,1>::res>() );
         }
     };
 public:
@@ -384,7 +383,8 @@ public:
 
         if ( assemble_vec ) // preinitialisation
             sollicitation.set(0.0);
-        m->update_skin();
+        if ( not assume_skin_not_needed )
+            m->update_skin();
 
         if ( assemble_mat ) {
             matrices.apply( ClearMat() );
@@ -396,7 +396,7 @@ public:
             else {
                 add_global_matrix( *this, Number<true>(), Number<false>(), indice_glob ); // global
                 apply( m->node_list, AssembleNode<true,false>(), indice_noda, *this ); // nodal
-                apply( m->elem_list, AssembleElem<true,false>(), indice_noda, indice_elem, *this ); // element (and skin elements)
+                apply( m->elem_list, AssembleElem<true,false>(), indice_noda, indice_elem, *this); // element (and skin elements)
             }
         }
         else {
@@ -594,18 +594,38 @@ public:
         return true;
     }
     ///
-    bool solve_system(ScalarType iterative_criterium=0.0) {
-        return solve_system_( iterative_criterium, Number<wont_add_nz>(), Number<MatCarac<0>::symm>() );
+    template<unsigned nddl,unsigned sym,class TTT,unsigned wna> bool solve_system_iterative_block(ScalarType iterative_criterium, Number<nddl>/*nb_nodal_unknowns*/, Number<sym>/*sym*/,StructForType<TTT>, Number<wna>) {
+        assert( 0 );
+        return false;
+    }
+    ///
+    bool solve_system_iterative_block(ScalarType iterative_criterium, Number<3>/*nb_nodal_unknowns*/, Number<true>/*sym*/,StructForType<double>, Number<false>/*wont_add_nz*/ ) {
+        MatWithTinyBlocks<ScalarType,Sym<3> > M( matrices(Number<0>()) );
+        MatWithTinyBlocks<ScalarType,Sym<3> > F = M; F.chol_incomp();
+        solve_using_incomplete_chol_factorize( F, M, sollicitation, vectors[0], iterative_criterium );
+        return true;
+    }
+    ///
+    bool solve_system(ScalarType iterative_criterium=0.0,bool disp_timing=false) {
+        bool res;
+        double t0 = time_of_day_in_sec();
+        if ( iterative_criterium and nb_nodal_unknowns==3 and sollicitation.size() % 3 == 0 and TypeInformation<ScalarType>::type()=="double" and wont_add_nz == false )
+            res = solve_system_iterative_block( iterative_criterium, Number<nb_nodal_unknowns>(), Number<MatCarac<0>::symm>(), StructForType<ScalarType>(), Number<wont_add_nz>() );
+        else
+            res = solve_system_( iterative_criterium, Number<wont_add_nz>(), Number<MatCarac<0>::symm>() );
+        if ( disp_timing )
+            std::cout << time_of_day_in_sec() - t0 << std::endl;
+        return res;
     }
     /**
      * call all functions to get solution...
      * @return 
      */
-    bool solve(ScalarType iterative_criterium=0.0) {
+    bool solve(ScalarType iterative_criterium=0.0,bool disp_timing=false) {
         allocate_matrices();
         shift();
         assemble();
-        if (solve_system(iterative_criterium) == false )
+        if (solve_system(iterative_criterium,disp_timing) == false )
             return false;
         update_variables();
         call_after_solve();
@@ -845,6 +865,7 @@ public:
     Vec<unsigned> indice_noda;
     unsigned indice_glob;
     bool mat_def_pos_if_sym, initialized, user_want_pierre_precond, mat_has_been_allocated_with_symamd;
+    bool assume_skin_not_needed;
     
     std::vector<Codegen::Ex> symbols;
     Codegen::Ex time_symbol;

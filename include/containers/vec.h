@@ -78,6 +78,11 @@ namespace LMT {
          static const int sparsity_rate = 0;        
     };
     
+    /** */
+    template<class TT,int s,class TO> struct SubComplex<Vec<TT,s,TO> > {
+        typedef Vec<TT,s,TO> TV;
+        typedef typename TypeInformation<TV>::template Variant<typename SubComplex<typename TypeInformation<TV>::SubType>::T>::T T;
+    };
     
     /** puet */
     template<class TV,class TSV,bool const_TV,bool const_TSV> struct SubVec;

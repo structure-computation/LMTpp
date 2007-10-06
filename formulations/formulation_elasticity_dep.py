@@ -45,8 +45,6 @@ def formulation():
     #return e.integration( res, 2, False ) * dJ * dEheavyside( fibres_matrice_level_set.expr )
     #sys.stderr.write(str( grad( dep.expr ) ))
     
-
-    
     E = elastic_modulus.expr # * ( 2 + cos( pos.expr[0] ) )
     epsilon = grad_sym_col(dep.expr)
     epstest = grad_sym_col(dep.test)

@@ -18,6 +18,7 @@
 #include "matelem.h"
 #include <iomanip>
 #include <fstream>
+#include "containers/evaluate_nb_cycles.h"
 
 namespace LMT {
 
@@ -162,6 +163,7 @@ T min(const Mat<T,STR,STO,IO> &m) {
 #include "matparticularcases.h"
 #include "matpointed.h"
 #include "matsparselu.h"
+#include "MatWithTinyBlocks.h"
 
 namespace LMT {
 
