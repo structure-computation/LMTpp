@@ -117,6 +117,14 @@ public:
         return res;
     }
 
+    /// return number of node at pos $pos ( in fact the first point in the sphere around pos, with radius tolerance )
+    int poin( const Pvec &pos, Tpos tolerance = 1e-6 ) const {
+        for(unsigned k=0; k<node_list.size(); ++k)
+            if ( norm_2( node_list[k].pos - pos ) < tolerance )
+                return k;
+        return -1;
+    }
+
     ///    
     TNodeList node_list;
     ///    
