@@ -25,6 +25,7 @@ public:
     FormulationAncestor() {
         assume_constant_matrix = false;
         default_iterative_criterium = 0.0;
+        assume_skin_not_needed = false;
     }
     virtual ~FormulationAncestor() {}
     
@@ -93,6 +94,7 @@ public:
     bool assume_constant_matrix; ///
     ScalarType default_iterative_criterium; ///
     unsigned order_integration_when_integration_totale;
+    bool assume_skin_not_needed;
 };
 
 }

@@ -84,7 +84,6 @@ public:
         initialized = false;
         user_want_pierre_precond = true;
         this->order_integration_when_integration_totale = 2;
-        assume_skin_not_needed = false;
     
         max_diag = 0;
         time_symbol = Codegen::symbol("time");
@@ -865,7 +864,6 @@ public:
     Vec<unsigned> indice_noda;
     unsigned indice_glob;
     bool mat_def_pos_if_sym, initialized, user_want_pierre_precond, mat_has_been_allocated_with_symamd;
-    bool assume_skin_not_needed;
     
     std::vector<Codegen::Ex> symbols;
     Codegen::Ex time_symbol;
