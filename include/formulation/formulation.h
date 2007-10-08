@@ -609,9 +609,9 @@ public:
     bool solve_system(ScalarType iterative_criterium=0.0,bool disp_timing=false) {
         bool res;
         double t0 = time_of_day_in_sec();
-        if ( iterative_criterium and nb_nodal_unknowns==3 and sollicitation.size() % 3 == 0 and TypeInformation<ScalarType>::type()=="double" and wont_add_nz == false )
-            res = solve_system_iterative_block( iterative_criterium, Number<nb_nodal_unknowns>(), Number<MatCarac<0>::symm>(), StructForType<ScalarType>(), Number<wont_add_nz>() );
-        else
+         if ( iterative_criterium and nb_nodal_unknowns==3 and sollicitation.size() % 3 == 0 and TypeInformation<ScalarType>::type()=="double" and wont_add_nz == false )
+             res = solve_system_iterative_block( iterative_criterium, Number<nb_nodal_unknowns>(), Number<MatCarac<0>::symm>(), StructForType<ScalarType>(), Number<wont_add_nz>() );
+         else
             res = solve_system_( iterative_criterium, Number<wont_add_nz>(), Number<MatCarac<0>::symm>() );
         if ( disp_timing )
             std::cout << time_of_day_in_sec() - t0 << std::endl;
@@ -621,8 +621,8 @@ public:
      * call all functions to get solution...
      * @return 
      */
-    bool solve(ScalarType iterative_criterium=0.0,bool disp_timing=false) {
-        allocate_matrices();
+    bool solve(ScalarType iterative_criterium=0.0,bool disp_timing=false,bool want_amd=false) {
+        allocate_matrices( want_amd );
         shift();
         assemble();
         if (solve_system(iterative_criterium,disp_timing) == false )

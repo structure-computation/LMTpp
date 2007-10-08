@@ -201,6 +201,8 @@ public:
     inline void resize(unsigned s,const TT &val) { DEBUGASSERT( static_size_==s ); *this = val; }
     """*static_size + """
     
+    unsigned size_in_bytes() const { return sizeof(TT) * size(); }
+    
     TT &operator[](unsigned i) { DEBUGASSERT(i<size()); return val[i]; } /// access to element i
     const TT &operator[](unsigned i) const { DEBUGASSERT(i<size()); return val[i]; } /// access to element i
     const TT &get(unsigned i) const { DEBUGASSERT(i<size()); return val[i]; } /// calling get ensure that the const version is called (useful for SparseVec)

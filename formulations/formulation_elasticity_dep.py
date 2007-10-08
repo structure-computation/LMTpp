@@ -53,7 +53,7 @@ def formulation():
     res = density.expr * dot( dep.expr.diff(time).diff(time) - f_vol.expr, dep.test )
     for i in range(dim): res += sigma[i] * epstest[i]
     for i in range(dim,epsilon.size()): res += 2 * sigma[i] * epstest[i]
-    #res.display_graphviz()
+    res.display_graphviz()
     
     #res += dot( epsilon_moy.expr - epsilon, epsilon_moy.test - epstest ) * elastic_modulus.expr * 1e5
     #res += dot( epsilon_moy.expr - wanted_epsilon_moy.expr, epsilon_moy.test ) * elastic_modulus.expr * 1e5
