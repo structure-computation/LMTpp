@@ -382,7 +382,7 @@ public:
 
         if ( assemble_vec ) // preinitialisation
             sollicitation.set(0.0);
-        if ( not assume_skin_not_needed )
+        if ( not this->assume_skin_not_needed )
             m->update_skin();
 
         if ( assemble_mat ) {
