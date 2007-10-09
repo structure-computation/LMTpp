@@ -86,11 +86,11 @@ for TS,t,n,ts,tset,tset0,tsetn in [
     """
 
 
-# ---------------------- unary operations ----------------------
+# --------------------------- unary operations ---------------------------
 
 lst = [
     ('conj' ,'P1'                        , ''           , ''            ),
-    ('abs' , 'P1'                        , ''           , ''            ),
+    ('abs' , 'typename SubComplex<P1>::T', ''           , ''            ),
     ('acos' ,'typename FloatType<P1>::T' , ''           , ''            ),
     ('asin' ,'typename FloatType<P1>::T' , ''           , ''            ),
     ('atan' ,'typename FloatType<P1>::T' , ''           , ''            ),
@@ -123,7 +123,7 @@ for op,tp,sseop,sse2op in lst:
     fsop = op
     if op=='-': fsop = 'operator'+op
     
-    if op in ["conj","abs"]: op = "LMT::"+op
+    if op in ["conj","abs","real","imag"]: op = "LMT::"+op
     
     print 'template<class P1,unsigned s> '+tp+' '+fsop+'(const SimdVec<P1,s> &a) { '+tp \
         +' res; for(unsigned i=0;i<s;++i) res[i] = '+op+'(a[i]); return res; }'

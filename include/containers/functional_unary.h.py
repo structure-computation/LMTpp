@@ -2,7 +2,7 @@ import string
 
 lst = [
     ('conj' ,'P1'                        , 'true'  ),
-    ('abs' , 'P1', 'true'  ),
+    ('abs' , 'typename SubComplex<P1>::T', 'true'  ),
     ('acos' ,'typename FloatType<P1>::T' , 'false' ),
     ('asin' ,'typename FloatType<P1>::T' , 'true'  ),
     ('atan' ,'typename FloatType<P1>::T' , 'true'  ),
