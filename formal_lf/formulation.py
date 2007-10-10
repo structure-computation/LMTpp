@@ -364,7 +364,7 @@ class Formulation:
         local_ds = dS_part.subs(EM(subs_vi))
         subs_vi = {}
         for i in range(len(c.var_inter)): subs_vi[ e.var_inter[i] ] = c.var_inter[i]
-        if dS_part
+        if dS_part:
             n = c.normal()
             for i in range(e.dim):
                 subs_vi[dS_normal[i]] = n[i]
