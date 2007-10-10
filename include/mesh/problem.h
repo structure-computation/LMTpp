@@ -29,7 +29,9 @@ public:
     static const unsigned dim = TListMesh::template SubType<0>::T::dim;
     
     ///
-    Problem() {}
+    Problem() {
+        file_prefix = file_prefix;
+    }
     ///
     void read_data(int argc,char **argv) throw (IoException) {
         if ( argc==1 ) {
@@ -55,8 +57,8 @@ public:
         }
     }
 private:
-    struct DispMesh { template<class TM> void operator()(const TM &m,DisplayParaview &dp,const Vec<std::string> &avoid_fields) const { dp.add_mesh(m,"tmp/paraview",avoid_fields); } };
-    struct DispSubMesh { template<class TM> void operator()(const TM &m,DisplayParaview &dp,const Vec<std::string> &avoid_fields) const { dp.add_mesh(m.sub_mesh(Number<1>()),"tmp/paraview",avoid_fields); } };
+    struct DispMesh { template<class TM> void operator()(const TM &m,DisplayParaview &dp,const Vec<std::string> &avoid_fields) const { dp.add_mesh(m,file_prefix,avoid_fields); } };
+    struct DispSubMesh { template<class TM> void operator()(const TM &m,DisplayParaview &dp,const Vec<std::string> &avoid_fields) const { dp.add_mesh(m.sub_mesh(Number<1>()),file_prefix,avoid_fields); } };
     struct AppendMesh { template<class TM,class TM2> void operator()(const TM &m,TM2 &mm) const { mm.append(m); } };
 public:
     void display(bool display_sub_meshes=false,const Vec<std::string> &avoid_fields=Vec<std::string>()) {
@@ -75,19 +77,23 @@ public:
         DisplayParaview dp;
         typename TListMesh::template SubType<0>::T m;
         apply( mesh_list, AppendMesh(), m );
-        dp.add_mesh(m,"tmp/paraview",avoid_fields);
+        dp.add_mesh( m, file_prefix, avoid_fields );
         dp.exec();
     }
     
-    void save_in_unique_mesh(bool display_sub_meshes=false,const Vec<std::string> &avoid_fields=Vec<std::string>()) {
+    void save_in_unique_mesh( bool display_sub_meshes=false, const Vec<std::string> &avoid_fields=Vec<std::string>(), std::string filename = "", bool exec = false ) {
+        if ( not filename.size() )
+            filename = file_prefix;
+        //
         DisplayParaview dp;
         typename TListMesh::template SubType<0>::T m;
         apply( mesh_list, AppendMesh(), m );
-        dp.add_mesh(m,"tmp/paraview",avoid_fields);
-        //dp.exec();
+        dp.add_mesh( m, filename, avoid_fields );
+        if ( exec )
+            dp.exec();
     }
    
-           
+    std::string file_prefix;
     TListMesh mesh_list;
 };
 
