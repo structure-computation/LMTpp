@@ -544,7 +544,7 @@ std::ostream &operator<<( std::ostream &os, const MatWithTinyBlocks<T,TO> &m ) {
 /*
  mp -> foactorized mat
 */
-template<class TM,class TO,class TA,class T> void solve_using_incomplete_chol_factorize( const MatWithTinyBlocks<TM,TO> &mp, const TA &A, const Vec<T> &b, Vec<T> &x, T crit = 1e-4, bool disp_r = true ) {
+template<class TM,class TO,class TA,class T> void solve_using_incomplete_chol_factorize( const MatWithTinyBlocks<TM,TO> &mp, const TA &A, const Vec<T> &b, Vec<T> &x, T crit = 1e-4, bool disp_r = false ) {
     bool disp_timing = true;
     if ( x.size() == 0 )
         x = range( b.size() );
@@ -553,6 +553,7 @@ template<class TM,class TO,class TA,class T> void solve_using_incomplete_chol_fa
     double t0 = time_of_day_in_sec();
 
     r = b - A * x;
+    if ( disp_r ) PRINT( max(abs(r)) );
     
     double t1 = time_of_day_in_sec();
     PRINT( ( 2 * A.row_size_in_bytes() + A.diag_size_in_bytes() + 2 * b.size_in_bytes() ) / (t1-t0) );

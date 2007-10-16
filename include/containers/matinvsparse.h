@@ -137,7 +137,7 @@ template<class T,int s,int s2> void solve_using_chol_factorize( const Mat<T,Sym<
     }
 }
 
-template<class T,int s2> void solve_using_incomplete_chol_factorize( const Mat<T,Sym<>,SparseLine<> > &mp, const Mat<T,Sym<>,SparseLine<> > &A, const Vec<T> &b, Vec<T,s2> &x, T crit = 1e-4, bool disp_r = false ) {
+template<class T,int s2> void solve_using_incomplete_chol_factorize( const Mat<T,Sym<>,SparseLine<> > &mp, const Mat<T,Sym<>,SparseLine<> > &A, const Vec<T> &b, Vec<T,s2> &x, T crit = 1e-4, bool disp_r = true ) {
     Vec<T> r, d, q, s;
     
     r = b - A * x;
