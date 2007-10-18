@@ -27,6 +27,7 @@ public:
     virtual unsigned nb_var_inter_virtual() const = 0;
     virtual TNode *node_virtual(unsigned i) = 0;
     virtual const TNode *node_virtual(unsigned i) const = 0;
+    virtual void set_node_virtual(unsigned i,TNode *n) = 0;
     virtual const char *name_virtual() const = 0;
     virtual const char *can_directly_be_represented_by_virtual() = 0;
     virtual unsigned num_in_elem_list_virtual() const = 0;
@@ -76,6 +77,9 @@ public:
     }
     const TNode *node(unsigned i) const {
         return nodes[i];
+    }
+    virtual void set_node_virtual(unsigned i,TNode *n) {
+        nodes[i] = n;
     }
     
     Pvec pos(unsigned i) const { return nodes[i]->pos; }

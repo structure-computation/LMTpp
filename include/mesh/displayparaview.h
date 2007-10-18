@@ -37,23 +37,23 @@ public:
     ~DisplayParaview() {
     }
     
-    template<class TM> void add_mesh(const TM &m,const std::string &prefix="tmp/paraview",const Vec<std::string> &display_fields=Vec<std::string>("all")) {
+    template<class TM> void add_mesh(const TM &m,const std::string &prefix="tmp/paraview_",const Vec<std::string> &display_fields=Vec<std::string>("all")) {
         std::string pvu_name = prefix;
         if ( prefix.rfind(".vtu") != prefix.size() - 4 )
             pvu_name += to_string( pvu_files[prefix].size() ) + ".vtu";
         std::cout << pvu_name << std::endl;
     
         pvu_files[prefix].push_back(pvu_name);
-        std::ofstream f(pvu_name.c_str());
+        std::ofstream f( pvu_name.c_str() );
         
-        write_mesh_vtk<true>(f,m,display_fields);
+        write_mesh_vtk<true>( f, m, display_fields );
 
         typename TM::Pvec xmi,xma;
         get_min_max( m.node_list, ExtractDM<pos_DM>(), xmi, xma );
         if ( m.node_list.size() )
             app_xminmax(prefix,xmi,xma);
     }
-    template<class TS> void add_shape(const Shape<2,TS> &shape,unsigned grid_size,const std::string &prefix="tmp/paraview") {
+    template<class TS> void add_shape(const Shape<2,TS> &shape,unsigned grid_size,const std::string &prefix="tmp/paraview_") {
         typedef typename Shape<2,TS>::Pvec Pvec;
         typedef typename Shape<2,TS>::TPen TPen;
         Pvec tdim_min,tdim_max;
@@ -105,7 +105,7 @@ public:
         field_to_display = name;
         type_field_to_display = type;
     }
-    void exec(bool all_mesh=false,const std::string &prefix="tmp/paraview") {
+    void exec(bool all_mesh=false,const std::string &prefix="tmp/paraview_") {
         std::string tmp_file = prefix + ".pvs";
         std::ofstream pvs( tmp_file.c_str() );
         pvs << "" << std::endl;
