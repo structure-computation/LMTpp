@@ -38,13 +38,13 @@ template<class TNode> void permutation_if_jac_neg(const Link &elem,TNode **nodes
 }
 template<class PosNodes,class Pvec,class TVI> void get_var_inter_linear(const Link &elem,const PosNodes &pos_nodes,const Pvec &pos,TVI &var_inter) {
 typedef typename Pvec::template SubType<0>::T T;
-    T reg0=pos_nodes[1][0]-pos_nodes[0][0]; T reg1=1.0/reg0; T reg2=pos[0]-pos_nodes[0][0]; reg1=reg1*reg2; var_inter[0]=reg1;
+    T reg0=pos_nodes[1][0]-pos_nodes[0][0]; T reg1=pos[0]-pos_nodes[0][0]; T reg2=1.0/reg0; reg2=reg1*reg2; var_inter[0]=reg2;
 
 }
 template<class PosNodes,class Pvec,class TVI> void get_var_inter(const Link &elem,const PosNodes &pos_nodes,const Pvec &pos,TVI &var_inter) {
 typedef typename Pvec::template SubType<0>::T T;
-    T reg0=1-var_inter[0]; T reg1=var_inter[0]*pos_nodes[1][0]; T reg2=reg0*pos_nodes[0][0]; T reg3=pos_nodes[1][0]-pos_nodes[0][0]; reg2=reg1+reg2;
-    reg2=pos[0]-reg2; reg1=reg3*var_inter[0]; T reg4=1.0/reg3; reg1=reg2+reg1; reg4=reg4*reg1;
+    T reg0=1-var_inter[0]; T reg1=pos_nodes[0][0]*reg0; T reg2=var_inter[0]*pos_nodes[1][0]; T reg3=pos_nodes[1][0]-pos_nodes[0][0]; reg2=reg1+reg2;
+    reg2=pos[0]-reg2; reg1=var_inter[0]*reg3; T reg4=1.0/reg3; reg1=reg2+reg1; reg4=reg4*reg1;
     var_inter[0]+=reg4;
 
 }
@@ -80,6 +80,14 @@ template<class TVI,class TVAL,class T> void get_interp(const Link &ne,const Elem
     res=val[0];
 
 }
+#ifndef STRUCT_Gauss
+#define STRUCT_Gauss
+struct Gauss {};
+#endif // STRUCT_Gauss
+template<class TVI,class TVAL,class T> void get_interp(const Link &ne,const Gauss &n,const TVI &var_inter,const TVAL &val,T &res) {
+    res=val[0];
+
+}
 #ifndef STRUCT_Elementary
 #define STRUCT_Elementary
 struct Elementary {};
@@ -93,9 +101,9 @@ template<class TVI,class TVAL,class T> void get_interp(const Link &ne,const Elem
 struct Bubble {};
 #endif // STRUCT_Bubble
 template<class TVI,class TVAL,class T> void get_interp(const Link &ne,const Bubble &n,const TVI &var_inter,const TVAL &val,T &res) {
-    T reg0=1-var_inter[0]; T reg1=var_inter[0]*reg0; reg1=4*reg1; T reg2=1-reg1; T reg3=var_inter[0]*reg2;
-    reg2=reg2*reg0; reg2=val[0]*reg2; reg3=val[1]*reg3; reg3=reg2+reg3; reg1=val[2]*reg1;
-    res=reg3+reg1;
+    T reg0=1-var_inter[0]; T reg1=var_inter[0]*reg0; reg1=4*reg1; T reg2=1-reg1; T reg3=reg0*reg2;
+    reg2=var_inter[0]*reg2; reg2=val[1]*reg2; reg3=val[0]*reg3; reg2=reg3+reg2; reg1=val[2]*reg1;
+    res=reg2+reg1;
 
 }
 #ifndef STRUCT_Skin_elementary

@@ -69,19 +69,19 @@ public:
         if ( (STRUCTURE::need_upper and STRUCTURE::need_lower)==false and STRUCTURE::need_diag )
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<=i;++j) {
-                    if ( val(i,j) )
+                    if ( LMT::abs( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
         else if ( (STRUCTURE::need_upper and STRUCTURE::need_lower)==false )
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<i;++j) {
-                    if ( val(i,j) )
+                    if ( LMT::abs( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
         else
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<nb_cols();++j) {
-                    if ( val(i,j) )
+                    if ( LMT::abs( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
     }
@@ -123,7 +123,12 @@ public:
     RETCOL col(unsigned i) { return FORMCOL; }
     CONSTRETCOL col(unsigned i) const { return CONSTFORMCOL; }
 
-    template<class T2> Mat &operator*=(const T2 &val) { data *= val; return *this; }
+    template<class T2> Mat &operator*=(const T2 &val) {
+        for(unsigned r=0;r<data.size();++r)
+            for(unsigned i=0;i<data[r].data.size();++i)
+                data[r].data[i] *= val;
+        return *this;
+    }
     template<class T2> Mat &operator/=(const T2 &val) { data /= val; return *this; }
 
     template<class T2,class STR2,class STO2> Mat &operator+=(const Mat<T2,STR2,STO2> &val) { *this = *this + val; return *this; }

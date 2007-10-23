@@ -48,30 +48,30 @@ template<class TNode> void permutation_if_jac_neg(const Bar_3 &elem,TNode **node
     T det_jac=nodes[1]->pos[0]-nodes[0]->pos[0];
 
     if ( det_jac < 0 ) {
-        TNode *tmp[] = {nodes[2],nodes[1],nodes[0]};
+        TNode *tmp[] = {nodes[1],nodes[2],nodes[0]};
         for(unsigned i=0;i<3;++i) nodes[i] = tmp[i];
     }
 }
 template<class PosNodes,class Pvec,class TVI> void get_var_inter_linear(const Bar_3 &elem,const PosNodes &pos_nodes,const Pvec &pos,TVI &var_inter) {
 typedef typename Pvec::template SubType<0>::T T;
-    T reg0=var_inter[0]-0.5; T reg1=0.5-var_inter[0]; T reg2=1-var_inter[0]; T reg3=2*reg2; T reg4=2*var_inter[0];
-    T reg5=2*reg1; T reg6=2*reg0; reg5=reg3+reg5; reg1=reg3*reg1; reg2=4*reg2;
-    reg6=reg4+reg6; reg3=4*var_inter[0]; reg0=reg4*reg0; reg4=reg0*pos_nodes[1][0]; T reg7=reg2*var_inter[0];
-    reg3=reg2-reg3; reg5=pos_nodes[0][0]*reg5; reg2=pos_nodes[0][0]*reg1; reg6=reg6*pos_nodes[1][0]; reg5=reg6-reg5;
-    reg6=reg7*pos_nodes[2][0]; reg3=reg3*pos_nodes[2][0]; reg4=reg2+reg4; reg6=reg4+reg6; reg5=reg3+reg5;
-    reg6=pos[0]-reg6; reg2=var_inter[0]*reg5; reg3=1.0/reg5; reg2=reg6+reg2; reg3=reg3*reg2;
-    var_inter[0]=reg3;
+    T reg0=1-var_inter[0]; T reg1=0.5-var_inter[0]; T reg2=var_inter[0]-0.5; T reg3=2*reg0; T reg4=2*var_inter[0];
+    T reg5=2*reg2; T reg6=2*reg1; T reg7=4*var_inter[0]; reg5=reg4+reg5; reg6=reg3+reg6;
+    reg0=4*reg0; reg2=reg4*reg2; reg1=reg3*reg1; reg3=reg0*var_inter[0]; reg7=reg0-reg7;
+    reg0=pos_nodes[1][0]*reg5; reg4=pos_nodes[0][0]*reg6; T reg8=pos_nodes[0][0]*reg1; T reg9=reg2*pos_nodes[1][0]; T reg10=reg3*pos_nodes[2][0];
+    reg4=reg0-reg4; reg0=pos_nodes[2][0]*reg7; reg9=reg8+reg9; reg10=reg9+reg10; reg0=reg4+reg0;
+    reg10=pos[0]-reg10; reg4=var_inter[0]*reg0; reg8=1.0/reg0; reg4=reg10+reg4; reg8=reg8*reg4;
+    var_inter[0]=reg8;
 
 }
 template<class PosNodes,class Pvec,class TVI> void get_var_inter(const Bar_3 &elem,const PosNodes &pos_nodes,const Pvec &pos,TVI &var_inter) {
 typedef typename Pvec::template SubType<0>::T T;
-    T reg0=0.5-var_inter[0]; T reg1=1-var_inter[0]; T reg2=var_inter[0]-0.5; T reg3=2*var_inter[0]; T reg4=2*reg0;
-    T reg5=2*reg2; T reg6=2*reg1; reg5=reg5+reg3; reg4=reg6+reg4; reg0=reg6*reg0;
-    reg6=4*var_inter[0]; reg1=4*reg1; reg2=reg3*reg2; reg4=reg4*pos_nodes[0][0]; reg3=reg0*pos_nodes[0][0];
-    T reg7=reg1*var_inter[0]; T reg8=reg2*pos_nodes[1][0]; reg5=reg5*pos_nodes[1][0]; reg6=reg1-reg6; reg3=reg8+reg3;
-    reg6=reg6*pos_nodes[2][0]; reg1=reg7*pos_nodes[2][0]; reg4=reg5-reg4; reg4=reg6+reg4; reg3=reg1+reg3;
-    reg1=var_inter[0]*reg4; reg3=pos[0]-reg3; reg5=1.0/reg4; reg1=reg3+reg1; reg5=reg5*reg1;
-    var_inter[0]+=reg5;
+    T reg0=1-var_inter[0]; T reg1=0.5-var_inter[0]; T reg2=var_inter[0]-0.5; T reg3=2*reg0; T reg4=2*var_inter[0];
+    T reg5=2*reg2; T reg6=2*reg1; T reg7=4*var_inter[0]; reg5=reg4+reg5; reg6=reg3+reg6;
+    reg0=4*reg0; reg2=reg4*reg2; reg1=reg3*reg1; reg3=reg0*var_inter[0]; reg7=reg0-reg7;
+    reg0=pos_nodes[1][0]*reg5; reg4=pos_nodes[0][0]*reg6; T reg8=reg2*pos_nodes[1][0]; T reg9=pos_nodes[0][0]*reg1; T reg10=reg3*pos_nodes[2][0];
+    reg8=reg9+reg8; reg9=pos_nodes[2][0]*reg7; reg4=reg0-reg4; reg9=reg4+reg9; reg10=reg8+reg10;
+    reg10=pos[0]-reg10; reg0=var_inter[0]*reg9; reg4=1.0/reg9; reg0=reg10+reg0; reg4=reg4*reg0;
+    var_inter[0]+=reg4;
 
 }
 #ifndef STRUCT_Global
@@ -96,8 +96,8 @@ struct Nodal {};
 #endif // STRUCT_Nodal
 template<class TVI,class TVAL,class T> void get_interp(const Bar_3 &ne,const Nodal &n,const TVI &var_inter,const TVAL &val,T &res) {
     T reg0=1-var_inter[0]; T reg1=2*reg0; T reg2=0.5-var_inter[0]; T reg3=2*var_inter[0]; T reg4=var_inter[0]-0.5;
-    reg0=4*reg0; reg4=reg3*reg4; reg2=reg1*reg2; reg2=val[0]*reg2; reg4=val[1]*reg4;
-    reg0=var_inter[0]*reg0; reg4=reg2+reg4; reg0=val[2]*reg0; res=reg4+reg0;
+    reg2=reg1*reg2; reg0=4*reg0; reg4=reg3*reg4; reg0=var_inter[0]*reg0; reg4=val[1]*reg4;
+    reg2=val[0]*reg2; reg4=reg2+reg4; reg0=val[2]*reg0; res=reg4+reg0;
 
 }
 #ifndef STRUCT_Elementary_mul_nb_nodes_of_each_children_elem
