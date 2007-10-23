@@ -56,7 +56,7 @@ public:
         resize( val.nb_rows(), val.nb_cols() );
         for(unsigned i=0;i<nb_rows();++i)
             for(unsigned j=0;j<nb_cols();++j)
-                if ( val(i,j) )
+                if ( (TT)val(i,j) )
                     operator()(i,j) = val(i,j);
     }
     template<class T2> Mat(const Mat<T2,Sym<>,SparseLine<> > &val) {

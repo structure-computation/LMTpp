@@ -26,12 +26,14 @@ namespace LMT {
 
 /// put gmsh mesh in m
 template<class TM>
-void read_msh_2( TM &m,std::istream &is ) throw ( std::runtime_error ) {
+void read_msh_2( TM &m,std::istream &is, unsigned nvi = 0 ) throw ( std::runtime_error ) {
     using namespace std;
     typedef typename TM::Pvec Pvec;
     typedef typename TM::TNode TNode;
     static const int dim = TM::dim;
 
+    if ( not nvi )
+        nvi = TM::dim;
     //
     int ctxte=0;
 
@@ -101,30 +103,30 @@ void read_msh_2( TM &m,std::istream &is ) throw ( std::runtime_error ) {
             }
 
             if ( type_elem == 1 ) { //TODO
-                if ( TM::dim == 1 )
+                if ( nvi == 1 )
                     m.add_element ( Bar(),DefaultBehavior(),vn.ptr() );
             } else if ( type_elem == 2 ) { //TODO
-                if ( TM::dim == 2 ) {
+                if ( nvi == 2 ) {
                     permutation_if_jac_neg ( Triangle(),vn.ptr() );
                     m.add_element ( Triangle(),DefaultBehavior(),vn.ptr() );
                 }
             } else if ( type_elem == 3 ) { //TODO
-                if ( TM::dim == 2 ) {
+                if ( nvi == 2 ) {
                     permutation_if_jac_neg ( Quad(),vn.ptr() );
                     m.add_element ( Quad(),DefaultBehavior(),vn.ptr() );
                 }
             } else if ( type_elem == 4 ) { //TODO
-                if ( TM::dim == 3 ) {
+                if ( nvi == 3 ) {
                     permutation_if_jac_neg ( Tetra(),vn.ptr() );
                     m.add_element ( Tetra(),DefaultBehavior(),vn.ptr() );
                 }
             } else if ( type_elem == 5 ) { //TODO
-                if ( TM::dim == 3 ) {
+                if ( nvi == 3 ) {
                     permutation_if_jac_neg ( Hexa(),vn.ptr() );
                     m.add_element ( Hexa(),DefaultBehavior(),vn.ptr() );
                 }
             } else if ( type_elem == 6 ) { //TODO
-                if ( TM::dim == 3 ) {
+                if ( nvi == 3 ) {
                     permutation_if_jac_neg ( Wedge(),vn.ptr() );
                     m.add_element ( Wedge(),DefaultBehavior(),vn.ptr() );
                 }
@@ -142,12 +144,12 @@ void read_msh_2( TM &m,std::istream &is ) throw ( std::runtime_error ) {
 
 /// put gid mesh in m
 template<class TM>
-void read_msh_2( TM &m,const std::string &fic_name ) throw ( std::runtime_error ) {
+void read_msh_2( TM &m,const std::string &fic_name, unsigned nvi = 0 ) throw ( std::runtime_error ) {
     // ouverture du fichier
     std::ifstream my_file( fic_name.c_str() );
     if ( ! my_file.is_open() )
         throw std::runtime_error( "opening of "+fic_name+" has failed." );
-    return read_msh_2( m,my_file );
+    return read_msh_2( m, my_file, nvi );
 }
 
 

@@ -137,11 +137,11 @@ template<class T,int s,int s2> void solve_using_chol_factorize( const Mat<T,Sym<
     }
 }
 
-template<class T,int s2> void solve_using_incomplete_chol_factorize( const Mat<T,Sym<>,SparseLine<> > &mp, const Mat<T,Sym<>,SparseLine<> > &A, const Vec<T> &b, Vec<T,s2> &x, T crit = 1e-4, bool disp_r = true ) {
+template<class T,int s2> void solve_using_incomplete_chol_factorize( const Mat<T,Sym<>,SparseLine<> > &mp, const Mat<T,Sym<>,SparseLine<> > &A, const Vec<T> &b, Vec<T,s2> &x, double crit = 1e-4, bool disp_r = true ) {
     Vec<T> r, d, q, s;
     
     r = b - A * x;
-    for(unsigned i=0;;++i) { if ( i==r.size() ) return; if ( abs(r[i]) > crit ) break; }
+    for(unsigned i=0;;++i) { if ( i==r.size() ) return; if ( LMT::abs(r[i]) > crit ) break; }
     solve_using_chol_factorize( mp, r, d );
     
     T deltn = dot(r,d);
@@ -153,7 +153,7 @@ template<class T,int s2> void solve_using_incomplete_chol_factorize( const Mat<T
         T alpha = deltn / dot( d, q );
         x += alpha * d;
         r -= alpha * q; //r = b - A * x;
-        for(unsigned i=0;;++i) { if ( i==r.size() ) return; if ( abs(r[i]) > crit ) break; }
+        for(unsigned i=0;;++i) { if ( i==r.size() ) return; if ( LMT::abs(r[i]) > crit ) break; }
         
         solve_using_chol_factorize( mp, r, s );
         deltn = dot( r, s );
