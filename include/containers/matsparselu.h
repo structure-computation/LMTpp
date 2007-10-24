@@ -66,8 +66,10 @@ public:
             L[i].data = val.data[i].data;
             U[i].indices = val.data[i].indices;
             U[i].data = val.data[i].data;
-            L[i].indices.pop_back();
-            L[i].data.pop_back();
+            if ( L[i].indices.size() ) {
+                L[i].indices.pop_back();
+                L[i].data.pop_back();
+            }
         }
     }
     template<class T2> Mat(const Mat<T2,Gen<>,SparseLine<> > &val) {
