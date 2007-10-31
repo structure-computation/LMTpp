@@ -75,6 +75,7 @@ for i,ret,conserve_sp in lst:
     ret = replace( ret, 'P1', 'typename Source::T' )
     I = i
     if i=='-': I = 'operator-'
+    else:      i = 'LMT::' + i
     print 'template<class Source> '+ret+' '+I+'(const DelayedAssignement<Source> &da) { return '+i+'( da.source.get() ); }'
 
 lst = [

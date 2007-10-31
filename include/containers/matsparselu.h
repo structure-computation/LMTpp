@@ -56,7 +56,7 @@ public:
         resize( val.nb_rows(), val.nb_cols() );
         for(unsigned i=0;i<nb_rows();++i)
             for(unsigned j=0;j<nb_cols();++j)
-                if ( (TT)val(i,j) )
+                if ( LMT::abs( val(i,j) ) )
                     operator()(i,j) = val(i,j);
     }
     template<class T2> Mat(const Mat<T2,Sym<>,SparseLine<> > &val) {
@@ -66,8 +66,10 @@ public:
             L[i].data = val.data[i].data;
             U[i].indices = val.data[i].indices;
             U[i].data = val.data[i].data;
-            L[i].indices.pop_back();
-            L[i].data.pop_back();
+            if ( L[i].indices.size() ) {
+                L[i].indices.pop_back();
+                L[i].data.pop_back();
+            }
         }
     }
     template<class T2> Mat(const Mat<T2,Gen<>,SparseLine<> > &val) {
@@ -104,7 +106,15 @@ public:
 //     Vec<VecSubMat<Mat,false,ExtractCol>,sr> col(unsigned i) { return Vec<VecSubMat<Mat,false,ExtractCol>,sr>(*this,i); }
 //     Vec<VecSubMat<Mat,true ,ExtractCol>,sr> col(unsigned i) const { return Vec<VecSubMat<Mat,true ,ExtractCol>,sr>(*this,i); }
 // 
-//     template<class T2> Mat &operator*=(const T2 &val) { data *= val; return *this; }
+    template<class T2> Mat &operator*=(const T2 &val) {
+        for(unsigned r=0;r<L.size();++r)
+            for(unsigned i=0;i<L[r].data.size();++i)
+                L[r].data[i] *= val; 
+        for(unsigned r=0;r<U.size();++r)
+            for(unsigned i=0;i<U[r].data.size();++i)
+                U[r].data[i] *= val; 
+        return *this;
+    }
 //     template<class T2> Mat &operator/=(const T2 &val) { data /= val; return *this; }
 // 
 //     template<class T2,class STR2,class STO2> Mat &operator+=(const Mat<T2,STR2,STO2> &val) { *this = *this + val; return *this; }

@@ -45,7 +45,7 @@ struct HashCH {
     unsigned v[n];
 };
 
-template<class T> void chol_factorize( Mat<T,Sym<>,SparseLine<> > &m ) {
+template<class T,class TS> void chol_factorize( Mat<T,TS,SparseLine<> > &m ) {
     static const unsigned NN = 16;
     Vec<HashCH<NN> > hash; hash.resize( m.nb_rows() );
     for(unsigned line=0;line<m.nb_rows();++line) {
@@ -60,7 +60,7 @@ template<class T> void chol_factorize( Mat<T,Sym<>,SparseLine<> > &m ) {
                 if ( not HashCH<NN>::cor( hash[col], hash[ line ] ) ) continue;
 
                 T v = dot_chol_factorize( m.data[col], m.data[line] );
-                if ( v ) {
+                if ( LMT::abs( v ) ) {
                     unsigned os = m.data[line].indices.size();
                     m.data[line].indices.resize( os+1 );
                     m.data[line].data.resize( os+1 );
@@ -128,7 +128,29 @@ template<class T,int s,int s2> void solve_using_chol_factorize( const Mat<T,Sym<
 
     //
     Vec<T,s2> tmpvec = res;
+    while (nb_lines--) {
+        T tmp = tmpvec[nb_lines] / mat.data[nb_lines].data.back();
+        for(unsigned i=0;i<mat.data[nb_lines].data.size()-1;++i)
+            tmpvec[ mat.data[nb_lines].indices[i] ] -= mat.data[nb_lines].data[i] * tmp;
+        res[nb_lines] = tmp;
+    }
+}
 
+/// m is assumed to be factorized
+template<class T,int s,int s2> void solve_using_chol_factorize( const Mat<T,Herm<s>,SparseLine<> > &mat, const Vec<T> &sol, Vec<T,s2> &res ) {
+    unsigned nb_lines = mat.nb_rows();
+    
+    res.resize( nb_lines );
+    //
+    for(unsigned line=0;line<nb_lines;++line) {
+        T v = sol[line];
+        for(unsigned i=0;i<mat.data[line].data.size()-1;++i)
+            v -= LMT::conj( mat.data[line].data[i] ) * res[ mat.data[line].indices[i] ];
+        res[line] = v / LMT::conj( mat.data[line].data.back() );
+    }
+
+    //
+    Vec<T,s2> tmpvec = res;
     while (nb_lines--) {
         T tmp = tmpvec[nb_lines] / mat.data[nb_lines].data.back();
         for(unsigned i=0;i<mat.data[nb_lines].data.size()-1;++i)
@@ -183,7 +205,7 @@ template<class T> void lu_factorize( Mat<T,Gen<>,SparseLU> &m ) {
                 ie = m.L[line].indices[ind+1];
             while ( ++col < ie ) {
                 T v = dot_chol_factorize( m.U[col], m.L[line] );
-                if ( v ) {
+                if ( LMT::abs( v ) ) {
                     unsigned os = m.L[line].indices.size();
                     m.L[line].indices.resize( os+1 );
                     m.L[line].data.resize( os+1 );
@@ -208,7 +230,7 @@ template<class T> void lu_factorize( Mat<T,Gen<>,SparseLU> &m ) {
                 ie = m.U[line].indices[ind+1];
             while ( ++col < ie ) {
                 T v = dot_chol_factorize( m.U[line], m.L[col] );
-                if ( v ) {
+                if ( LMT::abs( v ) ) {
                     unsigned os = m.U[line].indices.size();
                     m.U[line].indices.resize( os+1 );
                     m.U[line].data.resize( os+1 );

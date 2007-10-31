@@ -58,12 +58,12 @@ template<class TNode> void permutation_if_jac_neg(const Bar &elem,TNode **nodes)
 }
 template<class PosNodes,class Pvec,class TVI> void get_var_inter_linear(const Bar &elem,const PosNodes &pos_nodes,const Pvec &pos,TVI &var_inter) {
 typedef typename Pvec::template SubType<0>::T T;
-    T reg0=pos_nodes[1][0]-pos_nodes[0][0]; T reg1=1.0/reg0; T reg2=pos[0]-pos_nodes[0][0]; reg1=reg1*reg2; var_inter[0]=reg1;
+    T reg0=pos_nodes[1][0]-pos_nodes[0][0]; T reg1=pos[0]-pos_nodes[0][0]; T reg2=1.0/reg0; reg2=reg1*reg2; var_inter[0]=reg2;
 
 }
 template<class PosNodes,class Pvec,class TVI> void get_var_inter(const Bar &elem,const PosNodes &pos_nodes,const Pvec &pos,TVI &var_inter) {
 typedef typename Pvec::template SubType<0>::T T;
-    T reg0=1-var_inter[0]; T reg1=var_inter[0]*pos_nodes[1][0]; T reg2=reg0*pos_nodes[0][0]; T reg3=pos_nodes[1][0]-pos_nodes[0][0]; reg2=reg1+reg2;
+    T reg0=1-var_inter[0]; T reg1=pos_nodes[0][0]*reg0; T reg2=var_inter[0]*pos_nodes[1][0]; T reg3=pos_nodes[1][0]-pos_nodes[0][0]; reg2=reg1+reg2;
     reg2=pos[0]-reg2; reg1=reg3*var_inter[0]; T reg4=1.0/reg3; reg1=reg2+reg1; reg4=reg4*reg1;
     var_inter[0]+=reg4;
 
@@ -130,7 +130,7 @@ struct Bubble {};
 #endif // STRUCT_Bubble
 template<class TVI,class TVAL,class T> void get_interp(const Bar &ne,const Bubble &n,const TVI &var_inter,const TVAL &val,T &res) {
     T reg0=1-var_inter[0]; T reg1=var_inter[0]*reg0; reg1=4*reg1; T reg2=1-reg1; T reg3=reg0*reg2;
-    reg2=var_inter[0]*reg2; reg3=val[0]*reg3; reg2=val[1]*reg2; reg2=reg3+reg2; reg1=val[2]*reg1;
+    reg2=var_inter[0]*reg2; reg2=val[1]*reg2; reg3=val[0]*reg3; reg2=reg3+reg2; reg1=val[2]*reg1;
     res=reg2+reg1;
 
 }

@@ -55,9 +55,11 @@ void make_rect(TM &m,const Triangle &t,typename TM::Pvec X0,typename TM::Pvec X1
     Vec<unsigned,TM::dim> nb_points(nb_points_); 
 
     unsigned nb_x = (unsigned)nb_points[0], nb_y = (unsigned)nb_points[1], beg = m.node_list.size();
-    Pvec incr = (X1-X0)/(nb_points-1);
-    for(Rectilinear_iterator<Tpos,TM::dim> iter(X0,X1+(incr+(incr==0))*0.5,incr+(incr==0));iter;++iter)
-        m.add_node( iter.pos );
+    Pvec P( 0.0 );
+    for(P[1]=0;P[1]<nb_y;++P[1])
+        for(P[0]=0;P[0]<nb_x;++P[0])
+            m.add_node( X0 + (X1-X0) / (nb_points-1) * P );
+    //
     for(unsigned i=0;i<nb_y-1;++i) {
         for(unsigned j=0;j<nb_x-1;++j) {
             /**

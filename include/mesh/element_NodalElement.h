@@ -76,6 +76,14 @@ template<class TVI,class TVAL,class T> void get_interp(const NodalElement &ne,co
     res=val[0];
 
 }
+#ifndef STRUCT_Gauss
+#define STRUCT_Gauss
+struct Gauss {};
+#endif // STRUCT_Gauss
+template<class TVI,class TVAL,class T> void get_interp(const NodalElement &ne,const Gauss &n,const TVI &var_inter,const TVAL &val,T &res) {
+    res=val[0];
+
+}
 #ifndef STRUCT_Der_nodal
 #define STRUCT_Der_nodal
 struct Der_nodal {};
