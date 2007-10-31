@@ -1,5 +1,5 @@
-#ifndef LMTDISPLAYPARAVIEW_H
-#define LMTDISPLAYPARAVIEW_H
+#ifndef LMTTRI_SYM_H
+#define LMTTRI_SYM_H
 
 #include "containers/vec.h"
 
