@@ -106,6 +106,25 @@ public:
         type_field_to_display = type;
     }
     void exec(bool all_mesh=false,const std::string &prefix="tmp/paraview_") {
+        std::string tmp_file = prefix + ".pvd";
+        std::ofstream f( tmp_file.c_str() );
+        //
+        f << "<?xml version='1.0'?>" << std::endl;
+        f << "<VTKFile type='Collection' version='0.1'>" << std::endl;
+        f << "    <Collection>" << std::endl;
+        for( std::map<std::string,Vec<std::string> >::const_iterator iter = pvu_files.begin(); iter != pvu_files.end(); ++iter ) {
+            for(unsigned i=0;i<( all_mesh ? iter->second.size() : min(iter->second.size(),(unsigned)1) );++i) {
+                // f_ := getcwd() + "/" + fn
+                f << "        <DataSet part='$cpt' file='" << iter->second[i] << "'/>" << std::endl;
+            }
+        }
+        f << "    </Collection>" << std::endl;
+        f << "</VTKFile>" << std::endl;
+        f.close();
+        
+        system( ( "paraview --data=" + tmp_file ).c_str() );
+    
+        /*
         std::string tmp_file = prefix + ".pvs";
         std::ofstream pvs( tmp_file.c_str() );
         pvs << "" << std::endl;
@@ -176,6 +195,7 @@ public:
         pvs.close();
         
         system( ("paraview --data="+tmp_file).c_str() );
+        */
     }
 private:
     template<class PV> void app_xminmax(const std::string &prefix,const PV &xmi,const PV &xma) {
