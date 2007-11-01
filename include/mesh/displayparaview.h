@@ -105,7 +105,7 @@ public:
         field_to_display = name;
         type_field_to_display = type;
     }
-    void exec(bool all_mesh=false,const std::string &prefix="tmp/paraview_") {
+    void exec(bool all_mesh=false,const std::string &prefix="paraview_") {
         std::string tmp_file = prefix + ".pvd";
         std::ofstream f( tmp_file.c_str() );
         //

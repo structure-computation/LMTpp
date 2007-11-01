@@ -83,5 +83,49 @@ def trace_sym_col(sigma,epstest):
     #degree,cpt = 0,0
     ##while cpt < len( coeffs ):
         
+    
+def get_taylor_expansion( expr, beg, var, deg_poly_max ):
+    res = ExVector()
+    r = 1.0
+    for i in range( deg_poly_max + 1 ):
+        res.push_back( r * expr.subs( var, beg ) )
+        if i < deg_poly_max:
+            expr = expr.diff( var )
+            r /= i + 1
+    return res
+
+def integration( expr, var, beg, end, deg_poly_max = 5 ):
+    taylor_expansion =  get_taylor_expansion( expr, beg, var, deg_poly_max )
+    #
+    res = 0
+    for i in range( taylor_expansion.size() ):
+        res += taylor_expansion[i] * ( end - beg ) ** ( i + 1 ) / ( i + 1 )
+    return res;
 
 
+def minimize_iteration( expr, variables, old_values = ExVector() ):
+    if type( variables ) != ExVector:
+        return minimize_iteration( expr, vector( variables ), old_values )
+    if not old_values.size():
+        old_values = [ number( 0 ) ] * variables.size()
+    #
+    nb_unknowns = variables.size()
+    M = ExMatrix( nb_unknowns, nb_unknowns )
+    V = ExVector( nb_unknowns )
+    #
+    for i in range( nb_unknowns ):
+        d = expr.diff( variables[i] )
+        for j in range( nb_unknowns ):
+            M[i,j] = d.diff( variables[j] )
+        V[i] = -d
+    #
+    for i in range( nb_unknowns ):
+        for j in range( nb_unknowns ):
+            V[i] += M[i,j] * variables[j]
+    #
+    for n in range( nb_unknowns ):
+        for i in range( nb_unknowns ):
+            V[i] = V[i].subs( variables[n], old_values[n] )
+            for j in range( nb_unknowns ):
+                M[i,j] = M[i,j].subs( variables[n], old_values[n] )
+    return M.inverse() * V

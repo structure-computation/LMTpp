@@ -79,7 +79,15 @@ class Element:
         res[d] = self.interpolation['nodal'].subs(EM(s))
       return res
 
-    def integration(self,expr,order,mul_by_jac=True):
+    def analytical_integration( self, expr, order = 5, mul_by_jac = True ):
+        res = expr
+        if mul_by_jac:
+            res *= self.det_jacobian()
+        for i in range( self.nb_var_inter-1, -1, -1 ):
+            res = integration( res, self.var_inter[i], self.interval_var_inter[i][0], self.interval_var_inter[i][1], order )
+        return res
+
+    def integration( self, expr, order, mul_by_jac = True ):
       if type(expr) is float or type(expr) is int: expr = Number(expr)
       if mul_by_jac:
         expr *= self.det_jacobian()
