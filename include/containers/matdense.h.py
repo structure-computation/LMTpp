@@ -49,6 +49,8 @@ public:
     static const bool fixed_size = ( sr>=0"""+' && sc>=0'*nsquare+""" );
     static const int static_rows = sr;
     static const int static_cols = """+['sr','sc'][nsquare]+""";
+    static const int default_nb_rows = MAX( static_rows, 0 );
+    static const int default_nb_cols = MAX( static_cols, 0 );
     static const int static_data_size = ( fixed_size ? STATICDATASIZE : -1 );
     typedef Vec<TT,static_data_size> TV;
     typedef typename TV::template SubType<0>::T T;
@@ -149,10 +151,10 @@ public:
     unsigned size() const { return nr.val; }"""*(1-nsquare)+"""
 
     Mat() {}
-    explicit Mat(unsigned nr) { this->nr.set(0); """+"real_nr.set(0);"*(structure=='Gen')+(" this->nc.set(0); "+"real_nc.set(0);"*(structure=='Gen'))*nsquare+""" resize(nr,nr); }
-    Mat(unsigned nr,unsigned nc) { this->nr.set(0); """+"real_nr.set(0);"*(structure=='Gen')+(" this->nc.set(0); "+"real_nc.set(0);"*(structure=='Gen'))*nsquare+""" resize(nr,nc); }
-    Mat(unsigned nr,unsigned nc,const TT &val) { this->nr.set(0); """+"real_nr.set(0);"*(structure=='Gen')+(" this->nc.set(0); "+"real_nc.set(0);"*(structure=='Gen'))*nsquare+""" resize(nr,nc); set(val); }
-    template<class T2,int s2> Mat(unsigned r,unsigned c,const Vec<T2,s2> &v):data(v) { this->nr.set(0); """+"real_nr.set(0);"*(structure=='Gen')+(" this->nc.set(0); "+"real_nc.set(0);"*(structure=='Gen'))*nsquare+""" resize(r,c); }
+    explicit Mat(unsigned nr) { this->nr.set(default_nb_rows); """+"real_nr.set(default_nb_rows);"*(structure=='Gen')+(" this->nc.set(default_nb_cols); "+"real_nc.set(default_nb_cols);"*(structure=='Gen'))*nsquare+""" resize(nr,nr); }
+    Mat(unsigned nr,unsigned nc) { this->nr.set(default_nb_rows); """+"real_nr.set(default_nb_rows);"*(structure=='Gen')+(" this->nc.set(default_nb_cols); "+"real_nc.set(default_nb_cols);"*(structure=='Gen'))*nsquare+""" resize(nr,nc); }
+    Mat(unsigned nr,unsigned nc,const TT &val) { this->nr.set(default_nb_rows); """+"real_nr.set(default_nb_rows);"*(structure=='Gen')+(" this->nc.set(default_nb_cols); "+"real_nc.set(default_nb_cols);"*(structure=='Gen'))*nsquare+""" resize(nr,nc); set(val); }
+    template<class T2,int s2> Mat(unsigned r,unsigned c,const Vec<T2,s2> &v):data(v) { this->nr.set(default_nb_rows); """+"real_nr.set(default_nb_rows);"*(structure=='Gen')+(" this->nc.set(default_nb_cols); "+"real_nc.set(default_nb_cols);"*(structure=='Gen'))*nsquare+""" resize(r,c); }
 
     template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
         if ( fixed_size==false )

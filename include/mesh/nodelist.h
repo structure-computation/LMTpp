@@ -126,7 +126,7 @@ public:
     Vec<Splitted<TNode *,256> > hp;
 protected:
     ///
-    void free() { hp.free(); for(unsigned i=0;i<dyn_data.size();++i) dyn_data[i]->free(); }
+    void free() { nb.free(); hp.free(); for(unsigned i=0;i<dyn_data.size();++i) dyn_data[i]->free(); }
     ///
     void is_a_ref_of(Vec &nl) { hp.is_a_ref_of(nl.hp); nb.is_a_ref_of(nl.nb); }
     /// correspondance number in original mesh -> number in this mesh

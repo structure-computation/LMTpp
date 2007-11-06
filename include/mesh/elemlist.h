@@ -68,8 +68,8 @@ public:
     typedef ElementAncestor<TNode> EA;
 
     Vec() {
-        nb_hash_val = 256;
-        has_elements_with_hash_val.resize(nb_hash_val);
+        nb_hash_val = 0;
+        //         has_elements_with_hash_val.resize(nb_hash_val);
     }
     struct RemetNousLesElementsDansLaTableDeHashageDeMaxPecas {
         template<class TE,class TM> void operator()(TE &e,TM &m) const { m.elem_list.register_element_in_hash_table( &e, m ); }
@@ -314,8 +314,7 @@ protected:
         for(unsigned i=0;i<dyn_data.size();++i) dyn_data[i]->free();
         for(unsigned i=0;i<nb_hash_val;++i) has_elements_with_hash_val[i].free();
         has_elements_with_hash_val.free();
-        has_elements_with_hash_val.resize(256);
-        nb_hash_val = 256;
+        nb_hash_val = 0;
     }
     /// internal use (protected exposure...)
     void pop_back_and_copy_to(DynamicDataAncestor *dda,unsigned i0,unsigned i1) const {

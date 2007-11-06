@@ -545,7 +545,7 @@ std::ostream &operator<<( std::ostream &os, const MatWithTinyBlocks<T,TO> &m ) {
  mp -> foactorized mat
 */
 template<class TM,class TO,class TA,class T> void solve_using_incomplete_chol_factorize( const MatWithTinyBlocks<TM,TO> &mp, const TA &A, const Vec<T> &b, Vec<T> &x, T crit = 1e-4, bool disp_r = false ) {
-    bool disp_timing = true;
+    // bool disp_timing = true;
     if ( x.size() == 0 )
         x = range( b.size() );
         

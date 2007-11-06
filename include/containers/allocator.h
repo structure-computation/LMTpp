@@ -18,7 +18,7 @@
 #ifndef WITHOUT_MALLOC
     #include <malloc.h>
 #endif
-// #define PRINT_ALLOC
+#define PRINT_ALLOC
 #ifdef PRINT_ALLOC
     #include <map>
 #endif
