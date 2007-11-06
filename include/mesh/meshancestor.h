@@ -124,13 +124,19 @@ public:
                 return k;
         return -1;
     }
+    
+    ///
+    void free() {
+        this->clear_elements();
+        this->clear_node_neighbours();
+        this->clear_node_parents();
+        this->clear_elem_neighbours();
+    }
 
     ///    
     TNodeList node_list;
     ///    
     TElemList elem_list;
-    ///
-    //GlobalStaticData data;
 protected:
     ///
     template<class NE,class BE,unsigned num_index>

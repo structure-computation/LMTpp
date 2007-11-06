@@ -76,6 +76,14 @@ public:
     SimpleConstIterator<EA *> get_parents_of(const EA *e) { return elem_parents[e->num_in_elem_list_virtual()][e.number]; }
     
     ///
+    void free() {
+        MA::free();
+        this->clear_elem_parents_g();
+        this->clear_elem_children_g();
+        this->node_list.free();
+    }
+    
+    ///
     TNext next;
 protected:
     ///
@@ -228,14 +236,6 @@ protected:
     void clear_elem_parents_rec() { clear_elem_parents_g(); next.clear_elem_parents_rec(); }
     void clear_elem_children_g() { for(unsigned i=0;i<NbSubTypes<NbElemType<skin> >::res;++i) elem_children[i].free(); --date_last_elem_chidren_update; }
     void clear_elem_children_rec() { clear_elem_children_g(); next.clear_elem_children_rec(); }
-    
-    void clear_rec() {
-        this->clear_elements();
-        this->clear_node_neighbours();
-        this->clear_node_parents();
-        this->clear_elem_neighbours();
-        next.clear_rec();
-    }
     
     /// can be accessed only from MeshGenericBis<> 
     Vec<EA *> elem_children[NbSubTypes<NbElemType<skin> >::res+(NbSubTypes<NbElemType<skin> >::res==0)];

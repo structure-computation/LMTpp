@@ -35,16 +35,22 @@ template<> struct NextPow2<1> { static const unsigned res = 1; };
 
 #ifdef PRINT_ALLOC
 extern std::map<std::string,long long> total_allocated;
-inline void disp_alloc() {
+inline void disp_alloc(const char *prefix="") {
     long long s = 0;
     for(std::map<std::string,long long>::const_iterator iter=total_allocated.begin();iter!=total_allocated.end();++iter) {
         if ( iter->second ) {
+            std::cout << prefix << iter->second << " " << std::flush;
             system( ( "c++filt -t " + iter->first ).c_str() );
-            std::cout << iter->second << std::endl;
             s += iter->second;
         }
     }
-    std::cout << "sum -> " << s << std::endl;
+    std::cout << prefix << "sum -> " << s << std::endl;
+}
+inline long long sum_alloc() {
+    long long s = 0;
+    for(std::map<std::string,long long>::const_iterator iter=total_allocated.begin();iter!=total_allocated.end();++iter)
+        s += iter->second;
+    return s;
 }
 #endif
 

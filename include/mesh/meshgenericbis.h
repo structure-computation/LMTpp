@@ -50,13 +50,13 @@ public:
         return &sub_mesh(nnn).elem_children[TE::num_in_elem_list][ e.number * nb_children ];
     }
     
-//     template<class TE> EA * const *get_children_of(const TE &e,const Number<0> &nnn) {
-//       return e; 
-//     }
-//     template<class TE> const EA * const *get_children_of(const TE &e,const Number<0> &nnn) {
-//        return e; 
-//     }
-//    
+    //     template<class TE> EA * const *get_children_of(const TE &e,const Number<0> &nnn) {
+    //       return e; 
+    //     }
+    //     template<class TE> const EA * const *get_children_of(const TE &e,const Number<0> &nnn) {
+    //        return e; 
+    //     }
+    //    
     
     /// only for Mesh<> or skin. Automatically call update_elem_children() (you'll have to free it manually if yo want to).
     void update_elem_parents() { update_elem_children(); this->next.update_elem_parents_rec( this->elem_list ); }
@@ -67,13 +67,6 @@ public:
     }
     ///
     void clear_elem_parents() { this->clear_elem_parents_rec(); }
-    
-    ///
-    void free() {
-        this->node_list.free();
-        this->clear_rec(); this->clear_elem_parents(); this->clear_elem_children();
-        this->signal_connectivity_change_rec(this->node_list);
-    }
 };
 
 ///

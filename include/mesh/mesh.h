@@ -80,7 +80,11 @@ public:
     /// 
     void update_skin();
     /// 
-    void free() { MGB::free(); skin.free(); cpt_nodes = 0; }
+    void free() {
+        MGB::free();
+        skin.free();
+        cpt_nodes = 0;
+    }
 private:
     struct AppendDataFrom {
         template<class TE,class TM2> void operator()(const TE &e,const TM2 &m,Mesh *th,const Vec<TNode *> &new_nodes) const {

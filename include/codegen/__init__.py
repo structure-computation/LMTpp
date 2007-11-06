@@ -128,4 +128,49 @@ def minimize_iteration( expr, variables, old_values = ExVector() ):
             V[i] = V[i].subs( variables[n], old_values[n] )
             for j in range( nb_unknowns ):
                 M[i,j] = M[i,j].subs( variables[n], old_values[n] )
-    return M.inverse() * V
+    
+    return solve_with_lu( lu( M ), V )
+    #return M.inverse() * V
+
+import types
+
+def _flatten(L,a):
+    for x in L:
+        if type(x) in (types.ListType,types.TupleType): _flatten(x,a)
+        else: a(x)
+
+def flatten(L):
+    '''recursively flatten the list or tuple L'''
+    R = []
+    _flatten(L,R.append)
+    return R
+    
+def lu( mat ):
+    fact = ExMatrix( mat.nb_rows(), mat.nb_cols() )
+    for row in range( mat.nb_rows() ):
+        # L
+        for col in range( row ):
+            tmp = mat[ row, col ]
+            for i in range( col ):
+                tmp -= fact[ i, col ] * fact[ row, i ]
+            fact[ row, col ] = tmp / fact[ col, col ]
+        # U
+        for col in range( row + 1 ):
+            tmp = mat[ col, row ]
+            for i in range( col ):
+                tmp -= fact[ i, row ] * fact[ col, i ]
+            fact[ col, row ] = tmp
+    return fact
+
+def solve_with_lu( fact, b ):
+    res = b
+    # L
+    for r in range( fact.nb_rows() ):
+        for i in range( r ):
+            res[r] -= fact[r,i] * res[i]
+    # U
+    for c in range( fact.nb_cols()-1, -1, -1 ):
+        res[c] /= fact[c,c]
+        for i in range( c ):
+            res[i] -= fact[i,c] * res[c]
+    return res

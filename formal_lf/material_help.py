@@ -227,7 +227,7 @@ def von_mises( sigma ):
     return sqrt(3.0)/2.0 * sqrt( dot(d,d) )
 
 # jac
-def calc_jac( coord, var_inter ):
+def calc_jac_ext( coord, var_inter ):
     res = ExMatrix( 3, 3 )
     for j in range( 3 ):
         for i in range( 3 ):
@@ -235,7 +235,7 @@ def calc_jac( coord, var_inter ):
     return res
 
 # grad( v )
-def grad( v, var_inter, inv_jac ):
+def grad_ext( v, var_inter, inv_jac ):
     res = ExMatrix( v.size(), var_inter.size() ) 
     for k in range( v.size() ):
         for j in range( var_inter.size() ):
@@ -244,8 +244,8 @@ def grad( v, var_inter, inv_jac ):
     return res
 
 # grad_sym( v ) -> column
-def grad_sym( v, var_inter, inv_jac ):
-    gr = grad( v, var_inter, inv_jac )
+def grad_sym_ext( v, var_inter, inv_jac ):
+    gr = grad_ext( v, var_inter, inv_jac )
     res = ExMatrix( v.size(), v.size() )
     for i in range( v.size() ):
         for j in range( v.size() ):
