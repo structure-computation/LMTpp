@@ -193,8 +193,8 @@ void read_avs(TM &mesh, std::istream &is) throw(std::runtime_error) {
         }
         nb+=1;
     }
-    mesh.sub_mesh(Number<1>()).elem_list.change_hash_size( mesh, mesh.elem_list.size() /2 +1);
-    mesh.sub_mesh(Number<2>()).elem_list.change_hash_size( mesh, mesh.elem_list.size() /2 +1);
+    mesh.sub_mesh(Number<1>()).elem_list.change_hash_size( mesh, mesh.elem_list.size() / 2 + 1 );
+    //mesh.sub_mesh(Number<2>()).elem_list.change_hash_size( mesh, mesh.elem_list.size() /2 +1);
 
 /*
 
