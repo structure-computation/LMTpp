@@ -81,6 +81,9 @@ public:
         this->clear_elem_parents_g();
         this->clear_elem_children_g();
         this->node_list.free();
+        
+        //
+        next.free();
     }
     
     ///
@@ -101,7 +104,11 @@ protected:
     }
 
     ///
-    template<class TE> void register_element_in_hash_table(TE *e) { this->elem_list.register_element_in_hash_table(e,*this); }
+    template<class TE> void register_element_in_hash_table( TE *e ) { 
+        if ( this->elem_list.nb_hash_val != this->wanted_hash_size )
+            this->elem_list.change_hash_size( *this, this->wanted_hash_size );
+        this->elem_list.register_element_in_hash_table( e, *this );
+    }
     ///
     template<class PEL> struct AppendChildrenElem {
         ///
@@ -111,10 +118,14 @@ protected:
         }
         template<class TE,class TSubMesh,class NE,class TN> void add_element_(TE &e,TSubMesh *m,const NE &ne,TN **n) {
             typedef typename TSubMesh::template TElem<NE,DefaultBehavior>::TE NTE;
+            
+            if ( m->elem_list.nb_hash_val != m->wanted_hash_size )
+                m->elem_list.change_hash_size( *m, m->wanted_hash_size );
+
             NTE *new_elem = m->elem_list.find(ne,DefaultBehavior(),*m,n);
             if ( ! new_elem ) {
-                new_elem = m->add_element(ne,DefaultBehavior(),n);
-                m->register_element_in_hash_table(new_elem);
+                new_elem = m->add_element( ne, DefaultBehavior(), n );
+                m->register_element_in_hash_table( new_elem );
             }
             static const unsigned nb_children = NbChildrenElement<typename TE::NE,nvi_to_subs>::res;
             // register as child
@@ -263,7 +274,7 @@ public:
     void clear_elem_children_rec() const {}
     template<class TE> void move_elem_children_data_rec(const TE &e,unsigned old_place,unsigned new_place) const {}
     template<class TNL> void signal_connectivity_change_rec(TNL &nl) {}
-    void clear_rec() const{}
+    void free() {}
 };
 
 };

@@ -58,7 +58,7 @@ public:
     template<class NE,class BE> typename TElem<NE,BE>::TE *add_element(const NE &ne,const BE &be,TNode *n0,TNode *n1,TNode *n2,TNode *n3,TNode *n4,TNode *n5,TNode *n6,TNode *n7) { TNode *n[] = {n0,n1,n2,n3,n4,n5,n6,n7}; return this->add_element(ne,be,n); }
     template<class NE,class BE> typename TElem<NE,BE>::TE *add_element(const NE &ne,const BE &be,TNode *n0,TNode *n1,TNode *n2,TNode *n3,TNode *n4,TNode *n5,TNode *n6,TNode *n7, TNode *n8) { TNode *n[] = {n0,n1,n2,n3,n4,n5,n6,n7,n8}; return this->add_element(ne,be,n); }
     template<class NE,class BE> typename TElem<NE,BE>::TE *add_element(const NE &ne,const BE &be,TNode *n0,TNode *n1,TNode *n2,TNode *n3,TNode *n4,TNode *n5,TNode *n6,TNode *n7, TNode *n8,TNode *n9) { TNode *n[] = {n0,n1,n2,n3,n4,n5,n6,n7,n8,n9}; return this->add_element(ne,be,n); }
-  
+    
     template<class NE,class BE> typename TElem<NE,BE>::TE *add_element(const NE &ne,const BE &be,unsigned *n) { TNode *np[NE::nb_nodes]; for(unsigned i=0;i<NE::nb_nodes;++i) np[i] = &this->node_list[n[i]]; return MA::add_element_(ne,be,np); }
     template<class NE,class BE> typename TElem<NE,BE>::TE *add_element(const NE &ne,const BE &be,unsigned n0) { unsigned n[] = {n0}; return add_element(ne,be,n); }
     template<class NE,class BE> typename TElem<NE,BE>::TE *add_element(const NE &ne,const BE &be,unsigned n0,unsigned n1) { unsigned n[] = {n0,n1}; return add_element(ne,be,n); }
@@ -70,7 +70,7 @@ public:
     template<class NE,class BE> typename TElem<NE,BE>::TE *add_element(const NE &ne,const BE &be,unsigned n0,unsigned n1,unsigned n2,unsigned n3,unsigned n4,unsigned n5,unsigned n6,unsigned n7) { unsigned n[] = {n0,n1,n2,n3,n4,n5,n6,n7}; return add_element(ne,be,n); }
     template<class NE,class BE> typename TElem<NE,BE>::TE *add_element(const NE &ne,const BE &be,unsigned n0,unsigned n1,unsigned n2,unsigned n3,unsigned n4,unsigned n5,unsigned n6,unsigned n7,unsigned n8) { unsigned n[] = {n0,n1,n2,n3,n4,n5,n6,n7,n8}; return add_element(ne,be,n); }
     template<class NE,class BE> typename TElem<NE,BE>::TE *add_element(const NE &ne,const BE &be,unsigned n0,unsigned n1,unsigned n2,unsigned n3,unsigned n4,unsigned n5,unsigned n6,unsigned n7,unsigned n8,unsigned n9) { unsigned n[] = {n0,n1,n2,n3,n4,n5,n6,n7,n8,n9}; return add_element(ne,be,n); }
-
+    
     
     /// to be called after add_element or add_node to say that update_... should recalculate (but it's not necessary the first time updates are called).
     void signal_connectivity_change() {
@@ -78,7 +78,7 @@ public:
         skin.signal_connectivity_change_rec(skin.node_list);
     }
     /// 
-    void update_skin();
+    void update_skin( bool rm_intermediate_data = false );
     /// 
     void free() {
         MGB::free();
@@ -242,7 +242,7 @@ namespace LMTPRIVATE {
 };
 
 template<class Carac>
-void Mesh<Carac>::update_skin() {
+void Mesh<Carac>::update_skin( bool rm_intermediate_data ) {
     this->update_elem_parents(Number<1>());
     LMTPRIVATE::AddElemWith1Parent<Mesh> ae;
     ae.m = this;
@@ -264,6 +264,13 @@ void Mesh<Carac>::update_skin() {
     // parents
     for(unsigned i=0;i<TSkin::TElemList::nb_elem_type;++i)
          this->skin.elem_parents[i] = ae.parents[i];
+
+
+    // 
+    if ( rm_intermediate_data ) {
+        this->clear_elem_children();
+        this->sub_mesh(Number<1>()).free();
+    }
 }
 
 //

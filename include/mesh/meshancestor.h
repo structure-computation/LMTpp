@@ -67,6 +67,7 @@ public:
         date_last_node_parents_update = 0;
         date_last_elem_neighbours_update = 0;
         for(unsigned i=0;i<TElemList::nb_elem_type;++i) cpt_elem[i] = 0;
+        wanted_hash_size = 1024;
     }
 
     /// 
@@ -137,6 +138,8 @@ public:
     TNodeList node_list;
     ///    
     TElemList elem_list;
+    ///
+    unsigned wanted_hash_size;
 protected:
     ///
     template<class NE,class BE,unsigned num_index>
