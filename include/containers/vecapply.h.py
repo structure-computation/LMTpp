@@ -11,12 +11,12 @@ for tt in ['void','int']:
 
     print_apply_ext('apply_nz'          ,TT,TV,'apply(v,op,PARALIST);')
     print_apply_ext('apply_nz_unique'   ,TT,TV,'apply_nz(v,op,PARALIST);')
-    print_apply_ext('apply_range'       ,TT,TV,'DEBUGASSERT(to<=v.size()); for(;from<to;++from) op(v[from],PARALIST);',suppar=['int from','int to'])
-    print_apply_ext('apply_range_stride',TT,TV,'DEBUGASSERT(to<=v.size()); for(;from<to;from+=inc) op(v[from],PARALIST);',suppar=['int from','int to','int inc'])
+    print_apply_ext('apply_range'       ,TT,TV,'DEBUGASSERT(to<=(int)v.size()); for(;from<to;++from) op(v[from],PARALIST);',suppar=['int from','int to'])
+    print_apply_ext('apply_range_stride',TT,TV,'DEBUGASSERT(to<=(int)v.size()); for(;from<to;from+=inc) op(v[from],PARALIST);',suppar=['int from','int to','int inc'])
 
     print_apply_ext('apply_wi'          ,TT,TV,'for(unsigned i=0;i<v.size();++i) op(v[i],i,PARALIST);')
     print_apply_ext('apply_nz_wi'       ,TT,TV,'apply_wi(v,op,PARALIST);')
-    print_apply_ext('apply_range_wi'    ,TT,TV,'DEBUGASSERT(to<=v.size()); for(;from<to;++from) op(v[from],from,PARALIST);',suppar=['int from','int to'])
+    print_apply_ext('apply_range_wi'    ,TT,TV,'DEBUGASSERT(to<=(int)v.size()); for(;from<to;++from) op(v[from],from,PARALIST);',suppar=['int from','int to'])
 
     print_apply_ext('find_w_wo_ind'     ,TT,TV,'return reduction( generate(v,op,PARALIST), Or() );',ret='bool',suppar=['const Number<0> &ni'])
     print_apply_ext('find_w_wo_ind'     ,TT,TV,'for(unsigned i=0;i<v.size();++i) if (op(v[i],PARALIST)) return true; return false;',ret='bool',suppar=['const Number<1> &ni'])
