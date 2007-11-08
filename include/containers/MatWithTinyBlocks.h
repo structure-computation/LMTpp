@@ -546,9 +546,10 @@ std::ostream &operator<<( std::ostream &os, const MatWithTinyBlocks<T,TO> &m ) {
 */
 template<class TM,class TO,class TA,class T> void solve_using_incomplete_chol_factorize( const MatWithTinyBlocks<TM,TO> &mp, const TA &A, const Vec<T> &b, Vec<T> &x, T crit = 1e-4, bool disp_r = false ) {
     // bool disp_timing = true;
-    if ( not x.size() )
-        x = range( b.size() );
+    if ( x.size() <= A.nb_rows() )
+        x.resize( A.nb_rows(), 0.0 );
         
+    //
     Vec<T> r, d, q, s;
     double t0 = time_of_day_in_sec();
 

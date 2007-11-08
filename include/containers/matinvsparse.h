@@ -160,8 +160,8 @@ template<class T,int s,int s2> void solve_using_chol_factorize( const Mat<T,Herm
 }
 
 template<class T,int s2> void solve_using_incomplete_chol_factorize( const Mat<T,Sym<>,SparseLine<> > &mp, const Mat<T,Sym<>,SparseLine<> > &A, const Vec<T> &b, Vec<T,s2> &x, double crit = 1e-4, bool disp_r = true ) {
-    if ( not x.size() )
-        x.resize( A.nb_rows() );
+    if ( x.size() <= A.nb_rows() )
+        x.resize( A.nb_rows(), 0.0 );
     //
     Vec<T> r, d, q, s;
     
@@ -262,7 +262,9 @@ template<class T> void lu_factorize( Mat<T,Gen<>,SparseLU> &m ) {
 /// m is assumed to be factorized
 template<class T,int s,int s2> void solve_using_lu_factorize( const Mat<T,Gen<s>,SparseLU> &mat, const Vec<T> &sol, Vec<T,s2> &res ) {
     unsigned nb_lines = mat.nb_rows();
-    res.resize( nb_lines );
+    //
+    if ( res.size() <= nb_lines )
+        res.resize( nb_lines, 0.0 );
     //
     for(unsigned line=0;line<nb_lines;++line) {
         T v = sol[line];
