@@ -181,6 +181,7 @@ struct GetVtkTypes {
     template<unsigned n,class T> void operator()( const Number<n> &nn, const StructForType<T> &st ) { res.push_back( GetVtkType<T>::res() ); }
     template<unsigned n,class T> void operator()( const Number<n> &nn, const StructForType<std::complex<T> > &st ) { res.push_back( GetVtkType<T>::res() ); }
     template<unsigned n,class T,int s> void operator()( const Number<n> &nn, const StructForType<Vec<T,s> > &st ) { res.push_back( GetVtkType<T>::res() ); }
+    template<unsigned n,class T,int s,int s2,int s3> void operator()( const Number<n> &nn, const StructForType<Vec<Vec<Vec<T,s>,s2>,s3> > &st ) { res.push_back( GetVtkType<T>::res() ); }
     template<unsigned n,class T,int s,int s2> void operator()( const Number<n> &nn, const StructForType<Vec<Vec<T,s>,s2 > > &st ) { res.push_back( GetVtkType<T>::res() ); }
     template<unsigned n,class T,int s,int s2> void operator()( const Number<n> &nn, const StructForType<Mat<T,Gen<s,s2> > > &st ) { res.push_back( GetVtkType<T>::res() ); }
     Vec<const char *> res;

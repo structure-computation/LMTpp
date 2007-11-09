@@ -90,13 +90,13 @@ template<class TNode> void permutation_if_jac_neg(const Quad &elem,TNode **nodes
 }
 template<class PosNodes,class Pvec,class TVI> void get_var_inter_linear(const Quad &elem,const PosNodes &pos_nodes,const Pvec &pos,TVI &var_inter) {
 typedef typename Pvec::template SubType<0>::T T;
-    T reg0=1-var_inter[1]; T reg1=1-var_inter[0]; T reg2=reg0*var_inter[0]; T reg3=reg0*reg1; T reg4=reg2*pos_nodes[1][1];
-    T reg5=reg3*pos_nodes[0][1]; T reg6=var_inter[0]*pos_nodes[1][1]; T reg7=reg1*pos_nodes[0][1]; T reg8=reg0*pos_nodes[0][1]; T reg9=reg0*pos_nodes[1][1];
-    T reg10=reg2*pos_nodes[1][0]; T reg11=pos_nodes[0][0]*reg3; T reg12=var_inter[0]*pos_nodes[1][0]; T reg13=var_inter[0]*var_inter[1]; T reg14=pos_nodes[0][0]*reg1;
-    T reg15=reg0*pos_nodes[1][0]; T reg16=pos_nodes[0][0]*reg0; T reg17=reg1*var_inter[1]; T reg18=reg13*pos_nodes[2][1]; reg4=reg5+reg4;
+    T reg0=1-var_inter[0]; T reg1=1-var_inter[1]; T reg2=reg1*var_inter[0]; T reg3=reg0*reg1; T reg4=reg2*pos_nodes[1][1];
+    T reg5=reg3*pos_nodes[0][1]; T reg6=var_inter[0]*pos_nodes[1][1]; T reg7=reg0*pos_nodes[0][1]; T reg8=reg1*pos_nodes[0][1]; T reg9=reg1*pos_nodes[1][1];
+    T reg10=reg2*pos_nodes[1][0]; T reg11=pos_nodes[0][0]*reg3; T reg12=var_inter[0]*pos_nodes[1][0]; T reg13=var_inter[0]*var_inter[1]; T reg14=pos_nodes[0][0]*reg0;
+    T reg15=reg1*pos_nodes[1][0]; T reg16=pos_nodes[0][0]*reg1; T reg17=reg0*var_inter[1]; T reg18=reg13*pos_nodes[2][1]; reg4=reg5+reg4;
     reg16=reg15-reg16; reg6=reg7+reg6; reg5=var_inter[1]*pos_nodes[2][0]; reg7=var_inter[0]*pos_nodes[2][1]; reg15=var_inter[1]*pos_nodes[2][1];
     reg12=reg14+reg12; reg14=var_inter[0]*pos_nodes[2][0]; reg10=reg11+reg10; reg11=reg13*pos_nodes[2][0]; reg8=reg9-reg8;
-    reg5=reg16+reg5; reg12=reg14-reg12; reg9=reg1*pos_nodes[3][0]; reg6=reg7-reg6; reg7=reg1*pos_nodes[3][1];
+    reg5=reg16+reg5; reg12=reg14-reg12; reg9=reg0*pos_nodes[3][0]; reg6=reg7-reg6; reg7=reg0*pos_nodes[3][1];
     reg14=pos_nodes[3][0]*reg17; reg11=reg10+reg11; reg10=var_inter[1]*pos_nodes[3][1]; reg15=reg8+reg15; reg18=reg4+reg18;
     reg4=pos_nodes[3][1]*reg17; reg8=var_inter[1]*pos_nodes[3][0]; reg9=reg12+reg9; reg10=reg15-reg10; reg8=reg5-reg8;
     reg14=reg11+reg14; reg7=reg6+reg7; reg4=reg18+reg4; reg14=pos[0]-reg14; reg4=pos[1]-reg4;
@@ -109,21 +109,21 @@ typedef typename Pvec::template SubType<0>::T T;
 }
 template<class PosNodes,class Pvec,class TVI> void get_var_inter(const Quad &elem,const PosNodes &pos_nodes,const Pvec &pos,TVI &var_inter) {
 typedef typename Pvec::template SubType<0>::T T;
-    T reg0=1-var_inter[1]; T reg1=1-var_inter[0]; T reg2=reg0*var_inter[0]; T reg3=reg1*reg0; T reg4=pos_nodes[0][0]*reg3;
-    T reg5=reg2*pos_nodes[1][0]; T reg6=pos_nodes[1][1]*reg0; T reg7=reg0*pos_nodes[0][1]; T reg8=reg1*pos_nodes[0][1]; T reg9=pos_nodes[1][1]*var_inter[0];
-    T reg10=reg3*pos_nodes[0][1]; T reg11=pos_nodes[1][1]*reg2; T reg12=var_inter[0]*pos_nodes[1][0]; T reg13=pos_nodes[0][0]*reg1; T reg14=pos_nodes[0][0]*reg0;
-    T reg15=reg0*pos_nodes[1][0]; T reg16=var_inter[0]*var_inter[1]; T reg17=pos_nodes[2][1]*var_inter[1]; reg7=reg6-reg7; reg6=pos_nodes[2][1]*var_inter[0];
-    reg9=reg8+reg9; reg8=pos_nodes[2][0]*reg16; reg5=reg4+reg5; reg4=reg1*var_inter[1]; reg11=reg10+reg11;
-    reg12=reg13+reg12; reg10=pos_nodes[2][0]*var_inter[0]; reg13=pos_nodes[2][1]*reg16; T reg18=pos_nodes[2][0]*var_inter[1]; reg14=reg15-reg14;
-    reg9=reg6-reg9; reg6=pos_nodes[3][1]*reg1; reg13=reg11+reg13; reg11=pos_nodes[3][1]*reg4; reg15=pos_nodes[3][1]*var_inter[1];
-    reg18=reg14+reg18; reg14=pos_nodes[3][0]*var_inter[1]; reg12=reg10-reg12; reg10=pos_nodes[3][0]*reg1; reg8=reg5+reg8;
-    reg17=reg7+reg17; reg5=pos_nodes[3][0]*reg4; reg11=reg13+reg11; reg15=reg17-reg15; reg14=reg18-reg14;
-    reg6=reg9+reg6; reg5=reg8+reg5; reg10=reg12+reg10; reg5=pos[0]-reg5; reg11=pos[1]-reg11;
-    reg7=var_inter[0]*reg14; reg8=reg10*reg15; reg9=var_inter[0]*reg15; reg12=reg14*reg6; reg8=reg12-reg8;
-    reg9=reg11+reg9; reg11=var_inter[1]*reg6; reg7=reg5+reg7; reg5=var_inter[1]*reg10; reg7=reg5+reg7;
-    reg9=reg11+reg9; reg5=reg6/reg8; reg11=reg15/reg8; reg13=reg10/reg8; reg8=reg14/reg8;
-    reg5=reg7*reg5; reg13=reg9*reg13; reg11=reg7*reg11; reg8=reg9*reg8; var_inter[0]+=reg5-reg13;
-    var_inter[1]+=reg8-reg11;
+    T reg0=1-var_inter[0]; T reg1=1-var_inter[1]; T reg2=reg0*reg1; T reg3=reg1*var_inter[0]; T reg4=reg1*pos_nodes[1][1];
+    T reg5=reg1*pos_nodes[0][1]; T reg6=var_inter[0]*var_inter[1]; T reg7=reg0*pos_nodes[0][1]; T reg8=var_inter[0]*pos_nodes[1][1]; T reg9=reg2*pos_nodes[0][1];
+    T reg10=reg3*pos_nodes[1][1]; T reg11=reg1*pos_nodes[1][0]; T reg12=pos_nodes[0][0]*reg1; T reg13=reg3*pos_nodes[1][0]; T reg14=pos_nodes[0][0]*reg2;
+    T reg15=pos_nodes[0][0]*reg0; T reg16=var_inter[0]*pos_nodes[1][0]; reg12=reg11-reg12; reg11=reg6*pos_nodes[2][1]; reg10=reg9+reg10;
+    reg9=var_inter[1]*pos_nodes[2][0]; reg8=reg7+reg8; reg7=var_inter[0]*pos_nodes[2][1]; T reg17=var_inter[0]*pos_nodes[2][0]; reg13=reg14+reg13;
+    reg14=reg6*pos_nodes[2][0]; reg5=reg4-reg5; reg4=var_inter[1]*pos_nodes[2][1]; reg16=reg15+reg16; reg15=reg0*var_inter[1];
+    reg14=reg13+reg14; reg13=reg15*pos_nodes[3][0]; T reg18=reg15*pos_nodes[3][1]; reg11=reg10+reg11; reg16=reg17-reg16;
+    reg10=reg0*pos_nodes[3][0]; reg9=reg12+reg9; reg12=var_inter[1]*pos_nodes[3][1]; reg17=reg0*pos_nodes[3][1]; reg8=reg7-reg8;
+    reg4=reg5+reg4; reg5=var_inter[1]*pos_nodes[3][0]; reg12=reg4-reg12; reg10=reg16+reg10; reg5=reg9-reg5;
+    reg13=reg14+reg13; reg17=reg8+reg17; reg18=reg11+reg18; reg4=var_inter[0]*reg12; reg13=pos[0]-reg13;
+    reg18=pos[1]-reg18; reg7=reg5*reg17; reg8=reg10*reg12; reg9=reg5*var_inter[0]; reg11=reg10*var_inter[1];
+    reg8=reg7-reg8; reg4=reg18+reg4; reg14=var_inter[1]*reg17; reg9=reg13+reg9; reg13=reg12/reg8;
+    reg16=reg10/reg8; reg18=reg5/reg8; reg8=reg17/reg8; reg4=reg14+reg4; reg9=reg11+reg9;
+    reg8=reg9*reg8; reg16=reg4*reg16; reg13=reg9*reg13; reg18=reg4*reg18; var_inter[0]+=reg8-reg16;
+    var_inter[1]+=reg18-reg13;
 
 }
 #ifndef STRUCT_Global
