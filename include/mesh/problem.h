@@ -73,22 +73,22 @@ public:
     /**
         Assumes that type mesh number 0 can contain all data
     */
-    void display_in_unique_mesh(bool display_sub_meshes=false,const Vec<std::string> &avoid_fields=Vec<std::string>()) {
+    void display_in_unique_mesh( bool display_sub_meshes=false, const Vec<std::string> &avoid_fields=Vec<std::string>(), double time_step = 0 ) {
         DisplayParaview dp;
         typename TListMesh::template SubType<0>::T m;
         apply( mesh_list, AppendMesh(), m );
-        dp.add_mesh( m, file_prefix, avoid_fields );
+        dp.add_mesh( m, file_prefix, avoid_fields, time_step );
         dp.exec();
     }
     
-    void save_in_unique_mesh( bool display_sub_meshes=false, const Vec<std::string> &avoid_fields=Vec<std::string>(), std::string filename = "", bool exec = false ) {
+    void save_in_unique_mesh( bool display_sub_meshes=false, const Vec<std::string> &avoid_fields=Vec<std::string>(), std::string filename = "", bool exec = false, double time_step = 0 ) {
         if ( not filename.size() )
             filename = file_prefix;
         //
         DisplayParaview dp;
         typename TListMesh::template SubType<0>::T m;
         apply( mesh_list, AppendMesh(), m );
-        dp.add_mesh( m, filename, avoid_fields );
+        dp.add_mesh( m, filename, avoid_fields, time_step );
         if ( exec )
             dp.exec();
     }

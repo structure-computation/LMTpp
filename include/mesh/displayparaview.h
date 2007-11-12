@@ -37,10 +37,10 @@ public:
     ~DisplayParaview() {
     }
     
-    template<class TM> void add_mesh(const TM &m,const std::string &prefix="tmp/paraview_",const Vec<std::string> &display_fields=Vec<std::string>("all"),double time_step=0) {
+    template<class TM> void add_mesh(const TM &m,const std::string &prefix="tmp/paraview",const Vec<std::string> &display_fields=Vec<std::string>("all"),double time_step=0) {
         std::string pvu_name = prefix;
         //if ( prefix.rfind(".vtu") != prefix.size() - 4 )
-        pvu_name += to_string( time_step ) + "_" + to_string( pvu_files[time_step].size() ) + ".vtu";
+        pvu_name += "_" + to_string( time_step ) + "_" + to_string( pvu_files[time_step].size() ) + ".vtu";
         std::cout << pvu_name << std::endl;
     
         pvu_files[ time_step ].push_back( pvu_name );
@@ -53,7 +53,7 @@ public:
         if ( m.node_list.size() )
             app_xminmax(prefix,xmi,xma);
     }
-    template<class TS> void add_shape(const Shape<2,TS> &shape,unsigned grid_size,const std::string &prefix="tmp/paraview_") {
+    template<class TS> void add_shape(const Shape<2,TS> &shape,unsigned grid_size,const std::string &prefix="tmp/paraview") {
         typedef typename Shape<2,TS>::Pvec Pvec;
         typedef typename Shape<2,TS>::TPen TPen;
         Pvec tdim_min,tdim_max;
@@ -71,7 +71,7 @@ public:
         shape.get_penetration( points.begin(), pem.begin(), points.size() );
         
         std::ostringstream ss;
-        ss << prefix << vti_files.size() << ".vti";
+        ss << prefix << "_" << vti_files.size() << ".vti";
         std::string vti_name( ss.str() );
         vti_files.push_back(vti_name);
         std::ofstream f(vti_name.c_str());
@@ -106,7 +106,7 @@ public:
         type_field_to_display = type;
     }
 
-   void make_pvs_file( const std::string &filename = "paraview.pvd" ) const {
+   void make_pvd_file( const std::string &filename = "paraview.pvd" ) const {
         std::ofstream f( filename.c_str() );
         //
         f << "<?xml version='1.0'?>" << std::endl;
@@ -121,7 +121,7 @@ public:
    }
 
     void exec( const std::string &filename = "paraview.pvd" ) {
-        make_pvs_file( filename );
+        make_pvd_file( filename );
 
         system( ( "paraview --data=" + filename ).c_str() );
     
