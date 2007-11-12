@@ -133,20 +133,33 @@ typedef typename Pvec::template SubType<0>::T T;
     T reg26=reg22*pos_nodes[5][0]; reg10=reg13+reg10; reg13=reg22*pos_nodes[5][1]; reg17=reg24+reg17; reg14=reg15+reg14;
     reg15=reg0*pos_nodes[5][0]; reg11=reg12+reg11; reg9=reg11+reg9; reg16=reg20+reg16; reg26=reg25-reg26;
     reg13=reg17-reg13; reg15=reg14+reg15; reg23=reg10+reg23; reg15=pos[0]-reg15; reg9=pos[1]-reg9;
+<<<<<<< HEAD:include/mesh/element_Triangle_6.h
     reg10=var_inter[0]*reg26; reg11=reg23*reg13; reg12=var_inter[0]*reg13; reg14=reg26*reg16; reg11=reg14-reg11;
     reg12=reg9+reg12; reg9=var_inter[1]*reg16; reg10=reg15+reg10; reg15=var_inter[1]*reg23; reg10=reg15+reg10;
     reg12=reg9+reg12; reg9=reg16/reg11; reg15=reg13/reg11; reg17=reg23/reg11; reg11=reg26/reg11;
     reg9=reg10*reg9; reg17=reg12*reg17; reg15=reg10*reg15; reg11=reg12*reg11; var_inter[0]=reg9-reg17;
     var_inter[1]=reg11-reg15;
+=======
+    reg10=reg26*reg16; reg11=var_inter[0]*reg26; reg12=reg23*reg13; reg14=var_inter[0]*reg13; reg12=reg10-reg12;
+    reg14=reg9+reg14; reg9=var_inter[1]*reg16; reg11=reg15+reg11; reg15=var_inter[1]*reg23; reg11=reg15+reg11;
+    reg14=reg9+reg14; reg9=reg16/reg12; reg15=reg13/reg12; reg17=reg23/reg12; reg12=reg26/reg12;
+    reg9=reg11*reg9; reg17=reg14*reg17; reg15=reg11*reg15; reg12=reg14*reg12; var_inter[0]=reg9-reg17;
+    var_inter[1]=reg12-reg15;
+>>>>>>> 512dc2050926bfccc64f86a01cb2ce23c8050af9:include/mesh/element_Triangle_6.h
 
 }
 template<class PosNodes,class Pvec,class TVI> void get_var_inter(const Triangle_6 &elem,const PosNodes &pos_nodes,const Pvec &pos,TVI &var_inter) {
 typedef typename Pvec::template SubType<0>::T T;
     T reg0=1-var_inter[0]; reg0=reg0-var_inter[1]; T reg1=2*reg0; T reg2=2*var_inter[0]; T reg3=reg1-1;
     T reg4=reg2-1; T reg5=2*var_inter[1]; T reg6=reg5-1; T reg7=reg4*var_inter[0]; T reg8=reg0*reg3;
+<<<<<<< HEAD:include/mesh/element_Triangle_6.h
     reg4=reg2+reg4; reg3=reg1+reg3; reg1=pos_nodes[0][0]*reg8; reg2=reg7*pos_nodes[1][0]; reg5=reg5+reg6;
+=======
+    reg4=reg2+reg4; reg3=reg1+reg3; reg5=reg5+reg6; reg1=pos_nodes[0][0]*reg8; reg2=reg7*pos_nodes[1][0];
+>>>>>>> 512dc2050926bfccc64f86a01cb2ce23c8050af9:include/mesh/element_Triangle_6.h
     T reg9=reg8*pos_nodes[0][1]; T reg10=reg7*pos_nodes[1][1]; T reg11=4*var_inter[0]; T reg12=4*reg0; reg6=reg6*var_inter[1];
     T reg13=pos_nodes[2][1]*reg5; T reg14=pos_nodes[0][1]*reg3; T reg15=pos_nodes[1][1]*reg4; T reg16=reg6*pos_nodes[2][0]; reg2=reg1+reg2;
+<<<<<<< HEAD:include/mesh/element_Triangle_6.h
     reg10=reg9+reg10; reg1=pos_nodes[2][0]*reg5; reg9=reg6*pos_nodes[2][1]; T reg17=pos_nodes[0][0]*reg3; T reg18=reg12-reg11;
     T reg19=reg12*var_inter[0]; T reg20=pos_nodes[1][0]*reg4; T reg21=reg11*var_inter[1]; T reg22=4*var_inter[1]; T reg23=reg11*pos_nodes[3][1];
     reg13=reg13-reg14; reg9=reg10+reg9; reg10=reg19*pos_nodes[3][1]; T reg24=pos_nodes[3][1]*reg18; reg14=reg15-reg14;
@@ -163,6 +176,24 @@ typedef typename Pvec::template SubType<0>::T T;
     reg13=reg2+reg13; reg2=reg17/reg10; reg15=reg1/reg10; reg16=reg23/reg10; reg10=reg26/reg10;
     reg2=reg9*reg2; reg16=reg13*reg16; reg15=reg9*reg15; reg10=reg13*reg10; var_inter[0]+=reg2-reg16;
     var_inter[1]+=reg10-reg15;
+=======
+    reg10=reg9+reg10; reg1=pos_nodes[2][0]*reg5; reg9=reg6*pos_nodes[2][1]; T reg17=pos_nodes[0][0]*reg3; T reg18=pos_nodes[1][0]*reg4;
+    T reg19=reg12-reg11; T reg20=reg12*var_inter[0]; reg16=reg2+reg16; reg2=reg20*pos_nodes[3][0]; reg15=reg15-reg14;
+    T reg21=pos_nodes[3][1]*reg19; reg14=reg13-reg14; reg13=reg11*pos_nodes[3][1]; T reg22=4*var_inter[1]; T reg23=reg11*var_inter[1];
+    reg9=reg10+reg9; reg10=reg20*pos_nodes[3][1]; T reg24=pos_nodes[3][0]*reg19; reg18=reg18-reg17; reg17=reg1-reg17;
+    reg1=reg11*pos_nodes[3][0]; T reg25=reg22*pos_nodes[4][0]; reg0=reg0*reg22; reg24=reg18+reg24; reg18=reg11*pos_nodes[4][1];
+    reg13=reg14-reg13; reg12=reg12-reg22; reg14=reg22*pos_nodes[4][1]; reg21=reg15+reg21; reg10=reg9+reg10;
+    reg1=reg17-reg1; reg9=reg23*pos_nodes[4][1]; reg15=reg23*pos_nodes[4][0]; reg2=reg16+reg2; reg16=reg11*pos_nodes[4][0];
+    reg25=reg24+reg25; reg17=reg0*pos_nodes[5][1]; reg24=pos_nodes[5][1]*reg12; reg18=reg13+reg18; reg13=pos_nodes[5][0]*reg12;
+    T reg26=reg22*pos_nodes[5][0]; reg16=reg1+reg16; reg1=reg22*pos_nodes[5][1]; reg14=reg21+reg14; reg15=reg2+reg15;
+    reg2=reg0*pos_nodes[5][0]; reg9=reg10+reg9; reg17=reg9+reg17; reg24=reg18+reg24; reg26=reg25-reg26;
+    reg1=reg14-reg1; reg2=reg15+reg2; reg13=reg16+reg13; reg2=pos[0]-reg2; reg17=pos[1]-reg17;
+    reg9=var_inter[0]*reg26; reg10=reg13*reg1; reg14=var_inter[0]*reg1; reg15=reg26*reg24; reg10=reg15-reg10;
+    reg14=reg17+reg14; reg16=var_inter[1]*reg24; reg9=reg2+reg9; reg2=var_inter[1]*reg13; reg9=reg2+reg9;
+    reg14=reg16+reg14; reg2=reg24/reg10; reg16=reg1/reg10; reg17=reg13/reg10; reg10=reg26/reg10;
+    reg2=reg9*reg2; reg17=reg14*reg17; reg16=reg9*reg16; reg10=reg14*reg10; var_inter[0]+=reg2-reg17;
+    var_inter[1]+=reg10-reg16;
+>>>>>>> 512dc2050926bfccc64f86a01cb2ce23c8050af9:include/mesh/element_Triangle_6.h
 
 }
 #ifndef STRUCT_Global

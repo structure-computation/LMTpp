@@ -154,6 +154,7 @@ template<class TNode> void permutation_if_jac_neg(const Tetra_10 &elem,TNode **n
 }
 template<class PosNodes,class Pvec,class TVI> void get_var_inter_linear(const Tetra_10 &elem,const PosNodes &pos_nodes,const Pvec &pos,TVI &var_inter) {
 typedef typename Pvec::template SubType<0>::T T;
+<<<<<<< HEAD:include/mesh/element_Tetra_10.h
     T reg0=1-var_inter[0]; reg0=reg0-var_inter[1]; reg0=reg0-var_inter[2]; T reg1=2*reg0; T reg2=2*var_inter[0];
     T reg3=reg1-1; T reg4=2*var_inter[2]; T reg5=2*var_inter[1]; T reg6=reg2-1; T reg7=reg4-1;
     T reg8=reg5-1; T reg9=reg3*reg0; T reg10=reg6*var_inter[0]; reg4=reg4+reg7; reg5=reg5+reg8;
@@ -208,10 +209,67 @@ typedef typename Pvec::template SubType<0>::T T;
     reg54=reg54/reg46; reg52=reg52/reg46; reg46=reg16/reg46; reg50=reg31+reg50; reg46=reg50*reg46;
     reg29=reg21-reg29; reg52=reg50*reg52; reg47=reg40-reg47; reg54=reg50*reg54; reg45=reg49-reg45;
     var_inter[0]=reg29-reg46; var_inter[1]=reg52+reg47; var_inter[2]=reg45-reg54;
+=======
+    T reg0=1-var_inter[0]; reg0=reg0-var_inter[1]; reg0=reg0-var_inter[2]; T reg1=2*var_inter[0]; T reg2=2*reg0;
+    T reg3=2*var_inter[1]; T reg4=reg1-1; T reg5=reg2-1; T reg6=2*var_inter[2]; T reg7=reg4*var_inter[0];
+    T reg8=reg0*reg5; T reg9=reg3-1; T reg10=reg6-1; reg6=reg6+reg10; reg5=reg2+reg5;
+    reg2=pos_nodes[1][1]*reg7; T reg11=reg8*pos_nodes[0][1]; reg3=reg3+reg9; reg9=var_inter[1]*reg9; T reg12=pos_nodes[0][0]*reg8;
+    T reg13=pos_nodes[1][0]*reg7; T reg14=pos_nodes[2][2]*reg3; T reg15=4*var_inter[0]; T reg16=pos_nodes[0][2]*reg5; T reg17=pos_nodes[0][0]*reg5;
+    T reg18=pos_nodes[2][1]*reg9; reg2=reg11+reg2; reg11=pos_nodes[3][1]*reg6; T reg19=pos_nodes[2][1]*reg3; T reg20=pos_nodes[2][0]*reg3;
+    T reg21=pos_nodes[0][1]*reg5; T reg22=pos_nodes[2][0]*reg9; T reg23=pos_nodes[3][0]*reg6; reg13=reg12+reg13; reg0=4*reg0;
+    reg12=pos_nodes[1][2]*reg7; reg10=var_inter[2]*reg10; T reg24=pos_nodes[0][2]*reg8; T reg25=pos_nodes[3][2]*reg6; T reg26=pos_nodes[2][2]*reg9;
+    T reg27=pos_nodes[4][1]*reg15; reg19=reg19-reg21; reg20=reg20-reg17; T reg28=pos_nodes[4][0]*reg15; T reg29=pos_nodes[3][0]*reg10;
+    reg22=reg13+reg22; reg23=reg23-reg17; reg11=reg11-reg21; reg12=reg24+reg12; reg13=var_inter[0]*reg0;
+    reg18=reg2+reg18; reg25=reg25-reg16; reg2=pos_nodes[3][1]*reg10; reg24=4*var_inter[2]; reg4=reg1+reg4;
+    reg1=pos_nodes[4][2]*reg15; reg14=reg14-reg16; T reg30=4*var_inter[1]; T reg31=pos_nodes[3][2]*reg10; reg26=reg12+reg26;
+    reg12=pos_nodes[5][2]*reg15; reg14=reg14-reg1; reg29=reg22+reg29; reg22=pos_nodes[4][0]*reg13; T reg32=pos_nodes[1][1]*reg4;
+    T reg33=pos_nodes[6][2]*reg30; T reg34=pos_nodes[6][1]*reg30; T reg35=pos_nodes[4][1]*reg13; reg2=reg18+reg2; reg19=reg19-reg27;
+    reg18=pos_nodes[5][1]*reg15; reg1=reg25-reg1; reg27=reg11-reg27; reg11=reg0-reg15; reg25=reg0-reg30;
+    T reg36=pos_nodes[1][0]*reg4; T reg37=var_inter[1]*reg15; T reg38=pos_nodes[6][0]*reg30; reg23=reg23-reg28; T reg39=pos_nodes[5][0]*reg15;
+    T reg40=reg0-reg24; reg28=reg20-reg28; reg18=reg19+reg18; reg19=pos_nodes[6][1]*reg25; reg27=reg27-reg34;
+    reg20=pos_nodes[7][1]*reg40; T reg41=pos_nodes[4][0]*reg11; reg17=reg36-reg17; reg35=reg2+reg35; reg2=pos_nodes[5][1]*reg37;
+    reg36=pos_nodes[1][2]*reg4; T reg42=var_inter[1]*reg0; reg12=reg14+reg12; reg14=pos_nodes[6][2]*reg25; reg1=reg1-reg33;
+    T reg43=pos_nodes[7][2]*reg40; reg31=reg26+reg31; reg26=pos_nodes[4][2]*reg13; reg23=reg23-reg38; T reg44=pos_nodes[7][0]*reg40;
+    T reg45=pos_nodes[4][1]*reg11; T reg46=pos_nodes[5][0]*reg37; reg21=reg32-reg21; reg39=reg28+reg39; reg22=reg29+reg22;
+    reg28=pos_nodes[6][0]*reg25; reg29=pos_nodes[6][0]*reg42; reg2=reg35+reg2; reg32=pos_nodes[6][1]*reg42; reg46=reg22+reg46;
+    reg16=reg36-reg16; reg22=pos_nodes[4][2]*reg11; reg35=pos_nodes[7][2]*reg24; reg0=var_inter[2]*reg0; reg28=reg39+reg28;
+    reg14=reg12+reg14; reg43=reg1+reg43; reg1=pos_nodes[8][2]*reg15; reg12=pos_nodes[8][0]*reg15; reg44=reg23+reg44;
+    reg26=reg31+reg26; reg23=pos_nodes[5][2]*reg37; reg31=pos_nodes[5][0]*reg30; reg36=pos_nodes[5][1]*reg30; reg39=pos_nodes[7][1]*reg24;
+    reg41=reg17+reg41; reg21=reg45+reg21; reg17=pos_nodes[8][1]*reg15; reg20=reg27+reg20; reg19=reg18+reg19;
+    reg18=pos_nodes[7][0]*reg24; reg27=pos_nodes[5][2]*reg30; reg31=reg41+reg31; reg41=var_inter[2]*reg15; reg45=pos_nodes[9][1]*reg24;
+    reg19=reg19-reg39; reg14=reg14-reg35; T reg47=pos_nodes[9][2]*reg24; T reg48=pos_nodes[6][2]*reg42; reg23=reg26+reg23;
+    reg28=reg28-reg18; reg26=pos_nodes[9][0]*reg24; reg1=reg43+reg1; reg43=pos_nodes[9][2]*reg30; T reg49=pos_nodes[9][0]*reg30;
+    reg12=reg44+reg12; reg36=reg21+reg36; reg17=reg20+reg17; reg20=pos_nodes[9][1]*reg30; reg21=pos_nodes[7][0]*reg0;
+    reg29=reg46+reg29; reg32=reg2+reg32; reg2=pos_nodes[7][1]*reg0; reg22=reg16+reg22; reg26=reg28+reg26;
+    reg27=reg22+reg27; reg21=reg29+reg21; reg16=pos_nodes[8][0]*reg41; reg43=reg1+reg43; reg49=reg12+reg49;
+    reg48=reg23+reg48; reg1=pos_nodes[7][2]*reg0; reg47=reg14+reg47; reg2=reg32+reg2; reg12=pos_nodes[8][1]*reg41;
+    reg45=reg19+reg45; reg38=reg31-reg38; reg20=reg17+reg20; reg14=var_inter[2]*reg30; reg34=reg36-reg34;
+    reg16=reg21+reg16; reg17=pos_nodes[9][0]*reg14; reg19=pos_nodes[8][1]*reg24; reg39=reg34-reg39; reg21=reg49*reg47;
+    reg22=reg45*reg43; reg23=reg26*reg43; reg28=pos_nodes[8][0]*reg24; reg18=reg38-reg18; reg33=reg27-reg33;
+    reg12=reg2+reg12; reg2=pos_nodes[9][1]*reg14; reg27=reg20*reg47; reg1=reg48+reg1; reg29=pos_nodes[8][2]*reg41;
+    reg31=reg26*reg20; reg32=pos_nodes[9][2]*reg14; reg34=reg49*reg45; reg21=reg23-reg21; reg27=reg22-reg27;
+    reg29=reg1+reg29; reg17=reg16+reg17; reg19=reg39+reg19; reg28=reg18+reg28; reg1=pos_nodes[8][2]*reg24;
+    reg35=reg33-reg35; reg2=reg12+reg2; reg34=reg31-reg34; reg12=var_inter[0]*reg19; reg2=pos[1]-reg2;
+    reg16=reg28*reg27; reg18=var_inter[0]*reg28; reg32=reg29+reg32; reg1=reg35+reg1; reg29=reg19*reg21;
+    reg17=pos[0]-reg17; reg16=reg29-reg16; reg29=reg28*reg43; reg33=reg1*reg34; reg35=var_inter[0]*reg1;
+    reg36=reg19*reg43; reg12=reg2+reg12; reg2=var_inter[1]*reg45; reg38=reg20*reg1; reg39=reg19*reg47;
+    reg18=reg17+reg18; reg17=var_inter[1]*reg26; reg44=reg26*reg1; reg32=pos[2]-reg32; reg46=reg45*reg1;
+    reg48=reg49*reg1; T reg50=reg28*reg47; reg33=reg16-reg33; reg44=reg50-reg44; reg38=reg36-reg38;
+    reg46=reg39-reg46; reg16=reg28*reg20; reg35=reg32+reg35; reg32=var_inter[1]*reg47; T reg51=reg49*reg19;
+    reg12=reg2+reg12; reg2=reg28*reg45; reg18=reg17+reg18; reg17=var_inter[2]*reg20; T reg52=var_inter[2]*reg49;
+    T reg53=reg26*reg19; reg48=reg29-reg48; reg44=reg44/reg33; reg51=reg16-reg51; reg53=reg2-reg53;
+    reg21=reg21/reg33; reg48=reg48/reg33; reg18=reg52+reg18; reg52=var_inter[2]*reg43; reg12=reg17+reg12;
+    reg35=reg32+reg35; reg27=reg27/reg33; reg38=reg38/reg33; reg46=reg46/reg33; reg35=reg52+reg35;
+    reg34=reg34/reg33; reg51=reg51/reg33; reg33=reg53/reg33; reg27=reg18*reg27; reg21=reg21*reg12;
+    reg44=reg12*reg44; reg38=reg18*reg38; reg48=reg48*reg12; reg46=reg18*reg46; reg46=reg44-reg46;
+    reg33=reg35*reg33; reg48=reg38-reg48; reg51=reg35*reg51; reg27=reg21-reg27; reg34=reg35*reg34;
+    var_inter[1]=reg51+reg48; var_inter[0]=reg27-reg34; var_inter[2]=reg46-reg33;
+>>>>>>> 512dc2050926bfccc64f86a01cb2ce23c8050af9:include/mesh/element_Tetra_10.h
 
 }
 template<class PosNodes,class Pvec,class TVI> void get_var_inter(const Tetra_10 &elem,const PosNodes &pos_nodes,const Pvec &pos,TVI &var_inter) {
 typedef typename Pvec::template SubType<0>::T T;
+<<<<<<< HEAD:include/mesh/element_Tetra_10.h
     T reg0=1-var_inter[0]; reg0=reg0-var_inter[1]; reg0=reg0-var_inter[2]; T reg1=2*var_inter[0]; T reg2=2*reg0;
     T reg3=2*var_inter[2]; T reg4=2*var_inter[1]; T reg5=reg1-1; T reg6=reg2-1; T reg7=reg3-1;
     T reg8=reg4-1; T reg9=reg0*reg6; T reg10=var_inter[0]*reg5; reg6=reg2+reg6; reg3=reg3+reg7;
@@ -266,6 +324,62 @@ typedef typename Pvec::template SubType<0>::T T;
     reg23=reg23/reg37; reg50=reg50/reg37; reg37=reg13/reg37; reg4=reg51+reg4; reg37=reg4*reg37;
     reg22=reg28-reg22; reg50=reg4*reg50; reg48=reg42-reg48; reg23=reg4*reg23; reg44=reg33-reg44;
     var_inter[0]+=reg22-reg37; var_inter[1]+=reg50+reg48; var_inter[2]+=reg44-reg23;
+=======
+    T reg0=1-var_inter[0]; reg0=reg0-var_inter[1]; reg0=reg0-var_inter[2]; T reg1=2*reg0; T reg2=2*var_inter[0];
+    T reg3=reg2-1; T reg4=reg1-1; T reg5=2*var_inter[1]; T reg6=2*var_inter[2]; T reg7=reg0*reg4;
+    T reg8=var_inter[0]*reg3; T reg9=reg6-1; T reg10=reg5-1; T reg11=pos_nodes[1][1]*reg8; T reg12=pos_nodes[0][1]*reg7;
+    T reg13=pos_nodes[0][0]*reg7; T reg14=pos_nodes[1][0]*reg8; reg6=reg6+reg9; reg4=reg1+reg4; reg5=reg5+reg10;
+    reg10=reg10*var_inter[1]; reg1=pos_nodes[0][2]*reg7; T reg15=pos_nodes[1][2]*reg8; T reg16=pos_nodes[3][2]*reg6; T reg17=pos_nodes[0][0]*reg4;
+    T reg18=pos_nodes[2][2]*reg5; T reg19=pos_nodes[0][2]*reg4; T reg20=pos_nodes[2][0]*reg5; T reg21=pos_nodes[2][1]*reg10; T reg22=pos_nodes[3][0]*reg6;
+    reg12=reg11+reg12; reg11=4*var_inter[0]; reg13=reg14+reg13; reg14=pos_nodes[2][0]*reg10; T reg23=pos_nodes[3][1]*reg6;
+    T reg24=pos_nodes[2][1]*reg5; T reg25=pos_nodes[0][1]*reg4; reg9=reg9*var_inter[2]; reg0=4*reg0; reg18=reg18-reg19;
+    reg20=reg20-reg17; T reg26=reg11*pos_nodes[4][0]; T reg27=reg9*pos_nodes[3][1]; reg21=reg12+reg21; reg22=reg22-reg17;
+    reg24=reg24-reg25; reg12=var_inter[0]*reg0; T reg28=4*var_inter[1]; T reg29=pos_nodes[2][2]*reg10; reg14=reg13+reg14;
+    reg13=reg9*pos_nodes[3][0]; reg23=reg23-reg25; T reg30=reg11*pos_nodes[4][1]; reg3=reg2+reg3; reg2=4*var_inter[2];
+    reg16=reg16-reg19; reg1=reg15+reg1; reg15=reg11*pos_nodes[4][2]; T reg31=reg0-reg11; T reg32=reg12*pos_nodes[4][1];
+    reg23=reg23-reg30; T reg33=reg12*pos_nodes[4][0]; T reg34=reg0-reg28; reg29=reg1+reg29; reg1=pos_nodes[1][1]*reg3;
+    T reg35=reg28*pos_nodes[6][1]; reg16=reg16-reg15; reg13=reg14+reg13; reg14=reg11*pos_nodes[5][1]; reg30=reg24-reg30;
+    reg24=reg28*pos_nodes[6][0]; reg15=reg18-reg15; reg18=reg28*pos_nodes[6][2]; T reg36=reg11*pos_nodes[5][2]; T reg37=pos_nodes[1][0]*reg3;
+    reg20=reg20-reg26; T reg38=reg11*pos_nodes[5][0]; reg27=reg21+reg27; reg21=reg11*var_inter[1]; reg26=reg22-reg26;
+    reg22=reg0-reg2; T reg39=reg9*pos_nodes[3][2]; reg25=reg1-reg25; reg1=pos_nodes[4][1]*reg31; T reg40=pos_nodes[7][1]*reg22;
+    reg23=reg23-reg35; T reg41=reg12*pos_nodes[4][2]; T reg42=pos_nodes[7][2]*reg22; T reg43=pos_nodes[1][2]*reg3; reg36=reg15+reg36;
+    reg14=reg30+reg14; reg15=pos_nodes[6][1]*reg34; reg16=reg16-reg18; reg39=reg29+reg39; reg29=reg21*pos_nodes[5][1];
+    reg27=reg32+reg27; reg30=pos_nodes[6][2]*reg34; reg32=var_inter[1]*reg0; T reg44=pos_nodes[4][0]*reg31; reg17=reg37-reg17;
+    reg37=pos_nodes[7][0]*reg22; reg26=reg26-reg24; reg13=reg33+reg13; reg33=reg21*pos_nodes[5][0]; T reg45=pos_nodes[6][0]*reg34;
+    reg38=reg20+reg38; reg20=reg32*pos_nodes[6][1]; reg29=reg27+reg29; reg45=reg38+reg45; reg37=reg26+reg37;
+    reg26=reg11*pos_nodes[8][0]; reg19=reg43-reg19; reg27=pos_nodes[4][2]*reg31; reg38=pos_nodes[7][2]*reg2; reg43=reg21*pos_nodes[5][2];
+    reg39=reg41+reg39; reg41=pos_nodes[7][0]*reg2; T reg46=reg28*pos_nodes[5][0]; reg17=reg44+reg17; reg30=reg36+reg30;
+    reg0=var_inter[2]*reg0; reg36=pos_nodes[7][1]*reg2; reg44=reg11*pos_nodes[8][2]; reg42=reg16+reg42; reg16=reg28*pos_nodes[5][1];
+    reg1=reg25+reg1; reg25=reg32*pos_nodes[6][0]; reg33=reg13+reg33; reg15=reg14+reg15; reg13=reg11*pos_nodes[8][1];
+    reg40=reg23+reg40; reg13=reg40+reg13; reg14=reg28*pos_nodes[9][1]; reg43=reg39+reg43; reg23=reg32*pos_nodes[6][2];
+    reg46=reg17+reg46; reg17=reg28*pos_nodes[5][2]; reg27=reg19+reg27; reg44=reg42+reg44; reg16=reg1+reg16;
+    reg26=reg37+reg26; reg1=reg28*pos_nodes[9][0]; reg19=reg0*pos_nodes[7][0]; reg25=reg33+reg25; reg33=reg28*pos_nodes[9][2];
+    reg30=reg30-reg38; reg37=pos_nodes[9][2]*reg2; reg39=reg0*pos_nodes[7][1]; reg20=reg29+reg20; reg29=reg11*var_inter[2];
+    reg40=pos_nodes[9][0]*reg2; reg15=reg15-reg36; reg42=pos_nodes[9][1]*reg2; reg45=reg45-reg41; reg35=reg16-reg35;
+    reg24=reg46-reg24; reg33=reg44+reg33; reg37=reg30+reg37; reg16=reg28*var_inter[2]; reg17=reg27+reg17;
+    reg27=reg29*pos_nodes[8][0]; reg19=reg25+reg19; reg23=reg43+reg23; reg25=reg0*pos_nodes[7][2]; reg30=reg29*pos_nodes[8][1];
+    reg39=reg20+reg39; reg42=reg15+reg42; reg40=reg45+reg40; reg1=reg26+reg1; reg14=reg13+reg14;
+    reg13=reg14*reg37; reg15=reg42*reg33; reg20=reg40*reg33; reg26=reg1*reg37; reg18=reg17-reg18;
+    reg41=reg24-reg41; reg17=pos_nodes[8][0]*reg2; reg25=reg23+reg25; reg23=reg16*pos_nodes[9][1]; reg30=reg39+reg30;
+    reg27=reg19+reg27; reg19=reg29*pos_nodes[8][2]; reg24=pos_nodes[8][1]*reg2; reg36=reg35-reg36; reg35=reg16*pos_nodes[9][0];
+    reg19=reg25+reg19; reg25=reg16*pos_nodes[9][2]; reg35=reg27+reg35; reg24=reg36+reg24; reg23=reg30+reg23;
+    reg27=reg1*reg42; reg17=reg41+reg17; reg38=reg18-reg38; reg18=pos_nodes[8][2]*reg2; reg26=reg20-reg26;
+    reg30=reg40*reg14; reg13=reg15-reg13; reg36=reg24*reg26; reg39=reg17*reg13; reg41=var_inter[0]*reg24;
+    reg43=var_inter[0]*reg17; reg25=reg19+reg25; reg27=reg30-reg27; reg18=reg38+reg18; reg35=pos[0]-reg35;
+    reg23=pos[1]-reg23; reg19=reg17*reg37; reg38=reg40*reg18; reg44=reg1*reg18; reg45=reg17*reg33;
+    reg46=reg42*reg18; reg39=reg36-reg39; reg36=var_inter[0]*reg18; T reg47=reg18*reg27; reg41=reg23+reg41;
+    reg23=var_inter[1]*reg42; T reg48=reg24*reg33; T reg49=reg14*reg18; reg43=reg35+reg43; reg35=var_inter[1]*reg40;
+    T reg50=reg24*reg37; reg25=pos[2]-reg25; reg47=reg39-reg47; reg44=reg45-reg44; reg49=reg48-reg49;
+    reg46=reg50-reg46; reg39=reg17*reg14; T reg51=reg1*reg24; reg36=reg25+reg36; reg25=var_inter[1]*reg37;
+    T reg52=reg17*reg42; reg41=reg23+reg41; reg23=reg40*reg24; reg38=reg19-reg38; reg43=reg35+reg43;
+    reg35=var_inter[2]*reg14; T reg53=var_inter[2]*reg1; reg46=reg46/reg47; reg51=reg39-reg51; reg49=reg49/reg47;
+    reg23=reg52-reg23; reg13=reg13/reg47; reg26=reg26/reg47; reg44=reg44/reg47; reg36=reg25+reg36;
+    reg41=reg35+reg41; reg25=var_inter[2]*reg33; reg43=reg53+reg43; reg38=reg38/reg47; reg46=reg43*reg46;
+    reg44=reg44*reg41; reg49=reg43*reg49; reg38=reg38*reg41; reg26=reg26*reg41; reg13=reg43*reg13;
+    reg23=reg23/reg47; reg51=reg51/reg47; reg36=reg25+reg36; reg47=reg27/reg47; reg46=reg38-reg46;
+    reg23=reg36*reg23; reg44=reg49-reg44; reg51=reg36*reg51; reg13=reg26-reg13; reg47=reg47*reg36;
+    var_inter[1]+=reg51+reg44; var_inter[0]+=reg13-reg47; var_inter[2]+=reg46-reg23;
+>>>>>>> 512dc2050926bfccc64f86a01cb2ce23c8050af9:include/mesh/element_Tetra_10.h
 
 }
 #ifndef STRUCT_Global
@@ -290,6 +404,7 @@ struct Nodal {};
 #endif // STRUCT_Nodal
 template<class TVI,class TVAL,class T> void get_interp(const Tetra_10 &ne,const Nodal &n,const TVI &var_inter,const TVAL &val,T &res) {
     T reg0=1-var_inter[0]; reg0=reg0-var_inter[1]; reg0=reg0-var_inter[2]; T reg1=2*var_inter[0]; T reg2=2*reg0;
+<<<<<<< HEAD:include/mesh/element_Tetra_10.h
     T reg3=2*var_inter[1]; reg2=reg2-1; reg1=reg1-1; reg2=reg0*reg2; reg1=var_inter[0]*reg1;
     reg3=reg3-1; T reg4=2*var_inter[2]; reg1=val[1]*reg1; reg2=val[0]*reg2; reg3=var_inter[1]*reg3;
     reg4=reg4-1; reg0=4*reg0; reg2=reg1+reg2; reg3=val[2]*reg3; reg4=var_inter[2]*reg4;
@@ -298,6 +413,16 @@ template<class TVI,class TVAL,class T> void get_interp(const Tetra_10 &ne,const 
     reg5=reg2+reg5; reg3=val[6]*reg3; reg0=var_inter[2]*reg0; reg2=4*var_inter[1]; reg3=reg5+reg3;
     reg1=var_inter[2]*reg1; reg0=val[7]*reg0; reg2=var_inter[2]*reg2; reg1=val[8]*reg1; reg0=reg3+reg0;
     reg2=val[9]*reg2; reg1=reg0+reg1; res=reg1+reg2;
+=======
+    reg2=reg2-1; reg1=reg1-1; T reg3=2*var_inter[1]; reg2=reg0*reg2; T reg4=2*var_inter[2];
+    reg3=reg3-1; reg1=var_inter[0]*reg1; reg2=val[0]*reg2; reg1=val[1]*reg1; reg4=reg4-1;
+    reg3=var_inter[1]*reg3; reg3=val[2]*reg3; reg1=reg2+reg1; reg0=4*reg0; reg4=var_inter[2]*reg4;
+    reg4=val[3]*reg4; reg3=reg1+reg3; reg1=4*var_inter[0]; reg2=var_inter[0]*reg0; reg2=val[4]*reg2;
+    reg4=reg3+reg4; reg3=var_inter[1]*reg1; reg3=val[5]*reg3; T reg5=var_inter[1]*reg0; reg2=reg4+reg2;
+    reg3=reg2+reg3; reg5=val[6]*reg5; reg0=var_inter[2]*reg0; reg2=4*var_inter[1]; reg1=var_inter[2]*reg1;
+    reg0=val[7]*reg0; reg5=reg3+reg5; reg0=reg5+reg0; reg1=val[8]*reg1; reg2=var_inter[2]*reg2;
+    reg1=reg0+reg1; reg2=val[9]*reg2; res=reg1+reg2;
+>>>>>>> 512dc2050926bfccc64f86a01cb2ce23c8050af9:include/mesh/element_Tetra_10.h
 
 }
 #ifndef STRUCT_Elementary_mul_nb_nodes_of_each_children_elem

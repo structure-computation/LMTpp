@@ -1,10 +1,21 @@
+<<<<<<< HEAD:include/codegen/codegen.py
 # This file was created automatically by SWIG.
+=======
+# This file was created automatically by SWIG 1.3.29.
+>>>>>>> 512dc2050926bfccc64f86a01cb2ce23c8050af9:include/codegen/codegen.py
 # Don't modify this file, modify the SWIG interface instead.
 # This file is compatible with both classic and new-style classes.
 
 import _codegen
+<<<<<<< HEAD:include/codegen/codegen.py
 
 def _swig_setattr(self,class_type,name,value):
+=======
+import new
+new_instancemethod = new.instancemethod
+def _swig_setattr_nondynamic(self,class_type,name,value,static=1):
+    if (name == "thisown"): return self.this.own(value)
+>>>>>>> 512dc2050926bfccc64f86a01cb2ce23c8050af9:include/codegen/codegen.py
     if (name == "this"):
         if isinstance(value, class_type):
             self.__dict__[name] = value.this
@@ -172,6 +183,7 @@ class EM(_object):
     def values(*args): return _codegen.EM_values(*args)
     def items(*args): return _codegen.EM_items(*args)
     def __contains__(*args): return _codegen.EM___contains__(*args)
+<<<<<<< HEAD:include/codegen/codegen.py
     def __iter__(*args): return _codegen.EM___iter__(*args)
     def __del__(self, destroy=_codegen.delete_EM):
         try:
@@ -185,6 +197,37 @@ class EMPtr(EM):
         _swig_setattr(self, EM,self.__class__,EM)
 _codegen.EM_swigregister(EMPtr)
 
+=======
+    def key_iterator(*args): return _codegen.EM_key_iterator(*args)
+    def value_iterator(*args): return _codegen.EM_value_iterator(*args)
+    def __iter__(self): return self.key_iterator()
+    def iterkeys(self): return self.key_iterator()
+    def itervalues(self): return self.value_iterator()
+    def iteritems(self): return self.iterator()
+    def __init__(self, *args): 
+        this = _codegen.new_EM(*args)
+        try: self.this.append(this)
+        except: self.this = this
+    def empty(*args): return _codegen.EM_empty(*args)
+    def size(*args): return _codegen.EM_size(*args)
+    def clear(*args): return _codegen.EM_clear(*args)
+    def swap(*args): return _codegen.EM_swap(*args)
+    def get_allocator(*args): return _codegen.EM_get_allocator(*args)
+    def begin(*args): return _codegen.EM_begin(*args)
+    def end(*args): return _codegen.EM_end(*args)
+    def rbegin(*args): return _codegen.EM_rbegin(*args)
+    def rend(*args): return _codegen.EM_rend(*args)
+    def count(*args): return _codegen.EM_count(*args)
+    def erase(*args): return _codegen.EM_erase(*args)
+    def find(*args): return _codegen.EM_find(*args)
+    def lower_bound(*args): return _codegen.EM_lower_bound(*args)
+    def upper_bound(*args): return _codegen.EM_upper_bound(*args)
+    __swig_destroy__ = _codegen.delete_EM
+    __del__ = lambda self : None;
+EM_swigregister = _codegen.EM_swigregister
+EM_swigregister(EM)
+symbol = _codegen.symbol
+>>>>>>> 512dc2050926bfccc64f86a01cb2ce23c8050af9:include/codegen/codegen.py
 number = _codegen.number
 
 sqrt = _codegen.sqrt
@@ -206,6 +249,7 @@ class PEX(_object):
     __swig_setmethods__["second"] = _codegen.PEX_second_set
     __swig_getmethods__["second"] = _codegen.PEX_second_get
     if _newclass:second = property(_codegen.PEX_second_get, _codegen.PEX_second_set)
+<<<<<<< HEAD:include/codegen/codegen.py
     def __init__(self, *args):
         _swig_setattr(self, PEX, 'this', _codegen.new_PEX(*args))
         _swig_setattr(self, PEX, 'thisown', 1)
@@ -220,6 +264,24 @@ class PEXPtr(PEX):
         if not hasattr(self,"thisown"): _swig_setattr(self, PEX, 'thisown', 0)
         _swig_setattr(self, PEX,self.__class__,PEX)
 _codegen.PEX_swigregister(PEXPtr)
+=======
+    def __len__(self): return 2
+    def __repr__(self): return str((self.first, self.second))
+    def __getitem__(self, index): 
+      if not (index % 2): 
+        return self.first
+      else:
+        return self.second
+    def __setitem__(self, index, val):
+      if not (index % 2): 
+        self.first = val
+      else:
+        self.second = val
+    __swig_destroy__ = _codegen.delete_PEX
+    __del__ = lambda self : None;
+PEX_swigregister = _codegen.PEX_swigregister
+PEX_swigregister(PEX)
+>>>>>>> 512dc2050926bfccc64f86a01cb2ce23c8050af9:include/codegen/codegen.py
 
 class ExVector(_object):
     __swig_setmethods__ = {}

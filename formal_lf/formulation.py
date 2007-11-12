@@ -64,6 +64,9 @@ class Formulation:
       'apply_on_elements_after_solve' : apply_on_elements_after_solve,
       'apply_on_elements_after_solve_2' : apply_on_elements_after_solve,
       'apply_on_elements_after_solve_3' : apply_on_elements_after_solve,
+      'apply_on_elements_after_solve_4' : apply_on_elements_after_solve,
+      'apply_on_elements_after_solve_5' : apply_on_elements_after_solve,
+      'apply_on_elements_after_solve_6' : apply_on_elements_after_solve,
       'options' : options,
     }
     execfile( name_file, globals(), self.ind )
@@ -462,6 +465,9 @@ class Formulation:
     form_after_solve = self.apply_on_elements_after_solve(unk_subs)
     form_after_solve_2 = self.apply_on_elements_after_solve_2(unk_subs)
     form_after_solve_3 = self.apply_on_elements_after_solve_3(unk_subs)
+    form_after_solve_4 = self.apply_on_elements_after_solve_4(unk_subs)
+    form_after_solve_5 = self.apply_on_elements_after_solve_5(unk_subs)
+    form_after_solve_6 = self.apply_on_elements_after_solve_6(unk_subs)
     
     # surfacic part
     dS_part = form.diff(dS)
@@ -512,7 +518,7 @@ class Formulation:
     for n,i in old_glob.items(): globals()[n] = i
     res['unknown_symbols'] = unknown_symbols
     
-    return res, [form_after_solve,form_after_solve_2,form_after_solve_3]
+    return res, [form_after_solve,form_after_solve_2,form_after_solve_3,form_after_solve_4,form_after_solve_5,form_after_solve_6]
   
   def contact_pos_is(self,imp_node):
     if self.dim==3:   angle = norm(self.is_rotation.expr)
@@ -649,6 +655,21 @@ class Formulation:
     f.write( form_after_solve[2] + '\n' )
     f.write( '      #undef PNODE\n' )
     f.write( '    }\n' )
+    f.write( '    template<class TE,class TF> static void after_solve_4(TE &elem,TF &f,const unsigned *indices) {\n' )
+    f.write( '      #define PNODE(N) (*elem.node(N))\n' )
+    f.write( form_after_solve[3] + '\n' )
+    f.write( '      #undef PNODE\n' )
+    f.write( '    }\n' )
+    f.write( '    template<class TE,class TF> static void after_solve_5(TE &elem,TF &f,const unsigned *indices) {\n' )
+    f.write( '      #define PNODE(N) (*elem.node(N))\n' )
+    f.write( form_after_solve[4] + '\n' )
+    f.write( '      #undef PNODE\n' )
+    f.write( '    }\n' )   
+    f.write( '    template<class TE,class TF> static void after_solve_6(TE &elem,TF &f,const unsigned *indices) {\n' )
+    f.write( '      #define PNODE(N) (*elem.node(N))\n' )
+    f.write( form_after_solve[5] + '\n' )
+    f.write( '      #undef PNODE\n' )
+    f.write( '    }\n' )   
         
     for skin in [False,True]:
       self.write_carac_for_t(f,'elementary',skin,e)

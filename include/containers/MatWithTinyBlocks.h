@@ -123,13 +123,16 @@ struct MatWithTinyBlocks<T,Sym<3> > {
     
     Vec<RB> rows;
     Vec<DB> diags;
-    ST nb_rows, nb_cols;
+    ST nb_rows_, nb_cols_;
+
+    ST nb_rows() const { return nb_rows_; }
+    ST nb_cols() const { return nb_cols_; }
 
     void resize( ST r, ST c ) {
         assert( r % n == 0 );
         assert( c % n == 0 );
-        nb_rows = r;
-        nb_cols = c;
+        nb_rows_ = r;
+        nb_cols_ = c;
         rows.resize( r / n );
         diags.resize( r / n );
     }
@@ -139,7 +142,7 @@ struct MatWithTinyBlocks<T,Sym<3> > {
     }
     
     template<class T2> MatWithTinyBlocks( const MatWithTinyBlocks<T2,Sym<3> > &m ) {
-        resize( m.nb_rows, m.nb_rows );
+        resize( m.nb_rows_, m.nb_rows_ );
         for(unsigned r=0;r<rows.size();++r) {
             rows[r].indices = m.rows[r].indices;
             rows[r].data = m.rows[r].data;
@@ -230,7 +233,7 @@ struct MatWithTinyBlocks<T,Sym<3> > {
         Vec<T> r;
         Vec<T> &r_for_trans = r;
     
-        r.resize( nb_rows, 0 );
+        r.resize( nb_rows_, 0 );
         for( ST num_block_set=num_thread; num_block_set<(ST)rows.size(); num_block_set += nb_thread ) {
             ST real_row = num_block_set * 3;
             const RB &lbs = rows[ num_block_set ];
@@ -533,8 +536,8 @@ struct MatWithTinyBlocks<T,Sym<3> > {
 
 template<class T,class TO>
 std::ostream &operator<<( std::ostream &os, const MatWithTinyBlocks<T,TO> &m ) {
-    for(int i=0;i<m.nb_rows;++i) {
-        for(int j=0;j<m.nb_cols;++j)
+    for(int i=0;i<m.nb_rows_;++i) {
+        for(int j=0;j<m.nb_cols_;++j)
             os << std::setw(8) << m( i, j ) << " "; 
         os << "\n";
     }
@@ -546,7 +549,7 @@ std::ostream &operator<<( std::ostream &os, const MatWithTinyBlocks<T,TO> &m ) {
 */
 template<class TM,class TO,class TA,class T> void solve_using_incomplete_chol_factorize( const MatWithTinyBlocks<TM,TO> &mp, const TA &A, const Vec<T> &b, Vec<T> &x, T crit = 1e-4, bool disp_r = false ) {
     // bool disp_timing = true;
-    if ( x.size() <= A.nb_rows() )
+    if ( x.size() <= (unsigned)A.nb_rows() )
         x.resize( A.nb_rows(), 0.0 );
         
     //

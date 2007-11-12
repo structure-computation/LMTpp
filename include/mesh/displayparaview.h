@@ -37,13 +37,13 @@ public:
     ~DisplayParaview() {
     }
     
-    template<class TM> void add_mesh(const TM &m,const std::string &prefix="tmp/paraview_",const Vec<std::string> &display_fields=Vec<std::string>("all")) {
+    template<class TM> void add_mesh(const TM &m,const std::string &prefix="tmp/paraview_",const Vec<std::string> &display_fields=Vec<std::string>("all"),double time_step=0) {
         std::string pvu_name = prefix;
-        if ( prefix.rfind(".vtu") != prefix.size() - 4 )
-            pvu_name += to_string( pvu_files[prefix].size() ) + ".vtu";
+        //if ( prefix.rfind(".vtu") != prefix.size() - 4 )
+        pvu_name += to_string( time_step ) + "_" + to_string( pvu_files[time_step].size() ) + ".vtu";
         std::cout << pvu_name << std::endl;
     
-        pvu_files[prefix].push_back(pvu_name);
+        pvu_files[ time_step ].push_back( pvu_name );
         std::ofstream f( pvu_name.c_str() );
         
         write_mesh_vtk<true>( f, m, display_fields );
@@ -105,24 +105,25 @@ public:
         field_to_display = name;
         type_field_to_display = type;
     }
-    void exec(bool all_mesh=false,const std::string &prefix="paraview_") {
-        std::string tmp_file = prefix + ".pvd";
-        std::ofstream f( tmp_file.c_str() );
+
+   void make_pvs_file( const std::string &filename = "paraview.pvd" ) const {
+        std::ofstream f( filename.c_str() );
         //
         f << "<?xml version='1.0'?>" << std::endl;
         f << "<VTKFile type='Collection' version='0.1'>" << std::endl;
         f << "    <Collection>" << std::endl;
-        for( std::map<std::string,Vec<std::string> >::const_iterator iter = pvu_files.begin(); iter != pvu_files.end(); ++iter ) {
-            for(unsigned i=0;i<( all_mesh ? iter->second.size() : min(iter->second.size(),(unsigned)1) );++i) {
-                // f_ := getcwd() + "/" + fn
-                f << "        <DataSet part='$cpt' file='" << iter->second[i] << "'/>" << std::endl;
-            }
-        }
+        unsigned cpt = 0;
+        for( std::map<double,Vec<std::string> >::const_iterator iter = pvu_files.begin(); iter != pvu_files.end(); ++iter, ++cpt )
+            for(unsigned i=0;i<iter->second.size();++i)
+                f << "        <DataSet timestep='" << iter->first << "' part='" << i << "' file='" << iter->second[i] << "'/>" << std::endl;
         f << "    </Collection>" << std::endl;
         f << "</VTKFile>" << std::endl;
-        f.close();
-        
-        system( ( "paraview --data=" + tmp_file ).c_str() );
+   }
+
+    void exec( const std::string &filename = "paraview.pvd" ) {
+        make_pvs_file( filename );
+
+        system( ( "paraview --data=" + filename ).c_str() );
     
         /*
         std::string tmp_file = prefix + ".pvs";
@@ -213,7 +214,7 @@ private:
         }
     }
 
-    std::map<std::string,Vec<std::string> > pvu_files;
+    std::map<double,Vec<std::string> > pvu_files;
     Vec<std::string> vti_files;
     std::string field_to_display;
     TypeField type_field_to_display;
@@ -237,7 +238,7 @@ template<class TM> void display_mesh(const TM &m,const char *nodal_field_to_disp
 /**
  * usefull to get several Windows (using apply_mt)
  */
-struct DpExec { void operator()(DisplayParaview &dp,unsigned i) const { dp.exec(false,"tmp/conf"+to_string(i)); } };
+struct DpExec { void operator()(DisplayParaview &dp,unsigned i) const { dp.exec( "tmp/conf"+to_string(i)+".pvs"); } };
 
 };
 
