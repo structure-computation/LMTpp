@@ -8,7 +8,7 @@
 
 namespace LMT {
 
-template<class Carac_> class Mesh;
+template<class Carac_,unsigned max_sub_meshes> class Mesh;
 template<class MeshCarac,class TNode,unsigned nvi_to_subs,unsigned skin> struct VecElemList {};
 template<class MeshCarac,class TNode,unsigned nvi_to_subs,unsigned skin> struct IsVecOp<VecElemList<MeshCarac,TNode,nvi_to_subs,skin> > { typedef int T; };
 
@@ -353,7 +353,7 @@ protected:
     ///
     Vec<DynamicDataAncestor *> dyn_data;
 
-    template<class Carac_> friend class Mesh;
+    template<class Carac_,unsigned max_sub_meshes> friend class Mesh;
     template<class Carac_,unsigned nvi_to_subs_,unsigned skin_> friend class MeshAncestor;
     template<class Carac_,unsigned nvi_to_subs_,unsigned skin_,unsigned end_nvi_to_subs_> friend class MeshGeneric;
 };

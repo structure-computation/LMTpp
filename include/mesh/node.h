@@ -14,7 +14,7 @@
 
 namespace LMT {
 
-template<class CaracName> class Mesh;
+template<class CaracName,unsigned max_sub_meshes> class Mesh;
 template<class Carac,unsigned nvi_to_subs,unsigned skin> class MeshAncestor;
 
 /**
@@ -35,7 +35,7 @@ public:
     /// 
     unsigned number;
     template<class TT,int s,class O> friend class Vec;
-    template<class CaracName> friend class Mesh;
+    template<class CaracName,unsigned max_sub_meshes> friend class Mesh;
     template<class Carac,unsigned nvi_to_subs,unsigned skin> friend class MeshAncestor;
 };
 

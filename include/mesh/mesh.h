@@ -16,23 +16,29 @@
 
 namespace LMT {
 
+template<class Carac,unsigned max_sub_meshes>
+struct MeshNbSubMeshes { enum { res = max_sub_meshes ? MIN( Carac::dim+1, max_sub_meshes ) : Carac::dim+1 }; };
+
+
 /**
   The entry class for all type of meshes. If you want to add elements, nodes, ... you must use Mesh<>
 
   \author Hugo LECLERC
  */
-template<class Carac>
-class Mesh : public MeshGenericBis<Carac,false,Carac::dim+1> {
+template<class Carac,unsigned max_sub_meshes=0>
+class Mesh : public MeshGenericBis< Carac, false, MeshNbSubMeshes<Carac,max_sub_meshes>::res > {
 public:
-    typedef MeshGenericBis<Carac,false,Carac::dim+1> MGB;
+    enum { nb_sub_meshes = MeshNbSubMeshes<Carac,max_sub_meshes>::res };
+    typedef MeshGenericBis< Carac, false, nb_sub_meshes > MGB;
     typedef MeshAncestor<Carac,0,false> MA;
     typedef typename MA::TNode TNode;
     typedef typename MA::TElemList TElemList;
-    typedef MeshGenericBis<Carac,true,Carac::dim+1> TSkin;
+    typedef MeshGenericBis< Carac, true, nb_sub_meshes > TSkin;
     template<class NE,class BE=DefaultBehavior> struct TElem { typedef typename TElemList::template TElem<NE,BE>::TE TE; };
     
     ///
     Mesh() {
+        PRINT( nb_sub_meshes );
         cpt_nodes=0;
     }
     /// add a node using default constructor
@@ -241,8 +247,8 @@ namespace LMTPRIVATE {
     };
 };
 
-template<class Carac>
-void Mesh<Carac>::update_skin( bool rm_intermediate_data ) {
+template<class Carac,unsigned max_sub_meshes>
+void Mesh<Carac,max_sub_meshes>::update_skin( bool rm_intermediate_data ) {
     this->update_elem_parents(Number<1>());
     LMTPRIVATE::AddElemWith1Parent<Mesh> ae;
     ae.m = this;
@@ -284,9 +290,9 @@ void Mesh<Carac>::update_skin( bool rm_intermediate_data ) {
 //     apply( m.skin.elem_list, Copy_data_from_sub_mesh_to_skin(), m );
 // }
 
-template<class TCM>
-typename Mesh<TCM>::Pvec center( const Mesh<TCM> &m ) {
-    typename Mesh<TCM>::Pvec res( 0 );
+template<class TCM,unsigned max_sub_meshes>
+typename Mesh<TCM,max_sub_meshes>::Pvec center( const Mesh<TCM,max_sub_meshes> &m ) {
+    typename Mesh<TCM,max_sub_meshes>::Pvec res( 0 );
     for(unsigned i=0;i<m.node_list.size();++i)
         res += m.node_list[i].pos;
     return res / m.node_list.size();

@@ -95,6 +95,7 @@ def get_taylor_expansion( expr, beg, var, deg_poly_max ):
     return res
 
 def integration( expr, var, beg, end, deg_poly_max = 5 ):
+    disc = expr.find_discontiuities( var )
     taylor_expansion =  get_taylor_expansion( expr, beg, var, deg_poly_max )
     #
     res = 0

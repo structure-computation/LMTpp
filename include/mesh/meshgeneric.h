@@ -16,7 +16,7 @@
 
 namespace LMT {
 
-template<class CN> class Mesh;
+template<class CN,unsigned max_sub_meshes> class Mesh;
 template<class CN,unsigned SK,unsigned MN> class MeshGenericBis;
 
 // ---------------------------------------------------------------------------------------------------
@@ -255,7 +255,7 @@ protected:
     ///
     unsigned date_last_elem_chidren_update, date_last_elem_parents_update;
         
-    template<class CN> friend class Mesh;
+    template<class CN,unsigned max_sub_meshes> friend class Mesh;
     template<class CN,unsigned NV,unsigned SK,unsigned MN> friend class MeshGeneric;
     template<class CN,unsigned SK,unsigned MN> friend class MeshGenericBis;
     template<class PEL> friend struct AppendChildrenElem;
