@@ -14,7 +14,7 @@
 
 namespace LMT {
 
-template<class CaracName> class Mesh;
+template<class CaracName,unsigned max_sub_meshes> class Mesh;
 template<class CaracName,unsigned nvi_to_subs,unsigned skin,unsigned end_nvi_to_subs> class MeshGeneric;
 template<class CaracName,unsigned skin,unsigned end_nvi_to_subs> class MeshGenericBis;
 
@@ -75,7 +75,7 @@ protected:
     ///
     Vec<DynamicDataAncestor *> dyn_data;
     ///
-    template<class CaracName> friend class Mesh;
+    template<class CaracName,unsigned max_sub_meshes> friend class Mesh;
     template<class CN,unsigned NV,unsigned SK,unsigned MSK> friend class MeshGeneric;
     template<class CN,unsigned SK,unsigned MSK> friend class MeshGenericBis;
 };
@@ -134,7 +134,7 @@ protected:
     ///
     Vec<DynamicDataAncestor *> dyn_data;
     ///
-    template<class CaracName> friend class Mesh;
+    template<class CaracName,unsigned max_sub_meshes> friend class Mesh;
     template<class CN,unsigned NV,unsigned SK,unsigned MSK> friend class MeshGeneric;
     template<class CN,unsigned SK,unsigned MSK> friend class MeshGenericBis;
 };

@@ -18,7 +18,7 @@
 #ifndef WITHOUT_MALLOC
     #include <malloc.h>
 #endif
-#define PRINT_ALLOC
+// #define PRINT_ALLOC
 #ifdef PRINT_ALLOC
     #include <map>
 #endif
@@ -68,14 +68,14 @@ struct Allocator<T,alignement,AllocateWithMalloc> {
         #ifndef WITHOUT_MALLOC
             T *res = (T *)memalign( MAX(al,sizeof(void*)), size*sizeof(T) );
             if ( !res ) {
-                std::cerr << "Allocation pb " << size*sizeof(T) << std::endl;
+                std::cerr << "Problème d'allocation : il est impossible de réserver " << size*sizeof(T) << " octets." << std::endl;
                 assert(0);
             }
             return res;
         #else
             alloc_ptr = (T *)malloc( size*sizeof(T) + al -1 );
             if ( !alloc_ptr ) {
-                std::cerr << "Allocation pb " << size*sizeof(T) << std::endl;
+                std::cerr << "Problème d'allocation : il est impossible de réserver " << size*sizeof(T) << " octets." << std::endl;
                 assert(0);
             }
         return alloc_ptr + ((alignement-(((long)alloc_ptr/sizeof(T))%alignement))%alignement);
@@ -110,7 +110,8 @@ struct Allocator<T,alignement,AllocateWithNew> {
         
         alloc_ptr = new T[size+alignement-1];
         if ( !alloc_ptr )
-            std::cerr << "Allocation pb" << std::endl;
+            std::cerr << "Problème d'allocation : il est impossible de réserver " << size*sizeof(T) << " octets (avec alignement=" << alignement << ")." << std::endl;
+            //             std::cerr << "Allocation pb" << std::endl;
         return alloc_ptr + ((alignement-(((long)alloc_ptr/sizeof(T))%alignement))%alignement);
     }
     void free_mem(T *v) {

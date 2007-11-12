@@ -30,33 +30,13 @@ integration_truc = Variable( interpolation='global', default_value='0', unit='kg
 integration_totale = False
 # --------------------------------------------------------------------------------------------------------------------------------
 def formulation():
-    #
-    #dep_inf = dep.expr.subs( e.var_inter[dim-1], 0 ) 
-    #dep_sup = dep.expr.subs( e.var_inter[dim-1], 1 )
-    #X = pos.expr.diff( e.var_inter[0] )
-    #if dim == 3:
-        #Y = pos.expr.diff( e.var_inter[1] )
-        #normale = vect_prod( X, Y )
-    #else:
-        #normale = [ -X[1], X[0] ]
-    #dJ = length( normale )
-    #normale /= norm( normale )
-    #salto_de_u = dot( dep_sup - dep_inf, normale )
-    #return e.integration( res, 2, False ) * dJ * dEheavyside( fibres_matrice_level_set.expr )
-    #sys.stderr.write(str( grad( dep.expr ) ))
-    
     E = elastic_modulus.expr # * ( 2 + cos( pos.expr[0] ) )
     epsilon = grad_sym_col(dep.expr)
     epstest = grad_sym_col(dep.test)
     sigma = mul( hooke_isotrope( E, poisson_ratio.expr, dim, options['behavior_simplification'] )[0] , epsilon )
         
     res = density.expr * dot( dep.expr.diff(time).diff(time) - f_vol.expr, dep.test )
-    for i in range(dim): res += sigma[i] * epstest[i]
-    for i in range(dim,epsilon.size()): res += 2 * sigma[i] * epstest[i]
-    res.display_graphviz()
-    
-    #res += dot( epsilon_moy.expr - epsilon, epsilon_moy.test - epstest ) * elastic_modulus.expr * 1e5
-    #res += dot( epsilon_moy.expr - wanted_epsilon_moy.expr, epsilon_moy.test ) * elastic_modulus.expr * 1e5
+    res += trace_sym_col( sigma, epstest )
     
     return res * dV + dot( f_nodal.expr, dep.test ) * dN - dot( f_surf.expr, dep.test ) * dS - dot( p.expr * dS_normal, dep.test ) * dS
 
