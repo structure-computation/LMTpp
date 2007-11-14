@@ -10,7 +10,7 @@ temperature = Variable( default_value='0.0', unit='K' )
 
 fibres_matrice_level_set = Variable( default_value='1', unit='1' ) # 
 
-toto= Variable( nb_dim = [2,2], unit='1' ) # 
+toto = Variable( nb_dim = [2,2], unit='1' ) # 
 
 sigma = Variable( interpolation='der_nodal', default_value='0', nb_dim=[dim*(dim+1)/2], unit='N/m^2' )
 epsilon = Variable( interpolation='der_nodal', default_value='0', nb_dim=[dim*(dim+1)/2], unit='1' )
@@ -33,12 +33,13 @@ def formulation():
     E = elastic_modulus.expr # * ( 2 + cos( pos.expr[0] ) )
     epsilon = grad_sym_col(dep.expr)
     epstest = grad_sym_col(dep.test)
-    sigma = mul( hooke_isotrope( E, poisson_ratio.expr, dim, options['behavior_simplification'] )[0] , epsilon )
-        
+    sigma = mul( hooke_isotrope( E * ( 1 + pos.expr[0]**2 ), poisson_ratio.expr, dim, options['behavior_simplification'] )[0] , epsilon )
+    
     res = density.expr * dot( dep.expr.diff(time).diff(time) - f_vol.expr, dep.test )
     res += trace_sym_col( sigma, epstest )
     
     return res * dV + dot( f_nodal.expr, dep.test ) * dN - dot( f_surf.expr, dep.test ) * dS - dot( p.expr * dS_normal, dep.test ) * dS
+
 
 
 # --------------------------------------------------------------------------------------------------------------------------------

@@ -22,7 +22,9 @@ template<class TNode_>
 class ElementAncestor {
 public:
     typedef TNode_ TNode;
+    typedef typename TNode_::T T;
     static const unsigned dim = TNode::dim;
+    
     virtual unsigned nb_nodes_virtual() const = 0;
     virtual unsigned nb_var_inter_virtual() const = 0;
     virtual TNode *node_virtual(unsigned i) = 0;
@@ -34,6 +36,9 @@ public:
 
     virtual typename TNode::Pvec sample_normal_virtual() const = 0;
     virtual typename TNode::Pvec sample_tangent_virtual() const = 0;
+    
+    virtual void set_field( const std::string field_name, T value ) = 0;
+    virtual void set_field( const std::string field_name, Vec<T,3> value ) = 0;
 
     unsigned number;
     
@@ -119,6 +124,9 @@ public:
         return sample_tangent(*this);
     }
     virtual ~Element() {}
+    
+    virtual void set_field( const std::string field_name, T value ) { TData::dm_data_set_field( field_name, value ); }
+    virtual void set_field( const std::string field_name, Vec<T,3> value ) { TData::dm_data_set_field( field_name, value ); }
 };
 
 ///

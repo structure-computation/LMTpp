@@ -59,7 +59,12 @@ namespace LMT {
     static const unsigned nb_params = 0
     
 /// struct Foo : public VoidDMSet {}; create a DMset with 0 fields
-struct VoidDMSet { VOIDDMSET; };
+struct VoidDMSet {
+    VOIDDMSET;
+    template<class TT> void dm_data_set_field( const std::string field_name, TT value ) {
+        std::cerr << "There s no variable named " << field_name << " in data struct" << std::endl;
+    }
+};
 
 namespace DM {
 
