@@ -481,4 +481,22 @@ void Op::depends_on_rec(long unsigned current_id) const {
     // else -> already done
 }
 
+void Op::find_discontinuities( long unsigned current_id, std::vector<const Op *> &lst ) const {
+    if ( id != current_id ) {
+        id = current_id;
+        if ( is_a_function_1() ) {
+            if ( type == Heavyside or type == Heavyside_if or type == Abs )
+                lst.push_back( this );
+            //
+            data.children[0]->find_discontinuities( current_id, lst );
+        }
+        else if ( is_a_function_2() ) {
+            data.children[0]->find_discontinuities( current_id, lst );
+            data.children[1]->find_discontinuities( current_id, lst );
+        }
+    }
+    // else -> already done
+}
+
+
 };

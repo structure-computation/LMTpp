@@ -72,11 +72,13 @@ public:
     std::string to_string() const;
     std::string graphviz_repr() const;
     
+    
 //private:
     mutable long unsigned id;
     mutable const Op *res_op;
     
     void depends_on_rec(long unsigned current_id) const;
+    void find_discontinuities( long unsigned current_id, std::vector<const Op *> &lst ) const;
     bool mustPrecede(const Op *b) const;
     void decreaseCptUse() const;
     const Op *makeChildUsing(const Op *c);

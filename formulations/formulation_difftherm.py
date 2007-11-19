@@ -1,5 +1,6 @@
-temperature = Variable( unknown=True, nb_der=1, default_value='300.0', unit='K' )
+temperature = Variable( unknown=True, nb_der=0, default_value='300.0', unit='K' )
 Q = Variable( default_value='0.0', unit='K/s' )
+Qs = Variable( interpolation='nodal', default_value='0.0', unit='K/s' )
 
 density = Variable( interpolation='global', default_value='3160.0', unit='kg/m^3' )
 heat_capacity = Variable( interpolation='global', default_value='1100.0', unit='J/kg/K' )
@@ -22,7 +23,7 @@ def formulation():
   t,te = temperature.expr, temperature.test
 
   res = a * dot(grad(t),grad(te)) + t.diff(time) * te
-  return res * dV + H.expr * ( t - t0.expr ) * te * dS # ).subs( time, time_steps[0] )
+  return res * dV + ( pos.expr[2] ) * ( pos.expr[0] < 1e-6 ) * te * dS +  H.expr * ( t - t0.expr ) * te * dS # ).subs( time, time_steps[0] )
 
 # 
 # therm_penalty = Variable( interpolation='global', default_value='1e6', unit='1' )

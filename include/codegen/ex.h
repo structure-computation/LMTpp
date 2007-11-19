@@ -69,6 +69,8 @@ public:
     
     bool depends_on(const Ex &ex) const;
     
+    Ex find_discontinuity( const Ex &v ) const;
+    
     Ex operator-() const;
     Ex operator+=(const Ex &a);
     Ex operator-=(const Ex &a);
@@ -98,6 +100,8 @@ public:
     
     Ex diff(const Ex &a) const;
     Ex diff(std::map<Ex,Ex,Ex::ExMapCmp> &m) const; /// beware : m will be modified, adding new elements
+    
+    bool is_zero() const;
     
     
     typedef std::set<Ex,Ex::ExMapCmp> SetEx;
@@ -191,6 +195,8 @@ Ex sqrt(const Ex &a);
 Ex abs(const Ex &a);        
 Ex heavyside(const Ex &a);  
 Ex heavyside_if(const Ex &a);  
+inline Ex heaviside(const Ex &a) { return heavyside( a ); }
+inline Ex heaviside_if(const Ex &a) { return heavyside_if( a ); }
 Ex eqz(const Ex &a);        
 Ex sin(const Ex &a);        
 Ex cos(const Ex &a);        

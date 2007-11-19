@@ -8,6 +8,8 @@
 namespace Codegen {
     inline double heavyside(double a) { return (a>=0); }
     inline double heavyside_if(double a) { return (a>=0); }
+    inline double heaviside(double a) { return (a>=0); }
+    inline double heaviside_if(double a) { return (a>=0); }
     inline double sqrt(double a) { return ::sqrt(a); }
     inline double sin(double a) { return ::sin(a); }
     inline double cos(double a) { return ::cos(a); }
@@ -40,6 +42,7 @@ namespace std {
 namespace Codegen {
 
 double heavyside(double a);
+double heaviside(double a);
 double sqrt(double NONNEGATIVE);
 double sin(double);
 double cos(double);
@@ -73,7 +76,11 @@ public:
     bool is_a_function_2() const;
     void display_graphviz(const char *filename="tmp.dot") const;
     
-    bool depends_on(const Ex &ex) const;
+    Ex find_discontinuity( const Ex &v ) const;
+    
+    bool depends_on( const Ex &ex ) const;
+    
+    bool is_zero() const;
     
     Ex subs(const Ex &a,const Ex &b) const;
     Ex subs(std::map<Codegen::Ex,Codegen::Ex> &m) const;
@@ -97,6 +104,8 @@ Ex number(const char *val);
 
 Ex heavyside(const Ex &a);
 Ex heavyside_if(const Ex &a);
+Ex heaviside(const Ex &a);
+Ex heaviside_if(const Ex &a);
 Ex sqrt(const Ex &a);
 Ex sin(const Ex &a);
 Ex cos(const Ex &a);
@@ -225,6 +234,8 @@ public:
 ExVector abs(const ExVector &a);
 ExVector heavyside(const ExVector &a);
 ExVector heavyside_if(const ExVector &a);
+ExVector heaviside(const ExVector &a);
+ExVector heaviside_if(const ExVector &a);
 ExVector eqz(const ExVector &a);
 ExVector sin(const ExVector &a);
 ExVector cos(const ExVector &a);
@@ -326,6 +337,8 @@ public:
 ExMatrix abs(const ExMatrix &a);
 ExMatrix heavyside(const ExMatrix &a);
 ExMatrix heavyside_if(const ExMatrix &a);
+ExMatrix heaviside(const ExMatrix &a);
+ExMatrix heaviside_if(const ExMatrix &a);
 ExMatrix eqz(const ExMatrix &a);
 ExMatrix sin(const ExMatrix &a);
 ExMatrix cos(const ExMatrix &a);

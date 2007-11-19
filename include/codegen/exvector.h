@@ -80,6 +80,8 @@ ExVector sqrt(const ExVector &a);
 ExVector abs(const ExVector &a);
 ExVector heavyside(const ExVector &a);
 ExVector heavyside_if(const ExVector &a);
+inline ExVector heaviside(const ExVector &a) { return heavyside(a); }
+inline ExVector heaviside_if(const ExVector &a) { return heavyside_if(a); }
 ExVector eqz(const ExVector &a);
 ExVector sin(const ExVector &a);
 ExVector cos(const ExVector &a);

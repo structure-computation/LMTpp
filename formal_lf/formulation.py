@@ -68,6 +68,7 @@ class Formulation:
       'apply_on_elements_after_solve_5' : apply_on_elements_after_solve,
       'apply_on_elements_after_solve_6' : apply_on_elements_after_solve,
       'options' : options,
+      'gauss_points' : [],
     }
     execfile( name_file, globals(), self.ind )
 
@@ -97,6 +98,8 @@ class Formulation:
       var.set_expr( name_var, self.Interpolations[ var.interpolation ](e), e )
     for name_var,var in self.get_is_variables().items():
       var.set_expr( name_var )
+    k = min( filter(lambda x:x>=self.order_integration,e.gauss_points.keys()) )
+    self.gauss_points = e.gauss_points[k]
 
   def write_nb__unknowns(self,f,t,skin,t_tot,TE,e=None):
     nb_unknowns = 0
@@ -426,6 +429,7 @@ class Formulation:
       ('green_lagrange',e.green_lagrange),
       ('green_lagrange_col',e.green_lagrange_col),
       ('options', self.options),
+      ('gauss_points', self.gauss_points),
     ]
     # global variables
     class VariablesFormulation:

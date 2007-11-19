@@ -82,6 +82,8 @@ ExMatrix operator/(const Ex &a,const ExMatrix &b);
 ExMatrix abs(const ExMatrix &a);
 ExMatrix heavyside(const ExMatrix &a);
 ExMatrix heavyside_if(const ExMatrix &a);
+inline ExMatrix heaviside(const ExMatrix &a) { return heavyside(a); }
+inline ExMatrix heaviside_if(const ExMatrix &a) { return heavyside_if(a); }
 ExMatrix eqz(const ExMatrix &a);
 ExMatrix sin(const ExMatrix &a);
 ExMatrix cos(const ExMatrix &a);

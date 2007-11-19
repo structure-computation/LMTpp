@@ -101,6 +101,7 @@ Ex Ex::subs_with_test(const Ex &a,const Ex &b) const {
 Ex Ex::subs(std::map<Ex,Ex,Ex::ExMapCmp> &m) const {
     ++current_id;
     for( std::map<Ex,Ex,Ex::ExMapCmp>::const_iterator iter = m.begin(); iter != m.end(); ++iter ) {
+        iter->second.op->cptUse++;
         iter->first.op->res_op = iter->second.op;
         iter->first.op->id = current_id;
     }
@@ -393,6 +394,19 @@ bool Ex::depends_on(const Ex &ex) const {
     op->depends_on_rec( current_id );
     return op->res_op;
 }
+    
+Ex Ex::find_discontinuity( const Ex &v ) const {
+    ++current_id;
+    
+    std::vector<const Op *> lst;
+    op->find_discontinuities( current_id, lst );
+    for(int i=lst.size()-1;i>=0;--i)
+        if ( Ex( lst[i] ).depends_on( v ) )
+            return Ex( lst[i] );
+    return 0;
+}
+
+bool Ex::is_zero() const { return op->type == Op::Number and op->val == 0.0; }
 
 
 };
