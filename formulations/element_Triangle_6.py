@@ -33,6 +33,10 @@ interpolation["nodal"] = (2*X0 - 1) * X0 * val[0] + \
                                4*X0 * X1 * val[3] + \
                                4*X1 * X2 * val[4] + \
                                4*X2 * X0 * val[5]
+
+interpolation["nodal_3"] = (1-var_inter[0]-var_inter[1]) * val[0] + \
+                           var_inter[0]                  * val[1] + \
+                           var_inter[1]                  * val[2]
                          
 # ni = (1-var_inter[0]-var_inter[1]) * var_inter[0] * var_inter[1] * 81
 # interpolation["bubble"] = (1-var_inter[0]-var_inter[1]) * (1-ni) * val[0] + \

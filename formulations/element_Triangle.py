@@ -24,6 +24,7 @@ interpolation["nodal"] = (1-var_inter[0]-var_inter[1]) * val[0] + \
                          var_inter[0]                  * val[1] + \
                          var_inter[1]                  * val[2]
 
+interpolation["nodal_3"] = interpolation["nodal"]
 
 
 ni = (1-var_inter[0]-var_inter[1]) * var_inter[0] * var_inter[1] * 81
