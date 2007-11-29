@@ -15,8 +15,8 @@
 namespace LMT {
 
 template<class T> inline T dot_chol_factorize( const Vec<Sparse<T> > &v1, const Vec<Sparse<T> > &v2 ) {
-    T res = 0.0;
-    if ( v2.indices.size() == 0 ) return 0.0;
+    T res = T( 0.0 );
+    if ( v2.indices.size() == 0 ) return T( 0.0 );
     for(unsigned i=0,j=0;i<v1.indices.size()-1;++i) {
         while ( v2.indices[j] < v1.indices[i] ) {
             ++j;
@@ -208,7 +208,7 @@ template<class T> void lu_factorize( Mat<T,Gen<>,SparseLU> &m ) {
                 ie = m.L[line].indices[ind+1];
             while ( ++col < ie ) {
                 T v = dot_chol_factorize( m.U[col], m.L[line] );
-                if ( LMT::abs( v ) ) {
+                if ( abs_indication( v ) ) {
                     unsigned os = m.L[line].indices.size();
                     m.L[line].indices.resize( os+1 );
                     m.L[line].data.resize( os+1 );
@@ -233,7 +233,7 @@ template<class T> void lu_factorize( Mat<T,Gen<>,SparseLU> &m ) {
                 ie = m.U[line].indices[ind+1];
             while ( ++col < ie ) {
                 T v = dot_chol_factorize( m.U[line], m.L[col] );
-                if ( LMT::abs( v ) ) {
+                if ( abs_indication( v ) ) {
                     unsigned os = m.U[line].indices.size();
                     m.U[line].indices.resize( os+1 );
                     m.U[line].data.resize( os+1 );

@@ -23,9 +23,10 @@ def formulation():
   t,te = temperature.expr, temperature.test
 
   res = a * dot(grad(t),grad(te)) + t.diff(time) * te
-  return res * dV + ( pos.expr[2] ) * ( pos.expr[0] < 1e-6 ) * te * dS +  H.expr * ( t - t0.expr ) * te * dS # ).subs( time, time_steps[0] )
-
-# 
+  return res * dV + H.expr * ( t - t0.expr ) * te * dS
+ 
+# ).subs( time, time_steps[0] )
+#  + ( pos.expr[2] ) * ( pos.expr[0] < 1e-6 ) * te * dS + 
 # therm_penalty = Variable( interpolation='global', default_value='1e6', unit='1' )
 # contact_temperature = ISVariable( default_value='600', unit='K' )
 # #

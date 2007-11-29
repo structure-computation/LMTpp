@@ -33,6 +33,7 @@ public:
     virtual const char *name_virtual() const = 0;
     virtual const char *can_directly_be_represented_by_virtual() = 0;
     virtual unsigned num_in_elem_list_virtual() const = 0;
+    virtual T measure_virtual() const = 0;
 
     virtual typename TNode::Pvec sample_normal_virtual() const = 0;
     virtual typename TNode::Pvec sample_tangent_virtual() const = 0;
@@ -123,6 +124,8 @@ public:
     virtual typename TNode::Pvec sample_tangent_virtual() const {
         return sample_tangent(*this);
     }
+    virtual T measure_virtual() const { return measure( *this ); }
+    
     virtual ~Element() {}
     
     virtual void set_field( const std::string field_name, T value ) { TData::dm_data_set_field( field_name, value ); }
