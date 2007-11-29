@@ -31,7 +31,7 @@ for op,sop,dr,conserve_sp in lst:
     print '/// \\relates Lambda'
     print 'struct '+op+' {'
     print '    template<class P1,class P2,class P3=void,class P4=void> struct ReturnType { typedef '+ret+' T; };'
-    print '    template<class P1,class P2> '+ret+' operator()(const P1 &p1,const P2 &p2) const { return '+csop+'; }'
+    print '    template<class P1,class P2> '+ret+' operator()(const P1 &p1,const P2 &p2) const { return '+ret+'('+csop+'); }'
     if dr: print '    template<class T> inline void init_reduction(T &p) const { p = '+dr+'; }'
     print '};'
     if conserve_sp:
