@@ -196,6 +196,14 @@ template<class T,int s2> void solve_using_incomplete_chol_factorize( const Mat<T
 /// in place...
 template<class T> void lu_factorize( Mat<T,Gen<>,SparseLU> &m ) {
     unsigned n = m.nb_rows();
+    // something on diag ?
+    for(unsigned line=0;line<n;++line) {
+        if ( m.U[line].indices.back() != line ) {
+            m.U[line].indices.push_back( line );
+            m.U[line].data.push_back( 0 );
+        }
+    }
+    //
     for(unsigned line=0;line<n;++line) {
         // L
         for(unsigned ind=0;ind<m.L[line].indices.size();++ind) {
