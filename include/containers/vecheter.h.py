@@ -70,6 +70,38 @@ public:
         return val_elem_nb_( i, dm, Number<1>() );
     }
 
+
+    // const version + ptr
+    template<class EA,class DM> const typename ExtractDM<DM>::template ReturnType<T>::T &val_elem_nb_( const EA *e, const DM &dm, const Number<nb_sub_type> & ) const {
+        ExtractDM<DM> ed;
+        return ed( *static_cast<const T *>( e ) );
+    }
+    template<class EA,class DM,unsigned nnn> const typename ExtractDM<DM>::template ReturnType<T>::T &val_elem_nb_( const EA *e, const DM &dm, const Number<nnn> & ) const {
+        ExtractDM<DM> ed;
+        if ( dynamic_cast<const T *>( e ) )
+            return ed( *static_cast<const T *>( e ) );
+        return TNext::val_elem_( e, dm, Number<nnn+1>() );
+    }
+    template<class EA,class DM> const typename ExtractDM<DM>::template ReturnType<T>::T &val_elem_nb( const EA *e, const DM &dm = DM() ) const {
+        return val_elem_( e, dm, Number<1>() );
+    }
+    
+    // non-const version + ptr
+    template<class EA,class DM> static typename ExtractDM<DM>::template ReturnType<T>::T &val_elem_( EA *e, const DM &dm, const Number<nb_sub_type> & ) {
+        ExtractDM<DM> ed;
+        return ed( *static_cast<T *>( e ) );
+    }
+    template<class EA,class DM,unsigned nnn> static typename ExtractDM<DM>::template ReturnType<T>::T &val_elem_( EA *e, const DM &dm, const Number<nnn> & ) {
+        ExtractDM<DM> ed;
+        if ( dynamic_cast<T *>( e ) )
+            return ed( *static_cast<T *>( e ) );
+        return TNext::val_elem_( e, dm, Number<nnn+1>() );
+    }
+    template<class EA,class DM> static typename ExtractDM<DM>::template ReturnType<T>::T &val_elem( EA *e, const DM &dm = DM() ) {
+        return val_elem_( e, dm, Number<1>() );
+    }
+
+
     void resize(const unsigned *s) { vec.resize(s[nt]); next.resize(s); }
     
     unsigned size() const { return vec.size() + next.size(); } /// total number of elements

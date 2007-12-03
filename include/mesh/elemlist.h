@@ -105,6 +105,13 @@ public:
         return hp.val_elem_nb( i, dm );
     }
 
+    template<class DM> static const typename ExtractDM<DM>::template ReturnType< typename CaracVec<0>::template SubType<0>::TTClass >::T &val_elem( const EA *e, const DM &dm = DM() ) {
+        return TList::val_elem( e, dm );
+    }
+    template<class DM> static typename ExtractDM<DM>::template ReturnType< typename CaracVec<0>::template SubType<0>::TTClass >::T &val_elem( EA *e, const DM &dm = DM() ) {
+        return TList::val_elem( e, dm );
+    }
+
     template<class Op> static void apply_on_down_cast(const EA *ea,const Op& op) { TList::apply_on_down_cast(ea,op); }
     template<class Op> static void apply_on_down_cast(EA *ea,const Op& op) { TList::apply_on_down_cast(ea,op); }
     template<class Op> static void apply_on_down_cast(const EA *ea,Op& op) { TList::apply_on_down_cast(ea,op); }
