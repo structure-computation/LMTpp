@@ -7,6 +7,9 @@ template<class Carac,unsigned nt=0,class T=typename Carac::template SubType<nt>:
 
 template<class Carac,unsigned nt,class TT> struct IsVecOp<Heterogeneous<Carac,nt,TT> > { typedef int T; };
 
+template<class NameDM>
+struct ExtractDM;
+
 /// heterogeneous vector. static_size is the number of elements
 template<class Carac,unsigned nt,class TT,int static_size_>
 class Vec<Heterogeneous<Carac,nt,TT>,static_size_,int> {
@@ -37,6 +40,36 @@ public:
 
     void free() { vec.free(); next.free(); }
     
+    // const version
+    template<class DM> const typename ExtractDM<DM>::template ReturnType<T>::T &val_elem_nb_( unsigned i, const DM &dm, const Number<nb_sub_type> & ) const {
+        ExtractDM<DM> ed;
+        return ed( vec[i] );
+    }
+    template<class DM,unsigned nnn> const typename ExtractDM<DM>::template ReturnType<T>::T &val_elem_nb_( unsigned i, const DM &dm, const Number<nnn> & ) const {
+        ExtractDM<DM> ed;
+        if ( i < vec.size() )
+            return ed( vec[i] );
+        return next.val_elem_nb_( i - vec.size(), dm, Number<nnn+1>() );
+    }
+    template<class DM> const typename ExtractDM<DM>::template ReturnType<T>::T &val_elem_nb( unsigned i, const DM &dm = DM() ) const {
+        return val_elem_nb_( i, dm, Number<1>() );
+    }
+    
+    // non-const version
+    template<class DM> typename ExtractDM<DM>::template ReturnType<T>::T &val_elem_nb_( unsigned i, const DM &dm, const Number<nb_sub_type> & ) {
+        ExtractDM<DM> ed;
+        return ed( vec[i] );
+    }
+    template<class DM,unsigned nnn> typename ExtractDM<DM>::template ReturnType<T>::T &val_elem_nb_( unsigned i, const DM &dm, const Number<nnn> & ) {
+        ExtractDM<DM> ed;
+        if ( i < vec.size() )
+            return ed( vec[i] );
+        return next.val_elem_nb_( i - vec.size(), dm, Number<nnn+1>() );
+    }
+    template<class DM> typename ExtractDM<DM>::template ReturnType<T>::T &val_elem_nb( unsigned i, const DM &dm = DM() ) {
+        return val_elem_nb_( i, dm, Number<1>() );
+    }
+
     void resize(const unsigned *s) { vec.resize(s[nt]); next.resize(s); }
     
     unsigned size() const { return vec.size() + next.size(); } /// total number of elements

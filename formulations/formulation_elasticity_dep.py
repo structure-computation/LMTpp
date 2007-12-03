@@ -20,6 +20,7 @@ d      = Variable( interpolation='elementary', default_value='0', unit='1' ) #
 d_evol = Variable( interpolation='elementary', default_value='0', unit='1' ) # 
 d_pond = Variable( interpolation='elementary', default_value='0', unit='1' ) # 
 d_sum  = Variable( interpolation='elementary', default_value='0', unit='1' ) # 
+pouet  = Variable( interpolation='elementary', nb_dim=[dim], default_value='0', unit='1' ) # 
 
 
 #assume_symmetric_matrix = False

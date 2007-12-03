@@ -98,6 +98,13 @@ public:
     
     unsigned index_of_down_cast(const EA *ea) const { return hp.index_of_down_cast(ea); } /// return index of type of EA which can be an ancestor of an element in the list
 
+    template<class DM> const typename ExtractDM<DM>::template ReturnType< typename CaracVec<0>::template SubType<0>::TTClass >::T &val_elem_nb( unsigned i, const DM &dm = DM() ) const {
+        return hp.val_elem_nb( i, dm );
+    }
+    template<class DM> typename ExtractDM<DM>::template ReturnType< typename CaracVec<0>::template SubType<0>::TTClass >::T &val_elem_nb( unsigned i, const DM &dm = DM() ) {
+        return hp.val_elem_nb( i, dm );
+    }
+
     template<class Op> static void apply_on_down_cast(const EA *ea,const Op& op) { TList::apply_on_down_cast(ea,op); }
     template<class Op> static void apply_on_down_cast(EA *ea,const Op& op) { TList::apply_on_down_cast(ea,op); }
     template<class Op> static void apply_on_down_cast(const EA *ea,Op& op) { TList::apply_on_down_cast(ea,op); }

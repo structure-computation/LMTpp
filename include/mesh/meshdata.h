@@ -255,7 +255,8 @@ template<class NameDM>
 struct ExtractDM {
     template<class TNode> struct ReturnType { typedef typename TNode::template SubTypeByName0<NameDM>::TT T; };
     template<class TNode> struct ReturnType<TNode *> { typedef typename TNode::template SubTypeByName0<NameDM>::TT T; };
-    template<class TNode> typename TNode::template SubTypeByName0<NameDM>::TT operator()(const TNode &node) const { return node.member_named( n ); }
+    template<class TNode> const typename TNode::template SubTypeByName0<NameDM>::TT &operator()(const TNode &node) const { return node.member_named( n ); }
+    template<class TNode> typename TNode::template SubTypeByName0<NameDM>::TT &operator()(TNode &node) const { return node.member_named( n ); }
     NameDM n;
 };
 
