@@ -21,7 +21,7 @@ struct Gen {
     static const int static_nb_rows = s_rows;
     static const int static_nb_cols = s_cols;
     static const bool fixed_size = ( s_rows>=0 && s_cols>=0 ); 
-    static std::string name() { std::ostringstream os; os << "Gen " << s_rows << "x" << s_cols;  return os.str(); }
+    static std::string name() { return "Gen"; /*std::ostringstream os; os << "Gen " << s_rows << "x" << s_cols;  return os.str();*/ }
     
     static const bool need_diag = true;
     static const bool need_upper = true;
@@ -39,7 +39,7 @@ struct Sym {
     static const int static_nb_cols = size;
     static const bool fixed_size = ( size>=0 );
     static const bool stored_in_upper_part = stored_in_upper_part_;
-    static std::string name() { std::ostringstream os; os << "Sym " << size << " upper part : " << stored_in_upper_part;  return os.str(); }
+    static std::string name() { return "Sym"; /*std::ostringstream os; os << "Sym " << size << " upper part : " << stored_in_upper_part;  return os.str();*/ }
 
     static const bool need_diag = true;
     static const bool need_upper = stored_in_upper_part_;
@@ -54,7 +54,7 @@ struct Herm {
     static const int static_nb_cols = size;
     static const bool fixed_size = ( size>=0 );
     static const bool stored_in_upper_part = stored_in_upper_part_;
-    static std::string name() { std::ostringstream os; os << "Herm " << size << " upper part : " << stored_in_upper_part;  return os.str(); }
+    static std::string name() { return "Herm"; /*std::ostringstream os; os << "Herm " << size << " upper part : " << stored_in_upper_part;  return os.str();*/ }
 
     static const bool need_diag = true;
     static const bool need_upper = stored_in_upper_part_;
@@ -70,7 +70,7 @@ struct AntiSym {
     static const int static_nb_cols = size;
     static const bool fixed_size = ( size>=0 );
     static const bool stored_in_upper_part = stored_in_upper_part_;
-    static std::string name() { std::ostringstream os; os << "AntiSym " << size << " upper part : " << stored_in_upper_part;  return os.str(); }
+    static std::string name() { return "AntiSym"; /*std::ostringstream os; os << "AntiSym " << size << " upper part : " << stored_in_upper_part;  return os.str();*/ }
 
     static const bool need_diag = false;
     static const bool need_upper = stored_in_upper_part_;
@@ -85,7 +85,7 @@ struct Diag {
     static const int static_nb_rows = s_rows;
     static const int static_nb_cols = s_cols;
     static const bool fixed_size = ( s_rows>=0 && s_cols>=0 ); 
-    static std::string name() { std::ostringstream os; os << "Diag " << s_rows << "x" << s_cols;  return os.str(); }
+    static std::string name() { return "Diag"; /*std::ostringstream os; os << "Diag " << s_rows << "x" << s_cols;  return os.str();*/ }
 
     static const bool need_diag = true;
     static const bool need_upper = false;
@@ -100,7 +100,7 @@ struct TriUpper {
     static const int static_nb_rows = s_rows;
     static const int static_nb_cols = s_cols;
     static const bool fixed_size = ( s_rows>=0 && s_cols>=0 ); 
-    static std::string name() { std::ostringstream os; os << "TriUpper " << s_rows << "x" << s_cols;  return os.str(); }
+    static std::string name() { return "TriUpper"; /*std::ostringstream os; os << "TriLower " << s_rows << "x" << s_cols;  return os.str();*/ }
 
     static const bool need_diag = true;
     static const bool need_upper = true;
@@ -114,7 +114,7 @@ struct TriLower {
     static const int static_nb_rows = s_rows;
     static const int static_nb_cols = s_cols;
     static const bool fixed_size = ( s_rows>=0 && s_cols>=0 ); 
-    static std::string name() { std::ostringstream os; os << "TriLower " << s_rows << "x" << s_cols;  return os.str(); }
+    static std::string name() { return "TriLower"; /*std::ostringstream os; os << "TriLower " << s_rows << "x" << s_cols;  return os.str();*/ }
 
     static const bool need_diag = true;
     static const bool need_upper = false;
