@@ -91,6 +91,14 @@ struct Allocator<T,alignement,AllocateWithMalloc> {
             if ( v ) free(alloc_ptr);
         #endif
     }
+    void clear() {
+        #ifdef WITHOUT_MALLOC
+            alloc_ptr = NULL;
+        #endif
+        #ifdef PRINT_ALLOC
+        allocated = 0;
+        #endif
+    }
     #ifdef WITHOUT_MALLOC
         T *alloc_ptr;
     #endif
@@ -120,6 +128,14 @@ struct Allocator<T,alignement,AllocateWithNew> {
         #endif
         if ( v ) delete [] alloc_ptr;
     }
+    
+    void clear() {
+        alloc_ptr = NULL;
+        #ifdef PRINT_ALLOC
+        allocated = 0;
+        #endif
+    }
+    
     T *alloc_ptr;
     #ifdef PRINT_ALLOC
     long long allocated;

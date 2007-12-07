@@ -99,6 +99,11 @@ public:
     typedef DelayedAssignement<DelayedAssignementSparseSource<TT> > RetOp;
     typedef TT RetOpConst;
     
+    void throw_ref_and_clear( Vec &res ) {
+        data   .throw_ref_and_clear( res.data    );
+        indices.throw_ref_and_clear( res.indices );
+        res.si = si; si = 0;
+    }
     
     RetOp operator[](unsigned i) {
         DEBUGASSERT( i < size() );

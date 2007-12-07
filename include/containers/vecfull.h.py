@@ -178,6 +178,7 @@ public:
     
     void resize(unsigned ns) { if ( ns > r ) reserve(ns); s = ns; }
     void resize(unsigned ns,const TT &v) { unsigned os=s; resize(ns); if (ns>os) copy_vec_value_aligned(v,val+os,ns-os); }
+    
     void reserve(unsigned ns) {
         Allocator nallocator;
         TT *nvec = nallocator.allocate(ns);
@@ -188,7 +189,9 @@ public:
         allocator = nallocator;
         r = ns;
     } /// Reserve room for new elements if ns > size. If ns is lesser than size, resize *this.
+    
     void free() { allocator.free_mem(val); init(); }
+    
     TT *make_room_to_insert( ST from, ST n ) {
         ST os = s;
         resize( s + n );
@@ -196,6 +199,21 @@ public:
             val[ i + n ] = val[ i ];
         return val + from;
     }
+    
+    // res will contain data of this and this is cleared.
+    void throw_ref_and_clear( Vec &res ) {
+        res.free();
+        res.val = val;
+        res.s = s;
+        res.r = r;
+        res.allocator = allocator;
+        //
+        val = NULL;
+        s = 0;
+        r = 0;
+        allocator.clear();
+    }
+    
     """*(1-static_size) + """
     inline void resize(unsigned s) const { DEBUGASSERT( static_size_==s ); }
     inline void resize(unsigned s,const TT &val) { DEBUGASSERT( static_size_==s ); *this = val; }
@@ -215,7 +233,7 @@ public:
 
     Vec operator-() const { Vec res = generate(*this,Negate()); return res; }
 
-/*
+    /*
     template<class T2> Vec &operator*=(const T2 &va) { apply_nz(*this,AssignSelfOp(),Multiplies(),va); return *this; }
     template<class T2> Vec &operator/=(const T2 &va) { apply_nz(*this,AssignSelfOp(),Divides   (),va); return *this; }
     template<class T2> Vec &operator%=(const T2 &va) { apply_nz(*this,AssignSelfOp(),Modulus   (),va); return *this; }
@@ -235,7 +253,7 @@ public:
     template<class T2,int s2> Vec &operator-=(const Vec<T2,s2> &val) { apply_simd_wi( *this, AssignSelfOp(), Minus(), val ); return *this; }
     template<class T2,int s2> Vec &operator^=(const Vec<T2,s2> &val) { apply_simd_wi( *this, AssignSelfOp(), Xor()  , val ); return *this; }
     template<class T2,int s2> Vec &operator|=(const Vec<T2,s2> &val) { apply_simd_wi( *this, AssignSelfOp(), Or()   , val ); return *this; }
-*/
+    */
 """+SELFOP+"""
 """+GETRANGE+"""
     
