@@ -205,6 +205,10 @@ template<class T1,class T2> struct TypePromoteWithSubType<GreaterEq,false,false,
     struct TypePromote<Equal,std::complex<T1>,std::complex<T2> > {
         typedef bool T;
     };
+    template<class T1,class T2>
+    struct TypePromote<NotEqual,std::complex<T1>,std::complex<T2> > {
+        typedef bool T;
+    };
 #endif
 
 // ------------------------------------------------ scalar type ---------------------------------------------------------
