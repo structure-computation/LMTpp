@@ -239,6 +239,22 @@ void display_structure(const Mat<T,Str,Sto,IO> &mat,const char *name_file="res")
     system(s2.str().c_str());
 }
 
+template <class T, class STR, class STO>
+Mat<T,Sym<>,STO> sym (const Mat<T,STR,STO> &M) {
+    return T(0.5)*(M+trans(M));
+}
+template <class T, int s, class STO>
+const Mat<T,Sym<>,STO> &sym (const Mat<T,Sym<s>,STO> &M) {
+    return M;
+}
+template <class T, class STR, class STO>
+Mat<T,Sym<>,STO> sym (const Mat<std::complex<T>,STR,STO> &M) {
+    return T(0.5)*(M+trans(conj(M)));
+}
+template <class T, int s, class STO>
+const Mat<T,Sym<>,STO> &sym (const Mat<std::complex<T>,Herm<s>,STO> &M) {
+    return M;
+}
 
 };
 
