@@ -8,7 +8,7 @@ def rep(r,m):
         res = replace(tmp,k,v)
     return res
 
-print """// file generated from matdense.h.py. Do not modify
+print """// file generated from matsparse.h.py. Do not modify
 
 namespace LMT {
 
@@ -69,19 +69,19 @@ public:
         if ( (STRUCTURE::need_upper and STRUCTURE::need_lower)==false and STRUCTURE::need_diag )
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<=i;++j) {
-                    if ( LMT::abs( val(i,j) ) )
+                    if ( LMT::abs_indication( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
         else if ( (STRUCTURE::need_upper and STRUCTURE::need_lower)==false )
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<i;++j) {
-                    if ( LMT::abs( val(i,j) ) )
+                    if ( LMT::abs_indication( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
         else
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<nb_cols();++j) {
-                    if ( LMT::abs( val(i,j) ) )
+                    if ( LMT::abs_indication( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
     }
@@ -302,7 +302,7 @@ template<class T1,int s1,class T2,int s2> Vec<typename TypePromote<Multiplies,T1
     typedef typename TypePromote<Multiplies,T1,T2>::T TR;
     Vec<TR,MAX(s1,s2)> res; res.resize( m.nb_rows() );
     for(unsigned i=0;i<m.nb_rows();++i) {
-        TR r = 0.0;
+        TR r = TR(0.0);
         if ( m.data[i].indices.size() ) {
             unsigned j;
             for(j=0;j<m.data[i].indices.size()-1;++j) {

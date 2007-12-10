@@ -200,7 +200,7 @@ template<class T> void lu_factorize( Mat<T,Gen<>,SparseLU> &m ) {
     for(unsigned line=0;line<n;++line) {
         if ( m.U[line].indices.back() != line ) {
             m.U[line].indices.push_back( line );
-            m.U[line].data.push_back( 0 );
+            m.U[line].data.push_back( T(0) );
         }
     }
     //
@@ -272,7 +272,7 @@ template<class T,int s,int s2> void solve_using_lu_factorize( const Mat<T,Gen<s>
     unsigned nb_lines = mat.nb_rows();
     //
     if ( res.size() <= nb_lines )
-        res.resize( nb_lines, 0.0 );
+        res.resize( nb_lines, T(0.0) );
     //
     for(unsigned line=0;line<nb_lines;++line) {
         T v = sol[line];
