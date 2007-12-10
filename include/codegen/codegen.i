@@ -216,6 +216,7 @@ public:
     ExVector __div__(const Ex &other) { return *self / other; }
     ExVector __div__(double other) { return *self / other; }
     ExVector __rdiv__(double other) { return other / *self; }
+    ExVector __rdiv__(const Ex &other) { return other / *self; }
     
     ExVector __pow__(const ExVector &other) { return pow(*self,other); }
     ExVector __pow__(const Ex &other) { return pow(*self,other); }

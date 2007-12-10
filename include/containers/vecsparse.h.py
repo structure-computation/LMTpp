@@ -102,7 +102,7 @@ public:
     void throw_ref_and_clear( Vec &res ) {
         data   .throw_ref_and_clear( res.data    );
         indices.throw_ref_and_clear( res.indices );
-        res.si = si; si = 0;
+        si     .throw_val_and_clear( res.si      );
     }
     
     RetOp operator[](unsigned i) {
