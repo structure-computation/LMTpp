@@ -69,19 +69,19 @@ public:
         if ( (STRUCTURE::need_upper and STRUCTURE::need_lower)==false and STRUCTURE::need_diag )
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<=i;++j) {
-                    if ( LMT::abs_indication( val(i,j) ) )
+                    if ( /*LMT::*/abs_indication( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
         else if ( (STRUCTURE::need_upper and STRUCTURE::need_lower)==false )
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<i;++j) {
-                    if ( LMT::abs_indication( val(i,j) ) )
+                    if ( /*LMT::*/abs_indication( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
         else
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<nb_cols();++j) {
-                    if ( LMT::abs_indication( val(i,j) ) )
+                    if ( /*LMT::*/abs_indication( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
     }

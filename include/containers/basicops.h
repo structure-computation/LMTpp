@@ -124,8 +124,9 @@ for op in lst:
     template<class T,class T2> inline void set_imag(const T &val,const T2 &v) {}
     
 #endif
-template<class T> inline T abs(const T &val) { return std::abs(val); }
-template<class T> inline T abs_indication(const T &val) { return std::abs(val); } // if val is a function, return abs( something_close_to_mean(val) )
+struct Abs;
+template<class T> inline typename TypePromote<Abs,T>::T abs(const T &val) { return std::abs(val); }
+template<class T> inline typename TypePromote<Abs,T>::T abs_indication(const T &val) { return LMT::abs(val); } // if val is a function, return abs( something_close_to_mean(val) )
 template<class T> inline typename FloatType<T>::T acos(const T &val) { return std::acos(val); }
 template<class T> inline typename FloatType<T>::T asin(const T &val) { return std::asin(val); }
 template<class T> inline typename FloatType<T>::T atan(const T &val) { return std::atan(val); }

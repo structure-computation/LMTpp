@@ -90,11 +90,6 @@ public:
     
     Pvec pos(unsigned i) const { return nodes[i]->pos; }
 
-    TNode *nodes[nb_nodes];
-
-    /// nb fields
-    static const unsigned nb_params = DM::NbFields<TData>::res;
-
     // virtual
     virtual unsigned nb_nodes_virtual() const {
         return nb_nodes;
@@ -130,6 +125,11 @@ public:
     
     virtual void set_field( const std::string field_name, T value ) { TData::dm_data_set_field( field_name, value ); }
     virtual void set_field( const std::string field_name, Vec<T,3> value ) { TData::dm_data_set_field( field_name, value ); }
+
+    ///
+    TNode *nodes[nb_nodes];
+    /// nb fields
+    static const unsigned nb_params = DM::NbFields<TData>::res;
 };
 
 ///

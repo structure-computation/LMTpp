@@ -14,6 +14,7 @@
 
 #include "basicops.h"
 #include "simd.h"
+#include "ptrconstif.h"
 
 namespace LMT {
 

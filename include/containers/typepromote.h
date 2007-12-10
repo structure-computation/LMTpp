@@ -144,7 +144,7 @@ template<> struct CanBeConvertedTo<std::complex<double>,std::complex<double> > {
 
 // --------------------------------------------------------------------------------------------------------------------
 
-template<class Op,class T1,class T2> struct TypePromote;
+template<class Op,class T1,class T2=void> struct TypePromote;
 
 template<class Op,bool eng_t1_sup_t2,bool eng_t2_sup_t1,class T1,class T2,unsigned englobing> struct TypePromoteWithSubType;
 
@@ -162,6 +162,11 @@ template<class Op,class T1,class T2,unsigned englobing> struct TypePromoteWithSu
     typedef typename TypeInformation<T1>::template Variant<BT>::T T;
 };
 
+template<class Op,class T1> struct TypePromote<Op,T1,void> {
+    typedef typename Op::template ReturnType<T1>::T T;
+};
+
+
 // --------------------------------------------------------------------------------------------------------------------
 /** gives the best type for result of op(A,B) where A is of type T1 and B is of type T2.
   Example :
@@ -170,7 +175,7 @@ TypePromoteAdd<Plus,bool,double>::T -> double
     \endcode
     say that double contains more informations than bool. TypePromote works for Vec, Mat, ...
 */
-template<class Op,class T1,class T2=void>
+template<class Op,class T1,class T2>
 struct TypePromote {
     typedef typename TypePromoteWithSubType<
         Op,

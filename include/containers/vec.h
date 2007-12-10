@@ -14,9 +14,9 @@
 
 #include "staticassert.h"
 #include "allocator.h"
-#include "simd.h"
 #include "ptrconstif.h"
 #include "functional.h"
+#include "simd.h"
 #include "staticvalif.h"
 #include "storebyrefif.h"
 #include "delayedassignement.h"

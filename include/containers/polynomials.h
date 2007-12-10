@@ -37,9 +37,9 @@ public:
     static Vec<Vec<T> > deriv_coef;
 public:
     Pol ();
-    Pol (const T &a); ///Construit le polynome constant egal a a
-    Pol (const Vec<T> &V); ///Construit le polynome a partir de ses coefficients
-    template <class T2> Pol (const Pol<nd,nx,T2> &P); ///Construit un polynome a partir d'un autre polynome de meme degre
+    template<class ScalarType> Pol(const ScalarType &a); ///Construit le polynome constant egal a a
+    Pol(const Vec<T> &V); ///Construit le polynome a partir de ses coefficients
+    template <class T2> Pol(const Pol<nd,nx,T2> &P); ///Construit un polynome a partir d'un autre polynome de meme degre
 //     template <int nd2> Pol (const Pol<nd2,nx,T> &P); Construit un polynome a partir d'un polynome de degre maximal different
     Pol (const T &a, const T &b, unsigned q); ///Construit le polynome a + b*Xq;
     template <class T2> Pol<nd,nx,T> &operator= (const Pol<nd,nx,T2> &P); ///Renvoie un polynome egal a P
@@ -86,7 +86,7 @@ Vec<unsigned,nx_> Pol<nd,nx,T>::next_power(const Vec<unsigned,nx_> &v, int dmaxi
     unsigned tmp=res[0];
     for (unsigned i=1;i<res.size();i++)
         tmp+=res[i];
-    if (tmp<dmaxi) {
+    if ((int)tmp<dmaxi) {
         res[0]++;
     }
     else {
@@ -123,7 +123,7 @@ void Pol<nd,nx,T>::initialize() {
     Vec<Vec<unsigned,nx> > puissances_derivee;
     puissances_derivee.resize(1);
     puissances_derivee[0].set(0);
-    while (puissances_derivee[puissances_derivee.size()-1][nx-1]<max(nd-1,0)) {
+    while ((int)puissances_derivee[puissances_derivee.size()-1][nx-1]<max(nd-1,0)) {
         puissances_derivee.resize(puissances_derivee.size()+1);
         puissances_derivee[puissances_derivee.size()-1]=next_power(puissances_derivee[puissances_derivee.size()-2],nd-1);
 //         puissances_derivee.append(next_power(puissances_derivee[puissances_derivee.size()-1],nd-1));
@@ -233,11 +233,12 @@ Pol<nd,nx,T>::Pol() {
 }
 
 template <int nd, int nx, class T>
-Pol<nd,nx,T>::Pol(const T &a) {
+template<class ScalarType>
+Pol<nd,nx,T>::Pol(const ScalarType &a) {
     if (init)
         initialize();
     coefs.resize(puissances.size(),T(0));
-    coefs[0]=a;
+    coefs[0] = a;
 }
 
 template <int nd, int nx, class T>
@@ -325,7 +326,7 @@ bool Pol<nd,nx,T>::operator== (const Pol<nd,nx,T2> &P) const {
 template <int nd, int nx, class T>
 template <class T2>
 bool Pol<nd,nx,T>::operator!= (const Pol<nd,nx,T2> &P) const {
-    return coefs!=P.coefficients();
+    return not ( coefs == P.coefficients() );
 }
 
 template <int nd, int nx, class T>
@@ -369,8 +370,8 @@ Pol<nd,nx,typename TypePromote<Plus,T1,T2>::T> operator*(const Pol<nd,nx,T1> &P,
     typedef typename TypePromote<Plus,T1,T2>::T T;
     Vec<T> res_vec;
     res_vec.resize(P.puissances.size(),T(0));
-    for (int i=0;i<res_vec.size();i++) {
-        for (int j=0;j<P.mult[i].size();j++)
+    for (unsigned i=0;i<res_vec.size();i++) {
+        for (unsigned j=0;j<P.mult[i].size();j++)
             res_vec[i]+=P.coefficients()[P.mult[i][j][0]]*Q.coefficients()[P.mult[i][j][1]];
     }
     return Pol<nd,nx,T>(res_vec);
@@ -425,7 +426,7 @@ Pol<nd,nx,T> operator*(const T &t, const Pol<nd,nx,T> &P) {
 // }
 
 template <int nd, int nx, class T>
-typename Abs::template ReturnType<T>::T abs_indication(const Pol<nd,nx,T> &P) {
+inline typename TypePromote<Abs,T>::T abs_indication(const Pol<nd,nx,T> &P) {
     return abs_indication(P.coefficients()[0]);
 }
 

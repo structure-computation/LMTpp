@@ -49,19 +49,19 @@ void read_msh_2( TM &m,std::istream &is, unsigned nvi = 0 ) throw ( std::runtime
         getline ( is,str );
 
         // �aluation du contexte
-        if ( str.find ( "$EndNodes" ) <str.size() ) {
+        if ( str.find ( "$EndNodes" ) < str.size() ) {
             ctxte=0;
             continue;
         }
-        if ( str.find ( "$EndElements" ) <str.size() ) {
+        if ( str.find ( "$EndElements" ) < str.size() ) {
             break;
         }
-        if ( str.find ( "$Nodes" ) <str.size() ) {
+        if ( str.find ( "$Nodes" ) < str.size() ) {
             getline ( is,str );
             ctxte=1;
             continue;
         }
-        if ( str.find ( "$Elements" ) <str.size() ) {
+        if ( str.find ( "$Elements" ) < str.size() ) {
             getline ( is,str );
             ctxte=2;
             continue;
@@ -69,14 +69,14 @@ void read_msh_2( TM &m,std::istream &is, unsigned nvi = 0 ) throw ( std::runtime
 
         // utilisation du contexte
         if ( ctxte==1 ) {
-            istringstream s ( str );
+            istringstream s( str );
             int number;
             s >> number;
             Pvec vec;
             for ( int di=0;di<dim;di++ )
                 s >> vec[di];
             // we add the node and we retain is ref
-            map_num_node[number] = m.add_node ( vec );
+            map_num_node[number] = m.add_node( vec );
             continue;
         }
         if ( ctxte==2 ) {
