@@ -15,8 +15,8 @@
 namespace LMT {
 
 template<class T> inline T dot_chol_factorize( const Vec<Sparse<T> > &v1, const Vec<Sparse<T> > &v2 ) {
-    T res = T( 0.0 );
-    if ( v2.indices.size() == 0 ) return T( 0.0 );
+    T res = T( 0 );
+    if ( v2.indices.size() == 0 ) return T( 0 );
     for(unsigned i=0,j=0;i<v1.indices.size()-1;++i) {
         while ( v2.indices[j] < v1.indices[i] ) {
             ++j;
@@ -272,7 +272,7 @@ template<class T,int s,int s2> void solve_using_lu_factorize( const Mat<T,Gen<s>
     unsigned nb_lines = mat.nb_rows();
     //
     if ( res.size() <= nb_lines )
-        res.resize( nb_lines, T(0.0) );
+        res.resize( nb_lines, T(0) );
     //
     for(unsigned line=0;line<nb_lines;++line) {
         T v = sol[line];

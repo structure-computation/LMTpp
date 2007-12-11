@@ -1,7 +1,8 @@
 import string
 from vecgenhelp import *
 
-print """
+print """// file generated from vecsparse.h.py. Do not modify
+
 namespace LMT {
 
 template<class T> struct Sparse {};
@@ -17,7 +18,7 @@ template<class TT> struct DelayedAssignementSparseSource {
     template<class Op,class T2> void apply(const Op &op,const T2 &v) {
         if ( found ) {
             (*data)[pos] = op( (*data)[pos], v );
-            if ( TT( (*data)[pos] ) == TT( 0.0 ) ) {
+            if ( TT( (*data)[pos] ) == TT( 0 ) ) {
                 for(;pos<indices->size()-1;++pos) {
                     (*data)[pos] = (*data)[pos+1];
                     (*indices)[pos] = (*indices)[pos+1];
@@ -28,7 +29,7 @@ template<class TT> struct DelayedAssignementSparseSource {
         }
         else  {
             TT r = op((TT)0,v);
-            if ( r != TT( 0.0 ) ) {
+            if ( r != TT( 0 ) ) {
                 // creation
                 indices->new_elem();
                 data->new_elem();
