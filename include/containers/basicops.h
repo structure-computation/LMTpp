@@ -76,6 +76,9 @@ inline int ceil(int a) { return a; }
 inline unsigned ceil(unsigned a) { return a; }
 template<class T> T ceil(T a) { return std::ceil(a); }
 
+///
+inline int ceil( int a, int m ) { return ( ( a + m - 1 ) / m ) * m; }
+
 /// 1 if equal 0
 template<class T> bool heavyside(const T &val) { return (val>=0); }
 /// 1 if equal 0

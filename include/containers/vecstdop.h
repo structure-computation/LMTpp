@@ -25,7 +25,7 @@ std::istream &operator>>( std::istream &s, Vec<T,-1> &v ) {
  */
 template<class T,int stat_dim>
 std::ostream &operator<<( std::ostream &s, const Vec<T,stat_dim> &v ) {
-    apply(v, Display(), s , " " );
+    apply( v, Display(), s , " " );
     return s;
 }
 

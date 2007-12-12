@@ -23,6 +23,10 @@ def formulation():
   t,te = temperature.expr, temperature.test
 
   res = a * dot(grad(t),grad(te)) + t.diff(time) * te
+  
+  print res
+  res.display_graphviz()
+  
   return res * dV + H.expr * ( t - t0.expr ) * te * dS
  
 # ).subs( time, time_steps[0] )
