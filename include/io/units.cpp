@@ -202,7 +202,7 @@ static const char *unit_data = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?> 
 "  </group>                                                                             \n"
 "  <group id=\"angle\">                                                                 \n"
 "    <unit id=\"rad\" scale=\"1\" name=\"radian\"/>                                     \n"
-"    <unit id=\"deg\" scale=\"0.01745329251994329547437168059786927187815308570861816406\25\" name=\"degree\"/> \n"
+"    <unit id=\"deg\" scale=\"0.01745329251994329547437168059786927187815308570861816406\" name=\"degree\"/> \n"
 "    <unit id=\"'\" scale=\"1.04719755119\" name=\"angle-minute\" noprefix=\"true\"/>   \n"
 "    <unit id=\"&quot;\" scale=\"62.8318503714\" name=\"angle-second\" noprefix=\"true\"/> \n"
 "  </group>                                                                             \n"
