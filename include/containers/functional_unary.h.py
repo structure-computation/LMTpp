@@ -27,7 +27,7 @@ for i,ret,conserve_sp in lst:
     print '/// \\InGroup Lambda'
     print 'struct '+I+' {'
     print '    template<class P1,class P2=void,class P3=void,class P4=void> struct ReturnType { typedef '+ret+' T; };'
-    print '    template<class P1> '+ret+' operator()(const P1 &p1) const {' + ('using LMT::%s;'%i) * (i!='-') + 'return '+'LMT::'*(i!='-')+i+'(p1); }'
+    print '    template<class P1> '+ret+' operator()(const P1 &p1) const {' + ('using LMT::%s;'%i) * (i!='-') + 'return '+'LMT::'*( i!='-' and False )+i+'(p1); }'
     print '};'
     if conserve_sp=='true':
         print 'template<> struct ConserveZeroes<'+I+'> { static const unsigned res = '+conserve_sp+'; };'

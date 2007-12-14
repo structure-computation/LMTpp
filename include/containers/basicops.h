@@ -113,9 +113,18 @@ for op in lst:
     print 'template<class T> T '+op+'(const T &val) { return std::'+op+'(val); }'
 */
 #ifndef WITHOUTCOMPLEX
-    template<class T> inline std::complex<T> conj(const std::complex<T> &val) { return std::conj(val); }
-    template<class T> inline T real(const std::complex<T> &val) { return std::real(val); }
-    template<class T> inline T imag(const std::complex<T> &val) { return std::imag(val); }
+    //     template<class T> inline std::complex<T> conj(const std::complex<T> &val) { return std::conj(val); }
+    inline std::complex<double> conj(const std::complex<double> &val) { return std::conj(val); }
+    inline std::complex<long double> conj(const std::complex<long double> &val) { return std::conj(val); }
+    
+    //     template<class T> inline T real(const std::complex<T> &val) { return std::real(val); }
+    inline double real(const std::complex<double> &val) { return std::real(val); }
+    inline long double real(const std::complex<long double> &val) { return std::real(val); }
+    
+    //     template<class T> inline T imag(const std::complex<T> &val) { return std::imag(val); }
+    inline double imag(const std::complex<double> &val) { return std::imag(val); }
+    inline long double imag(const std::complex<long double> &val) { return std::imag(val); }
+    
     template<class T> inline T abs(const std::complex<T> &val) { return std::abs(val); }
     template<class T> inline T abs_indication(const std::complex<T> &val) { return LMT::abs(val); }
     

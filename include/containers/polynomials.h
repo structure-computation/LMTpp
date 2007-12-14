@@ -447,13 +447,23 @@ Pol<nd,nx,T> operator*(const T &t, const Pol<nd,nx,T> &P) {
 }
 
 template <int nd, int nx, class T>
-typename Abs::template ReturnType<T>::T abs_indication(const Pol<nd,nx,T> &P) {
+typename TypePromote<Abs,T>::T abs_indication(const Pol<nd,nx,T> &P) {
     return abs_indication(P.coefficients()[0]);
 }
 
-template <int nd, int nx, class T>
-Pol<nd,nx,T> real(const Pol<nd,nx,std::complex<T> > &P) {
-    return Pol<nd,nx,T>(real(P.coefficients()));
+template <int nd,class T>
+Pol<nd,1,typename TypePromote<Conj,T>::T> conj( const Pol<nd,1,T> &P ) {
+    return Pol<nd,1,typename TypePromote<Conj,T>::T>( conj(P.coefficients()) );
+}
+
+template <int nd, class T>
+Pol<nd,1,typename TypePromote<Real,T>::T> real(const Pol<nd,1,T> &P) {
+    return Pol<nd,1,typename TypePromote<Real,T>::T>( real(P.coefficients()) );
+}
+
+template <int nd, class T>
+Pol<nd,1,typename TypePromote<Imag,T>::T> imag(const Pol<nd,1,T> &P) {
+    return Pol<nd,1,typename TypePromote<Imag,T>::T>( imag(P.coefficients()) );
 }
 
 template <int nd, int nx, class T>
@@ -1529,7 +1539,7 @@ Pol<nd,1,T> pow(const Pol<nd,1,T> &P, int a) {
 }
 
 template <int nd, class T>
-void plot (const Pol<nd,1,T> &P, std::string s="w l") {
+void plot(const Pol<nd,1,T> &P, std::string s="w l") {
     T A = P.RootsLowerBound();
     T B = P.RootsUpperBound();
     Vec<T> V = range(A,(B-A)/500,B);
@@ -1539,7 +1549,7 @@ void plot (const Pol<nd,1,T> &P, std::string s="w l") {
 }
 
 template <int nd, class T>
-void plot (const Pol<nd,1,T> &P, const Vec<T> &V, const std::string &s="w l") {
+void plot(const Pol<nd,1,T> &P, const Vec<T> &V, const std::string &s="w l") {
     //Affiche la fonction
     GnuPlot gp;
     gp.plot(V,P(V),s.c_str());
@@ -1547,7 +1557,7 @@ void plot (const Pol<nd,1,T> &P, const Vec<T> &V, const std::string &s="w l") {
 }
 
 template <int nd, class T>
-void plot (const Pol<nd,1,T> &P, const Pol<nd,1,T> &Q, const Vec<T> &V, const std::string &s="w l") {
+void plot(const Pol<nd,1,T> &P, const Pol<nd,1,T> &Q, const Vec<T> &V, const std::string &s="w l") {
     //Affiche la fonction
     GnuPlot gp;
     gp.plot(V,P(V),Q(V),s.c_str());
@@ -1563,6 +1573,16 @@ std::ostream &operator<<(std::ostream &os, const Pol<nd,1,T> &P) {
         if (P.coefficients()[j]<0)
             os << "-" << -P.coefficients()[j] << "*X^" << j << " ";
     }
+    os << " ";
+    return os;
+}
+
+template <int nd, class T>
+std::ostream &operator<<(std::ostream &os, const Pol<nd,1,std::complex<T> > &P) {
+    os << " " << P.coefficients()[0] << " ";
+    for (unsigned j=1;j<P.coefficients().size();j++)
+        if (P.coefficients()[j]!=std::complex<T>(0))
+            os << "+" << P.coefficients()[j] << "*X^" << j << " ";
     os << " ";
     return os;
 }

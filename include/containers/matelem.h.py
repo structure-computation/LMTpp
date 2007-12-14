@@ -30,7 +30,7 @@ lst = [
 for i in lst:
     I = string.capitalize(i)
     print 'template<class TV,class Structure,class Storage,unsigned alignement,int nr>'
-    print 'typename '+I+'::template ReturnType<typename TV::template SubType<0>::T>::T '+i+'(const MatElem<TV,Structure,Storage,alignement,nr> &me) {'
+    print 'typename TypePromote<'+I+',typename TV::template SubType<0>::T>::T '+i+'(const MatElem<TV,Structure,Storage,alignement,nr> &me) {'
     print '    return '+i+'((typename TV::template SubType<0>::T)me);'
     print '}'
 

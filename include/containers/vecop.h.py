@@ -30,7 +30,9 @@ for nb_par in [1,2,3]:
 template<""" + join(lst_tpar,',') + """,int static_size_>
 class Vec<VecOp<"""+join(lst_par,',')+""">,static_size_,int> {
 public:
-    template<unsigned n,unsigned inner=0> struct SubType { typedef typename OP::template ReturnType<"""+J('typename V%(i)i::template SubType<n>::T')+""">::T T; };
+    template<unsigned n,unsigned inner=0> struct SubType {
+        typedef typename TypePromote<OP,"""+J('typename V%(i)i::template SubType<n>::T')+""">::T T;
+    };
     template<unsigned inner> struct SubType<1,inner> { typedef void T; };
     static const unsigned nb_sub_type = V0::nb_sub_type;
     typedef typename SubType<0>::T T0;
