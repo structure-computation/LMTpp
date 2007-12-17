@@ -125,8 +125,10 @@ for op in lst:
     inline double imag(const std::complex<double> &val) { return std::imag(val); }
     inline long double imag(const std::complex<long double> &val) { return std::imag(val); }
     
-    template<class T> inline T abs(const std::complex<T> &val) { return std::abs(val); }
-    template<class T> inline T abs_indication(const std::complex<T> &val) { return LMT::abs(val); }
+    inline double abs(const std::complex<double> &val) { return std::abs(val); }
+    inline long double abs(const std::complex<long double> &val) { return std::abs(val); }
+    inline double abs_indication(const std::complex<double> &val) { return LMT::abs(val); }
+    inline long double abs_indication(const std::complex<long double> &val) { return LMT::abs(val); }
     
     template<class T> inline T conj(const T &val) { return val; }
     template<class T> inline T real(const T &val) { return val; }

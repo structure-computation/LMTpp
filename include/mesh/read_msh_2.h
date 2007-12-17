@@ -24,9 +24,20 @@
 
 namespace LMT {
 
+///
+template<class TE,class VarTag,unsigned n,unsigned m>
+void assign_tag_values( TE *e, const Vec<double> &tag_values, const VarTag &vt, Number<n>, Number<m> ) {
+    ExtractDM<typename VarTag::template SubType<n>::T> ev;
+    ev( *e ) = tag_values[ n ];
+    assign_tag_values( e, tag_values, vt, Number<n+1>(), Number<m>() );
+}
+template<class TE,class VarTag,unsigned n           > void assign_tag_values( TE   *e, const Vec<double> &tag_values, const VarTag &vt, Number<n>, Number<n> ) { }
+template<         class VarTag,unsigned n,unsigned m> void assign_tag_values( void *e, const Vec<double> &tag_values, const VarTag &vt, Number<n>, Number<m> ) { }
+template<         class VarTag,unsigned n           > void assign_tag_values( void *e, const Vec<double> &tag_values, const VarTag &vt, Number<n>, Number<n> ) { }
+
 /// put gmsh mesh in m
-template<class TM>
-void read_msh_2( TM &m,std::istream &is, unsigned nvi = 0 ) throw ( std::runtime_error ) {
+template<class TM,class VarTag>
+void read_msh_2( TM &m,std::istream &is, unsigned nvi, const VarTag &vt ) throw ( std::runtime_error ) {
     using namespace std;
     typedef typename TM::Pvec Pvec;
     typedef typename TM::TNode TNode;
@@ -40,6 +51,7 @@ void read_msh_2( TM &m,std::istream &is, unsigned nvi = 0 ) throw ( std::runtime
     // correspondance between number in file -> ref in mesh
     map<int,TNode *> map_num_node;
     string type_element;
+    Vec<double> tag_values;
     //
     while ( 1 ) {
         if ( ! is )
@@ -57,13 +69,13 @@ void read_msh_2( TM &m,std::istream &is, unsigned nvi = 0 ) throw ( std::runtime
             break;
         }
         if ( str.find ( "$Nodes" ) < str.size() ) {
-            getline ( is,str );
-            ctxte=1;
+            getline( is,str );
+            ctxte = 1;
             continue;
         }
         if ( str.find ( "$Elements" ) < str.size() ) {
-            getline ( is,str );
-            ctxte=2;
+            getline( is,str );
+            ctxte = 2;
             continue;
         }
 
@@ -89,11 +101,10 @@ void read_msh_2( TM &m,std::istream &is, unsigned nvi = 0 ) throw ( std::runtime
             unsigned nb_nodes;
             nb_nodes = nb_nodes_elem[type_elem-1];
             unsigned nb_tags;
-            unsigned tmp;
             s >> nb_tags;
-            for ( unsigned k = 0; k<nb_tags; k++ ) {
-                s >> tmp;
-            }
+            tag_values.resize( nb_tags );
+            for ( unsigned k = 0; k<nb_tags; k++ )
+                s >> tag_values[k];
 
             LMT::Vec<TNode *> vn;
             vn.resize ( nb_nodes );
@@ -104,31 +115,31 @@ void read_msh_2( TM &m,std::istream &is, unsigned nvi = 0 ) throw ( std::runtime
 
             if ( type_elem == 1 ) { //TODO
                 if ( nvi == 1 )
-                    m.add_element ( Bar(),DefaultBehavior(),vn.ptr() );
+                    assign_tag_values( m.add_element( Bar(),DefaultBehavior(),vn.ptr() ), tag_values, vt, Number<0>(), Number<NbSubTypes<VarTag>::res>() );
             } else if ( type_elem == 2 ) { //TODO
                 if ( nvi == 2 ) {
                     permutation_if_jac_neg ( Triangle(),vn.ptr() );
-                    m.add_element ( Triangle(),DefaultBehavior(),vn.ptr() );
+                    assign_tag_values( m.add_element( Triangle(),DefaultBehavior(),vn.ptr() ), tag_values, vt, Number<0>(), Number<NbSubTypes<VarTag>::res>() );
                 }
             } else if ( type_elem == 3 ) { //TODO
                 if ( nvi == 2 ) {
                     permutation_if_jac_neg ( Quad(),vn.ptr() );
-                    m.add_element ( Quad(),DefaultBehavior(),vn.ptr() );
+                    assign_tag_values( m.add_element( Quad(),DefaultBehavior(),vn.ptr() ), tag_values, vt, Number<0>(), Number<NbSubTypes<VarTag>::res>() );
                 }
             } else if ( type_elem == 4 ) { //TODO
                 if ( nvi == 3 ) {
                     permutation_if_jac_neg ( Tetra(),vn.ptr() );
-                    m.add_element ( Tetra(),DefaultBehavior(),vn.ptr() );
+                    assign_tag_values( m.add_element( Tetra(),DefaultBehavior(),vn.ptr() ), tag_values, vt, Number<0>(), Number<NbSubTypes<VarTag>::res>() );
                 }
             } else if ( type_elem == 5 ) { //TODO
                 if ( nvi == 3 ) {
                     permutation_if_jac_neg ( Hexa(),vn.ptr() );
-                    m.add_element ( Hexa(),DefaultBehavior(),vn.ptr() );
+                    assign_tag_values( m.add_element( Hexa(),DefaultBehavior(),vn.ptr() ), tag_values, vt, Number<0>(), Number<NbSubTypes<VarTag>::res>() );
                 }
             } else if ( type_elem == 6 ) { //TODO
                 if ( nvi == 3 ) {
                     permutation_if_jac_neg ( Wedge(),vn.ptr() );
-                    m.add_element ( Wedge(),DefaultBehavior(),vn.ptr() );
+                    assign_tag_values( m.add_element( Wedge(),DefaultBehavior(),vn.ptr() ), tag_values, vt, Number<0>(), Number<NbSubTypes<VarTag>::res>() );
                 }
             } else if ( type_elem == 15 ) { //TODO
             } else {
@@ -149,7 +160,17 @@ void read_msh_2( TM &m,const std::string &fic_name, unsigned nvi = 0 ) throw ( s
     std::ifstream my_file( fic_name.c_str() );
     if ( ! my_file.is_open() )
         throw std::runtime_error( "opening of "+fic_name+" has failed." );
-    return read_msh_2( m, my_file, nvi );
+    read_msh_2( m, my_file, nvi, HeteroExplPack<>() );
+}
+
+/// put gid mesh in m
+template<class TM,class VarTag>
+void read_msh_2( TM &m,const std::string &fic_name, unsigned nvi, const VarTag &vt  ) throw ( std::runtime_error ) {
+    // ouverture du fichier
+    std::ifstream my_file( fic_name.c_str() );
+    if ( ! my_file.is_open() )
+        throw std::runtime_error( "opening of "+fic_name+" has failed." );
+    read_msh_2( m, my_file, nvi, vt );
 }
 
 
