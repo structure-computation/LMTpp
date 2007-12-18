@@ -116,32 +116,36 @@ void read_msh_2( TM &m,std::istream &is, unsigned nvi, const VarTag &vt ) throw 
             if ( type_elem == 1 ) { //TODO
                 if ( nvi == 1 )
                     assign_tag_values( m.add_element( Bar(),DefaultBehavior(),vn.ptr() ), tag_values, vt, Number<0>(), Number<NbSubTypes<VarTag>::res>() );
-            } else if ( type_elem == 2 ) { //TODO
+            }
+            else if ( type_elem == 2 ) { //TODO
                 if ( nvi == 2 ) {
                     permutation_if_jac_neg ( Triangle(),vn.ptr() );
                     assign_tag_values( m.add_element( Triangle(),DefaultBehavior(),vn.ptr() ), tag_values, vt, Number<0>(), Number<NbSubTypes<VarTag>::res>() );
                 }
-            } else if ( type_elem == 3 ) { //TODO
+            }
+            else if ( type_elem == 3 ) { //TODO
                 if ( nvi == 2 ) {
                     permutation_if_jac_neg ( Quad(),vn.ptr() );
                     assign_tag_values( m.add_element( Quad(),DefaultBehavior(),vn.ptr() ), tag_values, vt, Number<0>(), Number<NbSubTypes<VarTag>::res>() );
                 }
-            } else if ( type_elem == 4 ) { //TODO
+            }
+            else if ( type_elem == 4 ) { //TODO
                 if ( nvi == 3 ) {
                     permutation_if_jac_neg ( Tetra(),vn.ptr() );
                     assign_tag_values( m.add_element( Tetra(),DefaultBehavior(),vn.ptr() ), tag_values, vt, Number<0>(), Number<NbSubTypes<VarTag>::res>() );
                 }
-            } else if ( type_elem == 5 ) { //TODO
+            }
+            else if ( type_elem == 5 ) { //TODO
                 if ( nvi == 3 ) {
                     permutation_if_jac_neg ( Hexa(),vn.ptr() );
                     assign_tag_values( m.add_element( Hexa(),DefaultBehavior(),vn.ptr() ), tag_values, vt, Number<0>(), Number<NbSubTypes<VarTag>::res>() );
                 }
-            } else if ( type_elem == 6 ) { //TODO
+            }
+            else if ( type_elem == 6 ) { //TODO
                 if ( nvi == 3 ) {
                     permutation_if_jac_neg ( Wedge(),vn.ptr() );
                     assign_tag_values( m.add_element( Wedge(),DefaultBehavior(),vn.ptr() ), tag_values, vt, Number<0>(), Number<NbSubTypes<VarTag>::res>() );
                 }
-            } else if ( type_elem == 15 ) { //TODO
             } else {
                 std::cout << "unknown type elem." << std::endl;
                 assert ( 0 );
@@ -150,6 +154,122 @@ void read_msh_2( TM &m,std::istream &is, unsigned nvi, const VarTag &vt ) throw 
             continue;
         }
     }
+}
+
+/// put gid mesh in m
+/// corresponding sub mesh must be updated
+template<class TM,unsigned nvi,class VarTag>
+void read_msh_2_tags_for_nvi( TM &m, const std::string &fic_name, Number<nvi>, const VarTag &vt ) throw ( std::runtime_error ) {
+    // ouverture du fichier
+    std::ifstream is( fic_name.c_str() );
+    if ( ! is.is_open() )
+        throw std::runtime_error( "opening of "+fic_name+" has failed." );
+    // $MeshFormat
+    std::string str;
+    getline( is, str );
+    // 2 x x
+    int major;
+    is >> major; // 2
+    getline( is, str ); // mezzo, minor
+    assert( major >= 2 );
+    // $EndMeshFormat, $Nodes
+    getline( is, str ); // $EndMeshFormat
+    getline( is, str ); // $Nodes
+    // nodes
+    unsigned nb_nodes = 0;
+    is >> nb_nodes; //
+    Vec<unsigned> corr_nodes; corr_nodes.resize( nb_nodes+1, 0 );
+    unsigned offset_nodes = m.node_list.size() - nb_nodes;
+    for(unsigned i=0;i<nb_nodes;++i) {
+        unsigned num_node = 0;
+        is >> num_node;
+        getline( is, str );
+        //
+        if ( num_node >= corr_nodes.size() )
+            corr_nodes.resize( num_node + 16, 0 );
+        corr_nodes[ num_node ] = offset_nodes + i;
+    }
+    // $EndNodes
+    getline( is, str );
+    if ( str != "$EndNodes" )
+        throw std::runtime_error( "msh file is corrupted : mark '$EndNodes' is absent" );
+    // $Elements
+    getline( is, str );
+    if ( str != "$Elements" )
+        throw std::runtime_error( "msh file is corrupted : mark '$Elements' is absent" );
+    // elements
+    unsigned nb_elems = 0;
+    is >> nb_elems; //
+    getline( is, str );
+    Vec<double> tag_values;
+    for(unsigned i=0;i<nb_elems;++i) {
+        static unsigned nb_nodes_elem[] = { 2, 3, 4, 4, 8, 6, 5, 3, 6, 9, 10, 27, 18, 14, 1, 8, 20, 15, 13 };
+        static unsigned nvi_elem[] = { 0, 1, 2, 2, 3, 3, 3 };
+        //
+        getline( is, str );
+        std::istringstream s( str );
+        unsigned number = 0, type_elem = 0, nb_tags = 0;
+        s >> number >> type_elem >> nb_tags;
+        if ( type_elem > 6 )
+            throw std::runtime_error( "TODO : type_elem > 6..." );
+        if ( nvi_elem[ type_elem ] == nvi ) {
+            unsigned nb_nodes = nb_nodes_elem[type_elem-1];
+            tag_values.resize( nb_tags );
+            for (unsigned k=0;k<nb_tags;++k)
+                s >> tag_values[k];
+            Vec<typename TM::TNode *> v; v.resize( nb_nodes );
+            for(unsigned i=0;i<nb_nodes;++i) {
+                unsigned nn;
+                s >> nn;
+                v[ i ] = &m.node_list[ corr_nodes[ nn ] ];
+            }
+            if ( type_elem == 1 ) { //TODO
+                if ( nvi == 1 )
+                    assign_tag_values( m.sub_mesh( Number<nvi>() ).elem_list.find( Bar(), DefaultBehavior(), m, v.ptr() ), tag_values, vt, Number<0>(), Number<NbSubTypes<VarTag>::res>() );
+            }
+            //             else if ( type_elem == 2 ) { //TODO
+            //                 if ( nvi == 2 ) {
+            //                     permutation_if_jac_neg ( Triangle(),vn.ptr() );
+            //                     assign_tag_values( m.add_element( Triangle(),DefaultBehavior(),vn.ptr() ), tag_values, vt, Number<0>(), Number<NbSubTypes<VarTag>::res>() );
+            //                 }
+            //             }
+            //             else if ( type_elem == 3 ) { //TODO
+            //                 if ( nvi == 2 ) {
+            //                     permutation_if_jac_neg ( Quad(),vn.ptr() );
+            //                     assign_tag_values( m.add_element( Quad(),DefaultBehavior(),vn.ptr() ), tag_values, vt, Number<0>(), Number<NbSubTypes<VarTag>::res>() );
+            //                 }
+            //             }
+            //             else if ( type_elem == 4 ) { //TODO
+            //                 if ( nvi == 3 ) {
+            //                     permutation_if_jac_neg ( Tetra(),vn.ptr() );
+            //                     assign_tag_values( m.add_element( Tetra(),DefaultBehavior(),vn.ptr() ), tag_values, vt, Number<0>(), Number<NbSubTypes<VarTag>::res>() );
+            //                 }
+            //             }
+            //             else if ( type_elem == 5 ) { //TODO
+            //                 if ( nvi == 3 ) {
+            //                     permutation_if_jac_neg ( Hexa(),vn.ptr() );
+            //                     assign_tag_values( m.add_element( Hexa(),DefaultBehavior(),vn.ptr() ), tag_values, vt, Number<0>(), Number<NbSubTypes<VarTag>::res>() );
+            //                 }
+            //             }
+            //             else if ( type_elem == 6 ) { //TODO
+            //                 if ( nvi == 3 ) {
+            //                     permutation_if_jac_neg ( Wedge(),vn.ptr() );
+            //                     assign_tag_values( m.add_element( Wedge(),DefaultBehavior(),vn.ptr() ), tag_values, vt, Number<0>(), Number<NbSubTypes<VarTag>::res>() );
+            //                 }
+            //             }
+            //             else {
+            //                 std::cout << "unknown type elem." << std::endl;
+            //                 assert ( 0 );
+            //             }
+        }
+    }
+}
+
+/// put gid mesh in m
+template<class TM,class VarTag>
+void read_msh_2_tags_on_skin( TM &m, const std::string &fic_name, const VarTag &vt ) throw ( std::runtime_error ) {
+    m.update_skin();
+    read_msh_2_tags_for_nvi( m, fic_name, Number<TM::dim-1>(), vt );
 }
 
 
