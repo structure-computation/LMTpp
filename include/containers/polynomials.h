@@ -330,10 +330,9 @@ Vec<Pol<nd-1,nx,T>,nx> Pol<nd,nx,T>::derivative() const {
     Vec<Vec<T>,nx> res_vec;
     for (int i=0;i<nx;i++)
         res_vec[i].resize(res[i].puissances.size());
-    for (int i=1;i<deriv_ind.size();i++) {
+    for (int i=1;i<deriv_ind.size();i++)
         for (int j=0;j<deriv_ind[i].size();j++)
             res_vec[deriv_var[i][j]][deriv_ind[i][j]]=deriv_coef[i][j]*coefs[i];
-    }
     for (int i=0;i<nx;i++)
         res[i]=Pol<nd-1,nx,T>(res_vec[i]);
     return res;
@@ -451,19 +450,19 @@ typename TypePromote<Abs,T>::T abs_indication(const Pol<nd,nx,T> &P) {
     return abs_indication(P.coefficients()[0]);
 }
 
-template <int nd,class T>
-Pol<nd,1,typename TypePromote<Conj,T>::T> conj( const Pol<nd,1,T> &P ) {
-    return Pol<nd,1,typename TypePromote<Conj,T>::T>( conj(P.coefficients()) );
+template <int nd, int nx, class T>
+Pol<nd,nx,typename TypePromote<Conj,T>::T> conj( const Pol<nd,nx,T> &P ) {
+    return Pol<nd,nx,typename TypePromote<Conj,T>::T>( conj(P.coefficients()) );
 }
 
-template <int nd, class T>
-Pol<nd,1,typename TypePromote<Real,T>::T> real(const Pol<nd,1,T> &P) {
-    return Pol<nd,1,typename TypePromote<Real,T>::T>( real(P.coefficients()) );
+template <int nd, int nx, class T>
+Pol<nd,nx,typename TypePromote<Real,T>::T> real(const Pol<nd,nx,T> &P) {
+    return Pol<nd,nx,typename TypePromote<Real,T>::T>( real(P.coefficients()) );
 }
 
-template <int nd, class T>
-Pol<nd,1,typename TypePromote<Imag,T>::T> imag(const Pol<nd,1,T> &P) {
-    return Pol<nd,1,typename TypePromote<Imag,T>::T>( imag(P.coefficients()) );
+template <int nd, int nx, class T>
+Pol<nd,nx,typename TypePromote<Imag,T>::T> imag(const Pol<nd,nx,T> &P) {
+    return Pol<nd,nx,typename TypePromote<Imag,T>::T>( imag(P.coefficients()) );
 }
 
 template <int nd, int nx, class T>
