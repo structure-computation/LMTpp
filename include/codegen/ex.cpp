@@ -408,5 +408,94 @@ Ex Ex::find_discontinuity( const Ex &v ) const {
 
 bool Ex::is_zero() const { return op->type == Op::Number and op->val == 0.0; }
 
+/*
+def get_taylor_expansion( expr, beg, var, deg_poly_max ):
+    res = ExVector()
+    r = 1.0
+    for i in range( deg_poly_max + 1 ):
+        res.push_back( r * expr.subs( var, beg ) )
+        if i < deg_poly_max:
+            expr = expr.diff( var )
+            r /= i + 1
+    return res
+
+def integration( expr, var, beg, end, deg_poly_max = 5 ):
+    disc = expr.find_discontinuity( var )
+    #if not disc.is_zero():
+        
+    taylor_expansion =  get_taylor_expansion( expr, beg, var, deg_poly_max )
+    #
+    res = 0
+    for i in range( taylor_expansion.size() ):
+        res += taylor_expansion[i] * ( end - beg ) ** ( i + 1 ) / ( i + 1 )
+    return res;
+
+*/
+std::vector<Ex> taylor_expansion( Ex expr, const Ex &var, unsigned max_poly_order, const Ex &beg = 0 ) {
+    std::vector<Ex> res;
+    Ex::T r = 1;
+    for(unsigned i=0;i<=max_poly_order;++i) {
+        res.push_back( r * expr.subs( var, beg ) );
+        if ( i < max_poly_order ) {
+            expr = expr.diff( var );
+            r /= i + 1;
+        }
+    }
+    return res;
+}
+
+Ex polynomial_integration(const Ex &expr,const Ex &v,const Ex &beg,const Ex &end,unsigned max_poly_order) {
+    std::vector<Ex> te = taylor_expansion( expr, v, max_poly_order, beg );
+    Ex res( 0 );
+    for(unsigned i=0;i<te.size();++i)
+        res += te[i] * pow( end - beg, i + 1 ) / ( i + 1 );
+    return res;
+}
+
+Ex integration(const Ex &expr,const Ex &v,const Ex &beg,const Ex &end,unsigned deg_poly_max) {
+    Ex disc = expr.find_discontinuity( v );
+    if ( disc.op->type != Op::Number ) {
+        Ex ch = disc.op->data.children[0];
+        //
+        Ex subs_n;
+        Ex subs_p;
+        switch ( disc.op->type ) {
+            case Op::Heavyside:
+            case Op::Heavyside_if:
+                subs_n = expr.subs( disc, 0 );
+                subs_p = expr.subs( disc, 1 );
+                break;
+            case Op::Abs:
+                subs_n = expr.subs( disc,   ch );
+                subs_p = expr.subs( disc, - ch );
+                break;
+            default:
+                assert( 0 );
+        }
+        //
+        Ex mid = ( beg + end ) / 2;
+        std::vector<Ex> expansion_ = taylor_expansion( ch, v, 2, mid );
+        Ex cut = mid - expansion_[0] / ( expansion_[1] + eqz( expansion_[1] ) );
+        
+        
+        Ex p_beg = heaviside( ch.subs( v, beg ) );
+        Ex p_end = heaviside( ch.subs( v, end ) );
+        Ex n_beg = 1 - p_beg;
+        Ex n_end = 1 - p_end;
+        //
+        //
+        Ex nb = beg + ( cut - beg ) * p_beg * n_end;
+        Ex ne = end + ( beg - end + ( cut - beg ) * n_beg ) * p_end;
+        Ex pb = beg + ( end - beg + ( cut - end ) * p_end ) * n_beg;
+        Ex pe = end + ( cut - end ) * p_beg * n_end;
+        
+        Ex int_n = integration( subs_n, v, nb, ne, deg_poly_max );
+        Ex int_p = integration( subs_p, v, pb, pe, deg_poly_max );
+        return int_n + int_p;
+    }
+    //
+    return polynomial_integration( expr, v, beg, end, deg_poly_max );
+}
+
 
 };

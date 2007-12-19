@@ -94,16 +94,6 @@ def get_taylor_expansion( expr, beg, var, deg_poly_max ):
             r /= i + 1
     return res
 
-def integration( expr, var, beg, end, deg_poly_max = 5 ):
-    disc = expr.find_discontinuity( var )
-    #if not disc.is_zero():
-        
-    taylor_expansion =  get_taylor_expansion( expr, beg, var, deg_poly_max )
-    #
-    res = 0
-    for i in range( taylor_expansion.size() ):
-        res += taylor_expansion[i] * ( end - beg ) ** ( i + 1 ) / ( i + 1 )
-    return res;
 
 
 def minimize_iteration( expr, variables, old_values = ExVector() ):

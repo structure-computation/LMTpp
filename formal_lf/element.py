@@ -84,11 +84,15 @@ class Element:
         if mul_by_jac:
             res *= self.det_jacobian()
         for i in range( self.nb_var_inter-1, -1, -1 ):
-            res = integration( res, self.var_inter[i], self.interval_var_inter[i][0], self.interval_var_inter[i][1], order )
+            beg = self.interval_var_inter[i][0]
+            end = self.interval_var_inter[i][1]
+            if type(beg) is float or type(beg) is int: beg = number(beg)
+            if type(end) is float or type(end) is int: end = number(end)
+            res = integration( res, self.var_inter[i], beg, end, order )
         return res
 
     def integration( self, expr, order, mul_by_jac = True ):
-      if type(expr) is float or type(expr) is int: expr = Number(expr)
+      if type(expr) is float or type(expr) is int: expr = number(expr)
       if mul_by_jac:
         expr *= self.det_jacobian()
       res = 0.0
