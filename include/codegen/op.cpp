@@ -485,8 +485,8 @@ void Op::find_discontinuities( long unsigned current_id, std::vector<const Op *>
     if ( id != current_id ) {
         id = current_id;
         if ( is_a_function_1() ) {
-            if ( type == Heavyside or type == Heavyside_if or type == Abs )
-                lst.push_back( this );
+            if ( type == Heavyside or type == Heavyside_if or type == Abs or type == Sgn )
+                lst.push_back( this ); 
             //
             data.children[0]->find_discontinuities( current_id, lst );
         }
