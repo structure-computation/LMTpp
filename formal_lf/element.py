@@ -445,8 +445,10 @@ class Element:
         return res
             
     #
-    def mean( self, expr, order ):
-        return self.integration( expr, order, False ) / self.integration( number(1), 0, False )
+    def mean( self, expr, order = 0 ):
+        if order:
+            return self.integration( expr, order, False ) / self.integration( number(1), 0, False )
+        return self.analytical_integration( expr, False ) / self.analytical_integration( number(1), False )
     
     #
     def measure( self ):

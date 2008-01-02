@@ -466,8 +466,8 @@ Ex integration(const Ex &expr,const Ex &v,const Ex &beg,const Ex &end,unsigned d
                 subs_p = expr.subs( disc, 1 );
                 break;
             case Op::Abs:
-                subs_n = expr.subs( disc,   ch );
-                subs_p = expr.subs( disc, - ch );
+                subs_n = expr.subs( disc, - ch );
+                subs_p = expr.subs( disc,   ch );
                 break;
             default:
                 assert( 0 );
