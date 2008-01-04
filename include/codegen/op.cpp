@@ -150,8 +150,8 @@ Op::T Op::operation(Op::TypeEx type,Op::T a,Op::T b) {
     return 0;
 }
 
-bool makeAbsVal(Op::TypeEx t) { return ( t==Op::Abs || t==Op::Cos ); }
-bool makeSymVal(Op::TypeEx t) { return ( t==Op::Sin || t==Op::Tan || t==Op::Sgn || t==Op::Eqz || t==Op::Asin || t==Op::Atan ); }
+bool makeAbsVal(Op::TypeEx t) { return ( t==Op::Abs || t==Op::Cos || t==Op::Eqz ); }
+bool makeSymVal(Op::TypeEx t) { return ( t==Op::Sin || t==Op::Tan || t==Op::Sgn || t==Op::Asin || t==Op::Atan ); }
 
 void Op::set_val_should_be_updated() const {
     if ( val_should_be_updated )
