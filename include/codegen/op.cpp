@@ -265,7 +265,7 @@ const Op *make_function_2(Op::TypeEx t,const Op *a,const Op *b) {
             if ( a->val<0.0 )  return make_function_2(Op::Sub,b,op_number(-a->val));
             if ( a->val==0.0 ) return b;
         }
-        if ( b->type==Op::Number && b->val<0.0 ) return make_function_2(Op::Sub,a,op_number(-b->val));
+        //if ( b->type==Op::Number && b->val<0.0 ) return make_function_2(Op::Sub,a,op_number(-b->val));
     }
     // a-(-b), (-a)-b, a-(-5), -5-b
     if ( t==Op::Sub ) {
@@ -290,29 +290,22 @@ const Op *make_function_2(Op::TypeEx t,const Op *a,const Op *b) {
             // 2*(3*a)
             if ( b->type==Op::Mul && b->data.children[0]->type==Op::Number )
                 return make_function_2( Op::Mul, op_number(a->val*b->data.children[0]->val), b->data.children[1] );
+            //2*(3/a)
+            //if ( b->type==Op::Div && b->data.children[0]->type==Op::Number )
+            //return make_function_2( Op::Div, op_number(a->val*b->data.children[0]->val), b->data.children[1] );
         }
     }
     if ( t==Op::Div ) {
         if ( a==b ) return op_number(1);
-        if ( a->type==Op::Number && a->val==1 ) {
-            if ( a->val==1 ) return make_function_2(Op::Pow,b,op_number(-1));
-            if ( a->val==0 ) return op_number(0);
-        }
+        if ( a->type==Op::Number && a->val==1 ) return make_function_2(Op::Pow,b,op_number(-1));
         if ( a->type==Op::Number && a->val==0 ) return op_number(0);
         if ( b->type==Op::Number && b->val==1 ) return a;
     }
-    // a**1, a**0, (a**b)**-b, 0**b, 1**b, (-a)**2, (-a)**3
+    // a**1, a**0, 0**b, 1**b, (-a)**2, (-a)**3
     if ( t==Op::Pow ) {
         if ( b->type==Op::Number ) {
             if ( b->val == 1.0 ) return a;
             if ( b->val == 0.0 ) return op_number(1.0);
-        }
-        if ( a->type==Op::Pow ) {
-            const Op *c1 = b;
-            const Op *c2 = a->data.children[1];
-            if ( c1->type==Op::Neg && c1->data.children[0]==c2 ) return op_number(1);
-            if ( c2->type==Op::Neg && c2->data.children[0]==c1 ) return op_number(1);
-            if ( c2->type==Op::Number && c2->type==Op::Number && c1->val+c2->val==0 ) return op_number(1);
         }
         if ( a->type==Op::Number ) {
             if ( a->val == 1 ) return a;
