@@ -163,7 +163,7 @@ private:
     
     friend Ex pow(const Ex &a,const Ex &b);
     friend Ex max(const Ex &a,const Ex &b);
-    friend Ex min(const Ex &a,const Ex &b);
+    friend Ex mini(const Ex &a,const Ex &b);
     friend Ex atan2(const Ex &a,const Ex &b);
 
     friend Ex new_function_1(const std::string &f,const Ex &a);
@@ -211,7 +211,7 @@ Ex acos(const Ex &a);
 Ex atan(const Ex &a);       
                             
 Ex pow(const Ex &a,const Ex &b);
-Ex min(const Ex &a,const Ex &b);
+Ex mini(const Ex &a,const Ex &b);
 Ex max(const Ex &a,const Ex &b);
 Ex atan2(const Ex &a,const Ex &b);
                             

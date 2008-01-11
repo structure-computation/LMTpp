@@ -26,7 +26,7 @@ namespace Codegen {
     inline double min(double a,double b) { return std::min(a,b); }
     inline double atan2(double a,double b) { return std::atan2(a,b); }
     inline int max(int a,int b) { return std::max(a,b); }
-    inline int min(int a,int b) { return std::min(a,b); }
+    inline int mini(int a,int b) { return std::min(a,b); }
 };
 
 
@@ -58,10 +58,10 @@ double log(double POSITIVE);
 double exp(double);
 double abs(double);
 double max(double,double);
-double min(double,double);
+double mini(double,double);
 double atan2(double,double);
 int max(int a,int b);
-int min(int a,int b);
+int mini(int a,int b);
 
 class Ex {
 public:
@@ -125,9 +125,9 @@ Ex abs(const Ex &a);
 Ex max(const Ex &a,const Ex &b);
 Ex max(const Ex &a,double b);
 Ex max(double a,const Ex &b);
-Ex min(const Ex &a,const Ex &b);
-Ex min(const Ex &a,double b);
-Ex min(double a,const Ex &b);
+Ex mini(const Ex &a,const Ex &b);
+Ex mini(const Ex &a,double b);
+Ex mini(double a,const Ex &b);
 
 Ex atan2(const Ex &a,const Ex &b);
 Ex atan2(const Ex &a,double b);
@@ -263,9 +263,9 @@ ExVector max(const ExVector &a,const ExVector &b);
 ExVector max(const ExVector &a,const Ex &b);
 ExVector max(const Ex &a,const ExVector &b);
 
-ExVector min(const ExVector &a,const ExVector &b);
-ExVector min(const ExVector &a,const Ex &b);
-ExVector min(const Ex &a,const ExVector &b);
+ExVector mini(const ExVector &a,const ExVector &b);
+ExVector mini(const ExVector &a,const Ex &b);
+ExVector mini(const Ex &a,const ExVector &b);
 
 Ex dot(const ExVector &a,const ExVector &b);
 

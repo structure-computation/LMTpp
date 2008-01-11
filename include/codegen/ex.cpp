@@ -345,7 +345,7 @@ Ex atan(const Ex &a) { return make_function_1(Op::Atan,a.op); }
 
 Ex pow(const Ex &a,const Ex &b) { return make_function_2(Op::Pow,a.op,b.op); }
 Ex max(const Ex &a,const Ex &b) { return make_function_2(Op::Max,a.op,b.op); }
-Ex min(const Ex &a,const Ex &b) { return make_function_2(Op::Min,a.op,b.op); }
+Ex mini(const Ex &a,const Ex &b) { return make_function_2(Op::Min,a.op,b.op); }
 Ex atan2(const Ex &a,const Ex &b) { return make_function_2(Op::Atan2,a.op,b.op); }
 
 Ex::T Ex::get_val() const {

@@ -201,7 +201,7 @@ ExVector V(const Ex &a,const ExVector &b) { \
     return res; \
 }
 BOP(pow)
-BOP(min)
+BOP(mini)
 BOP(max)
 #undef BOP    
 
