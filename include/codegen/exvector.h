@@ -96,10 +96,13 @@ ExVector atan(const ExVector &a);
     
 ExVector pow(const ExVector &a,const ExVector &b);
 ExVector max(const ExVector &a,const ExVector &b);
+ExVector min(const ExVector &a,const ExVector &b);
 ExVector pow(const ExVector &a,const Ex &b);
 ExVector max(const ExVector &a,const Ex &b);
+ExVector min(const ExVector &a,const Ex &b);
 ExVector pow(const Ex &a,const ExVector &b);
 ExVector max(const Ex &a,const ExVector &b);
+ExVector min(const Ex &a,const ExVector &b);
 
 Ex dot(const ExVector &a,const ExVector &b);
 /// sqrt(dot(a,a)+additional_val)

@@ -24,11 +24,8 @@ def formulation():
 
   res = a * dot(grad(t),grad(te)) + t.diff(time) * te
   
-  print res
-  res.display_graphviz()
-  
   return res * dV + H.expr * ( t - t0.expr ) * te * dS
- 
+  
 # ).subs( time, time_steps[0] )
 #  + ( pos.expr[2] ) * ( pos.expr[0] < 1e-6 ) * te * dS + 
 # therm_penalty = Variable( interpolation='global', default_value='1e6', unit='1' )

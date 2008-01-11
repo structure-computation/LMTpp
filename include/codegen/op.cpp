@@ -145,6 +145,7 @@ Op::T Op::operation(Op::TypeEx type,Op::T a,Op::T b) {
         case Pow:       return ( b==0.0 ? (T)1.0 : pow(a,b) );
         case Atan2:     return atan2(a,b);
         case Max:       return ( a>b ? a : b );
+        case Min:       return ( a<b ? a : b );
         default:        assert( 0 );
     }
     return 0;
@@ -420,6 +421,7 @@ std::string Op::graphviz_repr() const {
         case Atan2:     return "atan2";
         
         case Max:       return "max";
+        case Min:       return "min";
         default: ;
     }
     return "Error : type not managed in graphviz_repr.";
@@ -443,6 +445,7 @@ Op::TypeEx Op::getType(const std::string &type) {
     if ( type=="pow" )   return Pow;
     if ( type=="Atan2" ) return Atan2;
     if ( type=="max" )   return Max;
+    if ( type=="min" )   return Min;
     if ( ( type[0]>='0' && type[0]<='9' ) || type[0]=='.' )
         return Number;
     return Symbol;

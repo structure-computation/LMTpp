@@ -293,6 +293,7 @@ Ex Ex::diff(const Op *op,const Ex &a,const Ex &da,const Ex &b,const Ex &db) {
         case Op::Div:       return da / b - db * a / pow(b,2);
         case Op::Pow:       return b*da*pow(a,b-1) + db*log(a)*Ex(op);
         case Op::Max:       return heavyside(b-a)*db + (1-heavyside(b-a))*da;
+        case Op::Min:       return heavyside(a-b)*db + (1-heavyside(a-b))*da;
         case Op::Atan2:     return ( db/a - da*b/(a*a) ) / ( 1+pow(b/a,2) );
         default:            assert( 0 );
     }
@@ -344,6 +345,7 @@ Ex atan(const Ex &a) { return make_function_1(Op::Atan,a.op); }
 
 Ex pow(const Ex &a,const Ex &b) { return make_function_2(Op::Pow,a.op,b.op); }
 Ex max(const Ex &a,const Ex &b) { return make_function_2(Op::Max,a.op,b.op); }
+Ex min(const Ex &a,const Ex &b) { return make_function_2(Op::Min,a.op,b.op); }
 Ex atan2(const Ex &a,const Ex &b) { return make_function_2(Op::Atan2,a.op,b.op); }
 
 Ex::T Ex::get_val() const {

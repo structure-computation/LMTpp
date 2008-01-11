@@ -57,14 +57,15 @@ public:
         Pow = 54,
         Atan2 = 55,
         
-        Max = 60
+        Max = 60,
+        Min = 61
     } TypeEx;
 
     Op();
     ~Op();
     
     static bool is_a_function_1(TypeEx type) { return ( type>=Abs && type<Add ); }
-    static bool is_a_function_2(TypeEx type) { return ( type>=Add && type<=Max ); }
+    static bool is_a_function_2(TypeEx type) { return ( type>=Add && type<=Min ); }
     static TypeEx getType(const std::string &type);
     bool is_a_function_1() const { return is_a_function_1(type); }
     bool is_a_function_2() const { return is_a_function_2(type); }
