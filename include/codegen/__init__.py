@@ -167,3 +167,4 @@ def solve_with_lu( fact, b ):
         for i in range( c ):
             res[i] -= fact[i,c] * res[c]
     return res
+

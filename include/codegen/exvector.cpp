@@ -33,6 +33,21 @@ ExVector::ExVector(const Ex &e1,const Ex &e2,const Ex &e3) {
     vec[1] = e2;
     vec[2] = e3;
 }
+ExVector::ExVector(const Ex &e1,const Ex &e2,const Ex &e3,const Ex &e4) {
+    vec.resize( 4 );
+    vec[0] = e1;
+    vec[1] = e2;
+    vec[2] = e3;
+    vec[3] = e4;
+}
+ExVector::ExVector(const Ex &e1,const Ex &e2,const Ex &e3,const Ex &e4,const Ex &e5) {
+    vec.resize( 5 );
+    vec[0] = e1;
+    vec[1] = e2;
+    vec[2] = e3;
+    vec[3] = e4;
+    vec[4] = e5;
+}
 ExVector::ExVector(const Ex &e1,const Ex &e2,const Ex &e3,const Ex &e4,const Ex &e5,const Ex &e6) {
     vec.resize( 6 );
     vec[0] = e1;
@@ -211,12 +226,14 @@ Ex dot(const ExVector &a,const ExVector &b) {
         res += a(i) * b(i);
     return res;
 }
+
 Ex norm(const ExVector &a,Ex::T additional_val) {
     Ex res;
     for(unsigned i=0;i<a.size();++i)
         res += pow(a(i),2);
     return sqrt(res+additional_val);
 }
+
 ExVector vect_prod(const ExVector &v1,const ExVector &v2) {
     assert( v1.size()==v2.size() );
     if ( v2.size()==3 )

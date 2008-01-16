@@ -292,26 +292,32 @@ public:
     ExMatrix subs(const Ex &a,const Ex &b) const;
     ExMatrix diff(const Ex &a) const;
     
+    void resize( unsigned r, unsigned c );
+    
     Ex max() const;
     Ex trace() const;
     ExMatrix transpose() const;
     Ex determinant() const;
+    ExVector solve( const ExVector &v ) const;
+    ExVector solve( const ExVector &v, const Ex &det ) const;
+    ExVector solve_regular_or_not( const ExVector &v ) const;
+    ExVector solve_with_one_at( unsigned index, const ExVector &v ) const;
+    ExVector find_eigen_values_sym() const;
+    ExMatrix find_eigen_vectors_sym( const ExVector &eigen_values ) const;
     ExVector row(unsigned c) const;
     ExVector col(unsigned c) const;
     ExMatrix without_col(unsigned col) const;
     ExMatrix without_row(unsigned row) const;
     ExMatrix inverse() const;
     ExMatrix operator-() const;
+    void add_col( const ExVector &v );
+    void add_row( const ExVector &v );
 };
     
 %extend ExMatrix {
     Ex __getitem__(std::vector<unsigned> i) { assert(i.size()==2); return (*self)(i[0],i[1]); }
     void __setitem__(std::vector<unsigned> i,const Ex &val) { assert(i.size()==2); (*self)(i[0],i[1]) = val; }
     void __setitem__(std::vector<unsigned> i,double val) { assert(i.size()==2); (*self)(i[0],i[1]) = val; }
-    
-/*     void __init__() {} */
-/*     void __init__(const ExMatrix &other) { *self = other; } */
-/*     void __init__(unsigned nb_rows=0,unsigned nb_cols=0) { *self = Codegen::ExMatrix(nb_rows,nb_cols); } */
     
     ExMatrix __add__(const ExMatrix &other) const { return *self + other; }
     ExMatrix __add__(const Ex &other) const { return *self + other; }
@@ -324,7 +330,7 @@ public:
     ExMatrix __rsub__(double other) { return other - *self; }
     
     ExVector __mul__(const ExVector &other) { return *self * other; }
-    ExMatrix __mul__(const ExMatrix &other) { return *self * other; }
+    /*     ExMatrix __mul__(const ExMatrix &other) { return *self * other; } */
     ExMatrix __mul__(const Ex &other) { return *self * other; }
     ExMatrix __mul__(double other) { return *self * other; }
     ExMatrix __rmul__(double other) { return other * *self; }

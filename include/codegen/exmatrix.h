@@ -39,6 +39,9 @@ public:
     ExMatrix diff(const Ex &a) const;
     ExMatrix diff(std::map<Ex,Ex,Ex::ExMapCmp> &m) const;
     
+    void resize( unsigned r, unsigned c );
+    
+    
     bool is_null() const;
     bool depends_on(const Ex &ex) const;
     
@@ -46,6 +49,12 @@ public:
     Ex trace() const;
     //ExMatrix transpose() const;
     Ex determinant() const;
+    ExVector solve( const ExVector &b ) const;
+    ExVector solve( const ExVector &b, const Ex &det ) const;
+    ExVector solve_regular_or_not( const ExVector &b ) const; // if matrix is singular, give a non null "solution" if b in Im(m). If not singular, give the unique solution
+    ExVector solve_with_one_at( unsigned index, const ExVector &b ) const; // solve with imposed solution[index]=1
+    ExVector find_eigen_values_sym() const; // assuming matrix is symetric
+    ExMatrix find_eigen_vectors_sym( const ExVector &eigen_values ) const;
     ExMatrix without_col(unsigned col) const;
     ExMatrix without_row(unsigned row) const;
     ExVector col(unsigned col) const;
@@ -53,6 +62,8 @@ public:
     ExMatrix inverse() const;
     ExMatrix transpose() const;
     ExMatrix operator-() const;
+    void add_col( const ExVector &v );
+    void add_row( const ExVector &v );
     
     static ExMatrix differentiate(const ExVector &ex,const ExVector &symbols);
 private:
@@ -63,12 +74,16 @@ private:
     friend Ex dot(const ExVector &a,const ExMatrix &b);
     friend Ex dot(const ExMatrix &a,const ExMatrix &b);
 };
+    
+ExVector mul( const ExMatrix &a, const ExVector &b );
+ExMatrix mul( const ExMatrix &a, const ExMatrix &b );
+
 // if mat.size()=vec.size()+1, do it the OpenGL way
 ExVector operator*(const ExMatrix &mat,const ExVector &vec);
 
 ExMatrix operator+(const ExMatrix &a,const ExMatrix &b);
 ExMatrix operator-(const ExMatrix &a,const ExMatrix &b);
-ExMatrix operator*(const ExMatrix &a,const ExMatrix &b);
+// ExMatrix operator*(const ExMatrix &a,const ExMatrix &b);
 ExMatrix operator/(const ExMatrix &a,const ExMatrix &b);
 ExMatrix operator+(const ExMatrix &a,const Ex &b);
 ExMatrix operator-(const ExMatrix &a,const Ex &b);

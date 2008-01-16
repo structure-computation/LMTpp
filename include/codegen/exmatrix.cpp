@@ -13,7 +13,12 @@
 #include <sstream>
 #include <iostream>
 #include <assert.h>
+#include <complex>
 #include "exvector.h"
+#define PRINT( A ) \
+    std::cout << "  " << __STRING(A) << std::flush << " -> " << (A) << std::endl
+#define PRINTN( A ) \
+    std::cout << "  " << __STRING(A) << std::flush << " ->\n" << (A) << std::endl
 
 namespace Codegen {
 
@@ -100,6 +105,202 @@ Ex ExMatrix::determinant() const {
         res += (1.0-2.0*(l&1)) * operator()(l,0) * Ac.without_row(l).determinant();
     return res;
 }
+
+ExVector ExMatrix::solve( const ExVector &v ) const {
+    Ex d = determinant();
+    return solve( v, d + eqz(d) );
+}
+
+ExVector ExMatrix::solve( const ExVector &v, const Ex &det ) const {
+    unsigned s = nb_rows();
+    ExVector r( s );
+    for(unsigned i=0;i<s;++i) {
+        ExMatrix m = *this;
+        for(unsigned j=0;j<s;++j)
+            m(i,j) = v[j];
+        r[i] = m.determinant() / det;
+    }
+    return r;
+}
+
+ExMatrix mul( const ExMatrix &a, const ExMatrix &b ) {
+    assert( a.nb_cols() == b.nb_rows() );
+    ExMatrix res( a.nb_rows(), b.nb_cols() );
+    for(unsigned i=0;i<a.nb_rows();++i)
+        for(unsigned j=0;j<b.nb_cols();++j)
+            for(unsigned k=0;k<a.nb_cols();++k)
+                res( i, j ) += a( i, k ) * b( k, j );
+    return res;
+}
+
+ExVector mul( const ExMatrix &mat, const ExVector &vec ) {
+    assert( mat.nb_cols() == vec.size() );
+    unsigned nr = mat.nb_rows(), nc = mat.nb_cols();
+    ExVector res(nr);
+    for(unsigned i=0;i<nr;++i)
+        for(unsigned j=0;j<nc;++j)
+            res(i) += mat(i,j) * vec(j);
+    return res;
+}
+
+ExVector ExMatrix::solve_with_one_at( unsigned index, const ExVector &b ) const {
+    ExMatrix m = without_col( index );
+    ExVector v = b - col( index );
+    ExMatrix a = mul( m.transpose(), m );
+    ExVector r = mul( m.transpose(), v );
+    ExVector tmp = a.solve_regular_or_not( r );
+    //
+    unsigned s = nb_cols();
+    ExVector res( s );
+    for(unsigned i=0;i<index;++i)
+        res[i] = tmp[i];
+    res[index] = 1;
+    for(unsigned i=index+1;i<s;++i)
+        res[i] = tmp[i-1];
+    return res;
+}
+
+ExVector find_prop_that_minimize_error( const std::vector<ExVector> &propositions, const std::vector<Ex> &errors ) {
+    ExVector res = propositions[0];
+    Ex mi = errors[0];
+    for(unsigned i=1;i<propositions.size();++i) {
+        Ex want = 1 - heaviside( errors[i] - mi );
+        mi = want * errors[i] + ( 1 - want ) * mi;
+        res = want * propositions[i] + ( 1 - want ) * res;
+    }
+    return res;
+}
+
+ExVector ExMatrix::solve_regular_or_not( const ExVector &b ) const {
+    //
+    if ( nb_cols() == 1 ) {
+        ExVector r(1); Ex d = operator()(0,0);
+        r[0] = b[0] / ( d + eqz(d) ) * ( 1 - eqz(d) ) + eqz(d);
+        return r;
+    }
+    //
+    std::vector<ExVector> propositions;
+    std::vector<Ex> errors;
+    // cramer
+    ExVector X = solve( b );
+    propositions.push_back( X );
+    errors.push_back( norm_2_squared( mul( *this, X ) - b ) );
+    // with imposed values
+    for(unsigned i=0;i<nb_rows();++i) {
+        X = solve_with_one_at( i, b );
+        propositions.push_back( X );
+        errors.push_back( norm_2_squared( mul( *this, X ) - b ) );
+    }
+    return find_prop_that_minimize_error( propositions, errors );
+}
+
+ExVector get_eig_poly( const ExMatrix &self ) {
+    unsigned s = self.nb_cols();
+    if ( s == 0 )
+        return ExVector( 0 );
+    if ( s == 1 )
+        return ExVector( self(0,0), -1 );
+    if ( s == 2 )
+        return ExVector( self(0,0) * self(1,1) - self(1,0) * self(0,1), - self(1,1) - self(0,0), 1 );
+    if ( s == 3 )
+        return ExVector(
+            self(0,0)*(self(1,1)*self(2,2)-self(2,1)*self(1,2))-self(1,0)*(self(0,1)*self(2,2)-self(2,1)*self(0,2))+self(2,0)*(self(0,1)*self(1,2)-self(1,1)*self(0,2)),
+            self(2,1) * self(1,2) + self(1,0)*self(0,1) + self(2,0)*self(0,2) - self(0,0)*(self(2,2)+self(1,1)) - self(1,1)*self(2,2),
+            self(2,2) + self(1,1) + self(0,0),
+            Ex( -1 )
+        );
+    // else -> generic case
+    Ex lambda("lambda");
+    ExMatrix md = self;
+    for(unsigned i=0;i<s;++i)
+        md(i,i) -= lambda;
+    assert( 0 /*TODO*/ );
+    ExVector res;
+    return res;
+}
+
+std::complex<Ex> powc( const std::complex<Ex> &v, double p ) {
+    Ex m = log( abs( v ) ), a = arg( v );
+    return std::exp( Ex( p ) * std::complex<Ex>( m, a ) );
+    //     return v * pow( m, p ) / ( m + eqz( m ) ) * ( 1 - eqz( m ) );
+}
+
+ExVector roots_of_poly_assumed_real( const ExVector &pol ) {
+    if ( pol.size() <= 1 )
+        return ExVector( 0 );
+    if ( pol.size() == 2 )
+        return ExVector( - pol[0] / ( pol[1] + eqz(pol[1]) ) );
+    if ( pol.size() == 3 ) {
+        Ex a = pol[2], b = pol[1], c = pol[0];
+        Ex delta = pow( b, 2 ) - 4 * a * c;
+        return ExVector(
+            ( - b - sqrt( delta ) ) / ( 2 * a ),
+            ( - b + sqrt( delta ) ) / ( 2 * a )
+        );
+    }
+    if ( pol.size() == 4 ) {
+        Ex a = pol[2] / pol[3];
+        Ex b = pol[1] / pol[3];
+        Ex c = pol[0] / pol[3];
+        Ex p = b - pow(a,2) / 3;
+        Ex q = pow(a,3) / 13.5 - a * b / 3 + c;
+        Ex delta = 4 * pow(p,3) + 27 * pow(q,2);
+        Ex trois = 3;
+        //delta >= 0
+        //         Ex u = (-27*q+sqrt(27*delta))/2;
+        //         Ex v = (-27*q-sqrt(27*delta))/2;
+        //         res += heaviside( delta ) * ExVector(
+        //             sgn(u)*pow(abs(u),1.0/3.0)+sgn(v)*pow(abs(v),1.0/3.0)-a)/3.0
+        //         );
+        //delta < 0
+        std::complex<Ex> j( -1.0/2.0, sqrt(3.0)/2.0 );
+        std::complex<Ex> v( -27.0*q/2.0, sqrt(-27.0*delta)/2.0 );
+        std::complex<Ex> u( powc( v, 1.0/3.0 ) );
+        ExVector res;
+        res.push_back( ( 2.0 * std::real(    u)-a ) / 3.0 );
+        res.push_back( ( 2.0 * std::real(  j*u)-a ) / 3.0 );
+        res.push_back( ( 2.0 * std::real(j*j*u)-a ) / 3.0 );
+        return res;
+    }
+    
+    assert( 0 /*TODO*/ );
+    return ExVector();
+}
+
+ExVector ExMatrix::find_eigen_values_sym() const {
+    assert( nb_rows() == nb_cols() );
+    unsigned s = nb_rows();
+    ExVector res( s );
+    //
+    ExVector pol = get_eig_poly( *this );
+    return roots_of_poly_assumed_real( pol );
+}
+
+ExMatrix ExMatrix::find_eigen_vectors_sym( const ExVector &eigen_values ) const {
+    unsigned s = nb_cols();
+    ExMatrix res( 0, s );
+    for(unsigned num_eig_val=0;num_eig_val<eigen_values.size();++num_eig_val) {
+        // m - lambda * Id
+        ExMatrix md = *this;
+        for(unsigned i=0;i<s;++i)
+            md(i,i) -= eigen_values[ num_eig_val ];
+        // orthogonality
+        for(unsigned num_old=0;num_old<res.nb_rows();++num_old)
+            md.add_row( res.row( num_old ) );
+        //
+        std::vector<ExVector> propositions;
+        std::vector<Ex> errors;
+        ExVector so( md.nb_rows() );
+        for(unsigned num_trial=0;num_trial<s;++num_trial) {
+            ExVector re = md.solve_with_one_at( num_trial, so );
+            propositions.push_back( re );
+            errors.push_back( norm_2_squared( mul( md, re ) - so ) );
+        }
+        res.add_row( find_prop_that_minimize_error( propositions, errors ) );
+    }
+    return res;
+}
+
 ExMatrix ExMatrix::without_col(unsigned col) const {
     ExMatrix res( nb_rows(), nb_cols()-1 );
     for(unsigned i=0;i<nb_rows();++i) {
@@ -123,16 +324,14 @@ ExMatrix ExMatrix::without_row(unsigned row) const {
 
 ExVector ExMatrix::col(unsigned c) const {
    ExVector res( nb_rows() );
-   for(unsigned i=0;i<nb_rows();++i) {
+   for(unsigned i=0;i<nb_rows();++i)
          res[i] = operator()(i,c);
-   }
    return res;
 }
 ExVector ExMatrix::row(unsigned c) const {
    ExVector res( nb_cols() );
-   for(unsigned i=0;i<nb_cols();++i) {
+   for(unsigned i=0;i<nb_cols();++i)
       res[i] = operator()(c,i);
-   }
    return res;
 }
 
@@ -190,6 +389,26 @@ bool ExMatrix::depends_on(const Ex &ex) const {
             return true;
     return false;
 
+}
+
+void ExMatrix::resize( unsigned r, unsigned c ) {
+    ExMatrix tmp( r, c );
+    for(unsigned i=0;i<std::min( r, _nb_rows );++i)
+        for(unsigned j=0;j<std::min( c, _nb_cols );++j)
+            tmp( i, j ) = operator()( i, j );
+    *this = tmp;
+}
+
+void ExMatrix::add_col( const ExVector &v ) {
+    resize( _nb_rows, _nb_cols + 1 );
+    for(unsigned i=0;i<std::min( v.size(), _nb_rows );++i)
+        operator()( i, _nb_cols-1 ) = v[i];
+}
+
+void ExMatrix::add_row( const ExVector &v ) {
+    resize( _nb_rows + 1, _nb_cols );
+    for(unsigned j=0;j<std::min( v.size(), _nb_cols );++j)
+        operator()( _nb_rows-1, j ) = v[j];
 }
 
 Ex dot(const ExMatrix &a,const ExVector &b) {
