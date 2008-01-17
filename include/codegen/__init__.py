@@ -200,3 +200,15 @@ def solve_with_chol( fact, b ):
             tmp_vec[i] -= fact[c,i] * tmp
         res[c] = tmp
     return res
+
+# inverse of m assuming m is definite positive
+def chol_inv( m ):
+    fact = chol( m )
+    s = m.nb_rows()
+    res = ExMatrix( s, 0 )
+    for i in range( s ):
+        v = ExVector( s )
+        v[i] = 1
+        res.add_col( solve_with_chol( fact, v ) )
+    return res
+
