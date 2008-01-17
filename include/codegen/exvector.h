@@ -24,12 +24,12 @@ namespace Codegen {
 class ExVector {
 public:
     explicit ExVector(unsigned size=0);
-    ExVector(const Ex &e1);
-    ExVector(const Ex &e1,const Ex &e2);
-    ExVector(const Ex &e1,const Ex &e2,const Ex &e3);
-    ExVector(const Ex &e1,const Ex &e2,const Ex &e3,const Ex &e4);
-    ExVector(const Ex &e1,const Ex &e2,const Ex &e3,const Ex &e4,const Ex &e5);
-    ExVector(const Ex &e1,const Ex &e2,const Ex &e3,const Ex &e4,const Ex &e5,const Ex &e6);
+    explicit ExVector(const Ex &e1);
+    explicit ExVector(const Ex &e1,const Ex &e2);
+    explicit ExVector(const Ex &e1,const Ex &e2,const Ex &e3);
+    explicit ExVector(const Ex &e1,const Ex &e2,const Ex &e3,const Ex &e4);
+    explicit ExVector(const Ex &e1,const Ex &e2,const Ex &e3,const Ex &e4,const Ex &e5);
+    explicit ExVector(const Ex &e1,const Ex &e2,const Ex &e3,const Ex &e4,const Ex &e5,const Ex &e6);
     Ex &operator()(unsigned i) { assert(i<vec.size()); return vec[i]; }
     const Ex &operator()(unsigned i) const { assert(i<vec.size()); return vec[i]; }
     Ex &operator[](unsigned i) { assert(i<vec.size()); return vec[i]; }
@@ -60,6 +60,9 @@ public:
     ExVector operator-=(const ExVector &a);
     ExVector operator*=(const ExVector &a);
     ExVector operator/=(const ExVector &a);
+    
+    ExVector &operator/=(const Ex &a);
+    
     static ExVector differentiate(const Ex &ex,const ExVector &symbols);
 private:
     std::vector<Ex> vec;
@@ -109,6 +112,8 @@ ExVector mini(const Ex &a,const ExVector &b);
 Ex dot(const ExVector &a,const ExVector &b);
 /// sqrt(dot(a,a)+additional_val)
 Ex norm(const ExVector &a,Ex::T additional_val=0.0);
+/// sqrt(dot(a,a)+additional_val)
+Ex norm_2(const ExVector &a,Ex::T additional_val=0.0);
 /// dot( a, a )
 inline Ex norm_2_squared( const ExVector &a ) { return dot( a, a ); }
 /// defined only in 3D

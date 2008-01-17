@@ -57,6 +57,8 @@ ExVector::ExVector(const Ex &e1,const Ex &e2,const Ex &e3,const Ex &e4,const Ex 
     vec[4] = e5;
     vec[5] = e6;
 }
+    
+ExVector &ExVector::operator/=(const Ex &a) { *this = *this / a; return *this; }
 
 bool ExVector::has(const Ex &ex) const {
     return ( std::find(vec.begin(),vec.end(),ex) != vec.end() );
@@ -228,6 +230,13 @@ Ex dot(const ExVector &a,const ExVector &b) {
 }
 
 Ex norm(const ExVector &a,Ex::T additional_val) {
+    Ex res;
+    for(unsigned i=0;i<a.size();++i)
+        res += pow(a(i),2);
+    return sqrt(res+additional_val);
+}
+
+Ex norm_2(const ExVector &a,Ex::T additional_val) {
     Ex res;
     for(unsigned i=0;i<a.size();++i)
         res += pow(a(i),2);

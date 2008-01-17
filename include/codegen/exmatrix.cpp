@@ -160,8 +160,9 @@ ExVector ExMatrix::solve_with_one_at( unsigned index, const ExVector &b ) const 
     return res;
 }
 
-ExVector find_prop_that_minimize_error( const std::vector<ExVector> &propositions, const std::vector<Ex> &errors ) {
-    ExVector res = propositions[0];
+template<class T>
+T find_prop_that_minimize_error( const std::vector<T> &propositions, const std::vector<Ex> &errors ) {
+    T res = propositions[0];
     Ex mi = errors[0];
     for(unsigned i=1;i<propositions.size();++i) {
         Ex want = 1 - heaviside( errors[i] - mi );
@@ -267,6 +268,39 @@ ExVector roots_of_poly_assumed_real( const ExVector &pol ) {
     return ExVector();
 }
 
+Ex one_root_of_poly_assumed_real( const ExVector &pol ) {
+    if ( pol.size() <= 1 )
+        return 0;
+    if ( pol.size() == 2 )
+        return - pol[0] / ( pol[1] + eqz(pol[1]) );
+    if ( pol.size() == 3 ) {
+        Ex a = pol[2], b = pol[1], c = pol[0];
+        Ex delta = pow( b, 2 ) - 4 * a * c;
+        return ( - b + sqrt( delta ) ) / ( 2 * a );
+    }
+    if ( pol.size() == 4 ) {
+        Ex a = pol[2] / pol[3];
+        Ex b = pol[1] / pol[3];
+        Ex c = pol[0] / pol[3];
+        Ex p = b - pow(a,2) / 3;
+        Ex q = pow(a,3) / 13.5 - a * b / 3 + c;
+        Ex delta = 4 * pow(p,3) + 27 * pow(q,2);
+        Ex trois = 3;
+        //delta >= 0
+        //         Ex u = (-27*q+sqrt(27*delta))/2;
+        //         Ex v = (-27*q-sqrt(27*delta))/2;
+        //         res += heaviside( delta ) * ExVector(
+        //             sgn(u)*pow(abs(u),1.0/3.0)+sgn(v)*pow(abs(v),1.0/3.0)-a)/3.0
+        //         );
+        //delta < 0
+        std::complex<Ex> v( -27.0*q/2.0, sqrt(-27.0*delta)/2.0 );
+        std::complex<Ex> u( powc( v, 1.0/3.0 ) );
+        return ( 2.0 * std::real(u)-a ) / 3.0;
+    }
+    assert( 0 /*TODO*/ );
+    return 0;
+}
+
 ExVector ExMatrix::find_eigen_values_sym() const {
     assert( nb_rows() == nb_cols() );
     unsigned s = nb_rows();
@@ -276,9 +310,15 @@ ExVector ExMatrix::find_eigen_values_sym() const {
     return roots_of_poly_assumed_real( pol );
 }
 
+Ex ExMatrix::find_one_eigen_value_sym() const {
+    ExVector pol = get_eig_poly( *this );
+    return one_root_of_poly_assumed_real( pol );
+}
+
 ExMatrix ExMatrix::find_eigen_vectors_sym( const ExVector &eigen_values ) const {
     unsigned s = nb_cols();
     ExMatrix res( 0, s );
+    //
     for(unsigned num_eig_val=0;num_eig_val<eigen_values.size();++num_eig_val) {
         // m - lambda * Id
         ExMatrix md = *this;
@@ -299,6 +339,54 @@ ExMatrix ExMatrix::find_eigen_vectors_sym( const ExVector &eigen_values ) const 
         res.add_row( find_prop_that_minimize_error( propositions, errors ) );
     }
     return res;
+}
+
+ExMatrix ExMatrix::find_eigen_vectors_sym_bis() const {
+    if ( nb_rows() != 3 ) {
+        ExVector eigen_values = find_eigen_values_sym();
+        return find_eigen_vectors_sym( eigen_values );
+    }
+    Ex val_1 = find_one_eigen_value_sym();
+    unsigned s = nb_cols();
+    // m - lambda * Id
+    ExMatrix md = *this;
+    for(unsigned i=0;i<s;++i)
+        md(i,i) -= val_1;
+        
+    //
+    std::vector<ExMatrix> propositions;
+    std::vector<Ex> errors;
+    ExVector so( md.nb_rows() );
+    for(unsigned num_trial=0;num_trial<s;++num_trial) {
+        ExVector u1 = md.solve_with_one_at( num_trial, so );
+        u1 /= norm_2( u1 );
+        //
+        ExVector v2( s ), v3( s );
+        v2[ ( num_trial + 1 ) % s ] = 1;
+        v3[ ( num_trial + 2 ) % s ] = 1;
+        v2 -= dot( v2, u1 ) * u1;
+        v2 /= norm_2( v2 );
+        v3 -= dot( v3, u1 ) * u1;
+        v3 -= dot( v3, v2 ) * v2;
+        v3 /= norm_2( v3 );
+        //
+        Ex a = dot( v2, mul( *this, v2 ) );
+        Ex b = dot( v2, mul( *this, v3 ) );
+        Ex c = dot( v3, mul( *this, v3 ) );
+        Ex t = atan2( 2 * b, a - c ) / 2;
+        Ex co = cos( t );
+        Ex si = sin( t );
+        ExVector u2 =  co * v2 + si * v3;
+        ExVector u3 = -si * v2 + co * v3;
+        //
+        ExMatrix P( s, 0 );
+        P.add_col( u1 );
+        P.add_col( u2 );
+        P.add_col( u3 );
+        propositions.push_back( P );
+        errors.push_back( norm_2_squared( mul( md, u1 ) - so ) );
+    }
+    return find_prop_that_minimize_error( propositions, errors );
 }
 
 ExMatrix ExMatrix::without_col(unsigned col) const {

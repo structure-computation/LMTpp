@@ -304,6 +304,7 @@ public:
     ExVector solve_with_one_at( unsigned index, const ExVector &v ) const;
     ExVector find_eigen_values_sym() const;
     ExMatrix find_eigen_vectors_sym( const ExVector &eigen_values ) const;
+    ExMatrix find_eigen_vectors_sym_bis() const;
     ExVector row(unsigned c) const;
     ExVector col(unsigned c) const;
     ExMatrix without_col(unsigned col) const;
