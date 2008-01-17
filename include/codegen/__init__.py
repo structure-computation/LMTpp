@@ -168,3 +168,35 @@ def solve_with_lu( fact, b ):
             res[i] -= fact[i,c] * res[c]
     return res
 
+def chol( mat ):
+    assert( mat.nb_rows() == mat.nb_cols() )
+    s = mat.nb_cols()
+    fact = ExMatrix( s, s )
+    for row in range( s ):
+        for col in range( row + 1 ):
+            tmp = mat[ row, col ]
+            for i in range( col ):
+                tmp -= fact[ col, i ] * fact[ row, i ]
+            if row == col:
+                fact[ row, col ] = 1 / sqrt( tmp )
+            else:
+                fact[ row, col ] = tmp * fact[ col, col ]
+    return fact
+
+def solve_with_chol( fact, b ):
+    s = fact.nb_rows()
+    #
+    res = ExVector( b.size() )
+    for r in range( s ):
+        v = b[r]
+        for i in range( r ):
+            v -= fact[r,i] * res[i]
+        res[r] = v * fact[r,r]
+    #
+    tmp_vec = res
+    for c in range( fact.nb_cols()-1, -1, -1 ):
+        tmp = tmp_vec[c] * fact[c,c]
+        for i in range( c ):
+            tmp_vec[i] -= fact[c,i] * tmp
+        res[c] = tmp
+    return res
