@@ -32,6 +32,14 @@ Write_code &Write_code::add( const Ex &ex, const std::string &name, Method metho
     return *this;
 }
 
+unsigned Write_code::node_count() const {
+    ++Ex::current_id;
+    unsigned res = 0;
+    for(unsigned i=0;i<lst_var.size();++i)
+        res += lst_var[i].ex.op->node_count_rec( Ex::current_id );
+    return res;
+}
+
 void Write_code::set_node_order() {
     node_order.resize( nodes.size() );
     unsigned i = 0;

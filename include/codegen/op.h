@@ -72,7 +72,7 @@ public:
     float priority() const;
     std::string to_string() const;
     std::string graphviz_repr() const;
-    
+    unsigned node_count_rec(long unsigned current_id) const;
     
 //private:
     mutable long unsigned id;

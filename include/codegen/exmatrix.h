@@ -41,7 +41,6 @@ public:
     
     void resize( unsigned r, unsigned c );
     
-    
     bool is_null() const;
     bool depends_on(const Ex &ex) const;
     
@@ -61,6 +60,7 @@ public:
     ExMatrix without_row(unsigned row) const;
     ExVector col(unsigned col) const;
     ExVector row(unsigned row) const;
+    ExVector diag() const;
     ExMatrix inverse() const;
     ExMatrix transpose() const;
     ExMatrix operator-() const;

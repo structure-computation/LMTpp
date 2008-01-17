@@ -14,6 +14,7 @@
 #include <iostream>
 #include <assert.h>
 #include <complex>
+#include <set>
 #include "exvector.h"
 #define PRINT( A ) \
     std::cout << "  " << __STRING(A) << std::flush << " -> " << (A) << std::endl
@@ -315,30 +316,67 @@ Ex ExMatrix::find_one_eigen_value_sym() const {
     return one_root_of_poly_assumed_real( pol );
 }
 
+/*
+    return 
+*/
 ExMatrix ExMatrix::find_eigen_vectors_sym( const ExVector &eigen_values ) const {
-    unsigned s = nb_cols();
-    ExMatrix res( 0, s );
-    //
-    for(unsigned num_eig_val=0;num_eig_val<eigen_values.size();++num_eig_val) {
+    unsigned s = nb_rows(); assert( nb_rows() == nb_cols() );
+        
+    // the last eigen_value will fill the matrix -> proposition and orthonormalization
+    //     if ( eigen_vectors.nb_cols() == eigen_vectors.nb_rows() + 1 ) {
+    //         assert( remaining_indices.size() == 1 );
+    //         ExVector eig_vec( s ); eig_vec[ remaining_indices[0] ] = 1;
+    //         for(unsigned i=0;i<eigen_vectors.nb_cols();++i)
+    //             eig_vec -= dot( eig_vec, eigen_vectors[i] ) * eigen_vectors[i];
+    //         eigen_vectors.add_col( eig_vec / norm_2( eig_vec ) );
+    //         return;
+    //     }
+    ExMatrix eigen_vectors( s, 0 );
+    ExVector sum_of_want_vector( s );
+    for(unsigned num_eig_val=0;num_eig_val < std::min( eigen_values.size(), s-1 );++num_eig_val) {
+        //
+        Ex eig_val = eigen_values[ num_eig_val ];
+    
         // m - lambda * Id
         ExMatrix md = *this;
         for(unsigned i=0;i<s;++i)
-            md(i,i) -= eigen_values[ num_eig_val ];
+            md(i,i) -= eig_val;
         // orthogonality
-        for(unsigned num_old=0;num_old<res.nb_rows();++num_old)
-            md.add_row( res.row( num_old ) );
+        for(unsigned num_old=0;num_old<eigen_vectors.nb_cols();++num_old)
+            md.add_row( eigen_vectors.col(num_old) );
+    
         //
         std::vector<ExVector> propositions;
         std::vector<Ex> errors;
         ExVector so( md.nb_rows() );
+        ExVector best_eig_vec( s );
+        Ex min_error;
+        ExVector want_vector( s );
         for(unsigned num_trial=0;num_trial<s;++num_trial) {
-            ExVector re = md.solve_with_one_at( num_trial, so );
-            propositions.push_back( re );
-            errors.push_back( norm_2_squared( mul( md, re ) - so ) );
+            ExVector eig_vec_proposition = md.solve_with_one_at( num_trial, so );
+            Ex error = norm_2_squared( mul( md, eig_vec_proposition ) - so );
+            //
+            Ex want = ( num_trial == 0 ? 1 : 1 - heaviside( error - min_error ) );
+            min_error = want * error + ( 1 - want ) * min_error;
+            best_eig_vec = want * eig_vec_proposition + ( 1 - want ) * best_eig_vec;
+            ExVector one_at_num_trial( s ); one_at_num_trial[ num_trial ] = 1;
+            want_vector = want * one_at_num_trial + ( 1 - want ) * want_vector;
         }
-        res.add_row( find_prop_that_minimize_error( propositions, errors ) );
+        sum_of_want_vector += want_vector;
+        best_eig_vec /= norm_2( best_eig_vec );
+        eigen_vectors.add_col( best_eig_vec );
     }
-    return res;
+    
+    // last eig vec
+    if ( eigen_values.size() == s ) {
+        ExVector eig_vec_proposition = 1 - sum_of_want_vector;
+        for(unsigned num_old=0;num_old<eigen_vectors.nb_cols();++num_old)
+            eig_vec_proposition -= dot( eig_vec_proposition, eigen_vectors.col(num_old) ) * eigen_vectors.col(num_old);
+        eig_vec_proposition /= norm_2( eig_vec_proposition );
+        eigen_vectors.add_col( eig_vec_proposition );
+    }
+        
+    return eigen_vectors;
 }
 
 ExMatrix ExMatrix::find_eigen_vectors_sym_bis() const {
@@ -423,6 +461,12 @@ ExVector ExMatrix::row(unsigned c) const {
    return res;
 }
 
+ExVector ExMatrix::diag() const {
+   ExVector res( nb_cols() );
+   for(unsigned i=0;i<nb_cols();++i)
+      res[i] = operator()(i,i);
+   return res;
+}
 
 
 ExMatrix ExMatrix::inverse() const {

@@ -307,6 +307,7 @@ public:
     ExMatrix find_eigen_vectors_sym_bis() const;
     ExVector row(unsigned c) const;
     ExVector col(unsigned c) const;
+    ExVector diag() const;
     ExMatrix without_col(unsigned col) const;
     ExMatrix without_row(unsigned row) const;
     ExMatrix inverse() const;
@@ -390,6 +391,7 @@ public:
     Write_code(const char *default_type="T",unsigned nb_spaces=4);
     enum Method {Declare,Set,Add,Sub,Return}; 
     void add( const Ex &ex, const std::string &name, Method method=Declare );
+    unsigned node_count() const;
     std::string to_string();
 };
 %extend Write_code {

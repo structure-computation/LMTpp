@@ -121,8 +121,8 @@ public:
     bool operator<(const Ex &e) const { return ( op < e.op ); }
     
     const Op *op;
-private:
     static long unsigned current_id;
+private:
     
     void diff_rec() const;
     void subs_rec() const;

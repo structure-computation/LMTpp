@@ -37,6 +37,8 @@ public:
     /// update nodes and leaves.
     Write_code &add( const Ex &ex, const std::string &name, Method method=Declare );
     std::string to_string();    
+    unsigned node_count() const;
+    
     std::vector<Var> lst_var;
     
 private:
