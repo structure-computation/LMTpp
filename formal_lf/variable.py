@@ -18,22 +18,22 @@ class Variable:
   def extr(self,test_expr=False): return self.extrapolation( (self.nb_der+self.sup_nb_der)*(not test_expr) )
     
   def type_to_str(self,in_vec,vec_size):
-    if len(self.T): res = self.T
-    elif len(self.nb_dim)==1: res = "Vec<Tpos,"+str(self.nb_dim[0])+">"
-    elif len(self.nb_dim)==2: res = "Mat<Tpos,Gen<"+str(self.nb_dim[0])+","+str(self.nb_dim[1])+"> >"
-    else: res = "Tpos"
-    
-    if in_vec: res = 'Vec<' + res + ',' + str( vec_size ) + '>'
-    return res
+        if len(self.T): res = self.T
+        elif len(self.nb_dim)==1: res = "Vec<Tpos,"+str(self.nb_dim[0])+">"
+        elif len(self.nb_dim)==2: res = "Mat<Tpos,Gen<"+str(self.nb_dim[0])+","+str(self.nb_dim[1])+"> >"
+        else: res = "Tpos"
+        
+        if in_vec: res = 'Vec<' + res + ',' + str( vec_size ) + '>'
+        return res
 
   def nb_elements(self):
-    res = 1
-    for i in self.nb_dim: res *= i
-    return res
+        res = 1
+        for i in self.nb_dim: res *= i
+        return res
 
   def join(self, obj):
-    self.nb_der = max( self.nb_der, obj.nb_der )
-    obj.nb_der = max( self.nb_der, obj.nb_der )
+        self.nb_der = max( self.nb_der, obj.nb_der )
+        obj.nb_der = max( self.nb_der, obj.nb_der )
 
   def get_scalar_expr(self,name_var,interpolation,element,num_element,symbols,test_expr=False):
     """ Fill gnagna.expr for all gnagna in variables """
