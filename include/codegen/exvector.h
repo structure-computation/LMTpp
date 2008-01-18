@@ -109,6 +109,9 @@ ExVector pow(const Ex &a,const ExVector &b);
 ExVector max(const Ex &a,const ExVector &b);
 ExVector mini(const Ex &a,const ExVector &b);
 
+ExVector pos_part(const ExVector &a);
+ExVector neg_part(const ExVector &a);
+
 Ex dot(const ExVector &a,const ExVector &b);
 /// sqrt(dot(a,a)+additional_val)
 Ex norm(const ExVector &a,Ex::T additional_val=0.0);

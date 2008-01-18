@@ -260,5 +260,13 @@ std::ostream &operator<<(std::ostream &os,const Codegen::ExVector &vec) {
     return os;
 }
 
+ExVector pos_part(const ExVector &a) {
+    return a * heaviside( a );
+}
+
+ExVector neg_part(const ExVector &a) {
+    return a * heaviside( - a );
+}
+
 };
 

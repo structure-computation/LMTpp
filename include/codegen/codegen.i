@@ -242,6 +242,7 @@ public:
     ExVector subs(const Ex &f,double t) const { return self->subs(f,Codegen::number(t)); }
 };
     
+ExVector sqrt(const ExVector &a);
 ExVector abs(const ExVector &a);
 ExVector heavyside(const ExVector &a);
 ExVector heavyside_if(const ExVector &a);
@@ -259,6 +260,9 @@ ExVector asin(const ExVector &a);
 ExVector acos(const ExVector &a);
 ExVector atan(const ExVector &a);
     
+ExVector pos_part(const ExVector &a);
+ExVector neg_part(const ExVector &a);
+
 ExVector max(const ExVector &a,const ExVector &b);
 ExVector max(const ExVector &a,const Ex &b);
 ExVector max(const Ex &a,const ExVector &b);

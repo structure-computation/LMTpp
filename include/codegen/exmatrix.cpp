@@ -239,6 +239,12 @@ std::complex<Ex> powc( const std::complex<Ex> &v, double p ) {
     //     return v * pow( m, p ) / ( m + eqz( m ) ) * ( 1 - eqz( m ) );
 }
 
+std::complex<Ex> sqrtc( const Ex &v ) {
+    Ex s = sqrt( abs( v ) );
+    Ex p = heaviside( v );
+    return std::complex<Ex>( s * p, s * ( 1 - p ) );
+}
+
 ExVector roots_of_poly_assumed_real( const ExVector &pol ) {
     if ( pol.size() <= 1 )
         return ExVector( 0 );
@@ -253,9 +259,10 @@ ExVector roots_of_poly_assumed_real( const ExVector &pol ) {
         );
     }
     if ( pol.size() == 4 ) {
-        Ex a = pol[2] / pol[3];
-        Ex b = pol[1] / pol[3];
-        Ex c = pol[0] / pol[3];
+        Ex z = pol[3] + eqz( pol[3] );
+        Ex a = pol[2] / z;
+        Ex b = pol[1] / z;
+        Ex c = pol[0] / z;
         Ex p = b - pow(a,2) / 3;
         Ex q = pow(a,3) / 13.5 - a * b / 3 + c;
         Ex delta = 4 * pow(p,3) + 27 * pow(q,2);
@@ -268,12 +275,13 @@ ExVector roots_of_poly_assumed_real( const ExVector &pol ) {
         //         );
         //delta < 0
         std::complex<Ex> j( -1.0/2.0, sqrt(3.0)/2.0 );
-        std::complex<Ex> v( -27.0*q/2.0, sqrt(-27.0*delta)/2.0 );
+        std::complex<Ex> v( -27.0*q/2.0, 0 );
+        v += sqrtc( - 27.0 * delta ) / Ex( 2.0 ) * std::complex<Ex>( 0, 1 );
         std::complex<Ex> u( powc( v, 1.0/3.0 ) );
         ExVector res;
-        res.push_back( ( 2.0 * std::real(    u)-a ) / 3.0 );
-        res.push_back( ( 2.0 * std::real(  j*u)-a ) / 3.0 );
-        res.push_back( ( 2.0 * std::real(j*j*u)-a ) / 3.0 );
+        res.push_back( ( 2.0 * std::real(    u) - a ) / 3.0 );
+        res.push_back( ( 2.0 * std::real(  j*u) - a ) / 3.0 );
+        res.push_back( ( 2.0 * std::real(j*j*u) - a ) / 3.0 );
         return res;
     }
     
