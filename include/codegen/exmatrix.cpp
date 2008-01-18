@@ -144,8 +144,13 @@ ExVector mul( const ExMatrix &mat, const ExVector &vec ) {
     return res;
 }
 
-ExVector ExMatrix::solve_with_one_at( unsigned index, const ExVector &b ) const {
+ExVector ExMatrix::solve_with_one_at( unsigned index, const ExVector &b, bool zero_at_the_beginning ) const {
     ExMatrix m = without_col( index );
+    //
+    if ( zero_at_the_beginning )
+        for(unsigned i=0;i<index;++i)
+            m = m.without_col( 0 );
+    
     ExVector v = b - col( index );
     ExMatrix a = mul( m.transpose(), m );
     ExVector r = mul( m.transpose(), v );
@@ -153,11 +158,18 @@ ExVector ExMatrix::solve_with_one_at( unsigned index, const ExVector &b ) const 
     //
     unsigned s = nb_cols();
     ExVector res( s );
-    for(unsigned i=0;i<index;++i)
-        res[i] = tmp[i];
-    res[index] = 1;
-    for(unsigned i=index+1;i<s;++i)
-        res[i] = tmp[i-1];
+    if ( zero_at_the_beginning ) {
+        res[index] = 1;
+        for(unsigned i=index+1,cpt=0;i<s;++i)
+            res[i] = tmp[cpt++];
+    }
+    else {
+        for(unsigned i=0;i<index;++i)
+            res[i] = tmp[i];
+        res[index] = 1;
+        for(unsigned i=index+1;i<s;++i)
+            res[i] = tmp[i-1];
+    }
     return res;
 }
 
@@ -298,6 +310,7 @@ Ex one_root_of_poly_assumed_real( const ExVector &pol ) {
         std::complex<Ex> u( powc( v, 1.0/3.0 ) );
         return ( 2.0 * std::real(u)-a ) / 3.0;
     }
+    
     assert( 0 /*TODO*/ );
     return 0;
 }
@@ -322,15 +335,6 @@ Ex ExMatrix::find_one_eigen_value_sym() const {
 ExMatrix ExMatrix::find_eigen_vectors_sym( const ExVector &eigen_values ) const {
     unsigned s = nb_rows(); assert( nb_rows() == nb_cols() );
         
-    // the last eigen_value will fill the matrix -> proposition and orthonormalization
-    //     if ( eigen_vectors.nb_cols() == eigen_vectors.nb_rows() + 1 ) {
-    //         assert( remaining_indices.size() == 1 );
-    //         ExVector eig_vec( s ); eig_vec[ remaining_indices[0] ] = 1;
-    //         for(unsigned i=0;i<eigen_vectors.nb_cols();++i)
-    //             eig_vec -= dot( eig_vec, eigen_vectors[i] ) * eigen_vectors[i];
-    //         eigen_vectors.add_col( eig_vec / norm_2( eig_vec ) );
-    //         return;
-    //     }
     ExMatrix eigen_vectors( s, 0 );
     ExVector sum_of_want_vector( s );
     for(unsigned num_eig_val=0;num_eig_val < std::min( eigen_values.size(), s-1 );++num_eig_val) {
@@ -353,14 +357,15 @@ ExMatrix ExMatrix::find_eigen_vectors_sym( const ExVector &eigen_values ) const 
         Ex min_error;
         ExVector want_vector( s );
         for(unsigned num_trial=0;num_trial<s;++num_trial) {
-            ExVector eig_vec_proposition = md.solve_with_one_at( num_trial, so );
-            Ex error = norm_2_squared( mul( md, eig_vec_proposition ) - so );
+            ExVector eig_vec_proposition = md.solve_with_one_at( num_trial, so, true );
             //
+            Ex error = norm_2_squared( mul( md, eig_vec_proposition ) - so );
             Ex want = ( num_trial == 0 ? 1 : 1 - heaviside( error - min_error ) );
-            min_error = want * error + ( 1 - want ) * min_error;
-            best_eig_vec = want * eig_vec_proposition + ( 1 - want ) * best_eig_vec;
+            min_error = min_error + want * ( error - min_error );
+            best_eig_vec = best_eig_vec + want * ( eig_vec_proposition - best_eig_vec );
+            //
             ExVector one_at_num_trial( s ); one_at_num_trial[ num_trial ] = 1;
-            want_vector = want * one_at_num_trial + ( 1 - want ) * want_vector;
+            want_vector = want_vector + want * ( one_at_num_trial - want_vector );
         }
         sum_of_want_vector += want_vector;
         best_eig_vec /= norm_2( best_eig_vec );
@@ -369,14 +374,62 @@ ExMatrix ExMatrix::find_eigen_vectors_sym( const ExVector &eigen_values ) const 
     
     // last eig vec
     if ( eigen_values.size() == s ) {
-        ExVector eig_vec_proposition = 1 - sum_of_want_vector;
-        for(unsigned num_old=0;num_old<eigen_vectors.nb_cols();++num_old)
-            eig_vec_proposition -= dot( eig_vec_proposition, eigen_vectors.col(num_old) ) * eigen_vectors.col(num_old);
-        eig_vec_proposition /= norm_2( eig_vec_proposition );
-        eigen_vectors.add_col( eig_vec_proposition );
+        if ( s == 1 )
+            eigen_vectors.add_col( ExVector( Ex(1) ) );
+        else if ( s == 2 )
+            eigen_vectors.add_col( ExVector( -eigen_vectors(1,0), eigen_vectors(0,0) ) );
+        else if ( s == 3 )
+            eigen_vectors.add_col( vect_prod( eigen_vectors.col(0), eigen_vectors.col(1) ) );
+        else {
+            ExVector eig_vec_proposition = 1 - sum_of_want_vector;
+            for(unsigned num_old=0;num_old<eigen_vectors.nb_cols();++num_old)
+                eig_vec_proposition -= dot( eig_vec_proposition, eigen_vectors.col(num_old) ) * eigen_vectors.col(num_old);
+            eig_vec_proposition /= norm_2( eig_vec_proposition );
+            eigen_vectors.add_col( eig_vec_proposition );
+        }
     }
         
     return eigen_vectors;
+}
+
+ExMatrix ExMatrix::ldl() const {
+    assert( nb_rows() == nb_cols() );
+    unsigned s = nb_rows();
+    ExMatrix fact = *this;
+    for(unsigned j=0;j<s;++j) {
+        ExVector v( s );
+        for(unsigned i=0;i<j;++i)
+            v[i] = fact( j, i ) * fact( i, i );
+        for(unsigned i=0;i<j;++i)
+            v[j] = fact( j, i ) * v[i];
+        fact( j, j ) = v[ j ];
+        //
+        for(unsigned k=j+1;k<s;++k) {
+            for(unsigned i=0;i<j;++i)
+                fact( k, j ) -= fact( k, i ) * v[i];
+            fact( k, j ) /= v[j];
+        }
+        //         Ex d = fact( row, row );
+        //         fact( row, row ) = 1 / ( d + eqz( d ) ) * ( 1 - eqz( d ) );
+    }
+    return fact;
+}
+
+ExVector ExMatrix::solve_using_ldl( const ExVector &b ) const {
+    unsigned s = nb_rows();
+    // L
+    ExVector res = b;
+    for(unsigned r=0;r<s;++r)
+        for(unsigned c=0;c<r;++c)
+            res[r] -= operator()(r,c) * res[c];
+    // D
+    for(unsigned r=0;r<s;++r)
+        res[r] *= operator()(r,r);
+    // L^T
+    for(int c=s-1;c>=0;--c)
+        for(unsigned r=0;r<c;++r)
+            res[r] -= operator()(c,r) * res[c];
+    return res;
 }
 
 ExMatrix ExMatrix::find_eigen_vectors_sym_bis() const {

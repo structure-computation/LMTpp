@@ -298,10 +298,12 @@ public:
     Ex trace() const;
     ExMatrix transpose() const;
     Ex determinant() const;
+    ExMatrix ldl() const;
+    ExVector solve_using_ldl( const ExVector &b ) const;
     ExVector solve( const ExVector &v ) const;
     ExVector solve( const ExVector &v, const Ex &det ) const;
     ExVector solve_regular_or_not( const ExVector &v ) const;
-    ExVector solve_with_one_at( unsigned index, const ExVector &v ) const;
+    ExVector solve_with_one_at( unsigned index, const ExVector &v, bool zero_at_the_beginning = false ) const;
     ExVector find_eigen_values_sym() const;
     ExMatrix find_eigen_vectors_sym( const ExVector &eigen_values ) const;
     ExMatrix find_eigen_vectors_sym_bis() const;

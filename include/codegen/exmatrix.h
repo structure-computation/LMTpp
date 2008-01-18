@@ -48,10 +48,12 @@ public:
     Ex trace() const;
     //ExMatrix transpose() const;
     Ex determinant() const;
+    ExMatrix ldl() const;
+    ExVector solve_using_ldl( const ExVector &b ) const;
     ExVector solve( const ExVector &b ) const;
     ExVector solve( const ExVector &b, const Ex &det ) const;
     ExVector solve_regular_or_not( const ExVector &b ) const; // if matrix is singular, give a non null "solution" if b in Im(m). If not singular, give the unique solution
-    ExVector solve_with_one_at( unsigned index, const ExVector &b ) const; // solve with imposed solution[index]=1
+    ExVector solve_with_one_at( unsigned index, const ExVector &b, bool zero_at_the_beginning = false ) const; // solve with imposed solution[index]=1
     ExVector find_eigen_values_sym() const; // assuming matrix is symetric
     Ex       find_one_eigen_value_sym() const; // assuming matrix is symetric
     ExMatrix find_eigen_vectors_sym( const ExVector &eigen_values ) const;
