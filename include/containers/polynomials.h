@@ -19,6 +19,10 @@ namespace LMT {
   @author Gouttebroze
 */
 
+/////////////////////////////////////////////////////////////////////////////////
+// DEFINITION DE LA CLASSE POLYNOME MULTIVARIABLES ET DE SES FONCTIONS MEMBRES //
+/////////////////////////////////////////////////////////////////////////////////
+
 template <int nd=4, int nx=1, class T=double>
 class Pol {
 private:
@@ -39,8 +43,6 @@ public:
     Pol ();
 //     template <class T2> Pol (const T2 &a); //Construit le polynome constant egal a a
     Pol (const T &a); ///Construit le polynome constant egal a a
-    Pol (int a); ///Construit le polynome constant egal a a
-    Pol (unsigned int a); ///Construit le polynome constant egal a a
     Pol (const Vec<T> &V); ///Construit le polynome a partir de ses coefficients
     template <class T2> Pol (const Pol<nd,nx,T2> &P); ///Construit un polynome a partir d'un autre polynome de meme degre
 //     template <int nd2> Pol (const Pol<nd2,nx,T> &P); Construit un polynome a partir d'un polynome de degre maximal different
@@ -49,8 +51,9 @@ public:
     const Vec<T> &coefficients() const {return coefs;} ///Renvoie les coefficients du polynome
     const Vec<Vec<unsigned,nx> > &powers() const {return puissances;} ///Renvoie les puissances du polynome
     template <class T2> typename TypePromote<Multiplies,T,T2>::T operator() (const Vec<T2,nx> &V) const; /// Renvoie la valeur du polynome en V
-    Vec<Pol<nd-1,nx,T>,nx> derivative() const; ///Renvoie les polynomes derives
-    operator bool() const {return true;};
+    typedef Pol<nd-1,nx,T> Derivative;
+    Vec<Derivative,nx> derivative() const; ///Renvoie les polynomes derives
+    operator bool() const {return true;}
     Pol<nd,nx,T> operator-() const; ///Renvoie le polynome oppose;
     template <class T2> bool operator== (const Pol<nd,nx,T2> &P) const; /// Verifie si le polynome est egal a P
     template <class T2> bool operator!= (const Pol<nd,nx,T2> &P) const; /// Verifie si le polynome est different de P
@@ -253,22 +256,6 @@ Pol<nd,nx,T>::Pol(const T &a) {
 }
 
 template <int nd, int nx, class T>
-Pol<nd,nx,T>::Pol(int a) {
-    if (init)
-        initialize();
-    coefs.resize(puissances.size(),T(0));
-    coefs[0]=a;
-}
-
-template <int nd, int nx, class T>
-Pol<nd,nx,T>::Pol(unsigned int a) {
-    if (init)
-        initialize();
-    coefs.resize(puissances.size(),T(0));
-    coefs[0]=a;
-}
-
-template <int nd, int nx, class T>
 Pol<nd,nx,T>::Pol(const Vec<T> &V) {
     if (init)
         initialize();
@@ -325,16 +312,17 @@ typename TypePromote<Multiplies,T,T2>::T Pol<nd,nx,T>::operator() (const Vec<T2,
 }
 
 template <int nd, int nx, class T>
-Vec<Pol<nd-1,nx,T>,nx> Pol<nd,nx,T>::derivative() const {
-    Vec<Pol<nd-1,nx,T>,nx> res;
+Vec<typename Pol<nd,nx,T>::Derivative,nx> Pol<nd,nx,T>::derivative() const {
+    Vec<Derivative,nx> res;
     Vec<Vec<T>,nx> res_vec;
     for (int i=0;i<nx;i++)
         res_vec[i].resize(res[i].puissances.size());
-    for (int i=1;i<deriv_ind.size();i++)
+    for (int i=1;i<deriv_ind.size();i++) {
         for (int j=0;j<deriv_ind[i].size();j++)
             res_vec[deriv_var[i][j]][deriv_ind[i][j]]=deriv_coef[i][j]*coefs[i];
+    }
     for (int i=0;i<nx;i++)
-        res[i]=Pol<nd-1,nx,T>(res_vec[i]);
+        res[i]=Derivative(res_vec[i]);
     return res;
 }
 
@@ -367,9 +355,9 @@ void Pol<nd,nx,T>::operator-= (const Pol<nd,nx,T2> &P) {
     coefs-=P.coefficients();
 }
 
-/////////////////////////////////////////////////////////////////////
-// DEFINITION DES FONCTIONS GLOBALES EN RAPPORT AVEC DES POLYNOMES //
-/////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+// DEFINITION DES FONCTIONS GLOBALES EN RAPPORT AVEC DES POLYNOMES MULTIVARIABLES //
+////////////////////////////////////////////////////////////////////////////////////
 
 template <int nd, int nx, class T1, class T2>
 Pol<nd,nx,typename TypePromote<Plus,T1,T2>::T> operator+(const Pol<nd,nx,T1> &P, const Pol<nd,nx,T2> &Q) {
@@ -451,7 +439,7 @@ typename TypePromote<Abs,T>::T abs_indication(const Pol<nd,nx,T> &P) {
 }
 
 template <int nd, int nx, class T>
-Pol<nd,nx,typename TypePromote<Conj,T>::T> conj( const Pol<nd,nx,T> &P ) {
+Pol<nd,nx,typename TypePromote<Conj,T>::T> conj(const Pol<nd,nx,T> &P) {
     return Pol<nd,nx,typename TypePromote<Conj,T>::T>( conj(P.coefficients()) );
 }
 
@@ -513,10 +501,8 @@ class Pol<nd,1,T> {
 private:
     Vec<T> coefs;
 public:
-    Pol () {};
+    Pol () {}
     Pol (const Vec<T> &V); ///Construit un polynome a partir de ses coeficients
-    Pol (int a); ///Construit le polynome constant egal a a
-    Pol (unsigned int a); ///Construit le polynome constant egal a a
     Pol (const T &a); ///Construit un polynome constant egal a a
     Pol (const T &a, const T &b); ///Construit un polynome du 1er degre
     Pol (const T &a, const T &b, const T &c); ///Construit un polynome du 2eme degre
@@ -529,13 +515,12 @@ public:
     template <int nd_, class T_> Pol<nd,1,T> &operator= (const Pol<nd_,1,T_> &P); ///Renvoie un polynome egal a P
     const Vec<T> &coefficients() const {return coefs;} ///Renvoie les coefficients du polynome
     Vec<Vec<unsigned,1> > powers() const; ///Renvoie les puissances du polynome
-    int degree() const {return coefs.size()-1;} ///Renvoie le degre du polynome
-    template <class T2> typename TypePromote<Multiplies,T,T2>::T operator() (T2 x) const;  ///Renvoie la valeur du polynome en x
+    template <class T2> typename TypePromote<Multiplies,T,T2>::T operator() (const T2 &x) const;  ///Renvoie la valeur du polynome en x
     template <class T2> typename TypePromote<Multiplies,T,T2>::T operator() (const Vec<T2,1> &V) const; ///Renvoie le vecteur des valeurs du polynome en toutes les valeurs de V
     template <class T2> Vec<typename TypePromote<Multiplies,T,T2>::T> operator() (const Vec<T2> &V) const; ///Renvoie le vecteur des valeurs du polynome en toutes les valeurs de V
-    T coef_max() const; ///Renvoie le plus grand coefficient en valeur absolue
     Pol<nd,1,T> operator-() const {return Pol<nd,1,T>(-coefs);} ///Renvoie le polynome oppose;
-    Pol<nd-1,1,T> derivative() const; ///Renvoie le polynome derivee
+    typedef Pol<nd-1,1,T> Derivative;
+    Derivative derivative() const; ///Renvoie le polynome derivee
     Pol<nd,1,T> integral (const T &a) const; ///Renvoie le polynome integrale qui prend a comme valeur en 0
     int MaxPositivesRoots() const; ///Renvoie le nombre maximal de racines positives
     int MaxNegativesRoots() const; ///Renvoie le nombre maximal de racines negatives
@@ -544,11 +529,12 @@ public:
     Pol<nd,1,T> remainder(const Pol<nd,1,T> &P) const; ///Renvoie le reste de la division par un polynome
     T root_dichotomy (T a,T b) const; ///Cherche une racine par dichotomie entre a et b
     Vec<T> roots() const; ///Renvoie les racines du polynome
-    T Newton(T d) const; ///Cherche une racine par l'algorithme de Newton en partant de d
-    operator bool() const {return true;};
-    bool constant() const {return coefs.size()==1;}; ///Indique si le polynome est constant
-    bool operator==(const T &t) const ; ///Indique si le polynome est egal a t
-    bool operator!=(const T &t) const ; ///Indique si le polynome est different de t
+    T newton(const T &d, bool b, int imax) const; ///Cherche une racine par l'algorithme de Newton en partant de d
+    T householder(const T &d, bool b, int imax) const; ///Cherche une racine par l'algorithme de Householder en partant de d
+    operator bool() const {return true;}
+    bool constant() const {return coefs.size()==1;} ///Indique si le polynome est constant
+    bool operator==(const T &t) const; ///Indique si le polynome est egal a t
+    bool operator!=(const T &t) const; ///Indique si le polynome est different de t
     template <class T1> bool operator==(const T1 &d) const; ///Regarde si le polynome est different de d
     template <class T1> bool operator!=(const T1 &d) const; ///Regarde si le polynome est different de d
     template <class T2> void operator+=(const T2 &t); ///Ajoute t au polynome
@@ -556,23 +542,13 @@ public:
     template <int nd2, class T2> void operator+=(const Pol<nd2,1,T2> &Q); ///Ajoute Q au polynome
     template <int nd2, class T2> void operator-=(const Pol<nd2,1,T2> &Q); ///Retranche Q au polynome
     template <class T2> void operator*=(const T2 &t); ///Multiplie le polynome par t
-    void operator/=(const T &t) {coefs/=t;}; ///Divise le polynome par t
+    void operator/=(const T &t) {coefs/=t;} ///Divise le polynome par t
     template <class T2> T2 troncate(const T2 &c, const T2 &d, const T2 &r, int nmax); ///Tronque le polynome autour de c pour avec un residu inferieur a r sur un intervalle de taille 2d
 };
 
 template <int nd, class T>
 Pol<nd,1,T>::Pol(const Vec<T> &V) {
     coefs=V;
-}
-
-template <int nd, class T>
-Pol<nd,1,T>::Pol (int a) {
-    coefs.resize(1,a);
-}
-
-template <int nd, class T>
-Pol<nd,1,T>::Pol (unsigned int a) {
-    coefs.resize(1,a);
 }
 
 template <int nd, class T>
@@ -644,8 +620,7 @@ Pol<nd,1,T>::Pol (const T &a, const T &b, const T &c, const T &d, const T &e, co
     if(nd>0) coefs[1]=b;
     if(nd>1) coefs[2]=c;
     if(nd>2) coefs[3]=d;
-    if(nd>3) coefs[4]=e;// template <int nd, int nx, class T>
-// Vec<Vec<unsigned,nx> > Pol<nd,nx,T>::puissances;
+    if(nd>3) coefs[4]=e;
     if(nd>4) coefs[5]=f;
     if(nd>5) coefs[6]=g;
     if(nd>6) coefs[7]=h;
@@ -677,7 +652,7 @@ Vec<Vec<unsigned,1> > Pol<nd,1,T>::powers() const{
 
 template <int nd, class T>
 template <class T2>
-typename TypePromote<Multiplies,T,T2>::T Pol<nd,1,T>::operator() (T2 x) const {
+typename TypePromote<Multiplies,T,T2>::T Pol<nd,1,T>::operator() (const T2 &x) const {
     typedef typename TypePromote<Multiplies,T,T2>::T TR;
     using namespace std;
     TR res = coefs[0];
@@ -709,32 +684,20 @@ Vec<typename TypePromote<Multiplies,T,T2>::T> Pol<nd,1,T>::operator() (const Vec
 }
 
 template <int nd, class T>
-T Pol<nd,1,T>::coef_max () const {
-    T res=abs(coefs[0]);
-    for (int i=1;i<=degree();i++)
-        if (res<abs(coefs[i]))
-            res=abs(coefs[i]);
-    return res;
-}
-
-template <int nd, class T>
-Pol<nd-1,1,T> Pol<nd,1,T>::derivative() const {
+typename Pol<nd,1,T>::Derivative Pol<nd,1,T>::derivative() const {
+    if (coefs.size()==1)
+        return Derivative(T(0));
     Vec<T> coefficientsDerivee;
-    if (degree()==0)
-        coefficientsDerivee.resize(1,0);
-    if (degree()>0) {
-        coefficientsDerivee.resize(degree());
-        for (unsigned i=0;i<coefficientsDerivee.size();i++)
-            coefficientsDerivee[i]=coefs[i+1]*(i+1);
-    };
-    Pol<nd,1,T> res(coefficientsDerivee);
-    return res;
-};
+    coefficientsDerivee.resize(coefs.size()-1);
+    for (unsigned i=0;i<coefficientsDerivee.size();i++)
+        coefficientsDerivee[i]=coefs[i+1]*(i+1);
+    return Derivative(coefficientsDerivee);
+}
 
 template <int nd, class T>
 Pol<nd,1,T> Pol<nd,1,T>::integral(const T &a) const {
     Vec<T> coefficientsintegrale;
-    coefficientsintegrale.resize(degree()+2);
+    coefficientsintegrale.resize(coefs.size()+1);
     coefficientsintegrale[0]=a;
     for (int i=1;i<coefficientsintegrale.size();i++)
         coefficientsintegrale[i]=coefs[i-1]/i;
@@ -776,40 +739,12 @@ int Pol<nd,1,T>::MaxNegativesRoots() const {
 
 template <int nd, class T>
 T Pol<nd,1,T>::RootsUpperBound() const {
-    T res=0;
-    T L=1+abs(coef_max());
-    Pol<nd,1,T> P=*this;
-    const Vec<T> &p=P.coefficients();
-    while (P.MaxPositivesRoots()>0) {
-        Vec<T> q=p;
-        for (int i=p.size()-2;i>=0;i--)
-            q[i]=p[i]+L*q[i+1];
-        Pol<nd,1,T> Q(q);
-        P=Q;
-        if (P.MaxPositivesRoots()==0)
-            res=L;
-        L=2*L;
-    }
-    return res;
+    return T(1)+norm_inf(coefs/coefs[coefs.size()-1]);
 }
 
 template <int nd, class T>
 T Pol<nd,1,T>::RootsLowerBound() const {
-    T res=0;
-    T L=-1-abs(coef_max());
-    Pol<nd,1,T> P=*this;
-    const Vec<T> &p=P.coefficients();
-    while (P.MaxNegativesRoots()>0) {
-        Vec<T> q=p;
-        for (int i=p.size()-2;i>=0;i--)
-            q[i]=p[i]+L*q[i+1];
-        Pol<nd,1,T> Q(q);
-        P=Q;
-        if (P.MaxNegativesRoots()==0)
-            res=L;
-        L=2*L;
-    }
-    return res;
+    return -T(1)-norm_inf(coefs/coefs[coefs.size()-1]);
 }
 
 template <int nd, class T>
@@ -822,8 +757,6 @@ T Pol<nd,1,T>::root_dichotomy (T a,T b) const {
     T e=max(a,b);
     while ((e-c)/(abs(e)+abs(c))>5*std::numeric_limits<T>::epsilon()) {
         T d=(c+e)/2;
-        // cout << "e vaut " << e << endl;
-        // cout << "c vaut " << c << endl;
         if (sgn(operator()(d))==sgn(operator()(c)))
             c=d;
         else
@@ -835,7 +768,7 @@ T Pol<nd,1,T>::root_dichotomy (T a,T b) const {
 template <int nd, class T>
 Pol<nd,1,T> Pol<nd,1,T>::remainder(const Pol<nd,1,T> &D) const {
     Vec<T> r=coefs;
-    if (D.degree()<=degree()) {
+    if (D.coefficients().size()<=coefs.size()) {
         Vec<T> d=D.coefficients();
         for (unsigned i=1;i<=coefs.size()-d.size()+1;i++) {
             T aux=r[r.size()-1]/d[d.size()-1];
@@ -844,7 +777,8 @@ Pol<nd,1,T> Pol<nd,1,T>::remainder(const Pol<nd,1,T> &D) const {
                 r[r.size()-d.size()+j+1]-=aux*d[j];
         }
     }
-    while (r.size()>1 and r[r.size()-1]==0)
+    T norm=norm_inf(coefs);
+    while (r.size()>1 and abs(r[r.size()-1])/norm<std::numeric_limits<T>::epsilon())
         r.erase_elem_nb(r.size()-1);
     return Pol<nd,1,T>(r);
 }
@@ -853,19 +787,18 @@ template <int nd, class T>
 Vec<T> Pol<nd,1,T>::roots () const {
     using namespace std;
     Vec<T> res;
-    res.resize(0);
-    if (degree()==1)
+    if (coefs.size()==2)
         res.push_back(-coefs[0]/coefs[1]);
-    if (degree()==2) {
+    else if (coefs.size()==3) {
         T delta=coefs[1]*coefs[1]-4*coefs[0]*coefs[2];
         if (delta==0)
             res.push_back(-0.5*coefs[1]/coefs[2]);
         if (delta>0) {
             res.push_back(-0.5*(coefs[1]+sqrt(delta))/coefs[2]);
             res.push_back(-0.5*(coefs[1]-sqrt(delta))/coefs[2]);
-        };
-    };
-    if (degree()==3) {
+        }
+    }
+    else if (coefs.size()==4) {
         T a=coefs[2]/coefs[3];
         T b=coefs[1]/coefs[3];
         T c=coefs[0]/coefs[3];
@@ -877,7 +810,7 @@ Vec<T> Pol<nd,1,T>::roots () const {
             T u=(-27*q+sqrt(27*delta))/2;
             T v=(-27*q-sqrt(27*delta))/2;
             res.push_back((sgn(u)*::pow(std::abs(u),1.0/trois)+sgn(v)*::pow(std::abs(v),1.0/trois)-a)/3);
-        };
+        }
         if (delta<0) {
             complex<T> j(-1/2.,sqrt(3.)/2.);
             complex<T> v(-27.*q/2.,sqrt(-27*delta)/2.);
@@ -886,22 +819,24 @@ Vec<T> Pol<nd,1,T>::roots () const {
             res.push_back((2*std::real(j*u)-a)/3);
             res.push_back((2*std::real(j*j*u)-a)/3);
             sort(res);
-        };
-    };
-    if (degree()>3) {
+        }
+    }
+    else if (coefs.size()>4) {
         if (coefs[0]!=0) {
-            Vec<Pol<nd-1,1,T> > Sturm(*this,derivative());
-            while (Sturm[Sturm.size()-1].degree()>0)
+            Vec<Pol<nd,1,T> > Sturm(*this,derivative());
+            while (Sturm[Sturm.size()-1].coefficients().size()>1)
                 Sturm.push_back(-Sturm[Sturm.size()-2].remainder(Sturm[Sturm.size()-1]));
             Vec<T> X(RootsLowerBound(),RootsUpperBound());
             int diffmax=2;
             while(diffmax>1) {
                 Vec<int> deltas;
                 deltas.resize(X.size(),0);
-                for (unsigned i=0;i<X.size();i++)
-                    for (unsigned j=1;j<Sturm.size();j++)
+                for (unsigned i=0;i<X.size();i++){
+                    for (unsigned j=1;j<Sturm.size();j++) {
                         if (sgn(Sturm[j-1](X[i]))!=sgn(Sturm[j](X[i])))
                             deltas[i]++;
+                    }
+                }
                 Vec<int> diffs;
                 diffs.resize(deltas.size()/2,0);
                 Vec<T> X2;
@@ -922,11 +857,16 @@ Vec<T> Pol<nd,1,T>::roots () const {
                 X=X2;
             }
             for (unsigned i=0;i<X.size()/2;i++) {
-                T r=Newton((X[2*i]+X[2*i+1])/2);
-                if (r<X[2*i] or r>X[2*i+1])
+                bool b=0;
+                T r=newton((X[2*i]+X[2*i+1])/2,b);
+                if ((r<X[2*i] or r>X[2*i+1]) or b) {
+                    b=0;
+                    r=householder((X[2*i]+X[2*i+1])/2,b);
+                }
+                if ((r<X[2*i] or r>X[2*i+1]) or b)
                     r=root_dichotomy(X[2*i],X[2*i+1]);
                 res.push_back(r);
-            };
+            }
         }
         else {
             Vec<T> aux=coefs;
@@ -940,20 +880,42 @@ Vec<T> Pol<nd,1,T>::roots () const {
             res.push_back(0);
             res.append(r);
         }
-    };
+    }
     return res;
 }
 
 template <int nd, class T>
-T Pol<nd,1,T>::Newton (T d) const {
+T Pol<nd,1,T>::newton (const T &d, bool c=0, int imax=100) const {
     T a=d;
     T b=d-1;
-    Pol<nd-1,1,T> Q=derivative();
-    while (abs(a-b)/max(abs(a),abs(b))>100*std::numeric_limits<T>::epsilon()) {
-        T aux=a;
-        b=aux;
-        a=b-operator()(b)/Q(b);
-    };
+    Derivative Q=derivative();
+    int compteur=0;
+    while (abs(a-b)/max(abs(a),abs(b))>100*std::numeric_limits<T>::epsilon()&&compteur<imax) {
+        b=a;
+        a-=operator()(a)/Q(a);
+        compteur++;
+    }
+    if (compteur==imax)
+        bool c=1;
+    return a;
+}
+
+template <int nd, class T>
+T Pol<nd,1,T>::householder (const T &d, bool c=0, int imax=100) const {
+    T a=d;
+    T b=d-1;
+    Derivative Q=derivative();
+    typename Derivative::Derivative R=Q.derivative();
+    int compteur=0;
+    while (abs(a-b)/max(abs(a),abs(b))>100*std::numeric_limits<T>::epsilon()&&compteur<imax) {
+        b=a;
+        T pa=operator()(a);
+        T qa=Q(a);
+        a-=(pa/qa)*(1+(pa*R(a))/(2*pow(qa,2)));
+        compteur++;
+    }
+    if (compteur==imax)
+        bool c=1;
     return a;
 }
 
@@ -1086,9 +1048,9 @@ void Pol<nd,1,T>::operator*=(const T2 &t) {
     Pol<nd,1,T> Q(t);
     Vec<T> q=Q.coefficients();
     if ((coefs.size()==1 and coefs[0]==0) or (q.size()==1 and q[0]==0))
-        r.resize(1,0);
+        r.resize(1,T(0));
     else {
-        r.resize(coefs.size()+q.size()-1,0);
+        r.resize(coefs.size()+q.size()-1,T(0));
         for (int i=0;i<min(q.size(),coefs.size());i++)
             for (int j=0;j<=i;j++)
                 r[i]+=coefs[j]*q[i-j];
@@ -1099,7 +1061,7 @@ void Pol<nd,1,T>::operator*=(const T2 &t) {
             for (int i=q.size();i<r.size();i++)
                 for (int j=i-q.size()+1;j<coefs.size();j++)
                     r[i]+=coefs[j]*q[i-j];
-        };
+        }
         if (coefs.size()>q.size()) {
             for (int i=q.size();i<coefs.size();i++)
                 for (int j=0;j<q.size();j++)
@@ -1107,8 +1069,8 @@ void Pol<nd,1,T>::operator*=(const T2 &t) {
             for (int i=coefs.size();i<r.size();i++)
                 for (int j=i-coefs.size()+1;j<q.size();j++)
                     r[i]+=q[j]*coefs[i-j];
-        };
-    };
+        }
+    }
     coefs=r;
 }
 
@@ -1145,7 +1107,7 @@ Pol<(nd1>nd2?nd2:nd1),1,typename TypePromote<Plus,T1,T2>::T> operator+(const Pol
     if (q.size()>p.size())
         for (unsigned i=p.size();i<r.size();i++)
             r[i]=q[i];
-    if (p.size()>q.size())
+    else if (p.size()>q.size())
         for (unsigned i=q.size();i<r.size();i++)
             r[i]=p[i];
     while(r.size()>1 and r[r.size()-1]==0)
@@ -1165,7 +1127,7 @@ Pol<(nd1>nd2?nd2:nd1),1,T> operator+(const Pol<nd1,1,T> &P, const Pol<nd2,1,T> &
     if (q.size()>p.size())
         for (unsigned i=p.size();i<r.size();i++)
             r[i]=q[i];
-    if (p.size()>q.size())
+    else if (p.size()>q.size())
         for (unsigned i=q.size();i<r.size();i++)
             r[i]=p[i];
     while(r.size()>1 and r[r.size()-1]==0)
@@ -1185,7 +1147,7 @@ Pol<nd,1,T> operator+(const Pol<nd,1,T> &P, const Pol<nd,1,T> &Q) {
     if (q.size()>p.size())
         for (unsigned i=p.size();i<r.size();i++)
             r[i]=q[i];
-    if (p.size()>q.size())
+    else if (p.size()>q.size())
         for (unsigned i=q.size();i<r.size();i++)
             r[i]=p[i];
     while(r.size()>1 and r[r.size()-1]==T(0))
@@ -1215,7 +1177,7 @@ Pol<(nd1>nd2?nd2:nd1),1,typename TypePromote<Minus,T1,T2>::T> operator-(const Po
     if (q.size()>p.size())
         for (int i=p.size();i<r.size();i++)
             r[i]=-q[i];
-    if (p.size()>q.size())
+    else if (p.size()>q.size())
         for (int i=q.size();i<r.size();i++)
             r[i]=p[i];
     while(r.size()>1 and r[r.size()-1]==0)
@@ -1255,7 +1217,7 @@ Pol<nd,1,T> operator-(const Pol<nd,1,T> &P, const Pol<nd,1,T> &Q) {
     if (q.size()>p.size())
         for (int i=p.size();i<r.size();i++)
             r[i]=-q[i];
-    if (p.size()>q.size())
+    else if (p.size()>q.size())
         for (int i=q.size();i<r.size();i++)
             r[i]=p[i];
     while(r.size()>1 and r[r.size()-1]==T(0))
@@ -1284,7 +1246,7 @@ Pol<(nd1>nd2?nd2:nd1),1,typename TypePromote<Multiplies,T1,T2>::T> operator*(con
         Vec<typename TypePromote<Multiplies,T1,T2>::T> r;
         const Vec<T1> &p = P.coefficients();
         const Vec<T2> &q = Q.coefficients();
-        r.resize(p.size()+q.size()-1,0);
+        r.resize(p.size()+q.size()-1,typename TypePromote<Multiplies,T1,T2>::T(0));
         for (int i=0;i<min(q.size(),p.size());i++)
             for (int j=0;j<=i;j++)
                 r[i]+=p[j]*q[i-j];
@@ -1295,7 +1257,7 @@ Pol<(nd1>nd2?nd2:nd1),1,typename TypePromote<Multiplies,T1,T2>::T> operator*(con
             for (int i=q.size();i<r.size();i++)
                 for (int j=i-q.size()+1;j<p.size();j++)
                     r[i]+=p[j]*q[i-j];
-        };
+        }
         if (p.size()>q.size()) {
             for (int i=q.size();i<p.size();i++)
                 for (int j=0;j<q.size();j++)
@@ -1303,9 +1265,9 @@ Pol<(nd1>nd2?nd2:nd1),1,typename TypePromote<Multiplies,T1,T2>::T> operator*(con
             for (int i=p.size();i<r.size();i++)
                 for (int j=i-p.size()+1;j<q.size();j++)
                     r[i]+=q[j]*p[i-j];
-        };
+        }
         return Pol<(nd1>nd2?nd2:nd1),1,typename TypePromote<Multiplies,T1,T2>::T>( r );
-    };
+    }
 }
 
 template <int nd1, int nd2, class T>
@@ -1318,7 +1280,7 @@ Pol<(nd1>nd2?nd2:nd1),1,T> operator*(const Pol<nd1,1,T> &P, const Pol<nd2,1,T> &
         Vec<T> r;
         const Vec<T> &p = P.coefficients();
         const Vec<T> &q = Q.coefficients();
-        r.resize(p.size()+q.size()-1,0);
+        r.resize(p.size()+q.size()-1,T(0));
         for (int i=0;i<min(q.size(),p.size());i++)
             for (int j=0;j<=i;j++)
                 r[i]+=p[j]*q[i-j];
@@ -1329,7 +1291,7 @@ Pol<(nd1>nd2?nd2:nd1),1,T> operator*(const Pol<nd1,1,T> &P, const Pol<nd2,1,T> &
             for (int i=q.size();i<r.size();i++)
                 for (int j=i-q.size()+1;j<p.size();j++)
                     r[i]+=p[j]*q[i-j];
-        };
+        }
         if (p.size()>q.size()) {
             for (int i=q.size();i<p.size();i++)
                 for (int j=0;j<q.size();j++)
@@ -1337,9 +1299,9 @@ Pol<(nd1>nd2?nd2:nd1),1,T> operator*(const Pol<nd1,1,T> &P, const Pol<nd2,1,T> &
             for (int i=p.size();i<r.size();i++)
                 for (int j=i-p.size()+1;j<q.size();j++)
                     r[i]+=q[j]*p[i-j];
-        };
+        }
         return Pol<nd1+nd2,1,T>( r );
-    };
+    }
 }
 
 template <int nd, class T1, class T2>
@@ -1352,7 +1314,7 @@ Pol<nd,1,typename TypePromote<Multiplies,T1,T2>::T> operator*(const Pol<nd,1,T1>
         Vec<typename TypePromote<Multiplies,T1,T2>::T> r;
         const Vec<T1> &p = P.coefficients();
         const Vec<T2> &q = Q.coefficients();
-        r.resize(p.size()+q.size()-1,0);
+        r.resize(p.size()+q.size()-1,typename TypePromote<Multiplies,T1,T2>::T(0));
         for (int i=0;i<min(q.size(),p.size());i++)
             for (int j=0;j<=i;j++)
                 r[i]+=p[j]*q[i-j];
@@ -1363,7 +1325,7 @@ Pol<nd,1,typename TypePromote<Multiplies,T1,T2>::T> operator*(const Pol<nd,1,T1>
             for (int i=q.size();i<r.size();i++)
                 for (int j=i-q.size()+1;j<p.size();j++)
                     r[i]+=p[j]*q[i-j];
-        };
+        }
         if (p.size()>q.size()) {
             for (int i=q.size();i<p.size();i++)
                 for (int j=0;j<q.size();j++)
@@ -1371,9 +1333,9 @@ Pol<nd,1,typename TypePromote<Multiplies,T1,T2>::T> operator*(const Pol<nd,1,T1>
             for (int i=p.size();i<r.size();i++)
                 for (int j=i-p.size()+1;j<q.size();j++)
                     r[i]+=q[j]*p[i-j];
-        };
+        }
         return Pol<nd,1,typename TypePromote<Multiplies,T1,T2>::T>( r );
-    };
+    }
 }
 
 template <int nd, class T>
@@ -1386,7 +1348,7 @@ Pol<nd,1,T> operator*(const Pol<nd,1,T> &P, const Pol<nd,1,T> &Q) {
         Vec<T> r;
         const Vec<T> &p = P.coefficients();
         const Vec<T> &q = Q.coefficients();
-        r.resize(p.size()+q.size()-1,0);
+        r.resize(p.size()+q.size()-1,T(0));
         for (int i=0;i<min(q.size(),p.size());i++)
             for (int j=0;j<=i;j++)
                 r[i]+=p[j]*q[i-j];
@@ -1397,7 +1359,7 @@ Pol<nd,1,T> operator*(const Pol<nd,1,T> &P, const Pol<nd,1,T> &Q) {
             for (int i=q.size();i<r.size();i++)
                 for (int j=i-q.size()+1;j<p.size();j++)
                     r[i]+=p[j]*q[i-j];
-        };
+        }
         if (p.size()>q.size()) {
             for (int i=q.size();i<p.size();i++)
                 for (int j=0;j<q.size();j++)
@@ -1405,9 +1367,9 @@ Pol<nd,1,T> operator*(const Pol<nd,1,T> &P, const Pol<nd,1,T> &Q) {
             for (int i=p.size();i<r.size();i++)
                 for (int j=i-p.size()+1;j<q.size();j++)
                     r[i]+=q[j]*p[i-j];
-        };
+        }
         return Pol<nd,1,T>( r );
-    };
+    }
 }
 
 // template <int nd1, class T1, class T2>
@@ -1586,9 +1548,9 @@ std::ostream &operator<<(std::ostream &os, const Pol<nd,1,std::complex<T> > &P) 
     return os;
 }
 
-/////////////////////////////////////////
-// LE TRUC QU'HUGO M'A DIT DE RAJOUTER //
-/////////////////////////////////////////
+///////////////////////////
+// PROPAGATION DES TYPES //
+///////////////////////////
 
 template<int m, int n,class TT> struct TypeInformation<Pol<m,n,TT> > {
     static const int res = TypeInformation<TT>::res;
