@@ -279,6 +279,7 @@ Ex Ex::diff(const Op *op,const Ex &a,const Ex &da) {
         case Op::Asin:      return da*pow(1-pow(a,2),-(T)0.5);
         case Op::Acos:      return -da*pow(1-pow(a,2),-(T)0.5);
         case Op::Atan:      return da/(1+pow(a,2));
+        case Op::Dirac:     return number( 0.0 ); // assert( 0 /* interdit, le prof de math va vous pizzater */ );
         default:            assert( 0 );
     }
     return 0;
@@ -342,6 +343,8 @@ Ex neg(const Ex &a) { return make_function_1(Op::Neg,a.op); }
 Ex asin(const Ex &a) { return make_function_1(Op::Asin,a.op); }
 Ex acos(const Ex &a) { return make_function_1(Op::Acos,a.op); }
 Ex atan(const Ex &a) { return make_function_1(Op::Atan,a.op); }
+
+Ex dirac(const Ex &a) { return make_function_1(Op::Dirac,a.op); }
 
 Ex pow(const Ex &a,const Ex &b) { return make_function_2(Op::Pow,a.op,b.op); }
 Ex max(const Ex &a,const Ex &b) { return make_function_2(Op::Max,a.op,b.op); }
@@ -458,6 +461,26 @@ Ex integration(const Ex &expr,const Ex &v,const Ex &beg,const Ex &end,unsigned d
     Ex disc = expr.find_discontinuity( v );
     if ( disc.op->type != Op::Number ) {
         Ex ch = disc.op->data.children[0];
+        
+        //
+        Ex mid = ( beg + end ) / 2;
+        std::vector<Ex> expansion_ = taylor_expansion( ch, v, 2, mid );
+        Ex a_0 = expansion_[0], a_1 = expansion_[1];
+        Ex cut = mid - a_0 / ( a_1 + eqz( a_1 ) );
+        
+        
+        // Dirac
+        if ( disc.op->type == Op::Dirac ) {
+            std::cout << "-> " << expr << std::endl;
+            std::cout << a_0  << std::endl;
+            std::cout << a_1  << std::endl;
+            
+            Ex cb = heaviside( cut - beg );
+            Ex ce = heaviside( cut - end );
+            return expr.subs( disc, 1 ).subs( v, cut ) * ( 1 - eqz( a_1 ) ) * ( cb + ce - 2 * cb * ce ) + 
+                   integration( expr.subs( disc, dirac( a_0 ) ), v, beg, end ) * eqz( a_1 );
+        }
+        
         //
         Ex subs_n;
         Ex subs_p;
@@ -478,11 +501,6 @@ Ex integration(const Ex &expr,const Ex &v,const Ex &beg,const Ex &end,unsigned d
             default:
                 assert( 0 );
         }
-        //
-        Ex mid = ( beg + end ) / 2;
-        std::vector<Ex> expansion_ = taylor_expansion( ch, v, 2, mid );
-        Ex cut = mid - expansion_[0] / ( expansion_[1] + eqz( expansion_[1] ) );
-        
         
         Ex p_beg = heaviside( ch.subs( v, beg ) );
         Ex p_end = heaviside( ch.subs( v, end ) );

@@ -10,6 +10,7 @@ namespace Codegen {
     inline double heavyside_if(double a) { return (a>=0); }
     inline double heaviside(double a) { return (a>=0); }
     inline double heaviside_if(double a) { return (a>=0); }
+    inline double dirac(double a) { return (a==0); }
     inline double sqrt(double a) { return ::sqrt(a); }
     inline double sin(double a) { return ::sin(a); }
     inline double cos(double a) { return ::cos(a); }
@@ -45,6 +46,7 @@ namespace Codegen {
 
 double heavyside(double a);
 double heaviside(double a);
+double dirac(double a);
 double sqrt(double NONNEGATIVE);
 double sin(double);
 double cos(double);
@@ -110,6 +112,7 @@ Ex heavyside(const Ex &a);
 Ex heavyside_if(const Ex &a);
 Ex heaviside(const Ex &a);
 Ex heaviside_if(const Ex &a);
+Ex dirac(const Ex &a);
 Ex sqrt(const Ex &a);
 Ex sin(const Ex &a);
 Ex cos(const Ex &a);

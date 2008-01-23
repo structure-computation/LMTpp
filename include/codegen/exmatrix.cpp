@@ -234,9 +234,9 @@ ExVector get_eig_poly( const ExMatrix &self ) {
 }
 
 std::complex<Ex> powc( const std::complex<Ex> &v, double p ) {
-    Ex m = log( abs( v ) ), a = arg( v );
-    return std::exp( Ex( p ) * std::complex<Ex>( m, a ) );
-    //     return v * pow( m, p ) / ( m + eqz( m ) ) * ( 1 - eqz( m ) );
+    Ex a = v.real() * v.real() + v.imag() * v.imag();
+    Ex m = log( a + eqz( a ) ) / 2, ar = arg( v );
+    return std::exp( Ex( p ) * std::complex<Ex>( m, ar ) );
 }
 
 std::complex<Ex> sqrtc( const Ex &v ) {
@@ -366,6 +366,7 @@ ExMatrix ExMatrix::find_eigen_vectors_sym( const ExVector &eigen_values ) const 
         ExVector want_vector( s );
         for(unsigned num_trial=0;num_trial<s;++num_trial) {
             ExVector eig_vec_proposition = md.solve_with_one_at( num_trial, so, true );
+            eig_vec_proposition /= norm_2( eig_vec_proposition );
             //
             Ex error = norm_2_squared( mul( md, eig_vec_proposition ) - so );
             Ex want = ( num_trial == 0 ? 1 : 1 - heaviside( error - min_error ) );
@@ -376,7 +377,7 @@ ExMatrix ExMatrix::find_eigen_vectors_sym( const ExVector &eigen_values ) const 
             want_vector = want_vector + want * ( one_at_num_trial - want_vector );
         }
         sum_of_want_vector += want_vector;
-        best_eig_vec /= norm_2( best_eig_vec );
+        // best_eig_vec /= norm_2( best_eig_vec );
         eigen_vectors.add_col( best_eig_vec );
     }
     

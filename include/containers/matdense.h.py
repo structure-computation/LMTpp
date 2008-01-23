@@ -121,8 +121,11 @@ public:
         }
     #endif
 
-    T &operator[](unsigned index) { return data[ index ]; }
-    const T &operator[](unsigned index) const { return data[ index ]; }
+    TT &operator[](unsigned index) { return data[ index ]; }
+    const TT &operator[](unsigned index) const { return data[ index ]; }
+    
+    TT &operator[](int index) { return data[ index ]; }
+    const TT &operator[](int index) const { return data[ index ]; }
     
     void clear() { data.set((TT)0); } /// set all values to 0
     

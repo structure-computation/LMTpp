@@ -120,6 +120,7 @@ Op::T Op::operation(Op::TypeEx type,Op::T a) {
         case Abs:       return std::abs(a);
         case Heavyside: return (a>=0);
         case Heavyside_if: return (a>=0);
+        case Dirac:     return (a==0);
         case Eqz:       return (a==0);
         case Sin:       return sin(a);
         case Cos:       return cos(a);
@@ -407,6 +408,7 @@ std::string Op::graphviz_repr() const {
         case Abs:       return "abs";
         case Heavyside: return "heavyside";
         case Heavyside_if: return "heavyside_if";
+        case Dirac:     return "dirac";
         case Eqz:       return "eqz";
         case Sin:       return "sin";
         case Cos:       return "cos";
@@ -430,6 +432,7 @@ Op::TypeEx Op::getType(const std::string &type) {
     if ( type=="abs" ) return Abs;
     if ( type=="heavyside" ) return Heavyside;
     if ( type=="heavyside_if" ) return Heavyside_if;
+    if ( type=="dirac" ) return Dirac;
     if ( type=="eqz" ) return Eqz;
     if ( type=="sin" ) return Sin;
     if ( type=="cos" ) return Cos;
@@ -492,7 +495,7 @@ void Op::find_discontinuities( long unsigned current_id, std::vector<const Op *>
     if ( id != current_id ) {
         id = current_id;
         if ( is_a_function_1() ) {
-            if ( type == Heavyside or type == Heavyside_if or type == Abs or type == Sgn )
+            if ( type == Heavyside or type == Heavyside_if or type == Abs or type == Sgn or type == Dirac )
                 lst.push_back( this ); 
             //
             data.children[0]->find_discontinuities( current_id, lst );

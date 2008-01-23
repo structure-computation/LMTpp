@@ -209,6 +209,8 @@ Ex neg(const Ex &a);
 Ex asin(const Ex &a);       
 Ex acos(const Ex &a);       
 Ex atan(const Ex &a);       
+
+Ex dirac(const Ex &a);       
                             
 Ex pow(const Ex &a,const Ex &b);
 Ex mini(const Ex &a,const Ex &b);

@@ -49,6 +49,8 @@ public:
         Exp = 22,
         Heavyside_if = 23,
         
+        Dirac = 24,
+        
         // functions with 2 variables
         Add = 50,
         Sub = 51,
