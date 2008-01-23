@@ -549,11 +549,15 @@ public:
 template <int nd, class T>
 Pol<nd,1,T>::Pol(const Vec<T> &V) {
     coefs=V;
+    while(coefs.size()>1 and coefs[coefs.size()-1]==0)
+        coefs.pop_back();
 }
 
 template <int nd, class T>
 Pol<nd,1,T>::Pol (const T &a) {
     coefs.resize(1,a);
+    while(coefs.size()>1 and coefs[coefs.size()-1]==0)
+        coefs.pop_back();
 }
 
 template <int nd, class T>
@@ -561,6 +565,8 @@ Pol<nd,1,T>::Pol (const T &a, const T &b) {
     coefs.resize(min(2,nd+1));
     coefs[0]=a;
     if(nd>0) coefs[1]=b;
+    while(coefs.size()>1 and coefs[coefs.size()-1]==0)
+        coefs.pop_back();
 }
 
 template <int nd, class T>
@@ -569,6 +575,8 @@ Pol<nd,1,T>::Pol (const T &a, const T &b, const T &c) {
     coefs[0]=a;
     if(nd>0) coefs[1]=b;
     if(nd>1) coefs[2]=c;
+    while(coefs.size()>1 and coefs[coefs.size()-1]==0)
+        coefs.pop_back();
 }
 
 template <int nd, class T>
@@ -578,6 +586,8 @@ Pol<nd,1,T>::Pol (const T &a, const T &b, const T &c, const T &d) {
     if(nd>0) coefs[1]=b;
     if(nd>1) coefs[2]=c;
     if(nd>2) coefs[3]=d;
+    while(coefs.size()>1 and coefs[coefs.size()-1]==0)
+        coefs.pop_back();
 }
 
 template <int nd, class T>
@@ -588,6 +598,8 @@ Pol<nd,1,T>::Pol (const T &a, const T &b, const T &c, const T &d, const T &e) {
     if(nd>1) coefs[2]=c;
     if(nd>2) coefs[3]=d;
     if(nd>3) coefs[4]=e;
+    while(coefs.size()>1 and coefs[coefs.size()-1]==0)
+        coefs.pop_back();
 }
 
 template <int nd, class T>
@@ -599,6 +611,8 @@ Pol<nd,1,T>::Pol (const T &a, const T &b, const T &c, const T &d, const T &e, co
     if(nd>2) coefs[3]=d;
     if(nd>3) coefs[4]=e;
     if(nd>4) coefs[5]=f;
+    while(coefs.size()>1 and coefs[coefs.size()-1]==0)
+        coefs.pop_back();
 }
 
 template <int nd, class T>
@@ -611,6 +625,8 @@ Pol<nd,1,T>::Pol (const T &a, const T &b, const T &c, const T &d, const T &e, co
     if(nd>3) coefs[4]=e;
     if(nd>4) coefs[5]=f;
     if(nd>5) coefs[6]=g;
+    while(coefs.size()>1 and coefs[coefs.size()-1]==0)
+        coefs.pop_back();
 }
 
 template <int nd, class T>
@@ -624,6 +640,8 @@ Pol<nd,1,T>::Pol (const T &a, const T &b, const T &c, const T &d, const T &e, co
     if(nd>4) coefs[5]=f;
     if(nd>5) coefs[6]=g;
     if(nd>6) coefs[7]=h;
+    while(coefs.size()>1 and coefs[coefs.size()-1]==0)
+        coefs.pop_back();
 }
 
 template <int nd, class T>
@@ -632,6 +650,8 @@ Pol<nd,1,T>::Pol (const Pol<nd2,1,T2> &P2) {
     coefs=P2.coefficients();
     if (coefs.size()>nd+1)
         coefs.resize(nd+1);
+    while(coefs.size()>1 and coefs[coefs.size()-1]==0)
+        coefs.pop_back();
 }
 
 template <int nd, class T>
@@ -772,14 +792,14 @@ Pol<nd,1,T> Pol<nd,1,T>::remainder(const Pol<nd,1,T> &D) const {
         Vec<T> d=D.coefficients();
         for (unsigned i=1;i<=coefs.size()-d.size()+1;i++) {
             T aux=r[r.size()-1]/d[d.size()-1];
-            r.erase_elem_nb(r.size()-1);
+            r.pop_back();
             for (unsigned j=0;j<d.size()-1;j++)
                 r[r.size()-d.size()+j+1]-=aux*d[j];
         }
     }
     T norm=norm_inf(coefs);
     while (r.size()>1 and abs(r[r.size()-1])/norm<std::numeric_limits<T>::epsilon())
-        r.erase_elem_nb(r.size()-1);
+        r.pop_back();
     return Pol<nd,1,T>(r);
 }
 
@@ -959,7 +979,7 @@ void Pol<nd,1,T>::operator+=(const T2 &t) {
     for (int i=tmp;i<q.size();i++)
         coefs[i]=q[i];
     while(coefs.size()>1 and coefs[coefs.size()-1]==0)
-        coefs.erase_elem_nb(coefs.size()-1);
+        coefs.pop_back();
 }
 
 template <int nd, class T>
@@ -973,7 +993,7 @@ void Pol<nd,1,T>::operator-=(const T2 &t) {
     for (int i=tmp;i<Q.coefficients().size();i++)
         coefs[i]=-Q.coefficients()[i];
     while(coefs.size()>1 and coefs[coefs.size()-1]==0)
-        coefs.erase_elem_nb(coefs.size()-1);
+        coefs.pop_back();
 }
 
 template <int nd, class T>
@@ -988,7 +1008,7 @@ void Pol<nd,1,T>::operator+=(const Pol<nd2,1,T2> &Q) {
             coefs[i]=Q.coefficients()[i];
     }
     while(coefs.size()>1 and coefs[coefs.size()-1]==T(0))
-        coefs.erase_elem_nb(coefs.size()-1);
+        coefs.pop_back();
 }
 
 template <int nd, class T>
@@ -1003,7 +1023,7 @@ void Pol<nd,1,T>::operator-=(const Pol<nd2,1,T2> &Q) {
             coefs[i]=-Q.coefficients()[i];
     }
     while(coefs.size()>1 and coefs[coefs.size()-1]==T(0))
-        coefs.erase_elem_nb(coefs.size()-1);
+        coefs.pop_back();
 }
 
 template <int nd, class T>
@@ -1111,7 +1131,7 @@ Pol<(nd1>nd2?nd2:nd1),1,typename TypePromote<Plus,T1,T2>::T> operator+(const Pol
         for (unsigned i=q.size();i<r.size();i++)
             r[i]=p[i];
     while(r.size()>1 and r[r.size()-1]==0)
-        r.erase_elem_nb(r.size()-1);
+        r.pop_back();
     Pol<(nd1>nd2?nd2:nd1),1,typename TypePromote<Plus,T1,T2>::T> res(r);
     return res;
 }
@@ -1131,7 +1151,7 @@ Pol<(nd1>nd2?nd2:nd1),1,T> operator+(const Pol<nd1,1,T> &P, const Pol<nd2,1,T> &
         for (unsigned i=q.size();i<r.size();i++)
             r[i]=p[i];
     while(r.size()>1 and r[r.size()-1]==0)
-        r.erase_elem_nb(r.size()-1);
+        r.pop_back();
     Pol<(nd1>nd2?nd2:nd1),1,T> res(r);
     return res;
 }
@@ -1151,7 +1171,7 @@ Pol<nd,1,T> operator+(const Pol<nd,1,T> &P, const Pol<nd,1,T> &Q) {
         for (unsigned i=q.size();i<r.size();i++)
             r[i]=p[i];
     while(r.size()>1 and r[r.size()-1]==T(0))
-        r.erase_elem_nb(r.size()-1);
+        r.pop_back();
     Pol<nd,1,T> res(r);
     return res;
 }
@@ -1181,7 +1201,7 @@ Pol<(nd1>nd2?nd2:nd1),1,typename TypePromote<Minus,T1,T2>::T> operator-(const Po
         for (int i=q.size();i<r.size();i++)
             r[i]=p[i];
     while(r.size()>1 and r[r.size()-1]==0)
-        r.erase_elem_nb(r.size()-1);
+        r.pop_back();
     Pol<(nd1>nd2?nd2:nd1),1,typename TypePromote<Minus,T1,T2>::T> res(r);
     return res;
 }
@@ -1201,7 +1221,7 @@ Pol<(nd1>nd2?nd2:nd1),1,T> operator-(const Pol<nd1,1,T> &P, const Pol<nd2,1,T> &
         for (int i=q.size();i<r.size();i++)
             r[i]=p[i];
     while(r.size()>1 and r[r.size()-1]==0)
-        r.erase_elem_nb(r.size()-1);
+        r.pop_back();
     Pol<(nd1>nd2?nd2:nd1),1,T> res(r);
     return res;
 }
@@ -1221,7 +1241,7 @@ Pol<nd,1,T> operator-(const Pol<nd,1,T> &P, const Pol<nd,1,T> &Q) {
         for (int i=q.size();i<r.size();i++)
             r[i]=p[i];
     while(r.size()>1 and r[r.size()-1]==T(0))
-        r.erase_elem_nb(r.size()-1);
+        r.pop_back();
     Pol<nd,1,T> res(r);
     return res;
 }
