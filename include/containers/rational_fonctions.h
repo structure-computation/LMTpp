@@ -643,12 +643,20 @@ template <int nd, class T>
 Rat<nd,1,T>::Rat (const T &a) {
     num.resize(1,a);
     den.resize(1,T(1));
+    while(num.size()>1 and num[num.size()-1]==0)
+        num.pop_back();
+    while(den.size()>1 and den[den.size()-1]==0)
+        den.pop_back();
 }
 
 template <int nd, class T>
 Rat<nd,1,T>::Rat(const Vec<T> &V, const Vec<T> &W) {
     num=V;
     den=W;
+    while(num.size()>1 and num[num.size()-1]==0)
+        num.pop_back();
+    while(den.size()>1 and den[den.size()-1]==0)
+        den.pop_back();
 }
 
 template <int nd, class T>
@@ -656,6 +664,10 @@ template <class T2>
 Rat<nd,1,T>::Rat (const Rat<nd,1,T2> &P) {
     num=P.numerator();
     num=P.denominator();
+    while(num.size()>1 and num[num.size()-1]==0)
+        num.pop_back();
+    while(den.size()>1 and den[den.size()-1]==0)
+        den.pop_back();
 }
 
 template <int nd, class T>
@@ -768,10 +780,7 @@ typename Rat<nd,1,T>::Derivative Rat<nd,1,T>::derivative() const {
 
 template <int nd, class T>
 Vec<T> Rat<nd,1,T>::roots () const {
-    Vec<T> aux=num;
-    while (aux[aux.size()-1]==0)
-        aux.erase_elem_nb(aux.size()-1);
-    Pol<nd,1,T> numerat(aux);
+    Pol<nd,1,T> numerat(num);
     return numerat.roots();
 }
 

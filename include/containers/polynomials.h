@@ -10,7 +10,7 @@
 #include <limits>
 #include <complex>
 #include <containers/gnuplot.h>
-#include <containers/mat.h>
+#include <containers/vec.h>
 #include <containers/algo.h>
 
 namespace LMT {
@@ -549,14 +549,14 @@ public:
 template <int nd, class T>
 Pol<nd,1,T>::Pol(const Vec<T> &V) {
     coefs=V;
-    while(coefs.size()>1 and coefs[coefs.size()-1]==0)
+    while(coefs.size()>1 and coefs[coefs.size()-1]==T(0))
         coefs.pop_back();
 }
 
 template <int nd, class T>
 Pol<nd,1,T>::Pol (const T &a) {
     coefs.resize(1,a);
-    while(coefs.size()>1 and coefs[coefs.size()-1]==0)
+    while(coefs.size()>1 and coefs[coefs.size()-1]==T(0))
         coefs.pop_back();
 }
 
@@ -565,7 +565,7 @@ Pol<nd,1,T>::Pol (const T &a, const T &b) {
     coefs.resize(min(2,nd+1));
     coefs[0]=a;
     if(nd>0) coefs[1]=b;
-    while(coefs.size()>1 and coefs[coefs.size()-1]==0)
+    while(coefs.size()>1 and coefs[coefs.size()-1]==T(0))
         coefs.pop_back();
 }
 
@@ -575,7 +575,7 @@ Pol<nd,1,T>::Pol (const T &a, const T &b, const T &c) {
     coefs[0]=a;
     if(nd>0) coefs[1]=b;
     if(nd>1) coefs[2]=c;
-    while(coefs.size()>1 and coefs[coefs.size()-1]==0)
+    while(coefs.size()>1 and coefs[coefs.size()-1]==T(0))
         coefs.pop_back();
 }
 
@@ -586,7 +586,7 @@ Pol<nd,1,T>::Pol (const T &a, const T &b, const T &c, const T &d) {
     if(nd>0) coefs[1]=b;
     if(nd>1) coefs[2]=c;
     if(nd>2) coefs[3]=d;
-    while(coefs.size()>1 and coefs[coefs.size()-1]==0)
+    while(coefs.size()>1 and coefs[coefs.size()-1]==T(0))
         coefs.pop_back();
 }
 
@@ -598,7 +598,7 @@ Pol<nd,1,T>::Pol (const T &a, const T &b, const T &c, const T &d, const T &e) {
     if(nd>1) coefs[2]=c;
     if(nd>2) coefs[3]=d;
     if(nd>3) coefs[4]=e;
-    while(coefs.size()>1 and coefs[coefs.size()-1]==0)
+    while(coefs.size()>1 and coefs[coefs.size()-1]==T(0))
         coefs.pop_back();
 }
 
@@ -611,7 +611,7 @@ Pol<nd,1,T>::Pol (const T &a, const T &b, const T &c, const T &d, const T &e, co
     if(nd>2) coefs[3]=d;
     if(nd>3) coefs[4]=e;
     if(nd>4) coefs[5]=f;
-    while(coefs.size()>1 and coefs[coefs.size()-1]==0)
+    while(coefs.size()>1 and coefs[coefs.size()-1]==T(0))
         coefs.pop_back();
 }
 
@@ -625,7 +625,7 @@ Pol<nd,1,T>::Pol (const T &a, const T &b, const T &c, const T &d, const T &e, co
     if(nd>3) coefs[4]=e;
     if(nd>4) coefs[5]=f;
     if(nd>5) coefs[6]=g;
-    while(coefs.size()>1 and coefs[coefs.size()-1]==0)
+    while(coefs.size()>1 and coefs[coefs.size()-1]==T(0))
         coefs.pop_back();
 }
 
@@ -640,7 +640,7 @@ Pol<nd,1,T>::Pol (const T &a, const T &b, const T &c, const T &d, const T &e, co
     if(nd>4) coefs[5]=f;
     if(nd>5) coefs[6]=g;
     if(nd>6) coefs[7]=h;
-    while(coefs.size()>1 and coefs[coefs.size()-1]==0)
+    while(coefs.size()>1 and coefs[coefs.size()-1]==T(0))
         coefs.pop_back();
 }
 
@@ -650,7 +650,7 @@ Pol<nd,1,T>::Pol (const Pol<nd2,1,T2> &P2) {
     coefs=P2.coefficients();
     if (coefs.size()>nd+1)
         coefs.resize(nd+1);
-    while(coefs.size()>1 and coefs[coefs.size()-1]==0)
+    while(coefs.size()>1 and coefs[coefs.size()-1]==T(0))
         coefs.pop_back();
 }
 
@@ -805,7 +805,6 @@ Pol<nd,1,T> Pol<nd,1,T>::remainder(const Pol<nd,1,T> &D) const {
 
 template <int nd, class T>
 Vec<T> Pol<nd,1,T>::roots () const {
-    using namespace std;
     Vec<T> res;
     if (coefs.size()==2)
         res.push_back(-coefs[0]/coefs[1]);
@@ -822,22 +821,21 @@ Vec<T> Pol<nd,1,T>::roots () const {
         T a=coefs[2]/coefs[3];
         T b=coefs[1]/coefs[3];
         T c=coefs[0]/coefs[3];
-        T p = b - ::pow(a,2)/3;
-        T q = ::pow(a,3)/13.5 - a*b/3 + c;
-        T delta = 4*::pow(p,3)+27*::pow(q,2);
-        T trois=3;
+        T p = b - std::pow(a,2)/3.;
+        T q = std::pow(a,3)/13.5 - a*b/3 + c;
+        T delta = 4.*std::pow(p,3)+27.*std::pow(q,2.);
         if (delta>=0) {
-            T u=(-27*q+sqrt(27*delta))/2;
-            T v=(-27*q-sqrt(27*delta))/2;
-            res.push_back((sgn(u)*::pow(std::abs(u),1.0/trois)+sgn(v)*::pow(std::abs(v),1.0/trois)-a)/3);
+            T u=(-13.5*q+sqrt(6.75*delta));
+            T v=(-13.5*q-sqrt(6.75*delta));
+            res.push_back((sgn(u)*std::pow(std::abs(u),1./3.)+sgn(v)*std::pow(std::abs(v),1./3.)-a)/3.);
         }
         if (delta<0) {
-            complex<T> j(-1/2.,sqrt(3.)/2.);
-            complex<T> v(-27.*q/2.,sqrt(-27*delta)/2.);
-            complex<T> u=pow(v,1/trois);
-            res.push_back((2*std::real(u)-a)/3);
-            res.push_back((2*std::real(j*u)-a)/3);
-            res.push_back((2*std::real(j*j*u)-a)/3);
+            complex<T> j(-0.5,sqrt(3.)/2.);
+            complex<T> v(-13.5*q,sqrt(-6.75*delta));
+            complex<T> u=std::pow(v,1./3.);
+            res.push_back((2.*std::real(u)-a)/3.);
+            res.push_back((2.*std::real(j*u)-a)/3.);
+            res.push_back((2.*std::real(j*j*u)-a)/3.);
             sort(res);
         }
     }
@@ -931,7 +929,7 @@ T Pol<nd,1,T>::householder (const T &d, bool c=0, int imax=100) const {
         b=a;
         T pa=operator()(a);
         T qa=Q(a);
-        a-=(pa/qa)*(1+(pa*R(a))/(2*pow(qa,2)));
+        a-=(pa/qa)*(1+(pa*R(a))/(2*std::pow(qa,2)));
         compteur++;
     }
     if (compteur==imax)
