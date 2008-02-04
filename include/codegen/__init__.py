@@ -291,7 +291,7 @@ def sqr_root_mat_sym(M):
     M_neg = mul( mul( M_eigen_vectors, DM_neg ), M_eigen_vectors.transpose() )
     return M_neg
 
-# racine carree d'une matrice diagonale positive (OK)
+# racine carree d'une matrice positive (OK)
 def sqr_root_mat_diag(M):
     dim = M.nb_rows()
     res = ExMatrix(dim, dim)

@@ -298,8 +298,8 @@ struct MatElem<TV,STRUCTURE,STORAGE > {
 
 
 print """
-template<class T1,int s1,class T2,int s2> Vec<typename TypePromote<Multiplies,T1,T2>::T,MAX(s1,s2)> operator*( const Mat<T1,Sym<s1>,SparseLine<> > &m, const Vec<T2,s2> &b ) {
-    typedef typename TypePromote<Multiplies,T1,T2>::T TR;
+template<class T1,int s1,class T2_,int s2> Vec<typename TypePromote<Multiplies,T1,typename Vec<T2_,s2>::template SubType<0>::T>::T,MAX(s1,s2)> operator*( const Mat<T1,Sym<s1>,SparseLine<> > &m, const Vec<T2_,s2> &b ) {
+    typedef typename TypePromote<Multiplies,T1,typename Vec<T2_,s2>::template SubType<0>::T>::T TR;
     Vec<TR,MAX(s1,s2)> res; res.resize( m.nb_rows() );
     for(unsigned i=0;i<m.nb_rows();++i) {
         TR r = TR(0.0);
