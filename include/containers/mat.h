@@ -78,6 +78,7 @@ struct TypeInformation<Mat<TTV,Structure,Storage,OP> > {
     typedef typename Mat<TTV,Structure,Storage,OP>::T TT;
     static const int res = TypeInformation<TT>::res;
     static const int englobing = 20 + TypeInformation<TT>::englobing;
+    static const bool is_scalar = false;
     typedef TT SubType;
     template<class TV> struct Variant { typedef Mat<TV,Structure,Storage,OP> T; };
     template<class TV> struct DeepVariant { typedef Mat<typename TypeInformation<TT>::template DeepVariant<TV>::T,Structure,Storage,OP> T; };

@@ -805,6 +805,7 @@ Pol<nd,1,T> Pol<nd,1,T>::remainder(const Pol<nd,1,T> &D) const {
 
 template <int nd, class T>
 Vec<T> Pol<nd,1,T>::roots () const {
+    using namespace std;
     Vec<T> res;
     if (coefs.size()==2)
         res.push_back(-coefs[0]/coefs[1]);

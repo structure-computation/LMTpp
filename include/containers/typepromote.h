@@ -61,6 +61,7 @@ for i,vi in m:
 template<> struct TypeInformation<bool> {
     static const int res = 0;
     static const int englobing = 0;
+    static const bool is_scalar = true;
     static std::string type() { return "bool"; }
     static const bool float_type = false;
     typedef bool SubType;
@@ -69,6 +70,7 @@ template<> struct TypeInformation<bool> {
 template<> struct TypeInformation<unsigned> {
     static const int res = 1;
     static const int englobing = 0;
+    static const bool is_scalar = true;
     static std::string type() { return "unsigned"; }
     static const bool float_type = false;
     typedef unsigned SubType;
@@ -77,6 +79,7 @@ template<> struct TypeInformation<unsigned> {
 template<> struct TypeInformation<int> {
     static const int res = 2;
     static const int englobing = 0;
+    static const bool is_scalar = true;
     static std::string type() { return "int"; }
     static const bool float_type = false;
     typedef int SubType;
@@ -85,6 +88,7 @@ template<> struct TypeInformation<int> {
 template<> struct TypeInformation<float> {
     static const int res = 3;
     static const int englobing = 0;
+    static const bool is_scalar = true;
     static std::string type() { return "float"; }
     static const bool float_type = true;
     typedef float SubType;
@@ -93,6 +97,7 @@ template<> struct TypeInformation<float> {
 template<> struct TypeInformation<double> {
     static const int res = 4;
     static const int englobing = 0;
+    static const bool is_scalar = true;
     static std::string type() { return "double"; }
     static const bool float_type = true;
     typedef double SubType;
@@ -101,6 +106,7 @@ template<> struct TypeInformation<double> {
 template<> struct TypeInformation<long double> {
     static const int res = 5;
     static const int englobing = 0;
+    static const bool is_scalar = true;
     static std::string type() { return "long double"; }
     static const bool float_type = true;
     typedef long double SubType;
@@ -112,6 +118,7 @@ template<> struct TypeInformation<long double> {
     template<class TT> struct TypeInformation<std::complex<TT> > {
         static const int res = TypeInformation<TT>::res;
         static const int englobing = 1 + TypeInformation<TT>::englobing;
+        static const bool is_scalar = true;
         typedef TT SubType;
         template<class TV> struct Variant { typedef std::complex<TV> T; };
         template<class TV> struct DeepVariant { typedef std::complex<typename TypeInformation<TT>::template DeepVariant<TV>::T> T; };

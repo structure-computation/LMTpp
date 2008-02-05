@@ -162,6 +162,7 @@ namespace LMT {
         typedef typename Vec<TT,s>::template SubType<0>::T ST;
         static const int res = TypeInformation<ST>::res;
         static const int englobing = 10 + TypeInformation<ST>::englobing;
+        static const bool is_scalar = false;
         typedef ST SubType;
         template<class TV> struct Variant { typedef Vec<TV,s> T; };
         template<class TV> struct DeepVariant { typedef Vec<typename TypeInformation<ST>::template DeepVariant<TV>::T,s> T; };
