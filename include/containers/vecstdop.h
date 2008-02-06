@@ -223,7 +223,7 @@ inline typename FloatType<typename TypeReduction<Multiplies,Vec<T,s> >::T>::T no
         \relates Vec
  */
 template<class T,int s>
-inline typename TypeReduction<Multiplies,Vec<T,s> >::T norm_inf(const Vec<T,s> &c) {
+inline typename TypePromote<Abs,typename TypeReduction<Multiplies,Vec<T,s> >::T>::T norm_inf(const Vec<T,s> &c) {
     return max(abs(c));
 }
 
@@ -231,7 +231,7 @@ inline typename TypeReduction<Multiplies,Vec<T,s> >::T norm_inf(const Vec<T,s> &
         \relates Vec
  */
 template<class T,int s>
-inline typename TypeReduction<Multiplies,Vec<T,s> >::T norm_1(const Vec<T,s> &c) {
+inline typename TypePromote<Abs,typename TypeReduction<Multiplies,Vec<T,s> >::T>::T norm_1(const Vec<T,s> &c) {
     return sum(abs(c));
 }
 

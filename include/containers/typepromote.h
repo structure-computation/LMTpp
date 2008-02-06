@@ -229,6 +229,9 @@ template<class TV,class Prefered=double> struct FloatType {
 template<class T> struct IsComplex { static const bool res = false; };
 template<class T> struct IsComplex<std::complex<T> > { static const bool res = true; };
 
+template<class TT, bool is_scalar=TypeInformation<TT>::is_scalar> struct IsScalar {};
+template<class TT> struct IsScalar<TT,true> {typedef TT T;};
+
 template<class T> void display_type( std::ostream &os, const T & ) {
     os << TypeInformation<T>::type();
 }

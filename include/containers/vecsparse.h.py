@@ -13,7 +13,7 @@ template<class TT> struct DelayedAssignementSparseSource {
     typedef TT T;
     TT get() const {
         if ( found ) return (*data)[pos];
-        return (TT)0;
+        return TT(0);
     }
     template<class Op,class T2> void apply(const Op &op,const T2 &v) {
         if ( found ) {
@@ -73,7 +73,7 @@ public:
         TT operator[](unsigned i) const {
             while ( j < vec->indices.size() && vec->indices[j] < i ) ++j;
             if ( j < vec->indices.size() && vec->indices[j] == i ) return vec->data[j];
-            return 0;
+            return TT(0);
         }
         Vec *vec;
         mutable unsigned j;
@@ -83,7 +83,7 @@ public:
         TT operator[](unsigned i) const {
             while ( j < s && indices[j] < i ) ++j;
             if ( j < s && indices[j] == i ) return data[j];
-            return 0;
+            return TT(0);
         }
         const unsigned *indices;
         const TT *data;
@@ -136,7 +136,7 @@ public:
         }
         for( ;b<e && indices[b]<=i; ++b )
             if ( indices[b] == i ) return data[ b ];
-        return 0;
+        return RetOpConst(0);
     } /// access to element i
     TT get(unsigned i) const { return operator[](i); } /// calling get() ensures that the this is the const version of operator[] which is called
     void set(unsigned i,const TT v) { operator[](i)=v; } /// set element i

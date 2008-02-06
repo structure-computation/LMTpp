@@ -139,7 +139,7 @@ for op in lst:
     
 #endif
 struct Abs;
-template<class T> inline typename TypePromote<Abs,T>::T abs(const T &val) { return std::abs(val); }
+template<class T> inline typename TypePromote<Abs,T>::T abs(const T &val) { return typename TypePromote<Abs,T>::T(std::abs(val)); }
 template<class T> inline typename TypePromote<Abs,T>::T abs_indication(const T &val) { return LMT::abs(val); } // if val is a function, return abs( something_close_to_mean(val) )
 template<class T> inline typename FloatType<T>::T acos(const T &val) { return std::acos(val); }
 template<class T> inline typename FloatType<T>::T asin(const T &val) { return std::asin(val); }

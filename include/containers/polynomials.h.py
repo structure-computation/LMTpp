@@ -1,4 +1,4 @@
-// file generated from poynomials.h.py. Do not modify
+print """// file generated from poynomials.h.py. Do not modify
 
 ////////////////////////////////////
 //  Author : Camille GOUTTEBROZE  //
@@ -992,9 +992,16 @@ void Pol<nd,1,T>::operator-=(const Pol<nd2,1,T2> &Q) {
 ///////////////////////////////////////////////////////////////////////////////////
 // DEFINITION DES FONCTIONS GLOBALES EN RAPPORT AVEC DES POLYNOMES MONOVARIABLES //
 ///////////////////////////////////////////////////////////////////////////////////
+"""
 
-template <int nd1, int nd2, class T1, class T2>
-    Pol<(nd1>nd2?nd2:nd1),1,typename TypePromote<Plus,T1,T2>::T> operator+(const Pol<nd1,1,T1> &P, const Pol<nd2,1,T2> &Q) {
+lst = [
+    ('int nd1, int nd2, ','const Pol<nd1,1,T1> &P, const Pol<nd2,1,T2> &Q','(nd1>nd2?nd2:nd1)'),
+    ('int nd, ','const Pol<nd,1,T1> &P, const Pol<nd,1,T2> &Q','nd'),
+]
+
+for temp,params,nd in lst:
+    print """template <"""+temp+"""class T1, class T2>
+    Pol<"""+nd+""",1,typename TypePromote<Plus,T1,T2>::T> operator+("""+params+""") {
     if (!bool(P))
         return Q;
     else if (!bool(Q))
@@ -1016,39 +1023,14 @@ template <int nd1, int nd2, class T1, class T2>
         typename TypePromote<Abs,T>::T m=norm_inf(r);
         while(r.size()>1 and abs(r[r.size()-1])/m<std::numeric_limits<typename TypePromote<Abs,T>::T>::epsilon())
             r.pop_back();
-        Pol<(nd1>nd2?nd2:nd1),1,T> res(r);
+        Pol<"""+nd+""",1,T> res(r);
         return res;
     }
-}
-template <int nd, class T1, class T2>
-    Pol<nd,1,typename TypePromote<Plus,T1,T2>::T> operator+(const Pol<nd,1,T1> &P, const Pol<nd,1,T2> &Q) {
-    if (!bool(P))
-        return Q;
-    else if (!bool(Q))
-        return P;
-    else {
-        typedef typename TypePromote<Plus,T1,T2>::T T;
-        const Vec<T> &p = P.coefficients();
-        const Vec<T> &q = Q.coefficients();
-        Vec<T> r;
-        r.resize(max(q.size(),p.size()));
-        for (int i=0;i<min(q.size(),p.size());i++)
-            r[i]=p[i]+q[i];
-        if (q.size()>p.size())
-            for (int i=p.size();i<r.size();i++)
-                r[i]=q[i];
-        else if (p.size()>q.size())
-            for (int i=q.size();i<r.size();i++)
-                r[i]=p[i];
-        typename TypePromote<Abs,T>::T m=norm_inf(r);
-        while(r.size()>1 and abs(r[r.size()-1])/m<std::numeric_limits<typename TypePromote<Abs,T>::T>::epsilon())
-            r.pop_back();
-        Pol<nd,1,T> res(r);
-        return res;
-    }
-}
-template <int nd1, int nd2, class T1, class T2>
-    Pol<(nd1>nd2?nd2:nd1),1,typename TypePromote<Minus,T1,T2>::T> operator-(const Pol<nd1,1,T1> &P, const Pol<nd2,1,T2> &Q) {
+}"""
+
+for temp,params,nd in lst:
+    print """template <"""+temp+"""class T1, class T2>
+    Pol<"""+nd+""",1,typename TypePromote<Minus,T1,T2>::T> operator-("""+params+""") {
     if (!bool(P))
         return -Q;
     else if (!bool(Q))
@@ -1070,39 +1052,14 @@ template <int nd1, int nd2, class T1, class T2>
         typename TypePromote<Abs,T>::T m=norm_inf(r);
         while(r.size()>1 and abs(r[r.size()-1])/m<std::numeric_limits<typename TypePromote<Abs,T>::T>::epsilon())
             r.pop_back();
-        Pol<(nd1>nd2?nd2:nd1),1,T> res(r);
+        Pol<"""+nd+""",1,T> res(r);
         return res;
     }
-}
-template <int nd, class T1, class T2>
-    Pol<nd,1,typename TypePromote<Minus,T1,T2>::T> operator-(const Pol<nd,1,T1> &P, const Pol<nd,1,T2> &Q) {
-    if (!bool(P))
-        return -Q;
-    else if (!bool(Q))
-        return P;
-    else {
-        typedef typename TypePromote<Plus,T1,T2>::T T;
-        const Vec<T> &p = P.coefficients();
-        const Vec<T> &q = Q.coefficients();
-        Vec<T> r;
-        r.resize(max(q.size(),p.size()));
-        for (int i=0;i<min(q.size(),p.size());i++)
-            r[i]=p[i]-q[i];
-        if (q.size()>p.size())
-            for (int i=p.size();i<r.size();i++)
-                r[i]=-q[i];
-        else if (p.size()>q.size())
-            for (int i=q.size();i<r.size();i++)
-                r[i]=p[i];
-        typename TypePromote<Abs,T>::T m=norm_inf(r);
-        while(r.size()>1 and abs(r[r.size()-1])/m<std::numeric_limits<typename TypePromote<Abs,T>::T>::epsilon())
-            r.pop_back();
-        Pol<nd,1,T> res(r);
-        return res;
-    }
-}
-template <int nd1, int nd2, class T1, class T2>
-    Pol<(nd1>nd2?nd2:nd1),1,typename TypePromote<Multiplies,T1,T2>::T> operator*(const Pol<nd1,1,T1> &P, const Pol<nd2,1,T2> &Q) {
+}"""
+
+for temp,params,nd in lst:
+    print """template <"""+temp+"""class T1, class T2>
+    Pol<"""+nd+""",1,typename TypePromote<Multiplies,T1,T2>::T> operator*("""+params+""") {
     if (!bool(P))
         return P;
     else if (!bool(Q))
@@ -1112,7 +1069,7 @@ template <int nd1, int nd2, class T1, class T2>
         Vec<T> r;
         const Vec<T> &p = P.coefficients();
         const Vec<T> &q = Q.coefficients();
-        r.resize(min(p.size()+q.size()-1,(nd1>nd2?nd2:nd1)+1),T(0));
+        r.resize(min(p.size()+q.size()-1,"""+nd+"""+1),T(0));
         for (int i=0;i<min(q.size(),p.size());i++)
             for (int j=0;j<=i;j++)
                 r[i]+=p[j]*q[i-j];
@@ -1135,109 +1092,44 @@ template <int nd1, int nd2, class T1, class T2>
         typename TypePromote<Abs,T>::T m=norm_inf(r);
         while(r.size()>1 and abs(r[r.size()-1])/m<std::numeric_limits<typename TypePromote<Abs,T>::T>::epsilon())
             r.pop_back();
-        return Pol<(nd1>nd2?nd2:nd1),1,T>(r);
+        return Pol<"""+nd+""",1,T>(r);
     }
-}
-template <int nd, class T1, class T2>
-    Pol<nd,1,typename TypePromote<Multiplies,T1,T2>::T> operator*(const Pol<nd,1,T1> &P, const Pol<nd,1,T2> &Q) {
-    if (!bool(P))
-        return P;
-    else if (!bool(Q))
-        return Q;
-    else {
-        typedef typename TypePromote<Plus,T1,T2>::T T;
-        Vec<T> r;
-        const Vec<T> &p = P.coefficients();
-        const Vec<T> &q = Q.coefficients();
-        r.resize(min(p.size()+q.size()-1,nd+1),T(0));
-        for (int i=0;i<min(q.size(),p.size());i++)
-            for (int j=0;j<=i;j++)
-                r[i]+=p[j]*q[i-j];
-        if (q.size()>=p.size()) {
-            for (int i=p.size();i<q.size();i++)
-                for (int j=0;j<p.size();j++)
-                    r[i]+=p[j]*q[i-j];
-            for (int i=q.size();i<r.size();i++)
-                for (int j=i-q.size()+1;j<p.size();j++)
-                    r[i]+=p[j]*q[i-j];
-        }
-        if (p.size()>q.size()) {
-            for (int i=q.size();i<p.size();i++)
-                for (int j=0;j<q.size();j++)
-                    r[i]+=q[j]*p[i-j];
-            for (int i=p.size();i<r.size();i++)
-                for (int j=i-p.size()+1;j<q.size();j++)
-                    r[i]+=q[j]*p[i-j];
-        }
-        typename TypePromote<Abs,T>::T m=norm_inf(r);
-        while(r.size()>1 and abs(r[r.size()-1])/m<std::numeric_limits<typename TypePromote<Abs,T>::T>::epsilon())
-            r.pop_back();
-        return Pol<nd,1,T>(r);
-    }
-}
-template <int nd1, int nd2, class T1, class T2>
-    Pol<(nd1>nd2?nd2:nd1),1,typename TypePromote<Divides,T1,T2>::T> operator/(const Pol<nd1,1,T1> &P, const Pol<nd2,1,T2> &Q) {
-    if (!bool(P))
-        return P;
-    else {
-        typedef typename TypePromote<Plus,T1,T2>::T T;
-        Vec<T> r,a,b;
-        r.resize((nd1>nd2?nd2:nd1)+1,T(0));
-        a.resize((nd1>nd2?nd2:nd1)+1,T(0));
-        b.resize((nd1>nd2?nd2:nd1),T(0));
-        const Vec<T> &p=P.coefficients();
-        const Vec<T> &q=Q.coefficients();
-        a[0]=T(1)/q[0];
-        for (int k=1;k<a.size();k++) {
-            for (int s=0;s<k;s++)
-                b[k-1]+=a[s]*a[k-1-s];
-            for (int i=max(k-int(q.size())+1,0);i<k;i++)
-                a[k]+=(T(i-k)/T(k))*q[k-i]*b[i];
-        }
-        for (int i=0;i<p.size();i++)
-            for (int j=0;j<=i;j++)
-                r[i]+=p[j]*a[i-j];
-        for (int i=p.size();i<a.size();i++)
-            for (int j=0;j<p.size();j++)
-                r[i]+=p[j]*a[i-j];
-        typename TypePromote<Abs,T>::T m=norm_inf(r);
-        while(r.size()>1 and abs(r[r.size()-1])/m<std::numeric_limits<typename TypePromote<Abs,T>::T>::epsilon())
-            r.pop_back();
-        return Pol<(nd1>nd2?nd2:nd1),1,T>(r);
-    }
-}
-template <int nd, class T1, class T2>
-    Pol<nd,1,typename TypePromote<Divides,T1,T2>::T> operator/(const Pol<nd,1,T1> &P, const Pol<nd,1,T2> &Q) {
-    if (!bool(P))
-        return P;
-    else {
-        typedef typename TypePromote<Plus,T1,T2>::T T;
-        Vec<T> r,a,b;
-        r.resize(nd+1,T(0));
-        a.resize(nd+1,T(0));
-        b.resize(nd,T(0));
-        const Vec<T> &p=P.coefficients();
-        const Vec<T> &q=Q.coefficients();
-        a[0]=T(1)/q[0];
-        for (int k=1;k<a.size();k++) {
-            for (int s=0;s<k;s++)
-                b[k-1]+=a[s]*a[k-1-s];
-            for (int i=max(k-int(q.size())+1,0);i<k;i++)
-                a[k]+=(T(i-k)/T(k))*q[k-i]*b[i];
-        }
-        for (int i=0;i<p.size();i++)
-            for (int j=0;j<=i;j++)
-                r[i]+=p[j]*a[i-j];
-        for (int i=p.size();i<a.size();i++)
-            for (int j=0;j<p.size();j++)
-                r[i]+=p[j]*a[i-j];
-        typename TypePromote<Abs,T>::T m=norm_inf(r);
-        while(r.size()>1 and abs(r[r.size()-1])/m<std::numeric_limits<typename TypePromote<Abs,T>::T>::epsilon())
-            r.pop_back();
-        return Pol<nd,1,T>(r);
-    }
-}
+}"""
 
+for temp,params,nd in lst:
+    print """template <"""+temp+"""class T1, class T2>
+    Pol<"""+nd+""",1,typename TypePromote<Divides,T1,T2>::T> operator/("""+params+""") {
+    if (!bool(P))
+        return P;
+    else {
+        typedef typename TypePromote<Plus,T1,T2>::T T;
+        Vec<T> r,a,b;
+        r.resize("""+nd+"""+1,T(0));
+        a.resize("""+nd+"""+1,T(0));
+        b.resize("""+nd+""",T(0));
+        const Vec<T> &p=P.coefficients();
+        const Vec<T> &q=Q.coefficients();
+        a[0]=T(1)/q[0];
+        for (int k=1;k<a.size();k++) {
+            for (int s=0;s<k;s++)
+                b[k-1]+=a[s]*a[k-1-s];
+            for (int i=max(k-int(q.size())+1,0);i<k;i++)
+                a[k]+=(T(i-k)/T(k))*q[k-i]*b[i];
+        }
+        for (int i=0;i<p.size();i++)
+            for (int j=0;j<=i;j++)
+                r[i]+=p[j]*a[i-j];
+        for (int i=p.size();i<a.size();i++)
+            for (int j=0;j<p.size();j++)
+                r[i]+=p[j]*a[i-j];
+        typename TypePromote<Abs,T>::T m=norm_inf(r);
+        while(r.size()>1 and abs(r[r.size()-1])/m<std::numeric_limits<typename TypePromote<Abs,T>::T>::epsilon())
+            r.pop_back();
+        return Pol<"""+nd+""",1,T>(r);
+    }
+}"""
+
+print """
 template <int nd, class T>
 void plot(const Pol<nd,1,T> &P, std::string s="w l") {
     T A = P.RootsLowerBound();
@@ -1362,28 +1254,23 @@ Pol<nd,nx,T> pow(const Pol<nd,1,T> &P, int a) {
 template <int nd, int nx, class T>
 typename TypePromote<Abs,T>::T abs_indication(const Pol<nd,nx,T> &P) {
     return abs_indication(P.coefficients()[0]);
-}
+}"""
 
+lst=[
+    ('Abs','abs'),
+    ('Conj','conj'),
+    ('Real','real'),
+    ('Imag','imag'),
+]
+
+for t,f in lst:
+    print """
 template <int nd, int nx, class T>
-Pol<nd,nx,typename TypePromote<Abs,T>::T> abs(const Pol<nd,nx,T> &P) {
-    return Pol<nd,nx,typename TypePromote<Abs,T>::T>(abs(P.coefficients()));
-}
+Pol<nd,nx,typename TypePromote<"""+t+""",T>::T> """+f+"""(const Pol<nd,nx,T> &P) {
+    return Pol<nd,nx,typename TypePromote<"""+t+""",T>::T>("""+f+"""(P.coefficients()));
+}"""
 
-template <int nd, int nx, class T>
-Pol<nd,nx,typename TypePromote<Conj,T>::T> conj(const Pol<nd,nx,T> &P) {
-    return Pol<nd,nx,typename TypePromote<Conj,T>::T>(conj(P.coefficients()));
-}
-
-template <int nd, int nx, class T>
-Pol<nd,nx,typename TypePromote<Real,T>::T> real(const Pol<nd,nx,T> &P) {
-    return Pol<nd,nx,typename TypePromote<Real,T>::T>(real(P.coefficients()));
-}
-
-template <int nd, int nx, class T>
-Pol<nd,nx,typename TypePromote<Imag,T>::T> imag(const Pol<nd,nx,T> &P) {
-    return Pol<nd,nx,typename TypePromote<Imag,T>::T>(imag(P.coefficients()));
-}
-
+print """
 template<int m, int n,class TT> struct TypeInformation<Pol<m,n,TT> > {
     static const int res = TypeInformation<TT>::res;
     static const int englobing = 1 + TypeInformation<TT>::englobing;
@@ -1400,4 +1287,4 @@ template<int m, int n,class TT> struct HasTypeInformation<Pol<m,n,TT> > { static
 }
 
 #endif // POLYNOMIALS_H
-
+"""
