@@ -726,6 +726,7 @@ class Formulation:
       f.write( '  #define PNODE(N) node\n' )
 
     write_matrix( f, matrices[T]['M'], matrices[T]['V'], symmetric, matrices[T]['i'], matrices[T]['o'], assemble_mat, assemble_vec )
+    
     f.write( '  #undef PNODE\n' )
     f.write( '}\n' )
 
