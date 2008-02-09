@@ -165,18 +165,21 @@ public:
     template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
         if ( fixed_size==false )
             resize( val.nb_rows(), val.nb_cols() );
-        if ( (STRUCTURE::need_upper and STRUCTURE::need_lower)==false and STRUCTURE::need_diag )
+        if ( STRUCTURE::need_diag and STRUCTURE::need_upper==false and STRUCTURE::need_lower==false )
+            for(unsigned i=0;i<val.nb_rows();++i)
+                operator()( i, i ) = val(i,i);
+        else if ( (STRUCTURE::need_upper and STRUCTURE::need_lower)==false and STRUCTURE::need_diag )
             for(unsigned i=0;i<val.nb_rows();++i)
                 for(unsigned j=0;j<=i;++j)
-                    operator()( i,j ) = val(i,j);
+                    operator()( i, j ) = val(i,j);
         else if ( (STRUCTURE::need_upper and STRUCTURE::need_lower)==false )
             for(unsigned i=0;i<val.nb_rows();++i)
                 for(unsigned j=0;j<i;++j)
-                    operator()( i,j ) = val(i,j);
+                    operator()( i, j ) = val(i,j);
         else
             for(unsigned i=0;i<val.nb_rows();++i)
                 for(unsigned j=0;j<val.nb_cols();++j)
-                    operator()( i,j ) = val(i,j);
+                    operator()( i, j ) = val(i,j);
     }
 
     
