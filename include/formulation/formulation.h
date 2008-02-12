@@ -83,7 +83,7 @@ public:
         time_steps = 1e40;
         initialized = false;
         user_want_pierre_precond = true;
-        this->order_integration_when_integration_totale = 2;
+        this->order_integration_when_integration_totale = Carac::order_integration;
     
         max_diag = 0;
         time_symbol = Codegen::symbol("time");

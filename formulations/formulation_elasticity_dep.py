@@ -13,7 +13,7 @@ epsilon = Variable( interpolation='der_nodal', default_value='0', nb_dim=[dim*(d
 tr_epsilon = Variable( interpolation='der_nodal', default_value='0', unit='1' )
 
 f_nodal = Variable( nb_dim=[dim], nb_der=0, default_value='0.0,'*(dim-1)+'0.0', unit='N' )
-f_surf = Variable( interpolation='skin_elementary', nb_dim=[dim], default_value='0.0,'*(dim-1)+'0.0', unit='N/m^2', ext = True )
+f_surf = Variable( interpolation='skin_elementary', nb_dim=[dim], default_value='0.0,'*(dim-1)+'0.0', unit='N/m^2' )
 p = Variable( interpolation='skin_elementary', default_value='0.0', unit='N/m^2' )
 
 d      = Variable( interpolation='elementary', default_value='0', unit='1' ) # 

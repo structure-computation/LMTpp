@@ -427,7 +427,7 @@ void make_rect(TM &m,const Hexa_20 &t,typename TM::Pvec X0,typename TM::Pvec X1,
     BestialNodeAdder<TM> ban; ban.m = &m; ban.prec = min( (X1-X0)/nb_elements ) * 1e-6;
     
     Pvec step = (X1-X0) / nb_elements;
-    for(Rectilinear_iterator<Tpos,TM::dim> iter( X0, X1 + 0.1 * step, step ); iter; ++iter ) {
+    for(Rectilinear_iterator<Tpos,TM::dim> iter( X0, X1 - 0.1 * step, step ); iter; ++iter ) {
         typename TM::TNode *n[20] = {
             ban.get_node( iter.pos + step * Pvec(0.0,0.0,0.0) ),
             ban.get_node( iter.pos + step * Pvec(1.0,0.0,0.0) ),

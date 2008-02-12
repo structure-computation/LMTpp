@@ -281,6 +281,7 @@ class Formulation:
     f.write( '  static const bool friction_coeff_is_a_nodal_variable = 0;\n' )
     f.write( '  static const unsigned offset_of_pos_unknown=3;\n' )
     f.write( '  static const unsigned pos_is_an_unknown = %s;\n'%(['false','true'][self.pos.unknown]) )
+    f.write( '  static const unsigned order_integration = %i;\n' % self.order_integration )
 
     # is_unknown
     all_unk = []
@@ -496,7 +497,7 @@ class Formulation:
     if self.integration_totale:
         dV_part = e.integration( form.diff(dV), self.order_integration ).subs(EM(unk_subs))
     else:
-        dV_part = form.diff(dV).subs(EM(unk_subs))*e.det_jacobian() * self.ponderation
+        dV_part = form.diff(dV).subs(EM(unk_subs)) * e.det_jacobian() * self.ponderation
     form = form.subs( dV, 0 )
 
     # dSubInter

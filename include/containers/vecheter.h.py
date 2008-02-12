@@ -319,6 +319,8 @@ print_apply_ext(
 )
 print_apply_ext('remove_if' ,TP,TV,'remove_if(v.vec,op,PARALIST); remove_if(v.next,op,PARALIST);',onlyfornonconstvec=True)
 
+print_apply_ext('apply_mt',TP,TV,'apply_mt(v.vec,nb_threads,op,PARALIST); apply_mt(v.next,nb_threads,op,PARALIST);', suppar=['int nb_threads'] )
+
 # without data
 TP = ['class Carac','unsigned nt']
 TV = 'Vec<Heterogeneous<Carac,nt,void>,s,int>'
@@ -327,6 +329,7 @@ print_apply_ext('apply_wi',TP,TV,'')
 print_apply_ext('find' ,TP,TV,'return false;',ret='bool')
 print_apply_ext('apply_range',TP,TV,'',suppar=['int from','int to'])
 print_apply_ext('remove_if' ,TP,TV,'',onlyfornonconstvec=True)
+print_apply_ext('apply_mt',TP,TV,'', suppar=['int nb_threads'] )
 
 print '} // namespace LMT'
 
