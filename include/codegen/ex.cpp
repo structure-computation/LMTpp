@@ -212,13 +212,39 @@ Ex::T Ex::subs_numerical(std::map<Ex,Ex::T,Ex::ExMapCmp> &m) const throw(Subs_nu
     throw Subs_numerical_error( to_string() );
 }
 
-void Ex::get_sub_symbols(SetEx &sub_symbols) const {
-    SetEx lst;
-    get_sub_nodes(lst);
-    for(SetEx::const_iterator iter=lst.begin();iter!=lst.end();++iter)
-        if ( iter->is_a_symbol() )
-            sub_symbols.insert( *iter );
+void get_sub_symbols_rec( const Op *op, Ex::SetEx &sub_symbols ) {
+    if ( op->id == Ex::current_id )
+        return;
+    op->id = Ex::current_id;
+    //
+    if ( op->type == Op::Symbol )
+        sub_symbols.insert( op );
+    else
+        for(unsigned i=0;i<op->nb_children();++i)
+            get_sub_symbols_rec( op->data.children[i], sub_symbols );
 }
+void Ex::get_sub_symbols( SetEx &sub_symbols ) const {
+    ++Ex::current_id;
+    get_sub_symbols_rec( op, sub_symbols );
+}
+
+void get_sub_numbers_rec( const Op *op, Ex::SetNumber &sub_numbers ) {
+    if ( op->id == Ex::current_id )
+        return;
+    op->id = Ex::current_id;
+    //
+    if ( op->type == Op::Number )
+        sub_numbers.insert( op->val );
+    else
+        for(unsigned i=0;i<op->nb_children();++i)
+            get_sub_numbers_rec( op->data.children[i], sub_numbers );
+}
+void Ex::get_sub_numbers( SetNumber &sub_numbers ) const {
+    ++Ex::current_id;
+    get_sub_numbers_rec( op, sub_numbers );
+}
+
+
 void Ex::get_sub_nodes(SetEx &lst) const {
     if ( find( lst.begin(), lst.end(), *this ) != lst.end() )
         return;

@@ -1,4 +1,4 @@
-temperature = Variable( unknown=True, nb_der=0, default_value='300.0', unit='K' )
+temperature = Variable( unknown=True, nb_der=1, default_value='300.0', unit='K' )
 Q = Variable( default_value='0.0', unit='K/s' )
 Qs = Variable( interpolation='nodal', default_value='0.0', unit='K/s' )
 
@@ -14,6 +14,7 @@ t0 = Variable( interpolation='global', default_value='500', unit='K' )
 left_time_integration = 0
 right_time_integration = 1
 
+
 #
 def formulation():
   #sys.stderr.write( str( epslopigh.expr ) )
@@ -26,6 +27,7 @@ def formulation():
   
   return res * dV + H.expr * ( t - t0.expr ) * te * dS
   
+  
 # ).subs( time, time_steps[0] )
 #  + ( pos.expr[2] ) * ( pos.expr[0] < 1e-6 ) * te * dS + 
 # therm_penalty = Variable( interpolation='global', default_value='1e6', unit='1' )
@@ -33,3 +35,7 @@ def formulation():
 # #
 # def IS_contact_formulation(): return therm_penalty.expr * temperature.test * ( temperature.expr - contact_temperature.expr )
 # def elem_contact_formulation(ve): return number(0)
+
+
+
+

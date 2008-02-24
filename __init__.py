@@ -164,10 +164,14 @@ class MakePb:
 class MakePbFE:
     def write_formulation_h_from_scons( self, target, source, env ):
         output = file( str(target[0]), 'w' )
+        asmout = file( str(target[1]), 'w' )
         
         for f,e in self.fe_set:
             if e.dim == self.d:
-                f.write( e, output )
+                f.write( e, output, asmout = asmout, use_asm = self.use_asm )
+    
+        output.close()
+        asmout.close()
     
     def write_formulation_cpp_from_scons( self, target, source, env ):
         output = file( str(target[0]), 'w' )
@@ -199,7 +203,8 @@ def make_pb( env,
              options = {},
              additional_fields = {},
              types = ['double'],
-             dep_py = True ):
+             dep_py = True,
+             use_asm = False ):
    # find formulation and element files
    f_files, e_files = [], []
    for f in formulations:
@@ -253,7 +258,8 @@ def make_pb( env,
       for T in types:
           for f_name in map_f.keys():
             bn = 'formulation_%s_%s_%s.cpp' % (d,T,f_name)
-            bh = 'formulation_%s_%s_%s.h' % (d,T,f_name)
+            ba = 'formulation_%s_%s_%s_.asm' % (d,T,f_name)
+            bh = 'formulation_%s_%s_%s.h'   % (d,T,f_name)
             #fos_h.append( env.Command( directory + 'formulation_%s_%s_%i.h'%(f.name,e.name,e.dim), [f.name_file,e.name_file]+base_py_files, cp.write_formulation_h_from_scons ) )
             pbc = MakePbFE()
             pbc.d = d
@@ -261,19 +267,11 @@ def make_pb( env,
             pbc.name = name
             pbc.f_name = f_name
             pbc.fe_set = map_f[ f_name ]
-            f_h = env.Command( directory + bh, pb_h, pbc.write_formulation_h_from_scons )
+            pbc.use_asm = use_asm
+            f_h, f_asm = env.Command( [ directory + bh, directory + ba ], pb_h, pbc.write_formulation_h_from_scons )
             all_cpp += env.Command( directory + bn, f_h, pbc.write_formulation_cpp_from_scons , TARGET = bn + '_opt' * opt +'_debug'*(1-opt) + '.o' )
-              
-   #fos_h = []
-   #for f,e in fe_sets:
-      #cp = MakePbFE()
-      #cp.f = f
-      #cp.e = e
-      
-   # formulations.h
-   #fo_h = env.Command( directory + 'formulations.h', fos_h, pb.write_formulations_h_from_scons )
-
-   # problem.cpp
+            if use_asm:
+                all_cpp += [ f_asm ]
    
    return all_cpp
 

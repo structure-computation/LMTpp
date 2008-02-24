@@ -39,6 +39,8 @@ public:
     //struct ExMapCmp { bool operator()(const Ex &e1,const Ex &e2) const { return (e1.op<e2.op); } };
     typedef std::less<Ex> ExMapCmp;
     typedef std::map<Ex,Ex,Ex::ExMapCmp> MapEx;
+    typedef std::set<Ex,Ex::ExMapCmp> SetEx;
+    typedef std::set<T> SetNumber;
     
     Ex();
     Ex(const Op *ex);
@@ -104,8 +106,9 @@ public:
     bool is_zero() const;
     
     
-    typedef std::set<Ex,Ex::ExMapCmp> SetEx;
     void get_sub_symbols(SetEx &sub_symbols) const;
+    void get_sub_numbers(SetNumber &sub_numbers) const;
+    
     void get_sub_nodes(SetEx &sub_nodes) const;
     unsigned nb_children_rec() const { return nb_children_op(op); }
     

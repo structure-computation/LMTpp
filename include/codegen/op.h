@@ -71,10 +71,12 @@ public:
     static TypeEx getType(const std::string &type);
     bool is_a_function_1() const { return is_a_function_1(type); }
     bool is_a_function_2() const { return is_a_function_2(type); }
+    unsigned nb_children() const { return is_a_function_1(type) + 2 * is_a_function_2(type); }
     float priority() const;
     std::string to_string() const;
     std::string graphviz_repr() const;
     unsigned node_count_rec(long unsigned current_id) const;
+    bool leave() const { return type == Symbol or type == Number; }
     
 //private:
     mutable long unsigned id;
@@ -101,8 +103,8 @@ public:
     };
     Value data;
     TypeEx type;
-    void *additional_data; /// only for symbols
-    int movability_level; /// only for symbols
+    mutable void *additional_data; /// only for symbols
+    mutable int movability_level; /// only for symbols
     mutable Cvector<const Op *> parents;
     mutable unsigned cptUse;
     mutable T val; /// available for all kind of ops

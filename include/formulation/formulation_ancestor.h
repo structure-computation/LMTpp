@@ -88,6 +88,8 @@ public:
     #endif
     virtual void get_mat( Mat<ScalarType,Sym<>,SparseLine<> > *&mat ) = 0; ///
 
+    virtual void display_mat( std::ostream &os ) const = 0; ///
+
     virtual Vec<ScalarType> &get_sollicitation() = 0; ///
     virtual Vec<ScalarType> &get_result(unsigned num=0) = 0; ///
 

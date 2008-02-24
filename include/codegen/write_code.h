@@ -39,8 +39,14 @@ public:
     std::string to_string();    
     unsigned node_count() const;
     
+    std::string to_asm();
+    std::string asm_caller( std::string asm_function_name );
+    
     std::vector<Var> lst_var;
     
+    void write_graphviz(std::ostream &os);
+    void display_graphviz();
+
 private:
     struct Node {
         Node():reg(-2) {}
@@ -62,13 +68,10 @@ private:
     Write_code_language *wcl;
     
     const Op *set_depth_rec(const Ex &ex,unsigned depth); /// find max depth for each sub nodes ( results in nodes ). Only used via add()
-    
+     
     Tleaves::iterator get_next_node();
     std::string ex_to_string(Node &node) const; /// use node_order to get output
     void set_node_order();
-    
-    void write_graphviz(std::ostream &os);
-    void display_graphviz();
 };
 
 void write_graphviz(const Op *op,std::ostream &os);

@@ -402,6 +402,9 @@ public:
     void add( const Ex &ex, const std::string &name, Method method=Declare );
     unsigned node_count() const;
     std::string to_string();
+    std::string to_asm();
+    std::string asm_caller( std::string asm_function_name );
+    void display_graphviz();
 };
 %extend Write_code {
     void add( int ex, const std::string &name, Method method ) { self->add( Codegen::number(ex),name,method ); }

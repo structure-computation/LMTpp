@@ -889,6 +889,10 @@ public:
     
     virtual unsigned get_indice_noda(unsigned num_node) const { return indice_noda[num_node]; }
     
+    virtual void display_mat( std::ostream &os ) const {
+        os << matrices( Number<0>() );
+    }
+    
     TM *m;
     Carac carac;
     ScalarType max_diag;

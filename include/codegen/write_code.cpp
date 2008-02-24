@@ -1,10 +1,13 @@
 #include "op.h"
+#include "ex.h"
 #include "write_code.h"
 #include "write_code_language_cpp.h"
 #include <sstream>
 #include <iostream>
 #include <fstream>
 #include <assert.h>
+
+#include "MakeAsm.h"
 
 using namespace std;
 
@@ -222,4 +225,346 @@ void Write_code::write_graphviz(ostream &os) {
     os << "}" << endl;
 }
 
+void get_sub_symbols_and_numbers_rec( const Op *op, std::map<const Op *,int,std::less<const Op *> > &tmp_ops, int &tmp_value_size ) {
+    if ( op->id == Ex::current_id )
+        return;
+    op->id = Ex::current_id;
+    //
+    if ( op->leave() and tmp_ops.find( op ) == tmp_ops.end() )
+        tmp_ops[ op ] = tmp_value_size++;
+    else
+        for(unsigned i=0;i<op->nb_children();++i)
+            get_sub_symbols_and_numbers_rec( op->data.children[i], tmp_ops, tmp_value_size );
+}
+
+/*
+    tmp_values contains
+        1 << 63
+        numbers + symbols + results ( apparition order )
+        
+*/
+std::string Write_code::asm_caller( std::string asm_function_name ) {
+    typedef std::map<const Op *,int,std::less<const Op *> > MapOp;
+    
+    //
+    MapOp tmp_ops; // value -> pos in [ EAX + ... ]
+    int tmp_value_size = 3;
+    
+    ++Ex::current_id;
+    for(unsigned i=0;i<lst_var.size();++i) {
+        const Op *op = lst_var[i].ex.op;
+        get_sub_symbols_and_numbers_rec( op, tmp_ops, tmp_value_size );
+        if ( tmp_ops.find( op ) == tmp_ops.end() )
+            tmp_ops[ op ] = tmp_value_size++;
+    }
+    
+    //
+    std::ostringstream os;
+    os << std::string( wcl->nb_spaces, ' ' ) << "double tmp_values[ " << tmp_value_size << " ];\n";
+    os << std::string( wcl->nb_spaces, ' ' ) << "long long tmp_bm = (long long)1 << 63;\n";
+    os << std::string( wcl->nb_spaces, ' ' ) << "tmp_values[ 0 ] = reinterpret_cast<double &>( tmp_bm );\n";
+    os << std::string( wcl->nb_spaces, ' ' ) << "tmp_values[ 1 ] = 1.0;\n";
+    os << std::string( wcl->nb_spaces, ' ' ) << "tmp_values[ 2 ] = 0.0;\n";
+    for( MapOp::iterator iter=tmp_ops.begin(); iter!=tmp_ops.end(); ++iter )
+        if ( iter->first->leave() ) 
+            os << std::string( wcl->nb_spaces, ' ' ) << "tmp_values[ " << iter->second << " ] = " << Ex( iter->first ) << ";\n";
+    
+    // call
+    os << std::string( wcl->nb_spaces, ' ' ) << asm_function_name << "( tmp_values );\n";
+    
+    //
+    for(unsigned i=0;i<lst_var.size();++i) {
+        os << std::string( wcl->nb_spaces, ' ' );
+        switch ( lst_var[i].method ) {
+            case Write_code::Declare: os << "double " << lst_var[i].name << " = " ; break;
+            case Write_code::Set:     os <<              lst_var[i].name << " = " ; break;
+            case Write_code::Add:     os <<              lst_var[i].name << " += "; break;
+            case Write_code::Sub:     os <<              lst_var[i].name << " -= "; break;
+            case Write_code::Return:  os << "return "; break;
+        }
+        os << "tmp_values[ " << tmp_ops[ lst_var[i].ex.op ] << " ];\n";
+    }
+    
+    //
+    return os.str();
+}
+
+std::string Write_code::to_asm() {
+    typedef std::map<const Op *,int,std::less<const Op *> > MapOp;
+    
+    
+    //
+    MakeAsm ma;
+    ++Ex::current_id;
+    for(unsigned i=0;i<lst_var.size();++i)
+        ma.add_op_to_write( lst_var[i].ex.op );
+    
+    //
+    return ma.write_asm();
+}
+
+// -----------------------------------------------------------------------------------------------------------------------------
+
+/*
+struct WriteAsmInfo {
+    static const unsigned NOWHERE = 0;
+    static const unsigned STACK   = 1;
+    static const unsigned REG     = 2;
+    static const unsigned EAX     = 3;
+    
+    WriteAsmInfo() : reg(-1), pos_in_lst_var(-1), nb_parents(0), storage( NOWHERE ) {}
+    int reg;
+    int pos_in_lst_var;
+    unsigned nb_parents;
+    unsigned ordering;
+    unsigned storage;
 };
+
+
+unsigned storage_time( const Op *reg, const Op *current_parent ) {
+    unsigned res = std::numeric_limits<unsigned>::max();
+    for(unsigned i=0;i<reg->parents.size();++i) {
+        if ( reg->parents[i]->id == Ex::current_id ) {
+            unsigned p = reinterpret_cast<WriteAsmInfo *>( reg->parents[i]->additional_data )->ordering;
+            unsigned c = reinterpret_cast<WriteAsmInfo *>( reg->            additional_data )->ordering;
+            if ( p > c )
+                res = std::min( res, p - c );
+        }
+    }
+    return res;
+}
+
+// bestial
+void make_ordering_rec( const Op *op, std::vector<const Op *> &ordering ) {
+    if ( op->id == Ex::current_id )
+        return;
+    op->id == Ex::current_id;
+    //
+    if ( op->is_a_function_1() ) {
+        make_ordering_rec( op->data.children[0], ordering );
+        ordering.push_back( op );
+    }
+    else if ( op->is_a_function_2() ) {
+        make_ordering_rec( op->data.children[0], ordering );
+        make_ordering_rec( op->data.children[1], ordering );
+        ordering.push_back( op );
+    }
+    
+}
+
+struct MakeAsm {
+    MakeAsm() : stack_size( 0 ) {}
+    
+    std::string get_val( const WriteAsmInfo *chw ) {
+        std::ostringstream ss;
+        if ( chw->pos_in_lst_var >= 0 )
+            ss << "[ eax + " << chw->pos_in_lst_var << " ]";
+        else if ( chw->storage == WriteAsmInfo::EAX )
+            ss << "[ eax + " << chw->reg << " ]";
+        else if ( chw->storage == WriteAsmInfo::STACK )
+            ss << "[ esp + " << stack_size - chw->reg << " ]";
+        else {
+            std::cout << chw->storage << std::endl;
+            assert( chw->storage == WriteAsmInfo::REG );
+            ss << "xmm" << chw->reg;
+        }
+        return ss.str();
+    }
+    
+    void write_binary_commutative_asm_instr( std::ostream &os, const Op *op, int reg, const char *n ) {
+        const Op *ch_0 = op->data.children[0];
+        const Op *ch_1 = op->data.children[1];
+        const WriteAsmInfo *chw_0 = reinterpret_cast<const WriteAsmInfo *>( ch_0->additional_data );
+        const WriteAsmInfo *chw_1 = reinterpret_cast<const WriteAsmInfo *>( ch_1->additional_data );
+        
+        if ( chw_0->storage == WriteAsmInfo::REG ) { // REG + ...
+            if ( chw_1->storage == WriteAsmInfo::REG ) { // REG + REG
+                if ( reg == chw_0->reg )
+                    os << "    " << n << "  xmm" << reg << ", xmm" << chw_1->reg << "\n";
+                else if ( reg == chw_1->reg )
+                    os << "    " << n << "  xmm" << reg << ", xmm" << chw_0->reg << "\n";
+                else {
+                    os << "    movapd  xmm" << reg << ", xmm" << chw_0->reg << "\n";
+                    os << "    " << n << "  xmm" << reg << ", xmm" << chw_1->reg << "\n";
+                }
+            }
+            else { // REG + ( EAX or STACk )
+                if ( reg == chw_0->reg )
+                    os << "    " << n << "  xmm" << reg << ", " << get_val( chw_1 ) << "\n";
+                else {
+                    os << "    movapd  xmm" << reg << ", " << get_val( chw_1 ) << "\n";
+                    os << "    " << n << "  xmm" << reg << ", xmm" << chw_0->reg << "\n";
+                }
+            }
+        }
+        else { // EAX + ...
+            if ( chw_1->storage == WriteAsmInfo::REG ) { // EAX + REG
+                if ( reg == chw_1->reg )
+                    os << "    " << n << "  xmm" << reg << ", " << get_val( chw_0 ) << "\n";
+                else {
+                    os << "    movapd  xmm" << reg << ", " << get_val( chw_0 ) << "\n";
+                    os << "    " << n << "  xmm" << reg << ", xmm" << chw_1->reg << "\n";
+                }
+            }
+            else { // EAX + EAX
+                os << "    movapd  xmm" << reg << ", " << get_val( chw_0 ) << "\n";
+                os << "    " << n << "  xmm" << reg << ", " << get_val( chw_1 ) << "\n";
+            }
+        }
+    }
+    
+    void write_asm_instr( std::ostream &os, const Op *op, int reg ) {
+        switch ( op->type ) {
+            case Op::Number:       assert( 0 ); break;
+            case Op::Symbol:       assert( 0 ); break;
+            
+            case Op::Abs: {
+                long long tmp = (long long)1 << 63;
+                os << "    andps  xmm" << reg << ", [ eax + 8 * " << map_numbers[ reinterpret_cast<double &>( tmp ) ] << " ]\n";
+                break;
+            }
+            case Op::Heavyside:    
+            case Op::Heavyside_if: 
+            case Op::Eqz:          
+            case Op::Log:          
+            case Op::Exp:          
+            case Op::Sin:          
+            case Op::Cos:          
+            case Op::Sgn:          
+            case Op::Tan:          
+            case Op::Neg:          
+            case Op::Asin:         
+            case Op::Acos:         
+            case Op::Atan:         
+            case Op::Dirac:        
+            
+            case Op::Add:          write_binary_commutative_asm_instr( os, op, reg, "addsd" ); break;
+            case Op::Sub:          
+            case Op::Mul:          write_binary_commutative_asm_instr( os, op, reg, "mulsd" ); break;
+            case Op::Div:          
+            case Op::Pow:          
+            case Op::Max:          write_binary_commutative_asm_instr( os, op, reg, "maxsd" ); break;
+            case Op::Min:          write_binary_commutative_asm_instr( os, op, reg, "minsd" ); break;
+            case Op::Atan2:        
+            
+            default:            assert( 0 );
+        }
+    
+    }
+    
+    void write_asm( std::ostream &os, const std::vector<Write_code::Var> &lst_var ) {
+        // ordering (basic) + simple cases
+        ++Ex::current_id;
+        std::vector<const Op *> ordering;
+        for(unsigned i=0;i<lst_var.size();++i) {
+            const Op *op = lst_var[i].ex.op;
+            if ( op->type == Op::Number ) {
+                os << "    movsd  xmm0, [ eax + 8 * " << map_numbers[ op->val ] << " ]\n";
+                os << "    movsd  [ eax + 8 * " << i << " ], xmm0\n";
+            }
+            else if ( op->type == Op::Symbol ) {
+                os << "    movsd  xmm0, [ eax + 8 * " << op->movability_level   << " ]\n";
+                os << "    movsd  [ eax + 8 * " << i << " ], xmm0\n";
+            }
+            else
+                make_ordering_rec( op, ordering );
+        }
+            
+        // WriteAsmInfo
+        std::vector<WriteAsmInfo> wa_info( ordering.size() );
+        std::list<WriteAsmInfo> additional_wa_info;
+        for(unsigned i=0;i<ordering.size();++i) {
+            WriteAsmInfo *n = &wa_info[ i ];
+            n->ordering = i;
+            ordering[i]->additional_data = reinterpret_cast<void *>( n );
+            for(unsigned j=0;j<ordering[i]->nb_children();++j) {
+                const Op *ch = ordering[i]->data.children[j];
+                if ( ch->id != Ex::current_id ) {
+                    ch->id = Ex::current_id;
+                    //
+                    WriteAsmInfo wa;
+                    if ( ch->type == Op::Number or ch->type == Op::Symbol ) {
+                        wa->storage = WriteAsmInfo::EAX;
+                        wa->reg     = ( op->type == Op::Number ? map_numbers[ op->val ] : op->movability_level );
+                    }
+                    //
+                    additional_wa_info.push_front( wa );
+                    ordering[i]->data.children[j]->additional_data = reinterpret_cast<void *>( &additional_wa_info.front() );
+                }
+                reinterpret_cast<WriteAsmInfo *>( ordering[i]->data.children[j]->additional_data )->nb_parents ++;
+            }
+        }
+        for(unsigned i=0;i<lst_var.size();++i) {
+            const Op *op = lst_var[i].ex.op;
+            WriteAsmInfo *wa = reinterpret_cast<WriteAsmInfo *>( ordering[i]->additional_data );
+        }
+        for(unsigned i=0;i<lst_var.size();++i)
+            reinterpret_cast<WriteAsmInfo *>( lst_var[i].ex.op->additional_data )->pos_in_lst_var = i;
+        
+        // write
+        unsigned nb_registers = 8;
+        registers.resize( nb_registers, NULL );
+        unsigned stack_pos = 0;
+        for(unsigned i=0;i<ordering.size();++i) {
+            int reg = -1;
+            // free reg update
+            for(unsigned j=0;j<ordering[i]->nb_children();++j) {
+                const Op *ch = ordering[i]->data.children[j];
+                WriteAsmInfo *chw = reinterpret_cast<WriteAsmInfo *>( ch->additional_data );
+                if ( --chw->nb_parents == 0 and chw->storage == WriteAsmInfo::REG ) {
+                    reg = chw->reg;
+                    registers[ reg ] = NULL;
+                }
+            }
+            // register choice
+            if ( reg < 0 ) {
+                reg = 0;
+                for(unsigned j=0;j<registers.size();++j) {
+                    if ( registers[j] == NULL ) {
+                        reg = j;
+                        break;
+                    }
+                    if ( storage_time( registers[j], ordering[i] ) < storage_time( registers[reg], ordering[i] ) )
+                        reg = j;
+                }
+            }
+            
+            // asm instr
+            save_reg_if_necessary( os, reg );
+            write_asm_instr( os, ordering[i], reg );
+            
+            // register management
+            registers[ reg ] = ordering[i];
+            reinterpret_cast<WriteAsmInfo *>( ordering[i]->additional_data )->storage = WriteAsmInfo::REG;
+            reinterpret_cast<WriteAsmInfo *>( ordering[i]->additional_data )->reg     = reg;
+            
+            // inf lst_var ?
+            if ( reinterpret_cast<WriteAsmInfo *>(ordering[i]->additional_data)->pos_in_lst_var >= 0 )
+                os << "    movsd  [ eax + 8 * " << reinterpret_cast<WriteAsmInfo *>(ordering[i]->additional_data)->pos_in_lst_var << " ], xmm" << reg << "\n";
+        }
+        os << "    ret\n";
+    }
+    
+    void save_reg_if_necessary( std::ostream &os, int reg ) {
+        if ( not registers[ reg ] )
+            return;
+        WriteAsmInfo *wa = reinterpret_cast<WriteAsmInfo *>( registers[ reg ]->additional_data );
+        if ( wa->pos_in_lst_var >= 0 )
+            return;
+        os << "    push  xmm" << reg << "\n";
+        //
+        wa->storage = WriteAsmInfo::STACK;
+        wa->reg     = --stack_size;
+    }
+    
+    std::vector<const Op *> registers;
+    unsigned stack_size;
+};
+*/
+
+
+
+};
+
+
+

@@ -78,6 +78,7 @@ class Formulation:
     self.ponderation = symbol("ponderation")
     for n,i in self.ind.items():
       setattr( self, n, i )
+    self.num_func_write_matrix = 0
 
   def get_variables(self):
     res = {}
@@ -101,7 +102,7 @@ class Formulation:
     k = min( filter(lambda x:x>=self.order_integration,e.gauss_points.keys()) )
     self.gauss_points = e.gauss_points[k]
 
-  def write_nb__unknowns(self,f,t,skin,t_tot,TE,e=None):
+  def write_nb__unknowns( self, f, t, skin, t_tot, TE, e=None ):
     nb_unknowns = 0
     for name_var,var in self.get_variables().items():
       if var.unknown and skin==var.skin_var:
@@ -681,6 +682,11 @@ class Formulation:
     f.write( '\n' )
 
   def write_matrix(self,f,T,assemble_mat,assemble_vec,symmetric,matrices,e):
+    asm_fname = 'elem_matrix_%s_%s_%i' % ( self.name, self.e.name, self.num_func_write_matrix )
+    if self.use_asm:
+      self.num_func_write_matrix += 1
+      f.write( 'extern "C" void %s( double * );\n' % asm_fname )
+    #
     f.write( '// \n' )
     BU = ',unsigned symmetric_version'*(assemble_mat==False)
     if T=='V':
@@ -726,15 +732,18 @@ class Formulation:
       f.write( '      const unsigned *indices) {\n' )
       f.write( '  #define PNODE(N) node\n' )
 
-    write_matrix( f, matrices[T]['M'], matrices[T]['V'], symmetric, matrices[T]['i'], matrices[T]['o'], assemble_mat, assemble_vec )
+    write_matrix( f, matrices[T]['M'], matrices[T]['V'], symmetric, matrices[T]['i'], matrices[T]['o'], assemble_mat, assemble_vec, asmout = self.asmout, use_asm = self.use_asm, asm_fname = asm_fname )
     
     f.write( '  #undef PNODE\n' )
     f.write( '}\n' )
 
     if T=='N': f.write( '#endif\n' )
 
-  def write( self, e, f=sys.stdout ):
+  def write( self, e, f = sys.stdout, asmout = sys.stdout, use_asm = False ):
+    self.asmout  = asmout
+    self.use_asm = use_asm
     if isinstance(e,str): e = Element(e,self.dim)
+    self.e = e
     f.write( '/// @author hugo LECLERC\n' )
     ifndef = self.name.upper()
     for i in range(len(ifndef)):

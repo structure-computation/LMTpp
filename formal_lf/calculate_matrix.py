@@ -43,9 +43,7 @@ def calculate_matrix( expr, unknown_symbols, unknown_test_symbols, subs={}, allo
   return { 'M':matrix( M ), 'V':vector( V ) }
 
 
-
-
-def write_matrix( f, M, V, symmetric, indices, offsets, assemble_mat, assemble_vec ):
+def write_matrix( f, M, V, symmetric, indices, offsets, assemble_mat, assemble_vec, use_asm, asmout = None, asm_fname = "" ):
   cw = Write_code('T')
   for i in range(M.nb_rows()):
     if assemble_mat:
@@ -55,7 +53,14 @@ def write_matrix( f, M, V, symmetric, indices, offsets, assemble_mat, assemble_v
     if assemble_vec:
       if V[i]:
         cw.add( V[i], 'f.sollicitation[indices['+str(indices[i])+']+'+str(offsets[i])+']', Write_code.Add )
-  f.write( cw.to_string() )
+  if use_asm:
+    f.write( cw.asm_caller( asm_fname ) )
+    #
+    asmout.write( 'global %s\n' % asm_fname )
+    asmout.write( '%s:\n' % asm_fname )
+    asmout.write( cw.to_asm() )
+  else:
+    f.write( cw.to_string() )
 
 
 # 

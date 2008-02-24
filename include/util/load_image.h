@@ -77,9 +77,9 @@ void display_image(const Mat<T,Str,Sto,IO> &mat,const char *name_file="toto") {
         
     f.close();
     
-    ostringstream s,s2;
-    s << "display -depth 8 -size " << mat.nb_rows() << "x" << mat.nb_cols() << " gray:" << name_file;
-    system(s.str().c_str());
+    ostringstream s2;
+    //s << "display -depth 8 -size " << mat.nb_rows() << "x" << mat.nb_cols() << " gray:" << name_file;
+    //system(s.str().c_str());
     
     s2 << "convert -depth 8 -size " << mat.nb_rows() << "x" << mat.nb_cols() << " gray:" << name_file << " " << name_file << ".png";
     system(s2.str().c_str());

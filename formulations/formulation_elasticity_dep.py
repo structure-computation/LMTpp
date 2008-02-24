@@ -39,7 +39,6 @@ def formulation():
     return res * dV + dot( f_nodal.expr, dep.test ) * dN - dot( f_surf.expr, dep.test ) * dS - dot( p.expr * dS_normal, dep.test ) * dS
 
 
-
 # --------------------------------------------------------------------------------------------------------------------------------
 def apply_on_elements_after_solve(unk_subs): # return a string
     E = elastic_modulus.expr # * ( 1 + heavyside( fibres_matrice_level_set.expr ) )

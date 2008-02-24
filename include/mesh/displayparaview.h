@@ -123,7 +123,8 @@ public:
     void exec( const std::string &filename = "paraview.pvd" ) {
         make_pvd_file( filename );
 
-        system( ( "paraview --data=" + filename ).c_str() );
+        std::string t = "paraview --data=" + filename;
+        system( t.c_str() );
     
         /*
         std::string tmp_file = prefix + ".pvs";
