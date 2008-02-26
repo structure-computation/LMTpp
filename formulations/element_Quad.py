@@ -35,6 +35,16 @@ interpolation["bubble"] = (1-var_inter[0]) * (1-var_inter[1]) * (1-ni) * val[0] 
 interpolation["der_nodal"] = val[0]
 interpolation["gauss"] = val[0] + val[1] + val[2] + val[3]
 
+tmp_authorized_permutations = [
+    [0,1,2,3],
+]
+for i in range(4):
+    authorized_permutations += tmp_authorized_permutations
+    for c in range( len(tmp_authorized_permutations) ):
+        tmp_authorized_permutations[c] = tmp_authorized_permutations[c][1:4] + [ tmp_authorized_permutations[c][0] ]
+authorized_permutations = authorized_permutations[1:]
+
+
 quality = 1
 # ---------------------------------------------------------------------------------
 def local_coordinates(point):
