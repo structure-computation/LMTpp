@@ -31,7 +31,7 @@ bool get_factorization( const Mat<TT,Gen<s,s>,Sto,IO> &m, TF &fact ) {
         // find largest value in column c
         unsigned bl = c;
         for(unsigned j=c+1;j<n;++j)
-            if ( LMT::abs_indication(fact.first(fact.second[j],c)) > LMT::abs_indication(fact.first(fact.second[bl],c)) )
+            if ( abs_indication(fact.first(fact.second[j],c)) > abs_indication(fact.first(fact.second[bl],c)) )
                 bl = j;
         swap( fact.second[c], fact.second[bl] );
         for(unsigned i=c+1;i<n;++i) {

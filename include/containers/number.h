@@ -20,6 +20,7 @@
 namespace LMT {
 
 template<unsigned num> struct Number {};
+template<int num> struct Relative_Number {};
 
 }
 
