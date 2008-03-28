@@ -973,9 +973,9 @@ Vec<T> Pol<nd,1,T>::roots () const {
             res.push_back((sgn(u)*std::pow(std::abs(u),T(1)/T(3))+sgn(v)*std::pow(std::abs(v),T(1)/T(3))-a)/3.);
         }
         if (delta<0) {
-            complex<T> j(-0.5,sqrt(3.)/2.);
-            complex<T> v(-13.5*q,sqrt(-6.75*delta));
-            complex<T> u=std::pow(v,T(1)/T(3));
+            std::complex<T> j(-0.5,sqrt(3.)/2.);
+            std::complex<T> v(-13.5*q,sqrt(-6.75*delta));
+            std::complex<T> u=std::pow(v,T(1)/T(3));
             res.push_back((2.*std::real(u)-a)/3.);
             res.push_back((2.*std::real(j*u)-a)/3.);
             res.push_back((2.*std::real(j*j*u)-a)/3.);

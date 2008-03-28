@@ -66,6 +66,7 @@ public:
         date_last_node_neighbours_update = 0;
         date_last_node_parents_update = 0;
         date_last_elem_neighbours_update = 0;
+        date_last_absolute_number_update = 0;
         for(unsigned i=0;i<TElemList::nb_elem_type;++i) cpt_elem[i] = 0;
         wanted_hash_size = 1024;
     }
@@ -133,6 +134,28 @@ public:
         this->clear_node_parents();
         this->clear_elem_neighbours();
     }
+    
+    /// without update
+    unsigned get_absolute_number( const EA *e ) const {
+        unsigned r = 0;
+        for(unsigned i=0;i<e->num_in_elem_list_virtual();++i)
+            r += cpt_elem[ i ];
+        return r + e->number;
+    }
+
+private:
+   struct AbsoluteNumberUpdate { template<class TE> void operator()( TE &e, unsigned &n ) const { e.absolute_number = n++; } };
+public:
+    
+    /// 
+    void absolute_number_update() {
+        if ( date_last_absolute_number_update == date_last_connectivity_change )
+            return;
+        date_last_absolute_number_update = date_last_connectivity_change;
+        unsigned cpt = 0;
+        apply( elem_list, AbsoluteNumberUpdate(), cpt );
+    }
+    
 
     ///    
     TNodeList node_list;
@@ -171,7 +194,8 @@ protected:
     unsigned date_last_connectivity_change, 
              date_last_node_neighbours_update, 
              date_last_node_parents_update, 
-             date_last_elem_neighbours_update;
+             date_last_elem_neighbours_update,
+             date_last_absolute_number_update;
 
     ///    
     PackedVectorOfVector<TNode *> node_neighbours;

@@ -37,9 +37,15 @@ template<class TM,bool const_tm,class TV1,class TV2=void> struct SubMat;
 */
 template<class T,class Structure,class Storage,class OP>
 std::ostream &operator<<(std::ostream &os,const Mat<T,Structure,Storage,OP> &m) {
-    for(unsigned i=0;i<m.nb_rows();++i) {
+    int max_size = 0;
+    for(unsigned i=0;i<m.nb_rows();++i)
         for(unsigned j=0;j<m.nb_cols();++j)
-            os << std::setw(8) << m(i,j) << " ";
+            max_size = max( max_size, to_string( m( i, j ) ).size() );
+    for(unsigned i=0;i<m.nb_rows();++i) {
+        for(unsigned j=0;j<m.nb_cols();++j) {
+            std::string s = to_string( m( i, j ) );
+            os << s << std::string( max_size + 1 - s.size(), ' ' );
+        }
         os << "\n";
     }
     return os;

@@ -57,6 +57,11 @@ public:
         return res;
     }
     
+    template<int s> Vec<std::complex<double>,s> ffti(const Vec<std::complex<double>,s> &v) {
+        Vec<std::complex<double>,s> res = fft( v );
+        return res / (double)v.size();
+    }
+    
     bool init; /// true if at least one FFT has been queried.
     fftw_plan p;
 };

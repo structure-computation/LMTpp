@@ -28,7 +28,7 @@ void load_image(std::string file,Mat &m) {
         file = "toto.pnm";
     }
 
-    std::ifstream f(file.c_str());
+    std::ifstream f( file.c_str() );
     if (!f) {
         std::cerr << "Impossible to open " << file << std::endl;
         return;
@@ -41,13 +41,13 @@ void load_image(std::string file,Mat &m) {
 
     unsigned r,c;
     std::istringstream is(toto);
-    is >> r >> c;
+    is >> c >> r;
     
     int depth;
     f >> depth;
     assert(depth=255);
-    std::cout << r << std::endl;
-    std::cout << c << std::endl;
+    
+    getline(f,toto);
 
     unsigned char *pen = new unsigned char[ r*c ];
     f.read( (char *)pen, sizeof(unsigned char)*r*c );
@@ -56,20 +56,15 @@ void load_image(std::string file,Mat &m) {
     for(unsigned i=0,cpt=0;i<r;++i)
         for(unsigned j=0;j<c;++j,++cpt)
             m(i,j) = pen[cpt];
-    delete pen;
+    delete [] pen;
 }
 /// ostream interface
 template<class T,class Str,class Sto,class IO>
-void display_image(const Mat<T,Str,Sto,IO> &mat,const char *name_file="toto") {
+void display_image(const Mat<T,Str,Sto,IO> &mat, const std::string &name_file="toto") {
     typedef typename Mat<T,Str,Sto,IO>::T TT;
     using namespace std;
     
-    ofstream f(name_file);
-    
-    T m = 0.0;
-    for(unsigned l=0;l<mat.nb_rows();++l)
-        for(unsigned c=0;c<mat.nb_cols();++c)
-            m = max( m, (TT)mat(l,c) );
+    ofstream f( name_file.c_str() );
         
     for(unsigned l=0;l<mat.nb_rows();++l)
         for(unsigned c=0;c<mat.nb_cols();++c)
@@ -78,10 +73,7 @@ void display_image(const Mat<T,Str,Sto,IO> &mat,const char *name_file="toto") {
     f.close();
     
     ostringstream s2;
-    //s << "display -depth 8 -size " << mat.nb_rows() << "x" << mat.nb_cols() << " gray:" << name_file;
-    //system(s.str().c_str());
-    
-    s2 << "convert -depth 8 -size " << mat.nb_rows() << "x" << mat.nb_cols() << " gray:" << name_file << " " << name_file << ".png";
+    s2 << "convert -depth 8 -size " << mat.nb_cols() << "x" << mat.nb_rows() << " gray:" << name_file << " " << name_file << ".png";
     system(s2.str().c_str());
 }
 

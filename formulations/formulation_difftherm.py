@@ -1,4 +1,4 @@
-temperature = Variable( unknown=True, nb_der=1, default_value='300.0', unit='K' )
+temperature = Variable( unknown=True, nb_der=1, default_value='0.0', unit='K' )
 Q = Variable( default_value='0.0', unit='K/s' )
 Qs = Variable( interpolation='nodal', default_value='0.0', unit='K/s' )
 
@@ -7,11 +7,11 @@ heat_capacity = Variable( interpolation='global', default_value='1100.0', unit='
 thermal_conductivity = Variable( interpolation='global', default_value='1.5', unit='W/m/K' )
 
 H = Variable( interpolation='skin_elementary', default_value='0.0', unit='W/m^2/K' )
-t0 = Variable( interpolation='global', default_value='500', unit='K' )
+t0 = Variable( interpolation='global', default_value='0', unit='K' )
 
 #epslopigh = Variable( interpolation='gauss', default_value='500', nb_dim=[6], unit='K' )
 
-left_time_integration = 0
+left_time_integration  = 0
 right_time_integration = 1
 
 
@@ -20,12 +20,18 @@ def formulation():
   #sys.stderr.write( str( epslopigh.expr ) )
   
   a = thermal_conductivity.expr / ( density.expr * heat_capacity.expr ) # 'a' est la diffusivite thermique en m^2/s (ici a=4.3153e-07 m^2/s)
-  # k = heat_capacity.expr*thermal_conductivity.expr # -Q.expr
+  # k = heat_capacity.expr*thermal_conductivity.expr #
   t,te = temperature.expr, temperature.test
 
-  res = a * dot(grad(t),grad(te)) + t.diff(time) * te
+  ah = ExVector(3)
+  ah[ 0 ] = a
+  ah[ 1 ] = a
+  ah[ 2 ] = 0.8 * a
+
+  res = dot( ah * grad(t),grad(te)) + ( t.diff(time) - Q.expr ) * te
   
-  return res * dV + H.expr * ( t - t0.expr ) * te * dS
+  return res * dV + H.expr * ( t - t0.expr ) * te * dS - Qs.expr * te * dN
+  
   
   
 # ).subs( time, time_steps[0] )

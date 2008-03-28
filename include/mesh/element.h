@@ -42,6 +42,7 @@ public:
     virtual void set_field( const std::string field_name, Vec<T,3> value ) = 0;
 
     unsigned number;
+    unsigned absolute_number;
     
     virtual ~ElementAncestor() {}
 };
