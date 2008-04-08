@@ -78,6 +78,20 @@ std::istream &line_input( std::istream &s, Mat<TT,Structure,Storage,OP> &m ) {
     return s;
 }
 
+template<class T,class Structure,class Storage,class OP>
+void read_ascii_mat_file( Mat<T,Structure,Storage,OP> &mat, std::istream &f ) {
+    while ( true ) {
+        std::string str;
+        getline( f, str );
+        if ( not f )
+            break;
+        std::istringstream ss( str );
+        Vec<T> v;
+        ss >> v;
+        mat.resize( mat.nb_rows() + 1, v.size() );
+        mat.row( mat.nb_rows() - 1 ) = v;
+    }
+}
 
 template<class TTV,class Structure,class Storage,class OP>
 struct TypeInformation<Mat<TTV,Structure,Storage,OP> > {
