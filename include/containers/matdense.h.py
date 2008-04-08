@@ -364,7 +364,7 @@ struct MatElem<TV,STRUCTURE,STORAGE,alignement,nrs> {
                                    'MAX(0,sr*(sr-1)/2)' * ( structure=='AntiSym' ) + \
                                    'MIN(sr,sc)' * (structure=='Diag'),
                 # static size
-                'SETDYNDATASIZE' : (mi+'TV od = data; unsigned o_r = real_n%(a)s.val; unsigned r%(a)s=n%(a)s+alignement-1; r%(a)s-=r%(a)s %% alignement; real_n%(a)s.set(r%(a)s); real_n%(b)s.set(n%(b)s); data.resize(real_nr.val*real_nc.val); for(unsigned i=0;i<m%(a)s;++i) for(unsigned j=0;j<m%(b)s;++j) data[real_n%(a)s.val*i+j] = od[o_r*i+j];'%ab) * (structure=='Gen') + \
+                'SETDYNDATASIZE' : (mi+'TV od = data; unsigned o_r = real_n%(a)s.val; unsigned r%(a)s=n%(a)s+alignement-1; r%(a)s-=r%(a)s %% alignement; real_n%(a)s.set(r%(a)s); real_n%(b)s.set(n%(b)s); data.resize(real_nr.val*real_nc.val); for(unsigned i=0;i<m%(b)s;++i) for(unsigned j=0;j<m%(a)s;++j) data[real_n%(a)s.val*i+j] = od[o_r*i+j];'%ab) * (structure=='Gen') + \
                                    ('unsigned ri=nr/alignement; unsigned res=ri*(ri+1)/2*alignement*alignement+(nr % alignement)*(ri+1)*alignement; '+ \
                                     'unsigned o=nr+alignement-1; o-=o % alignement; res -= o-nr; data.resize(res);'+RNR) * (structure in ['Sym','Herm','TriUpper','TriLower']
                                    ) + \
