@@ -168,7 +168,7 @@ class MakePbFE:
         
         for f,e in self.fe_set:
             if e.dim == self.d:
-                f.write( e, output, asmout = asmout, use_asm = self.use_asm )
+                f.write( e, output, asmout = asmout, use_asm = self.use_asm, name_der_vars = self.name_der_vars )
     
         output.close()
         asmout.close()
@@ -204,7 +204,8 @@ def make_pb( env,
              additional_fields = {},
              types = ['double'],
              dep_py = True,
-             use_asm = False ):
+             use_asm = False,
+             name_der_vars = [] ):
    # find formulation and element files
    f_files, e_files = [], []
    for f in formulations:
@@ -244,6 +245,7 @@ def make_pb( env,
    pb.e_files           = e_files
    pb.formulations      = formulations
    pb.elements          = elements
+   pb.name_der_vars     = name_der_vars
    fe_sets, all_dims, map_f = pb.get_fe_sets_and_dims()
    pb.fe_sets, pb.all_dims, pb.map_f = fe_sets, all_dims, map_f
 

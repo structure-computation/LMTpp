@@ -217,7 +217,7 @@ class Problem:
         output.write( '#endif // %s\n' % ifndef )
 
     # write all in a single file
-    def write(self,output=sys.stdout):
+    def write( self, output = sys.stdout, name_der_vars = [] ):
         fe_sets, all_dims = self.get_fe_sets_and_dims()
         
         ifndef = self.name
@@ -232,12 +232,12 @@ class Problem:
         
         # formulations
         for f,e in fe_sets:
-            f.write( e, output )
-            
+            f.write( e, output, name_der_vars = name_der_vars )
+        
         output.write( '\n' )
         output.write( '#endif // PROBLEM_' + ifndef + '\n' )
 
-def write_pb(name,formulations,elements,dim='nvi',output=sys.stdout,incpaths=['.','LMT/formulations'],options={},additional_fields={},types=['double']):
+def write_pb(name,formulations,elements,dim='nvi',output=sys.stdout,incpaths=['.','LMT/formulations'],options={},additional_fields={},types=['double'],name_der_vars=[]):
     """    dim -> for one element, say number of dimension we need
         Ex : write_pb('toto',[...],['Triangle','Tetra'],'3') -> Triangle and Tetra will cohabite in a mesh in 3D
         Ex : write_pb('toto',[...],['Triangle','Tetra'],'nvi') -> 2 meshes will be created. One in 2D with triangles and one in 3D with tetras
@@ -250,7 +250,6 @@ def write_pb(name,formulations,elements,dim='nvi',output=sys.stdout,incpaths=['.
         } will cause ... Example of behavior_simplification : 'plane strain', 'axysymmetric', ...
     """
     pb = Problem(name,formulations,elements,dim,incpaths,options,additional_fields)
-    pb.write(output)
-
+    pb.write( output, name_der_vars )
 
     

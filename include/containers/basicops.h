@@ -40,8 +40,8 @@ namespace LMT {
     printf("%s\n",os.str().c_str()); \
 }
 #define PRINTTYPE( A ) \
-    std::cout << "  " << __STRING(A) << " ->" << std::endl << "    " << std::flush; \
-    system( ("c++filt "+std::string( (A).name() )).c_str() )
+    std::cout << "  " << __STRING(A) << " -> " << (A).name() << std::endl;
+//     system( ("c++filt "+std::string( (A).name() )).c_str() )
 
 class Min;
 class Max;

@@ -89,6 +89,7 @@ public:
             fflush(tube);
         }
     }
+    
     /// Dans le cas o une seule variable est fournie. x=num�o. vec=ordonn�
     template<class T1,int s1,class O1,class T2,int s2,class O2>
     void plot(const Vec<T1,s1,O1> &x,const Vec<T2,s2,O2> &y1,const Vec<T2,s2,O2> &y2,const char *params="") {

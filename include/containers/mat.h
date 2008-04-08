@@ -40,7 +40,7 @@ std::ostream &operator<<(std::ostream &os,const Mat<T,Structure,Storage,OP> &m) 
     int max_size = 0;
     for(unsigned i=0;i<m.nb_rows();++i)
         for(unsigned j=0;j<m.nb_cols();++j)
-            max_size = max( max_size, to_string( m( i, j ) ).size() );
+            max_size = max( max_size, (int)to_string( m( i, j ) ).size() );
     for(unsigned i=0;i<m.nb_rows();++i) {
         for(unsigned j=0;j<m.nb_cols();++j) {
             std::string s = to_string( m( i, j ) );

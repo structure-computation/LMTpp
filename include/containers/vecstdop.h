@@ -122,8 +122,22 @@ inline typename TypeReduction<Multiplies,Vec<TT,s> >::T product(const Vec<TT,s> 
 */
 template<class TT,int s>
 inline typename TypeReduction<Plus,Vec<TT,s> >::T mean(const Vec<TT,s> &v) {
-    return sum(v) / v.size();
+    return sum( v ) / v.size();
 }
+
+/**
+
+*/
+template<class TT,int s>
+inline typename TypeReduction<Plus,Vec<TT,s> >::T variance(const Vec<TT,s> &v) {
+    return mean( ( v - mean(v) ) * ( v - mean(v) ) );
+}
+
+template<class TT,int s>
+inline typename TypeReduction<Plus,Vec<TT,s> >::T standard_deviation(const Vec<TT,s> &v) {
+    return sqrt( variance( v ) );
+}
+
 
 /** Scalar product. Generic form
   \relates Vec

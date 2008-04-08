@@ -40,7 +40,7 @@ def calculate_matrix( expr, unknown_symbols, unknown_test_symbols, subs={}, allo
       if dont_want_to_add_KUn == False:
         for j in range(len(unknown_symbols)):
             V[i] += M[i][j] * unknown_symbols[j]
-  return { 'M':matrix( M ), 'V':vector( V ) }
+  return { 'M':matrix( M ), 'V':vector( V ), 'U':unknown_symbols }
 
 
 def write_matrix( f, M, V, symmetric, indices, offsets, assemble_mat, assemble_vec, use_asm, asmout = None, asm_fname = "" ):

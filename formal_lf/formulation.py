@@ -251,7 +251,7 @@ class Formulation:
     self.write_max_error(f,t,skin,t_tot,TE,e)
     self.write_set_old_vec(f,t,skin,t_tot,TE,e)
     
-  def write_carac(self,f,e,matrices,contact_matrices):
+  def write_carac(self,f,e,matrices,contact_matrices,name_der_vars,der_var_syms):
     ifndef_carac = ( self.name+"_"+str(self.dim)+"_num_"+str(self.nb_form)+"_CARAC_H" ).upper()
     f.write( '#ifndef %s\n'%(ifndef_carac) )
     f.write( '#define %s\n'%(ifndef_carac) )
@@ -283,6 +283,14 @@ class Formulation:
     f.write( '  static const unsigned offset_of_pos_unknown=3;\n' )
     f.write( '  static const unsigned pos_is_an_unknown = %s;\n'%(['false','true'][self.pos.unknown]) )
     f.write( '  static const unsigned order_integration = %i;\n' % self.order_integration )
+    
+    #
+    f.write( '  static const unsigned nb_der_var = %i;\n' % len(der_var_syms) )
+    f.write( '  template<class TF> static void add_to_der_vars( TF &f, const Vec<T> &v ) {\n' )
+    for s in range(len(der_var_syms)):
+        f.write( '      %s += v[ %i ];\n' % ( str(der_var_syms[s]), s ) )
+    f.write( '  }\n' )
+
 
     # is_unknown
     all_unk = []
@@ -739,7 +747,58 @@ class Formulation:
 
     if T=='N': f.write( '#endif\n' )
 
-  def write( self, e, f = sys.stdout, asmout = sys.stdout, use_asm = False ):
+  def write_der_var_vector(self,f,T,matrices,e,der_var,num_der_var):
+    asm_fname = 'elem_matrix_%s_%s_%i' % ( self.name, self.e.name, self.num_func_write_matrix )
+    if self.use_asm:
+      self.num_func_write_matrix += 1
+      f.write( 'extern "C" void %s( double * );\n' % asm_fname )
+    #
+    f.write( '// \n' )
+    if T=='V':
+      f.write( 'template<class TM,class T,bool wont_add_nz,class T_pos,class ND,class ED,unsigned nim>\n' )
+      if self.integration_totale:
+          f.write( 'void add_elem_vector_der_var(\n' )
+      else:
+          f.write( 'void add_local_elem_vector_der_var(T ponderation,const T *var_inter,\n' )
+      f.write( '      Formulation<TM,%s,DefaultBehavior,T,wont_add_nz> &f,\n' % self.name )
+      f.write( '      const Element<%s,DefaultBehavior,Node<%i,T_pos,ND>,ED,nim> &elem,\n'%(e.name,self.dim) )
+      f.write( '      const unsigned *indices, Number<%i> num_der_var ) {\n' % num_der_var )
+      f.write( '  #define PNODE(N) (*elem.node(N))\n' )
+    
+    elif T[0]=='S':
+      num_child = string.atoi(T[1:])
+      f.write( 'template<class TM,class T,bool wont_add_nz,class T_pos,class ND,class ED,unsigned nim,class ED2,unsigned nim2>\n' )
+      f.write( 'void add_skin_elem_vector_der_var(\n' )
+      f.write( '      Formulation<TM,%s,DefaultBehavior,T,wont_add_nz> &f,\n' % self.name )
+      f.write( '      const Element<%s,DefaultBehavior,Node<%i,T_pos,ND>,ED,nim> &elem,\n' % (e.name,self.dim) )
+      f.write( '      const Element<%s,DefaultBehavior,Node<%i,T_pos,ND>,ED2,nim2> &skin_elem,\n'%(e.children[num_child]['name'],self.dim) )
+      f.write( '      const Number<%s> &num_child,\n' % num_child )
+      f.write( '      const unsigned *indices, Number<%i> num_der_var ) {\n' % num_der_var )
+      f.write( '  #define PNODE(N) (*elem.node(N))\n' )
+      
+    elif T=='N':
+      txt = 'ADD_NODAL_VEC_DER_VAR_%s' % self.name
+      f.write( '#ifndef '+txt+'\n' )
+      f.write( '#define '+txt+'\n' )
+      f.write( 'template<class TM,class T,bool wont_add_nz>\n' )
+      f.write( 'void add_nodal_vector_der_var(\n' )
+      f.write( '      Formulation<TM,%s,DefaultBehavior,T,wont_add_nz> &f,\n' % self.name )
+      f.write( '      const typename TM::TNode &node,\n' )
+      f.write( '      const unsigned *indices, Number<%i> num_der_var ) {\n' % num_der_var )
+      f.write( '  #define PNODE(N) node\n' )
+      
+    f.write( '  /* %s */' % str(der_var) )
+
+    V = matrices[T]['V'].diff( der_var ) - mul( matrices[T]['M'].diff( der_var ), vector( matrices[T]['U'] ) )
+    #V = V.subs(  )
+    write_matrix( f, matrices[T]['M'], V, True, matrices[T]['i'], matrices[T]['o'], False, True, asmout = self.asmout, use_asm = self.use_asm, asm_fname = asm_fname )
+    
+    f.write( '  #undef PNODE\n' )
+    f.write( '}\n' )
+
+    if T=='N': f.write( '#endif\n' )
+  
+  def write( self, e, f = sys.stdout, asmout = sys.stdout, use_asm = False, name_der_vars = [] ):
     self.asmout  = asmout
     self.use_asm = use_asm
     if isinstance(e,str): e = Element(e,self.dim)
@@ -748,26 +807,41 @@ class Formulation:
     ifndef = self.name.upper()
     for i in range(len(ifndef)):
       if ifndef[i]=='/' or ifndef[i]==',' or ifndef[i]=='.': ifndef = ifndef[:i]+'_'+ifndef[i+1:]
-    #f.write( '#ifndef %s\n'%(ifndef) )
-    #f.write( '#define %s\n'%(ifndef) )
     f.write( '\n' )
     f.write( '#include "formulation/formulation.h"\n' )
     f.write( 'namespace LMT {\n' )
 
+    # der_var
+    der_vars = []
+    for n in name_der_vars:
+        exec ( "der_vars.append( self." + n + " )" )
+    
     # elem and nodal matrices
     self.set_variable_expressions(e)
     matrices,form_after_solve = self.calculate_matrices(e)
 
     contact_matrices = self.calculate_contact_matrices(e)
 
-    self.write_carac(f,e,matrices,contact_matrices)
-    self.write_carac_for_element(f,e,matrices,contact_matrices,form_after_solve)
+    der_var_syms = []
+    for d in der_vars:
+        for l in d.symbols:
+            der_var_syms += l[3]
+    
+    self.write_carac( f, e, matrices, contact_matrices, name_der_vars, der_var_syms )
+    self.write_carac_for_element( f, e, matrices, contact_matrices, form_after_solve )
 
+    # main matrices
     for T in ['V','N']+['S'+str(i) for i in range(len(e.children))]:
         for assemble_mat in [True,False]:
             for assemble_vec in [True,False]:
                 for symmetric in [False,True][(assemble_mat==False):]:
-                    self.write_matrix(f,T,assemble_mat,assemble_vec,symmetric,matrices,e)
+                    self.write_matrix( f, T, assemble_mat, assemble_vec, symmetric, matrices, e )
+    
+    # der_var matrices
+    for n in range(len(der_var_syms)):
+        for T in ['V','N']+['S'+str(i) for i in range(len(e.children))]:
+            self.write_der_var_vector( f, T, matrices, e, der_var_syms[n], n )
+    
     # contact matrices
     #     sub_elems = []
     #     for c in e.children:
@@ -781,52 +855,51 @@ class Formulation:
     #       for symmetric in [False,True][update_only_vec:]:
     #         self.write_contact_matrix(f,'N',update_only_vec,symmetric,contact_matrices,'')
 
-
     f.write( '} // namespace LMT\n' )
     f.write( '\n' )
+    
     #f.write( '#endif // %s\n'%(ifndef) )
-
-#   def write_contact_matrix(self,f,T,update_only_vec,symmetric,matrices,e):
-#     f.write( '// \n' )
-#     BU = ',bool symmetric_version' * update_only_vec
-#     if T=='V':
-#       f.write( '#ifndef ADD_CONTACT_ELEMENTARY_MATRIX_%s_%s_%i_%i_%i_%i\n'%(e.name,self.name,self.dim,self.nb_form,symmetric,update_only_vec) )
-#       f.write( '#define ADD_CONTACT_ELEMENTARY_MATRIX_%s_%s_%i_%i_%i_%i\n'%(e.name,self.name,self.dim,self.nb_form,symmetric,update_only_vec) )
-#       f.write( 'template<class T,class TM,class Tnode,class T_pos,class ND,class ED,class TSys,class TTs%s,class CD>\n'%BU )
-#       f.write( 'void add_contact_elementary_matrix(\n' )
-#       f.write( '      %s<T> f,\n'%(self.name) )
-#       f.write( '      Matrix_is_symmetric<%s> mis,\n'%( ['false','true','symmetric_version'][symmetric+update_only_vec] ) )
-#       f.write( '      Update_only_vec<%s> uov,\n'%( ['false','true'][update_only_vec] ) )
-#       f.write( '      Number<%i> nfo,\n'%self.nb_form )
-#       f.write( '      const TM &mesh,\n' )
-#       f.write( '      const Tnode &node,\n' )
-#       f.write( '      const Element<%s,Node<T_pos,%i,ND>,ED> &elem,\n'%(e.name,self.dim) )
-#       f.write( '      TSys &syst,\n' )
-#       f.write( '      const unsigned *indices,\n' )
-#       f.write( '      T surtension_coefficient,\n' )
-#       f.write( '      const CD &cd,\n' )
-#       f.write( '      T time,\n' )
-#       f.write( '      const TTs &time_steps) {\n' )
-#       f.write( '  #define PNODE(N) (*elem.node(N))\n' )
-#     elif T=='N':
-#       f.write( '#ifndef  ADD_CONTACT_NODAL_MATRIX_%s_%i_%i_%i_%i\n'%(self.name,self.dim,self.nb_form,symmetric,update_only_vec) )
-#       f.write( '#define  ADD_CONTACT_NODAL_MATRIX_%s_%i_%i_%i_%i\n'%(self.name,self.dim,self.nb_form,symmetric,update_only_vec) )
-#       f.write( 'template<class T,class TM,class Tnode,class TTs,class CD,class TSys%s>\n'%BU )
-#       f.write( 'void add_contact_nodal_matrix(\n' )
-#       f.write( '      %s<T> f,\n'%self.name )
-#       f.write( '      Matrix_is_symmetric<%s> mis,\n'%( ['false','true','symmetric_version'][symmetric+update_only_vec] ) )
-#       f.write( '      Update_only_vec<%s> uov,\n'%( ['false','true'][update_only_vec] ) )
-#       f.write( '      Number<%i> nfo,\n'%self.nb_form )
-#       f.write( '      const TM &mesh,\n' )
-#       f.write( '      const Tnode &node,\n' )
-#       f.write( '      TSys &syst,\n' )
-#       f.write( '      const unsigned *indices,\n' )
-#       f.write( '      T surtension_coefficient,\n' )
-#       f.write( '      const CD &cd,\n' )
-#       f.write( '      T time,\n' )
-#       f.write( '      const TTs &time_steps) {\n' )
-#       f.write( '  #define PNODE(N) node\n' )
-#     write_matrix( f, matrices[T]['M'], matrices[T]['V'], symmetric, matrices[T]['i'], matrices[T]['o'], update_only_vec )
-#     f.write( '  #undef PNODE\n' )
-#     f.write( '}\n' )
-#     f.write( '#endif\n' )
+    #   def write_contact_matrix(self,f,T,update_only_vec,symmetric,matrices,e):
+    #     f.write( '// \n' )
+    #     BU = ',bool symmetric_version' * update_only_vec
+    #     if T=='V':
+    #       f.write( '#ifndef ADD_CONTACT_ELEMENTARY_MATRIX_%s_%s_%i_%i_%i_%i\n'%(e.name,self.name,self.dim,self.nb_form,symmetric,update_only_vec) )
+    #       f.write( '#define ADD_CONTACT_ELEMENTARY_MATRIX_%s_%s_%i_%i_%i_%i\n'%(e.name,self.name,self.dim,self.nb_form,symmetric,update_only_vec) )
+    #       f.write( 'template<class T,class TM,class Tnode,class T_pos,class ND,class ED,class TSys,class TTs%s,class CD>\n'%BU )
+    #       f.write( 'void add_contact_elementary_matrix(\n' )
+    #       f.write( '      %s<T> f,\n'%(self.name) )
+    #       f.write( '      Matrix_is_symmetric<%s> mis,\n'%( ['false','true','symmetric_version'][symmetric+update_only_vec] ) )
+    #       f.write( '      Update_only_vec<%s> uov,\n'%( ['false','true'][update_only_vec] ) )
+    #       f.write( '      Number<%i> nfo,\n'%self.nb_form )
+    #       f.write( '      const TM &mesh,\n' )
+    #       f.write( '      const Tnode &node,\n' )
+    #       f.write( '      const Element<%s,Node<T_pos,%i,ND>,ED> &elem,\n'%(e.name,self.dim) )
+    #       f.write( '      TSys &syst,\n' )
+    #       f.write( '      const unsigned *indices,\n' )
+    #       f.write( '      T surtension_coefficient,\n' )
+    #       f.write( '      const CD &cd,\n' )
+    #       f.write( '      T time,\n' )
+    #       f.write( '      const TTs &time_steps) {\n' )
+    #       f.write( '  #define PNODE(N) (*elem.node(N))\n' )
+    #     elif T=='N':
+    #       f.write( '#ifndef  ADD_CONTACT_NODAL_MATRIX_%s_%i_%i_%i_%i\n'%(self.name,self.dim,self.nb_form,symmetric,update_only_vec) )
+    #       f.write( '#define  ADD_CONTACT_NODAL_MATRIX_%s_%i_%i_%i_%i\n'%(self.name,self.dim,self.nb_form,symmetric,update_only_vec) )
+    #       f.write( 'template<class T,class TM,class Tnode,class TTs,class CD,class TSys%s>\n'%BU )
+    #       f.write( 'void add_contact_nodal_matrix(\n' )
+    #       f.write( '      %s<T> f,\n'%self.name )
+    #       f.write( '      Matrix_is_symmetric<%s> mis,\n'%( ['false','true','symmetric_version'][symmetric+update_only_vec] ) )
+    #       f.write( '      Update_only_vec<%s> uov,\n'%( ['false','true'][update_only_vec] ) )
+    #       f.write( '      Number<%i> nfo,\n'%self.nb_form )
+    #       f.write( '      const TM &mesh,\n' )
+    #       f.write( '      const Tnode &node,\n' )
+    #       f.write( '      TSys &syst,\n' )
+    #       f.write( '      const unsigned *indices,\n' )
+    #       f.write( '      T surtension_coefficient,\n' )
+    #       f.write( '      const CD &cd,\n' )
+    #       f.write( '      T time,\n' )
+    #       f.write( '      const TTs &time_steps) {\n' )
+    #       f.write( '  #define PNODE(N) node\n' )
+    #     write_matrix( f, matrices[T]['M'], matrices[T]['V'], symmetric, matrices[T]['i'], matrices[T]['o'], update_only_vec )
+    #     f.write( '  #undef PNODE\n' )
+    #     f.write( '}\n' )
+    #     f.write( '#endif\n' )
