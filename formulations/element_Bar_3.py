@@ -10,7 +10,7 @@ children = [
   {'name':'NodalElement', 'nodes':[1], 'var':[number(1)]},
 ]
 
-permutation = [ 1, 2, 0 ]
+permutation = [ 1, 0, 2 ]
 
 #ni = (1-var_inter[0])*var_inter[0]*4;
 #interpolation['nodal'] = (1-var_inter[0])*(1-ni)*val[0] + ni*val[1] + var_inter[0]*(1-ni)*val[2]

@@ -6,6 +6,7 @@
 namespace LMT {
 
 struct Bar;
+struct Bar_3;
 struct Triangle_6;
 struct Triangle;
 struct Quad;
@@ -40,6 +41,21 @@ void make_rect(TM &m,const Bar &t,typename TM::Pvec X0,typename TM::Pvec X1,type
         m.add_element( Bar(), DefaultBehavior(), beg+i, beg+i+1 );
     }
 }
+
+/**
+*/
+template<class TM>
+void make_rect(TM &m,const Bar_3 &t,typename TM::Pvec X0,typename TM::Pvec X1,typename TM::Pvec nb_points_) {
+    typedef typename TM::Pvec Pvec;
+    typedef typename TM::Tpos Tpos;
+    unsigned nb_points = 2 * unsigned( nb_points_[ 0 ] ) - 1;
+
+    for( unsigned i=0; i<nb_points; ++i )
+        m.add_node( X0 + i * ( X1 - X0 ) / ( nb_points - 1.0 ) );
+    for( unsigned i=0; i<nb_points-2; i += 2 )
+        m.add_element( Bar_3(), DefaultBehavior(), i, i+2, i+1 );
+}
+
 /**
  * Triangle
  * @param m 

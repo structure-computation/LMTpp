@@ -26,7 +26,9 @@ struct Bar_3 {
 };
 
 // --------------------------------------------------------------------------------------------------------
-template<> struct NbChildrenElement<Bar_3,1> { static const unsigned res = 3; };
+template<> struct NbChildrenElement<Bar_3,1> { static const unsigned res = 2; };
+
+template<unsigned n> struct TypeChildrenElement<Bar_3,1,n> { typedef NodalElement T; };
 
 template<class TN,class TNG,class TD,unsigned NET,class TC,class HET>
 void append_skin_elements(Element<Bar_3,TN,TNG,TD,NET> &e,TC &ch,HET &het,Number<1> nvi_to_subs) {
