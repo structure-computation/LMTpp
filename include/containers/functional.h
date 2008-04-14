@@ -297,6 +297,27 @@ static Function<C_4> _4;
 // because we don't want the compiler to complain about unused static variables
 inline void pouet_function() { _1 + _2 + _3 + _4; }
 
+
+// ------------------------------------------------ AbsIndication ---------------------------------------------------------
+/// \InGroup Lambda
+struct AbsIndication {
+    //template<class P1,class P2=void,class P3=void,class P4=void> struct ReturnType { typedef typename SubComplex<P1>::T T; };
+    template<class P1> typename SubComplex<P1>::T operator()(const P1 &p1) const { return abs_indication(p1); }
+};
+template<> struct ConserveZeroes<AbsIndication> { static const unsigned res = true; };
+
+template<bool is_scalar,class TT> struct TypePromoteAbsIndicationWithIsScalarBool;
+template<class TT> struct TypePromoteAbsIndicationWithIsScalarBool<true,TT> {
+    typedef typename SubComplex<TT>::T T;
+};
+
+template<class TT>
+struct TypePromote<TT,AbsIndication> {
+    static const bool is_scalar = TypeInformation<TT>::is_scalar;
+    typedef typename TypePromoteAbsIndicationWithIsScalarBool<is_scalar,TT>::T T;
+};
+
+
 }
 
 

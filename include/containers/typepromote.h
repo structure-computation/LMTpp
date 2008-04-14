@@ -236,7 +236,6 @@ template<class T> void display_type( std::ostream &os, const T & ) {
     os << TypeInformation<T>::type();
 }
 
-
 }
 
 #endif // LMT_TYPEPROMOTE_HEADER

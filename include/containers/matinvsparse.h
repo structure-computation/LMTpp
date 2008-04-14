@@ -197,8 +197,13 @@ template<class T,int s2> void solve_using_incomplete_chol_factorize( const Mat<T
 
 
 // ---------------------------------------- LU ----------------------------------------
-/// in place...
 template<class T> void lu_factorize( Mat<T,Gen<>,SparseLU> &m ) {
+    Vec<unsigned> permumation;
+    lu_factorize( m, permumation, false );
+}
+
+/// in place...
+template<class T> void lu_factorize( Mat<T,Gen<>,SparseLU> &m, Vec<unsigned> &permumation, bool allow_partial_pivot ) {
     unsigned n = m.nb_rows();
     // something on diag ?
     for(unsigned line=0;line<n;++line) {
@@ -258,6 +263,21 @@ template<class T> void lu_factorize( Mat<T,Gen<>,SparseLU> &m ) {
                     m.U[line].indices[ind] = col;
                 }
             }
+        }
+        
+        // partial pivot
+        if ( not abs_indication( m.U[line].data.back() ) ) {
+            unsigned best_line_p = 0;
+            typename TypePromote<T,AbsIndication>::T best_abs_indication = -1.0;
+            for(unsigned line_p=line+1;line_p<m.nb_rows();++line_p) {
+                if ( best_abs_indication < abs_indication( m( line_p, line ) ) ) {
+                    best_abs_indication = abs_indication( m( line_p, line ) );
+                    best_line_p = line_p;
+                }
+            }
+            if ( best_abs_indication == -1.0 )
+                throw SolveException("null pivot ");
+            // swap line
         }
     }
 }

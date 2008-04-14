@@ -19,6 +19,8 @@ interpolation['nodal'] =   2 * (1-X) * ( 0.5 - X ) * val[0] + \
                            2 *   X   * ( X - 0.5 ) * val[1] + \
                            4 * (1-X) *      X      * val[2]
 
+interpolation['nodal_2'] = (1-X)*val[0] + X*val[1]
+
 interpolation["der_nodal"] = val[0]
 
 quality = 1

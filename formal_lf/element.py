@@ -225,6 +225,13 @@ class Element:
     def green_lagrange_col(self,v): return mat_sym_to_vec_col(self.green_lagrange(v))
     
     def div(self,v):
+      if isinstance( v, ExMatrix ):    #etienne
+        if (v.nb_cols() != self.nb_var_inter or v.nb_rows() != self.nb_var_inter) :
+           print 'Error : div available only if v.nb_cols() = self.nb_var_inter and v.nb_rows() = self.nb_var_inter '
+           return 0
+        res=ExVector(v.nb_rows())
+        for i in range(v.nb_rows()): res[i] += self.div(v.row(i))
+        return res
       if isinstance( v, ExVector ):
         if v.size() != self.nb_var_inter:
             print 'Error : div available only if v.size() != self.nb_var_inter'

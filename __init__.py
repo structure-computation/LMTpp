@@ -270,6 +270,7 @@ def make_pb( env,
             pbc.f_name = f_name
             pbc.fe_set = map_f[ f_name ]
             pbc.use_asm = use_asm
+            pbc.name_der_vars = []
             f_h, f_asm = env.Command( [ directory + bh, directory + ba ], pb_h, pbc.write_formulation_h_from_scons )
             all_cpp += env.Command( directory + bn, f_h, pbc.write_formulation_cpp_from_scons , TARGET = bn + '_opt' * opt +'_debug'*(1-opt) + '.o' )
             if use_asm:
