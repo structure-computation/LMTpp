@@ -160,7 +160,13 @@ typename TNG::T measure( const Element<Triangle,TN,TNG,TD,NET> &e ) {
     return 0.5 * length( P1-P0 ) * length( P2-P0 );
 }
 
-};
+
+template<class TV>
+bool var_inter_is_inside( const Triangle &e, const TV &var_inter ) {
+    return heaviside( var_inter[0] ) * heaviside( var_inter[1] ) * heaviside( 1 - var_inter[0] - var_inter[1] );
+}
+
+}
 
 #include "element_Triangle.h"
 

@@ -61,6 +61,8 @@ public:
     typedef Vec<VecNodeList<TNode,skin> > TNodeList;
     typedef Vec<VecElemList<Carac,TNode,nvi_to_subs,skin> > TElemList;
     template<class NE,class BE=DefaultBehavior> struct TElem { typedef typename TElemList::template TElem<NE,BE>::TE TE; };
+    static const unsigned nvi = TElemList::nvi;
+    
     MeshAncestor() {
         date_last_connectivity_change = 1;
         date_last_node_neighbours_update = 0;

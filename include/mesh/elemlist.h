@@ -23,6 +23,17 @@ private:
         };
     };
     struct GetNvi { template<class TE> struct Val { static const unsigned res = TE::nb_var_inter; }; };
+    
+    template<class TL,class TE=typename TL::T>
+    struct GetNviFromHeterList {
+        static const unsigned cur = TE::nb_var_inter;
+        static const unsigned nex = GetNviFromHeterList<typename TL::TNext>::res;
+        static const unsigned res = ( nex > cur ? nex : cur );
+    };
+    template<class TL>
+    struct GetNviFromHeterList<TL,void> {
+        static const unsigned res = 0;
+    };
 public:
     static const int static_size = -1;
     static const bool fixed_size = false;
@@ -60,6 +71,8 @@ public:
     typedef Vec<Heterogeneous<CaracVec<2> > > TListPtrPtr;
     /// nb type of elements 
     static const unsigned nb_elem_type = TList::nb_sub_type;
+    ///
+    static const unsigned nvi = GetNviFromHeterList<TList>::res;
     ///
     template<class NE,class BE> struct IndexOf { static const unsigned res = LMT::IndexOf<CaracNEBE,std::pair<NE,BE> >::res; };
     ///
