@@ -8,9 +8,9 @@ print """// file generated from poynomials.h.py. Do not modify
 #ifndef POLYNOMIALS_H
 #define POLYNOMIALS_H
 
-#include <vector>
-#include <limits>
-#include <complex>
+//#include <vector>
+//#include <limits>
+//#include <complex>
 #include <containers/gnuplot.h>
 #include <containers/vec.h>
 #include <containers/algo.h>
