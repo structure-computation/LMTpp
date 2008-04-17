@@ -15,6 +15,7 @@
 #include "mesh/hexa.h"
 #include "mesh/tetra.h"
 #include "mesh/wedge.h"
+#include "mesh/triangle_6.h"
 #include "containers/indexof.h"
 
 #include <fstream>
@@ -147,8 +148,22 @@ void read_msh_2( TM &m,std::istream &is, unsigned nvi, const VarTag &vt ) throw 
                     permutation_if_jac_neg ( Wedge(),vn.ptr() );
                     assign_tag_values( m.add_element( Wedge(),DefaultBehavior(),vn.ptr() ), tag_values, vt, Number<0>(), Number<NbSubTypes<VarTag>::res>() );
                 }
-            } else {
-                //std::cout << "unknown type elem." << type_elem << std::endl;
+            }
+            else if ( type_elem == 8 ) { //TODO
+                if ( nvi == 1 ) {
+                    assign_tag_values( m.add_element( Bar_3(),DefaultBehavior(),vn.ptr() ), tag_values, vt, Number<0>(), Number<NbSubTypes<VarTag>::res>() );
+                }
+            }
+            else if ( type_elem == 9 ) { //TODO
+                if ( nvi == 2 ) {
+                    permutation_if_jac_neg ( Triangle_6(),vn.ptr() );
+                    assign_tag_values( m.add_element( Triangle_6(),DefaultBehavior(),vn.ptr() ), tag_values, vt, Number<0>(), Number<NbSubTypes<VarTag>::res>() );
+                }
+            }
+            else if ( type_elem == 15 ) { //TODO
+            }
+            else {
+                std::cout << "unknown type elem in read_msh_2 -> " << type_elem << std::endl;
             }
 
             continue;

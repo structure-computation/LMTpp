@@ -984,8 +984,8 @@ public:
         for(unsigned num_iter=0;num_iter<15;++num_iter) {
             assemble();
             
-            matrices(Number<0>()) += exp_mat_coeff * exp_mat;
-            sollicitation += exp_mat_coeff * exp_mat * exp_val;
+            //matrices(Number<0>()) += exp_mat_coeff * exp_mat;
+            //sollicitation += exp_mat_coeff * exp_mat * exp_val;
             
             Inv<ScalarType,Sym<>,SparseLine<> > I( matrices(Number<0>()) );
             vectors[ 0 ] = I * sollicitation;
