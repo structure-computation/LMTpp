@@ -381,6 +381,7 @@ public:
     virtual void assemble_clean_mat(bool assemble_mat=true,bool assemble_vec=true) {
         if ( not initialized ) { // old_vectors
             get_initial_conditions();
+            shift();
         }
 
         if ( assemble_vec ) // preinitialisation

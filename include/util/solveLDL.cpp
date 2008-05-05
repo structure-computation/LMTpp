@@ -26,7 +26,7 @@ void LDL_solver::get_factorization( LMT::Mat<double,LMT::Sym<>,LMT::SparseLine<>
     
     // fill-in
     for(unsigned i=0;i<mat.nb_rows();++i) {
-        for(unsigned j=0;j<m.data[i].indices.size()-1;++j) {
+        for(int j=0;j<(int)m.data[i].indices.size()-1;++j) {
             mat.data[ m.data[i].indices[j] ].indices.push_back( i );
             mat.data[ m.data[i].indices[j] ].data.push_back( m.data[i].data[j] );
         }
