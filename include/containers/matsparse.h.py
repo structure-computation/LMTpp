@@ -106,6 +106,46 @@ public:
     
     void free() { resize(0); data.free(); }
 
+    unsigned nb_nz() const {
+        unsigned res = 0;
+        for(unsigned i=0;i<data.size();++i)
+            res += data[i].indices.size();
+        return res;
+    }
+    
+    template<class Op,unsigned n>
+    void sweep_by_rc_set( Op &op, Number<n> ) const {
+        for(unsigned r=0;r<data.size();r+=n)
+            sweep_by_rc_set( op, Number<n>(), r );
+    }
+    
+    template<class Op,unsigned n>
+    void sweep_by_rc_set( Op &op, Number<n>, unsigned r ) const {
+        unsigned c[ n ];
+        bool     v[ n ];
+        // init
+        for(unsigned i=0;i<n;++i) {
+            v[i] = ( r+i < data.size() ? data[r+i].indices.size() : false );
+            c[i] = 0;
+        }
+        // sweep
+        while ( true ) {
+            // min( ind )
+            unsigned m = std::numeric_limits<unsigned>::max();
+            for(unsigned i=0;i<n;++i)
+                if ( v[i] )
+                    m = min( m, data[r+i].indices[c[i]] );
+            if ( m == std::numeric_limits<unsigned>::max() )
+                return;
+            //
+            for(unsigned i=0;i<n;++i) {
+                if ( v[i] and m == data[r+i].indices[c[i]] ) {
+                    op( r+i, m, data[r+i].data[c[i]] );
+                    v[ i ] = ++c[i] < data[r+i].indices.size();
+                }
+            }
+        }
+    }
     
     typedef RETDIAG RetDiag;
     typedef CONSTRETDIAG RetDiagConst;
