@@ -31,6 +31,7 @@ public:
     static const int static_cols = """+['sr','sc'][nsquare]+""";
     typedef Vec<Sparse<TT>,"""+['static_cols','static_rows'][row_oriented]+"""> TVI;
     typedef typename TVI::template SubType<0>::T T;
+    typedef T T0;
     typedef Vec<TVI,"""+['static_rows','static_cols'][row_oriented]+"""> TV;
 
     void clear() { for(unsigned i=0;i<data.size();++i) { data[i].indices.free(); data[i].data.free(); } } /// set all values to 0
@@ -251,9 +252,9 @@ private:
 template<class TV,int sr"""+',int sc'*nsquare+""">
 struct MatElem<TV,STRUCTURE,STORAGE > {
     MatElem(TV &mm,unsigned i,unsigned j):data(mm),line(i),column(j) {}
-    template<class T> operator T() const { RDATALC }
     typedef typename TV::template SubType<0>::T::template SubType<0>::T T0;
-    T0 conv() const { return T0( *this ); }
+    template<class T> operator T() const { RDATALC }
+    T0 conv() const { RDATALC }
     """ + join(['template<class T> MatElem &operator'+op+'=(const T &val) { MATELEM'+op+' return *this; }' for op in lst_op],'\n    ') + """
     TV &data;
     unsigned line,column;
@@ -263,7 +264,7 @@ struct MatElem<TV,STRUCTURE,STORAGE > {
             # RDATALC
             if structure!='Gen':
                 if structure=='Diag':
-                    res = replace(res,'RDATALC','return (line==column ? (T)data[line][column] : (T)0 );')
+                    res = replace(res,'RDATALC','return (line==column ? (T0)data[line][column] : (T0)0 );')
                     for op in lst_op:
                         res = replace(res,'MATELEM'+op,'DEBUGASSERT(line==column); data[line][column] '+op+'= val;')
                 elif structure in ['Sym','Herm','TriUpper','TriLower','AntiSym']:
@@ -280,13 +281,13 @@ struct MatElem<TV,STRUCTURE,STORAGE > {
                     R1 = 'if ( '+I1+'>='+I2+' ) {' + rep( IN1, {'POSTFIX':';', 'PREFIX':'return '}) + ' } else { ' + rep( IN2, {'POSTFIX':';', 'PREFIX':'return '+CONJ} ) + '};'
                     R2 = 'if ( '+I1+'>='+I2+' ) {' + rep( IN1, {'POSTFIX':'OP= val;', 'PREFIX':''}) + ' } else { ' + rep( IN2, {'POSTFIX':'OP= '+CONJ+'(val);', 'PREFIX':''} ) + '};'
                     if structure == 'AntiSym':
-                        R1 = 'if (line==column) return (T)0; ' + R1
+                        R1 = 'if (line==column) return (T0)0; ' + R1
                         R2 = 'if (line!=column) { ' + R2 + ' }'
                     if structure == 'TriUpper':
-                        R1 = 'if (line>column) return (T)0; return data[%s][%s];' % ( ['line','column'][row_oriented], ['line','column'][1-row_oriented] )
+                        R1 = 'if (line>column) return (T0)0; return data[%s][%s];' % ( ['line','column'][row_oriented], ['line','column'][1-row_oriented] )
                         R2 = 'if (line<=column) { data[%s][%s] OP= val; }' % ( ['line','column'][row_oriented], ['line','column'][1-row_oriented] )
                     if structure == 'TriLower':
-                        R1 = 'if (line<column) return (T)0; return data[%s][%s];' % ( ['line','column'][row_oriented], ['line','column'][1-row_oriented] )
+                        R1 = 'if (line<column) return (T0)0; return data[%s][%s];' % ( ['line','column'][row_oriented], ['line','column'][1-row_oriented] )
                         R2 = 'if (line>=column) { data[%s][%s] OP= val; }' % ( ['line','column'][row_oriented], ['line','column'][1-row_oriented] )
                 
                     res = replace(res,'RDATALC',R1)
