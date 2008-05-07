@@ -121,7 +121,7 @@ public:
         return res;
     }
     void print() {
-        cholmod_print_sparse( A, "A", &c ) ;         /* print the matrix */
+        cholmod_print_sparse( A, const_cast<char *>("A"), &c ) ;         /* print the matrix */
     }
 
     ///

@@ -30,7 +30,7 @@ template<class T> inline T dot_chol_factorize( const Vec<Sparse<T> > &v1, const 
 template<unsigned n>
 struct HashCH {
     HashCH() {
-        for(unsigned i=0;i<n;++i) v[n] = 0;
+        for(unsigned i=0;i<n;++i) v[i] = 0;
     }
     inline void add(unsigned col) {
         unsigned i = col / 32;
@@ -126,13 +126,13 @@ template<class T,int s,int s2> void solve_using_chol_factorize( const Mat<T,Sym<
         T v = sol[line];
         for(unsigned i=0;i<mat.data[line].data.size()-1;++i)
             v -= mat.data[line].data[i] * res[ mat.data[line].indices[i] ];
-        res[line] = v * mat.data[line].data.back();
+        res[line] = v / mat.data[line].data.back();
     }
 
     //
     Vec<T,s2> tmpvec = res;
     while (nb_lines--) {
-        T tmp = tmpvec[nb_lines] * mat.data[nb_lines].data.back();
+        T tmp = tmpvec[nb_lines] / mat.data[nb_lines].data.back();
         for(unsigned i=0;i<mat.data[nb_lines].data.size()-1;++i)
             tmpvec[ mat.data[nb_lines].indices[i] ] -= mat.data[nb_lines].data[i] * tmp;
         res[nb_lines] = tmp;
