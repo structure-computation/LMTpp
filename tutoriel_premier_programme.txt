@@ -1,0 +1,58 @@
+/*!
+\tutorial Mon premier programme
+
+    Allez voir les pages de :
+    \relates Mesh
+    \relates MeshAncestor
+    \relates MeshCarac
+    \relates MeshTransfer
+
+    \friend rapahel.pasquier@lmt.ens-cachan.fr
+
+    On procède en plusieurs étapes :
+
+    Avant d'écrire le code source, commencer par créer les fichiers suivants :
+        * SConstruct
+            qui contiendra :
+            \code
+                from LMT import *
+                env = Environment(
+                CPPPATH = [ '#LMT/include' ]
+                )
+
+                make_dep_py(env)
+                env.Program( "test", ["test.cpp"] )
+
+        * Makefile
+            qui contiendra
+            \code
+                all: codegen
+                    scons
+                codegen:
+                    cd LMT/include/codegen; scons
+            Attention: dans Makefile, les tabulations doivent être de vraies tabulations et non une séquance d'espaces!
+        * un lien sur la librairie LMT (taper ln -s ~/LMT LMT ).
+
+    Puis créer le fichier source, disons test.cpp, avec le contenu :
+        \code
+            #include <containers/mat.h>
+            using namespace LMT;
+            int main(  ) {
+                Mat<double> m(10,10);
+                for(unsigned i=0;i<m.nb_rows();++i)
+                    for(unsigned j=0;j<m.nb_cols();++j)
+                        m(i,j) = i + j;
+                PRINTN( m + 10 );
+                std::cout << dot( m.diag(), range(m.nb_rows()) ) << std::endl;
+            }
+
+        Remarque : Si vous choisissez un autre nom de fichier, n'oubliez pas de changer le fichier SConstruct en conséquence.
+    
+    Ensuite on lance kdevelop (taper kdevelop&).
+        Remarque : il se peut qu'un projet se lance automatiquement.
+    
+    Importer un projet (menu Project->Import existing project... et validez autant de fois que nécessaire sans faire de changement).
+    
+    Taper F8 pour lancer la compilation. Youpi! Ca marche !
+
+*/ 
