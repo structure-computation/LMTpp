@@ -106,6 +106,7 @@ template<class NameDM> struct ExactlyEqualDM {
     template<class P1,class P2,class P3=void,class P4=void> struct ReturnType { typedef bool T; };
     template<class P1,class P2> bool operator()(const P1 &p1,const P2 &p2) const { return p1.member_named(NameDM()) == p2.member_named(NameDM()); }
 };
+
 template<class TT> struct ExactlyEqualTo {
     ExactlyEqualTo(const TT &v):val(v) {}
     template<class P1,class P2=void,class P3=void,class P4=void> struct ReturnType { typedef bool T; };
@@ -113,6 +114,16 @@ template<class TT> struct ExactlyEqualTo {
     const TT &val;
 };
 template<class T> ExactlyEqualTo<T> exactly_equal(const T &val) { return ExactlyEqualTo<T>(val); }
+
+///
+// template<class TT> struct ExactlyEqualTo {
+//     ExactlyEqualTo(const TT &v):val(v) {}
+//     template<class P1,class P2=void,class P3=void,class P4=void> struct ReturnType { typedef bool T; };
+//     template<class P1> bool operator()(const P1 &p1) const { return p1 == val; }
+//     const TT &val;
+// };
+// ///
+// template<class T> ApproxEqualTo<T> approx_equal(const T &val,const T ) { return ApproxEqualTo<T>(val); }
 
 
 /** remove elements which are considered to be equal. Keeps the first ones.

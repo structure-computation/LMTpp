@@ -283,6 +283,23 @@ struct DistBetweenOp {
 //     TD dist;
 // };
 
+/** */
+template<class Pvec,class TD> struct DistBetweenVecInfEq {
+    template<class TV> struct ReturnType { typedef bool T; };
+    template<class P1> bool operator()(const P1 &p1) const {
+        return length(p2-p1)<dist;
+    }
+    Pvec p2;
+    TD dist;
+};
+
+template<class Pvec,class TD> DistBetweenVecInfEq<Pvec,TD> dist_between_vec_inf_eq( const Pvec &vec, const TD &d ) {
+    DistBetweenVecInfEq<Pvec,TD> res;
+    res.p2 = vec;
+    res.dist = d;
+    return res;
+}
+
 /** \f$ \sqrt{\sum_i c_i^2 + a } \f$
  \relates Vec
  */
