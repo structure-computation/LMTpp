@@ -110,7 +110,8 @@ class Problem:
                             if len( var.T ) == 0:
                                 output.write( ' '*nb_sp+'        if ( field_name == "'+namevar+'" ) { '+namevar+'['+str(i)+'] = value; return; } // hum\n' )
                     else:
-                        output.write( ' '*nb_sp+'        if ( field_name == "'+namevar+'" ) { '+namevar+' = value; return; }\n' )
+                        if len( var.T ) == 0:
+                            output.write( ' '*nb_sp+'        if ( field_name == "'+namevar+'" ) { '+namevar+' = value; return; }\n' )
             output.write( ' '*nb_sp+'        std::cerr << "There s no variable named " << field_name << " in data struct" << std::endl;\n' )
             output.write( ' '*nb_sp+"    }\n" )
             for d in range( 1, 4 ):

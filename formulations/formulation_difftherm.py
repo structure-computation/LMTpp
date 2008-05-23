@@ -13,6 +13,8 @@ H2 = Variable( interpolation='elementary', nb_dim=[3], default_value='0.0', unit
 H3 = Variable( interpolation='elementary', nb_dim=[3], default_value='0.0', unit='W/m^2/K' )
 #epslopigh = Variable( interpolation='gauss', default_value='500', nb_dim=[6], unit='K' )
 
+TOTO = Variable( interpolation='elementary', T="float", default_value='0.0', unit='W/m^2/K' )
+
 left_time_integration  = 0
 right_time_integration = 1
 
