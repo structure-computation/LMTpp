@@ -43,7 +43,7 @@ public:
         
         if ( not has_been_initialised ) {
             for(unsigned i=0;i<nb_formulations();++i) {
-                formulation_nb(i)->allocate_matrices( false );
+                formulation_nb(i)->allocate_matrices();
                 formulation_nb(i)->shift();
                 formulation_nb(i)->assemble();
                 if ( formulation_nb(i)->assume_constant_matrix ) {
@@ -89,7 +89,19 @@ public:
             else {
                 //formulation_nb(i)->shift();
                 //formulation_nb(i)->assemble( formulation_nb(i)->assume_constant_matrix==false );
-                formulation_nb(i)->solve_system( formulation_nb(i)->default_iterative_criterium );
+                Vec<T> old_vec; 
+                if ( formulation_nb(i)->non_linear_iterative_criterium )
+                    old_vec.resize( formulation_nb(i)->get_result().size(), T(0) );
+                unsigned nb_iterations = 0;
+                while ( true ) {
+                    formulation_nb(i)->solve_system( formulation_nb(i)->default_iterative_criterium );
+                    if ( formulation_nb(i)->non_linear_iterative_criterium == 0 or norm_2( old_vec - formulation_nb(i)->get_result() ) <= formulation_nb(i)->non_linear_iterative_criterium )
+                        break;
+                    if ( nb_iterations++ >= max_non_linear_iteration )
+                        throw SolveException();
+                    old_vec = formulation_nb(i)->get_result();
+                    formulation_nb(i)->assemble( formulation_nb(i)->assume_constant_matrix==false );
+                }
             }
         }
         

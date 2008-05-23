@@ -25,7 +25,9 @@ public:
     FormulationAncestor() {
         assume_constant_matrix = false;
         default_iterative_criterium = 0.0;
+        non_linear_iterative_criterium = 0.0;
         assume_skin_not_needed = false;
+        max_non_linear_iteration = 50;
     }
     virtual ~FormulationAncestor() {}
     
@@ -94,9 +96,11 @@ public:
     virtual Vec<ScalarType> &get_result(unsigned num=0) = 0; ///
 
     bool assume_constant_matrix; ///
-    ScalarType default_iterative_criterium; ///
+    ScalarType default_iterative_criterium; /// iterative_criterium for conjugate gradient, GMRES, ... based on norm_2( delta solution )
+    ScalarType non_linear_iterative_criterium; /// iterative_criterium for newton-raphson iterations, ... based on norm_2( delta solution )
     unsigned order_integration_when_integration_totale;
     bool assume_skin_not_needed;
+    unsigned max_non_linear_iteration;
 };
 
 }

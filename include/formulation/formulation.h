@@ -627,9 +627,22 @@ public:
     bool solve( ScalarType iterative_criterium=0.0, bool disp_timing=false ) {
         allocate_matrices();
         shift();
-        assemble();
-        if (solve_system(iterative_criterium,disp_timing) == false )
-            return false;
+        //
+        Vec<ScalarType> old_vec;
+        if ( this->non_linear_iterative_criterium )
+            old_vec.resize( vectors[0].size(), ScalarType(0) );
+        //
+        unsigned nb_iterations = 0;
+        while ( true ) {
+            assemble();
+            if ( solve_system(iterative_criterium,disp_timing) == false )
+                return false;
+            if ( this->non_linear_iterative_criterium == 0 or norm_2( old_vec - vectors[0] ) <= this->non_linear_iterative_criterium )
+                break;
+            if ( nb_iterations++ >= this->max_non_linear_iteration )
+                throw SolveException();
+            old_vec = vectors[0];
+        }
         update_variables();
         call_after_solve();
         return true;
