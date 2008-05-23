@@ -97,7 +97,7 @@ public:
                     formulation_nb(i)->solve_system( formulation_nb(i)->default_iterative_criterium );
                     if ( formulation_nb(i)->non_linear_iterative_criterium == 0 or norm_2( old_vec - formulation_nb(i)->get_result() ) <= formulation_nb(i)->non_linear_iterative_criterium )
                         break;
-                    if ( nb_iterations++ >= max_non_linear_iteration )
+                    if ( nb_iterations++ >= formulation_nb(i)->max_non_linear_iteration )
                         throw SolveException();
                     old_vec = formulation_nb(i)->get_result();
                     formulation_nb(i)->assemble( formulation_nb(i)->assume_constant_matrix==false );
