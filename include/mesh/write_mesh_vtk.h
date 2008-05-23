@@ -381,7 +381,7 @@ void write_mesh_vtk(std::ostream &os,const TM &m,const Vec<std::string> &display
         
         for(unsigned i=0;i<TM::TNode::nb_params;++i) {
             if ( std::find(display_fields.begin(),display_fields.end(),std::string(names[i]))!=display_fields.end() or (display_fields.size()>=1 and display_fields[0]=="all") ) {    //continue;
-                if ( names[i]!="pos" and nb_comp[i] ) {
+                if ( names[i]!=const_cast<char *>("pos") and nb_comp[i] ) {
                     os << "                <DataArray Name='" << names[i]
                             << "' NumberOfComponents='" << nb_comp[i] << "' type='" << get_vtk_types.res[i] << "' format='" << (binary ? "appended" : "ascii" ) << "' offset='" << appended.size() << "'>";
                     if ( binary )
@@ -643,8 +643,8 @@ void write_mesh_vtk_v2(std::ostream &os,const TM &m,const Vec<std::string> &disp
 
         for(unsigned i=0;i<TM::TNode::nb_params;++i) {
             if ( std::find(display_fields.begin(),display_fields.end(),std::string(names[i]))!=display_fields.end() or (display_fields.size()>=1 and display_fields[0]=="all") ) {    //continue;
-                if ( names[i]!="pos" and nb_comp[i] ) {
-
+                if ( names[i]!=const_cast<char *>("pos") and nb_comp[i] ) {
+                
                     os << names[i] << " " << nb_comp[i] << " " << m.node_list.size() << " float " <<endl;
                     os << dve.os[i].str();
                     os <<endl;
