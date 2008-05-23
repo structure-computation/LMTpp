@@ -107,7 +107,7 @@ class Problem:
                 if cond( var ) and len( var.nb_dim ) <= 1:
                     if in_vec( var ):
                         for i in range( cond(var) ):
-                            if len( var.T ):
+                            if len( var.T ) == 0:
                                 output.write( ' '*nb_sp+'        if ( field_name == "'+namevar+'" ) { '+namevar+'['+str(i)+'] = value; return; } // hum\n' )
                     else:
                         output.write( ' '*nb_sp+'        if ( field_name == "'+namevar+'" ) { '+namevar+' = value; return; }\n' )
@@ -119,10 +119,10 @@ class Problem:
                     if cond( var ) and var.nb_dim == [d]:
                         if in_vec( var ):
                             for i in range( cond(var) ):
-                                if len( var.T ):
+                                if len( var.T ) == 0:
                                     output.write( ' '*nb_sp+'        if ( field_name == "'+namevar+'" ) { '+namevar+'['+str(i)+'] = value; return; } // hum\n' )
                         else:
-                            if len( var.T ):
+                            if len( var.T ) == 0:
                                 output.write( ' '*nb_sp+'        if ( field_name == "'+namevar+'" ) { '+namevar+' = value; return; }\n' )
                 output.write( ' '*nb_sp+'        std::cerr << "There s no variable named " << field_name << " in data struct" << std::endl;\n' )
                 output.write( ' '*nb_sp+"    }\n" )
