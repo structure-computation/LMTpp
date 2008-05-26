@@ -30,6 +30,13 @@ std::ostream &operator<<( std::ostream &s, const Vec<T,stat_dim> &v ) {
 }
 
 
+// -------------------------------------------------------------- UTILITARY OP -----------------------------------------------------------------
+struct PushBack {
+    template<class T,class TV> void operator()( const T &val, TV &vec ) const {
+        vec.push_back( val );
+    }
+};
+
 // -------------------------------------------------------------- REDUCTION OP -----------------------------------------------------------------
 /**
   \relates Vec

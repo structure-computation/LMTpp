@@ -178,6 +178,10 @@ public:
         }
     }
     ///
+    template<class TV> void append( const TV &c ) {
+        apply( c, PushBack(), *this );
+    }
+    ///
     unsigned size() const { return nb_full_atoms()*atomic_size + size_last_atom; }
     ///
     inline unsigned nb_full_atoms() const { return max((int)atoms.size(),1)-1; }
