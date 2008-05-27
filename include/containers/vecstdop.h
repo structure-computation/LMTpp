@@ -37,6 +37,17 @@ struct PushBack {
     }
 };
 
+struct PushBackPtr {
+    template<class T,class TV> void operator()( T &val, TV &vec ) const {
+        vec.push_back( &val );
+    }
+};
+struct PushBackConstPtr {
+    template<class T,class TV> void operator()( const T &val, TV &vec ) const {
+        vec.push_back( &val );
+    }
+};
+
 // -------------------------------------------------------------- REDUCTION OP -----------------------------------------------------------------
 /**
   \relates Vec
