@@ -38,7 +38,7 @@ private:
 /** Create a [0:1:e] range \\relates Vec */
 template<class TT> Vec<Range<TT,0,1> > range(const TT &e) { DEBUGASSERT( e>=0 ); return Vec<Range<TT,0,1> >(0,1,e); }
 /** Create a [0:1:e] range \\relates Vec */
-template<class TT> Vec<Range<TT,-1,1> > range(const TT &b,const TT &e) { DEBUGASSERT( e>=b ); return Vec<Range<TT,-1,1> >(b,1,e); }
+template<class TT,class T2> Vec<Range<TT,-1,1> > range(const TT &b,const T2 &e) { DEBUGASSERT( (TT)e>=b ); return Vec<Range<TT,-1,1> >(b,1,e); }
 /** Create a [0:1:e] range \\relates Vec */
 template<class TT> Vec<Range<TT> > range(const TT &b,const TT &step,const TT &e) { DEBUGASSERT( (step>0 xor b>e) or b==e ); return Vec<Range<TT> >(b,step,e); }
 

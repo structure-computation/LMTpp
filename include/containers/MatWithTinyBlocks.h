@@ -137,7 +137,7 @@ struct MatWithTinyBlocks<T,Sym<3> > {
         diags.resize( r / n );
     }
 
-    MatWithTinyBlocks( ST r, ST c ) {
+    MatWithTinyBlocks( ST r = 0, ST c = 0 ) {
         resize( r, c );
     }
     
@@ -149,8 +149,6 @@ struct MatWithTinyBlocks<T,Sym<3> > {
         }
     }
     
-    //     template<class T2> MatWithTinyBlocks( Mat<T2,Sym<>,SparseCholMod> &m ) {
-    //     }
     template<class T2> MatWithTinyBlocks( Mat<T2,Sym<>,SparseLine<> > &m ) {
         resize( m.nb_rows(), m.nb_cols() );
         for(unsigned r=0;r<rows.size();++r) {
