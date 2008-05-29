@@ -65,6 +65,7 @@ public:
     virtual void get_initial_conditions() = 0; /// fill vectors[x] using dern_unknown
     
     virtual unsigned get_indice_noda(unsigned num_node) const = 0;
+    virtual unsigned num_in_vec_unknown(const std::string &name) const = 0;
     
     /**
      * add a constraint which will be added to system during assembly

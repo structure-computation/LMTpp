@@ -986,6 +986,7 @@ public:
     virtual void erase_constraints_from(unsigned number) { constraints.resize(number); }
     
     virtual unsigned get_indice_noda(unsigned num_node) const { return indice_noda[num_node]; }
+    virtual unsigned num_in_vec_unknown(const std::string &name) const { return carac.num_in_vec_unknown( name ); }
     
     virtual void display_mat( std::ostream &os ) const {
         os << matrices( Number<0>() );
