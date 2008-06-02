@@ -134,7 +134,7 @@ private:
     struct ResizeMat {
         struct GetNZ {
             template<class TE> void operator()(const TE &e,Formulation &f,Vec<Vec<unsigned> > &v) const {
-                assert( (CaracFormulationForElement<NameFormulation,TE,NameVariant,ScalarType>::nb_elementary_unknowns) == 0 );
+//                 assert( (CaracFormulationForElement<NameFormulation,TE,NameVariant,ScalarType>::nb_elementary_unknowns) == 0 );
                 if ( nb_nodal_unknowns ) {
                     for(unsigned i=0;i<TE::nb_nodes;++i) {
                         unsigned a = f.indice_noda[ f.m->node_list.number(*e.node(i)) ];

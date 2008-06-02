@@ -212,14 +212,14 @@ class Element:
     def green_lagrange(self,expr):
       """ """
       res = self.grad(expr)
-      tmp = matrix(self.nb_var_inter,self.nb_var_inter)
+      tmp = ExMatrix(self.nb_var_inter,self.nb_var_inter)
       for i in range(self.nb_var_inter):
         for j in range(self.nb_var_inter):
           tmp[i,j] = ( res[i,j] + res[j,i] ) / 2
       for i in range(self.nb_var_inter):
         for j in range(self.nb_var_inter):
           for k in range(self.nb_var_inter):
-            tmp[i,j] += res[k,i] * res[k,j] # / 2
+            tmp[i,j] += res[k,i] * res[k,j] / 2
       return tmp
       
     def green_lagrange_col(self,v): return mat_sym_to_vec_col(self.green_lagrange(v))
