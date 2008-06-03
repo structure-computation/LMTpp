@@ -1,4 +1,6 @@
-from codegen import *
+import os
+arch = os.uname()[4]
+execfile( os.path.dirname(__file__) + os.sep + "codegen_"+arch+".py" )
 
 def matrix(l):
     if ( len(l)==0 ):

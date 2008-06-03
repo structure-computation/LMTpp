@@ -1,6 +1,6 @@
 import os
 if 'arch' in ARGUMENTS: arch = ARGUMENTS['arch']
-else: arch=''
+else: arch = os.uname()[4]
 
 mac= 'mac' in ARGUMENTS and  ARGUMENTS['mac']
 
@@ -18,12 +18,14 @@ src = [
 found_swig = os.system('which swig')
 if arch=='ia64':
     found_swig = 1
-#if found_swig:
-#    Command('codegen_wrap.cc','codegen.i','/home/people/violeau/APPLI/SWIG-1.3.21/swig -python -c++ -o codegen_wrap.cc codegen.i')
+
+#print "sed 's/module codegen/module codegen_"+arch+"/' < codegen.i > codegen_"+arch+".i"
+#os.system( "sed 's/module codegen/module codegen_"+arch+"/' < codegen.i > codegen_"+arch+".i" )
+Command( "codegen_"+arch+".i", "codegen.i", "sed 's/module codegen/module codegen_"+arch+"/' < $SOURCE > $TARGET" )
 
 SharedLibrary(
-     'codegen',
-    src + [ [ "codegen_wrap.cc" ,"codegen.i" ][found_swig==0] ],
+    'codegen_'+arch,
+    src + [ [ "codegen_wrap.cc", "codegen_"+arch+".i" ][found_swig==0] ], # "codegen_"+arch+".i"
     SWIGFLAGS = "-python -c++",
     LIBPREFIX = "#_",
     CPPFLAGS = ' -g3 ', #  -O3

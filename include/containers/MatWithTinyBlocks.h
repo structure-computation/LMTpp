@@ -235,34 +235,34 @@ struct MatWithTinyBlocks<T,Sym<3> > {
         for( ST num_block_set=num_thread; num_block_set<(ST)rows.size(); num_block_set += nb_thread ) {
             ST real_row = num_block_set * 3;
             const RB &lbs = rows[ num_block_set ];
-            const double *d = lbs.data.ptr();
+            const T *d = lbs.data.ptr();
             
-            SimdVecAl<double,2> res_s_0 = SimdVecAl<double,2>::zero();
-            SimdVecAl<double,2> res_s_1 = SimdVecAl<double,2>::zero();
-            SimdVecAl<double,2> res_s_2 = SimdVecAl<double,2>::zero();
-            double res_f_0 = 0;
-            double res_f_1 = 0;
-            double res_f_2 = 0;
+            SimdVecAl<T,2> res_s_0 = SimdVecAl<T,2>::zero();
+            SimdVecAl<T,2> res_s_1 = SimdVecAl<T,2>::zero();
+            SimdVecAl<T,2> res_s_2 = SimdVecAl<T,2>::zero();
+            T res_f_0 = 0;
+            T res_f_1 = 0;
+            T res_f_2 = 0;
             for(ST ci=0; ci<(ST)lbs.indices.size(); ++ci, d += RB::tiny_block_size ) {
                 ST real_col = lbs.indices[ci];
                            
-                SimdVecAl<double,2> vec_s_0(v[real_col+0],v[real_col+1]);
-                double vec_f_0( v[real_col+2] );
+                SimdVecAl<T,2> vec_s_0(v[real_col+0],v[real_col+1]);
+                T vec_f_0( v[real_col+2] );
                 
-                res_s_0 += reinterpret_cast<const SimdVecAl<double,2> &>( d[ 0 ] ) * vec_s_0;
+                res_s_0 += reinterpret_cast<const SimdVecAl<T,2> &>( d[ 0 ] ) * vec_s_0;
                 res_f_0 += d[ 6 ] * vec_f_0;
-                res_s_1 += reinterpret_cast<const SimdVecAl<double,2> &>( d[ 2 ] ) * vec_s_0;
+                res_s_1 += reinterpret_cast<const SimdVecAl<T,2> &>( d[ 2 ] ) * vec_s_0;
                 res_f_1 += d[ 7 ] * vec_f_0;
-                res_s_2 += reinterpret_cast<const SimdVecAl<double,2> &>( d[ 4 ] ) * vec_s_0;
+                res_s_2 += reinterpret_cast<const SimdVecAl<T,2> &>( d[ 4 ] ) * vec_s_0;
                 res_f_2 += d[ 8 ] * vec_f_0;
                             
-                SimdVecAl<double,2> tmp_s_0 = 
-                    ( reinterpret_cast<const SimdVecAl<double,2> &>( d[ 0 ] ) ) * SimdVecAl<double,2>( v_for_trans[ real_row + 0 ] ) +
-                    ( reinterpret_cast<const SimdVecAl<double,2> &>( d[ 2 ] ) ) * SimdVecAl<double,2>( v_for_trans[ real_row + 1 ] ) +
-                    ( reinterpret_cast<const SimdVecAl<double,2> &>( d[ 4 ] ) ) * SimdVecAl<double,2>( v_for_trans[ real_row + 2 ] );
+                SimdVecAl<T,2> tmp_s_0 = 
+                    ( reinterpret_cast<const SimdVecAl<T,2> &>( d[ 0 ] ) ) * SimdVecAl<T,2>( v_for_trans[ real_row + 0 ] ) +
+                    ( reinterpret_cast<const SimdVecAl<T,2> &>( d[ 2 ] ) ) * SimdVecAl<T,2>( v_for_trans[ real_row + 1 ] ) +
+                    ( reinterpret_cast<const SimdVecAl<T,2> &>( d[ 4 ] ) ) * SimdVecAl<T,2>( v_for_trans[ real_row + 2 ] );
                 r_for_trans[ real_col + 0 ] += tmp_s_0[0];
                 r_for_trans[ real_col + 1 ] += tmp_s_0[1];
-                double tmp_f = 0;
+                T tmp_f = 0;
                 tmp_f += ( d[ 6 ] ) * v_for_trans[ num_block_set * 3 + 0 ];
                 tmp_f += ( d[ 7 ] ) * v_for_trans[ num_block_set * 3 + 1 ];
                 tmp_f += ( d[ 8 ] ) * v_for_trans[ num_block_set * 3 + 2 ];
@@ -300,39 +300,39 @@ struct MatWithTinyBlocks<T,Sym<3> > {
 
             // L
             if ( lbs.indices.size() ) {
-                double *d = lbs.data.ptr();
+                T *d = lbs.data.ptr();
                 for ( ST indice_col_block = 0; indice_col_block < ST( lbs.indices.size() ); ++indice_col_block ) {
                     ST num_new_col_block = lbs.indices[indice_col_block] / n;
                     ST num_col_block_0 = rows[ num_new_col_block ].indices.size(), num_col_block_1 = indice_col_block;
                     const DB &db = diags[ num_new_col_block ]; // *reinterpret_cast<DB *> ( diags.ptr() + num_new_col_block * DB::nb_values_for_alignement );
                     if ( find_corresponding_blocks ( rows[ num_new_col_block ], rows[ num_block_set ], num_col_block_0, num_col_block_1 ) ) {
                         // reg initialisation
-                        SimdVecAl<double,2> res_s_0_0 = SimdVecAl<double,2>::zero(), res_s_0_1 = SimdVecAl<double,2>::zero(), res_s_0_2 = SimdVecAl<double,2>::zero(), 
-                                            res_s_1_0 = SimdVecAl<double,2>::zero(), res_s_1_1 = SimdVecAl<double,2>::zero(), res_s_1_2 = SimdVecAl<double,2>::zero(), 
-                                            res_s_2_0 = SimdVecAl<double,2>::zero(), res_s_2_1 = SimdVecAl<double,2>::zero(), res_s_2_2 = SimdVecAl<double,2>::zero();
-                        double res_f_0_0 = 0, res_f_0_1 = 0, res_f_0_2 = 0, res_f_1_0 = 0, res_f_1_1 = 0, res_f_1_2 = 0, res_f_2_0 = 0, res_f_2_1 = 0, res_f_2_2 = 0;
+                        SimdVecAl<T,2> res_s_0_0 = SimdVecAl<T,2>::zero(), res_s_0_1 = SimdVecAl<T,2>::zero(), res_s_0_2 = SimdVecAl<T,2>::zero(), 
+                                            res_s_1_0 = SimdVecAl<T,2>::zero(), res_s_1_1 = SimdVecAl<T,2>::zero(), res_s_1_2 = SimdVecAl<T,2>::zero(), 
+                                            res_s_2_0 = SimdVecAl<T,2>::zero(), res_s_2_1 = SimdVecAl<T,2>::zero(), res_s_2_2 = SimdVecAl<T,2>::zero();
+                        T res_f_0_0 = 0, res_f_0_1 = 0, res_f_0_2 = 0, res_f_1_0 = 0, res_f_1_1 = 0, res_f_1_2 = 0, res_f_2_0 = 0, res_f_2_1 = 0, res_f_2_2 = 0;
                         // dot
                         do {
-                            const double *dj = rows[ num_new_col_block ].data.ptr() + num_col_block_0 * RB::tiny_block_size;
-                            const double *di = rows[ num_block_set     ].data.ptr() + num_col_block_1 * RB::tiny_block_size;
+                            const T *dj = rows[ num_new_col_block ].data.ptr() + num_col_block_0 * RB::tiny_block_size;
+                            const T *di = rows[ num_block_set     ].data.ptr() + num_col_block_1 * RB::tiny_block_size;
 
-                            res_s_0_0 += *reinterpret_cast<const SimdVecAl<double,2> *> ( di + 0 ) * *reinterpret_cast<const SimdVecAl<double,2> *> ( dj + 0 );
+                            res_s_0_0 += *reinterpret_cast<const SimdVecAl<T,2> *> ( di + 0 ) * *reinterpret_cast<const SimdVecAl<T,2> *> ( dj + 0 );
                             res_f_0_0 += di[ 6 ] * dj[ 6 ];
-                            res_s_1_0 += *reinterpret_cast<const SimdVecAl<double,2> *> ( di + 2 ) * *reinterpret_cast<const SimdVecAl<double,2> *> ( dj + 0 );
+                            res_s_1_0 += *reinterpret_cast<const SimdVecAl<T,2> *> ( di + 2 ) * *reinterpret_cast<const SimdVecAl<T,2> *> ( dj + 0 );
                             res_f_1_0 += di[ 7 ] * dj[ 6 ];
-                            res_s_2_0 += *reinterpret_cast<const SimdVecAl<double,2> *> ( di + 4 ) * *reinterpret_cast<const SimdVecAl<double,2> *> ( dj + 0 );
+                            res_s_2_0 += *reinterpret_cast<const SimdVecAl<T,2> *> ( di + 4 ) * *reinterpret_cast<const SimdVecAl<T,2> *> ( dj + 0 );
                             res_f_2_0 += di[ 8 ] * dj[ 6 ];
-                            res_s_0_1 += *reinterpret_cast<const SimdVecAl<double,2> *> ( di + 0 ) * *reinterpret_cast<const SimdVecAl<double,2> *> ( dj + 2 );
+                            res_s_0_1 += *reinterpret_cast<const SimdVecAl<T,2> *> ( di + 0 ) * *reinterpret_cast<const SimdVecAl<T,2> *> ( dj + 2 );
                             res_f_0_1 += di[ 6 ] * dj[ 7 ];
-                            res_s_1_1 += *reinterpret_cast<const SimdVecAl<double,2> *> ( di + 2 ) * *reinterpret_cast<const SimdVecAl<double,2> *> ( dj + 2 );
+                            res_s_1_1 += *reinterpret_cast<const SimdVecAl<T,2> *> ( di + 2 ) * *reinterpret_cast<const SimdVecAl<T,2> *> ( dj + 2 );
                             res_f_1_1 += di[ 7 ] * dj[ 7 ];
-                            res_s_2_1 += *reinterpret_cast<const SimdVecAl<double,2> *> ( di + 4 ) * *reinterpret_cast<const SimdVecAl<double,2> *> ( dj + 2 );
+                            res_s_2_1 += *reinterpret_cast<const SimdVecAl<T,2> *> ( di + 4 ) * *reinterpret_cast<const SimdVecAl<T,2> *> ( dj + 2 );
                             res_f_2_1 += di[ 8 ] * dj[ 7 ];
-                            res_s_0_2 += *reinterpret_cast<const SimdVecAl<double,2> *> ( di + 0 ) * *reinterpret_cast<const SimdVecAl<double,2> *> ( dj + 4 );
+                            res_s_0_2 += *reinterpret_cast<const SimdVecAl<T,2> *> ( di + 0 ) * *reinterpret_cast<const SimdVecAl<T,2> *> ( dj + 4 );
                             res_f_0_2 += di[ 6 ] * dj[ 8 ];
-                            res_s_1_2 += *reinterpret_cast<const SimdVecAl<double,2> *> ( di + 2 ) * *reinterpret_cast<const SimdVecAl<double,2> *> ( dj + 4 );
+                            res_s_1_2 += *reinterpret_cast<const SimdVecAl<T,2> *> ( di + 2 ) * *reinterpret_cast<const SimdVecAl<T,2> *> ( dj + 4 );
                             res_f_1_2 += di[ 7 ] * dj[ 8 ];
-                            res_s_2_2 += *reinterpret_cast<const SimdVecAl<double,2> *> ( di + 4 ) * *reinterpret_cast<const SimdVecAl<double,2> *> ( dj + 4 );
+                            res_s_2_2 += *reinterpret_cast<const SimdVecAl<T,2> *> ( di + 4 ) * *reinterpret_cast<const SimdVecAl<T,2> *> ( dj + 4 );
                             res_f_2_2 += di[ 8 ] * dj[ 8 ];
                         }
                         while ( find_corresponding_blocks ( rows[ num_new_col_block ], rows[ num_block_set ], num_col_block_0, num_col_block_1 ) );
@@ -366,21 +366,21 @@ struct MatWithTinyBlocks<T,Sym<3> > {
             }
             // D
             DB &ob = diags[ num_block_set ]; // *reinterpret_cast<DB *> ( diags.ptr() + num_block_set * DB::nb_values_for_alignement );
-            SimdVecAl<double,2> res_s_0_0 = SimdVecAl<double,2>::zero(), res_s_1_0 = SimdVecAl<double,2>::zero(), res_s_1_1 = SimdVecAl<double,2>::zero(), res_s_2_0 = SimdVecAl<double,2>::zero(), res_s_2_1 = SimdVecAl<double,2>::zero(), res_s_2_2 = SimdVecAl<double,2>::zero(); double res_f_0_0 = 0, res_f_1_0 = 0, res_f_1_1 = 0, res_f_2_0 = 0, res_f_2_1 = 0, res_f_2_2 = 0;
+            SimdVecAl<T,2> res_s_0_0 = SimdVecAl<T,2>::zero(), res_s_1_0 = SimdVecAl<T,2>::zero(), res_s_1_1 = SimdVecAl<T,2>::zero(), res_s_2_0 = SimdVecAl<T,2>::zero(), res_s_2_1 = SimdVecAl<T,2>::zero(), res_s_2_2 = SimdVecAl<T,2>::zero(); T res_f_0_0 = 0, res_f_1_0 = 0, res_f_1_1 = 0, res_f_2_0 = 0, res_f_2_1 = 0, res_f_2_2 = 0;
             // dot( x, x )
-            double *d = lbs.data.ptr();
+            T *d = lbs.data.ptr();
             for ( ST col_block=0; col_block < ST( lbs.indices.size() ); ++col_block, d += RB::tiny_block_size ) {
-                res_s_0_0 += *reinterpret_cast<const SimdVecAl<double,2> *> ( d + 0 ) * *reinterpret_cast<const SimdVecAl<double,2> *> ( d + 0 );
+                res_s_0_0 += *reinterpret_cast<const SimdVecAl<T,2> *> ( d + 0 ) * *reinterpret_cast<const SimdVecAl<T,2> *> ( d + 0 );
                 res_f_0_0 += d[ 6 ] * d[ 6 ];
-                res_s_1_0 += *reinterpret_cast<const SimdVecAl<double,2> *> ( d + 2 ) * *reinterpret_cast<const SimdVecAl<double,2> *> ( d + 0 );
+                res_s_1_0 += *reinterpret_cast<const SimdVecAl<T,2> *> ( d + 2 ) * *reinterpret_cast<const SimdVecAl<T,2> *> ( d + 0 );
                 res_f_1_0 += d[ 7 ] * d[ 6 ];
-                res_s_2_0 += *reinterpret_cast<const SimdVecAl<double,2> *> ( d + 4 ) * *reinterpret_cast<const SimdVecAl<double,2> *> ( d + 0 );
+                res_s_2_0 += *reinterpret_cast<const SimdVecAl<T,2> *> ( d + 4 ) * *reinterpret_cast<const SimdVecAl<T,2> *> ( d + 0 );
                 res_f_2_0 += d[ 8 ] * d[ 6 ];
-                res_s_1_1 += *reinterpret_cast<const SimdVecAl<double,2> *> ( d + 2 ) * *reinterpret_cast<const SimdVecAl<double,2> *> ( d + 2 );
+                res_s_1_1 += *reinterpret_cast<const SimdVecAl<T,2> *> ( d + 2 ) * *reinterpret_cast<const SimdVecAl<T,2> *> ( d + 2 );
                 res_f_1_1 += d[ 7 ] * d[ 7 ];
-                res_s_2_1 += *reinterpret_cast<const SimdVecAl<double,2> *> ( d + 4 ) * *reinterpret_cast<const SimdVecAl<double,2> *> ( d + 2 );
+                res_s_2_1 += *reinterpret_cast<const SimdVecAl<T,2> *> ( d + 4 ) * *reinterpret_cast<const SimdVecAl<T,2> *> ( d + 2 );
                 res_f_2_1 += d[ 8 ] * d[ 7 ];
-                res_s_2_2 += *reinterpret_cast<const SimdVecAl<double,2> *> ( d + 4 ) * *reinterpret_cast<const SimdVecAl<double,2> *> ( d + 4 );
+                res_s_2_2 += *reinterpret_cast<const SimdVecAl<T,2> *> ( d + 4 ) * *reinterpret_cast<const SimdVecAl<T,2> *> ( d + 4 );
                 res_f_2_2 += d[ 8 ] * d[ 8 ];
             }
 
@@ -420,20 +420,20 @@ struct MatWithTinyBlocks<T,Sym<3> > {
         for ( ST num_block_set=0;num_block_set<ST( rows.size() );++num_block_set ) {
             ST real_row = num_block_set * 3;
             const RB &lbs = rows[ num_block_set ];
-            const double *d = lbs.data.ptr();
+            const T *d = lbs.data.ptr();
             
             #ifdef __pouetSSE2__
                 register __v2df res_s_0 = _mm_setzero_pd();
                 register __v2df res_s_1 = _mm_setzero_pd();
                 register __v2df res_s_2 = _mm_setzero_pd();
-                register double res_f_0 = 0.0;
-                register double res_f_1 = 0.0;
-                register double res_f_2 = 0.0;
+                register T res_f_0 = 0.0;
+                register T res_f_1 = 0.0;
+                register T res_f_2 = 0.0;
                 for ( ST ci=0; ci < ST( lbs.indices.size() ); ++ci, d += RB::Block::nb_values_for_alignement ) {
                     ST real_col = lbs.indices[ci];
     
                     register __v2df vec_s_0 = { r[real_col+0], r[real_col+1] };
-                    register double vec_f_0 ( r[real_col+2] );
+                    register T vec_f_0 ( r[real_col+2] );
     
                     res_s_0 = _mm_add_pd( res_s_0, _mm_mul_pd( reinterpret_cast<const __v2df &>( d[ 0 ] ), vec_s_0 ) );
                     res_f_0 += d[ 6 ] * vec_f_0;
@@ -444,30 +444,30 @@ struct MatWithTinyBlocks<T,Sym<3> > {
                 }
     
                 const DB &db = diags[ num_block_set ];
-                r[ real_row + 0 ] -= SimdVecAl<double,2>(res_s_0).sum() + res_f_0;
+                r[ real_row + 0 ] -= SimdVecAl<T,2>(res_s_0).sum() + res_f_0;
                 r[ real_row + 0 ] /= db ( 0,0 );
-                r[ real_row + 1 ] -= SimdVecAl<double,2>(res_s_1).sum() + res_f_1 + db( 1,0 ) * r[ real_row + 0 ];
+                r[ real_row + 1 ] -= SimdVecAl<T,2>(res_s_1).sum() + res_f_1 + db( 1,0 ) * r[ real_row + 0 ];
                 r[ real_row + 1 ] /= db ( 1,1 );
-                r[ real_row + 2 ] -= SimdVecAl<double,2>(res_s_2).sum() + res_f_2 + db( 2,0 ) * r[ real_row + 0 ] + db( 2,1 ) * r[ real_row + 1 ];
+                r[ real_row + 2 ] -= SimdVecAl<T,2>(res_s_2).sum() + res_f_2 + db( 2,0 ) * r[ real_row + 0 ] + db( 2,1 ) * r[ real_row + 1 ];
                 r[ real_row + 2 ] /= db ( 2,2 );
             #else  // __SSE2__
-                SimdVecAl<double,2> res_s_0 = SimdVecAl<double,2>::zero();
-                SimdVecAl<double,2> res_s_1 = SimdVecAl<double,2>::zero();
-                SimdVecAl<double,2> res_s_2 = SimdVecAl<double,2>::zero();
-                double res_f_0 = 0;
-                double res_f_1 = 0;
-                double res_f_2 = 0;
+                SimdVecAl<T,2> res_s_0 = SimdVecAl<T,2>::zero();
+                SimdVecAl<T,2> res_s_1 = SimdVecAl<T,2>::zero();
+                SimdVecAl<T,2> res_s_2 = SimdVecAl<T,2>::zero();
+                T res_f_0 = 0;
+                T res_f_1 = 0;
+                T res_f_2 = 0;
                 for ( ST ci=0; ci < ST( lbs.indices.size() ); ++ci, d += RB::Block::nb_values_for_alignement ) {
                     ST real_col = lbs.indices[ci];
     
-                    SimdVecAl<double,2> vec_s_0( r[real_col+0], r[real_col+1] );
-                    double vec_f_0 ( r[real_col+2] );
+                    SimdVecAl<T,2> vec_s_0( r[real_col+0], r[real_col+1] );
+                    T vec_f_0 ( r[real_col+2] );
     
-                    res_s_0 += reinterpret_cast<const SimdVecAl<double,2> &> ( d[ 0 ] ) * vec_s_0;
+                    res_s_0 += reinterpret_cast<const SimdVecAl<T,2> &> ( d[ 0 ] ) * vec_s_0;
                     res_f_0 += d[ 6 ] * vec_f_0;
-                    res_s_1 += reinterpret_cast<const SimdVecAl<double,2> &> ( d[ 2 ] ) * vec_s_0;
+                    res_s_1 += reinterpret_cast<const SimdVecAl<T,2> &> ( d[ 2 ] ) * vec_s_0;
                     res_f_1 += d[ 7 ] * vec_f_0;
-                    res_s_2 += reinterpret_cast<const SimdVecAl<double,2> &> ( d[ 4 ] ) * vec_s_0;
+                    res_s_2 += reinterpret_cast<const SimdVecAl<T,2> &> ( d[ 4 ] ) * vec_s_0;
                     res_f_2 += d[ 8 ] * vec_f_0;
                 }
     
@@ -495,30 +495,30 @@ struct MatWithTinyBlocks<T,Sym<3> > {
             r[ real_row + 0 ] -= db ( 1, 0 ) * r[ real_row + 1 ];
             r[ real_row + 0 ] /= db ( 0, 0 );
             if ( lbs.indices.size() ) {
-                const double *d = lbs.data.ptr() + ( lbs.indices.size()-1 ) * RB::Block::nb_values_for_alignement;
+                const T *d = lbs.data.ptr() + ( lbs.indices.size()-1 ) * RB::Block::nb_values_for_alignement;
 
-                SimdVecAl<double,2> vec_s_0 ( r[ real_row + 0 ] ); register double vec_f_0 ( r[ real_row + 0 ] );
-                SimdVecAl<double,2> vec_s_1 ( r[ real_row + 1 ] ); register double vec_f_1 ( r[ real_row + 1 ] );
-                SimdVecAl<double,2> vec_s_2 ( r[ real_row + 2 ] ); register double vec_f_2 ( r[ real_row + 2 ] );
+                SimdVecAl<T,2> vec_s_0 ( r[ real_row + 0 ] ); register T vec_f_0 ( r[ real_row + 0 ] );
+                SimdVecAl<T,2> vec_s_1 ( r[ real_row + 1 ] ); register T vec_f_1 ( r[ real_row + 1 ] );
+                SimdVecAl<T,2> vec_s_2 ( r[ real_row + 2 ] ); register T vec_f_2 ( r[ real_row + 2 ] );
                 for ( ST ci=lbs.indices.size()-1; ci>=0; --ci ) {
                     ST real_col = lbs.indices[ci];
 
-                    //                     SimdVecAl<double,2> tmp_s_0 ( r[ real_col + 0 ], r[ real_col + 1 ] );
-                    //                     double tmp_f_0 ( r[ real_col + 2 ] );
+                    //                     SimdVecAl<T,2> tmp_s_0 ( r[ real_col + 0 ], r[ real_col + 1 ] );
+                    //                     T tmp_f_0 ( r[ real_col + 2 ] );
                     //                     
-                    //                     tmp_s_0 -= vec_s_0 * reinterpret_cast<const SimdVecAl<double,2> &> ( d[ 0 ] );
+                    //                     tmp_s_0 -= vec_s_0 * reinterpret_cast<const SimdVecAl<T,2> &> ( d[ 0 ] );
                     //                     tmp_f_0 -= vec_f_0 * d[ 6 ];
-                    //                     tmp_s_0 -= vec_s_1 * reinterpret_cast<const SimdVecAl<double,2> &> ( d[ 2 ] );
+                    //                     tmp_s_0 -= vec_s_1 * reinterpret_cast<const SimdVecAl<T,2> &> ( d[ 2 ] );
                     //                     tmp_f_0 -= vec_f_1 * d[ 7 ];
-                    //                     tmp_s_0 -= vec_s_2 * reinterpret_cast<const SimdVecAl<double,2> &> ( d[ 4 ] );
+                    //                     tmp_s_0 -= vec_s_2 * reinterpret_cast<const SimdVecAl<T,2> &> ( d[ 4 ] );
                     //                     tmp_f_0 -= vec_f_2 * d[ 8 ];
                     //                     r[ real_col + 0 ] = tmp_s_0[ 0 ];
                     //                     r[ real_col + 1 ] = tmp_s_0[ 1 ];
                     //                     r[ real_col + 2 ] = tmp_f_0;
-                    SimdVecAl<double,2> tmp_s_0 = SimdVecAl<double,2>( r[ real_col + 0 ], r[ real_col + 1 ] ) -
-                        ( vec_s_0 * reinterpret_cast<const SimdVecAl<double,2> &> ( d[ 0 ] ) + 
-                          vec_s_1 * reinterpret_cast<const SimdVecAl<double,2> &> ( d[ 2 ] ) +
-                          vec_s_2 * reinterpret_cast<const SimdVecAl<double,2> &> ( d[ 4 ] )
+                    SimdVecAl<T,2> tmp_s_0 = SimdVecAl<T,2>( r[ real_col + 0 ], r[ real_col + 1 ] ) -
+                        ( vec_s_0 * reinterpret_cast<const SimdVecAl<T,2> &> ( d[ 0 ] ) + 
+                          vec_s_1 * reinterpret_cast<const SimdVecAl<T,2> &> ( d[ 2 ] ) +
+                          vec_s_2 * reinterpret_cast<const SimdVecAl<T,2> &> ( d[ 4 ] )
                         );
                     
                     r[ real_col + 0 ] = tmp_s_0[ 0 ];
@@ -552,12 +552,12 @@ template<class TM,class TO,class TA,class T> void solve_using_incomplete_chol_fa
         
     //
     Vec<T> r, d, q, s;
-    double t0 = time_of_day_in_sec();
+    T t0 = time_of_day_in_sec();
 
     r = b - A * x;
     if ( disp_r ) PRINT( max(abs(r)) );
     
-    double t1 = time_of_day_in_sec();
+    T t1 = time_of_day_in_sec();
     PRINT( ( 2 * A.row_size_in_bytes() + A.diag_size_in_bytes() + 2 * b.size_in_bytes() ) / (t1-t0) );
     
     for(unsigned i=0;;++i) { if ( i==r.size() ) return; if ( abs(r[i]) > crit ) break; }
@@ -569,7 +569,7 @@ template<class TM,class TO,class TA,class T> void solve_using_incomplete_chol_fa
     t1 = time_of_day_in_sec();
     PRINT( ( 2 * ( A.row_size_in_bytes() + A.diag_size_in_bytes() ) + 3 * b.size_in_bytes() ) / (t1-t0) );
     
-    //     if ( disp_timing ) { double t1 = time_of_day_in_sec(); std::cout << "solve -> " << t1 - t0 << std::endl; t0 = t1; }
+    //     if ( disp_timing ) { T t1 = time_of_day_in_sec(); std::cout << "solve -> " << t1 - t0 << std::endl; t0 = t1; }
     
     T deltn = dot(r,d);
     unsigned cpt = 0;
@@ -577,24 +577,24 @@ template<class TM,class TO,class TA,class T> void solve_using_incomplete_chol_fa
         T delto = deltn;
         
         q = A * d;
-        //         if ( disp_timing ) { double t1 = time_of_day_in_sec(); std::cout << "mul -> " << t1 - t0 << std::endl; t0 = t1; }
+        //         if ( disp_timing ) { T t1 = time_of_day_in_sec(); std::cout << "mul -> " << t1 - t0 << std::endl; t0 = t1; }
         T alpha = deltn / dot( d, q );
         x += alpha * d;
         r -= alpha * q; // r = b - A * x;
         if ( disp_r ) PRINT( max(abs(r)) );
         for(unsigned i=0;;++i) { if ( i==r.size() ) return; if ( abs(r[i]) > crit ) break; }
             
-        //         if ( disp_timing ) { double t1 = time_of_day_in_sec(); std::cout << "alpha * ... -> " << t1 - t0 << std::endl; t0 = t1; }
+        //         if ( disp_timing ) { T t1 = time_of_day_in_sec(); std::cout << "alpha * ... -> " << t1 - t0 << std::endl; t0 = t1; }
         
         s = mp.solve( r );
-        //         if ( disp_timing ) { double t1 = time_of_day_in_sec(); std::cout << "solve -> " << t1 - t0 << std::endl; t0 = t1; }
+        //         if ( disp_timing ) { T t1 = time_of_day_in_sec(); std::cout << "solve -> " << t1 - t0 << std::endl; t0 = t1; }
         
         deltn = dot( r, s );
-        //         if ( disp_timing ) { double t1 = time_of_day_in_sec(); std::cout << "dot -> " << t1 - t0 << std::endl; t0 = t1; }
+        //         if ( disp_timing ) { T t1 = time_of_day_in_sec(); std::cout << "dot -> " << t1 - t0 << std::endl; t0 = t1; }
         
         T beta = deltn / delto;
         d = s + beta * d;
-        //         if ( disp_timing ) { double t1 = time_of_day_in_sec(); std::cout << "d -> " << t1 - t0 << std::endl; t0 = t1; }
+        //         if ( disp_timing ) { T t1 = time_of_day_in_sec(); std::cout << "d -> " << t1 - t0 << std::endl; t0 = t1; }
         ++cpt;
     }
 }

@@ -1,5 +1,8 @@
-bd = '../../../build/local/codegen'
+import os
+if 'arch' in ARGUMENTS: arch = ARGUMENTS['arch']
+else: arch = os.uname()[4]
 
-BuildDir(bd, '.', duplicate=1)
+bd = '../../../build/'+arch+'/LMT/codegen'
 
-libcodegen = SConscript( 'SConscript_py' ) # , build_dir=bd
+BuildDir( bd, '.', duplicate = 1 )
+libcodegen = SConscript( 'SConscript_py', build_dir = bd, duplicate = 1 )
