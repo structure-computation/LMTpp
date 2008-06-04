@@ -46,7 +46,7 @@ class Formulation:
       "dim" : dim,
       "nb_form" : nb_form,
       # variables
-      "pos" : Variable(unit='m',nb_dim=[dim]),
+      "pos" : Variable(unit='m',nb_dim=[max(1,dim)]),
       "is_on_skin" : Variable(unit='',default_value='0'),
       #"is_in_contact" : Variable(unit='',default_value='0'),
       # variables associated with solids

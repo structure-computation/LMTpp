@@ -83,7 +83,42 @@ public:
         skin.signal_connectivity_change_rec(skin.node_list);
     }
     /// 
-    void update_skin( bool rm_intermediate_data = false );
+    void update_skin( bool rm_intermediate_data = false ) { update_skin_( rm_intermediate_data, Number<MA::dim>() ); }
+    ///
+    void update_skin_( bool rm_intermediate_data, Number<0> ) { }
+    ///
+    template<unsigned inner>
+    void update_skin_( bool rm_intermediate_data, Number<inner> ) {
+        this->update_elem_parents(Number<1>());
+        LMTPRIVATE::AddElemWith1Parent<Mesh> ae;
+        ae.m = this;
+        ae.marqued.resize( this->node_list.size(), 0 );
+        this->skin.free();
+        this->skin.node_list.nb.free();
+        // elements
+        apply( this->sub_mesh(Number<1>()).elem_list, ae );
+        // nodes
+        // skin.node_list.nb.reserve( this->node_list.size() );
+        for(unsigned i=0,cpt=0;i<this->node_list.size();++i) {
+            if ( ae.marqued[i] ) {
+                this->skin.node_list.hp.push_back( &this->node_list[i] );
+                this->skin.node_list.nb.push_back( cpt++ );
+            }
+            else
+                this->skin.node_list.nb.push_back( 0 );
+        }
+        // parents
+        for(unsigned i=0;i<TSkin::TElemList::nb_elem_type;++i)
+            this->skin.elem_parents[i] = ae.parents[i];
+    
+    
+        // 
+        if ( rm_intermediate_data ) {
+            this->clear_elem_children();
+            this->sub_mesh(Number<1>()).free();
+        }
+    
+    }
     /// 
     void free() {
         MGB::free();
@@ -245,38 +280,6 @@ namespace LMTPRIVATE {
         Vec<Vec<typename TM::EA *,1> > parents[TM::TSkin::TElemList::nb_elem_type+(TM::TSkin::TElemList::nb_elem_type==0)];
     };
 };
-
-template<class Carac,unsigned max_sub_meshes>
-void Mesh<Carac,max_sub_meshes>::update_skin( bool rm_intermediate_data ) {
-    this->update_elem_parents(Number<1>());
-    LMTPRIVATE::AddElemWith1Parent<Mesh> ae;
-    ae.m = this;
-    ae.marqued.resize( this->node_list.size(), 0 );
-    this->skin.free();
-    this->skin.node_list.nb.free();
-    // elements
-    apply( this->sub_mesh(Number<1>()).elem_list, ae );
-    // nodes
-    // skin.node_list.nb.reserve( this->node_list.size() );
-    for(unsigned i=0,cpt=0;i<this->node_list.size();++i) {
-        if ( ae.marqued[i] ) {
-            this->skin.node_list.hp.push_back( &this->node_list[i] );
-            this->skin.node_list.nb.push_back( cpt++ );
-        }
-        else
-            this->skin.node_list.nb.push_back( 0 );
-    }
-    // parents
-    for(unsigned i=0;i<TSkin::TElemList::nb_elem_type;++i)
-         this->skin.elem_parents[i] = ae.parents[i];
-
-
-    // 
-    if ( rm_intermediate_data ) {
-        this->clear_elem_children();
-        this->sub_mesh(Number<1>()).free();
-    }
-}
 
 //
 // struct Copy_data_from_sub_mesh_to_skin {
