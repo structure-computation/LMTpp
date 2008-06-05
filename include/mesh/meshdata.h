@@ -12,7 +12,9 @@
 #ifndef LMTMESHDATA_H
 #define LMTMESHDATA_H
 
-#include "io/xmlnode.h"
+#ifndef DONT_WANT_XML
+    #include "io/xmlnode.h"
+#endif
 #include "containers/mat.h"
 
 namespace LMT {
@@ -135,6 +137,7 @@ namespace DM {
             op( number, dm_set.name_member_nb(Number<number>()), dm_set.member_nb(Number<number>()) );
             apply_with_names(dm_set,op,Number<number+1>(),nt);
         }
+        #ifndef DONT_WANT_XML
         template<class DMSet,unsigned total_number>
         void get_data_from_xml(DMSet &dm_set,const XmlNode &xn,const Number<total_number> &n1,const Number<total_number> &nt) {}
         template<class DMSet,unsigned number,unsigned total_number>
@@ -150,6 +153,7 @@ namespace DM {
             xn.set_attribute_with_unit( DMSet::name_member_nb(n1), DMSet::unit_member_nb(n1), dm_set.member_nb(n1) );
             send_data_to_xml(dm_set,xn,Number<number+1>(),nt);
         }
+        #endif
         template<class DMSet1,class DMSet2,unsigned total_number>
         void copy(const DMSet1 &dm_set1,DMSet2 &dm_set2,const Number<total_number> &n1,const Number<total_number> &nt) {}
         template<class DMSet1,class DMSet2,unsigned number,unsigned total_number>
@@ -217,6 +221,7 @@ namespace DM {
     template<class DMSet,unsigned n>
     void get_nb_comp_up_to(unsigned *res,const Number<n> &nn) { DMPRIVATE::get_nb_comp(StructForType<DMSet>(),res,Number<0>(),nn); }
 
+    #ifndef DONT_WANT_XML
     ///
     template<class DMSet>
     void get_data_from_xml(DMSet &dm_set,const XmlNode &xn) { DMPRIVATE::get_data_from_xml(dm_set,xn,Number<0>(),Number<NbFields<DMSet>::res>()); }
@@ -228,6 +233,7 @@ namespace DM {
     void send_data_to_xml(const DMSet &dm_set,XmlNode &xn) { DMPRIVATE::send_data_to_xml(dm_set,xn,Number<0>(),Number<NbFields<DMSet>::res>()); }
     template<class DMSet,unsigned n>
     void send_data_to_xml_up_to(const DMSet &dm_set,XmlNode &xn,const Number<n> &nn) { DMPRIVATE::send_data_to_xml(dm_set,xn,Number<0>(),nn); }
+    #endif
 
     ///
     template<class DMSet1,class DMSet2>

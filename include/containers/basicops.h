@@ -154,6 +154,7 @@ template<class T> inline typename FloatType<T>::T log10(const T &val) { return s
 template<class T> inline typename FloatType<T>::T sin(const T &val) { return std::sin(val); }
 template<class T> inline typename FloatType<T>::T sinh(const T &val) { return std::sinh(val); }
 template<class T> inline typename FloatType<T>::T sqrt(const T &val) { return std::sqrt(val); }
+template<class T> inline typename FloatType<T>::T rsqrt(const T &val) { return pow(val,-0.5); }
 template<class T> inline typename FloatType<T>::T tan(const T &val) { return std::tan(val); }
 template<class T> inline typename FloatType<T>::T tanh(const T &val) { return std::tanh(val); }
 
