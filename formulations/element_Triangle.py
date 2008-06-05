@@ -18,6 +18,12 @@ children = [
   { 'name':'Bar', 'nodes':[2, 0], 'var':[   number(0)    , 1-var_inter[0]] },
 ]
 
+var_inter_of_node_number = [
+  [ 0, 0 ],
+  [ 1, 0 ],
+  [ 0, 1 ],
+]
+
 permutation = [ 0, 2, 1 ]
 
 interpolation["nodal"] = (1-var_inter[0]-var_inter[1]) * val[0] + \

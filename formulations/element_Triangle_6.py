@@ -23,6 +23,15 @@ permutation = [ 5,4,3,2,1,0 ]
 #    0__3___1
 #
 
+var_inter_of_node_number = [
+  [ 0.0, 0.0 ],
+  [ 1.0, 0.0 ],
+  [ 0.0, 1.0 ],
+  [ 0.5, 0.0 ],
+  [ 0.5, 0.5 ],
+  [ 0.0, 0.5 ],
+]
+
 X0 = 1 - var_inter[0]-var_inter[1]
 X1 = var_inter[0]
 X2 = var_inter[1]

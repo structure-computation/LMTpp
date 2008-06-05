@@ -307,3 +307,16 @@ def sqr_root_mat_diag(M):
 
 
 
+#
+def subs_vec( val, old, new ):
+    if not type(old) == ExVector: old = vector( old )
+    if not type(new) == ExVector: new = vector( new )
+    if type(val) == ExVector:
+        res = ExVector( val.size() )
+        for n in range( val.size() ):
+            res[n] = subs_vec( val[n], old, new )
+        return res
+    res = val
+    for n in range( old.size() ):
+        res = res.subs( old[n], new[n] )
+    return res

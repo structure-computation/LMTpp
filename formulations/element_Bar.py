@@ -17,6 +17,11 @@ interpolation["gauss"] = val[0]
 
 quality = 1
 
+var_inter_of_node_number = [
+  [ 0 ],
+  [ 1 ],
+]
+
 # ---------------------------------------------------------------------------------
 def local_coordinates(point):
   v = positions[1]-positions[0]
