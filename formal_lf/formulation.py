@@ -79,6 +79,7 @@ class Formulation:
     for n,i in self.ind.items():
       setattr( self, n, i )
     self.num_func_write_matrix = 0
+    self.beg_absolute_time = symbol( 'f.time' )
 
   def get_variables(self):
     res = {}
@@ -423,6 +424,7 @@ class Formulation:
     old_glob = {}
     new_var = self.get_variables().items() + [
       ('time',extrapolation.time),
+      ('absolute_time',self.beg_absolute_time+extrapolation.time),
       ('time_steps',extrapolation.time_steps),
       ('dim',self.dim),
       ('dV',dV),
