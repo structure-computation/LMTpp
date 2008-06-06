@@ -1,8 +1,34 @@
 import os
 if 'arch' in ARGUMENTS: arch = ARGUMENTS['arch']
 else: arch = os.uname()[4]
+mac = 'mac' in ARGUMENTS and ARGUMENTS['mac']
 
-bd = '../../../build/'+arch+'/LMT/codegen'
+src = [
+    "ex.cpp",
+    "op.cpp",
+    "read_ex.cpp",
+    "write_graphviz.cpp",
+    "write_code.cpp",
+    "write_code_language_cpp.cpp",
+    "exmatrix.cpp",
+    "exvector.cpp",
+    # "exsolver.cpp",
+]
+found_swig = os.system('which swig')
+if arch=='ia64':
+    found_swig = 1
 
-#BuildDir( bd, '.', duplicate = 1 )
-libcodegen = SConscript( 'SConscript_py' ) # , build_dir = bd, duplicate = 1
+#print "sed 's/module codegen/module codegen_"+arch+"/' < codegen.i > codegen_"+arch+".i"
+#os.system( "sed 's/module codegen/module codegen_"+arch+"/' < codegen.i > codegen_"+arch+".i" )
+#Command( "codegen_"+arch+".i", "codegen.i", "sed 's/module codegen/module codegen_"+arch+"/' < $SOURCE > $TARGET" )
+
+SharedLibrary(
+    'codegen',
+    src + [ [ "codegen_wrap.cc", "codegen.i" ][found_swig==0] ],
+    SWIGFLAGS = "-python -c++",
+    LIBPREFIX = "#_",
+    CPPFLAGS = ' -O3 ',
+    CPPPATH = ['/usr/include/python2.5','/usr/include/python2.4','/usr/include/python2.3'],
+    LIBS = ['python'] * int(mac),
+    SHOBJSUFFIX = "_" + arch + ".o"
+)
