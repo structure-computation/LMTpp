@@ -20,7 +20,7 @@ if arch=='ia64':
     found_swig = 1
 
 #print "sed 's/module codegen/module codegen_"+arch+"/' < codegen.i > codegen_"+arch+".i"
-#os.system( "sed 's/module codegen/module codegen_"+arch+"/' < codegen.i > codegen_"+arch+".i" )
+os.system( "sed 's/module codegen/module codegen_"+arch+"/' < codegen.i > codegen_"+arch+".i" )
 Command( "codegen_"+arch+".i", "codegen.i", "sed 's/module codegen/module codegen_"+arch+"/' < $SOURCE > $TARGET" )
 
 SharedLibrary(

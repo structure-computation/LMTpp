@@ -4,5 +4,5 @@ else: arch = os.uname()[4]
 
 bd = '../../../build/'+arch+'/LMT/codegen'
 
-BuildDir( bd, '.', duplicate = 1 )
-libcodegen = SConscript( 'SConscript_py', build_dir = bd, duplicate = 1 )
+#BuildDir( bd, '.', duplicate = 1 )
+libcodegen = SConscript( 'SConscript_py' ) # , build_dir = bd, duplicate = 1
