@@ -66,7 +66,7 @@ public:
             L[i].data = val.data[i].data;
             U[i].indices = val.data[i].indices;
             U[i].data = val.data[i].data;
-            if ( L[i].indices.size() ) {
+            if ( L[i].indices.size() and L[i].indices.back()==i ) {
                 L[i].indices.pop_back();
                 L[i].data.pop_back();
             }
