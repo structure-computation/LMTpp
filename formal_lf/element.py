@@ -453,9 +453,15 @@ class Element:
             
     #
     def mean( self, expr, order = 0 ):
-        if order:
-            return self.integration( expr, order, False ) / self.integration( number(1), 0, False )
-        return self.analytical_integration( expr, False ) / self.analytical_integration( number(1), False )
+        if type(expr)==ExVector:
+            res = ExVector( expr.size() )
+            for i in range( expr.size() ):
+                res[i] = self.mean( expr[i] )
+            return res
+        else:
+            if order:
+                return self.integration( expr, order, False ) / self.integration( number(1), 0, False )
+            return self.analytical_integration( expr, False ) / self.analytical_integration( number(1), False )
     
     #
     def measure( self ):
