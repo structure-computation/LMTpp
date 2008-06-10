@@ -470,11 +470,13 @@ template<class T> bool lu_factorize( Mat<T,Gen<>,SparseLU> &m, Vec<int> &vector_
 }
 
 /// m is assumed to be factorized
-template<class T,int s,int s2> void solve_using_lu_factorize( const Mat<T,Gen<s>,SparseLU> &mat,const Vec<int> &permutation, const Vec<T> &sol, Vec<T,s2> &res ) {
-    Vec<T,s2> tmp_res;
-
-    tmp_res = res[permutation];
-    solve_using_lu_factorize(mat,sol,tmp_res );
+template<class T,int s,int s2> void solve_using_lu_factorize( const Mat<T,Gen<s>,SparseLU> &mat, const Vec<int> &permutation, const Vec<T> &sol, Vec<T,s2> &res, bool allow_permutation = true ) {
+    if ( allow_permutation ) {
+        Vec<T,s2> tmp_res = res[ permutation ];
+        solve_using_lu_factorize( mat, sol, tmp_res );
+        res = tmp_res; 
+    } else
+        solve_using_lu_factorize( mat, sol, res );
 }
 
 
