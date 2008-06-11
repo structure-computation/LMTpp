@@ -35,12 +35,15 @@ struct MakeAsm {
         int to_write;
     };
     
-    MakeAsm( bool x86_64 = false ) : x86_64( x86_64 ), tmp_value_size( 3 /* because of 1<<63, 1 and 0 */ ) {
+    MakeAsm( bool x86_64 = false ) : x86_64( x86_64 ), tmp_value_size( 3 /* because of ~(1<<63), 0 and 1 */ ) {
         base_type_size = 8; // double
         registers.resize( 8 + 8 * x86_64, NULL );
         stack.resize( registers.size(), NULL );
-        // 1<<63
-        wop_buffer.new_elem();
+        // ~ ( 1 << 63 )
+        sgn_wop = wop_buffer.new_elem();
+        sgn_wop->type = Op::Number;
+        sgn_wop->val  = ~ ( (long long)1 << 63 );
+        sgn_wop->pos_in_lst_var = 0;
         // 0
         zero_wop = wop_buffer.new_elem();
         zero_wop->type = Op::Number;
@@ -97,6 +100,7 @@ struct MakeAsm {
     SimpleSplittedVec<Wop *> wop_to_write;
     std::vector<Wop *> registers;
     std::vector<Wop *> stack;
+    Wop *sgn_wop;
     Wop *zero_wop;
     Wop *one_wop;
     
@@ -221,10 +225,10 @@ private:
     
     void write_asm_instr( std::ostream &os, Wop *wop ) {
         switch ( wop->type ) {
-            case Op::Number:       assert( 0 );                                         break;
-            case Op::Symbol:       assert( 0 );                                         break;
+            case Op::Number:       assert( 0 ); /*weird*/                               break;
+            case Op::Symbol:       assert( 0 ); /*weird*/                               break;
             
-            case Op::Abs:          assert( 0 );                                         break; /*assert( wop->children[0]->parents.size() == 0 ); os << "    andps  xmm" << reg << ", [ eax + 8 * 0 ]\n";*/ 
+            case Op::Abs:          write_abs( os, wop );                                break; /*assert( wop->children[0]->parents.size() == 0 ); os << "    andps  xmm" << reg << ", [ eax + 8 * 0 ]\n";*/ 
             case Op::Heavyside:    write_cmp_z( os, wop, 5 );                           break;
             case Op::Heavyside_if: assert( 0 );                                         break;
             case Op::Eqz:          write_cmp_z( os, wop, 0 );                           break;
@@ -371,6 +375,33 @@ private:
         else {
             int reg = find_free_reg( os );
             os << "    " << op_name << " xmm" << reg << ", "; write_wop_as_lhs( os, c0 ); os << "\n";
+            wop->reg = reg;
+            registers[ reg ] = wop;
+        }
+        
+        // parents
+        c0->parents.erase( std::find( c0->parents.begin(), c0->parents.end(), wop ) );
+    }
+    
+    void write_abs( std::ostream &os, Wop *wop ) {
+        Wop *c0 = wop->children[0];
+        
+        if ( c0->reg >= 0 ) {
+            int c0_reg = c0->reg;
+            if ( c0->parents.size() > 1 )
+                save_wop( os, c0, c0->reg, -1 );
+            // operation
+            os << "    andpd xmm" << c0_reg << ", "; write_wop_as_lhs( os, sgn_wop ); os << "\n";
+            //
+            wop->reg = c0_reg;
+            registers[ c0_reg ] = wop;
+        }
+        else {
+            int reg = find_free_reg( os );
+            // operation
+            os << "    movsd xmm" << reg << ", "; write_wop_as_lhs( os, c0 ); os << "\n";
+            os << "    andpd xmm" << reg << ", "; write_wop_as_lhs( os, sgn_wop ); os << "\n";
+            //
             wop->reg = reg;
             registers[ reg ] = wop;
         }

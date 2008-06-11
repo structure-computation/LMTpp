@@ -28,10 +28,6 @@ Write_code &Write_code::add( const Ex &ex, const std::string &name, Method metho
     var.method = method;
     lst_var.push_back( var );
 
-//     std::cerr << "set_depth_rec" << std::endl;
-//     std::cerr << "end set_depth_rec" << std::endl;
-
-    //std::cerr << "add " << ex.op << std::endl;
     return *this;
 }
 
@@ -261,7 +257,7 @@ std::string Write_code::asm_caller( std::string asm_function_name ) {
     //
     std::ostringstream os;
     os << std::string( wcl->nb_spaces, ' ' ) << "double tmp_values[ " << tmp_value_size << " ];\n";
-    os << std::string( wcl->nb_spaces, ' ' ) << "long long tmp_bm = (long long)1 << 63;\n";
+    os << std::string( wcl->nb_spaces, ' ' ) << "long long tmp_bm = ~( (long long)1 << 63 );\n";
     os << std::string( wcl->nb_spaces, ' ' ) << "tmp_values[ 0 ] = reinterpret_cast<double &>( tmp_bm );\n";
     os << std::string( wcl->nb_spaces, ' ' ) << "tmp_values[ 1 ] = 0.0;\n";
     os << std::string( wcl->nb_spaces, ' ' ) << "tmp_values[ 2 ] = 1.0;\n";
