@@ -1,8 +1,8 @@
 #ifndef MATHWITHTINYBLOCKS_H
 #define MATHWITHTINYBLOCKS_H
 
-#include <containers/mat.h>
-#include <containers/SimdAl.h>
+#include "mat.h"
+#include "SimdAl.h"
 
 namespace LMT {
 

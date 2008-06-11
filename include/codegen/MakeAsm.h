@@ -41,16 +41,16 @@ struct MakeAsm {
         stack.resize( registers.size(), NULL );
         // 1<<63
         wop_buffer.new_elem();
-        // 1
-        one_wop  = wop_buffer.new_elem();
-        one_wop ->type = Op::Number;
-        one_wop ->val  = 1;
-        one_wop ->pos_in_lst_var = 1;
         // 0
         zero_wop = wop_buffer.new_elem();
         zero_wop->type = Op::Number;
         zero_wop->val  = 0;
-        zero_wop->pos_in_lst_var = 0;
+        zero_wop->pos_in_lst_var = 1;
+        // 1
+        one_wop  = wop_buffer.new_elem();
+        one_wop ->type = Op::Number;
+        one_wop ->val  = 1;
+        one_wop ->pos_in_lst_var = 2;
     }
     
     void add_op_to_write( const Op *op ) {
@@ -225,9 +225,9 @@ private:
             case Op::Symbol:       assert( 0 );                                         break;
             
             case Op::Abs:          assert( 0 );                                         break; /*assert( wop->children[0]->parents.size() == 0 ); os << "    andps  xmm" << reg << ", [ eax + 8 * 0 ]\n";*/ 
-            case Op::Heavyside:    assert( 0 );                                         break;
+            case Op::Heavyside:    write_cmp_z( os, wop, 5 );                           break;
             case Op::Heavyside_if: assert( 0 );                                         break;
-            case Op::Eqz:          assert( 0 );                                         break;
+            case Op::Eqz:          write_cmp_z( os, wop, 0 );                           break;
             case Op::Log:          assert( 0 );                                         break;
             case Op::Exp:          assert( 0 );                                         break;
             case Op::Sin:          assert( 0 );                                         break;
@@ -263,6 +263,35 @@ private:
             if ( wop->parents.size() == 0 )
                 registers[ wop->reg ] = NULL;
         }
+    }
+    
+    void write_cmp_z( std::ostream &os, Wop *wop, int compare_operation ) {
+        Wop *c0 = wop->children[0];
+        
+        if ( c0->reg >= 0 ) {
+            int c0_reg = c0->reg;
+            if ( c0->parents.size() > 1 )
+                save_wop( os, c0, c0->reg, -1 );
+            // operation
+            os << "    cmpsd xmm" << c0_reg << ", "; write_wop_as_lhs( os, zero_wop ); os << ", " << compare_operation << "\n";
+            os << "    andpd xmm" << c0_reg << ", "; write_wop_as_lhs( os, one_wop  ); os << "\n";
+            //
+            wop->reg = c0_reg;
+            registers[ c0_reg ] = wop;
+        }
+        else {
+            int reg = find_free_reg( os );
+            // operation
+            os << "    movsd xmm" << reg << ", "; write_wop_as_lhs( os, c0 ); os << "\n";
+            os << "    cmpsd xmm" << reg << ", "; write_wop_as_lhs( os, zero_wop ); os << ", " << compare_operation << "\n";
+            os << "    andpd xmm" << reg << ", "; write_wop_as_lhs( os, one_wop  ); os << "\n";
+            //
+            wop->reg = reg;
+            registers[ reg ] = wop;
+        }
+        
+        // parents
+        c0->parents.erase( std::find( c0->parents.begin(), c0->parents.end(), wop ) );
     }
     
     template<bool commutative>

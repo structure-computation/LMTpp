@@ -12,7 +12,7 @@
 #ifndef LMT_gnuplot_HEADER
 #define LMT_gnuplot_HEADER
 
-#include "containers/mat.h"
+#include "mat.h"
 #include <sstream>
 
 namespace LMT {
