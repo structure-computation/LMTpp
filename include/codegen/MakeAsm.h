@@ -238,7 +238,7 @@ private:
             case Op::Cos:          assert( 0 );                                         break;
             case Op::Sgn:          assert( 0 );                                         break;
             case Op::Tan:          assert( 0 );                                         break;
-            case Op::Neg:          assert( 0 );                                         break;
+            case Op::Neg:          assert( 0 ); /*weird*/                               break;
             case Op::Asin:         assert( 0 );                                         break;
             case Op::Acos:         assert( 0 );                                         break;
             case Op::Atan:         assert( 0 );                                         break;

@@ -161,9 +161,9 @@ typename TNG::T measure( const Element<Triangle,TN,TNG,TD,NET> &e ) {
 }
 
 
-template<class TV>
-bool var_inter_is_inside( const Triangle &e, const TV &var_inter ) {
-    return heaviside( var_inter[0] ) * heaviside( var_inter[1] ) * heaviside( 1 - var_inter[0] - var_inter[1] );
+template<class TV,class T>
+bool var_inter_is_inside( const Triangle &e, const TV &var_inter, T tol = 0 ) {
+    return heaviside( var_inter[0] + tol ) * heaviside( var_inter[1] + tol ) * heaviside( 1 - var_inter[0] - var_inter[1] + tol );
 }
 
 }

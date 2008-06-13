@@ -208,6 +208,13 @@ template<class TE,class Pvec,class TVI> void get_var_inter(const TE &elem,const 
 //     }
 }
 
+
+template<class TE,class Pvec> bool pos_is_inside( const TE &elem,const Pvec &pos,typename TE::T criterium=1e-4,typename TE::T tol=1e-4) {
+    Vec<typename TE::T,TE::nb_var_inter> var_inter;
+    get_var_inter(elem,pos,var_inter,criterium);
+    return var_inter_is_inside( typename TE::NE(), var_inter, tol );
+}
+
 template<class TE> typename TE::Pvec sample_tangent( const TE &e ) {
     assert( 0 ); // non défini
     return typename TE::Pvec(0);

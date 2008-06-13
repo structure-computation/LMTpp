@@ -214,9 +214,9 @@ typename TNG::Pvec sample_normal(const Element<Quad,TN,TNG,TD,NET> &e) {
     return res / length( res );
 }
 
-template<class TV>
-bool var_inter_is_inside( const Quad &, const TV &var_inter ) {
-    return heaviside( var_inter[0] ) * heaviside( var_inter[1] ) * heaviside( 1 - var_inter[0] ) * heaviside( 1 - var_inter[1] );
+template<class TV,class T>
+bool var_inter_is_inside( const Quad &, const TV &var_inter, T tol ) {
+    return heaviside( var_inter[0] + tol ) * heaviside( var_inter[1] + tol ) * heaviside( 1 - var_inter[0] + tol ) * heaviside( 1 - var_inter[1] + tol );
 }
 
 
