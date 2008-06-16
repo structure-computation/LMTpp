@@ -151,7 +151,7 @@ private:
         if ( std::abs( expo - 1 ) < 1e-6 )
             return make_wop_rec( mant );
         // a ^ n  with n no int Z but in Z / 4
-        if ( is_int( expo ) == false and is_int( expo * 4 ) ) {
+        if ( is_int( expo ) == false and is_int( expo * 4 ) and expo != -0.5 ) {
             Wop *wop = wop_buffer.new_elem();
             wop->type = ( expo > 0 ? Wop::Sqrt : Wop::Rsqrt );
             wop->nb_children = 1;
