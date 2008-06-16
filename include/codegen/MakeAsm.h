@@ -150,10 +150,11 @@ private:
         // a ^ 1
         if ( std::abs( expo - 1 ) < 1e-6 )
             return make_wop_rec( mant );
-        // a ^ n  with n no int Z but in Z / 4
-        if ( is_int( expo ) == false and is_int( expo * 4 ) and expo != -0.5 ) {
+        // a ^ n  with n no int N but in N / 4
+        if ( expo > 0 and is_int( expo ) == false and is_int( expo * 4 ) ) {
             Wop *wop = wop_buffer.new_elem();
-            wop->type = ( expo > 0 ? Wop::Sqrt : Wop::Rsqrt );
+            // wop->type = ( expo > 0 ? Wop::Sqrt : Wop::Rsqrt );
+            wop->type = Wop::Sqrt;
             wop->nb_children = 1;
             wop->children[0] = make_wop_pow( mant, 2 * std::abs( expo ) );
             wop->children[0]->parents.push_back( wop );
@@ -254,7 +255,7 @@ private:
             case Op::Atan2:        assert( 0 );                                         break;
             
             case Wop::Sqrt:        write_sqrt_or_rsqrt          ( os, wop, "sqrtsd"  ); break;
-//             case Wop::Rsqrt:       write_sqrt_or_rsqrt          ( os, wop, "rsqrtsd" ); break;
+            // case Wop::Rsqrt:       write_sqrt_or_rsqrt          ( os, wop, "rsqrtsd" ); break;
             case Wop::Sqr:         write_sqr                    ( os, wop            ); break;
             
             default:            assert( 0 );
