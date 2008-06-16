@@ -254,7 +254,7 @@ private:
             case Op::Atan2:        assert( 0 );                                         break;
             
             case Wop::Sqrt:        write_sqrt_or_rsqrt          ( os, wop, "sqrtsd"  ); break;
-            case Wop::Rsqrt:       write_sqrt_or_rsqrt          ( os, wop, "rsqrtsd" ); break;
+//             case Wop::Rsqrt:       write_sqrt_or_rsqrt          ( os, wop, "rsqrtsd" ); break;
             case Wop::Sqr:         write_sqr                    ( os, wop            ); break;
             
             default:            assert( 0 );
