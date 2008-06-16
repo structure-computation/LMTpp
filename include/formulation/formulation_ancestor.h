@@ -81,6 +81,8 @@ public:
     
     virtual unsigned nb_constraints() const = 0;
     virtual void erase_constraints_from(unsigned number) = 0;
+    
+    virtual unsigned get_nb_nodal_unknowns() const = 0;
 
     #ifdef WITH_UMFPACK
     virtual void get_mat( Mat<ScalarType,Gen<>,SparseUMFPACK> *&mat ) = 0; ///

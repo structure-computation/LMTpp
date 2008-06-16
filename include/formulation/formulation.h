@@ -652,6 +652,7 @@ public:
     virtual void get_factorization_matrix() { get_factorization_matrix( Number<MatCarac<0>::symm>() ); }
     virtual void solve_system_using_factorization_matrix() { solve_system_using_factorization_matrix( Number<MatCarac<0>::symm>() ); }
     
+    virtual unsigned get_nb_nodal_unknowns() const { return nb_nodal_unknowns; }
     
     
     
