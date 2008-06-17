@@ -171,6 +171,21 @@ namespace DM {
             dm_set2.set_member_named0( typename DMSet1::template SubType0<number,0>::NT(), mean );
             get_ponderation(pond_list,nb_pond,dm_set2,Number<number+1>(),nt);
         }
+        //
+        template<class P>
+        void assign_or_assert_if_same_type_or_not( P *&r, P *v ) { r = v; }
+        template<class P1,class P2>
+        void assign_or_assert_if_same_type_or_not( P1 *&r, P2 *v ) { assert(0); }
+        template<class DMSet,class P,unsigned total_number>
+        void get_ptr_on( DMSet &dmset, const char *name, P *&res,const Number<total_number> &n1,const Number<total_number> &nt ) { res = NULL; }
+        template<class DMSet,class P,unsigned number,unsigned total_number>
+        void get_ptr_on( DMSet &dmset, const char *name, P *&res,const Number<number> &n1,const Number<total_number> &nt ) {
+            if ( strcmp( name, dmset.name_member_nb(n1) ) == 0 )
+                assign_or_assert_if_same_type_or_not( res, &dmset.member_nb(n1) );
+            else
+                get_ptr_on( dmset, name, res, Number<number+1>(), nt );
+        }
+
     };
     
     /// Get number of fields of a structure containing VOIDDMSET; or one or several CARADM(...);
@@ -254,6 +269,10 @@ namespace DM {
         DMPRIVATE::get_ponderation(pond_list,nb_pond,dm_set2,Number<0>(),nn);
     }
     
+
+    ///
+    template<class DMSet,class P>
+    void get_ptr_on( DMSet &dmset, const char *name, P *&res ) { DMPRIVATE::get_ptr_on( dmset, name, res, Number<0>(), Number<NbFields<DMSet>::res>() ); }
 
 }; // namespace DM
 

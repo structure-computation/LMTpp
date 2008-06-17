@@ -1002,7 +1002,6 @@ public:
             
             //matrices(Number<0>()) += exp_mat_coeff * exp_mat;
             //sollicitation += exp_mat_coeff * exp_mat * exp_val;
-            
             Inv<ScalarType,Sym<>,SparseLine<> > I( matrices(Number<0>()) );
             vectors[ 0 ] = I * sollicitation;
             
