@@ -66,6 +66,7 @@ namespace LMT {
                 formulation(i)->allocate_matrices(amd);
             //
             pos.resize( 0 );
+            unsigned nb_ddl_per_node = maf.pb->formulation_nb(maf.num_formulation)->get_nb_nodal_unknowns();
             for(unsigned i=0;i<formulations.size();++i) {
                 MeshAndForm &maf = formulations[i];
                 maf.local_unknowns_to_global_ones.reserve( maf.m->node_list.size() );
@@ -83,14 +84,13 @@ namespace LMT {
                     }
                 }
                 //
-                maf.local_ddl_to_global_ones.reserve( maf.local_unknowns_to_global_ones.size() * dim );
+                maf.local_ddl_to_global_ones.reserve( maf.local_unknowns_to_global_ones.size() * nb_ddl_per_node );
                 for(unsigned i=0;i<maf.local_unknowns_to_global_ones.size();++i)
-                    for(unsigned d=0;d<dim;++d)
-                        maf.local_ddl_to_global_ones.push_back( maf.local_unknowns_to_global_ones[i] * dim + d );
-                // PRINT( maf.local_unknowns_to_global_ones );
+                    for(unsigned d=0;d<nb_ddl_per_node;++d)
+                        maf.local_ddl_to_global_ones.push_back( maf.local_unknowns_to_global_ones[i] * nb_ddl_per_node + d );
             }
             //
-            K.resize( pos.size() * dim );
+            K.resize( pos.size() * nb_ddl_per_node );
         }
         //
         void set_initial_time_step(double time=1) {
