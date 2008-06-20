@@ -226,6 +226,9 @@ public:
     const TT &get(unsigned i) const { DEBUGASSERT(i<size()); return val[i]; } /// calling get ensure that the const version is called (useful for SparseVec)
     void set(unsigned i,const TT &v) { DEBUGASSERT(i<size()); val[i] = v; } /// set element i
     
+    template<class ST> SimdVec<TT,2> operator[]( const SimdVec<ST,2> &ind ) const { return SimdVec<TT,2>(val[ind[0]],val[ind[1]]); } /// access to element ind[0], ind[1]...
+    
+    
     template<unsigned nne> SimdVec<TT,nne> &simd(unsigned i,const Number<nne> &) { return reinterpret_cast<SimdVec<TT,nne> &>(val[i]); }
     template<unsigned nne> const SimdVec<TT,nne> &simd(unsigned i,const Number<nne> &) const { return reinterpret_cast<const SimdVec<TT,nne> &>(val[i]); }
     

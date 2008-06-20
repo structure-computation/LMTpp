@@ -321,3 +321,10 @@ def subs_vec( val, old, new ):
     for n in range( old.size() ):
         res = res.subs( old[n], new[n] )
     return res
+
+#
+def symbolic_select( vec, val ):
+    res = vec[0] * eqz( val - 0 )
+    for i in range( 1, vec.size() ):
+        res += vec[i] * eqz( val - i )
+    return res

@@ -239,6 +239,9 @@ public:
     ExVector __neg__() { return - *self; }
     ExVector __abs__() { return abs( *self ); }
     
+    ExVector __copy__() { return *self; }
+    ExVector clone() { return *self; }
+    
     std::string __repr__() const { return self->to_string(); }
     std::string __str__() const { return self->to_string(); }
     

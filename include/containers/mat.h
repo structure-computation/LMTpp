@@ -152,6 +152,17 @@ T mean(const Mat<T,STR,STO,IO> &m) {
 
 ///
 template<class T,class STR,class STO,class IO>
+T variance(const Mat<T,STR,STO,IO> &m) {
+    return mean( ( m - mean(m) ) * ( m - mean(m) ) );
+}
+
+template<class T,class STR,class STO,class IO>
+inline T standard_deviation(const Mat<T,STR,STO,IO> &m) {
+    return sqrt( variance( m ) );
+}
+
+///
+template<class T,class STR,class STO,class IO>
 T max(const Mat<T,STR,STO,IO> &m) {
     T res = -std::numeric_limits<T>::max();
     for(unsigned i=0;i<m.nb_rows();++i)

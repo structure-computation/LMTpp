@@ -1,4 +1,4 @@
-temperature = Variable( unknown=True, nb_der=1, default_value='0.0', unit='K' )
+temperature = Variable( unknown=True, nb_der=0, default_value='0.0', unit='K' )
 Q = Variable( default_value='0.0', unit='K/s' )
 Qs = Variable( interpolation='nodal', default_value='0.0', unit='K/s' )
 
@@ -27,12 +27,7 @@ def formulation():
   # k = heat_capacity.expr*thermal_conductivity.expr #
   t,te = temperature.expr, temperature.test
 
-  ah = ExVector(3)
-  ah[ 0 ] = a
-  ah[ 1 ] = a
-  ah[ 2 ] = 0.8 * a
-
-  res = dot( ah * grad(t),grad(te)) + ( t.diff(time) - Q.expr ) * te
+  res = dot( a * grad(t), grad(te) ) + ( t.diff(time) - Q.expr ) * te * 0
   
   return res * dV + H.expr * ( t - t0.expr ) * te * dS - Qs.expr * te * dN
   
@@ -45,7 +40,6 @@ def formulation():
 # #
 # def IS_contact_formulation(): return therm_penalty.expr * temperature.test * ( temperature.expr - contact_temperature.expr )
 # def elem_contact_formulation(ve): return number(0)
-
 
 
 

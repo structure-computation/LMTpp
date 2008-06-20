@@ -66,7 +66,7 @@ namespace LMT {
                 formulation(i)->allocate_matrices(amd);
             //
             pos.resize( 0 );
-            unsigned nb_ddl_per_node = maf.pb->formulation_nb(maf.num_formulation)->get_nb_nodal_unknowns();
+            unsigned nb_ddl_per_node = unsigned nb_ddl_per_node = formulations[0].pb->formulation_nb(formulations[0].num_formulation)->get_nb_nodal_unknowns();
             for(unsigned i=0;i<formulations.size();++i) {
                 MeshAndForm &maf = formulations[i];
                 maf.local_unknowns_to_global_ones.reserve( maf.m->node_list.size() );

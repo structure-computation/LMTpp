@@ -28,6 +28,7 @@ void load_image_pgm( std::string file, Mat &m, int ceil_size = 1 ) {
     getline(f,toto);
     while ( toto[0]=='#' )
         getline(f,toto);
+    unsigned cpt_jump = 1 + 2 * ( PT == "P6" );
 
     unsigned r,c;
     std::istringstream is(toto);
@@ -48,12 +49,12 @@ void load_image_pgm( std::string file, Mat &m, int ceil_size = 1 ) {
                 m(i,j) = bool( pen[ cpt / 8 ] & ( 1 << (cpt&7) ) );
         delete [] pen;
     } else if ( depth <= 255 ) {
-        unsigned char *pen = new unsigned char[ r * c ];
-        f.read( (char *)pen, sizeof(unsigned char) * r * c );
+        unsigned char *pen = new unsigned char[ r * c * cpt_jump ];
+        f.read( (char *)pen, sizeof(unsigned char) * r * c * cpt_jump );
     
         m.resize( r, ceil( c, ceil_size ) );
         for(unsigned i=0,cpt=0;i<r;++i)
-            for(unsigned j=0;j<c;++j,++cpt)
+            for(unsigned j=0;j<c;++j,cpt+=cpt_jump)
                 m(i,j) = pen[cpt];
         delete [] pen;
     } else if ( depth <= 65535 ) {

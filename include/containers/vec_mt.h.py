@@ -51,8 +51,8 @@ void apply_mt"""+wi+"""("""+Const[0]+""" Vec<TT,s> &v,unsigned nb_threads,"""+st
         for(unsigned i=0;i<nb_threads;++i)
             pthread_join(tid[i],(void **)ppa);
     
-        delete tid;
-        delete ppa;
+        delete [] tid;
+        delete [] ppa;
     }
     else {
         apply"""+wi+"""(v,"""+string.join( map(lambda (x):x,param), ',' )+""");
@@ -77,8 +77,8 @@ void apply_mt_stride"""+wi+"""("""+Const[0]+""" Vec<TT,s> &v,unsigned nb_threads
         for(unsigned i=0;i<nb_threads;++i)
             pthread_join(tid[i],(void **)ppa);
     
-        delete tid;
-        delete ppa;
+        delete [] tid;
+        delete [] ppa;
     }
     else {
         apply"""+wi+"""(v,"""+string.join( map(lambda (x):x,param), ',' )+""");

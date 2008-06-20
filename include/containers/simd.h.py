@@ -5,6 +5,8 @@ print """// generated file from simd.h.py. Do not modify
 #ifndef LMT_simd_HEADER
 #define LMT_simd_HEADER
 
+#include "allocator.h"
+
 #ifdef __SSE__
     #include <xmmintrin.h>
     #ifdef __INTEL_COMPILER
@@ -36,6 +38,7 @@ template<class T,unsigned s = SimdSize<T>::res>
 struct SimdVec {
     SimdVec() {}
     SimdVec(const T &v) { for(unsigned i=0;i<s;++i) val[i] = v; }
+    SimdVec(const T &v0,const T &v1) { val[0] = v0; val[1] = v1; }
     SimdVec(const T &v0,const T &v1,const T &v2,const T &v3) { val[0] = v0; val[1] = v1; val[2] = v2; val[3] = v3; }
     template<class T2> SimdVec(const SimdVec<T2,s> &v) { for(unsigned i=0;i<s;++i) val[i] = (T)v[i]; }
     static const unsigned nb_elem = s;
@@ -44,6 +47,9 @@ struct SimdVec {
     
     T val[s];
 };
+
+template<class T,unsigned s>
+T sum( const SimdVec<T,s> &v ) { T r = v[0]; for(unsigned i=1;i<s;++i) r += v[i]; return r; }
 
 template<class TT,unsigned s> struct TypeInformation<SimdVec<TT,s> > {
     static const int res = TypeInformation<TT>::res;
@@ -82,6 +88,8 @@ for TS,t,n,ts,tset,tset0,tsetn in [
         
         """+ts+""" val;
     };
+    template<> struct PreferredAllocator<"""+tp+""" > { typedef Allocator<"""+tp+""",2,AllocateWithMalloc> T; static const unsigned align=2; };
+
 #endif // __"""+TS+"""__
     """
 
@@ -228,4 +236,3 @@ namespace LMT {
 
 print '#endif // LMT_simd_HEADER'
 
-        
