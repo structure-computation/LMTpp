@@ -168,13 +168,15 @@ public:
     
     template<class T2,int s1> Vec &append(const Vec<T2,s1> &vec) { unsigned os=size(); resize(size()+vec.size()); for(unsigned i=0;i<vec.size();++i,++os) val[os] = (TT)vec[i]; return *this; }
     TT *new_elem() { if ( r==0 ) reserve(1); else if ( s==r ) reserve(2*r); return &val[s++]; } /// resize *this if necessary and return address to last element
-    void push_back(const TT &val) { *new_elem() = val; } /// Add a copy of val as a new element.
-    void push_back_in_reserved(const TT &v) { val[s++] = v; } /// Add a copy of val as a new element. Assumes that room for val is already reserved. Only for dynamic vectors.
+    TT &push_back(const TT &val) { TT &res = *new_elem(); res = val; return res; } /// Add a copy of val as a new element.
+    TT &push_back_in_reserved(const TT &v) { val[s] = v; return val[s++]; } /// Add a copy of val as a new element. Assumes that room for val is already reserved. Only for dynamic vectors.
+    TT &push_back_unique(const TT &v) { for(unsigned i=0;i<size();++i) if ( val[i] == v ) return val[i]; return push_back( v ); } /// Add a copy of val as a new element. Assumes that room for val is already reserved. Only for dynamic vectors.
     void pop_back() { --s; } /// remove the last element.
     void pop_back(unsigned nb_val) { s -= nb_val; } /// remove the nb_val elements at end.
     void fit_memory() { reserve(size()); } /// if size() is lesser than reserved, reallocate memory with 'right' size.
     void erase_elem_nb(unsigned i) { for(unsigned j=i;j<s-1;++j) val[j]=val[j+1]; pop_back(); } /// erase element number i. This procedure maintains the order of elements
     template<class T2> void erase_first(const T2 &v) { for(unsigned i=0;i<size();++i) if (val[i]==v) { val[i]=back(); pop_back(); } } /// erase first element==v. This procedure DOES NOT maintain the order of elements
+    void erase_elem_nb_unordered(unsigned i) { val[i] = val[--s]; } /// erase element number i. This procedure does not maintain the order of elements
     
     void resize(unsigned ns) { if ( ns > r ) reserve(ns); s = ns; }
     void resize(unsigned ns,const TT &v) { unsigned os=s; resize(ns); if (ns>os) copy_vec_value_aligned(v,val+os,ns-os); }

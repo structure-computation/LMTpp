@@ -96,6 +96,8 @@ public:
     struct Assign { template<class T2> void operator()(const T2 &val,unsigned ind,Vec &th) const { if (val==0) return; th.indices.push_back(ind); th.data.push_back(val); } };
     friend struct Assign;
     template<class T2,int s2> Vec &operator=(const Vec<T2,s2> &v) { DEBUGASSERT(v.size()==size()); indices.free(); data.free(); apply_nz(v,Assign(),*this); return *this; }
+    
+    template<class T2> Vec(const Vec<Sparse<T2> > &v) { indices = v.indices; data = v.data; }
        
     typedef DelayedAssignement<DelayedAssignementSparseSource<TT> > RetOp;
     typedef TT RetOpConst;

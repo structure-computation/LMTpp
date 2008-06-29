@@ -37,6 +37,7 @@ struct Wedge {
     static const unsigned nb_var_inter = 3;
     static const unsigned nb_nodes = 6;
     static const char *name() { return "Wedge"; }
+    static const char *avs_name() { return "prism"; }
     static const char *can_directly_be_represented_by() { return "Wedge"; }
 };
 

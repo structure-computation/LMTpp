@@ -13,6 +13,17 @@ for tt in ['void','int']:
     print_apply_ext('apply_nz_unique'      ,TT,TV,'apply_nz(v,op,PARALIST);')
     print_apply_ext('apply_range'          ,TT,TV,'DEBUGASSERT(to<=(int)v.size()); for(;from<to;++from) op(v[from],PARALIST);',suppar=['int from','int to'])
     print_apply_ext('apply_range_stride'   ,TT,TV,'DEBUGASSERT(to<=(int)v.size()); for(;from<to;from+=inc) op(v[from],PARALIST);',suppar=['int from','int to','int inc'])
+    for inc in [1,2,4]:
+        print_apply_ext(
+            'apply_range_by_n',TT,TV,
+            'for(;from<to-'+str(inc-1)+';from+='+str(inc)+') op('+string.join(map(lambda x:'v[from+'+str(x)+']',range(inc)),",")+',PARALIST); '+'for(;from<to;++from) op(v[from],PARALIST);'*(inc>1),
+            suppar=['int from','int to','const Number<'+str(inc)+'> &n_inc']
+        )
+    print_apply_ext(
+        'apply_on_number',TT,TV,
+        'op(v[num],PARALIST);',
+        suppar=['int num']
+    )
 
     print_apply_ext('apply_wi'             ,TT,TV,'for(unsigned i=0;i<v.size();++i) op(v[i],i,PARALIST);')
     print_apply_ext('apply_nz_wi'          ,TT,TV,'apply_wi(v,op,PARALIST);')

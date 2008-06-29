@@ -99,7 +99,6 @@ struct MatWithTinyBlocks<T,Sym<3> > {
     static const int n = 3;
     typedef int ST;
     typedef RowOfMatWithTinyBlocks<T,n> RB;
-    static const int num_thread = 0, nb_thread = 1;
     struct DB {
         static const ST s = n * ( n + 1 ) / 2;
         static const ST nb_values_for_alignement = s;
@@ -141,11 +140,18 @@ struct MatWithTinyBlocks<T,Sym<3> > {
         resize( r, c );
     }
     
+    void reserve_lines( const Vec<ST> &nb_tiny_blocks_per_line ) {
+        for(unsigned i=0;i<rows.size();++i) {
+            rows[ i ].indices.reserve( nb_tiny_blocks_per_line[i] );
+            rows[ i ].data   .reserve( nb_tiny_blocks_per_line[i] * RB::tiny_block_size );
+        }
+    }
+    
     template<class T2> MatWithTinyBlocks( const MatWithTinyBlocks<T2,Sym<3> > &m ) {
         resize( m.nb_rows_, m.nb_rows_ );
         for(unsigned r=0;r<rows.size();++r) {
             rows[r].indices = m.rows[r].indices;
-            rows[r].data = m.rows[r].data;
+            rows[r].data    = m.rows[r].data   ;
         }
     }
     
@@ -226,13 +232,13 @@ struct MatWithTinyBlocks<T,Sym<3> > {
         return rows[ row / n ]( row % n, col );
     }
     
-    Vec<T> operator*( const Vec<T> &v ) const {
+    void partial_mul( const Vec<T> &v, Vec<T> &r, ST num_thread, ST nb_thread ) const {
         const Vec<T> &v_for_trans = v; // HUM
-        Vec<T> r;
         Vec<T> &r_for_trans = r;
-    
-        r.resize( nb_rows_, 0 );
-        for( ST num_block_set=num_thread; num_block_set<(ST)rows.size(); num_block_set += nb_thread ) {
+        ST beg = (ST)rows.size() * ( num_thread + 0 ) / nb_thread;
+        ST end = (ST)rows.size() * ( num_thread + 1 ) / nb_thread;
+        for( ST num_block_set=beg; num_block_set<end; ++num_block_set ) {
+        // for( ST num_block_set=num_thread; num_block_set<(ST)rows.size(); num_block_set += nb_thread ) {
             ST real_row = num_block_set * 3;
             const RB &lbs = rows[ num_block_set ];
             const T *d = lbs.data.ptr();
@@ -272,9 +278,35 @@ struct MatWithTinyBlocks<T,Sym<3> > {
             r[ num_block_set * 3 + 0 ] += res_s_0[0]+res_s_0[1]+res_f_0+db( 0, 0 ) *v[num_block_set*3+0]+db( 0, 1 )*v[num_block_set*3+1]+db( 0, 2 )*v[num_block_set*3+2];
             r[ num_block_set * 3 + 1 ] += res_s_1[0]+res_s_1[1]+res_f_1+db( 1, 0 ) *v[num_block_set*3+0]+db( 1, 1 )*v[num_block_set*3+1]+db( 1, 2 )*v[num_block_set*3+2];
             r[ num_block_set * 3 + 2 ] += res_s_2[0]+res_s_2[1]+res_f_2+db( 2, 0 ) *v[num_block_set*3+0]+db( 2, 1 )*v[num_block_set*3+1]+db( 2, 2 )*v[num_block_set*3+2];
-        
         }
-        return r;
+    }
+    
+    struct Mul {
+        void operator()( int num_thread, const MatWithTinyBlocks &m, const Vec<T> &v, Vec<Vec<T> > &r ) const {
+            m.partial_mul( v, r[num_thread], num_thread, nb_thread );
+        }
+        unsigned nb_thread;
+    };
+    
+    Vec<T> mul( const Vec<T> &v, unsigned nb_thread ) const {
+        Vec<Vec<T> > r; r.resize( nb_thread );
+        for(unsigned i=0;i<nb_thread;++i)
+            r[i].resize( nb_rows_, 0 );
+        //
+        Mul m; m.nb_thread = nb_thread;
+        apply_mt( range(nb_thread), nb_thread, m, *this, v, r );
+        //
+        for(unsigned n=0;n<nb_rows_;++n) {
+            T z = r[0][n];
+            for(unsigned i=1;i<nb_thread;++i)
+                z += r[i][n];
+            r[0][n] = z;
+        }
+        return r[0];
+    }
+    
+    Vec<T> operator*( const Vec<T> &v ) const {
+        return mul( v, 1 );
     }
     
     inline static bool find_corresponding_blocks( const RB &bs_0, const RB &bs_1, ST &ind_0, ST &ind_1 ) {

@@ -363,6 +363,18 @@ for ptr,e in zip(['','_ptr'],['','*']):
     """)
     print_apply_ext('apply_nz_unique'+ptr,TP,TV,'apply_nz'+ptr+'(op,PARALIST);')
 
+for const in [False,True]:
+    print_apply_ext('find_elem',TP,TV,"""
+            unsigned nf = v.nb_full_atoms(), sl = v.size_last_atom;
+            for(unsigned i=0;i<nf;++i)
+                for(unsigned j=0;j<atomic_size;++j)
+                    if (op(v.atoms[i]->data[j],PARALIST)) return &v.atoms[i]->data[j];
+            for(unsigned j=0;j<sl;++j)
+                if (op(v.last_atom->data[j],PARALIST)) return &v.last_atom->data[j];
+            return NULL;
+    """,ret='const '*const+'TT *',onlyforconstvec=const, onlyfornonconstvec=not const)
+
+
 print """
 }
 """

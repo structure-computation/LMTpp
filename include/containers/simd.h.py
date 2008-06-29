@@ -48,8 +48,8 @@ struct SimdVec {
     T val[s];
 };
 
-template<class T,unsigned s>
-T sum( const SimdVec<T,s> &v ) { T r = v[0]; for(unsigned i=1;i<s;++i) r += v[i]; return r; }
+template<class T> T sum_if_simd( const T &v ) { return v; }
+template<class T,unsigned s> T sum_if_simd( const SimdVec<T,s> &v ) { T r = v[0]; for(unsigned i=1;i<s;++i) r += v[i]; return r; }
 
 template<class TT,unsigned s> struct TypeInformation<SimdVec<TT,s> > {
     static const int res = TypeInformation<TT>::res;
@@ -227,11 +227,13 @@ namespace std {
         static LMT::SimdVec<T,n> max() { return numeric_limits<T>::max(); }
     };
 }
+#ifndef WITHOUTCOMPLEX
 namespace LMT {
     template<class TT,unsigned n> struct SubComplex<LMT::SimdVec<std::complex<TT>,n> > {
         typedef LMT::SimdVec<TT,n> T;
     };
 }
+#endif
 """
 
 print '#endif // LMT_simd_HEADER'

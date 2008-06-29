@@ -11,6 +11,7 @@ struct Hexa {
     static const unsigned nb_var_inter = 3;
     static const unsigned nb_nodes = 8;
     static const char *name() { return "Hexa"; }
+    static const char *avs_name() { return "hex"; }
     static const char *can_directly_be_represented_by() { return "Hexa"; }
 };
 

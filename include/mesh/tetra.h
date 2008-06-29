@@ -30,6 +30,7 @@ struct Tetra {
     static const unsigned nb_var_inter = 3;
     static const unsigned nb_nodes = 4;
     static const char *name() { return "Tetra"; }
+    static const char *avs_name() { return "tet"; }
     static const char *can_directly_be_represented_by() { return "Tetra"; }
 };
 

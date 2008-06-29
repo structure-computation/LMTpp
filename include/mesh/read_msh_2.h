@@ -15,7 +15,7 @@
 #include "mesh/hexa.h"
 #include "mesh/tetra.h"
 #include "mesh/wedge.h"
-#include "mesh/triangle_6.h"
+#include "mesh/tetra_10.h"
 #include "containers/indexof.h"
 
 #include <fstream>
@@ -121,31 +121,31 @@ void read_msh_2( TM &m,std::istream &is, unsigned nvi, const VarTag &vt ) throw 
             }
             else if ( type_elem == 2 ) { //TODO
                 if ( nvi == 2 ) {
-                    permutation_if_jac_neg ( Triangle(),vn.ptr() );
+                    permutation_if_jac_neg ( Triangle(), vn.ptr() );
                     assign_tag_values( m.add_element( Triangle(),DefaultBehavior(),vn.ptr() ), tag_values, vt, Number<0>(), Number<NbSubTypes<VarTag>::res>() );
                 }
             }
             else if ( type_elem == 3 ) { //TODO
                 if ( nvi == 2 ) {
-                    permutation_if_jac_neg ( Quad(),vn.ptr() );
+                    permutation_if_jac_neg ( Quad(), vn.ptr() );
                     assign_tag_values( m.add_element( Quad(),DefaultBehavior(),vn.ptr() ), tag_values, vt, Number<0>(), Number<NbSubTypes<VarTag>::res>() );
                 }
             }
             else if ( type_elem == 4 ) { //TODO
                 if ( nvi == 3 ) {
-                    permutation_if_jac_neg ( Tetra(),vn.ptr() );
+                    permutation_if_jac_neg ( Tetra(), vn.ptr() );
                     assign_tag_values( m.add_element( Tetra(),DefaultBehavior(),vn.ptr() ), tag_values, vt, Number<0>(), Number<NbSubTypes<VarTag>::res>() );
                 }
             }
             else if ( type_elem == 5 ) { //TODO
                 if ( nvi == 3 ) {
-                    permutation_if_jac_neg ( Hexa(),vn.ptr() );
+                    permutation_if_jac_neg ( Hexa(), vn.ptr() );
                     assign_tag_values( m.add_element( Hexa(),DefaultBehavior(),vn.ptr() ), tag_values, vt, Number<0>(), Number<NbSubTypes<VarTag>::res>() );
                 }
             }
             else if ( type_elem == 6 ) { //TODO
                 if ( nvi == 3 ) {
-                    permutation_if_jac_neg ( Wedge(),vn.ptr() );
+                    permutation_if_jac_neg ( Wedge(), vn.ptr() );
                     assign_tag_values( m.add_element( Wedge(),DefaultBehavior(),vn.ptr() ), tag_values, vt, Number<0>(), Number<NbSubTypes<VarTag>::res>() );
                 }
             }
@@ -156,8 +156,15 @@ void read_msh_2( TM &m,std::istream &is, unsigned nvi, const VarTag &vt ) throw 
             }
             else if ( type_elem == 9 ) { //TODO
                 if ( nvi == 2 ) {
-                    permutation_if_jac_neg ( Triangle_6(),vn.ptr() );
+                    permutation_if_jac_neg ( Triangle_6(), vn.ptr() );
                     assign_tag_values( m.add_element( Triangle_6(),DefaultBehavior(),vn.ptr() ), tag_values, vt, Number<0>(), Number<NbSubTypes<VarTag>::res>() );
+                }
+            }
+            else if ( type_elem == 11 ) { //TODO
+                if ( nvi == 3 ) {
+                    swap( vn[8], vn[9] );
+                    permutation_if_jac_neg ( Tetra_10(), vn.ptr() );
+                    assign_tag_values( m.add_element( Tetra_10(),DefaultBehavior(),vn.ptr() ), tag_values, vt, Number<0>(), Number<NbSubTypes<VarTag>::res>() );
                 }
             }
             else if ( type_elem == 15 ) { //TODO

@@ -279,14 +279,16 @@ template <class T, int s, class STO>
 const Mat<T,Sym<>,STO> &sym (const Mat<T,Sym<s>,STO> &M) {
     return M;
 }
-template <class T, class STR, class STO>
-Mat<T,Sym<>,STO> sym (const Mat<std::complex<T>,STR,STO> &M) {
-    return T(0.5)*(M+trans(conj(M)));
-}
-template <class T, int s, class STO>
-const Mat<T,Sym<>,STO> &sym (const Mat<std::complex<T>,Herm<s>,STO> &M) {
-    return M;
-}
+#ifndef WITHOUTCOMPLEX
+    template <class T, class STR, class STO>
+    Mat<T,Sym<>,STO> sym (const Mat<std::complex<T>,STR,STO> &M) {
+        return T(0.5)*(M+trans(conj(M)));
+    }
+    template <class T, int s, class STO>
+    const Mat<T,Sym<>,STO> &sym (const Mat<std::complex<T>,Herm<s>,STO> &M) {
+        return M;
+    }
+#endif
 
 };
 

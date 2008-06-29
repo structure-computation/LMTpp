@@ -65,6 +65,11 @@ public:
         data = val.data;
     }
     
+    template<class T2> Mat(const Mat<T2,STRUCTURE,STORAGE > &val) {
+        resize( val.nb_rows(), val.nb_cols() );
+        data = val.data;
+    }
+    
     template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
         resize( val.nb_rows(), val.nb_cols() );
         if ( (STRUCTURE::need_upper and STRUCTURE::need_lower)==false and STRUCTURE::need_diag )
@@ -339,11 +344,12 @@ struct MatElem<TV,STRUCTURE,STORAGE > {
 
 
 print """
-template<class T1,int s1,class T2_,int s2> Vec<typename TypePromote<Multiplies,T1,typename Vec<T2_,s2>::template SubType<0>::T>::T,MAX(s1,s2)> operator*( const Mat<T1,Sym<s1>,SparseLine<> > &m, const Vec<T2_,s2> &b ) {
-    typedef typename TypePromote<Multiplies,T1,typename Vec<T2_,s2>::template SubType<0>::T>::T TR;
-    Vec<TR,MAX(s1,s2)> res; res.resize( m.nb_rows() );
-    for(unsigned i=0;i<m.nb_rows();++i) {
-        TR r = TR(0.0);
+template<class T1,int s1,class T2,int s2,class T3,int s3> void partial_mul( const Mat<T1,Sym<s1>,SparseLine<> > &m, const Vec<T2,s2> &b, Vec<T3,s3> &res, unsigned num_thread, unsigned nb_threads ) {
+    res.resize( m.nb_rows() );
+    unsigned beg = m.nb_rows() * ( num_thread + 0 ) / nb_threads;
+    unsigned end = m.nb_rows() * ( num_thread + 1 ) / nb_threads;
+    for(unsigned i=beg;i<end;++i) {
+        T3 r = T3(0.0);
         if ( m.data[i].indices.size() ) {
             unsigned j;
             for(j=0;j<m.data[i].indices.size()-1;++j) {
@@ -354,7 +360,30 @@ template<class T1,int s1,class T2_,int s2> Vec<typename TypePromote<Multiplies,T
         }
         res[i] = r;
     }
-    return res;
+}
+
+namespace LMT_PRIVATE {
+struct PartialMul {
+    template<class TM,class TV,class TR> void operator()( unsigned num_thread, const TM &m, const TV &v, TR &res ) const {
+        partial_mul( m, v, res[num_thread], num_thread, nb_threads );
+    }
+    unsigned nb_threads;
+};
+}
+
+template<class T1,int s1,class T2_,int s2> Vec<typename TypePromote<Multiplies,T1,T2_>::T,MAX(s1,s2)> mul( const Mat<T1,Sym<s1>,SparseLine<> > &m, const Vec<T2_,s2> &b, unsigned nb_threads ) {
+    typedef typename TypePromote<Multiplies,T1,typename Vec<T2_,s2>::template SubType<0>::T>::T TR;
+    Vec<Vec<TR,MAX(s1,s2)> > res; res.resize( nb_threads );
+    LMT_PRIVATE::PartialMul pm; pm.nb_threads = nb_threads;
+    apply_mt( range(nb_threads), nb_threads, pm, m, b, res );
+    for(unsigned i=1;i<nb_threads;++i)
+        res[0] += res[i];
+    return res[0];
+}
+
+
+template<class T1,int s1,class T2_,int s2> Vec<typename TypePromote<Multiplies,T1,T2_>::T,MAX(s1,s2)> operator*( const Mat<T1,Sym<s1>,SparseLine<> > &m, const Vec<T2_,s2> &b ) {
+    return mul( m, b, 1 );
 }
 """
 

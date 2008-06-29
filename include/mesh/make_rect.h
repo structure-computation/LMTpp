@@ -18,6 +18,7 @@ struct Tetra;
 struct DefaultBehavior;
 struct Wedge;
 struct Hexa_20;
+struct Tetra_10;
 
 /**
  * Bar
@@ -444,7 +445,7 @@ void make_rect(TM &m,const Hexa_20 &t,typename TM::Pvec X0,typename TM::Pvec X1,
     
     Pvec step = (X1-X0) / nb_elements;
     for(Rectilinear_iterator<Tpos,TM::dim> iter( X0, X1 - 0.1 * step, step ); iter; ++iter ) {
-        typename TM::TNode *n[20] = {
+        typename TM::TNode *n[] = {
             ban.get_node( iter.pos + step * Pvec(0.0,0.0,0.0) ),
             ban.get_node( iter.pos + step * Pvec(1.0,0.0,0.0) ),
             ban.get_node( iter.pos + step * Pvec(1.0,1.0,0.0) ),
@@ -469,6 +470,42 @@ void make_rect(TM &m,const Hexa_20 &t,typename TM::Pvec X0,typename TM::Pvec X1,
             ban.get_node( iter.pos + step * Pvec(0.0,1.0,0.5) )
         };
         m.add_element( Hexa_20(), DefaultBehavior(), n );
+    }
+}
+
+/**
+     Tetra_10
+        3
+       /|\
+      / |9\
+    7/  |  \8
+    /  /2\  \
+   / /6   5\ \
+  0/--- 4----\1
+ */
+template<class TM>
+void make_rect(TM &m,const Tetra_10 &t,typename TM::Pvec X0,typename TM::Pvec X1,typename TM::Pvec nb_elements) {
+    typedef typename TM::Pvec Pvec;
+    typedef typename TM::Tpos Tpos;
+
+    BestialNodeAdder<TM> ban; ban.m = &m; ban.prec = min( (X1-X0)/nb_elements ) * 1e-6;
+    
+    Pvec step = (X1-X0) / nb_elements;
+    for(Rectilinear_iterator<Tpos,TM::dim> iter( X0, X1 - 0.1 * step, step ); iter; ++iter ) {
+        typename TM::TNode *n[] = {
+            ban.get_node( iter.pos + step * Pvec(0.0,0.0,0.0) ),
+            ban.get_node( iter.pos + step * Pvec(1.0,0.0,0.0) ),
+            ban.get_node( iter.pos + step * Pvec(0.0,1.0,0.0) ),
+            ban.get_node( iter.pos + step * Pvec(0.0,0.0,1.0) ),
+                       
+            ban.get_node( iter.pos + step * Pvec(0.5,0.0,0.0) ),
+            ban.get_node( iter.pos + step * Pvec(0.5,0.5,0.0) ),
+            ban.get_node( iter.pos + step * Pvec(0.0,0.5,0.0) ),
+            ban.get_node( iter.pos + step * Pvec(0.0,0.0,0.5) ),
+            ban.get_node( iter.pos + step * Pvec(0.5,0.0,0.5) ),
+            ban.get_node( iter.pos + step * Pvec(0.0,0.5,0.5) ),
+        };
+        m.add_element( Tetra_10(), DefaultBehavior(), n );
     }
 }
 

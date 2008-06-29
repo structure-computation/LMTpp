@@ -114,6 +114,9 @@ template<> struct TypeInformation<long double> {
 };
 
 
+template<class TT> struct SubComplex {
+    typedef TT T;
+};
 #ifndef WITHOUTCOMPLEX
     template<class TT> struct TypeInformation<std::complex<TT> > {
         static const int res = TypeInformation<TT>::res;
@@ -124,9 +127,6 @@ template<> struct TypeInformation<long double> {
         template<class TV> struct DeepVariant { typedef std::complex<typename TypeInformation<TT>::template DeepVariant<TV>::T> T; };
         static std::string type() { return "complex<"+TypeInformation<TT>::type()+"> "; }
         static const bool float_type = TypeInformation<TT>::float_type;
-    };
-    template<class TT> struct SubComplex {
-        typedef TT T;
     };
     template<class TT> struct SubComplex<std::complex<TT> > {
         typedef TT T;
@@ -145,9 +145,11 @@ template<> struct CanBeConvertedTo<float,double> { static const bool res = true;
 template<> struct CanBeConvertedTo<double,double> { static const bool res = true; };
 template<> struct CanBeConvertedTo<long double,double> { static const bool res = true; };
 
-template<class T1,class T2> struct CanBeConvertedTo<T1,std::complex<T2> > { static const bool res = CanBeConvertedTo<T1,T2>::res; };
-template<> struct CanBeConvertedTo<std::complex<float>,std::complex<float> > { static const bool res = true; };
-template<> struct CanBeConvertedTo<std::complex<double>,std::complex<double> > { static const bool res = true; };
+#ifndef WITHOUTCOMPLEX
+    template<class T1,class T2> struct CanBeConvertedTo<T1,std::complex<T2> > { static const bool res = CanBeConvertedTo<T1,T2>::res; };
+    template<> struct CanBeConvertedTo<std::complex<float>,std::complex<float> > { static const bool res = true; };
+    template<> struct CanBeConvertedTo<std::complex<double>,std::complex<double> > { static const bool res = true; };
+#endif
 
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -227,7 +229,9 @@ template<class TV,class Prefered=double> struct FloatType {
 };
 
 template<class T> struct IsComplex { static const bool res = false; };
+#ifndef WITHOUTCOMPLEX
 template<class T> struct IsComplex<std::complex<T> > { static const bool res = true; };
+#endif
 
 template<class TT, bool is_scalar=TypeInformation<TT>::is_scalar> struct IsScalar {};
 template<class TT> struct IsScalar<TT,true> {typedef TT T;};

@@ -14,6 +14,7 @@
 
 namespace LMT {
 
+///
 template<
     class T0=void, class T1=void, class T2=void, class T3=void,
     class T4=void, class T5=void, class T6=void, class T7=void
@@ -27,6 +28,17 @@ template<
     template<unsigned inner> struct SubType<5,inner> { typedef T5 T; };
     template<unsigned inner> struct SubType<6,inner> { typedef T6 T; };
     template<unsigned inner> struct SubType<7,inner> { typedef T7 T; };
+};
+
+template<class TT> struct PtrOnTIfNotVoid { typedef TT *T; };
+template<> struct PtrOnTIfNotVoid<void> { typedef void T; };
+
+///
+template<class HEP>
+struct HeteroExplPackPtr {
+    template<unsigned n> struct SubType {
+        typedef typename PtrOnTIfNotVoid<typename HEP::template SubType<n>::T>::T T;
+    };
 };
 
 };
