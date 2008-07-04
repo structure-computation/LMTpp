@@ -1,9 +1,11 @@
 /*!
-\webpage[Introduction]{introduction}
+\webpage introduction Introduction
 
-    La librairie LMT++ est un ensemble de classes et de fonctions permettant d'accélérer le développement d'applications scientifiques. Elle utilise la conception orienté objet et surtout la conception générique ( ou méta-programmation) garante de flexibilité, et de longivité.
+La librairie LMT++ est un ensemble de classes et de fonctions permettant d'accélérer le développement d'applications scientifiques. Elle utilise la conception orienté objet et surtout la conception générique ( ou méta-programmation) garante de flexibilité, de longivité.
 
-
+\author Hugo Leclerc
+\friend hugo.leclerc@lmt.ens-cachan.fr
+\friend raphael.pasquier@lmt.ens-cachan.fr
 
 
 

@@ -35,6 +35,12 @@ namespace LMT {
     Full vector. Elements are contiguous.
     \warning during resize, pop_back, ... and so on, location of data in memory may be moved. Use SplittedVector if you are pointer stability.
 */
+/*!
+    \brief vecteur à élément contigus. Si la taille change , on préférera le type SplittedVector qui assure que le vecteur ne sera pas déplacé en mémoire après trop d'ajouts.
+    Full vector. Elements are contiguous.
+    \warning during resize, pop_back, ... and so on, location of data in memory may be moved. Use SplittedVector if you are pointer stability.
+*/
+
 template<class TT"""+',int static_size_'*static_size+""">
 class Vec<TT,"""+['-1','static_size_'][static_size]+""",void> {
 public:

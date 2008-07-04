@@ -24,16 +24,44 @@ namespace LMT {
 
 template<class MATOP> struct IsMatOp { typedef void T; };
 
-/**
-    \todo SIMD alignement for Row on Lower and Col on Upper
+/*!
+\generic_comment Mat
+
+    = Introduction
+
+        Cette classe permet de manipuler des tableaux à deux dimensions (cad des matrices).
+
+    = Spécialisations
+
+        Pour des matrices ou des utilisations particulières, il est préférable d'utiliser des spécialisations de la classe Mat pour économiser des ressources ou pour aller plus vite.
+
+            = Matrices creuses
+
+            = Matrices symétriques
+
+            = Décomposition LU
+
+ 
+
+    = Divers
+
+        On peut consulter le wiki de l'intranet http://intranet/mediawiki/index.php/Matrices .
+
+        <strong> SIMD alignement for Row on Lower and Col on Upper </strong>
+        \friend hugo.leclerc@lmt.ens-cachan.fr
+        \keyword Mathématiques/Algèbre linéaire
+        \author Hugo Leclerc
 */
 template<class T=double,class Structure=Gen<-1,-1>,class Storage=Dense<Col>,class ismatop=typename IsMatOp<T>::T>
 class Mat;
 
 template<class TM,bool const_tm,class TV1,class TV2=void> struct SubMat;
 
-/**
+/*!
     \relates Mat
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \keyword Mathématiques/Algèbre linéaire
+    \author Hugo Leclerc
 */
 template<class T,class Structure,class Storage,class OP>
 std::ostream &operator<<(std::ostream &os,const Mat<T,Structure,Storage,OP> &m) {
@@ -50,8 +78,11 @@ std::ostream &operator<<(std::ostream &os,const Mat<T,Structure,Storage,OP> &m) 
     }
     return os;
 }
-/**
+/*!
     \relates Mat
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \keyword Mathématiques/Algèbre linéaire
+    \author Hugo Leclerc
 */
 template<class T,class Structure,class Storage,class OP>
 std::istream &operator>>(std::istream &is,Mat<T,Structure,Storage,OP> &m) {
@@ -209,6 +240,13 @@ Mat<TV,Diag<s> > diag(const Vec<TV,s> &vec) {
     /** Convert a LMT::Mat to a matlab one
         \relates Mat
     */
+/*!
+
+    Convert a LMT::Mat to a matlab one
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \keyword Mathématiques/Algèbre linéaire
+    \author Hugo Leclerc
+*/
     template<class TT,class STR,class O,class IO>
     mxArray *to_matlab(const Mat<TT,STR,Dense<O>,IO> &mat) {
         typedef typename Mat<TT,STR,Dense<O>,IO>::T TV;
