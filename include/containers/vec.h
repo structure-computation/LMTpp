@@ -66,6 +66,7 @@ namespace LMT {
 /*!
     \generic_comment Vec
         \friend raphael.pasquier@lmt.ens-cachan.fr
+        \friend hugo.leclerc@lmt.ens-cachan.fr
 
             = description générale
  
@@ -100,6 +101,7 @@ namespace LMT {
                     * \a Vec<Sparse<TT>,static_size_> pour les vecteurs creux, i.e. on ne mémorise que les valeurs non nulles. 
                     * \a Vec<VecCst<TT>,static_size_,int> pour vecteur constant. En fait on ne mémorise q'une seule valeur d'où un gain en mémoire.
                     * \a Vec<VecDirac<TT>,static_size_,int> pour vecteur dont tous les éléments sont nuls sauf un (pensez à la base canonique).
+                    * \a Vec<Heterogeneous<Carac,nt,TT>,static_size_,int> pour des vecteurs d'éléments de type différent.
                     * \a VecSelect pour vecteur permettant de filtrer les éléments d'un autre vecteur. 
                     * \a Vec<VecHeavyside<TT>,static_size_,int> fait référence à la fonction de Heavyside qui est nulle pour x<0 et qui vaut un pour x>=0.
                     * \a Vec<Intersection<V0,V1,const_v0,false,false>,-1,int> Cette classe permet après spécialisation de déterminer l'intersction de deux vecteurs.
