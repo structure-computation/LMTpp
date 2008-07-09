@@ -87,7 +87,7 @@ template<class T> bool heavyside(const T &val) { return (val>=0); }
 template<class T> bool heaviside(const T &val) { return (val>=0); }
 /// 1 if equal 0
 template<class T> bool eqz(const T &val) { return heavyside(val)*heavyside(-val); }
-/// 1 if equal 0
+/// ...
 template<class T> int sgn(const T &val) { return ( val>0 ? 1 : -1 ); }
 
 /// length
@@ -203,7 +203,8 @@ struct GetFromStream {
     template<class T1,class IS> struct ReturnType { typedef IS T; };
     template<class T,class IS> IS &operator()(T &t,IS &is) const {
         // std::cout << "GetFromStream" << std::endl;
-        return is >> t;
+        is >> t;
+        return is;
     }
 };
 
