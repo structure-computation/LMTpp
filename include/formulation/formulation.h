@@ -620,6 +620,14 @@ public:
             std::cout << time_of_day_in_sec() - t0 << std::endl;
         return res;
     }
+    
+    struct ChecKNLConv {
+        template<class TE> bool operator()( const TE &e, const Formulation *f ) const {
+            typedef CaracFormulationForElement<NameFormulation,TE,NameVariant,ScalarType> CFE;
+            assert( CFE::nb_elementary_unknowns == 0 /*TODO*/ );
+            return false;
+        }
+    };
     /**
      * call all functions to get solution...
      * @return 
@@ -629,7 +637,7 @@ public:
         shift();
         //
         Vec<ScalarType> old_vec;
-        if ( this->non_linear_iterative_criterium )
+        if ( this->non_linear_iterative_criterium or this->non_linear_iterative_criterium_vec.size() )
             old_vec.resize( vectors[0].size(), ScalarType(0) );
         //
         unsigned nb_iterations = 0;
@@ -637,8 +645,29 @@ public:
             assemble();
             if ( solve_system(iterative_criterium,disp_timing) == false )
                 return false;
-            if ( this->non_linear_iterative_criterium == 0 or norm_2( old_vec - vectors[0] ) <= this->non_linear_iterative_criterium )
+                
+            if ( this->non_linear_iterative_criterium == 0 and this->non_linear_iterative_criterium_vec.size() == 0 ) // assuming linear system
                 break;
+            if ( this->non_linear_iterative_criterium and norm_inf( old_vec - vectors[0] ) <= this->non_linear_iterative_criterium )
+                break;
+            if ( this->non_linear_iterative_criterium_vec.size() ) {
+                bool converged = true;
+                unsigned num_unk = 0;
+                for(unsigned n=0;n<nb_nodal_unknowns;++n,++num_unk) {
+                    for(unsigned i=0;i<m->node_list.size() and converged;++i) {
+                        unsigned ind = indice_noda[i] + n;
+                        converged &= abs( old_vec[ind] - vectors[0][ind] ) <= this->non_linear_iterative_criterium_vec[ num_unk ];
+                    }
+                }
+                converged &= not find( m->elem_list, ChecKNLConv(), this );
+                for(unsigned n=0;n<nb_global_unknowns;++n,++num_unk) {
+                    unsigned ind = indice_glob + n;
+                    converged &= abs( old_vec[ind] - vectors[0][ind] ) <= this->non_linear_iterative_criterium_vec[ num_unk ];
+                }
+                if ( converged )
+                    break;
+            }
+            
             if ( nb_iterations++ >= this->max_non_linear_iteration )
                 throw SolveException();
             old_vec = vectors[0];

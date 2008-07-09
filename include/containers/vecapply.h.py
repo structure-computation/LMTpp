@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import string
 from vecgenhelp import *
 
@@ -9,9 +10,9 @@ namespace LMT {
 /*!
 \generic_comment apply
 
-    Cette fonction permet d'appliquer une opérateur, disons op, sur l'ensemble des éléments d'un conteneur (Vec en général). La syntaxe générale est du genre :
+    Cette fonction permet d'appliquer un opérateur, disons op, sur l'ensemble des éléments d'un conteneur (Vec en général). La syntaxe générale est du genre :
     apply( conteneur, op, param );
-    où param sont les éventuels paramètres de l'opérateur.
+    où param sont les éventuels parametres de l'opérateur.
 
 */
 

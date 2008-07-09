@@ -442,6 +442,7 @@ class Formulation:
       ('green_lagrange_col',e.green_lagrange_col),
       ('options', self.options),
       ('gauss_points', self.gauss_points),
+      ('cur_f', self),
     ]
     # global variables
     class VariablesFormulation:

@@ -39,6 +39,8 @@ public:
     virtual typename TNode::Pvec sample_tangent_virtual() const = 0;
     
     virtual void set_field( const std::string field_name, T value ) = 0;
+    virtual void set_field( const std::string field_name, Vec<T,1> value ) = 0;
+    virtual void set_field( const std::string field_name, Vec<T,2> value ) = 0;
     virtual void set_field( const std::string field_name, Vec<T,3> value ) = 0;
 
     unsigned number;
@@ -125,6 +127,8 @@ public:
     virtual ~Element() {}
     
     virtual void set_field( const std::string field_name, T value ) { TData::dm_data_set_field( field_name, value ); }
+    virtual void set_field( const std::string field_name, Vec<T,1> value ) { TData::dm_data_set_field( field_name, value ); }
+    virtual void set_field( const std::string field_name, Vec<T,2> value ) { TData::dm_data_set_field( field_name, value ); }
     virtual void set_field( const std::string field_name, Vec<T,3> value ) { TData::dm_data_set_field( field_name, value ); }
 
     ///
