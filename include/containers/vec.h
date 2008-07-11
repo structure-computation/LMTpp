@@ -88,12 +88,14 @@ namespace LMT {
                         vx.pop_back();       // le retire.
                         std::cout << vx << std:endl ; // affiche vx 
 
-            = Methodes les plus utiles
+            = Methodes et fonctions les plus utiles
 
                 Les méthodes de la classe Vec sont :
                     * resize(int n) qui fixe la taille du vecteur à n.
                     * free() qui libère la mémoire.
                     * à faire
+
+                <strong> IMPORTANT : </strong> On ne peut pas parler de la classe Vec sans parler de la fonction \a apply et de ses varaintes qui permettent de manipuler les éléments d'un vecteur sans les parcourir avec une boucle for. Alors n'hésitez pas à consulter la doc de \a apply . 
 
             = Des classes spécialisées
 
@@ -346,6 +348,62 @@ namespace LMT {
     #endif
 
 }
+
+/*!
+\generic_comment apply
+
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+
+    = Description
+
+        La fonction apply permet d'agir sur les éléments d'un vecteur sans recourir à une boucle (for). Cela améliore souvent les performances et le code s'en trouve aussi simplifié. 
+        La syntaxe générale est :
+        \code 
+            apply( vecteur, opérateur, les paramètres (facultatifs) de l'opérateur)
+
+        Certains types de fonctions apply agissent sur deux vecteurs en même temps. Leur syntaxe est alors :
+        \code 
+            apply( vecteur1, vecteur2, opérateur, les paramètres (facultatifs) de l'opérateur)
+
+
+        Ainsi si vous souhaitez faire un calcul sur les éléments d'un vecteur, vous créerai un opérateur correspondant à l'algorithme avec éventuellement des parmètres si l'algorithme a des varaiantes. Cela fonctionne suivant le même principe que les filtres sur une image et comme les filtres, on peut aussi enchaîner simplement les traitements ; cad par exemple  si vous avez défini des opérateurs op1, op2, ... on peut créer un autre opérateur op utilisant les op1, op2 et l'appliquer sur un vecteur via apply.
+
+        Suivant le même principe de fonctionnement on pourra aussi consulter la documentation des fonctions :
+            * \a find
+            * \a sort 
+            * \a remove_if
+            * \a find_elem
+
+        Enfin la fabricaton de certains opérateurs peut être simplifiée par le concept de fonction lambda, voir ...
+ 
+        Voici une liste d'exemples :
+            * (à faire)
+            * (à faire)
+
+
+    = Les variantes
+
+        = Un seul vecteur
+
+            * \a apply_wi comme apply mais l'opération sur l'élément dépend de son indice dans le tableau (wi pour with index).
+            * \a apply_range pour opérer sur des éléments consécutifs. 
+            * \a apply_range_stride pour opérer sur des éléments régulièrement espacés.
+            * \a apply_on_number pour opérér sur un seul élément (éxcepté pour les vecteurs hétérogènes, un simple v[i] est plus efficace). 
+            * \a apply_range_by_n 
+            * \a apply_nz_wi est plutôt utilisée pour les vecteurs creux ( \a Vec<Sparse<TT>,static_size_> ) car le traitement n'est fait que sur les éléments instanciés (donc à priori non nul).
+
+        = Deux vecteurs
+
+            * \a apply_ij qui opère sur toutes les paires formées d'un élément de chaque vecteur (équivaut à deux boucles imbriquées).  
+            * \a apply_i_supeq_j même chose avec le premier indice supérieur ou égal au second.
+            * \a apply_i_sup_j même chose avec le premier indice supérieur au second.
+            * 
+
+    \relates generate
+    \relates find
+    \relates sort
+*/
 
 
 

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import string
 from vecgenhelp import *
 
@@ -50,6 +51,24 @@ template<class TT> struct DelayedAssignementSparseSource {
     unsigned i;
 };
 
+/*!
+Cette classe permet de construire des vecteurs creux : cad si le vecteur a de nombreux éléments nuls, il est préférable de choisir ce format de stockage.
+Voici un exemple d'utilisation :
+    \code C/C++
+        Vec<Sparse<float> > vs;
+        Vec<Sparse<std::string>,10> vsf; // au plus dix éléments non nuls (nombre maximal fixé à la compilation).
+        Vec<int> plage ;
+        std::string residu;
+        
+        vsf.set(1000,"fee clochette");
+        residu = vsf.get( 1000 ); // où bien residu = vsf[1000];
+
+    
+
+
+    \relates Vec
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+*/
 template<class TT,int static_size_>
 class Vec<Sparse<TT>,static_size_> {
 public:

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import string
 from vecgenhelp import *
 
@@ -9,6 +10,20 @@ template<class Carac,unsigned nt,class TT> struct IsVecOp<Heterogeneous<Carac,nt
 
 template<class NameDM>
 struct ExtractDM;
+
+/*!
+\generic_comment apply_range_stride 
+
+    Sa syntaxe générale est :
+    \code 
+        apply_range_stride( vecteur, indice début, indice fin, incrément, opérateur, paramètres facultatifs de l'opérateur)  
+
+    Cette fonction applique un opérateur sur les éléments d'un vecteur à partir de l'indice début et tous les indices debut + i x incrément vérifiant debut + i x incrément < fin.
+
+    \relates apply
+    \relates Vec
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+*/
 
 /// heterogeneous vector. static_size is the number of elements
 template<class Carac,unsigned nt,class TT,int static_size_>

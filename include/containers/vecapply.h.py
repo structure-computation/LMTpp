@@ -1,5 +1,8 @@
+# -*- coding: utf-8 -*-
 import string
 from vecgenhelp import *
+
+
 
 #print 'namespace LMT {'
 print """
@@ -7,12 +10,16 @@ print """
 namespace LMT {
 
 /*!
-\generic_comment apply
+\generic_comment apply_wi
 
-    Cette fonction permet d'appliquer une opérateur, disons op, sur l'ensemble des éléments d'un conteneur (Vec en général). La syntaxe générale est du genre :
-    apply( conteneur, op, param );
-    où param sont les éventuels paramètres de l'opérateur.
+    cette fonction agit sur un vecteur comme \a apply mais en tenant compte de l'indice de l'élément (d'pù le wi pour with index).
+    Par conséquent la classe-fonction doit définir correctment operator() de cette façon :
+    \code 
+        template <class Telement> struct operateur {
+            void operator()( const Telement& e, int i ) const { bla bla }
+        };
 
+    \friend raphael.pasquier@lmt.ens-cachan.fr
 */
 
 """
