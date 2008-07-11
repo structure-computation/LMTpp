@@ -19,6 +19,10 @@ namespace LMT {
             void operator()( const Telement& e, int i ) const { bla bla }
         };
 
+    Cette fonction permet d'appliquer un opérateur, disons op, sur l'ensemble des éléments d'un conteneur (Vec en général). La syntaxe générale est du genre :
+    apply( conteneur, op, param );
+    où param sont les éventuels parametres de l'opérateur.
+
     \friend raphael.pasquier@lmt.ens-cachan.fr
 */
 
