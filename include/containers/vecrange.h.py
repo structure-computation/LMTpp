@@ -43,12 +43,12 @@ template<class TT,class T2> Vec<Range<TT,-1,1> > range(const TT &b,const T2 &e) 
 template<class TT> Vec<Range<TT> > range(const TT &b,const TT &step,const TT &e) { DEBUGASSERT( (step>0 xor b>e) or b==e ); return Vec<Range<TT> >(b,step,e); }
 
 
-/** Create a [0:1:e] range with fised size \\relates Vec */
-template<int s,class TT> Vec<Range<TT>,s> static_range() { return Vec<Range<TT>,s>(0,1); }
-/** Create a [0:1:e] range with fised size \\relates Vec */
-template<int s,class TT> Vec<Range<TT>,s> static_range(const TT &b) { return Vec<Range<TT>,s>(b,1); }
-/** Create a [0:1:e] range with fised size \\relates Vec */
-template<int s,class TT> Vec<Range<TT>,s> static_range(const TT &b,const TT &step) { return Vec<Range<TT>,s>(b,step); }
+/** Create a [0:1:e] range with fised size \relates Vec */
+template<int s,class TT> Vec<Range<TT>,s> static_range() { return Vec<Range<TT>,s>(0,1,s); }
+/** Create a [0:1:e] range with fised size \relates Vec */
+template<int s,class TT> Vec<Range<TT>,s> static_range(const TT &b) { return Vec<Range<TT>,s>(b,1,s); }
+/** Create a [0:1:e] range with fised size \relates Vec */
+template<int s,class TT> Vec<Range<TT>,s> static_range(const TT &b,const TT &step) { return Vec<Range<TT>,s>(b,step,s); }
 
 }
 """

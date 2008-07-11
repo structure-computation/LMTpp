@@ -178,7 +178,7 @@ struct Display {
     template<class T1,class OS=std::ostream,class SEP=void,class T4=void> struct ReturnType { typedef void T; };
     template<class T> void operator()(const T &t) const { std::cout << t << " "; }
     template<class T,class OS> void operator()(const T &t,OS &os) const { os << t << " "; }
-    template<class T,class OS,class SEP> void operator()(const T &t,OS &os,const SEP &sep) const { os << t << sep; }
+    template<class T,class OS,class SEP> void operator()(const T &t,OS &os,const SEP &sep) const { os << t; os << sep; }
     
     template<class T> void operator()(const T &t0,const T &t1,const T &t2,const T &t3) const { std::cout << t3 << " " << t2 << " " << t1 << " " << t0 << " "; }
     template<class T,class OS> void operator()(const T &t0,const T &t1,const T &t2,const T &t3,OS &os) const { os << t3 << " " << t2 << " " << t1 << " " << t0 << " "; }

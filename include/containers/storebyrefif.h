@@ -19,7 +19,7 @@ namespace LMT {
     
     if store_by_ref==false -> stores as T val.
     
-    should be specialized for heavy structures likes Mat<> to store as a reference.
+    should be specialized for heavy structures like Mat<> to store as a reference.
 */
 template<class T,bool store_by_ref> struct StoreByRefIf;
 
