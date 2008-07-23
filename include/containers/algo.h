@@ -18,6 +18,10 @@ namespace LMT {
 
 // -------------------------------------------------------------------- sort --------------------------------------------------------------------
 namespace ALGOPRIVATE {
+
+/*!
+Structure interne à la LMT++
+*/
     struct Sort {
         template<class T1,class T2,class Op> void operator()(T1 &val1,T2 &val2,const Op &op) const {
             if ( op(val1,val2) ) swap( val1, val2 );
@@ -27,15 +31,23 @@ namespace ALGOPRIVATE {
         }
     };
 };
-/** sort elements of l in ascending order, according to op::operator()(v1,v2) as comparison operator
+/*! 
+    sort elements of l in ascending order, according to op::operator()(v1,v2) as comparison operator
    assuming swap is possible between all elements of l
     \relates Vec
+    \relates apply
+    \relates apply_wi
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \friend raphael.pasquier@lmt.ens-cachan.fr
 */
 template<class TL,class Op> void sort(TL &l,const Op &op) {
     apply_wi( l, ALGOPRIVATE::Sort(), l, op );
 }
-/** sort elements of l in ascending order, assuming swap is possible between all elements of l
+/*!
+     sort elements of l in ascending order, assuming swap is possible between all elements of l
     \relates Vec
+        \friend hugo.leclerc@lmt.ens-cachan.fr
+    \friend raphael.pasquier@lmt.ens-cachan.fr
 */
 template<class TL> void sort(TL &l) { sort(l,Less()); }
 
@@ -54,8 +66,11 @@ namespace ALGOPRIVATE {
         Vec<unsigned> index;
     };
 };
-/** sort elements of l in ascending order, assuming swap is possible between all elements of l
+/*!
+    sort elements of l in ascending order, assuming swap is possible between all elements of l
     \relates Vec
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \friend raphael.pasquier@lmt.ens-cachan.fr
 */
 template<class TL,class Op> Vec<unsigned> sort_with_index(TL &l,const Op &op) {
     ALGOPRIVATE::SortWithIndex s;
@@ -63,8 +78,11 @@ template<class TL,class Op> Vec<unsigned> sort_with_index(TL &l,const Op &op) {
     apply_wi( l, s, l, op );
     return s.index;
 }
-/** sort elements of l in ascending order, assuming swap is possible between all elements of l
+/*!
+     sort elements of l in ascending order, assuming swap is possible between all elements of l
     \relates Vec
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \friend raphael.pasquier@lmt.ens-cachan.fr
 */
 template<class TL> Vec<unsigned> sort_with_index(TL &l) { return sort_with_index(l,Less()); }
 
@@ -88,10 +106,13 @@ namespace ALGOPRIVATE {
         unsigned j;
     };
 };
-/** remove elements which are considered to be equal using Op(v1,v2). Keeps the first ones.
+/*! 
+    remove elements which are considered to be equal using Op(v1,v2). Keeps the first ones.
     l has not to be sorted
-    \warning this procedure does not keep order of elements
+    <strong> this procedure does not keep order of elements </strong>
     \relates Vec
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \friend raphael.pasquier@lmt.ens-cachan.fr
 */
 template<class TL,class Op> void remove_doubles(TL &l,const Op &op) {
     ALGOPRIVATE::RemoveDoubles<Op> s; s.op = &op; s.j = 0;
@@ -115,21 +136,24 @@ template<class TT> struct ExactlyEqualTo {
 };
 template<class T> ExactlyEqualTo<T> exactly_equal(const T &val) { return ExactlyEqualTo<T>(val); }
 
-///
+//
 // template<class TT> struct ExactlyEqualTo {
 //     ExactlyEqualTo(const TT &v):val(v) {}
 //     template<class P1,class P2=void,class P3=void,class P4=void> struct ReturnType { typedef bool T; };
 //     template<class P1> bool operator()(const P1 &p1) const { return p1 == val; }
 //     const TT &val;
 // };
-// ///
+// //
 // template<class T> ApproxEqualTo<T> approx_equal(const T &val,const T ) { return ApproxEqualTo<T>(val); }
 
 
-/** remove elements which are considered to be equal. Keeps the first ones.
+/*!
+    remove elements which are considered to be equal. Keeps the first ones.
     l has not to be sorted
-    \warning this procedure does not keep order of elements
+    <strong> this procedure does not keep order of elements </strong>
     \relates Vec
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \friend raphael.pasquier@lmt.ens-cachan.fr
 */
 template<class TL> void remove_doubles(TL &l) { remove_doubles(l,ExactlyEqual()); }
 
@@ -271,9 +295,12 @@ namespace ALGOPRIVATE {
         TResOp val;
     };
 };
-/** \return a copy on the first element e such as op(e) >= op(i) for all i in l. In other words, look up for first e which maximize op(e)
+/*!
+    return a copy on the first element e such as op(e) >= op(i) for all i in l. In other words, look up for first e which maximize op(e)
     This procedure may not be optimal for lists with little size
-    \relates ALGO
+    \keyword Algorithme
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \friend raphael.pasquier@lmt.ens-cachan.fr 
 */
 template<class TL,class Op> typename TypeReduction<Plus,TL>::T max_element(const TL &l,const Op &op) {
     typedef typename TypeReduction<Plus,TL>::T TR;
@@ -287,9 +314,12 @@ template<class TL,class Op> typename TypeReduction<Plus,TL>::T max_element(const
     apply( l, me, res, op );
     return res;
 }
-/** \return a copy on the first element e such as op(e,param) >= op(i,param) for all i in l. In other words, look up for first e which maximize op(e,param).
+/*!
+    return a copy on the first element e such as op(e,param) >= op(i,param) for all i in l. In other words, look up for first e which maximize op(e,param).
     This procedure may not be optimal for lists with little size
-    \relates ALGO
+    \keyword Algorithme
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \friend raphael.pasquier@lmt.ens-cachan.fr 
 */
 template<class TL,class Op,class TP> typename TypeReduction<Plus,TL>::T max_element(const TL &l,const Op &op,const TP &param) {
     typedef typename TypeReduction<Plus,TL>::T TR;
@@ -303,15 +333,21 @@ template<class TL,class Op,class TP> typename TypeReduction<Plus,TL>::T max_elem
     apply(l, me, res, op, param );
     return res;
 }
-/** \return a copy on the first element e such as (e >= i) for all i in l. In other words, look up for first e which maximize op(e)
-    \relates ALGO
+/*!
+    return a copy on the first element e such as (e >= i) for all i in l. In other words, look up for first e which maximize op(e)
+    \keyword Algorithme
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \friend raphael.pasquier@lmt.ens-cachan.fr 
 */
 template<class TL> typename TypeReduction<Plus,TL>::T max_element(const TL &l) { return max_element(l,C_1()); }
 
 
-/** \return a copy on the first element e such as op(e) >= op(i) for all i in l. In other words, look up for first e which maximize op(e)
+/*!
+    return a copy on the first element e such as op(e) >= op(i) for all i in l. In other words, look up for first e which maximize op(e)
     This procedure may not be optimal for lists with little size
-    \relates ALGO
+    \keyword Algorithme
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \friend raphael.pasquier@lmt.ens-cachan.fr 
 */
 template<class TL,class Op> typename TypeReduction<Plus,TL>::T min_element(const TL &l,const Op &op) {
     typedef typename TypeReduction<Plus,TL>::T TR;
@@ -325,9 +361,12 @@ template<class TL,class Op> typename TypeReduction<Plus,TL>::T min_element(const
     apply( l, me, res, op );
     return res;
 }
-/** \return a copy on the first element e such as op(e,param) >= op(i,param) for all i in l. In other words, look up for first e which minimize op(e,param).
+/*! 
+    return a copy on the first element e such as op(e,param) >= op(i,param) for all i in l. In other words, look up for first e which minimize op(e,param).
     This procedure may not be optimal for lists with little size
-    \relates ALGO
+    \keyword Algorithme
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \friend raphael.pasquier@lmt.ens-cachan.fr 
 */
 template<class TL,class Op,class TP> typename TypeReduction<Plus,TL>::T min_element(const TL &l,const Op &op,const TP &param) {
     typedef typename TypeReduction<Plus,TL>::T TR;
@@ -341,12 +380,22 @@ template<class TL,class Op,class TP> typename TypeReduction<Plus,TL>::T min_elem
     apply(l, me, res, op, param );
     return res;
 }
-/** \return a copy on the first element e such as (e >= i) for all i in l. In other words, look up for first e which minimize op(e)
-    \relates ALGO
+/*! 
+    return a copy on the first element e such as (e >= i) for all i in l. In other words, look up for first e which minimize op(e)
+    \keyword Algorithme
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \friend raphael.pasquier@lmt.ens-cachan.fr 
 */
 template<class TL> typename TypeReduction<Plus,TL>::T min_element(const TL &l) { return min_element(l,C_1()); }
 
-/**
+/*!
+
+    Cette fonction prend en paramètre un vecteur de booléens to_check et retourne le vecteur contenant l' indice des éléments vrais.
+    \relates apply
+    \relates Vec
+
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \friend raphael.pasquier@lmt.ens-cachan.fr 
  */
 template<class VB> Vec<unsigned> find_with_index(const VB &to_check) {
     Vec<unsigned> res; res.reserve( to_check.size() );

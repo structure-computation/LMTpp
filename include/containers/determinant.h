@@ -3,8 +3,15 @@
 
 namespace LMT {
 
-/**
+/*!
     Attention : c'est bourrin. Sur des petites matrices uniquement
+    \relates Mat
+
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \friend rapahel.pasquier@lmt.ens-cachan.fr
+    \friend camille.gouttebroze@lmt.ens-cachan.fr
+
+    \author Camille Gouttebroze
 */
 template<class T>
 T determinant( const Mat<T> &m ) {

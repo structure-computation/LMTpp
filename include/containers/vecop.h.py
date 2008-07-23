@@ -1,8 +1,31 @@
+# -*- coding: utf-8 -*-
 from string import *
 from vecgenhelp import *
 
 print """
 namespace LMT {
+
+/*!
+\generic_comment generate
+
+    Commme \a apply cette fonction permet d'appliquer un opérateur à tous les éléments d'un vecteur mais contrairement à \a apply elle ne modifie pas le vecteur et renvoie le vecteur résultat.
+    Sa syntaxe générale est :
+    \code
+        vecteur generate( vecteur, opérateur, éventuellement un paramètre de l'opérateur) // opérateur unaire
+        vecteur generate( vecteur1, vecteur2, opérateur, éventuellement un paramètre de l'opérateur)  // opérateur binaire
+        vecteur generate( vecteur1, vecteur2, vecteur3, opérateur, éventuellement un paramètre de l'opérateur)  // opérateur ternaire
+
+    \\relates Vec
+    \\relates apply 
+
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \\Author Hugo Leclerc
+*/
+
+
+
+
 template<class Op,unsigned nb_v,class V1,bool br1,class V2=void,bool br2=true,class V3=void,bool br3=true> class VecOp {};
 
 template<class Op,unsigned nb_v,class V1,bool br1,class V2,bool br2,class V3,bool br3> struct IsVecOp<VecOp<Op,nb_v,V1,br1,V2,br2,V3,br3> > { typedef int T; };

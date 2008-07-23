@@ -4,6 +4,13 @@ from vecgenhelp import *
 
 print """
 namespace LMT {
+
+
+/*!
+    Avec cette structure, on alloue des petits blocs de mémoire séparés. Avantage : on peut ajouter des éléments sans réallouer.
+    \\friend hugo.leclerc@lmt.ens-cachan.fr
+*/
+
 template<class TT,unsigned atomic_size> struct Splitted {};
 
 template<class TT,unsigned atomic_size> struct IsVecOp<Splitted<TT,atomic_size> > { typedef int T; };
@@ -14,9 +21,9 @@ template<class TT,unsigned atomic_size> struct IsVecOp<Splitted<TT,atomic_size> 
  (which is not the case with std::vector or LMT::Vec<T,-1>).
  <strong> all operations that implies a walk through data assume that size is not modified. Example : if op in apply(op) add elements, new elements won't be used. </strong>
 
-    \relates Vec
-    \relates apply_wi_ptr
-    \relates apply
+    \\relates Vec
+    \\relates apply_wi_ptr
+    \\relates apply
 */
 template<class TT,unsigned atomic_size>
 class Vec<Splitted<TT,atomic_size>,-1,int> {

@@ -12,18 +12,54 @@ namespace LMT {
 /*!
 \generic_comment apply_wi
 
-    cette fonction agit sur un vecteur comme \a apply mais en tenant compte de l'indice de l'élément (d'pù le wi pour with index).
-    Par conséquent la classe-fonction doit définir correctment operator() de cette façon :
+    Cette fonction agit sur un vecteur comme \\a apply mais en tenant compte de l'indice de l'élément (d'où le wi pour with index).
+    Par conséquent la classe-fonction doit définir correctment operator() de la façon suivante :
     \code 
         template <class Telement> struct operateur {
             void operator()( const Telement& e, int i ) const { bla bla }
         };
 
-    Cette fonction permet d'appliquer un opérateur, disons op, sur l'ensemble des éléments d'un conteneur (Vec en général). La syntaxe générale est du genre :
-    apply( conteneur, op, param );
+    Cette fonction permet donc d'appliquer un opérateur, disons op, sur l'ensemble des éléments d'un conteneur (Vec en général). La syntaxe générale est du genre :
+    apply_wi( conteneur, op, param );
     où param sont les éventuels parametres de l'opérateur.
 
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \\friend raphael.pasquier@lmt.ens-cachan.fr
+    \\friend hugo.leclerc@lmt.ens-cachan.fr
+    \author Hugo Leclerc
+*/
+
+/*!
+\generic_comment apply_on_number
+
+    Cette fonction sert à appliquer un opérateur sur un seul élément d'un vecteur. Elle est surtout intéressante pour les vecteurs hétérogènes ( \a Vec<Heterogeneous<Carac,nt,TT>,static_size_,int> ). 
+    Sa syntaxe générale est :
+    \code
+        apply_on_number( vecteur, indice, opérateur, paramètres faculatatifs de l'opérateur ) 
+    
+    Remarque : 
+        * Pour un vecteur hétérogène, on n'a pas accès à l'indice d'un élément particulier. Donc on utilisera cette fonction avec \a find_with_index pour récupérer l'indice de l'élément.
+        * Excepté pour un vecteur hétérogène, il est préférable d'utiliser les crochets [] .
+    
+    \\relates apply
+    \\relates find
+    \\relates Vec
+    
+    \\friend hugo.leclerc@lmt.ens-cachan.fr
+    \\friend raphel.pasquier@lmt.ens-cachan.fr
+*/
+
+/*!
+\generic_comment find
+
+    Cette fonction permet de savoir si un élément d'un vecteur vérifie une certaine propriété en renvoyant un booléen.
+    La syntaxe générale est 
+    \code
+         booléen find( vecteur, opérateur, paramètres faculatatifs de l'opérateur ) 
+
+    <strong>Remarque : L'opérateur doit renvoyer un booléen.</strong>
+    \\relates Vec 
+    \\friend hugo.leclerc@lmt.ens-cachan.fr
+    \\friend rapahel.pasquier@lmt.ens-cachan.fr
 */
 
 """

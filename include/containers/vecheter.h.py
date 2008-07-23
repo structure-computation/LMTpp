@@ -20,9 +20,9 @@ struct ExtractDM;
 
     Cette fonction applique un opérateur sur les éléments d'un vecteur à partir de l'indice début et tous les indices debut + i x incrément vérifiant debut + i x incrément < fin.
 
-    \relates apply
-    \relates Vec
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \\relates apply
+    \\relates Vec
+    \\friend raphael.pasquier@lmt.ens-cachan.fr
 */
 
 /// heterogeneous vector. static_size is the number of elements
