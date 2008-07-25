@@ -115,7 +115,56 @@ namespace LMT {
     \\friend rapahel.pasquier@lmt.ens-cachan.fr
 */
 
+/*!
+\\generic_comment find_elem
 
+    Cette fonction renvoie un pointeur sur le premier élément d'un vecteur vérifiant une certaine propriété. 
+    La syntaxe générale est 
+    \code
+         remove_if( vecteur, opérateur, paramètres faculatatifs de l'opérateur ) 
+         
+    C'est l'opérateur qui contient la condition. Voici un exemple où on récupère un pointeur sur le premier élément égal à 7  d'un vecteur d'entier.
+    \code C/C++
+        template<class T,class U> struct MonOp {
+        
+            bool operator() (T t,U u)  { return (t.u==u) ? true : false ; }
+        } ;
+        
+        struct A {
+        
+            int u ;
+            char c ;
+        } ;
+        
+        int main() {
+        
+            A a;
+            Vec<A> v ;
+            A* pi = NULL ;
+            MonOp<A,int> op ;
+        
+            a.u = 10 ; a.c = 'e' ;
+            v.push_back(a);
+            a.u = 11 ; a.c = 'e' ;
+            v.push_back(a);
+            a.u = 7 ; a.c = 'e';
+            v.push_back(a);
+            a.u = 7 ; a.c = 'f' ;
+            v.push_back(a);
+        
+            pi = find_elem(v,op,7);
+            PRINTN(pi->u);
+            PRINTN(pi->c); // affiche e
+        }
+
+    
+    <strong> Remarque importante : la fonction ne marche pas avec les vecteurs hétérogènes (à moins que le type des éléments dérivent d'un type ancêtre).</strong>
+
+    \\relates Vec 
+    \\relates apply
+    \\friend hugo.leclerc@lmt.ens-cachan.fr
+    \\friend rapahel.pasquier@lmt.ens-cachan.fr
+*/
 
 """
 
