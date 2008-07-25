@@ -62,6 +62,61 @@ namespace LMT {
     \\friend rapahel.pasquier@lmt.ens-cachan.fr
 */
 
+/*!
+\generic_comment apply_range
+
+    Cette fonction est une variante de \a apply . 
+    La syntaxe générale est 
+    \code
+         booléen find( vecteur, début, fin, opérateur, paramètres faculatatifs de l'opérateur ) 
+         
+    Elle permet d'appliquer l'opérateur sur les indices de l'intervalle [début;fin[ (<strong> Attention : fin n'est pas compris </strong>).
+
+    \\relates Vec 
+    \\friend hugo.leclerc@lmt.ens-cachan.fr
+    \\friend rapahel.pasquier@lmt.ens-cachan.fr
+*/
+
+/*!
+\\generic_comment remove_if
+
+    Cette fonction supprime tous les éléments d'un vecteur vérifiant une certaine condition. 
+    La syntaxe générale est 
+    \code
+         remove_if( vecteur, opérateur, paramètres faculatatifs de l'opérateur ) 
+         
+    C'est l'opérateur qui contient la condition. Voici un exemple qui supprime tous les entiers supérieurs à 100  d'un vecteur d'entier.
+    \code C/C++
+        template<class T> struct MonOp {
+        
+            bool operator() (T t,int f)  { return (t>f) ? true : false ; }
+        } ;
+        
+        int main() {
+        
+            Vec<int> v = range(200); // crée un vecteur de taille 200 d'entiers variant de 0 à 199.
+            MonOp<int> op ;
+            
+            PRINTN(v);
+            remove_if(v,op,100);
+            PRINTN(v);
+        }
+
+    Juste quelques remarques : 
+        * on peut faire plus simple dans le cas précédent en utilisant les fonctions lambda : cad on écrirait 
+            \code C/C++
+                remove_if(v,_1>_2,100);
+          _1 représente l'élément courant et _2 le premier paramètre i.e. 100.
+        * l'opérateur parenthèse, operator(), doit retourner un booléen.
+
+    \\relates Vec 
+    \\relates apply
+    \\friend hugo.leclerc@lmt.ens-cachan.fr
+    \\friend rapahel.pasquier@lmt.ens-cachan.fr
+*/
+
+
+
 """
 
 
