@@ -20,12 +20,15 @@ namespace LMT {
         };
 
     Cette fonction permet donc d'appliquer un opérateur, disons op, sur l'ensemble des éléments d'un conteneur (Vec en général). La syntaxe générale est du genre :
-    apply_wi( conteneur, op, param );
+    \code 
+        apply_wi( conteneur, op, param );
     où param sont les éventuels parametres de l'opérateur.
+
+    A FAIRE : apply_wi a d'autres syntaxes utilisées en interne. J'en parlerai plus tard.
 
     \\friend raphael.pasquier@lmt.ens-cachan.fr
     \\friend hugo.leclerc@lmt.ens-cachan.fr
-    \author Hugo Leclerc
+    \\author Hugo Leclerc
 */
 
 /*!
