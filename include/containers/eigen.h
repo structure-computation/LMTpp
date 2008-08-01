@@ -3,7 +3,9 @@
 
 namespace LMT {
 
-/**
+/*!
+    VALABRE pour les matrices 2x2 visiblement
+    
    compute eigen values and vectors.
    input : vec in vector form
    output : eigenvalues, eigenvectors

@@ -21,17 +21,30 @@ struct IndexOfMagicValue { static const unsigned res = 123456; };
 
 ///
 namespace LMTPRIVATE {
+
+/*!
+\generic_comment IndexOf
+
+    Cette classe sert à renvoyer l'indice du type dans un vecteur hétérogène. Plus précisement elle est utilisée avec la classe \a Number
+
+    \relates HeterogeneousVector
+    \relates HeterogeneousPack
+
+    \author Hugo Leclerc
+*/
     template<class Carac,class TE,class T,unsigned n>
     struct IndexOf { static const unsigned res = IndexOf<Carac,TE,typename Carac::template SubType<n+1>::T,n+1>::res; };
     template<class Carac,class TE,unsigned n>
     struct IndexOf<Carac,TE,void,n> {
-        /** IT SEEMS THAT TE IS NOT INCLUDED IN HeterogeneousVector<Carac> */
+        /*! IT SEEMS THAT TE IS NOT INCLUDED IN HeterogeneousVector<Carac> */
         static const unsigned res = IndexOfMagicValue::res;
     };
     template<class Carac,class T,unsigned n>
     struct IndexOf<Carac,T,T,n> { static const unsigned res = n; };
     
     template<class Carac,class T,unsigned n>
+    template<class Carac,class T,unsigned n>
+    struct IndexOf<Carac,T,T,n> { static const unsigned res = n; };
     struct NbSubTypes { static const unsigned res = NbSubTypes<Carac,typename Carac::template SubType<n+1>::T,n+1>::res; };
     template<class Carac,unsigned n>
     struct NbSubTypes<Carac,void,n> { static const unsigned res = n; };
@@ -47,25 +60,25 @@ namespace LMTPRIVATE {
 };
 
 
-/** index of subtype TE in Carac (with template<unsigned n,unsigned inner> struct SubType { typedef ... T; })
-    \relates LMT::HeterogeneousVector
-    \relates LMT::HeterogeneousPack
+/*! index of subtype TE in Carac (with template<unsigned n,unsigned inner> struct SubType { typedef ... T; })
+    \relates HeterogeneousVector
+    \relates HeterogeneousPack
  */
 template<class Carac,class TE> struct IndexOf {
     static const unsigned res = LMTPRIVATE::IndexOf<Carac,TE,typename Carac::template SubType<0>::T,0>::res;
 };
 
-/** index of subtype TE in Carac (with template<unsigned n,unsigned inner> struct SubType { typedef ... T; })
-    \relates LMT::HeterogeneousVector
-    \relates LMT::HeterogeneousPack
+/*! index of subtype TE in Carac (with template<unsigned n,unsigned inner> struct SubType { typedef ... T; })
+    \relates HeterogeneousVector
+    \relates HeterogeneousPack
  */
 template<class Carac> struct NbSubTypes {
     static const unsigned res = LMTPRIVATE::NbSubTypes<Carac,typename Carac::template SubType<0>::T,0>::res;
 };
 
-/** Max of SOP<SubElemType>::val.
-    \relates LMT::HeterogeneousVector
-    \relates LMT::HeterogeneousPack
+/*! Max of SOP<SubElemType>::val.
+    \relates HeterogeneousVector
+    \relates HeterogeneousPack
  */
 template<class Carac,class SOP> struct MaxStatic {
     static const unsigned res = LMTPRIVATE::MaxStaticP<Carac,SOP,typename Carac::template SubType<0>::T,0>::res;

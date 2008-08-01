@@ -90,7 +90,23 @@ template<class T> bool eqz(const T &val) { return heavyside(val)*heavyside(-val)
 /// 1 if equal 0
 template<class T> int sgn(const T &val) { return ( val>0 ? 1 : -1 ); }
 
-/// length
+/*!
+\generic_comment length
+
+    La syntaxe de cette fonction est :
+    \code
+        length( nombre )
+        length( vecteur )
+        length( vecteur, nombre )
+
+    * La première synatxe calcule la valeur absolue du nombre.
+    * La deuxième calcule la norme L2
+    * la dernière calcule sqrt( norme du vecteur + nombre )
+    
+    \relates abs_indication
+
+*/
+/// retourne abs(val)
 template<class T> T length(const T &val) { return abs(val); }
 
 /*
@@ -129,12 +145,23 @@ for op in lst:
     
     inline double abs(const std::complex<double> &val) { return std::abs(val); }
     inline long double abs(const std::complex<long double> &val) { return std::abs(val); }
+
+/*!
+\generic_comment abs_indication
+
+    Cette fonction la "distance" entre l'objet et zéro.
+
+    \relates abs
+    \relates abs_indication
+*/
+
+/// abs
     inline double abs_indication(const std::complex<double> &val) { return LMT::abs(val); }
-    inline long double abs_indication(const std::complex<long double> &val) { return LMT::abs(val); }
+    inline long double abs_indication(const std::complex<long double> &val) { return LMT::abs(val); } /// abs
     
-    template<class T> inline T conj(const T &val) { return val; }
-    template<class T> inline T real(const T &val) { return val; }
-    template<class T> inline T imag(const T &val) { return 0; }
+    template<class T> inline T conj(const T &val) { return val; } /// renvoie le paramètre
+    template<class T> inline T real(const T &val) { return val; } /// renvoie le paramètre
+    template<class T> inline T imag(const T &val) { return 0; } /// renvoie toujours zéro
     
     template<class T,class T2> inline void set_imag(std::complex<T> &val,const T2 &v) { val = std::complex<T>(std::real(val),v); }
     template<class T,class T2> inline void set_imag(const T &val,const T2 &v) {}
@@ -170,7 +197,7 @@ template<class T1,class T2> void swap(T1 &v1,T2 &v2) {
     v2 = tmp;
 }
 
-/**
+/*!
     Example : apply( vec, Display(), std::cout );
     Example : apply( vec, Display(), std::cout, ' ' );
 */
@@ -185,7 +212,7 @@ struct Display {
     template<class T,class OS,class SEP> void operator()(const T &t0,const T &t1,const T &t2,const T &t3,OS &os,const SEP &sep) const { os << t3 << sep << t2 << sep << t1 << sep << t0 << sep; }
 };
 
-/**
+/*!
     Example : vec.apply_nz( DisplayWithIndex(), std::cout );
     Example : vec.apply_nz( DisplayWithIndex(), std::cout, ' ' );
 */
@@ -196,7 +223,7 @@ struct DisplayWithIndex {
     template<class T,class OS,class SEP> void operator()(const T &t,unsigned i,OS &os,const SEP &sep) const { os << '[' << i << ']' << t << sep; }
 };
 
-/**
+/*!
     Example : vec.apply( GetFromStream(), std::cin );
 */
 struct GetFromStream {

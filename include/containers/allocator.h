@@ -35,6 +35,12 @@ template<> struct NextPow2<1> { static const unsigned res = 1; };
 
 #ifdef PRINT_ALLOC
 extern std::map<std::string,long long> total_allocated;
+
+
+/*!
+    Cette fonction affiche le nombre d'octets que prend chaque fonction. Elle s'utilise avec la classe \a Allocator .
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+*/
 inline void disp_alloc(const char *prefix="") {
     long long s = 0;
     for(std::map<std::string,long long>::const_iterator iter=total_allocated.begin();iter!=total_allocated.end();++iter) {

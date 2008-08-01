@@ -91,9 +91,14 @@ namespace LMT {
             = Methodes et fonctions les plus utiles
 
                 Les méthodes de la classe Vec sont :
-                    * resize(int n) qui fixe la taille du vecteur à n.
-                    * free() qui libère la mémoire.
-                    * à faire
+                    * push_back(a) ajoute une copie de a dans le vecteur,
+                    * pop_back() retire le dernier élément ajouté,
+                    * back() retourne une copie du dernier élément ajouté,
+                    * front() retourne une copie du premier élément,
+                    * begin() retourne un pointeur (cad l'adresse) du premier élément  
+                    * resize(int n) qui fixe la taille du vecteur à n,
+                    * free() qui libère la mémoire,
+                    * et ne pas oublier reserve( unsigned int n) qui réserve de la place pour n éléments. Ainsi s vous connaissez environ le nombre d'éléments à ajouter via push_back() par exemple, vos appels push_back() seront bien plus rapides si vous appelez préalablement reserve().
 
                 <strong> IMPORTANT : </strong> On ne peut pas parler de la classe Vec sans parler de la fonction \a apply et de ses varaintes qui permettent de manipuler les éléments d'un vecteur sans les parcourir avec une boucle for. Alors n'hésitez pas à consulter la doc de \a apply . 
 
