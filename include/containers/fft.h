@@ -19,6 +19,12 @@ extern "C" {
 
 namespace LMT {
 
+/*!
+    Cette classe encapsule les fonctions de la librairie fftw \a http://www.fftw.org/ .
+
+    \relates Vec
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+*/
 class FFT {
 public:
     ///

@@ -24,16 +24,250 @@ namespace LMT {
 
 template<class MATOP> struct IsMatOp { typedef void T; };
 
-/**
-    \todo SIMD alignement for Row on Lower and Col on Upper
+/*!
+\generic_comment Mat
+
+    = Introduction
+
+        Cette classe permet de stocker et manipuler des tableaux à deux dimensions (cad des matrices) comme sur Matlab mais avec la LMT++ vous irez beaucoup plus vite et vous pourrez construire de très grosses matrices.
+        Il existe  des exemples de base ici.
+
+
+    = Spécialisations
+
+        Pour des utilisations particulières, il est préférable d'utiliser des spécialisations de la classe Mat pour économiser des ressources ou pour aller plus vite.
+
+            = Matrice creuse
+
+                A faire
+
+            = Matrice symétrique, de Heisenberg
+
+                A faire
+
+            = Matrice spéciale pour la décomposition LU
+
+                A faire
+
+    = FAQ 
+
+        Cette FAQ est tirée de celle de l'intranet : 
+
+        * Définition, instanciation
+
+            * \a #1 Les paramètres template des matrices et exemples de déclaration
+            * \a #8 Pour créer une matrice (ici taille 100,20) constituee du meme nombre (ici 1.0) partout  
+            * \a #5 Pour affecter la valeur 4 a toute la matrice 
+            * \a #3 Pour modifier la taille d'une matrice M
+            * \a #15 Pour creer une matrice diagonale possedant le vecteur V sur sa diagonale;
+            * \a #6 Pour assigner une matrice M2 à une matrice M1; 
+            * \a #11 Pour mettre un vecteur V dans une ligne ou colonne donnee i 
+            * \a #12 Pour mettre une matrice dans une autre
+            * \a #20 Pour initialiser une matrice dont les valeurs sont contenues dans un fichier texte
+            * \a #13 Pour concaténer deux matrices
+            * \a #22 Pour extraire une sous-matrice (à faire).
+
+        * Manipulation
+
+            *  pour accéder à l'élément de ligne i et de colonne j, on fait M(i,j) sachant que les indices commencent à zéro.
+            * \a #7 Pour faire des operations matrice-vecteur  
+            * \a #9 Pour obtenir le nombre de colonnes ou de lignes 
+            * \a #10 Pour transposer une matrice 
+            * \a #14 Pour modifier la diagonale de la matrice (ajouter 3) 
+            * \a #19 Pour vraiment inverser une matrice (à ne pas utiliser sans l'autorisation formelle de la Leclerc Corp. Inc.)
+            * \a #21 Pour calculer la moyenne, la variance, le min, le max des éléments d'une matrice
+
+        * Affichage
+
+            * \a #4 Pour afficher la matrice  
+            * \a #16 Pour afficher la forme des elements d'une matrice M sparse ou skyline  
+
+        * Résolution d'équations linéaires
+
+            * \a #17 Pour faire une factorisation de cholesky d'une matrice M et la stocker dans une nouvelle matrice I (M doit etre du type : Mat<type, Sym<>, stockage >) 
+            * \a #18 Pour résoudre un problème directement sans factoriser préalablement ni inverser de matrice
+
+
+
+        \anchor 1 Les paramtres template des matrices Mat<T,STR,STO> signifient :
+        * T est le type scalaire de base (double, float, long double, std::complex<double>, ...). 
+        * STR représente les propriétés de symétrie de la matrice (générale, symétrique, antisymétique, hermitienne, diagonale, triangulaire supérieure, triangulaire inférieure). 
+            * Gen<s1,s2> pour matrice pleine sans propriétés. Si on connaît la taille de la matrice avant la compilation, s1,s2 sont respectivement le nombre de lignes et de colonnes sinon s1 et s2 valent -1 et la matrice pourra changer de taille pendant l'éxécution du programme.
+            * Sym<s> pour matrice symétrique. s est la taille statique (fixée à la compilation) ou -1 si la taille n'est connue que durant l'éxécution. 
+                <strong >ATTENTION </strong> : contrairement à MATLAB, m(a,b)+=40 ajoute 40 en haut et en bas de la matrice (a,b et b,a).
+            * Herm<s> pour matrice hermitienne.
+            * AntiSym<s> pour matrice antisymetrique.
+            * Diag<s> pour matrice diagonale.
+            * TriUpper<s> pour matrice carré triangulaire superieure.
+            * TriLower<s> pour matrice carré triangulaire inferieure.
+
+        * STO représente le type de stockage (pleine, creuse).
+            * Dense<Orientation> pour matrice pleine. Si Orientation= classe Row alors les éléments sont rangés par lignes sinon ils sont rangés par colonne (rangement par defaut) avec la classe Col.
+            * SparseLine<Orientation> pour matrice creuse. 
+
+        Voici quelques exemples importants de déclaration :
+
+                \code C/C++
+                    Mat<float> M; // équivaut à Mat<double,Gen<-1,-1> >  donc M est une matrice pleine dont la taille n'est pas fixée à la compilation.
+                    Mat<int,10,10> M; // Matrice carré d'entiers int de taille fixée 10 10.
+                    Mat<float,SparseLine<> > M; // Matrice creuse sans symétrie avec rangement par défaut. 
+                            // laisser un espace entre les > >. 
+
+                    Mat<double,Sym<>,Dense<Col> > M;
+                    int n ;
+                
+                    n=5;
+                    M.resize(n) ;
+                    M(4,2) = 7;
+                    M[0] = 1;
+                    M[1] = 2;
+                    M[2] = 3;
+                    M[3] = 4;
+                    M[4] = 5;
+                    M[5] = 6;
+                    PRINTN(M);
+                        // M ->
+                        // 1 2 4 0 0
+                        // 2 3 5 0 0
+                        // 4 5 6 0 7
+                        // 0 0 0 0 0
+                        // 0 0 7 0 0
+
+                    Mat<double,Sym<>,Dense<Row> > M; // REMARQUE : on a remplacé Col par Row.
+                    int n ;
+                
+                    n=5;
+                    M.resize(n) ;
+                    M(4,2) = 7;
+                    M[0] = 1;
+                    M[1] = 2;
+                    M[2] = 3;
+                    M[3] = 4;
+                    M[4] = 5;
+                    M[5] = 6;
+                    PRINTN(M);
+                        // M ->
+                        // 1 2 3 4 5
+                        // 2 6 0 0 0
+                        // 3 0 0 0 7
+                        // 4 0 0 0 0
+                        // 5 0 7 0 0
+                        // remarquer la différence de stockage.
+
+        
+        \anchor 3 Pour modifier la taille d'une matrice M
+            \code C/C++
+                M.resize(m); // -> m*m
+                M.resize(m,n); // -> m*n
+                M.resize(m,n,10.0); // -> m*n et remplit avec des 10.0 
+
+        \anchor 4 Pour afficher la matrice
+            \code C/C++
+                std::cout << M << std::endl;
+                PRINT(M);
+                PRINTN(M); revient à la ligne 
+        \anchor 5 Pour affecter la valeur 4 a toute une matrice Dense
+            \code C/C++
+                M.set(4);
+        \anchor 6 Pour affecter la valeur 0 à toute une matrice SparseLine
+            \code C/C++
+                M.clear(); 
+        \anchor 7 Pour assigner une matrice M2 a une matrice M1;
+            \code C/C++
+                M1=M2; 
+        \anchor 8 Pour faire des operations matrice-vecteur
+            \code C/C++
+                M*V 
+        \anchor 9 Pour creer une matrice (ici de taille 100,20) constituée du meme nombre (ici 1.0) partout
+            \code C/C++
+                Mat<double> M(100,20,1.0); 
+                Pour obtenir le nombre de colonnes ou de lignes
+                M.nb_rows(); // le nombre de lignes
+                M.nb_cols(); // le nombre de colonnes 
+        \anchor 10 Pour transposer une matrice M
+            \code C/C++
+                M2=trans(M) 
+        \anchor 11 Pour mettre un vecteur V dans une ligne ou colonne donnee i
+            \code C/C++
+                M.row(i)=V;
+                M.col(i)=V;
+        \anchor 12 Pour mettre une matrice M2 dans une autre, disons M.
+            On stocke dans un vecteur d'entiers V1 de même taille que le nombre de lignes de M2 les indices des lignes de M que l'on veut remplir : e.g. si V1[0]= 3 on mettra les éléments de la première ligne de M2 dans la ligne 3 de M.
+            On stocke de même dans V2 les indices des colonnes de M. Puis on écrit : 
+            \code C/C++
+                M(V1,V2)=M2;
+                M[V1]=M2;  // Dans le cas où V2=V1 
+        \anchor 13 Pour concaténer deux matrices sur un exemple.
+            \code C/C++
+                Mat<double> m( 2, 2, 0.0 ), n( 2, 2, 0.0 );
+                Mat<double> r( 2, 4, 0.0 );
+                m.diag() = 1;
+                n.diag() = 2;
+                r( range(2), range(2) + 0 ) = m;
+                r( range(2), range(2) + 2 ) = n;
+                PRINTN( r );
+
+        \anchor 14 Pour modifier la diagonale de la matrice (ajouter 3)
+            \code C/C++
+                M.diag() += 3; 
+        \anchor 15 Pour creer une matrice diagonale possedant le vecteur V sur sa diagonale;
+            \code C/C++
+                diag(V); 
+        \anchor 16 Pour afficher la forme des elements d'une matrice M sparse ou skyline
+            \code C/C++
+                display_structure(M); 
+        \anchor 17 Pour faire une factorisation de cholesky d'une matrice M et la stocker dans une nouvelle matrice I (M doit etre du type : Mat<type, Sym<>, stockage >)
+            \code C/C++
+                    Inv<type, Sym<>, stockage > I=inv(M); 
+        \anchor 18 Pour resoudre un probleme directement sans factoriser préalablement. Si vous devez résoudre des systèmes linéaires ayant la même matrice, il vaut mieux factoriser.
+            \code C/C++
+                    V=inv(M)*R; // V est la solution de l'équation M X= R
+
+        \anchor 19 Pour vraiment inverser une matrice H et la mettre dans S: 
+            \code C/C++
+                include <containers/mat_true_inv.h>
+                
+                LMT::Mat<double,LMT::Gen<6,6> > H;
+                H = bla bla;
+                LMT::Mat<double,LMT::Gen<6,6> > S = true_inv( H );
+
+        \anchor 20 Pour initialiser une matrice dont les valeurs sont contenues dans un fichier texte
+            \code C/C++
+                using namespace LMT;
+    
+                int main() {
+
+                    Mat<double> mat;
+
+                    std::ifstream desc("chemin/fichier");
+                    read_ascii_mat_file( mat, desc );
+                }
+        \anchor 21 Pour calculer la moyenne, la variance, le min des éléments d'une matrice
+            \code C/C++
+                mean(M);variance(M);min(M);max(M);
+
+    = Divers
+
+        * si mat est de type matrice, mat.diag(), mat.row(), mat.col() peut être affecté (i.e. placé à gauche du signe =). 
+
+        * Il existe une FAQ sur l'intranet http://intranet/mediawiki/index.php/Matrices
+
+        <strong> SIMD alignement for Row on Lower and Col on Upper </strong>
+        \friend hugo.leclerc@lmt.ens-cachan.fr
+        \keyword Mathématiques/Algèbre linéaire
+        \author Hugo Leclerc
 */
+
 template<class T=double,class Structure=Gen<-1,-1>,class Storage=Dense<Col>,class ismatop=typename IsMatOp<T>::T>
 class Mat;
 
 template<class TM,bool const_tm,class TV1,class TV2=void> struct SubMat;
 
-/**
+/*!
     \relates Mat
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \keyword Mathématiques/Algèbre linéaire
+    \author Hugo Leclerc
 */
 template<class T,class Structure,class Storage,class OP>
 std::ostream &operator<<(std::ostream &os,const Mat<T,Structure,Storage,OP> &m) {
@@ -50,8 +284,11 @@ std::ostream &operator<<(std::ostream &os,const Mat<T,Structure,Storage,OP> &m) 
     }
     return os;
 }
-/**
+/*!
     \relates Mat
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \keyword Mathématiques/Algèbre linéaire
+    \author Hugo Leclerc
 */
 template<class T,class Structure,class Storage,class OP>
 std::istream &operator>>(std::istream &is,Mat<T,Structure,Storage,OP> &m) {
@@ -217,6 +454,13 @@ Mat<TV,Diag<s> > diag(const Vec<TV,s> &vec) {
     /** Convert a LMT::Mat to a matlab one
         \relates Mat
     */
+/*!
+
+    Convert a LMT::Mat to a matlab one
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \keyword Mathématiques/Algèbre linéaire
+    \author Hugo Leclerc
+*/
     template<class TT,class STR,class O,class IO>
     mxArray *to_matlab(const Mat<TT,STR,Dense<O>,IO> &mat) {
         typedef typename Mat<TT,STR,Dense<O>,IO>::T TV;

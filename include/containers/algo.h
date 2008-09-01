@@ -18,6 +18,10 @@ namespace LMT {
 
 // -------------------------------------------------------------------- sort --------------------------------------------------------------------
 namespace ALGOPRIVATE {
+
+/*!
+Structure interne à la LMT++
+*/
     struct Sort {
         template<class T1,class T2,class Op> void operator()(T1 &val1,T2 &val2,const Op &op) const {
             if ( op(val1,val2) ) swap( val1, val2 );
@@ -27,15 +31,51 @@ namespace ALGOPRIVATE {
         }
     };
 };
-/** sort elements of l in ascending order, according to op::operator()(v1,v2) as comparison operator
+
+/*!
+\generic_comment sort
+
+    La fonction sort trie les éléments d'un vecteur. Ses syntaxes générales sont :
+    \code
+        sort( vecteur)  // dans ce cas c'est l'opérateur <= défini dans la classe ou le <= par défaut  qui est pris.
+        sort( vecteur,opérateur)
+
+    opérateur est une classe ou structure implémentant l'opérateur parenthèse (i.e. operator() ) qui devra renvoyer un booléen.
+    Cet opérateur sera la relation d'ordre et sa syntaxe sera par exemple :
+    \code C/C++
+        template<class T> struct MonOp {
+            bool operator() (T &val1, T &val2) const { le code C++ }
+        }
+
+    où operator() renvoie vrai si val1 <= val2 et faux sinon.
+
+    <strong> Si le vecteur est de type hétérogène, le trie sera partiel.</strong>
+
+    \relates Vec
+    \relates apply
+    \relates apply_wi
+    \keyword Algorithme
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+*/
+
+/*! 
+    sort elements of l in ascending order, according to op::operator()(v1,v2) as comparison operator
    assuming swap is possible between all elements of l
     \relates Vec
+    \relates apply
+    \relates apply_wi
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \friend raphael.pasquier@lmt.ens-cachan.fr
 */
 template<class TL,class Op> void sort(TL &l,const Op &op) {
     apply_wi( l, ALGOPRIVATE::Sort(), l, op );
 }
-/** sort elements of l in ascending order, assuming swap is possible between all elements of l
+/*!
+     sort elements of l in ascending order, assuming swap is possible between all elements of l
     \relates Vec
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \friend raphael.pasquier@lmt.ens-cachan.fr
 */
 template<class TL> void sort(TL &l) { sort(l,Less()); }
 
@@ -54,8 +94,39 @@ namespace ALGOPRIVATE {
         Vec<unsigned> index;
     };
 };
-/** sort elements of l in ascending order, assuming swap is possible between all elements of l
+
+/*!
+\generic_comment sort_with_index
+
+    La fonction sort_with_index trie les éléments d'un vecteur comme \a sort et de plus renvoie la permutation associée sous forme d'un vecteur d'entiers. Ses syntaxes générales sont :
+    \code
+        sort_with_index( vecteur) // dans ce cas c'est l'opérateur <= défini dans la classe ou le <= par défaut  qui est pris.
+        sort_with_index( vecteur,op)
+
+    op est une instance de classe ou structure implémentant un opérateur parenthèse (i.e. operator() ) qui devra renvoyer un booléen.
+    Cet opérateur sera la relation d'ordre et sa syntaxe sera par exemple :
+    \code C/C++
+        struct MonOp {
+            template<class T> bool operator() (T &val1, T &val2) const { le code C++ }
+        }
+
+    où operator() renvoie vrai si val1 <= val2 et faux sinon.
+
+    <strong> Si le vecteur est de type hétérogène, le trie sera partiel.</strong>
+
     \relates Vec
+    \relates apply
+    \relates apply_wi
+    \keyword Algorithme
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+*/
+
+/*!
+    sort elements of l in ascending order, assuming swap is possible between all elements of l
+    \relates Vec
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \friend raphael.pasquier@lmt.ens-cachan.fr
 */
 template<class TL,class Op> Vec<unsigned> sort_with_index(TL &l,const Op &op) {
     ALGOPRIVATE::SortWithIndex s;
@@ -63,8 +134,11 @@ template<class TL,class Op> Vec<unsigned> sort_with_index(TL &l,const Op &op) {
     apply_wi( l, s, l, op );
     return s.index;
 }
-/** sort elements of l in ascending order, assuming swap is possible between all elements of l
+/*!
+     sort elements of l in ascending order, assuming swap is possible between all elements of l
     \relates Vec
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \friend raphael.pasquier@lmt.ens-cachan.fr
 */
 template<class TL> Vec<unsigned> sort_with_index(TL &l) { return sort_with_index(l,Less()); }
 
@@ -88,10 +162,39 @@ namespace ALGOPRIVATE {
         unsigned j;
     };
 };
-/** remove elements which are considered to be equal using Op(v1,v2). Keeps the first ones.
-    l has not to be sorted
-    \warning this procedure does not keep order of elements
+
+/*!
+\generic_comment remove_doubles
+
+    La fonction remove_doubles supprime les doublons d'un vecteur. Conséquence après l'opération, tous les éléments sont distincts. Ses syntaxes générales sont :
+    \code
+        sort_with_index( vecteur) // dans ce cas c'est l'opérateur == défini dans la classe ou le == par défaut  qui est pris.
+        sort_with_index( vecteur,op)
+
+    op est une instance de classe ou structure implémentant un opérateur parenthèse (i.e. operator() ) qui devra renvoyer un booléen.
+    Cet opérateur sera la relation d'égalité et sa syntaxe sera par exemple :
+    \code C/C++
+        struct MonOp {
+            template<class T> bool operator() (T &val1, T &val2) const { le code C++ }
+        }
+
+    où operator() renvoie vrai si val1 == val2 et faux sinon.
+
     \relates Vec
+    \relates apply
+    \relates apply_wi
+    \keyword Algorithme
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+*/
+
+/*! 
+    remove elements which are considered to be equal using Op(v1,v2). Keeps the first ones.
+    l has not to be sorted
+    <strong> this procedure does not keep order of elements </strong>
+    \relates Vec
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \friend raphael.pasquier@lmt.ens-cachan.fr
 */
 template<class TL,class Op> void remove_doubles(TL &l,const Op &op) {
     ALGOPRIVATE::RemoveDoubles<Op> s; s.op = &op; s.j = 0;
@@ -115,21 +218,24 @@ template<class TT> struct ExactlyEqualTo {
 };
 template<class T> ExactlyEqualTo<T> exactly_equal(const T &val) { return ExactlyEqualTo<T>(val); }
 
-///
+//
 // template<class TT> struct ExactlyEqualTo {
 //     ExactlyEqualTo(const TT &v):val(v) {}
 //     template<class P1,class P2=void,class P3=void,class P4=void> struct ReturnType { typedef bool T; };
 //     template<class P1> bool operator()(const P1 &p1) const { return p1 == val; }
 //     const TT &val;
 // };
-// ///
+// //
 // template<class T> ApproxEqualTo<T> approx_equal(const T &val,const T ) { return ApproxEqualTo<T>(val); }
 
 
-/** remove elements which are considered to be equal. Keeps the first ones.
+/*!
+    remove elements which are considered to be equal. Keeps the first ones.
     l has not to be sorted
-    \warning this procedure does not keep order of elements
+    <strong> this procedure does not keep order of elements </strong>
     \relates Vec
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \friend raphael.pasquier@lmt.ens-cachan.fr
 */
 template<class TL> void remove_doubles(TL &l) { remove_doubles(l,ExactlyEqual()); }
 
@@ -144,6 +250,37 @@ struct MinMax {
         ma = max(ma,op(val));
     }
 };
+
+/*!
+\generic_comment get_min_max
+
+    Cette fonction détermine le minimum et le maximum des éléments d'un vecteur. Voici ses syntaxes possibles :
+    \code
+        get_min_max(vecteur,&min,&max)
+        get_min_max(vecteur,&vecteur_min,&vecteur_max)
+        get_min_max(vecteur,op,&min,&max)
+        get_min_max(vecteur,op,&vecteur_min,&vecteur_max)      
+
+    La première syntaxe renvoie le min et le max.
+    La seconde renvoie deux vecteurs (de taille définie à l'éxécution), le premier contenant que la valeur min et le second que la valeur max.
+    La troisième renvoie le min et le max pour la relation d'ordre op.
+    La quatrième syntaxe fait la même chose que la deuxième mais suivant la relation d'ordre op.
+
+    Je rappelle le type général de l'opérateur op : 
+    \code C/C++
+        struct MonOp {
+            template<class T> bool operator() (T &val1, T &val2) const { le code C++ }
+        }
+
+    où operator() renvoie vrai si val1 <= val2 et faux sinon.
+    <strong> C'est l'opérateur operator() et non operator<=() qui est surchargé!</strong>
+
+    \relates Vec
+    \relates apply
+    \keyword Algorithme
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+*/
 template<class TL,class T> void get_min_max(const TL &l,T &mi,T &ma) {
     mi = std::numeric_limits<T>::max();
     ma = -mi;
@@ -205,6 +342,33 @@ struct FillIntersectionPtr {
     const Op *op;
 };
 
+/*!
+\generic_comment intersection_ptr
+
+    Voici les syntaxes possibles de cette fonction :
+    \code
+        intersection_ptr(vecteur1,vecteur2) // dans ce cas c'est l'opérateur == défini dans la classe ou le == par défaut qui est pris.
+        intersection_ptr(vecteur1,vecteur2,op)
+
+    Elle parcourt deux vecteurs et retourne un vecteur de paire de pointeurs (x,y) où x pointe sur un élément du premier vecteur, y sur un élément de second qui soit le premier à vérifier x=y (ou op(x,y) suivant la syntaxe). 
+
+    Je rappelle le type général de l'opérateur op : 
+    \code C/C++
+        struct MonOp {
+            template<class T> bool operator() (T &val1, T &val2) const { le code C++ }
+        }
+
+    où operator() renvoie vrai si val1 == val2 et faux sinon par exemple.
+
+    \relates Vec
+    \relates apply
+    \relates intersection_ptr_full
+    \keyword Algorithme/Mesh
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+
+
+*/
 template<class TL1,class TL2,class Op> typename IntersectionCarac<TL1,TL2>::T intersection_ptr(TL1 &l1,TL2 &l2,const Op &op) {
     typename IntersectionCarac<TL1,TL2>::T res;
     FillIntersectionPtr<Op> fi; fi.op = &op;
@@ -216,7 +380,33 @@ template<class TL1,class TL2> typename IntersectionCarac<TL1,TL2>::T intersectio
     return intersection_ptr(l1,l2,ExactlyEqual());
 }
 
+/*!
+\generic_comment intersection_ptr_full
 
+    Voici les syntaxes possibles de cette fonction :
+    \code
+        intersection_ptr_full(vecteur1,vecteur2) // dans ce cas c'est l'opérateur == défini dans la classe ou le == par défaut qui est pris.
+        intersection_ptr_full(vecteur1,vecteur2,op)
+
+    Elle parcourt deux vecteurs et retourne un vecteur de toutes les paires de pointeurs (x,y) où x pointe sur un élément du premier vecteur, y sur un élément de second qui vérifie x=y (ou op(x,y) suivant la syntaxe). 
+
+    Je rappelle le type général de l'opérateur op : 
+    \code C/C++
+        struct MonOp {
+            template<class T> bool operator() (T &val1, T &val2) const { le code C++ }
+        }
+
+    où operator() renvoie vrai si val1 == val2 et faux sinon par exemple.
+
+    \relates Vec
+    \relates apply
+    \relates intersection_ptr
+    \keyword Algorithme/Mesh
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+
+
+*/
 template<class TL1,class TL2,class Op> typename IntersectionCarac<TL1,TL2>::T intersection_ptr_full(TL1 &l1,TL2 &l2,const Op &op) {
     typename IntersectionCarac<TL1,TL2>::T res;
     FillIntersectionPtr<Op,true> fi; fi.op = &op;
@@ -271,9 +461,31 @@ namespace ALGOPRIVATE {
         TResOp val;
     };
 };
-/** \return a copy on the first element e such as op(e) >= op(i) for all i in l. In other words, look up for first e which maximize op(e)
-    This procedure may not be optimal for lists with little size
-    \relates ALGO
+
+
+/*!
+\generic_comment max_element
+
+    Voici les syntaxes possibles de cette fonction :
+    \code
+
+
+    \relates Vec
+    \relates apply
+    \relates min_element
+    \keyword Algorithme/Mesh
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+*/
+
+
+/*!
+    return a copy on the first element e such as op(e) >= op(i) for all i in l. In other words, look up for first e which maximize op(e)
+    This procedure may not be optimal for lists with little size.
+    \relates apply
+    \relates Vec
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \friend raphael.pasquier@lmt.ens-cachan.fr 
 */
 template<class TL,class Op> typename TypeReduction<Plus,TL>::T max_element(const TL &l,const Op &op) {
     typedef typename TypeReduction<Plus,TL>::T TR;
@@ -287,9 +499,13 @@ template<class TL,class Op> typename TypeReduction<Plus,TL>::T max_element(const
     apply( l, me, res, op );
     return res;
 }
-/** \return a copy on the first element e such as op(e,param) >= op(i,param) for all i in l. In other words, look up for first e which maximize op(e,param).
-    This procedure may not be optimal for lists with little size
-    \relates ALGO
+/*!
+    return a copy on the first element e such as op(e,param) >= op(i,param) for all i in l. In other words, look up for first e which maximize op(e,param).
+    This procedure may not be optimal for lists with little size.
+    \relates apply
+    \relates Vec
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \friend raphael.pasquier@lmt.ens-cachan.fr 
 */
 template<class TL,class Op,class TP> typename TypeReduction<Plus,TL>::T max_element(const TL &l,const Op &op,const TP &param) {
     typedef typename TypeReduction<Plus,TL>::T TR;
@@ -303,15 +519,23 @@ template<class TL,class Op,class TP> typename TypeReduction<Plus,TL>::T max_elem
     apply(l, me, res, op, param );
     return res;
 }
-/** \return a copy on the first element e such as (e >= i) for all i in l. In other words, look up for first e which maximize op(e)
-    \relates ALGO
+/*!
+    return a copy on the first element e such as (e >= i) for all i in l. In other words, look up for first e which maximize op(e)
+    \relates apply
+    \relates Vec
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \friend raphael.pasquier@lmt.ens-cachan.fr 
 */
 template<class TL> typename TypeReduction<Plus,TL>::T max_element(const TL &l) { return max_element(l,C_1()); }
 
 
-/** \return a copy on the first element e such as op(e) >= op(i) for all i in l. In other words, look up for first e which maximize op(e)
-    This procedure may not be optimal for lists with little size
-    \relates ALGO
+/*!
+    return a copy on the first element e such as op(e) >= op(i) for all i in l. In other words, look up for first e which maximize op(e)
+    This procedure may not be optimal for lists with little size.
+    \relates apply
+    \relates Vec
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \friend raphael.pasquier@lmt.ens-cachan.fr 
 */
 template<class TL,class Op> typename TypeReduction<Plus,TL>::T min_element(const TL &l,const Op &op) {
     typedef typename TypeReduction<Plus,TL>::T TR;
@@ -325,9 +549,13 @@ template<class TL,class Op> typename TypeReduction<Plus,TL>::T min_element(const
     apply( l, me, res, op );
     return res;
 }
-/** \return a copy on the first element e such as op(e,param) >= op(i,param) for all i in l. In other words, look up for first e which minimize op(e,param).
+/*! 
+    return a copy on the first element e such as op(e,param) >= op(i,param) for all i in l. In other words, look up for first e which minimize op(e,param).
     This procedure may not be optimal for lists with little size
-    \relates ALGO
+    \relates apply
+    \relates Vec
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \friend raphael.pasquier@lmt.ens-cachan.fr 
 */
 template<class TL,class Op,class TP> typename TypeReduction<Plus,TL>::T min_element(const TL &l,const Op &op,const TP &param) {
     typedef typename TypeReduction<Plus,TL>::T TR;
@@ -341,12 +569,24 @@ template<class TL,class Op,class TP> typename TypeReduction<Plus,TL>::T min_elem
     apply(l, me, res, op, param );
     return res;
 }
-/** \return a copy on the first element e such as (e >= i) for all i in l. In other words, look up for first e which minimize op(e)
-    \relates ALGO
+/*! 
+    return a copy on the first element e such as (e >= i) for all i in l. In other words, look up for first e which minimize op(e)
+
+    \relates apply
+    \relates Vec
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \friend raphael.pasquier@lmt.ens-cachan.fr 
 */
 template<class TL> typename TypeReduction<Plus,TL>::T min_element(const TL &l) { return min_element(l,C_1()); }
 
-/**
+/*!
+
+    Cette fonction prend en paramètre un vecteur de booléens to_check et retourne le vecteur contenant l' indice des éléments vrais.
+    \relates apply
+    \relates Vec
+
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \friend raphael.pasquier@lmt.ens-cachan.fr 
  */
 template<class VB> Vec<unsigned> find_with_index(const VB &to_check) {
     Vec<unsigned> res; res.reserve( to_check.size() );

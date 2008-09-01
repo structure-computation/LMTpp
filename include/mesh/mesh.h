@@ -19,12 +19,18 @@ namespace LMT {
 template<class Carac,unsigned max_sub_meshes>
 struct MeshNbSubMeshes { enum { res = max_sub_meshes ? MIN( Carac::dim+1, max_sub_meshes ) : Carac::dim+1 }; };
 
+/*!
+\generic_comment Mesh
 
-/**
-  The entry class for all type of meshes. If you want to add elements, nodes, ... you must use Mesh<>
+    The entry class for all type of meshes. If you want to add elements, nodes, ... you must use Mesh<>
 
-  \author Hugo LECLERC
+    (à faire)
+
+    \author Hugo LECLERC
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \keyword Maillage
  */
+
 template<class Carac,unsigned max_sub_meshes=0>
 class Mesh : public MeshGenericBis< Carac, false, MeshNbSubMeshes<Carac,max_sub_meshes>::res > {
 public:
@@ -141,14 +147,14 @@ private:
         }
     };
 public:
-    /** Append nodes of m to *this. addresses of new nodes are appended to new_nodes. Data of nodes is copied using DM::copy()
+    /*! Append nodes of m to *this. addresses of new nodes are appended to new_nodes. Data of nodes is copied using DM::copy()
         Used in append().
     */
     template<class TM2> void append_nodes_of(const TM2 &m,Vec<TNode *> &new_nodes) {
         new_nodes.reserve( new_nodes.size() + m.node_list.size() );
         apply( m.node_list, AppendDataFrom(), this, new_nodes );
     }
-    /**
+    /*!
         Append data, nodes and elements of m to this. 
     */
     template<class TM2> void append(const TM2 &m) {
@@ -184,7 +190,7 @@ public:
             signal_connectivity_change();
         return nop.res;
     }
-    /**
+    /*!
         num_sub_list -> type of element
         num_in_sub_list -> number of element in sub_vec<num_sub_list>()
     */

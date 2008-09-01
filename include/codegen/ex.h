@@ -23,15 +23,18 @@ namespace Codegen {
 class Op;
 unsigned nb_children_op(const Op *op);
 
-/**
-Base node class for Codegen. Can represent a symbol, a number, a multiplication, ...
-basic constructor Ex ex(); gives ex=0 by default
+/*!
+    Base node class for Codegen. Can represent a symbol, a number, a multiplication, ...
+    basic constructor Ex ex(); gives ex=0 by default
+    
+    Symbols can contain a name, a latex_name, (void *)additional_data and a value.
+    Thus, all operations between several Ex calculate a number.
+    Ex : cout << (symbol("a",1) + symbol("b",3)).get_val(); gives 4 as result.
 
-Symbols can contain a name, a latex_name, (void *)additional_data and a value.
-Thus, all operations between several Ex calculate a number.
-Ex : cout << (symbol("a",1) + symbol("b",3)).get_val(); gives 4 as result.
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \friend raphael.pasquier@lmt.ens-cachan.fr 
 
-@author LECLERC Hugo
+    \author LECLERC Hugo
 */
 class Ex {
 public:

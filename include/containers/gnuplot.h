@@ -17,6 +17,12 @@
 
 namespace LMT {
 
+/*!
+    classe servant d'interface avec le célèbre programme gnuplot.
+    \author Hugo Leclerc
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \keyword Graphisme/2D
+*/
 class GnuPlot {
 public:
     struct HD {
@@ -155,7 +161,7 @@ public:
     ///
     Vec<HD> holded_data;
 };
-/** plot and wait
+/*! plot and wait
 */
 template<class T,int s,class O>
 void plot(const Vec<T,s,O> &vec,const char *params="") {
@@ -164,7 +170,7 @@ void plot(const Vec<T,s,O> &vec,const char *params="") {
     gp.wait();
 }
 
-/** plot and wait
+/*! plot and wait
 */
 template<class T,class STR,class STO>
 void plot(const Mat<T,STR,STO> &mat,const char *params="") {

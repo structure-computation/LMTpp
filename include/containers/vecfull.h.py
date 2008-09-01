@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import string
 from vecgenhelp import *
 
@@ -35,6 +36,12 @@ namespace LMT {
     Full vector. Elements are contiguous.
     \warning during resize, pop_back, ... and so on, location of data in memory may be moved. Use SplittedVector if you are pointer stability.
 */
+/*!
+    \brief vecteur a element contigus. Si la taille change , on preferera le type SplittedVector qui assure que le vecteur ne sera pas deplace en memoire apres trop d'ajouts.
+    Full vector. Elements are contiguous.
+    \warning during resize, pop_back, ... and so on, location of data in memory may be moved. Use SplittedVector if you are pointer stability.
+*/
+
 template<class TT"""+',int static_size_'*static_size+""">
 class Vec<TT,"""+['-1','static_size_'][static_size]+""",void> {
 public:

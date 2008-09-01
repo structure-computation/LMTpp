@@ -7,7 +7,7 @@
     \relates MeshCarac
     \relates MeshTransfer
 
-    \friend rapahel.pasquier@lmt.ens-cachan.fr
+    \friend raphael.pasquier@lmt.ens-cachan.fr
 
     On procède en plusieurs étapes :
 
@@ -30,7 +30,7 @@
                     scons
                 codegen:
                     cd LMT/include/codegen; scons
-            Attention: dans Makefile, les tabulations doivent être de vraies tabulations et non une séquance d'espaces!
+            Attention: dans Makefile, les tabulations doivent être de vraies tabulations et non une séquence d'espaces!
         * un lien sur la librairie LMT (taper ln -s ~/LMT LMT ).
 
     Puis créer le fichier source, disons test.cpp, avec le contenu :

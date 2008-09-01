@@ -27,7 +27,7 @@ namespace LMTPRIVATE {
     template<class TMG> struct SubMesh<TMG,0> { typedef TMG T; };
 };
 
-/**
+/*!
     Used to define sub_meshes
     
     \author Hugo LECLERC

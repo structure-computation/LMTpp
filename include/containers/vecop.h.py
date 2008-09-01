@@ -1,8 +1,64 @@
+# -*- coding: utf-8 -*-
 from string import *
 from vecgenhelp import *
 
 print """
 namespace LMT {
+
+/*!
+\generic_comment generate
+
+    Commme \\a apply cette fonction permet d'appliquer un opérateur à tous les éléments d'un vecteur mais contrairement à \\a apply elle ne modifie pas le vecteur et renvoie le vecteur résultat.
+    Sa syntaxe générale est :
+    \code
+        vecteur generate( vecteur, opérateur, éventuellement un paramètre de l'opérateur) // opérateur unaire
+        vecteur generate( vecteur1, vecteur2, opérateur, éventuellement un paramètre de l'opérateur)  // opérateur binaire
+        vecteur generate( vecteur1, vecteur2, vecteur3, opérateur, éventuellement un paramètre de l'opérateur)  // opérateur ternaire
+
+    Exemple de code :
+    \\code C/C++
+        int main() {
+            Vec<double> v = range( 20 );
+            PRINT( generate( v, cast_int(_1) / 2 ) ); // convertit les éléments en int puis calcule le quotient de la division euclidienne et enfin renvoie le résultat dans un vecteur. _1 représente l'élément courant.
+            apply( v, _1 -= sin(_1) ); // cette fois-ci, v est modifié.
+            PRINT( v ); 
+        }
+
+    \\relates Vec
+    \\relates apply 
+
+    \\friend raphael.pasquier@lmt.ens-cachan.fr
+    \\friend hugo.leclerc@lmt.ens-cachan.fr
+    \\Author Hugo Leclerc
+*/
+
+/*!
+\generic_comment lambda-calcul
+
+    Avec toutes les fonctions de manipulation de vecteurs comme \\a apply , \\a generate , \\a find , \\a remove_if , etc...  on peut se passer de la création d'un opérateur en utilisant les variables _1, _2, ... et les opérations, fonctions standards  comme +, -, *, /, sin, etc...
+        * _1 désigne l'élément courant,
+        * _2 représente le premier paramètre de l'opérateur,
+        * _3 représente le deuxième paramètre, etc...
+
+    Sa syntaxe générale est :
+    \code
+        vecteur fonction( vecteur, expression avec _1, -2, ...  , éventuellement les paramètres de l'opérateur) 
+
+    Exemple de code :
+    \\code C/C++
+        remove_if(v, _1 > _2, 100); // cette instruction supprime tous les éléments supérieur à 100.
+
+
+    \\relates Vec
+    \\relates apply 
+
+    \keyword lambda-calcul
+    \\friend raphael.pasquier@lmt.ens-cachan.fr
+    \\friend hugo.leclerc@lmt.ens-cachan.fr
+    \\Author Hugo Leclerc
+*/
+
+
 template<class Op,unsigned nb_v,class V1,bool br1,class V2=void,bool br2=true,class V3=void,bool br3=true> class VecOp {};
 
 template<class Op,unsigned nb_v,class V1,bool br1,class V2,bool br2,class V3,bool br3> struct IsVecOp<VecOp<Op,nb_v,V1,br1,V2,br2,V3,br3> > { typedef int T; };

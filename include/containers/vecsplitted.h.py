@@ -1,17 +1,29 @@
+# -*- coding: utf-8 -*-
 import string
 from vecgenhelp import *
 
 print """
 namespace LMT {
+
+
+/*!
+    Avec cette structure, on alloue des petits blocs de mémoire séparés. Avantage : on peut ajouter des éléments sans réallouer.
+    \\friend hugo.leclerc@lmt.ens-cachan.fr
+*/
+
 template<class TT,unsigned atomic_size> struct Splitted {};
 
 template<class TT,unsigned atomic_size> struct IsVecOp<Splitted<TT,atomic_size> > { typedef int T; };
 
-/**
- stores blocks as T[atomic_size].<br>
- The main property is that push_back, resize and so on... do not change adress of stored data<br>
- (which is not the case with std::vector or LMT::Vec<T,-1>).<br>
- \warning all operations that implies a walk through data assume that size is not modified. Example : if op in apply(op) add elements, new elements won't be used. <br>
+/*!
+ stores blocks as T[atomic_size].
+ The main property is that push_back, resize and so on... do not change adress of stored data
+ (which is not the case with std::vector or LMT::Vec<T,-1>).
+ <strong> all operations that implies a walk through data assume that size is not modified. Example : if op in apply(op) add elements, new elements won't be used. </strong>
+
+    \\relates Vec
+    \\relates apply_wi_ptr
+    \\relates apply
 */
 template<class TT,unsigned atomic_size>
 class Vec<Splitted<TT,atomic_size>,-1,int> {
@@ -293,6 +305,24 @@ public:
     unsigned size_last_atom;
     bool owning;
 };
+
+/*!
+\generic_comment apply_wi_ptr
+
+    Cette fonction réservée aux vecteurs \a Vec<Splitted<TT,atomic_size>,-1,int> (cad un \a Vec spécialisé par \a Splitted) agit sur un vecteur comme \a apply mais en tenant compte de l'indice de l'élément (d'où le wi pour with index) et l'accés à cet élément se fait par référence.
+    Par conséquent la classe-fonction doit définir correctment operator() de cette façon :
+    \code 
+        template <class Telement> struct operateur {
+            void operator()( const Telement* ptr_e, int i ) const { bla bla }
+        };
+          
+    ptr_e est l'adresse de l'élément dans la mémoire de l'ordinateur.
+    *ptr_e est l'élément lui-même (remarquer l'astérisque).
+
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+*/
+
+
 """
 
 TP = ['class TT','unsigned atomic_size']

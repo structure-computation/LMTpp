@@ -3,6 +3,12 @@
 
 #include <vector>
 
+/*!
+
+Classe utilitaire.
+\keyword Utilitaires
+
+*/
 struct Beep {
     double *data;
     unsigned col;

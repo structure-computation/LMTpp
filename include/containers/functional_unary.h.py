@@ -24,7 +24,7 @@ for i,ret,conserve_sp in lst:
     I = string.capitalize(i)
     if i=='-': I = 'Negate'
     
-    print '/// \\InGroup Lambda'
+    print '/// \\keyword Lambda'
     print 'struct '+I+' {'
     print '    template<class P1,class P2=void,class P3=void,class P4=void> struct ReturnType { typedef '+ret+' T; };'
     print '    template<class P1> '+ret+' operator()(const P1 &p1) const {' + ('using LMT::%s;'%i) * (i!='-') + 'return '+'LMT::'*( i!='-' and False )+i+'(p1); }'
@@ -32,7 +32,7 @@ for i,ret,conserve_sp in lst:
     if conserve_sp=='true':
         print 'template<> struct ConserveZeroes<'+I+'> { static const unsigned res = '+conserve_sp+'; };'
 
-    print '/// \\InGroup Lambda'
+    print '/// \\keyword Lambda'
     print 'template<class O1,class O2,class O3,class O4,class O5>'
     if i=='-': i = 'operator-'
     print 'Function<ALGOCompose1,'+I+',Function<O1,O2,O3,O4,O5>,void,void> '+i+'(const Function<O1,O2,O3,O4,O5> &f) {'

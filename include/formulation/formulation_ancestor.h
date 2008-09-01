@@ -99,8 +99,9 @@ public:
     virtual Vec<ScalarType> &get_result(unsigned num=0) = 0; ///
 
     bool assume_constant_matrix; ///
-    ScalarType default_iterative_criterium; /// iterative_criterium for conjugate gradient, GMRES, ... based on norm_2( delta solution )
-    ScalarType non_linear_iterative_criterium; /// iterative_criterium for newton-raphson iterations, ... based on norm_2( delta solution )
+    ScalarType default_iterative_criterium; /// iterative_criterium for conjugate gradient, GMRES, ... based on norm_inf( delta solution )
+    ScalarType non_linear_iterative_criterium; /// iterative_criterium for newton-raphson iterations, ... based on norm_inf( delta solution )
+    Vec<ScalarType> non_linear_iterative_criterium_vec; /// iterative_criterium for newton-raphson iterations, ... based on norm_inf( delta solution )
     unsigned order_integration_when_integration_totale;
     bool assume_skin_not_needed;
     unsigned max_non_linear_iteration;

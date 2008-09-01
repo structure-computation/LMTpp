@@ -6,13 +6,17 @@
 #include "triangle.h"
 
 namespace LMT {
+/*!
 
-/**
- 3------2
- |      |
- |      |
- |      |
- 0------1
+\verbatim
+    3------2
+    |      |
+    |      |
+    |      |
+    0------1
+
+  \author Hugo LECLERC
+  \friend hugo.leclerc@lmt.ens-cachan.fr
 
 */
 

@@ -43,31 +43,89 @@
 
 namespace LMT {
     // ------------------------------------------------------------------------------------------------------------------------------------------------
-    /** typedef int T if VECOP is of kind Range<>, Heter, ... and so on. Usefull to avoid ambiguous
+    /*! typedef int T if VECOP is of kind Range<>, Heter, ... and so on. Usefull to avoid ambiguous
     */
     template<class VECOP> struct IsVecOp { typedef void T; };
-    /** res = true if Vec contains simd(i) method
+    /*! res = true if Vec contains simd(i) method
     */
     template<class TV> struct VecSupportSIMD {
         static const unsigned res = false;
     };
-    /**
+    /*!
     */
     template<class TV> struct SimdSizeForVec {
         static const unsigned res = SimdSize<typename TV::template SubType<0>::T>::res;
     };
-    /**
+    /*!
     */
     template<class VECOP> struct HasIncrIndexAcces { static const bool res = false; };
-    /**
+    /*!
     */
     template<class VECOP> struct HasIndexAccess { static const bool res = true; };
-    /**
-        Blah Blah Blah Blah
+
+/*!
+    \generic_comment Vec
+        \friend raphael.pasquier@lmt.ens-cachan.fr
+        \friend hugo.leclerc@lmt.ens-cachan.fr
+
+            = description générale
+ 
+                La classe générique Vec est une classe conteneur général qui permet de stocker des éléments de même types ou non. Les éléments sont repérés par un undice entier, le premier indice étant zéro. La taille peut être fixée à la compilation avec un gain en performance ou être variable, la gestion de la mémoire étant transparente. 
+                Elle ressemble donc aux classes vector et valarray de la librairie standard avec davantage de fonctionnalités (utiles pour le calcul scientifique).
+                Elle est très optimisée pour le calcul intensif et permet de faire simplement des opérations sur la totalité ou une partie des éléments. 
+                On peut facilement récupérer les données de Matlab et les mettre dans un "Vec", travailler avec des threads Linux.
+                Exemple de déclaration et d'utilisation :
+                \code
+                    Vec<double> vx,vy,vz; // vecteur de double de taille variable.
+                    Vec<string,3> v1,v2,v3,v4("if","then","else"); // vecteur de taille 3 de chaine de caracères.
+                    double* tab ;
+
+                        vz.resize(7);
+                        vz(tab); // copie les 7 premiers éléments du tableau tab dans vz.
+                        vx += abs(vy); // fait l'opération vx[i] = vx[i] + abs(vy[i]) pour tout i tq 0 <= i < vy.size() 
+                        v3 = v1 + v2; // ou tout autre opération compatible avec le type.
+                        vx.push_back( 1.0 ); // ajoute l'élément 1 à la fin du vecteur.
+                        vx.pop_back();       // le retire.
+                        std::cout << vx << std:endl ; // affiche vx 
+
+            = Methodes et fonctions les plus utiles
+
+                Les méthodes de la classe Vec sont :
+                    * push_back(a) ajoute une copie de a dans le vecteur,
+                    * pop_back() retire le dernier élément ajouté,
+                    * back() retourne une copie du dernier élément ajouté,
+                    * front() retourne une copie du premier élément,
+                    * begin() retourne un pointeur (cad l'adresse) du premier élément  
+                    * resize(int n) qui fixe la taille du vecteur à n,
+                    * free() qui libère la mémoire,
+                    * et ne pas oublier reserve( unsigned int n) qui réserve de la place pour n éléments. Ainsi s vous connaissez environ le nombre d'éléments à ajouter via push_back() par exemple, vos appels push_back() seront bien plus rapides si vous appelez préalablement reserve().
+
+                <strong> IMPORTANT : </strong> On ne peut pas parler de la classe Vec sans parler de la fonction \a apply et de ses varaintes qui permettent de manipuler les éléments d'un vecteur sans les parcourir avec une boucle for. Alors n'hésitez pas à consulter la doc de \a apply . 
+
+            = Des classes spécialisées
+
+                Pour certains usages, certaines spécialisations de la classe Vec sont plus recommandées :
+                    * \a Vec<Sparse<TT>,static_size_> pour les vecteurs creux, i.e. on ne mémorise que les valeurs non nulles. 
+                    * \a Vec<VecCst<TT>,static_size_,int> pour vecteur constant. En fait on ne mémorise q'une seule valeur d'où un gain en mémoire.
+                    * \a Vec<VecDirac<TT>,static_size_,int> pour vecteur dont tous les éléments sont nuls sauf un (pensez à la base canonique).
+                    * \a Vec<Heterogeneous<Carac,nt,TT>,static_size_,int> pour des vecteurs d'éléments de type différent.
+                    * \a VecSelect pour vecteur permettant de filtrer les éléments d'un autre vecteur. 
+                    * \a Vec<VecHeavyside<TT>,static_size_,int> fait référence à la fonction de Heavyside qui est nulle pour x<0 et qui vaut un pour x>=0.
+                    * \a Vec<Intersection<V0,V1,const_v0,false,false>,-1,int> Cette classe permet après spécialisation de déterminer l'intersction de deux vecteurs.
+                    * \a Vec<Range<TT,static_begin,static_step>,static_size_,int> Cette classe permet après spécialisation de définir des vecteurs dont les éléments non nuls sont placés de façon périodique.
+                    * \a Vec<Replace<TV,TR>,static_size_,int> (à faire).
+                    * \a Vec<Splitted<TT,atomic_size>,-1,int> Cette classe permet après spécialisation de définir des vecteurs dont les éléments sont stockés par blocs. Ce stockage améliore les performances pour certains algorithmes. 
+                    * \a SubVec (à faire).
+                    * \a VecElemList (à faire).
+                    * \a Vec<VecPointedValues<TT>,static_size_,int> Cette classe permet après spécialisation de définir un vecteur de pointeurs.
+
+            = Divers
+                Vous pouvez aussi Consulter aussi la FAQ du wiki \a http://intranet/mediawiki/index.php/Vecteurs#id2442799
     */
+
     template<class TO=double,int static_size=-1,class IVO=typename IsVecOp<TO>::T> class Vec;
     
-    /** */
+    /*! Spécialisation très générale */
     template<> class Vec<void,-1,void> {
     public:
          template<unsigned n> struct SubType { typedef void T; };
@@ -78,30 +136,30 @@ namespace LMT {
          static const int sparsity_rate = 0;        
     };
     
-    /** */
+    /*! */
     template<class TT,int s,class TO> struct SubComplex<Vec<TT,s,TO> > {
         typedef Vec<TT,s,TO> TV;
         typedef typename TypeInformation<TV>::template Variant<typename SubComplex<typename TypeInformation<TV>::SubType>::T>::T T;
     };
     
-    /** puet */
+    /*! puet */
     template<class TV,class TSV,bool const_TV,bool const_TSV> struct SubVec;
-    /** pouet
+    /*! pouet
     */
     struct SetSize {};
 
-    /**
+    /*!
     */
     template<class TVEC> struct CostAccess { static const unsigned res = 1; };
 
-    /**
+    /*!
       used in constructor
     */
     struct SetValues {};
     
     template<class TM,class Structure,class Storage,unsigned alignement,int nr> struct MatElem;
     // ------------------------------------------------------------------------------------------------------------------------------------------------
-    /** pouet
+    /*! pouet
     */
     struct AssignSelfOp {
         template<class T,class BOP,class T2> void operator()(T &val,unsigned index,const BOP &op,const T2 &a) const { val=op(val,a[index]); }
@@ -135,10 +193,10 @@ namespace LMT {
         }*/
 
     };
-    /** pouet
+    /*! pouet
     */
     template<class Op> struct VecSetBinOp1 { template<class TT,class VEC> void operator()(const TT &val,unsigned index,VEC &vec) const { vec[index] = op(val,vec[index]); } Op op; };
-    /** pouet
+    /*! pouet
     */
     template<class Op> struct VecSetBinOp2 { template<class TT,class VEC> void operator()(TT &val,unsigned index,const VEC &vec) const { val = op(val,vec[index]); } Op op; };
 
@@ -178,20 +236,20 @@ namespace LMT {
     };
 
     // ---------------------------------------------------------------------------------------------------------------------------------------
-    /** \relates Vec */
+    /*! \relates Vec */
     template<class TT,int s> SimdVec<typename Vec<TT,s>::template SubType<0>::T,1> get_simd(const Vec<TT,s> &v,unsigned i,const Number<1> &) {
         return SimdVec<typename Vec<TT,s>::template SubType<0>::T,1>( v[i+0] );
     }
-    /** \relates Vec */
+    /*! \relates Vec */
     template<class TT,int s> SimdVec<typename Vec<TT,s>::template SubType<0>::T,2> get_simd(const Vec<TT,s> &v,unsigned i,const Number<2> &) {
         return SimdVec<typename Vec<TT,s>::template SubType<0>::T,2>( v[i+1], v[i+0] );
     }
-    /** \relates Vec */
+    /*! \relates Vec */
     template<class TT,int s> SimdVec<typename Vec<TT,s>::template SubType<0>::T,4> get_simd(const Vec<TT,s> &v,unsigned i,const Number<4> &) {
         return SimdVec<typename Vec<TT,s>::template SubType<0>::T,4>( v[i+3], v[i+2], v[i+1], v[i+0] );
     }
     
-    /** \relates Vec */
+    /*! \relates Vec */
     template<class TV,bool const_v,bool with_simd=true> struct IncrementalAccess {
         IncrementalAccess(const TV &vv) { v.val = &vv; }
         IncrementalAccess(TV &vv) { v.val = &vv; }
@@ -199,9 +257,9 @@ namespace LMT {
         typename TV::template SubType<0>::T operator[](unsigned i) const { return (*v.val)[i]; }
         PtrConstIf<TV,const_v> v;
     };
-    /** \relates Vec */
+    /*! \relates Vec */
     template<class TV,bool with_simd> IncrementalAccess<TV,true ,with_simd> getIncrementalAccess(const TV &v) { return v; }
-    /** \relates Vec */
+    /*! \relates Vec */
     template<class TV,bool with_simd> IncrementalAccess<TV,false,with_simd> getIncrementalAccess(TV &v) { return v; }
 
 }
@@ -241,7 +299,7 @@ namespace std {
 #include "vecasm.h"
 
 namespace LMT {
-    /**
+    /*!
     Ex : Vec<std::string>::tokenize("toto:tata:1",':') returns ["toto","tata","1"]. Sep must be a ScalarType<T2>
     \relates Vec
     */
@@ -262,7 +320,7 @@ namespace LMT {
     #ifdef MATLAB_MEX_FILE
         struct VecSetReal { template<class TT,class VEC> void operator()(const TT &val,VEC &vec) { vec[index++] = LMT::real(val); } unsigned index; };
         struct VecSetImag { template<class TT,class VEC> void operator()(const TT &val,VEC &vec) { vec[index++] = LMT::imag(val); } unsigned index; };
-        /** Convert a LMT::Vec to a matlab one
+        /*! Convert a LMT::Vec to a matlab one
             Type can be either Col or Row
             \relates Vec
         */
@@ -295,6 +353,62 @@ namespace LMT {
     #endif
 
 }
+
+/*!
+\generic_comment apply
+
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+
+    = Description
+
+        La fonction apply permet d'agir sur les éléments d'un vecteur sans recourir à une boucle (for). Cela améliore souvent les performances et le code s'en trouve aussi simplifié. 
+        La syntaxe générale est :
+        \code 
+            apply( vecteur, opérateur, les paramètres (facultatifs) de l'opérateur)
+
+        Certains types de fonctions apply agissent sur deux vecteurs en même temps. Leur syntaxe est alors :
+        \code 
+            apply( vecteur1, vecteur2, opérateur, les paramètres (facultatifs) de l'opérateur)
+
+
+        Ainsi si vous souhaitez faire un calcul sur les éléments d'un vecteur, vous créerai un opérateur correspondant à l'algorithme avec éventuellement des parmètres si l'algorithme a des varaiantes. Cela fonctionne suivant le même principe que les filtres sur une image et comme les filtres, on peut aussi enchaîner simplement les traitements ; cad par exemple  si vous avez défini des opérateurs op1, op2, ... on peut créer un autre opérateur op utilisant les op1, op2 et l'appliquer sur un vecteur via apply.
+
+        Suivant le même principe de fonctionnement on pourra aussi consulter la documentation des fonctions :
+            * \a find
+            * \a sort 
+            * \a remove_if
+            * \a find_elem
+
+        Enfin la fabricaton de certains opérateurs peut être simplifiée par le concept de fonction lambda, voir ...
+ 
+        Voici une liste d'exemples :
+            * (à faire)
+            * (à faire)
+
+
+    = Les variantes
+
+        = Un seul vecteur
+
+            * \a apply_wi comme apply mais l'opération sur l'élément dépend de son indice dans le tableau (wi pour with index).
+            * \a apply_range pour opérer sur des éléments consécutifs. 
+            * \a apply_range_stride pour opérer sur des éléments régulièrement espacés.
+            * \a apply_on_number pour opérér sur un seul élément (éxcepté pour les vecteurs hétérogènes, un simple v[i] est plus efficace). 
+            * \a apply_range_by_n 
+            * \a apply_nz_wi est plutôt utilisée pour les vecteurs creux ( \a Vec<Sparse<TT>,static_size_> ) car le traitement n'est fait que sur les éléments instanciés (donc à priori non nul).
+
+        = Deux vecteurs
+
+            * \a apply_ij qui opère sur toutes les paires formées d'un élément de chaque vecteur (équivaut à deux boucles imbriquées).  
+            * \a apply_i_supeq_j même chose avec le premier indice supérieur ou égal au second.
+            * \a apply_i_sup_j même chose avec le premier indice supérieur au second.
+            * 
+
+    \relates generate
+    \relates find
+    \relates sort
+*/
 
 
 

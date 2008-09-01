@@ -3,10 +3,13 @@
 
 namespace LMT {
 
-/**
+/*!
+    VALABRE pour les matrices 2x2 visiblement
+    
    compute eigen values and vectors.
    input : vec in vector form
    output : eigenvalues, eigenvectors
+    \keyword Mathématiques/Algèbre linéaire/vecteurs et valeurs propres
  */
 template<class T>
 void get_eigen_values_and_vectors( const Vec<T,3> &vec, Vec<T,2> &eigenvalues, Vec<Vec<T,2>,2> &eigenvectors ) {
