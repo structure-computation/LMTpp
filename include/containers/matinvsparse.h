@@ -14,7 +14,7 @@
 
 namespace LMT {
 
-template<class T> inline T dot_chol_factorize( const Vec<Sparse<T> > &v1, const Vec<Sparse<T> > &v2 ) {
+template<class T,int s> inline T dot_chol_factorize( const Vec<Sparse<T>,s> &v1, const Vec<Sparse<T>,s> &v2 ) {
     T res = T( 0 );
     if ( v2.indices.size() == 0 ) return T( 0 );
     for(unsigned i=0,j=0;i<v1.indices.size()-1;++i) {

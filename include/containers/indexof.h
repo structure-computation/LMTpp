@@ -43,8 +43,6 @@ namespace LMTPRIVATE {
     struct IndexOf<Carac,T,T,n> { static const unsigned res = n; };
     
     template<class Carac,class T,unsigned n>
-    template<class Carac,class T,unsigned n>
-    struct IndexOf<Carac,T,T,n> { static const unsigned res = n; };
     struct NbSubTypes { static const unsigned res = NbSubTypes<Carac,typename Carac::template SubType<n+1>::T,n+1>::res; };
     template<class Carac,unsigned n>
     struct NbSubTypes<Carac,void,n> { static const unsigned res = n; };

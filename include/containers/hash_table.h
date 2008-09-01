@@ -46,6 +46,23 @@ struct HashTable {
     EqualFunction eq;
 };
 
+
 }
+
+// template<class K,class V,unsigned hash_size,class HashFunction,class NewValFunction,class EqualFunction>
+// std::ostream &operator<<( std::ostream &os, const typename LMT::HashTable<K,V,hash_size,HashFunction,NewValFunction,EqualFunction>::Item &h ) {
+//     os << item.key << " -> " << item.val;
+//     return os;
+// }
+
+template<class K,class V,unsigned hash_size,class HashFunction,class NewValFunction,class EqualFunction>
+std::ostream &operator<<( std::ostream &os, const LMT::HashTable<K,V,hash_size,HashFunction,NewValFunction,EqualFunction> &h ) {
+    for(unsigned i=0;i<hash_size;++i)
+        for(unsigned j=0;j<h.data[i].size();++j)
+            os << h.data[i][j].key << " -> " << h.data[i][j].val << "\n";
+    // LMT::apply( h.data[0], LMT::Display(), os, "\n" );
+    return os;
+}
+
 
 #endif // CONTAINERS_HASH_TABLE_H

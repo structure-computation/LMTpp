@@ -308,7 +308,12 @@ std::istream &line_input( std::istream &s, Mat<TT,Structure,Storage,OP> &m ) {
         }
     return s;
 }
-
+/**
+Pour les fichiers du genre
+ 0 1 2
+ 3 4 5
+ 6 7 8
+*/
 template<class T,class Structure,class Storage,class OP>
 void read_ascii_mat_file( Mat<T,Structure,Storage,OP> &mat, std::istream &f ) {
     while ( true ) {
@@ -430,6 +435,9 @@ T min(const Mat<T,STR,STO,IO> &m) {
 
 namespace LMT {
 
+/**
+Pour construire une matrice diagonale à partir d'un vecteur
+*/
 template<class TV,int s>
 Mat<TV,Diag<s> > diag(const Vec<TV,s> &vec) {
     return Mat<TV,Diag<s> >(vec.size(),vec.size(),vec);
@@ -482,7 +490,9 @@ Mat<TV,Diag<s> > diag(const Vec<TV,s> &vec) {
     }
 #endif
 
-/// ostream interface
+/**
+Affichage de la structure d'une matrice sous forme d'image
+*/
 template<class T,class Str,class Sto,class IO>
 void display_structure(const Mat<T,Str,Sto,IO> &mat,const char *name_file="res") {
     typedef typename Mat<T,Str,Sto,IO>::T TT;

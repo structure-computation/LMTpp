@@ -46,15 +46,15 @@ def make_dep_py(env):
     for i in get_files(".", re.compile( '.*\.problem.py$' ) ):
         corh = i[:-2] + "h"
         env.Command( corh, i, 'LMT/bin/lmtproblem.py %s' % i )
- 
+    
 def linkflags(libs):
     """ find flags for libraries which has exetutables that return them... """
     return string.join([ string.rstrip(os.popen(lib+' --libs').readline()) for lib in libs ])
-
+    
 def cppflags(libs):
     """ find flags for libraries which has exetutables that return them... """
     return string.join([ string.rstrip(os.popen(lib+' --cflags').readline()) for lib in libs ])
-
+    
 def makedist(target,source,env):
     """ dist """
     ere = ".*Cons|Makefile|Doxygen|TODO|Doxyfile|.sconsign"

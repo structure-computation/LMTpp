@@ -39,6 +39,9 @@ template<class TT> struct DelayedAssignementSymTriDiagSource {
 
 struct TriDiag { };
 
+/**
+  Matrice symétrique tridiagonale
+*/
 template<class T>
 class Mat<T,Sym<>,TriDiag,void> {
 public:

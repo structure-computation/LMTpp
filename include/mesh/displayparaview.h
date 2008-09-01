@@ -226,8 +226,8 @@ private:
 
 /**
  * declare a DisplayParaview instance, push m and interact with user
- * @param m 
- * @param nodal_field_to_display 
+ * @param m the mesh
+ * @param nodal_field_to_display ...
  */
 template<class TM> void display_mesh(const TM &m,const char *nodal_field_to_display="",DisplayParaview::TypeField type_field_to_display=DisplayParaview::Nodal) {
     DisplayParaview dp;

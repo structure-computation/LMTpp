@@ -196,6 +196,49 @@ inline typename TypeReduction<Max,Vec<T,s> >::T max(const Vec<T,s> &c) {
     DEBUGASSERT( c.size() );
     return reduction(c,Max());
 }
+
+/** index_of_max
+ \relates Vec
+ */
+template<class TV,class Op>
+inline unsigned index_of_max( const TV &c, const Op &op ) {
+    DEBUGASSERT( c.size() );
+    unsigned index = 0;
+    for(unsigned i=1;i<c.size();++i) 
+        if( op( c[index], c[i] ) )
+            index = i;
+    return index;
+}
+
+/** index_of_max
+ \relates Vec
+ */
+template<class TV>
+inline unsigned index_of_max( const TV &c ) {
+    return index_of_max( c, Less() );
+}
+
+/** index_of_min
+ \relates Vec
+*/
+template<class TV,class Op>
+inline unsigned index_of_min( const TV &c, const Op &op ) {
+    DEBUGASSERT( c.size() );
+    unsigned index = 0;
+    for(unsigned i=1;i<c.size();++i)
+        if( op( c[i], c[index] ) )
+            index = i;
+    return index;
+}
+
+/** index_of_max
+ \relates Vec
+ */
+template<class TV>
+inline unsigned index_of_min( const TV &c ) {
+    return index_of_min( c, Less() );
+}
+
 /*! true if all v verify v==true
  \relates Vec
  */

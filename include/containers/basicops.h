@@ -87,7 +87,7 @@ template<class T> bool heavyside(const T &val) { return (val>=0); }
 template<class T> bool heaviside(const T &val) { return (val>=0); }
 /// 1 if equal 0
 template<class T> bool eqz(const T &val) { return heavyside(val)*heavyside(-val); }
-/// 1 if equal 0
+/// ...
 template<class T> int sgn(const T &val) { return ( val>0 ? 1 : -1 ); }
 
 /*!
@@ -205,7 +205,7 @@ struct Display {
     template<class T1,class OS=std::ostream,class SEP=void,class T4=void> struct ReturnType { typedef void T; };
     template<class T> void operator()(const T &t) const { std::cout << t << " "; }
     template<class T,class OS> void operator()(const T &t,OS &os) const { os << t << " "; }
-    template<class T,class OS,class SEP> void operator()(const T &t,OS &os,const SEP &sep) const { os << t << sep; }
+    template<class T,class OS,class SEP> void operator()(const T &t,OS &os,const SEP &sep) const { os << t; os << sep; }
     
     template<class T> void operator()(const T &t0,const T &t1,const T &t2,const T &t3) const { std::cout << t3 << " " << t2 << " " << t1 << " " << t0 << " "; }
     template<class T,class OS> void operator()(const T &t0,const T &t1,const T &t2,const T &t3,OS &os) const { os << t3 << " " << t2 << " " << t1 << " " << t0 << " "; }
@@ -230,7 +230,8 @@ struct GetFromStream {
     template<class T1,class IS> struct ReturnType { typedef IS T; };
     template<class T,class IS> IS &operator()(T &t,IS &is) const {
         // std::cout << "GetFromStream" << std::endl;
-        return is >> t;
+        is >> t;
+        return is;
     }
 };
 
