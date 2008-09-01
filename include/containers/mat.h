@@ -38,28 +38,22 @@ template<class MATOP> struct IsMatOp { typedef void T; };
         Pour des utilisations particulières, il est préférable d'utiliser des spécialisations de la classe Mat pour économiser des ressources ou pour aller plus vite.
 
             = Matrice creuse
-
                 A faire
-
             = Matrice symétrique, de Heisenberg
-
                 A faire
-
             = Matrice spéciale pour la décomposition LU
-
                 A faire
-
     = FAQ 
 
         Cette FAQ est tirée de celle de l'intranet : 
 
-        * Définition, instanciation
+        * Définition, instantiation
 
             * \a #1 Les paramètres template des matrices et exemples de déclaration
             * \a #8 Pour créer une matrice (ici taille 100,20) constituee du meme nombre (ici 1.0) partout  
             * \a #5 Pour affecter la valeur 4 a toute la matrice 
             * \a #3 Pour modifier la taille d'une matrice M
-            * \a #15 Pour creer une matrice diagonale possedant le vecteur V sur sa diagonale;
+            * \a #15 Pour créer une matrice diagonale possedant le vecteur V sur sa diagonale;
             * \a #6 Pour assigner une matrice M2 à une matrice M1; 
             * \a #11 Pour mettre un vecteur V dans une ligne ou colonne donnee i 
             * \a #12 Pour mettre une matrice dans une autre
@@ -102,14 +96,14 @@ template<class MATOP> struct IsMatOp { typedef void T; };
             * TriLower<s> pour matrice carré triangulaire inferieure.
 
         * STO représente le type de stockage (pleine, creuse).
-            * Dense<Orientation> pour matrice pleine. Si Orientation= classe Row alors les éléments sont rangés par lignes sinon ils sont rangés par colonne (rangement par defaut) avec la classe Col.
-            * SparseLine<Orientation> pour matrice creuse. 
+            * Dense<Orientation> pour matrice pleine. Si Orientation= classe Row alors les éléments sont rangés par lignes sinon ils sont rangés par colonne (rangement par defaut) avec la classe Col donc on écrira soit Dense<Row>, Dense<Col>.
+            * SparseLine<Orientation> pour matrice creuse. Pour la classe Orientation, c'est la même manière que la classe Dense.
 
         Voici quelques exemples importants de déclaration :
 
                 \code C/C++
                     Mat<float> M; // équivaut à Mat<double,Gen<-1,-1> >  donc M est une matrice pleine dont la taille n'est pas fixée à la compilation.
-                    Mat<int,10,10> M; // Matrice carré d'entiers int de taille fixée 10 10.
+                    Mat<double> M(10,10,0.); // matrice de taille 10 10 initialisée à 0.
                     Mat<float,SparseLine<> > M; // Matrice creuse sans symétrie avec rangement par défaut. 
                             // laisser un espace entre les > >. 
 
@@ -178,7 +172,7 @@ template<class MATOP> struct IsMatOp { typedef void T; };
         \anchor 8 Pour faire des operations matrice-vecteur
             \code C/C++
                 M*V 
-        \anchor 9 Pour creer une matrice (ici de taille 100,20) constituée du meme nombre (ici 1.0) partout
+        \anchor 9 Pour créer une matrice (ici de taille 100,20) constituée du meme nombre (ici 1.0) partout
             \code C/C++
                 Mat<double> M(100,20,1.0); 
                 Pour obtenir le nombre de colonnes ou de lignes
@@ -210,7 +204,7 @@ template<class MATOP> struct IsMatOp { typedef void T; };
         \anchor 14 Pour modifier la diagonale de la matrice (ajouter 3)
             \code C/C++
                 M.diag() += 3; 
-        \anchor 15 Pour creer une matrice diagonale possedant le vecteur V sur sa diagonale;
+        \anchor 15 Pour créer une matrice diagonale possedant le vecteur V sur sa diagonale;
             \code C/C++
                 diag(V); 
         \anchor 16 Pour afficher la forme des elements d'une matrice M sparse ou skyline
