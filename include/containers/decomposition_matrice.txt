@@ -1,0 +1,136 @@
+/*!
+\tutorial Décomposition d'une matrice
+
+    A quoi bon une décomposition ?
+
+    Décomposer une matrice est intéressant par exemple lorsque il est nécessaire de résoudre des systèmes linéaires mx=f où la matrice m ne change pas.
+    Et suivant que la matrice est réelle symétrique, on prendra la décomposition de Cholesky ou sinon la décomposition LU dans le cas général.
+
+    = Décomposition de Cholesky
+
+        Rappel mathématique : Si m est symétrique définie positive, il existe une unique matrice C triangle supérieure à coefficients diagonaux positifs tel que m = tC * C où tC désigne la transposée de C. Du coup, le système mx=f s'écrit Cx=y et tCy=f et donc résoudre Kx=f revient à résoudre deux systèmes linéaires "triangulaires" donc très simple à résoudre.
+        Pour décomposer m suivant la méthode de Cholesky, on utilise la fonction chol_factorize (m) et pour ensuite résoudre le système mx=f, on appelle la fonction solve_using_chol_factorize(m,f,x).
+        Attention : la fonction chol_factorize (m) modifie m!
+
+        En code C++, cela donne par exemple :
+        \code C/C++
+            #include <containers/mat.h>
+            using namespace LMT;
+
+            int main() {
+                Mat<double,Sym<>,SparseLine<> > m(3);
+                m.diag() = 130.;
+                m(0,1) = 30.;
+                m(0,2) = 1.;
+                Mat<double,Sym<>,SparseLine<> > msa = m;
+                PRINTN( msa );
+                    // msa ->
+                    // 130 30  1
+                    // 30  130 0
+                    // 1   0   130
+                chol_factorize ( m );
+                Vec<double> f( -45, 40, -1 );
+                PRINTN( f );
+                    // f ->
+                    // -45 40 -1
+                Vec<double> x;
+                solve_using_chol_factorize( m, f, x );
+                PRINTN( x );
+                    //  x ->
+                    //  -0.44059 0.409367 -0.00430315
+                PRINTN( msa * x - f );
+                    //  msa * x - f ->
+                    //  -7.10543e-15 7.10543e-15 0
+            }
+
+        \relates chol_factorize
+        \relates solve_using_chol_factorize
+
+        Remarque : les fonctions chol_factorize (m) solve_using_chol_factorize(m,f,x) peuvent aussi être utilisée pour des matrices hermitiennes de type \a Mat <T,Herm<s>,SparseLine<>> .
+
+    = Décomposition LU
+
+        Si la matrice m n'a pas de symétrie, on utilise cette décomposition. On montre que cette décomposition matricielle correspond à la méthode de Gauss de résolution d'un système linéaire. Ainsi il existe plusieurs variantes dont deux ont été implémenté, une sans choix de pivot et une autre avec pivot partiel.
+        La deuxième variante avec pivot partiel est plus stable numériquement, ne s'arrête pas si un des pivots de la méthode de Gauss est proche de zéro mais elle demande plus d'opérations.
+        Pour décomposer m, on utilise lu_factorize() et pour résoudre un système solve_using_lu_factorize(). 
+        REMARQUE IMPORTANTE : la matrice doit être stockée au format SparseLU.
+
+        En code C++, cela donne par exemple sans choix du pivot:
+        \code C/C++
+            #include <containers/mat.h>
+            using namespace LMT;
+
+            #define DIM 3
+
+            int main() {
+               Mat<double,Gen<>, SparseLU > m(DIM,DIM);
+                Mat<double,Gen<> > ms ;
+
+                m.diag() = 130.;
+                m(0,1) = 30.;
+                m(0,2) = 1.;
+                ms = m;
+                PRINTN(ms);
+                    //  ms ->
+                    // 130 30  1
+                    // 0   130 0
+                    // 0   0   130
+                lu_factorize(m);
+                Vec<double> f( -45, 40, -1 );
+                Vec<double> x;
+                solve_using_lu_factorize( m, f, x );
+                PRINTN( x );
+                    //  x ->
+                    // -0.417101 0.307692 -0.00769231
+                PRINTN( ms * x - f );
+                    //  ms * x - f ->
+                    // 0 0 0                  x contient bien la solution!
+            }
+
+        Pour une décomposition avec pivot partiel, la fonction lu_factorize() prend en paramètre un vecteur qui contiendra le vecteur permutation et renvoie un booléen qui est vrai si la décomposition s'est déroulée jusqu' au bout (i.e. vrai si la matrice est inversible) et faux sinon.
+        Remarque : La fonction solve_using_lu_factorize() prendra aussi en paramètre le vecteur permutation pour calculer la solution du sytème. 
+
+        Exemple de code C++
+            #include <containers/mat.h>
+            using namespace LMT;
+
+            #define DIM 3
+
+            int main() {
+            
+                Mat<double,Gen<>, SparseLU > m(DIM,DIM);
+                Mat<double,Gen<> > ms ;
+                Vec<int> vecteur_permutation;
+            
+                m.diag() = 20.;
+                m(0,1) = 30.;
+                m(1,0) = 30.;
+                m(0,2) = 1.;
+                m(2,0) = 1.;
+                ms = m;
+                PRINTN(ms);
+                    //  ms ->
+                    // 20 30 1
+                    // 30 20 0
+                    // 1  0  20
+                lu_factorize(m,vecteur_permutation);
+                PRINTN(vecteur_permutation);
+                    //  vecteur_permutation ->
+                    // 1 0 2
+                Vec<double> f( -45, 40, -1 );
+                Vec<double> x;
+                    // x ->
+                    // 4.18962 -4.28443 -0.259481
+                solve_using_lu_factorize( m, vecteur_permutation, f, x );
+                PRINTN( x );
+                PRINTN( ms * x - f );
+                    //  ms * x - f ->
+                    // -7.10543e-15 0 0
+            }
+
+        \relates lu_factorize
+        \relates solve_using_lu_factorize
+
+    \friend pasquier@lmt.ens-cachan.fr
+    \friend leclerc@lmt.ens-cachan.fr
+*/ 
