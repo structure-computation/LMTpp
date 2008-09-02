@@ -17,7 +17,8 @@
             \code
                 from LMT import *
                 env = Environment(
-                CPPPATH = [ '#LMT/include' ]
+                    CPPPATH = [ '#LMT/include' ],
+                    LIBS = [ 'pthread' ]
                 )
 
                 make_dep_py(env)
