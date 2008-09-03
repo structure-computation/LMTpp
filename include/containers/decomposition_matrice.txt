@@ -60,16 +60,13 @@
             #include <containers/mat.h>
             using namespace LMT;
 
-            #define DIM 3
-
             int main() {
-               Mat<double,Gen<>, SparseLU > m(DIM,DIM);
-                Mat<double,Gen<> > ms ;
+                Mat<double,Gen<>, SparseLU > m(3,3);
 
                 m.diag() = 130.;
                 m(0,1) = 30.;
                 m(0,2) = 1.;
-                ms = m;
+                Mat<double,Gen<> > ms = m;
                 PRINTN(ms);
                     //  ms ->
                     // 130 30  1
@@ -91,15 +88,13 @@
         Remarque : La fonction solve_using_lu_factorize() prendra aussi en paramètre le vecteur permutation pour calculer la solution du sytème. 
 
         Exemple de code C++
+        \code C/C++
             #include <containers/mat.h>
             using namespace LMT;
 
-            #define DIM 3
-
             int main() {
             
-                Mat<double,Gen<>, SparseLU > m(DIM,DIM);
-                Mat<double,Gen<> > ms ;
+                Mat<double,Gen<>, SparseLU > m(3,3);
                 Vec<int> vecteur_permutation;
             
                 m.diag() = 20.;
@@ -107,7 +102,7 @@
                 m(1,0) = 30.;
                 m(0,2) = 1.;
                 m(2,0) = 1.;
-                ms = m;
+                Mat<double,Gen<> > ms = m;
                 PRINTN(ms);
                     //  ms ->
                     // 20 30 1
@@ -128,8 +123,10 @@
                     // -7.10543e-15 0 0
             }
 
-        \relates lu_factorize
-        \relates solve_using_lu_factorize
+    \relates lu_factorize
+    \relates solve_using_lu_factorize
+
+    \keyword Mathématiques/Algèbre linéaire/Décomposition de matrices
 
     \friend pasquier@lmt.ens-cachan.fr
     \friend leclerc@lmt.ens-cachan.fr

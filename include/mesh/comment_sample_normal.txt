@@ -1,0 +1,11 @@
+/*! 
+\generic_comment sample_normal
+
+    A faire
+
+    \keyword Maillage/Elément/Opération
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \relates Element 
+    \relates length
+*/

@@ -247,9 +247,12 @@ template<class MATOP> struct IsMatOp { typedef void T; };
         * Il existe une FAQ sur l'intranet http://intranet/mediawiki/index.php/Matrices
 
         <strong> SIMD alignement for Row on Lower and Col on Upper </strong>
-        \friend hugo.leclerc@lmt.ens-cachan.fr
-        \keyword Mathématiques/Algèbre linéaire
-        \author Hugo Leclerc
+
+    \keyword Algorithme/Conteneur
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \keyword Mathématiques/Algèbre linéaire
+    \author Hugo Leclerc
 */
 
 template<class T=double,class Structure=Gen<-1,-1>,class Storage=Dense<Col>,class ismatop=typename IsMatOp<T>::T>

@@ -1,0 +1,9 @@
+/*!
+\generic_comment Bar_3
+
+    Bar_3 représente un segment ou bien une tige sans épaisseur découpée en deux. 
+
+    \keyword Maillage/Elément
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+*/

@@ -64,64 +64,70 @@ namespace LMT {
     template<class VECOP> struct HasIndexAccess { static const bool res = true; };
 
 /*!
-    \generic_comment Vec
-        \friend raphael.pasquier@lmt.ens-cachan.fr
-        \friend hugo.leclerc@lmt.ens-cachan.fr
+\generic_comment Vec
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
 
-            = description générale
- 
-                La classe générique Vec est une classe conteneur général qui permet de stocker des éléments de même types ou non. Les éléments sont repérés par un undice entier, le premier indice étant zéro. La taille peut être fixée à la compilation avec un gain en performance ou être variable, la gestion de la mémoire étant transparente. 
-                Elle ressemble donc aux classes vector et valarray de la librairie standard avec davantage de fonctionnalités (utiles pour le calcul scientifique).
-                Elle est très optimisée pour le calcul intensif et permet de faire simplement des opérations sur la totalité ou une partie des éléments. 
-                On peut facilement récupérer les données de Matlab et les mettre dans un "Vec", travailler avec des threads Linux.
-                Exemple de déclaration et d'utilisation :
-                \code
-                    Vec<double> vx,vy,vz; // vecteur de double de taille variable.
-                    Vec<string,3> v1,v2,v3,v4("if","then","else"); // vecteur de taille 3 de chaine de caracères.
-                    double* tab ;
+        = description générale
 
-                        vz.resize(7);
-                        vz(tab); // copie les 7 premiers éléments du tableau tab dans vz.
-                        vx += abs(vy); // fait l'opération vx[i] = vx[i] + abs(vy[i]) pour tout i tq 0 <= i < vy.size() 
-                        v3 = v1 + v2; // ou tout autre opération compatible avec le type.
-                        vx.push_back( 1.0 ); // ajoute l'élément 1 à la fin du vecteur.
-                        vx.pop_back();       // le retire.
-                        std::cout << vx << std:endl ; // affiche vx 
+            La classe générique Vec est une classe conteneur général qui permet de stocker des éléments de même types ou non. Les éléments sont repérés par un undice entier, le premier indice étant zéro. La taille peut être fixée à la compilation avec un gain en performance ou être variable, la gestion de la mémoire étant transparente. 
+            Elle ressemble donc aux classes vector et valarray de la librairie standard avec davantage de fonctionnalités (utiles pour le calcul scientifique).
+            Elle est très optimisée pour le calcul intensif et permet de faire simplement des opérations sur la totalité ou une partie des éléments. 
+            On peut facilement récupérer les données de Matlab et les mettre dans un "Vec", travailler avec des threads Linux.
+            Exemple de déclaration et d'utilisation :
+            \code C/C++
+                Vec<double> vx,vy,vz; // vecteur de double de taille variable.
+                Vec<string,3> v1,v2,v3,v4("if","then","else"); // vecteur de taille 3 de chaine de caracères.
+                double* tab ;
 
-            = Methodes et fonctions les plus utiles
+                    vz.resize(7);
+                    vz(tab); // copie les 7 premiers éléments du tableau tab dans vz.
+                    vx += abs(vy); // fait l'opération vx[i] = vx[i] + abs(vy[i]) pour tout i tq 0 <= i < vy.size() 
+                    v3 = v1 + v2; // ou tout autre opération compatible avec le type.
+                    vx.push_back( 1.0 ); // ajoute l'élément 1 à la fin du vecteur.
+                    vx.pop_back();       // le retire.
+                    std::cout << vx << std:endl ; // affiche vx 
 
-                Les méthodes de la classe Vec sont :
-                    * push_back(a) ajoute une copie de a dans le vecteur,
-                    * pop_back() retire le dernier élément ajouté,
-                    * back() retourne une copie du dernier élément ajouté,
-                    * front() retourne une copie du premier élément,
-                    * begin() retourne un pointeur (cad l'adresse) du premier élément  
-                    * resize(int n) qui fixe la taille du vecteur à n,
-                    * free() qui libère la mémoire,
-                    * et ne pas oublier reserve( unsigned int n) qui réserve de la place pour n éléments. Ainsi s vous connaissez environ le nombre d'éléments à ajouter via push_back() par exemple, vos appels push_back() seront bien plus rapides si vous appelez préalablement reserve().
+        = Methodes et fonctions les plus utiles
 
-                <strong> IMPORTANT : </strong> On ne peut pas parler de la classe Vec sans parler de la fonction \a apply et de ses varaintes qui permettent de manipuler les éléments d'un vecteur sans les parcourir avec une boucle for. Alors n'hésitez pas à consulter la doc de \a apply . 
+            Les méthodes de la classe Vec sont :
+                * push_back(a) ajoute une copie de a dans le vecteur,
+                * pop_back() retire le dernier élément ajouté,
+                * back() retourne une copie du dernier élément ajouté,
+                * front() retourne une copie du premier élément,
+                * begin() retourne un pointeur (cad l'adresse) du premier élément  
+                * resize(int n) qui fixe la taille du vecteur à n,
+                * free() qui libère la mémoire,
+                * et ne pas oublier reserve( unsigned int n) qui réserve de la place pour n éléments. Ainsi s vous connaissez environ le nombre d'éléments à ajouter via push_back() par exemple, vos appels push_back() seront bien plus rapides si vous appelez préalablement reserve().
 
-            = Des classes spécialisées
+            <strong> IMPORTANT : </strong> On ne peut pas parler de la classe Vec sans parler de la fonction \a apply et de ses varaintes qui permettent de manipuler les éléments d'un vecteur sans les parcourir avec une boucle for. Alors n'hésitez pas à consulter la doc de \a apply . 
 
-                Pour certains usages, certaines spécialisations de la classe Vec sont plus recommandées :
-                    * \a Vec<Sparse<TT>,static_size_> pour les vecteurs creux, i.e. on ne mémorise que les valeurs non nulles. 
-                    * \a Vec<VecCst<TT>,static_size_,int> pour vecteur constant. En fait on ne mémorise q'une seule valeur d'où un gain en mémoire.
-                    * \a Vec<VecDirac<TT>,static_size_,int> pour vecteur dont tous les éléments sont nuls sauf un (pensez à la base canonique).
-                    * \a Vec<Heterogeneous<Carac,nt,TT>,static_size_,int> pour des vecteurs d'éléments de type différent.
-                    * \a VecSelect pour vecteur permettant de filtrer les éléments d'un autre vecteur. 
-                    * \a Vec<VecHeavyside<TT>,static_size_,int> fait référence à la fonction de Heavyside qui est nulle pour x<0 et qui vaut un pour x>=0.
-                    * \a Vec<Intersection<V0,V1,const_v0,false,false>,-1,int> Cette classe permet après spécialisation de déterminer l'intersction de deux vecteurs.
-                    * \a Vec<Range<TT,static_begin,static_step>,static_size_,int> Cette classe permet après spécialisation de définir des vecteurs dont les éléments non nuls sont placés de façon périodique.
-                    * \a Vec<Replace<TV,TR>,static_size_,int> (à faire).
-                    * \a Vec<Splitted<TT,atomic_size>,-1,int> Cette classe permet après spécialisation de définir des vecteurs dont les éléments sont stockés par blocs. Ce stockage améliore les performances pour certains algorithmes. 
-                    * \a SubVec (à faire).
-                    * \a VecElemList (à faire).
-                    * \a Vec<VecPointedValues<TT>,static_size_,int> Cette classe permet après spécialisation de définir un vecteur de pointeurs.
+        = Des classes spécialisées
 
-            = Divers
-                Vous pouvez aussi Consulter aussi la FAQ du wiki \a http://intranet/mediawiki/index.php/Vecteurs#id2442799
-    */
+            Pour certains usages, certaines spécialisations de la classe Vec sont plus recommandées :
+                * \a Vec<Sparse<TT>,static_size_> pour les vecteurs creux, i.e. on ne mémorise que les valeurs non nulles. 
+                * \a Vec<VecCst<TT>,static_size_,int> pour vecteur constant. En fait on ne mémorise q'une seule valeur d'où un gain en mémoire.
+                * \a Vec<VecDirac<TT>,static_size_,int> pour vecteur dont tous les éléments sont nuls sauf un (pensez à la base canonique).
+                * \a Vec<Heterogeneous<Carac,nt,TT>,static_size_,int> pour des vecteurs d'éléments de type différent.
+                * \a VecSelect pour vecteur permettant de filtrer les éléments d'un autre vecteur. 
+                * \a Vec<VecHeavyside<TT>,static_size_,int> fait référence à la fonction de Heavyside qui est nulle pour x<0 et qui vaut un pour x>=0.
+                * \a Vec<Intersection<V0,V1,const_v0,false,false>,-1,int> Cette classe permet après spécialisation de déterminer l'intersction de deux vecteurs.
+                * \a Vec<Range<TT,static_begin,static_step>,static_size_,int> Cette classe permet après spécialisation de définir des vecteurs dont les éléments non nuls sont placés de façon périodique.
+                * \a Vec<Replace<TV,TR>,static_size_,int> (à faire).
+                * \a Vec<Splitted<TT,atomic_size>,-1,int> Cette classe permet après spécialisation de définir des vecteurs dont les éléments sont stockés par blocs. Ce stockage améliore les performances pour certains algorithmes. 
+                * \a SubVec (à faire).
+                * \a VecElemList (à faire).
+                * \a Vec<VecPointedValues<TT>,static_size_,int> Cette classe permet après spécialisation de définir un vecteur de pointeurs.
+
+        = Divers
+            Vous pouvez aussi Consulter aussi la FAQ du wiki \a http://intranet/mediawiki/index.php/Vecteurs#id2442799
+
+    \keyword Algorithme/Conteneur
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \keyword Mathématiques/Algèbre linéaire
+    \author Hugo Leclerc
+*/
 
     template<class TO=double,int static_size=-1,class IVO=typename IsVecOp<TO>::T> class Vec;
     

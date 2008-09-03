@@ -18,6 +18,7 @@
 namespace LMT {
 
 // --------------------------------------------------------------------------------------------------------
+
 struct Bar_3 {
     static const unsigned nb_var_inter = 1;
     static const unsigned nb_nodes = 3;
@@ -40,6 +41,7 @@ void append_skin_elements(Element<Bar_3,TN,TNG,TD,NET> &e,TC &ch,HET &het,Number
 //void append_skin_elements(Element<Bar_3,TN,TNG,TD,NET> &e,TC &ch,HET &het,Number<1> nvi_to_subs) {}
 
 // --------------------------------------------------------------------------------------------------------
+
 template<class TN,class TNG,class TD,unsigned NET>
 typename TNG::Pvec sample_normal(const Element<Bar_3,TN,TNG,TD,NET> &e) {
     DEBUGASSERT( (TNG::dim==2) );
@@ -48,6 +50,7 @@ typename TNG::Pvec sample_normal(const Element<Bar_3,TN,TNG,TD,NET> &e) {
     res /= length(res);
     return res;
 }
+
 
 template<class TN,class TNG,class TD,unsigned NET>
 typename TNG::T measure( const Element<Bar_3,TN,TNG,TD,NET> &e ) {

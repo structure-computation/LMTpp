@@ -24,9 +24,9 @@ namespace LMTPRIVATE {
     };
 }
 
-/**
+/*!
     sum of all measure
-    \warning if elements do not share the same number of interpolation variables, you'll add areas to volumes and so on
+    ATTENTION : if elements do not share the same number of interpolation variables, you'll add areas to volumes and so on
     If it's the case, use measure( m, Number<nvi>() )
 */
 template<class TM>
@@ -36,9 +36,9 @@ typename TM::Tpos measure(const TM &m) {
     return res;
 }
 
-/**
+/*!
     sum of all measure
-    \warning if elements do not share the same number of interpolation variables, you'll add areas to volumes and so on
+    ATTENTION : if elements do not share the same number of interpolation variables, you'll add areas to volumes and so on
     If it's the case, use measure( m, Number<nvi>() )
 */
 template<class TM,unsigned n>
@@ -49,9 +49,9 @@ typename TM::Tpos measure(const TM &m,const Number<n> &nn) {
 }
 
 
-/**
+/*!
     sum of all measure
-    \warning if elements do not share the same number of interpolation variables, you'll add areas to volumes and so on
+    ATTENTION : if elements do not share the same number of interpolation variables, you'll add areas to volumes and so on
     If it's the case, use measure( m, Number<nvi>() )
 */
 template<class TM>

@@ -22,10 +22,10 @@
 
 namespace LMT {
 
-/**
-open paraview and send data
+/*!
+    open paraview and send data
 
-@author Hugo LECLERC
+    \author Hugo LECLERC
 */
 class DisplayParaview {
 public:
@@ -224,7 +224,7 @@ private:
     bool init_xminmax;
 };
 
-/**
+/*!
  * declare a DisplayParaview instance, push m and interact with user
  * @param m the mesh
  * @param nodal_field_to_display ...
@@ -236,7 +236,7 @@ template<class TM> void display_mesh(const TM &m,const char *nodal_field_to_disp
     dp.exec();
 }
 
-/**
+/*!
  * usefull to get several Windows (using apply_mt)
  */
 struct DpExec { void operator()(DisplayParaview &dp,unsigned i) const { dp.exec( "tmp/conf"+to_string(i)+".pvs"); } };

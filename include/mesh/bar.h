@@ -18,6 +18,16 @@
 namespace LMT {
 
 // --------------------------------------------------------------------------------------------------------
+
+/*!
+
+    Bar représente un segment ou bien une tige sans épaisseur. 
+
+    \keyword Elément
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+
+*/
 struct Bar {
     static const unsigned nb_var_inter = 1;
     static const unsigned nb_nodes = 2;
@@ -28,8 +38,18 @@ struct Bar {
 // --------------------------------------------------------------------------------------------------------
 template<> struct NbChildrenElement<Bar,1> { static const unsigned res = 2; };
 
+
+
 template<unsigned n> struct TypeChildrenElement<Bar,1,n> { typedef NodalElement T; };
 
+/*!
+
+    \keyword Elément/Opération
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \relates Bar
+    \relates Element 
+*/
 template<class TN,class TNG,class TD,unsigned NET,class TC,class HET>
 void append_skin_elements(Element<Bar,TN,TNG,TD,NET> &e,TC &ch,HET &het,Number<1> nvi_to_subs) {
     het.add_element(e,ch,NodalElement(),e.node(0));
@@ -39,8 +59,15 @@ void append_skin_elements(Element<Bar,TN,TNG,TD,NET> &e,TC &ch,HET &het,Number<1
 //void append_skin_elements(Element<Bar,TN,TNG,TD,NET> &e,TC &ch,HET &het,Number<1> nvi_to_subs) {}
 
 // --------------------------------------------------------------------------------------------------------
-/**
+/*!
     in 3D, all z are assumed to be identical
+
+    \keyword Elément/Opération
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \relates Bar
+    \relates Element 
+    \relates length
 */
 template<class TN,class TNG,class TD,unsigned NET,class Pvec,class T>
 void intersection(const Element<Bar,TN,TNG,TD,NET> &e,Pvec P1,Pvec P2,T &numP1P2,T &dist_ext) {
@@ -54,6 +81,16 @@ void intersection(const Element<Bar,TN,TNG,TD,NET> &e,Pvec P1,Pvec P2,T &numP1P2
     dist_ext = ( (P2[0]-P1[0])*(P1[1]-P3[1])-(P2[1]-P1[1])*(P1[0]-P3[0]) ) * den;
     dist_ext = (dist_ext>0.5) * (dist_ext-1.0) - (dist_ext<=0.5) * dist_ext;
 }
+
+/*! 
+
+    \keyword Elément/Opération
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \relates Bar
+    \relates Element 
+    \relates length
+*/
 template<class TN,class TNG,class TD,unsigned NET>
 typename TNG::Pvec sample_normal(const Element<Bar,TN,TNG,TD,NET> &e) {
     DEBUGASSERT( (TNG::dim==2) );
@@ -62,12 +99,31 @@ typename TNG::Pvec sample_normal(const Element<Bar,TN,TNG,TD,NET> &e) {
     res /= length(res);
     return res;
 }
+
+/*! 
+    sample_tangent() retourne le vecteur unitaire.
+
+    \keyword Elément/Opération
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \relates Bar
+    \relates Element 
+*/
 template<class TN,class TNG,class TD,unsigned NET>
 typename TNG::Pvec sample_tangent(const Element<Bar,TN,TNG,TD,NET> &e) {
     typename TNG::Pvec res = e.nodes[1]->pos - e.nodes[0]->pos;
     return res / length( res );
 }
 
+/*! 
+
+    \keyword Elément/Opération
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \relates copy
+    \relates Element 
+    \relates Bar
+*/
 template<class TN,class TNG,class TD,unsigned NET,class TM>
 bool divide_element(Element<Bar,TN,TNG,TD,NET> &e,TM &m,TNG **nodes) {
     if ( ! nodes[0] ) return false;
@@ -76,8 +132,17 @@ bool divide_element(Element<Bar,TN,TNG,TD,NET> &e,TM &m,TNG **nodes) {
     return true;
 }
 
-/** new_nodes are independant nodes created to make a fine grid for integration. Used in TvrcFormulation
+/*! 
+
+    new_nodes are independant nodes created to make a fine grid for integration. Used in TvrcFormulation
+    \keyword Elément/Opération
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
     \relates Triangle
+    \relates length
+    \relates get_ponderation
+    \relates Element 
+    \relates Bar
 */
 template<class TN,class TNG,class TD,unsigned NET,class T>
 void subdivision_element(const Element<Bar,TN,TNG,TD,NET> &e,Vec<TNG> &new_nodes,T max_dist) {
@@ -95,6 +160,14 @@ void subdivision_element(const Element<Bar,TN,TNG,TD,NET> &e,Vec<TNG> &new_nodes
     }
 }
 
+/*!
+    measure() donne la longueur de \a Bar
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \keyword Elément/Opération
+    \relates length
+    \relates Element 
+*/
 template<class TN,class TNG,class TD,unsigned NET>
 typename TNG::T measure( const Element<Bar,TN,TNG,TD,NET> &e ) {
     return length( e.node(1)->pos - e.node(0)->pos );
