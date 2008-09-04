@@ -6,6 +6,26 @@
 
 namespace LMT {
 
+/*!
+    Cube à 20 noeuds.
+    \verbatim
+        .                7 ---14----6
+        .               /|         /|
+        .            15  |       13 |
+        .            /  19      /  18
+        .            4---|-12---5   |
+        .            |   |      |   |
+        .            |   3---10-|-- 2
+        .            16 /      17  /
+        .            |11        | 9
+        .            |/         |/
+        .            0-----8----1
+
+    \keyword Maillage/Elément
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+*/
+
 //     7 ---14----6
 //    /|         /|
 //  15 |       13 |

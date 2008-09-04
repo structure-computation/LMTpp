@@ -19,6 +19,13 @@
 namespace LMT {
 
 // --------------------------------------------------------------------------------------------------------
+/*!
+    A faire
+
+    \keyword Maillage/Elément
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+*/
 struct Quad_6 {
     static const unsigned nb_var_inter = 2;
     static const unsigned nb_nodes = 6;

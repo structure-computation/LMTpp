@@ -16,9 +16,12 @@
 
 namespace Codegen {
 
-/**
+/*!
+    Cette classe sert pour le calcul symbolique des formulations écrites en Python.
 
-@author LECLERC Hugo
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \author LECLERC Hugo
 */
 class ExMatrix {
 public:

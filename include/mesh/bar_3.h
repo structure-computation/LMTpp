@@ -18,6 +18,12 @@
 namespace LMT {
 
 // --------------------------------------------------------------------------------------------------------
+/*!
+    Bar_3 représente une barre sans dimension ou segment avec un noeud dessus.  
+
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \keyword Maillage/Elément
+*/
 
 struct Bar_3 {
     static const unsigned nb_var_inter = 1;

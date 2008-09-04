@@ -26,7 +26,9 @@ namespace LMT {
                 | 0/---------\1
 
     \relates Mesh
-    \keyword Maillage/3D
+    \keyword Maillage/Elément
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
 */
 
 // --------------------------------------------------------------------------------------------------------
