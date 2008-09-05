@@ -19,6 +19,9 @@
 
 namespace LMT {
 
+/*!
+    Les classes Number<n> servent de paramètres à des classes ou fonctions paramétriques. Ces classes et ces fonctions ont des spécialisations pour les premières : cad  Number<0>, Number<1>, Number<2>, Number<3>. Ainsi les classes Number<n> jouent le rôle de descripteur pour des fonctions C.
+*/
 template<unsigned num> struct Number {};
 template<int num> struct Relative_Number {};
 

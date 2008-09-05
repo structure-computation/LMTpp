@@ -72,15 +72,28 @@ template<class T1,class T2,class T3> typename TypePromote<Max,T1,typename TypePr
     return max( a, max(b,c) );
 }
 
+/// identité.
 inline int ceil(int a) { return a; }
+/// identité.
 inline unsigned ceil(unsigned a) { return a; }
+/// fonction ceil de la std.
 template<class T> T ceil(T a) { return std::ceil(a); }
 
-///
+/*! 
+Dans le cas où a et m sont positifs, la fonction renvoie a si a est un multiple de m sinon elle renvoie a+1. 
+*/
 inline int ceil( int a, int m ) { return ( ( a + m - 1 ) / m ) * m; }
-///
+/*!
+Dans le cas où a et m sont positifs, la fonction renvoie le plus grand multiple de m inférieur ou égal à a.
+*/
 inline int floor( int a, int m ) { return a - a % m; }
 
+/*!
+\generic_comment heavyside
+
+    C'est la fonction de Heavyside qui renvoie un si son argument est supérieur ou égal à zéro et zéro sinon.
+    \keyword Mathématiques/Fonctions classiques 
+*/
 /// 1 if equal 0
 template<class T> bool heavyside(const T &val) { return (val>=0); }
 /// 1 if equal 0
@@ -174,7 +187,7 @@ template<class T> inline typename FloatType<T>::T acos(const T &val) { return st
 template<class T> inline typename FloatType<T>::T asin(const T &val) { return std::asin(val); }
 template<class T> inline typename FloatType<T>::T atan(const T &val) { return std::atan(val); }
 template<class T> inline typename FloatType<T>::T cos(const T &val) { return std::cos(val); }
-template<class T> inline typename FloatType<T>::T cosh(const T &val) { return std::cosh(val); }
+template<class T> inline typename FloatType<T>::T cosh(const T &val) { return std::cosh(val); } /// cosinus hyperbolique
 template<class T> inline typename FloatType<T>::T exp(const T &val) { return std::exp(val); }
 template<class T> inline typename FloatType<T>::T log(const T &val) { return std::log(val); }
 template<class T> inline typename FloatType<T>::T log10(const T &val) { return std::log10(val); }
@@ -190,7 +203,7 @@ template<class T> inline typename FloatType<T>::T tanh(const T &val) { return st
 template<class T1,class T2> typename TypePromote< Divides, T2, T1>::T
  solve(const T1 &A,const T2 &b) { return b/A; }
 
-/// swap
+/// swap : permute les deux arguments
 template<class T1,class T2> void swap(T1 &v1,T2 &v2) {
     T2 tmp = v1;
     v1 = v2;
@@ -235,6 +248,10 @@ struct GetFromStream {
     }
 };
 
+/*!
+
+    \keyword Utilitaires
+*/
 struct DoNothing {
     template<class T1,class T2=void,class T3=void,class T4=void> struct ReturnType { typedef void T; };
     template<class T> void operator()(const T &t) const {}
@@ -250,6 +267,11 @@ struct DoNothing {
 // }
 
 //return 1 if all the vector component are equal to 1 otherwise 0
+/*!
+    L'argument de bool_vec() doit être un vecteur de types scalaires ou bouléens. Elle renvoie vrai si tous les éléments sont non nuls ou vrais et faux sinon.
+    \keyword Utilitaires
+    \keyword Algorithme/Extraire
+*/
 template<class TV> bool bool_vec(const TV &v){
    bool res=1;
    for(unsigned i=0;i<v.size();++i){
