@@ -28,6 +28,30 @@ struct Tetra_10;
  * @param nb_x 
  * @param nb_y 
  */
+
+
+/*!
+\generic_comment make_rect
+
+    Cette fonction permet de générer un maillage de forme pavé (oblique) défini par les coordonnées cartésiennes X0 et X1 de sommets opposés, le type d'élément (Hexa, Quad_8, etc...) et le nombre de points par dimension.
+    Voici un exemple de code en dimension 3 générique :
+    \code C/C++
+        #include "mesh/make_rect.h"
+        using namespace LMT;
+        int main(int argc,char* argv[]) {
+            typedef Mesh<MeshCarac<3,double> > TM;
+            typedef TM::Pvec Pvec;
+        
+            TM m;
+            make_rect( m, Hexa(), Pvec( 0, 0, 0 ), Pvec( 2., 1., 1. ), Pvec( 100,50,50 ) );
+
+            trturn 0;
+        }
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \keyword Maillage/Elément/Opération
+*/
+
 template<class TM>
 void make_rect(TM &m,const Bar &t,typename TM::Pvec X0,typename TM::Pvec X1,typename TM::Pvec nb_points_) {
     typedef typename TM::Pvec Pvec;
@@ -422,18 +446,19 @@ struct BestialNodeAdder {
 };
 
 /**
- * Hexa_20
-//     7 ---14----6
-//    /|         /|
-//  15 |       13 |
-//  /  19      /  18
-// 4---|-12---5   |
-// |   |      |   |
-// |   3---10-|-- 2
-// 16 /      17  /
-// |11        | 9
-// |/         |/
-// 0-----8----1
+  Hexa_20
+    \verbatim
+        .                        7 ---14----6
+        .                       /|         /|
+        .                    15  |       13 |
+        .                    /  19      /  18
+        .                    4---|-12---5   |
+        .                    |   |      |   |
+        .                    |   3---10-|-- 2
+        .                    16 /      17  /
+        .                    |11        | 9
+        .                    |/         |/
+        .                    0-----8----1
  */
 template<class TM>
 void make_rect(TM &m,const Hexa_20 &t,typename TM::Pvec X0,typename TM::Pvec X1,typename TM::Pvec nb_elements) {
@@ -473,15 +498,16 @@ void make_rect(TM &m,const Hexa_20 &t,typename TM::Pvec X0,typename TM::Pvec X1,
     }
 }
 
-/**
-     Tetra_10
-        3
-       /|\
-      / |9\
-    7/  |  \8
-    /  /2\  \
-   / /6   5\ \
-  0/--- 4----\1
+/**  
+    \verbatim
+        .                        Tetra_10
+        .                            3
+        .                           /|\
+        .                          / |9\
+        .                        7/  |  \8
+        .                        /  /2\  \
+        .                       /  /6 5\  \
+        .                     0/--- 4------\1
  */
 template<class TM>
 void make_rect(TM &m,const Tetra_10 &t,typename TM::Pvec X0,typename TM::Pvec X1,typename TM::Pvec nb_elements) {

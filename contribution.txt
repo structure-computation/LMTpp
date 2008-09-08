@@ -5,26 +5,136 @@
 
     = Signaler un bug
 
-        En fait, la librairie a été beaucoup testé si votre programme plante ou si les résultats ne sont pas conformes, il est fort probable que vous ayez fait une erreur. La plus courante est un accès en lecture ou en écriture à des éléments d'un tableau non initialisés. Demandez aussi à vos voisins de vérifier votre code.
+        En fait, la librairie a été beaucoup testé et si votre programme plante ou si les résultats ne sont pas conformes, il est fort probable que vous ayez fait une erreur. La plus courante est un accès en lecture ou en écriture sur des éléments d'un tableau non initialisés. Demandez aussi à vos voisins de vérifier votre code.
         Sinon, envoyez un exemple simple de code où se situe l'erreur à \a hugo.leclerc@lmt.ens-cachan.fr ou à \a raphael.pasquier@lmt.ens-cachan.fr .
 
     = Ecrire du code
 
-        Vous pouvez compléter la librairie en ajoutant par exemple de nouvelles fonctions, formulations, éléments. Pour soumettre votre code, utiliser le programme git ou en dernier recours envoyer votre code par Email à Hugo  \a hugo.leclerc@lmt.ens-cachan.fr .
+        Vous pouvez compléter la librairie en ajoutant par exemple de nouvelles fonctions, formulations, éléments. Pour soumettre votre code, utiliser le programme git.
         Mais comment faire avec git ?
         Après avoir fini le code, taper dans une console dans le répertoire LMT/ : 
-        git commit -a
+        \code 
+            git commit -a
         pour faire une soummission. Vous entrez dans un éditeur de texte archaique. Taper un commentaire puis sortez.
         Ensuite tapez en console :
-        git-format-patch origin
+        \code 
+            git-format-patch origin
+        Le résultat est un fichier .patch qui vous enverrez à Hugo par Email.
 
     = Ecrire de la documentation
 
-        Vous pouvez aussi compléter et corriger la documentaion. 
+        Vous pouvez aussi compléter et corriger la documentaion. Vous pouvez utiliser git comme dans la section précédente.
+        Pour écrire des commentaires qui seront inclus dans les pages web de la documentation, vous devez respecter une syntaxe proche de celle de wiki.
 
+        = Introduction
 
+            Pour commencer il faut savoir que les commentaires qui seront examinés par le générateur de documentation sont entre les balises :
+            \verbatim 
+                / *!   / et *! sont attachés
+                    je commente mon code
+                * /  / * sont attachés
+            ou s'ils logent sur une seule ligne par trois slash.
+            Ainsi si vous souhaitez faire des commentaires personnels qui n'apparaîtront pas dans la doc, utilisez les balises standardsdu C++ ou celles de doxygen.
+            Ensuite <strong> LA REGLE D'OR </strong> pour écrire de la documentaion est de se souvenir que les sous-parties sont identifées par leur <strong> INDENTATION </strong> et la <strong> FIN DE LIGNE </strong>. Par exemple pour écrire un bout de code dans un commentaire, vous écrirez :
+            \verbatim
+                \code C/C++
+                    int main(int argc, char* argv[]) {
+                        std::cout << " hello world !" << std::endl;
+                        return 0;
+                    }
+                Cette phrase ne fait pas partie du bloc code car elle n'est pas indentée par rapport à celui-ci.
+            Ainsi pour identifer le bout de code, il n'est pas besoin de balise "fermante" comme en HTML genre <code> ... </code>. 
+            Maintenant on peut énumérer la syntaxe.
 
+        = Différents types de commenaires
 
+            Sachez que les blocs simples
+            \verbatim
+                / *!   * /
+                ///
+            sont rattachés à la première classe, méthode, fonction qui suit (ou qui précède pour le triple slash). 
+            Ensuite il existe quatre autres types de commentaires :
+            * le commentaire exemple qui commence par le mot-clé anti-slash example
+                \verbatim
+                    / *!
+                    \example titre de l'exemple
+                        bla bla ... (ATTENTION à l' INDENTATION!)
+                    * /
+            * le commentaire tutoriel qui commence par le mot-clé anti-slash tutorial
+                \verbatim
+                    / *!
+                    \tutorial titre du tutoriel
+                        bla bla ... (ATTENTION à l' INDENTATION!)
+                    * /
+            * le commentaire générique
+                S'il y a surdéfinition d'une fonction ou spécialisation d'une classe (paramétrique), il est intéressant d'avoir un commentaire général. On utilisera le commentaire de type générique, mot clé anti-slash generic_comment:
+                \verbatim
+                    / *!
+                    \generic_comment nom
+                        bla bla ... (ATTENTION à l' INDENTATION!)
+                    * /
+            * un commentaire général avec le mot-clé anti-slash webpage
+                Si un commentaire ne concerne pas une partie du code, on écrira :
+                \verbatim
+                    / *!
+                    \webpage nom_de_la_page titre de la page
+                         bla bla ... (ATTENTION à l' INDENTATION!)
+                    * /
 
+        = Les mot-clés et symboles
 
+            Outre ceux précédemment cités, on trouve des mots clés pour le formatage du texte:
+
+            * pour les <strong> sections </strong> avec le symbole =. Exemple :
+                \verbatim
+                    = section 1
+                    = sectoin 2
+                        = sous section 2.1
+                    = section 3
+            * Pour les <strong> listes </strong> avec le symbole *. Exemple :
+                \verbatim
+                    * item 1
+                    * item 2
+                        * sous-item 2.1
+            * Pour les <strong> tableaux </strong> avec le symbole & et le mot clé table. Par exemple :
+                \verbatim
+                    \table titre
+                        cell1 & cell2
+                        cell3 & cell4
+            * Pour le <strong> code </strong> avec le mot-clé code.
+                \verbatim 
+                    \code nom du langage
+                        code
+            * Pour faire un <strong> lien </strong> dans du texte avec le mot-clé a. Exemple :
+                \verbatim
+                    \a Vec
+                    \a www.google.fr
+                    \a truc@fai.fr
+            * Pour une <strong> ancre </strong> , cible d'un lien, avec le mot-clé anchor. Exemple :
+                \verbatim
+                    \a #titi
+                    \anchor titi
+            * Pour faire un <strong> lien bi-directionnel </strong> en fin de page avec le mot-clé relates :
+                \verbatim
+                    \relates Vec
+            * Pour un <strong> texte au format LaTeX </strong> avec le mot clé latex. Exemple :
+                \verbatim
+                    \latex
+                        $$ a^n+b^n=c^n $$ 
+            * Pour un <strong> courte description </strong> avec le mot clé brief. Exemple :
+                \verbatim 
+                    \brief Vec est un conteneur générique pour stocker un vecteur
+            * Pour associer l'élément commenté à un <strong> mot-clé de recherche </strong> , avec le mot-clé keyword :
+                \verbatim
+                    / *!
+                    sinus est une fontion trigonométrique définie sur R tout entier.
+                    \keyword Mathématiques/Fonction élémentaire/Trigonométrie
+                    * /
+                    double sin(double x) { ... }
+            * Pour signaler un <strong> ami </strong> pouvant vous aider, avec le mot-clé friend :
+                \verbatim 
+                    \friend hugo.leclerc@lmt.ens-cachan.fr
+            * Pour préciser l' <strong> auteur </strong> du code ou du commentaire avec le mot-clé author :
+                \verbatim
+                    \author Hugo Leclerc
 */
