@@ -1,0 +1,30 @@
+/*!
+\webpage contribution Contribution
+
+    Il y a plusieurs façon de contribuer à la librairie LMT++. 
+
+    = Signaler un bug
+
+        En fait, la librairie a été beaucoup testé si votre programme plante ou si les résultats ne sont pas conformes, il est fort probable que vous ayez fait une erreur. La plus courante est un accès en lecture ou en écriture à des éléments d'un tableau non initialisés. Demandez aussi à vos voisins de vérifier votre code.
+        Sinon, envoyez un exemple simple de code où se situe l'erreur à \a hugo.leclerc@lmt.ens-cachan.fr ou à \a raphael.pasquier@lmt.ens-cachan.fr .
+
+    = Ecrire du code
+
+        Vous pouvez compléter la librairie en ajoutant par exemple de nouvelles fonctions, formulations, éléments. Pour soumettre votre code, utiliser le programme git ou en dernier recours envoyer votre code par Email à Hugo  \a hugo.leclerc@lmt.ens-cachan.fr .
+        Mais comment faire avec git ?
+        Après avoir fini le code, taper dans une console dans le répertoire LMT/ : 
+        git commit -a
+        pour faire une soummission. Vous entrez dans un éditeur de texte archaique. Taper un commentaire puis sortez.
+        Ensuite tapez en console :
+        git-format-patch origin
+
+    = Ecrire de la documentation
+
+        Vous pouvez aussi compléter et corriger la documentaion. 
+
+
+
+
+
+
+*/

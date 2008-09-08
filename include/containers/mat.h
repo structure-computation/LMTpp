@@ -39,16 +39,15 @@ template<class MATOP> struct IsMatOp { typedef void T; };
 
             = Matrice creuse
                 A faire
-            = Matrice symétrique, de Heisenberg
-                A faire
+            = Matrice à symétrique
+                Les matrices symétriques se définissent en spécialisant le type \a Mat de base. On a les possibilités \a Sym , \a AntiSym , \a Herm . Pour des détails et des exemples, allez à la FAQ \a #1 
             = Matrice spéciale pour la décomposition LU
-                A faire
+                Pour la décomposition LU, il y a un format de stockage particulier spécialisé par la classe \a SparseLU . Pour un tutorial, allez à \a decompositiond'unematrice  et la FAQ \a #17 , \a #18
     = FAQ 
 
         Cette FAQ est tirée de celle de l'intranet : 
 
         * Définition, instantiation
-
             * \a #1 Les paramètres template des matrices et exemples de déclaration
             * \a #8 Pour créer une matrice (ici taille 100,20) constituee du meme nombre (ici 1.0) partout  
             * \a #5 Pour affecter la valeur 4 a toute la matrice 
@@ -60,9 +59,7 @@ template<class MATOP> struct IsMatOp { typedef void T; };
             * \a #20 Pour initialiser une matrice dont les valeurs sont contenues dans un fichier texte
             * \a #13 Pour concaténer deux matrices
             * \a #22 Pour extraire une sous-matrice (à faire).
-
         * Manipulation
-
             *  pour accéder à l'élément de ligne i et de colonne j, on fait M(i,j) sachant que les indices commencent à zéro.
             * \a #7 Pour faire des operations matrice-vecteur  
             * \a #9 Pour obtenir le nombre de colonnes ou de lignes 
@@ -70,18 +67,12 @@ template<class MATOP> struct IsMatOp { typedef void T; };
             * \a #14 Pour modifier la diagonale de la matrice (ajouter 3) 
             * \a #19 Pour vraiment inverser une matrice (à ne pas utiliser sans l'autorisation formelle de la Leclerc Corp. Inc.)
             * \a #21 Pour calculer la moyenne, la variance, le min, le max des éléments d'une matrice
-
         * Affichage
-
             * \a #4 Pour afficher la matrice  
             * \a #16 Pour afficher la forme des elements d'une matrice M sparse ou skyline  
-
         * Résolution d'équations linéaires
-
             * \a #17 Pour faire une factorisation de cholesky d'une matrice M et la stocker dans une nouvelle matrice I (M doit etre du type : Mat<type, Sym<>, stockage >) 
             * \a #18 Pour résoudre un problème directement sans factoriser préalablement ni inverser de matrice
-
-
 
         \anchor 1 Les paramtres template des matrices Mat<T,STR,STO> signifient :
         * T est le type scalaire de base (double, float, long double, std::complex<double>, ...). 
