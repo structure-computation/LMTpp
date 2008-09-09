@@ -9,15 +9,16 @@ namespace LMT {
 /*!
 
 \verbatim
-    3------2
-    |      |
-    |      |
-    |      |
-    0------1
+                    3------2
+                    |      |
+                    |      |
+                    |      |
+                    0------1
 
-  \author Hugo LECLERC
-  \friend hugo.leclerc@lmt.ens-cachan.fr
-
+    \relates Mesh
+    \keyword Maillage/Elément
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
 */
 
 // --------------------------------------------------------------------------------------------------------

@@ -27,6 +27,17 @@ namespace LMT {
 */
 
 // --------------------------------------------------------------------------------------------------------
+/*!
+    Carré 4x2.
+    \verbatim
+        .                    3--7--6--2
+        .                    |        |
+        .                    0--4--5--1
+
+    \keyword Maillage/Elément
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+*/
 struct Quad_42 {
     static const unsigned nb_var_inter = 2;
     static const unsigned nb_nodes = 8;

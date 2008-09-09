@@ -1,12 +1,11 @@
 /*!
 \tutorial Décomposition d'une matrice
 
-    A quoi bon une décomposition ?
-
-    Décomposer une matrice est intéressant par exemple lorsque il est nécessaire de résoudre des systèmes linéaires mx=f où la matrice m ne change pas.
+    Pourquoi une décomposition ?
+    Décomposer une matrice est intéressant par exemple lorsque il est nécessaire de résoudre plusieurs systèmes linéaires mx=f où la matrice m ne varie pas.
     Et suivant que la matrice est réelle symétrique, on prendra la décomposition de Cholesky ou sinon la décomposition LU dans le cas général.
 
-    = Décomposition de Cholesky
+    = Décomposition de Cholesky pour matrice symétrique ou hermitienne
 
         Rappel mathématique : Si m est symétrique définie positive, il existe une unique matrice C triangle supérieure à coefficients diagonaux positifs tel que m = tC * C où tC désigne la transposée de C. Du coup, le système mx=f s'écrit Cx=y et tCy=f et donc résoudre Kx=f revient à résoudre deux systèmes linéaires "triangulaires" donc très simple à résoudre.
         Pour décomposer m suivant la méthode de Cholesky, on utilise la fonction chol_factorize (m) et pour ensuite résoudre le système mx=f, on appelle la fonction solve_using_chol_factorize(m,f,x).
@@ -46,30 +45,27 @@
         \relates chol_factorize
         \relates solve_using_chol_factorize
 
-        Remarque : les fonctions chol_factorize (m) solve_using_chol_factorize(m,f,x) peuvent aussi être utilisée pour des matrices hermitiennes de type \a Mat <T,Herm<s>,SparseLine<>> .
+        Remarque : les fonctions chol_factorize (m) solve_using_chol_factorize(m,f,x) peuvent aussi être utilisée pour des matrices hermitiennes de type \a Mat<T,Herm<s>,SparseLine<>> .
 
     = Décomposition LU
 
         Si la matrice m n'a pas de symétrie, on utilise cette décomposition. On montre que cette décomposition matricielle correspond à la méthode de Gauss de résolution d'un système linéaire. Ainsi il existe plusieurs variantes dont deux ont été implémenté, une sans choix de pivot et une autre avec pivot partiel.
         La deuxième variante avec pivot partiel est plus stable numériquement, ne s'arrête pas si un des pivots de la méthode de Gauss est proche de zéro mais elle demande plus d'opérations.
         Pour décomposer m, on utilise lu_factorize() et pour résoudre un système solve_using_lu_factorize(). 
-        REMARQUE IMPORTANTE : la matrice doit être stockée au format SparseLU.
+        REMARQUE IMPORTANTE : la matrice doit être stockée au format \a SparseLU.
 
         En code C++, cela donne par exemple sans choix du pivot:
         \code C/C++
             #include <containers/mat.h>
             using namespace LMT;
 
-            #define DIM 3
-
             int main() {
-               Mat<double,Gen<>, SparseLU > m(DIM,DIM);
-                Mat<double,Gen<> > ms ;
+                Mat<double,Gen<>, SparseLU > m(3,3);
 
                 m.diag() = 130.;
                 m(0,1) = 30.;
                 m(0,2) = 1.;
-                ms = m;
+                Mat<double,Gen<> > ms = m;
                 PRINTN(ms);
                     //  ms ->
                     // 130 30  1
@@ -91,15 +87,13 @@
         Remarque : La fonction solve_using_lu_factorize() prendra aussi en paramètre le vecteur permutation pour calculer la solution du sytème. 
 
         Exemple de code C++
+        \code C/C++
             #include <containers/mat.h>
             using namespace LMT;
 
-            #define DIM 3
-
             int main() {
             
-                Mat<double,Gen<>, SparseLU > m(DIM,DIM);
-                Mat<double,Gen<> > ms ;
+                Mat<double,Gen<>, SparseLU > m(3,3);
                 Vec<int> vecteur_permutation;
             
                 m.diag() = 20.;
@@ -107,7 +101,7 @@
                 m(1,0) = 30.;
                 m(0,2) = 1.;
                 m(2,0) = 1.;
-                ms = m;
+                Mat<double,Gen<> > ms = m;
                 PRINTN(ms);
                     //  ms ->
                     // 20 30 1
@@ -128,8 +122,10 @@
                     // -7.10543e-15 0 0
             }
 
-        \relates lu_factorize
-        \relates solve_using_lu_factorize
+    \relates lu_factorize
+    \relates solve_using_lu_factorize
+
+    \keyword Mathématiques/Algèbre linéaire/Décomposition de matrices
 
     \friend pasquier@lmt.ens-cachan.fr
     \friend leclerc@lmt.ens-cachan.fr

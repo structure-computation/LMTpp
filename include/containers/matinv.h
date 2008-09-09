@@ -46,21 +46,29 @@ public:
     TF fact;
 };
 
-/** \relates Mat
+/*! \relates Mat
     Return an Inv<> object with factorization matrix
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
 */
 template<class T,class Str,class Sto,class IO>
 Inv<T,Str,Sto,IO> inv(const Mat<T,Str,Sto,IO> &m) throw(SolveException) {
     return m;
 }
 
-/**
+/*!
+
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
 */
 template<class T1,class Str,class Sto,class IO,class T2,int s2,class IO2>
 typename TypePromote< Divides, typename Vec<T2,s2,IO2>::template SubType<0>::T,typename Mat<T1,Str,Sto,IO>::T>::T
  solve(const Mat<T1,Str,Sto,IO> &A,const Vec<T2,s2,IO2> &b) throw(SolveException) { return inv(A)*b; }
 
-/**
+/*!
+
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
 */
 template<class T,class Str,class Sto,class IO,class AltT,class TT2,int s2>
 Vec<typename TypePromote<Multiplies,AltT,typename Vec<TT2,s2>::template SubType<0>::T>::T> operator*(const Inv<T,Str,Sto,IO,AltT> &i, const Vec<TT2,s2> &b) throw(SolveException) {

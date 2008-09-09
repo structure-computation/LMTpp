@@ -22,27 +22,30 @@
 #include "meshcarac.h"
 #include "elemlist.h"
 
-/** \defgroup maillages Définition et travail sur les maillages
-  \brief Classes et Fonctions utiliser pour définir ou travailler sur des maillages
-  \author Hugo LECLERC
-  
-  Pour utiliser la classe maillage il est nécessaire d'inclure le fichier mesh/mesh.h lors de la déclaration d'un maillage.
-  \code #include "mesh/mesh.h" \endcode 
-
+/*!
+    \brief Classes et Fonctions utiliser pour définir ou travailler sur des maillages
+    \author Hugo LECLERC
+    
+    Pour utiliser la classe maillage il est nécessaire d'inclure le fichier mesh/mesh.h lors de la déclaration d'un maillage.
+    \code C/C++
+        #include "mesh/mesh.h" 
+    \keyword 
 */
 
-/** \ingroup maillages
-\brief Classe générique pour la déclaration d'un maillage.
-
-La classe Mesh est paramétrable par une classe de caractéristiques définie et généré à partir du fichier SConstruct.
-
-Dans tous les exemples le maillage est noté m.
-Supposons que la classe Mesh_carac_pb_elast existe, on définira le maillage par :
-\code Mesh<Mesh_carac_pb_elast<2,double> > m; \endcode
-On pourra poser :
-\code typedef Mesh<Mesh_carac_pb_elast<2,double> > TM ;
-TM m;
-\endcode
+/*!
+    \brief Classe générique pour la déclaration d'un maillage.
+    
+    La classe Mesh est paramétrable par une classe de caractéristiques définie et généré à partir du fichier SConstruct.
+    
+    Dans tous les exemples le maillage est noté m.
+    Supposons que la classe Mesh_carac_pb_elast existe, on définira le maillage par :
+    \code C/C++
+        Mesh<Mesh_carac_pb_elast<2,double> > m;
+    On pourra poser :
+    \code C/C++
+        typedef Mesh<Mesh_carac_pb_elast<2,double> > TM ;
+        TM m;
+    \keyword Maillage
 */
 
 namespace LMT {

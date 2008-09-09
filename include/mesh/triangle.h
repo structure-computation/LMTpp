@@ -9,17 +9,18 @@ namespace LMT {
 
 /*!
     \verbatim
-                |  2
-                |  |\
-                |  | \
-                |  |  \
-                |  |   \
-                |  0----1
+                            2
+                            |\
+                            | \
+                            |  \
+                            |   \
+                            0----1
 
     \relates Mesh
-    \keyword Maillage/2D 
+    \keyword Maillage/Elément 
     \author Hugo LECLERC
     \friend hugo.leclerc@lmt.ens-cachan.fr
+    \friend raphael.pasquier@lmt.ens-cachan.fr
 */
 
 // --------------------------------------------------------------------------------------------------------

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import sys, re, string
 from formal_lf import *
 # gro toto

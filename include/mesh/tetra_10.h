@@ -7,14 +7,19 @@ namespace LMT {
 
 /**
 
-       3
-      /|\
-     / |9\
-   7/  |  \8
-   /  /2\  \
-  / /6   5\ \
- 0/--- 4----\1
+    Tétraèdre
+    \verbatim
+        .                          3
+        .                         /|\
+        .                        / |9\
+        .                      7/  |  \8
+        .                      /  /2\  \
+        .                     / /6   5\ \
+        .                    0/--- 4----\1
 
+    \keyword Maillage/Elément
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
 */
 
 // --------------------------------------------------------------------------------------------------------

@@ -26,6 +26,7 @@ namespace LMT {
 
     A FAIRE : apply_wi a d'autres syntaxes utilisées en interne. J'en parlerai plus tard.
 
+    \\keyword Algorithme/Transformer
     \\friend raphael.pasquier@lmt.ens-cachan.fr
     \\friend hugo.leclerc@lmt.ens-cachan.fr
     \\author Hugo Leclerc
@@ -46,7 +47,7 @@ namespace LMT {
     \\relates apply
     \\relates find
     \\relates Vec
-    
+    \\keyword Algorithme/Transformer
     \\friend hugo.leclerc@lmt.ens-cachan.fr
     \\friend raphel.pasquier@lmt.ens-cachan.fr
 */
@@ -60,6 +61,7 @@ namespace LMT {
          booléen find( vecteur, opérateur, paramètres faculatatifs de l'opérateur ) 
 
     <strong>Remarque : L'opérateur doit renvoyer un booléen.</strong>
+    \\keyword Algorithme/Extraire
     \\relates Vec 
     \\friend hugo.leclerc@lmt.ens-cachan.fr
     \\friend rapahel.pasquier@lmt.ens-cachan.fr
@@ -75,6 +77,7 @@ namespace LMT {
          
     Elle permet d'appliquer l'opérateur sur les indices de l'intervalle [début;fin[ (<strong> Attention : fin n'est pas compris </strong>).
 
+    \\keyword Algorithme/Transformer
     \\relates Vec 
     \\friend hugo.leclerc@lmt.ens-cachan.fr
     \\friend rapahel.pasquier@lmt.ens-cachan.fr
@@ -112,6 +115,7 @@ namespace LMT {
           _1 représente l'élément courant et _2 le premier paramètre i.e. 100.
         * l'opérateur parenthèse, operator(), doit retourner un booléen.
 
+    \\keyword Algorithme/Transformer
     \\relates Vec 
     \\relates apply
     \\friend hugo.leclerc@lmt.ens-cachan.fr
@@ -124,7 +128,7 @@ namespace LMT {
     Cette fonction renvoie un pointeur sur le premier élément d'un vecteur vérifiant une certaine propriété. 
     La syntaxe générale est 
     \code
-         remove_if( vecteur, opérateur, paramètres faculatatifs de l'opérateur ) 
+         find_elem( vecteur, opérateur, paramètres faculatatifs de l'opérateur ) 
          
     C'est l'opérateur qui contient la condition. Voici un exemple où on récupère un pointeur sur le premier élément égal à 7  d'un vecteur d'entier.
     \code C/C++
@@ -163,6 +167,7 @@ namespace LMT {
     
     <strong> Remarque importante : la fonction ne marche pas avec les vecteurs hétérogènes (à moins que le type des éléments dérivent d'un type ancêtre).</strong>
 
+    \\keyword Algorithme/Extraire
     \\relates Vec 
     \\relates apply
     \\friend hugo.leclerc@lmt.ens-cachan.fr

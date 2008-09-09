@@ -21,6 +21,11 @@ namespace LMT {
 
 /// Ex : CARACDMEXTNAME(0,double,pressure);
 /// Used when pressure_DM is defined outward
+/**
+Cette macro permet l'introspection du code C++ pour obtenir par exemple les attributs et les méthodes d'une classe.
+
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+*/
 #define CARACDMEXTNAME(number,mytype,myname,unit) \
     template<unsigned n,unsigned ioena=0> struct SubType##number { typedef void TT; typedef void NT; }; \
     template<unsigned ioena> struct SubType0<number,ioena> { typedef mytype TT; typedef myname##_DM NT; }; \

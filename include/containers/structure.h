@@ -14,7 +14,7 @@
 
 namespace LMT {
 
-/** Type of matrix structure. Generic square matrix
+/*! Type of matrix structure. Generic square matrix
  */
 template<int s_rows=-1,int s_cols=s_rows>
 struct Gen {
@@ -31,7 +31,7 @@ struct Gen {
     template<class V,class T> inline void set_strutured(V &t,unsigned line,unsigned column,const T &val) const { t(line,column) = val; }
 };
 
-/** Type of matrix structure. Symmetric matrix
+/*! Type of matrix structure. Symmetric matrix
 */
 template<int size=-1,bool stored_in_upper_part_=false>
 struct Sym {
@@ -46,7 +46,7 @@ struct Sym {
     static const bool need_lower = !stored_in_upper_part_;
 };
 
-/** Type of matrix structure. Symmetric matrix
+/*! Type of matrix structure. Symmetric matrix
 */
 template<int size=-1,bool stored_in_upper_part_=false>
 struct Herm {
@@ -62,7 +62,7 @@ struct Herm {
 };
 
 
-/** Type of matrix structure. Antisymmetric matrix
+/*! Type of matrix structure. Antisymmetric matrix
 */
 template<int size=-1,bool stored_in_upper_part_=false>
 struct AntiSym {
@@ -78,7 +78,7 @@ struct AntiSym {
 };
 
 
-/** Type of matrix structure. Antisymmetric matrix
+/*! Type of matrix structure. Antisymmetric matrix
 */
 template<int s_rows=-1,int s_cols=s_rows>
 struct Diag {
@@ -93,7 +93,7 @@ struct Diag {
 };
 
 
-/** Type of matrix structure.
+/*! Type of matrix structure.
 */
 template<int s_rows=-1,int s_cols=s_rows>
 struct TriUpper {
@@ -107,7 +107,7 @@ struct TriUpper {
     static const bool need_lower = false;
 };
 
-/** Type of matrix structure.
+/*! Type of matrix structure.
 */
 template<int s_rows=-1,int s_cols=s_rows>
 struct TriLower {
@@ -121,7 +121,7 @@ struct TriLower {
     static const bool need_lower = true;
 };
 
-/**
+/*!
     typedef ... T where ... is the transposed structure
 */
 template<class STR> struct StructureTrans {};

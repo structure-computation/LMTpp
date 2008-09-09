@@ -57,7 +57,23 @@ std::ostream &operator<<(std::ostream &os,const ElementAncestor<TNode> &ea) {
     return os;
 }
 
-///
+/*!
+\generic_comment Element
+
+    C'est la classe parent de tous les éléments géométriques (Triangle, Tetra, ...) servant à construire les maillages. Elle hérite de la classe "générique" TData qui contient les informations et surtout de \a ElementAncestor<TNode_> qui permet le polymorphisme dynamique sur des méthodes générales et qui stocke l'atribut number (pour l'indexation dans le maillage original).
+
+    \a Element et ses spécialisations ont cinq paramètres template, soit :
+        * NameElem est la classe du type d'élément (e.g. Triangle_6,...)
+        * NameBehavior est la classe contenant les informations sur le comportement de l'élément.
+        * TNode est le type de noeud (rappelons que TNode contient au moins sa position et d'autres données si nécessaires).
+        * TData est la classe stockant les données propres à un élément. Pour simplifier leur accès, element hérite aussi de TData.
+        * num_in_elem_list est le numéro de la sous liste du vecteur hétérogène qui contient l'élément.
+
+    \keyword Maillage/Elément
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+*/
+
 template<class NameElem_,class NameBehavior,class TNode_,class TData,unsigned num_in_elem_list_>
 class Element : public TData, public ElementAncestor<TNode_> {
 public:
