@@ -17,13 +17,13 @@
 namespace LMT {
 /*!
     \verbatim
-                |       3
-                |      /|\
-                |     / | \
-                |    /  |  \
-                |   /  /2\  \
-                |  / /     \ \
-                | 0/---------\1
+        .                               3
+        .                              /|\
+        .                             / | \
+        .                            /  |  \
+        .                           /  /2\  \
+        .                          / /     \ \
+        .                        0/---------\1
 
     \relates Mesh
     \keyword Maillage/Elément

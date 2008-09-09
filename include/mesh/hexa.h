@@ -9,7 +9,7 @@ namespace LMT {
 // --------------------------------------------------------------------------------------------------------
 
 /*!
-    Hexa représente un hexagone 
+    Hexa représente un pavé quelconque.
 
     \keyword Maillage/Elément
     \friend raphael.pasquier@lmt.ens-cachan.fr

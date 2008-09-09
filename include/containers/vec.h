@@ -65,8 +65,6 @@ namespace LMT {
 
 /*!
 \generic_comment Vec
-    \friend raphael.pasquier@lmt.ens-cachan.fr
-    \friend hugo.leclerc@lmt.ens-cachan.fr
 
         = description générale
 

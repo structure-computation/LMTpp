@@ -1,6 +1,12 @@
 /*! 
 \generic_comment append_skin_elements
 
+    La syntaxe générale est 
+    \code
+        append_skin_elements( e, ch, het, Number<n> )   
+
+    Cette fonction ajoute au mesh het les éléments enfants de dimension dim-n de l'élément e passé en paramètre avec le comportement ch.
+
     \keyword Maillage/Elément/Opération
     \friend raphael.pasquier@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
