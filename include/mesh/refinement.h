@@ -112,7 +112,8 @@ namespace LMTPRIVATE {
 /// subdivide each element bar e contained in mesh or sub_meshes such as op(e)==true (true means subdivision). Subdivide parents
 template<class TM,class Op>
 bool refinement(TM &m,Op &op) {
-    m.update_elem_children();
+    // m.update_elem_children();
+    m.update_elem_children( Number<TM::nvi-1>() );
     LMTPRIVATE::Refinment<TM,TM,0,TM::dim+1> r(&m);
     r.update_cut(m,op);
 

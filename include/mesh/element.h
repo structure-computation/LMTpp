@@ -201,15 +201,13 @@ template<class TE,class Pvec,class TVI> void get_var_inter(const TE &elem,const 
         pos_nodes[i] = elem.pos(i);
     
     get_var_inter_linear( typename TE::NE(), pos_nodes, pos, var_inter );
-//     Vec<typename TE::T,TE::nb_var_inter> old_var_inter = var_inter;
-//     while ( true ) {
-//         get_var_inter( typename TE::NE(), pos_nodes, pos, var_inter );
-//         get_var_inter( typename TE::NE(), pos_nodes, pos, var_inter );
-//         get_var_inter( typename TE::NE(), pos_nodes, pos, var_inter );
-//         if ( length( old_var_inter - var_inter ) < criterium )
-//             break;
-//         old_var_inter = var_inter;
-//     }
+    Vec<typename TE::T,TE::nb_var_inter> old_var_inter = var_inter;
+    while ( true ) {
+        get_var_inter( typename TE::NE(), pos_nodes, pos, var_inter );
+        if ( length( old_var_inter - var_inter ) < criterium )
+            break;
+        old_var_inter = var_inter;
+    }
 }
 
 
