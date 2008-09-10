@@ -176,7 +176,7 @@ public:
                 data[r].data[i] *= val;
         return *this;
     }
-    template<class T2> Mat &operator/=(const T2 &val) { data /= val; return *this; }
+    template<class T2> Mat &operator/=(const T2 &val) { for(unsigned r=0;r<data.size();++r) data[r].data /= val; return *this; }
 
     template<class T2,class STR2,class STO2> Mat &operator+=(const Mat<T2,STR2,STO2> &val) { *this = *this + val; return *this; }
     template<class T2,class STR2,class STO2> Mat &operator-=(const Mat<T2,STR2,STO2> &val) { *this = *this - val; return *this; }

@@ -184,12 +184,11 @@ class MakePbFE:
             if e.dim == self.d:
                 forms[ f.name ] = f
         for f in forms.values():
-            if e.dim == self.d:
-                output.write( 'namespace LMT {\n' )
-                for b in ['false','true ']:
-                    TF = 'Formulation<' + PN + '::TM,'+f.name+',DefaultBehavior,'+self.T+','+b+'>'
-                    output.write( 'FormulationAncestor<'+PN+'::T> *' + PN + '::new_formulation_' + f.name + '( Number<'+b+'>, ' + PN + '::TM &m ) { return new '+TF+'(m); }\n' )
-                output.write( '}\n' )
+            output.write( 'namespace LMT {\n' )
+            for b in ['false','true ']:
+                TF = 'Formulation<' + PN + '::TM,'+f.name+',DefaultBehavior,'+self.T+','+b+'>'
+                output.write( 'FormulationAncestor<'+PN+'::T> *' + PN + '::new_formulation_' + f.name + '( Number<'+b+'>, ' + PN + '::TM &m ) { return new '+TF+'(m); }\n' )
+            output.write( '}\n' )
         
 
 def make_pb( env,

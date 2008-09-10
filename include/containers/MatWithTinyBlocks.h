@@ -296,7 +296,7 @@ struct MatWithTinyBlocks<T,Sym<3> > {
         Mul m; m.nb_thread = nb_thread;
         apply_mt( range(nb_thread), nb_thread, m, *this, v, r );
         //
-        for(unsigned n=0;n<nb_rows_;++n) {
+        for(int n=0;n<nb_rows_;++n) {
             T z = r[0][n];
             for(unsigned i=1;i<nb_thread;++i)
                 z += r[i][n];
