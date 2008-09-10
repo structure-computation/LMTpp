@@ -28,6 +28,18 @@ namespace LMTPRIVATE {
 };
 
 /*!
+\generic_comment MeshGeneric
+
+    Cette classe sert à la construction des classes \a MeshGeneric et \a MeshGenericBis .
+    La méthode très utile de cette classe est sub_mesh( Number<n> ) pour accéder à un maillage enfant d'un maillage. Plus précisement, sub_mesh( Number<n> ) retourne une référence vers le maillage enfant de dimension dim-n où dim est la dimension du maillage appelant la méthode.
+    Par exemple, si on a un maillage de tétraèdre (classe \a Tetra ) alors
+        * sub_mesh( Number<0> ) renvoie le maillage appelant.
+        * sub_mesh( Number<1> ) renvoie le maillage enfant composé de triangles (classe \a Triangle par exemple).
+        * sub_mesh( Number<2> ) renvoie le maillage enfant composé de barres (classe \a Bar_3 par exemple).
+
+*/ 
+
+/*!
     Used to define sub_meshes
     
     \author Hugo LECLERC

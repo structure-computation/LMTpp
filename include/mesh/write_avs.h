@@ -125,6 +125,9 @@ struct node_output_ascii {
     }
 };
 
+/*!
+    \keyword Utilitaires
+*/
 struct Toto {
     template<class T>
     void operator()(unsigned num,const char *name,T val) const {

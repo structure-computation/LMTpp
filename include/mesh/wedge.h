@@ -33,6 +33,26 @@
 namespace LMT {
 
 // --------------------------------------------------------------------------------------------------------
+
+/*!
+    \verbatim
+        .                        5
+        .                       /|\
+        .                      / | \
+        .                     /  |  \
+        .                    3___|___4
+        .                    |   |   |
+        .                    |   2   |
+        .                    |  / \  |
+        .                    | /   \ |
+        .                    |/     \|
+        .                    0______ 1
+
+    \keyword Maillage/Elément
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+*/
+
 struct Wedge {
     static const unsigned nb_var_inter = 3;
     static const unsigned nb_nodes = 6;

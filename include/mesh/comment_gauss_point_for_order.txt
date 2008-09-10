@@ -1,0 +1,10 @@
+/*! 
+\generic_comment gauss_point_for_order
+
+    Cette fonction retourne suivant l'ordre et l'élément passé en paramètre un pointeur constant sur un tableau de double (type const double*) contenant à la suite le poids puis les coordonnées des points de Gauss ( p,u,v,p,u,v,...).
+
+    \keyword Maillage/Elément/Opération
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \relates Element 
+*/
