@@ -484,8 +484,15 @@ Mat<TV,Diag<s> > diag(const Vec<TV,s> &vec) {
     }
 #endif
 
-/**
-Affichage de la structure d'une matrice sous forme d'image
+/*!
+    Affichage de la structure d'une matrice sous forme d'image.
+    Cette fonction fait une mise à l'echelle linéaire par morceaux par rapport à la valeur maximale de la matrice.
+    C'est donc plus représentatif que le résultat de la fonction \a display_image .
+
+    \keyword Utilitaires
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \keyword Mathématiques/Algèbre linéaire/Opération  
 */
 template<class T,class Str,class Sto,class IO>
 void display_structure(const Mat<T,Str,Sto,IO> &mat,const char *name_file="res") {

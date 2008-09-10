@@ -162,7 +162,7 @@ for op in lst:
 /*!
 \generic_comment abs_indication
 
-    Cette fonction la "distance" entre l'objet et zéro.
+    Cette fonction retourne la "distance" entre l'objet et zéro.
 
     \relates abs
     \relates abs_indication
@@ -183,19 +183,61 @@ for op in lst:
 struct Abs;
 template<class T> inline typename TypePromote<Abs,T>::T abs(const T &val) { return typename TypePromote<Abs,T>::T(std::abs(val)); }
 template<class T> inline typename TypePromote<Abs,T>::T abs_indication(const T &val) { return LMT::abs(val); } // if val is a function, return abs( something_close_to_mean(val) )
+/*!
+    \keyword Mathématiques/Fonctions classiques 
+*/
 template<class T> inline typename FloatType<T>::T acos(const T &val) { return std::acos(val); }
+/*!
+    \keyword Mathématiques/Fonctions classiques 
+*/
 template<class T> inline typename FloatType<T>::T asin(const T &val) { return std::asin(val); }
+/*!
+    \keyword Mathématiques/Fonctions classiques 
+*/
 template<class T> inline typename FloatType<T>::T atan(const T &val) { return std::atan(val); }
+/*!
+    \keyword Mathématiques/Fonctions classiques 
+*/
 template<class T> inline typename FloatType<T>::T cos(const T &val) { return std::cos(val); }
+/*!
+    \keyword Mathématiques/Fonctions classiques 
+*/
 template<class T> inline typename FloatType<T>::T cosh(const T &val) { return std::cosh(val); } /// cosinus hyperbolique
+/*!
+    \keyword Mathématiques/Fonctions classiques 
+*/
 template<class T> inline typename FloatType<T>::T exp(const T &val) { return std::exp(val); }
+/*!
+    \keyword Mathématiques/Fonctions classiques 
+*/
 template<class T> inline typename FloatType<T>::T log(const T &val) { return std::log(val); }
+/*!
+    \keyword Mathématiques/Fonctions classiques 
+*/
 template<class T> inline typename FloatType<T>::T log10(const T &val) { return std::log10(val); }
+/*!
+    \keyword Mathématiques/Fonctions classiques 
+*/
 template<class T> inline typename FloatType<T>::T sin(const T &val) { return std::sin(val); }
+/*!
+    \keyword Mathématiques/Fonctions classiques 
+*/
 template<class T> inline typename FloatType<T>::T sinh(const T &val) { return std::sinh(val); }
+/*!
+    \keyword Mathématiques/Fonctions classiques 
+*/
 template<class T> inline typename FloatType<T>::T sqrt(const T &val) { return std::sqrt(val); }
+/*!
+    \keyword Mathématiques/Fonctions classiques 
+*/
 template<class T> inline typename FloatType<T>::T rsqrt(const T &val) { return pow(val,-0.5); }
+/*!
+    \keyword Mathématiques/Fonctions classiques 
+*/
 template<class T> inline typename FloatType<T>::T tan(const T &val) { return std::tan(val); }
+/*!
+    \keyword Mathématiques/Fonctions classiques 
+*/
 template<class T> inline typename FloatType<T>::T tanh(const T &val) { return std::tanh(val); }
 
 // inline unsigned pow(unsigned x,unsigned y) { unsigned res = 1; while(y--) res *= x; return res; }
@@ -203,7 +245,10 @@ template<class T> inline typename FloatType<T>::T tanh(const T &val) { return st
 template<class T1,class T2> typename TypePromote< Divides, T2, T1>::T
  solve(const T1 &A,const T2 &b) { return b/A; }
 
-/// swap : permute les deux arguments
+/*!
+    swap : permute les deux arguments
+    \keyword Utilitaires
+*/ swap : permute les deux arguments
 template<class T1,class T2> void swap(T1 &v1,T2 &v2) {
     T2 tmp = v1;
     v1 = v2;

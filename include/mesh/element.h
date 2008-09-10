@@ -166,7 +166,12 @@ public:
 template<class T1,class T2,class T3,unsigned nvi_to_subs>
 void append_skin_elements(const T1 &,const T2 &,const T3 &,const Number<nvi_to_subs> &n) {}
 
-/// isobarycenter of nodes
+/*! 
+    Cette fonction retourne l'isobarycentre des noeuds de l'élément.
+
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+*/
 template<class NameElem,class NameBehavior,class TNode,class TData,unsigned num_in_elem_list>
 typename TNode::Pvec center(const Element<NameElem,NameBehavior,TNode,TData,num_in_elem_list> &e) {
     typename TNode::Pvec res = 0.0;
@@ -174,6 +179,22 @@ typename TNode::Pvec center(const Element<NameElem,NameBehavior,TNode,TData,num_
         res += e.node(i)->pos;
     return res / NameElem::nb_nodes;
 }
+
+/*! 
+\generic_comment center
+    Cette fonction retourne l'isobarycentre des noeuds de l'élément.
+
+    \keyword Maillage/Elément/Opération
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+*/
+
+/*! 
+    Cette fonction retourne l'isobarycentre des noeuds de l'élément.
+
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+*/  
 template<class TNode>
 typename TNode::Pvec center(const ElementAncestor<TNode> &e) {
     typename TNode::Pvec res = 0.0;
@@ -182,11 +203,25 @@ typename TNode::Pvec center(const ElementAncestor<TNode> &e) {
     return res / e.nb_nodes_virtual();
 }
 
+/*!
+    A faire
+    A finir de programmer
+
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+*/
 template<class TE>
 typename TE::Pvec sample_normal(const TE &e) {
     assert(0); // not implemented
 }
 
+/*!
+    A faire
+
+
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+*/
 struct EquElem {
     template<class TE1,class TE2>
     bool operator()(const TE1 &e1,const TE2 &e2) const {
@@ -200,6 +235,13 @@ struct EquElem {
     }
 };
 
+/*!
+    A faire
+
+
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+*/
 struct DistBetweenElemCenter {
     template<class P1,class P2,class T3=void,class T4=void> struct ReturnType { typedef typename TypePromote<Plus,typename P1::T,typename P2::T>::T T; };
     template<class P1,class P2> typename TypePromote<Plus,typename P1::T,typename P2::T>::T operator()(const P1 &n1,const P2 &n2) const {
@@ -207,9 +249,12 @@ struct DistBetweenElemCenter {
     }
 };
 
-/**
-    Trouve les veriables d'interpolation correspondant à la position pos.
+/*!
+    Trouve les variables d'interpolation correspondant à la position pos.
     On suppose que var_inter n'est pas initialisé.
+
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
   */
 template<class TE,class Pvec,class TVI> void get_var_inter(const TE &elem,const Pvec &pos,TVI &var_inter,typename TE::T criterium) {
     Vec<Vec<typename TE::T,TE::dim>,TE::nb_nodes> pos_nodes;
@@ -226,13 +271,27 @@ template<class TE,class Pvec,class TVI> void get_var_inter(const TE &elem,const 
     }
 }
 
+/*! 
+    La fonction renvoie vrai si pos est à l'intérieur de l'élément avec une tolérance tol.
 
+
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+*/
 template<class TE,class Pvec> bool pos_is_inside( const TE &elem,const Pvec &pos,typename TE::T criterium=1e-4,typename TE::T tol=1e-4) {
     Vec<typename TE::T,TE::nb_var_inter> var_inter;
     get_var_inter(elem,pos,var_inter,criterium);
     return var_inter_is_inside( typename TE::NE(), var_inter, tol );
 }
 
+
+/*!
+    A faire
+
+
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+*/
 template<class TE> typename TE::Pvec sample_tangent( const TE &e ) {
     assert( 0 ); // non défini
     return typename TE::Pvec(0);

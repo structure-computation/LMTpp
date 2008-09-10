@@ -76,7 +76,7 @@ void load_image_pgm( std::string file, Mat &m, int ceil_size = 1 ) {
 }
 
 
-/**
+/*!
   Read PNM images only
 */
 template<class Mat>
@@ -92,7 +92,15 @@ void load_image( std::string file, Mat &m, int ceil_size = 1 ) {
     load_image_pgm( "toto.pnm", m, ceil_size );
 }
 
-/// ostream interface
+/*!
+    Cette fonction convertit la matrice passée en paramètre en une image. Plus précisément, chaque élément de la matrice est convertit en un nombre entier compris entre 0 et 255 et codant un niveau de gris.
+
+
+    \keyword Utilitaires
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \keyword Mathématiques/Algèbre linéaire/Opération     
+*/
 template<class T,class Str,class Sto,class IO>
 void display_image(const Mat<T,Str,Sto,IO> &mat, const std::string &name_file="toto") {
     typedef typename Mat<T,Str,Sto,IO>::T TT;
