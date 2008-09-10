@@ -248,7 +248,7 @@ template<class T1,class T2> typename TypePromote< Divides, T2, T1>::T
 /*!
     swap : permute les deux arguments
     \keyword Utilitaires
-*/ swap : permute les deux arguments
+*/
 template<class T1,class T2> void swap(T1 &v1,T2 &v2) {
     T2 tmp = v1;
     v1 = v2;
