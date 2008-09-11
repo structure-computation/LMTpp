@@ -102,7 +102,7 @@ inline unsigned ceil(unsigned a) { return a; }
 template<class T> T ceil(T a) { return std::ceil(a); }
 
 /*! 
-Dans le cas où a et m sont positifs, la fonction renvoie a si a est un multiple de m sinon elle renvoie a+1. 
+Dans le cas où a et m sont positifs, la fonction renvoie a si a est un multiple de m sinon elle renvoie a+m 
 */
 inline int ceil( int a, int m ) { return ( ( a + m - 1 ) / m ) * m; }
 /*!
