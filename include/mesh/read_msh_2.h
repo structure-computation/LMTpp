@@ -66,7 +66,7 @@ void read_msh_2( TM &m,std::istream &is, unsigned nvi, const VarTag &vt ) throw 
         string str;
         getline ( is,str );
 
-        // �aluation du contexte
+        // évaluation du contexte
         if ( str.find ( "$EndNodes" ) < str.size() ) {
             ctxte=0;
             continue;

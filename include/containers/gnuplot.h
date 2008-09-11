@@ -161,7 +161,7 @@ public:
     ///
     Vec<HD> holded_data;
 };
-/*! plot and wait
+/*! plot avec Gnuplot et attend
 */
 template<class T,int s,class O>
 void plot(const Vec<T,s,O> &vec,const char *params="") {
