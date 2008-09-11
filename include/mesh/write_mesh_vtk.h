@@ -327,6 +327,10 @@ inline void EncodeSingle(unsigned char i0,
     *o3 = '=';
 }
 
+/*!
+Cette fonction transforme une suite de nombres binaires en une suite de nombres codés en base 64.
+Fontion utillisée par \a write_mesh_vtk .
+*/
 inline void add_encoded( std::string s, std::string &appended ) {
     unsigned s_size = s.size();
     s = std::string( (char *)&s_size, (char *)&s_size + sizeof(s_size) ) + s;

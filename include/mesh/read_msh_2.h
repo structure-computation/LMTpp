@@ -26,7 +26,7 @@
 
 namespace LMT {
 
-///
+
 template<class TE,class VarTag,unsigned n,unsigned m>
 void assign_tag_values( TE *e, const Vec<double> &tag_values, const VarTag &vt, Number<n>, Number<m> ) {
     ExtractDM<typename VarTag::template SubType<n>::T> ev;
