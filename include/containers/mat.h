@@ -490,6 +490,7 @@ Mat<TV,Diag<s> > diag(const Vec<TV,s> &vec) {
     C'est donc plus représentatif que le résultat de la fonction \a display_image .
 
     \keyword Utilitaires
+    \keyword Algorithme/Affichage
     \friend raphael.pasquier@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
     \keyword Mathématiques/Algèbre linéaire/Opération  
