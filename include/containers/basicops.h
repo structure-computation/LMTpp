@@ -102,7 +102,7 @@ inline unsigned ceil(unsigned a) { return a; }
 template<class T> T ceil(T a) { return std::ceil(a); }
 
 /*! 
-Dans le cas où a et m sont positifs, la fonction renvoie a si a est un multiple de m sinon elle renvoie a+m 
+Dans le cas où a et m sont positifs, la fonction renvoie a si a est un multiple de m sinon elle renvoie le plus petit multiple de m supérieur à a.
 */
 inline int ceil( int a, int m ) { return ( ( a + m - 1 ) / m ) * m; }
 /*!
@@ -119,11 +119,20 @@ inline int floor( int a, int m ) { return a - a % m; }
 */
 /// 1 if equal 0
 template<class T> bool heavyside(const T &val) { return (val>=0); }
-/// 1 if equal 0
+/*!
+     1 if equal 0
+    \keyword Mathématiques/Fonctions classiques
+*/
 template<class T> bool heaviside(const T &val) { return (val>=0); }
-/// 1 if equal 0
+/*! 
+    true if equal 0
+    \keyword Mathématiques/Fonctions classiques
+*/
 template<class T> bool eqz(const T &val) { return heavyside(val)*heavyside(-val); }
-/// ...
+/*! 
+    renvoie 1 si val > 0 et -1 sinon
+    \keyword Mathématiques/Fonctions classiques
+*/
 template<class T> int sgn(const T &val) { return ( val>0 ? 1 : -1 ); }
 
 /*!
