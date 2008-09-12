@@ -47,11 +47,24 @@ class Min;
 class Max;
 class Divides;
 
+/*!
+\generic_comment min
+
+    Fonction clasique à deux ou trois paramètres.
+    \keyword Mathématiques/Fonctions classiques
+*/
 /// min
 template<class T1,class T2> typename TypePromote<Min,T1,T2>::T min(T1 a,T2 b) {
     typedef typename TypePromote<Min,T1,T2>::T T;
     return ( a<b ? static_cast<T>(a): static_cast<T>(b) );
 }
+
+/*!
+\generic_comment max
+
+    Fonction clasique à deux ou trois paramètres.
+    \keyword Mathématiques/Fonctions classiques
+*/
 /// max
 template<class T1,class T2> typename TypePromote<Max,T1,T2>::T max(T1 a,T2 b) {
     typedef typename TypePromote<Max,T1,T2>::T T;
@@ -63,15 +76,24 @@ template<class T1,class T2> typename TypePromote<Max,T1,T2>::T max(T1 a,T2 b) {
 #define ABS(x) ( (x)>=0 ? (x) : (-(x)) )
 #define SGNPLUS1(x) ( (x)>=0 + (x)>0 )
 
-/// min ternary
+/// min ternaire
 template<class T1,class T2,class T3> typename TypePromote<Min,T1,typename TypePromote<Min,T2,T3>::T>::T min(T1 a,T2 b,T3 c) {
     return min( a, min(b,c) );
 }
-/// max ternary
+/*! 
+    maximum ternaire
+    
+*/
 template<class T1,class T2,class T3> typename TypePromote<Max,T1,typename TypePromote<Max,T2,T3>::T>::T max(T1 a,T2 b,T3 c) {
     return max( a, max(b,c) );
 }
 
+/*!
+\generic_comment ceil
+    
+    Excepté la fonction à deux paramètres, la fonction ceil de la LMT++ correspond à celle de la librairie standard du C.
+    \keyword Mathématiques/Fonctions classiques
+*/
 /// identité.
 inline int ceil(int a) { return a; }
 /// identité.
@@ -80,11 +102,12 @@ inline unsigned ceil(unsigned a) { return a; }
 template<class T> T ceil(T a) { return std::ceil(a); }
 
 /*! 
-Dans le cas où a et m sont positifs, la fonction renvoie a si a est un multiple de m sinon elle renvoie a+m 
+Dans le cas où a et m sont positifs, la fonction renvoie a si a est un multiple de m sinon elle renvoie le plus petit multiple de m supérieur à a.
 */
 inline int ceil( int a, int m ) { return ( ( a + m - 1 ) / m ) * m; }
 /*!
 Dans le cas où a et m sont positifs, la fonction renvoie le plus grand multiple de m inférieur ou égal à a.
+\keyword Mathématiques/Fonctions classiques 
 */
 inline int floor( int a, int m ) { return a - a % m; }
 
@@ -96,11 +119,20 @@ inline int floor( int a, int m ) { return a - a % m; }
 */
 /// 1 if equal 0
 template<class T> bool heavyside(const T &val) { return (val>=0); }
-/// 1 if equal 0
+/*!
+     1 if equal 0
+    \keyword Mathématiques/Fonctions classiques
+*/
 template<class T> bool heaviside(const T &val) { return (val>=0); }
-/// 1 if equal 0
+/*! 
+    true if equal 0
+    \keyword Mathématiques/Fonctions classiques
+*/
 template<class T> bool eqz(const T &val) { return heavyside(val)*heavyside(-val); }
-/// ...
+/*! 
+    renvoie 1 si val > 0 et -1 sinon
+    \keyword Mathématiques/Fonctions classiques
+*/
 template<class T> int sgn(const T &val) { return ( val>0 ? 1 : -1 ); }
 
 /*!
@@ -117,7 +149,8 @@ template<class T> int sgn(const T &val) { return ( val>0 ? 1 : -1 ); }
     * la dernière calcule sqrt( norme du vecteur + nombre )
     
     \relates abs_indication
-
+    \keyword Mathématiques/Fonctions classiques 
+    \keyword Algorithme/Extraire
 */
 /// retourne abs(val)
 template<class T> T length(const T &val) { return abs(val); }
@@ -181,67 +214,97 @@ for op in lst:
     
 #endif
 struct Abs;
+/*!
+    \keyword Mathématiques/Fonctions classiques 
+
+    \relates abs_indication
+    \relates length
+*/
 template<class T> inline typename TypePromote<Abs,T>::T abs(const T &val) { return typename TypePromote<Abs,T>::T(std::abs(val)); }
 template<class T> inline typename TypePromote<Abs,T>::T abs_indication(const T &val) { return LMT::abs(val); } // if val is a function, return abs( something_close_to_mean(val) )
 /*!
+    C'est la fonction de la librairie standard du C.
     \keyword Mathématiques/Fonctions classiques 
+    \relates asin
+    \relates atan
 */
 template<class T> inline typename FloatType<T>::T acos(const T &val) { return std::acos(val); }
 /*!
+    C'est la fonction de la librairie standard du C.
     \keyword Mathématiques/Fonctions classiques 
+    \relates acos
+    \relates atan
 */
 template<class T> inline typename FloatType<T>::T asin(const T &val) { return std::asin(val); }
 /*!
+    C'est la fonction de la librairie standard du C.
     \keyword Mathématiques/Fonctions classiques 
+    \relates asin 
+    \relates acos
 */
 template<class T> inline typename FloatType<T>::T atan(const T &val) { return std::atan(val); }
 /*!
+    C'est la fonction de la librairie standard du C.
     \keyword Mathématiques/Fonctions classiques 
 */
 template<class T> inline typename FloatType<T>::T cos(const T &val) { return std::cos(val); }
 /*!
+    C'est la fonction de la librairie standard du C.
     \keyword Mathématiques/Fonctions classiques 
 */
 template<class T> inline typename FloatType<T>::T cosh(const T &val) { return std::cosh(val); } /// cosinus hyperbolique
 /*!
+    C'est la fonction de la librairie standard du C.
     \keyword Mathématiques/Fonctions classiques 
 */
 template<class T> inline typename FloatType<T>::T exp(const T &val) { return std::exp(val); }
 /*!
+    C'est la fonction de la librairie standard du C.
     \keyword Mathématiques/Fonctions classiques 
 */
 template<class T> inline typename FloatType<T>::T log(const T &val) { return std::log(val); }
 /*!
+    C'est la fonction de la librairie standard du C.
     \keyword Mathématiques/Fonctions classiques 
 */
 template<class T> inline typename FloatType<T>::T log10(const T &val) { return std::log10(val); }
 /*!
+    C'est la fonction de la librairie standard du C.
     \keyword Mathématiques/Fonctions classiques 
 */
 template<class T> inline typename FloatType<T>::T sin(const T &val) { return std::sin(val); }
 /*!
+    C'est la fonction de la librairie standard du C.
     \keyword Mathématiques/Fonctions classiques 
 */
 template<class T> inline typename FloatType<T>::T sinh(const T &val) { return std::sinh(val); }
 /*!
+    C'est la fonction de la librairie standard du C.
     \keyword Mathématiques/Fonctions classiques 
 */
 template<class T> inline typename FloatType<T>::T sqrt(const T &val) { return std::sqrt(val); }
 /*!
+    c'est la fonction x -> 1/sqrt(x) ou x -> x^(-0.5)
     \keyword Mathématiques/Fonctions classiques 
 */
 template<class T> inline typename FloatType<T>::T rsqrt(const T &val) { return pow(val,-0.5); }
 /*!
+    C'est la fonction de la librairie standard du C.
     \keyword Mathématiques/Fonctions classiques 
 */
 template<class T> inline typename FloatType<T>::T tan(const T &val) { return std::tan(val); }
 /*!
+    C'est la fonction de la librairie standard du C++.
     \keyword Mathématiques/Fonctions classiques 
 */
 template<class T> inline typename FloatType<T>::T tanh(const T &val) { return std::tanh(val); }
 
 // inline unsigned pow(unsigned x,unsigned y) { unsigned res = 1; while(y--) res *= x; return res; }
 
+/*!
+    La fonction résout l'équation Ax=b 
+    \keyword Mathématiques/Fonctions classiques
+*/
 template<class T1,class T2> typename TypePromote< Divides, T2, T1>::T
  solve(const T1 &A,const T2 &b) { return b/A; }
 
@@ -258,6 +321,9 @@ template<class T1,class T2> void swap(T1 &v1,T2 &v2) {
 /*!
     Example : apply( vec, Display(), std::cout );
     Example : apply( vec, Display(), std::cout, ' ' );
+    \keyword Algorithme/Affichage
+    \relates Vec
+    \relates apply
 */
 struct Display {
     template<class T1,class OS=std::ostream,class SEP=void,class T4=void> struct ReturnType { typedef void T; };

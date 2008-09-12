@@ -99,7 +99,8 @@ void load_image( std::string file, Mat &m, int ceil_size = 1 ) {
     \keyword Utilitaires
     \friend raphael.pasquier@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
-    \keyword Mathématiques/Algèbre linéaire/Opération     
+    \keyword Mathématiques/Algèbre linéaire/Opération   
+    \keyword Algorithme/Affichage  
 */
 template<class T,class Str,class Sto,class IO>
 void display_image(const Mat<T,Str,Sto,IO> &mat, const std::string &name_file="toto") {
