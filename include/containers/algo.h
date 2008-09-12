@@ -600,6 +600,7 @@ template<class TL> typename TypeReduction<Plus,TL>::T min_element(const TL &l) {
 /*!
 
     Cette fonction prend en paramètre un vecteur de booléens to_check et retourne le vecteur contenant l' indice des éléments vrais.
+
     \relates apply
     \relates Vec
 
