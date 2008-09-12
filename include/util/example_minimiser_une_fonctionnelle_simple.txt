@@ -20,7 +20,7 @@
         print wc.to_string()
         print "}"
 
-    Ce code envoie sur la sortie standard le code C++ d'une fonction calculant ce minimum. Donc en tapant en console :
+    Ce code envoie sur la sortie standard le code C++ une fonction calculant ce minimum. Donc en tapant en console :
     \verbatim
         python titi.py > titi.cpp
     On obtient le code de notre fonction.
