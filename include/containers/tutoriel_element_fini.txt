@@ -3,13 +3,13 @@
 
     La résolution d'un problème avec les éléments finis se fait en trois étapes :
         * Création d'un fichier python .py qui contiendra le nom du problème, les propriétés physiques générales du système et le type d'éléments finis.
-        * Création d'un autre fichier python pour la formulation (i.e. les équations, les inconnues, les grandeurs étudiées, ...)
-        * Création d'un projet kdevelop pour d'une part générer les fichiers d'en-têtes C++ .h à partir des deux précédents fichiers python puis d'autre part pur écrire le code de calcul.
+        * Création d'un autre fichier python pour la formulation (i.e. les équations, les granduers inconnues, les paramètres, ...)
+        * Création d'un projet kdevelop pour d'une part générer les fichiers d'en-têtes C++ .h à partir des deux précédents fichiers python puis d'autre part pour écrire le code de calcul.
 
 
     = Creation d'un fichier "problem.h.py"
 
-        Ce fichier sert a la fois a la definition du maillage (type d'element, dimension avec variables stockees) et des formulations retenues
+        Ce fichier sert à la fois a la definition du maillage (type d'element, dimension avec variables stockees) et des formulations retenues
 
         Exemple de fichier
 
@@ -32,29 +32,28 @@
                     "behavior_simplification" : 'plane stress'   
                 }
             )
-
-        Detail des champs :
-        * <strong> name </strong> : pb_elast : nom donne au probleme
-            Pour declarer ensuite un maillage il faudra faire 
+        Remarque: les commentaires python sur une ligne commencent par un diese (#).
+        Détail des champs :
+        * <strong> name </strong> : pb_elast est le nom donné au problème. Pour déclarer ensuite un maillage il faudra faire 
             \code C/C++
-                Mesh<Meshcarac_pb_elast<type, dimension> >  où type est le type des variables et dim la dimension de l'espace
-        * <strong> incpaths </strong> : (optionnel ) chemins dans lesquels les fichiers de formulations doivent etre recherches
-        * <strong> formulations </strong> : nom des formulations sur lesquelles on veut travailler. Dans les repertoires indiqués dans incpaths, doivent se trouver des fichiers python du type formulation_elasticity_isortropy.py. Ces fichiers contiennent les variables utilisees pour la formulation (modules materiau, contrainte,deplacement,deformation, energie..). C'est a l'interieur de ce fichier que l'on ecrit directement la formulation sous forme variationnelle (cf detail)
+                Mesh<Meshcarac_pb_elast<type, dim> > m; // où type est le type des variables (float, double, long double, etc) et dim la dimension de l'espace
+        * <strong> incpaths </strong> : (optionnel ) contient les chemins dans lesquels les fichiers de formulations doivent etre recherchés.
+        * <strong> formulations </strong> contiens les noms des formulations sur lesquelles on veut travailler. Dans les repertoires indiqués dans incpaths, doivent se trouver des fichiers python nommés formulation_elasticity_isotropy.py, formulation_elasticity_orthotropy.py. Ces fichiers contiennent les variables utilisées pour la formulation (modules materiau, contrainte, deplacement,deformation, energie..). C'est à l'interieur de ce fichier que l'on ecrit directement la formulation sous forme variationnelle (cf ci-dessous).
    
-        * <strong> elements </strong> : type d'elements a utiliser dans le maillage parmi : Bar, Triangle, Quad, Tetra, Wedge, Cube
-        * <strong> dim (optionnel) </strong> : dimension pour tous les elements precedemment decrits par defaut dim = 'nvi' c'est a dire que tous les elements sont regroupes selon leur nombre de variables d'interpolation (2 pour les quad et triangle, 3 pour tetra, cube, wedge, 1 pour les bar), il est possible d'imposer a dim n'importe quelle formule basee sur nvi
-        * <strong> additional_fields </strong> : champs additionnel a placer dans les maillages "nom du champs" : Variable (interpolation, unit,default_value,T,nb_dim)
-        * <strong> interpolation </strong> : correspond au type d'interpolation de la variable, choix parmi : nodal, elementary, global, der_nodal (derivable d'un champ nodal, vecteur contenant n points de gauss eux meme contenant de qu'on veut),bubble
-        * <strong> unit </strong> : unite du champs
-        * <strong> default_value </strong> : valeur par defaut T='type' type special souhaite pour le champs, pour obtenir un champ fonction de la dimension du problem utiliser DIM
-        * <strong> nb_dim </strong> : dimension si le champs est un vecteur
-        * <strong> options </strong> : exemple "behavior_simplification" possibilite de choisir entre 'plane stress', 'axysymmetric', 'plane strain'  ...
+        * <strong> elements </strong> contient les types d'éléments à utiliser dans le maillage parmi : Bar, Triangle, Quad, Tetra, Wedge, Cube, etc ... 
+        * <strong> dim (optionnel) </strong> est la dimension pour tous les éléments précédemment définis.  Par defaut dim = 'nvi', c'est à dire que tous les éléments sont regroupés selon leur nombre de variables d'interpolation (2 pour les quad et triangle, 3 pour tetra, cube, wedge, 1 pour les bar). Il est possible d'imposer a dim n'importe quelle expression basée sur nvi.
+        * <strong> additional_fields </strong> contient les champs additionnels à placer dans les maillages suivant la syntaxe
+             "nom du champs" : Variable (interpolation=valeur, unit=valeur,default_value=valeur,T=valeur,nb_dim=tableau de valeurs) où les valeurs sont exprimées sous forme d'un chaine de caractères. 
+            * <strong> interpolation </strong> : correspond au type d'interpolation de la variable, choisi parmi : nodal, elementary, global, der_nodal (dérivable d'un champ nodal, vecteur contenant n points de gauss eux meme contenant de qu'on veut),bubble, etc ... Pour connaître l'ensemble des possibilités, consultez la rubrique Maillage/Interpolation de la page "mot-clés".
+            * <strong> unit </strong> est l'unité du champs.
+            * <strong> default_value </strong> est la valeur par defaut.
+            * <strong> T </strong> ='type' si on souhaite donner un type special. Par exemple si un champ dépend de la dimension du problème, on écrira T='Vec<double,dim>' . 
+            * <strong> nb_dim </strong> est la dimension du champ si le champs est un vecteur.
+            * <strong> options </strong> est un comportement comme par exemple "behavior_simplification", 'plane stress', 'axysymmetric', 'plane strain'  ...
 
-    = Creation d'un fichier de formulation "formulation_elasticity.py"
-   
-        = Exemple de fichier
-   
-            \code Python
+    = Création d'un fichier de formulation "formulation_elasticity.py"
+           = Exemple de fichier
+               \code Python
                 f_vol = Variable( interpolation='global', nb_dim=[dim], default_value='0.0,'*(dim-1)+'0.0', unit='N/m^3' )
                 elastic_modulus = Variable( interpolation='global', default_value='15e3', unit='N/mm^2' )
                 poisson_ratio = Variable( interpolation='global', default_value='0.3', unit='1' )
@@ -96,16 +95,25 @@
                     return cw.to_string()
 
             Expliquons le code      
+            = Première étape : définition des variables accessibles au niveau du maillage   
+                C'est la même syntaxe que celle du premier fichier python avec un nouveau champ facultatif, unknown,  champs spécial indiquant que la variable est une inconnue du problème (obtenue par résolution d'un systeme).
+            = Deuxième étape : définition de la formulation.
+                On ecrit la formulation sous forme variationnelle dans la fonction formulation(). On aura bien-sûr besoin des champs et d'opérateurs classiques.
+                pour accéder à un champ C défini dans la première étape, on écrit C.expr et les opérateurs implémentés sont :
+                    * grad_sym_col
+                    * green_lagrange
+                    * pos
+                    * analytical_integration
+                    * integration
+                    * jacobian
+                    * inverse_jacobian
+                    * det_jacobian
+                    * grad
+                    * grad_sym
+                    * green_lagrange_col
+                    * div
+                Pour être au courant des derniers ajouts, consulter le fichier "element.py".
 
-            = Première étape : définition des variables accessibles au niveau du maillage
-   
-                nom_variable = Variable(même syntaxe que pour additional_fields dans le fichier problem.py)
-                unknown champs spécial indiquant que la variable est une inconnue du problème (obtenue par résolution d'un systeme)
-   
-            = Deuxième étape : definition de la formulation , on ecrit ici la formulation sous forme variationnelle
-   
-                pour acceder aux champs definis dans la premiere etape, utiliser champs.expr
-                plusieurs fonctions sont deja determinées dans le fichier "element.py" (grad_sym_col, green_lagrange ...)
                 pour definir une variable de type symbole : E = symbol('m.elastic_modulus')
                 pour definir un vecteur : vect = vector([...])
                 pour definir une matrice : mat = matrice([ [...] , [...] ])
@@ -114,54 +122,50 @@
     
                 les matrices de hooke sont definies dans material_help.py
     
-                On doit renvoyer l'expression variatio\code Python nnelle complete sans s'oocuper de savoir si on obtient une matrice ou un vecteur en sortie dV, dS ... correspond a l'integration souhaitee
+                On doit renvoyer l'expression variationnelle complete sans s'oocuper de savoir si on obtient une matrice ou un vecteur en sortie dV, dS ... correspond a l'integration souhaitee
    
             = Troisième étape : définition de fonctions pour calculer des valeurs apres résolution
-                possibilite d'ecrire jusqu'a 3 fonctions (apply_on_elements_after_solve, apply_on_elements_after_solve_2, apply_on_elements_after_solve_3)
-    
-                Pour ecrire le code genere, on utilise 
+                possibilite d'ecrire jusqu'a 3 fonctions (apply_on_elements_after_solve, apply_on_elements_after_solve_2, apply_on_elements_after_solve_3).
+                Pour écrire le code généré, on utilise 
                 \code Python
                     cw.Write_code(type,nombre d'espace dans le code genere)
                 pour ajouter un champ 
                 \code Python 
                     cw.add(valeur, 'expression en cpp', Write_code.Set)  (ou Write_code.Add )
-                pour ecrire le code
+                pour écrire le code
                 \code Python 
                     return cw.to_string()
     
-                <strong> Attention </strong> il n'est possible d'ecrire des variables que composante par composante
+                <strong> Attention : </strong> il n'est possible d'ecrire des variables que composante par composante
    
     = Projet Kdevelop
 
         Si vous avez oubliez comment on procède pour créer un projet kdevelop, consulter le tutoriel \a "Mon premier programme" .
    
-        = Utilisation en c++ des maillages et formulations
+        = Utilisation en C++ des maillages et formulations
 
-        = Definition d'un maillage base sur les definitions precedentes (problem.h.py, formulation_elasticity.py)
-
-            = Definition d'un maillage
+            = Définition d'un maillage caractérisé  par les deux fichiers problem.h.py, formulation_elasticity.py
                 \code C/C++
                     typedef Mesh<Mesh_carac_pb_elas<double,2 > > TM;
                     TM m;
     
             = Pour accéder aux champs definis au maillage :
-                champs globaux : m.elastic_modulus
-                champs nodaux : m.node_list[i].dep  
-                champs aux elements : 
-                    creer une structure pour realiser l'operation escomptee (exemple, affichage d'un champ particulier)
+                * champs globaux : m.elastic_modulus
+                * champs nodaux : m.node_list[i].dep  
+                * champs aux elements : créer un opérateur pour réaliser l'operation escomptée (exemple, affichage d'un champ particulier)
                 \code C/C++
                     struct affich_sigma{
                         template<class TE> void operator()(TE &e) const{
                         cout<< e.sigma[0] << endl;  // affichage de la contrainte au point de gauss 0
                         }
-                }
+                    };
     
             = Définition d'une formulation
                 \code C/C++
                     typedef Formulation<TM,elasticity> TF;
                     TF f(m);
     
-                f.m fait reference au maillage defini ci dessus
+                Remarque : f.m fait référence au maillage de la formulation.
 
     Allez voir les pages de :
     \relates Mesh

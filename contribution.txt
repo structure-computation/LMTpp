@@ -137,4 +137,16 @@
             * Pour préciser l' <strong> auteur </strong> du code ou du commentaire avec le mot-clé author :
                 \verbatim
                     \author Hugo Leclerc
+            * Pour déclarer une fonction ou une classe non principale,  avec le mot-clé internal :
+                \verbatim
+                    / *!
+                        \internal
+                        bla bla
+                    * /
+                    class Perso {
+                        ...
+                    }; 
+            * Pour déclarer un bloc non traduit par le générateur de code avec le mot clé verbatim :
+                \verbatim
+                    \brief ne sera pas traduit.
 */
