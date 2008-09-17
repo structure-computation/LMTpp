@@ -21,10 +21,10 @@ namespace Codegen {
 
 class Ex;
 
-/**
+/*!
 Base node class for Codegen. Can represent a symbol, a number, a multiplication, ...
 
-@author LECLERC Hugo
+\author LECLERC Hugo
 */
 class Op {
 public:
