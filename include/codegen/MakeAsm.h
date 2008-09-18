@@ -39,7 +39,7 @@ struct MakeAsm {
         base_type_size = 8; // double
         registers.resize( 8 + 8 * x86_64, NULL );
         stack.resize( registers.size(), NULL );
-        // ~ ( 1 << 63 )
+        // ~ ( 1 << 63 ) -> aligned
         sgn_wop = wop_buffer.new_elem();
         sgn_wop->type = Op::Number;
         sgn_wop->val  = ~ ( (long long)1 << 63 );
@@ -49,7 +49,7 @@ struct MakeAsm {
         zero_wop->type = Op::Number;
         zero_wop->val  = 0;
         zero_wop->pos_in_lst_var = 1;
-        // 1
+        // 1 -> aligned
         one_wop  = wop_buffer.new_elem();
         one_wop ->type = Op::Number;
         one_wop ->val  = 1;

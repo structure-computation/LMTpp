@@ -256,7 +256,8 @@ std::string Write_code::asm_caller( std::string asm_function_name ) {
     
     //
     std::ostringstream os;
-    os << std::string( wcl->nb_spaces, ' ' ) << "double tmp_values[ " << tmp_value_size << " ];\n";
+    os << std::string( wcl->nb_spaces, ' ' ) << "double tmp_values_[ " << tmp_value_size << " + 1 ];\n";
+    os << std::string( wcl->nb_spaces, ' ' ) << "double *tmp_values = tmp_values_ + bool( (long long)tmp_values_ & 8 );\n";
     os << std::string( wcl->nb_spaces, ' ' ) << "long long tmp_bm = ~( (long long)1 << 63 );\n";
     os << std::string( wcl->nb_spaces, ' ' ) << "tmp_values[ 0 ] = reinterpret_cast<double &>( tmp_bm );\n";
     os << std::string( wcl->nb_spaces, ' ' ) << "tmp_values[ 1 ] = 0.0;\n";
