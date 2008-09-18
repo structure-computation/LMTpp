@@ -1,46 +1,58 @@
 from LMT.include.codegen import *
+import sys
 
-def calculate_matrix( expr, unknown_symbols, unknown_test_symbols, subs={}, allow_surtension_coefficient=False, assume_non_linear=False, test=True, dont_want_to_add_KUn = False ):
-  M = []
-  V = []
+def calculate_matrix( expr, unknown_symbols, unknown_test_symbols, subs={}, allow_surtension_coefficient=False, assume_non_linear=False, test=True, dont_want_to_add_KUn=False, use_subs_instead_of_diff = False ):
+    M = []
+    V = []
 
-  #simplify(expr)
-
-  linear = True
-  if assume_non_linear:
-	  linear = False
-  subs_lin = dict(zip(unknown_symbols,[number(0.0)]*len(unknown_symbols)))
-  subs_tes = dict(zip(unknown_test_symbols,[number(0.0)]*len(unknown_symbols)))
-  if test==False:
-    unknown_test_symbols = unknown_symbols
+    # simplify(expr)
+    linear = True
+    if assume_non_linear:
+        linear = False
+    subs_lin = dict(zip(unknown_symbols     ,[number(0.0)]*len(unknown_symbols)))
+    subs_tes = dict(zip(unknown_test_symbols,[number(0.0)]*len(unknown_symbols)))
+    if test==False:
+        unknown_test_symbols = unknown_symbols
     
-  for i in unknown_test_symbols:
-    pM = []
-    dexpr = expr.diff( i ).subs_with_test(EM( subs_tes ))
-    # 
-    for j in unknown_symbols:
-      m = dexpr.diff(j).subs_with_test(EM(subs))
-      pM.append( m )
-      if assume_non_linear==False:
-        linear &= not ( m.subs_with_test(EM( subs_lin ))-m )
-    M.append( pM )
-    V.append( dexpr.subs_with_test(EM(subs)) )
-  
-  # for non linearities
-  if linear:
-    for i in range(len(unknown_test_symbols)):
-      V[i] = - V[i].subs_with_test(EM( subs_lin ))
-  else:
-    if allow_surtension_coefficient:
-      sur = symbol('surtension_coefficient','S_c')
-    else:
-      sur = 1
-    for i in range(len(unknown_test_symbols)):
-      V[i] = - V[i] * sur
-      if dont_want_to_add_KUn == False:
-        for j in range(len(unknown_symbols)):
-            V[i] += M[i][j] * unknown_symbols[j]
-  return { 'M':matrix( M ), 'V':vector( V ), 'U':unknown_symbols }
+    # if use_subs_instead_of_diff, substitution of vars (expr en test) with 0 and ones
+    if use_subs_instead_of_diff:
+        for test_unk in unknown_test_symbols:
+            pM = []
+            dexpr = expr.subs( test_unk, 1 ).subs_with_test(EM( subs_tes ))
+            for expr_unk in unknown_symbols:
+                m = dexpr.subs( expr_unk, 1 ).subs_with_test(EM( subs_lin ))
+                pM.append( m )
+            M.append( pM )
+            V.append( dexpr.subs_with_test(EM( subs_lin )) )
+    else: # -> differenciation
+        for i in unknown_test_symbols:
+            pM = []
+            dexpr = expr.diff( i ).subs_with_test(EM( subs_tes ))
+            # 
+            for j in unknown_symbols:
+                m = dexpr.diff(j).subs_with_test(EM(subs))
+                pM.append( m )
+                if assume_non_linear==False:
+                    linear &= not ( m.subs_with_test(EM( subs_lin ))-m )
+            M.append( pM )
+            V.append( dexpr.subs_with_test(EM(subs)) )
+    
+        # for non linearities
+        if linear:
+            for i in range(len(unknown_test_symbols)):
+                V[i] = - V[i].subs_with_test(EM( subs_lin ))
+        else:
+            if allow_surtension_coefficient:
+                sur = symbol('surtension_coefficient','S_c')
+            else:
+                sur = 1
+            for i in range(len(unknown_test_symbols)):
+                V[i] = - V[i] * sur
+                if dont_want_to_add_KUn == False:
+                    for j in range(len(unknown_symbols)):
+                        V[i] += M[i][j] * unknown_symbols[j]
+                        
+    return { 'M':matrix( M ), 'V':vector( V ), 'U':unknown_symbols }
 
 
 def write_matrix( f, M, V, symmetric, indices, offsets, assemble_mat, assemble_vec, use_asm, asmout = None, asm_fname = "" ):
@@ -64,7 +76,7 @@ def write_matrix( f, M, V, symmetric, indices, offsets, assemble_mat, assemble_v
 
 
 # 
-def solve_iteration( residual, unknown_symbols, unknown_test_symbols, subs={}, allow_surtension_coefficient=False, assume_non_linear=False, dont_want_to_add_KUn=False ):
-    MV = calculate_matrix( residual, unknown_symbols, unknown_test_symbols, subs, allow_surtension_coefficient, assume_non_linear, dont_want_to_add_KUn )
+def solve_iteration( residual, unknown_symbols, unknown_test_symbols, subs={}, allow_surtension_coefficient=False, assume_non_linear=False, dont_want_to_add_KUn=False, use_subs_instead_of_diff = False ):
+    MV = calculate_matrix( residual, unknown_symbols, unknown_test_symbols, subs, allow_surtension_coefficient, assume_non_linear, dont_want_to_add_KUn, use_subs_instead_of_diff = self.use_subs_instead_of_diff )
     return MV['M'].inverse() * MV['V']
     

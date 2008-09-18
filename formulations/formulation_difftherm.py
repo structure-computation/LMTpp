@@ -1,4 +1,4 @@
-temperature = Variable( unknown=True, nb_der=1, default_value='0.0', unit='K' )
+temperature = Variable( unknown=True, nb_der=0, default_value='0.0', unit='K' )
 Q = Variable( default_value='0.0', unit='K/s' )
 Qs = Variable( interpolation='nodal', default_value='0.0', unit='K/s' )
 
@@ -17,6 +17,8 @@ TOTO = Variable( interpolation='elementary', T="float", default_value='0.0', uni
 
 left_time_integration  = 0
 right_time_integration = 1
+
+use_subs_instead_of_diff = True
 
 
 #

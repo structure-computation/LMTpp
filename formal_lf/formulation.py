@@ -39,6 +39,7 @@ class Formulation:
       "supplementary_order_for_time_integration" : 0,
       "assume_linear_system" : True,
       "assume_non_linear" : False,
+      "use_subs_instead_of_diff" : False,
       "dont_want_to_add_KUn" : False,
       "use_test_functions" : True,
       "assume_symmetric_matrix" : True,
@@ -406,7 +407,7 @@ class Formulation:
         SN = 'S'+str(cpt_child)
 
         res[SN] = calculate_matrix( local_ds, unknown_symbols, unknown_test_symbols, {}, self.allow_surtension_coefficient, self.assume_non_linear, test=self.use_test_functions, 
-            dont_want_to_add_KUn = self.dont_want_to_add_KUn )
+            dont_want_to_add_KUn = self.dont_want_to_add_KUn, use_subs_instead_of_diff = self.use_subs_instead_of_diff )
 
         res[SN]['i'] = indices
         res[SN]['o'] = offsets
@@ -498,7 +499,7 @@ class Formulation:
     dN_part = dN_part.subs(EM( dict(zip(e.var_inter+unk_subs.keys(),[number(0)]*len(e.var_inter)+unk_subs.values())) ))
     #print '3'
     res['N'] = calculate_matrix( dN_part, unknown_symbols, unknown_test_symbols, {}, self.allow_surtension_coefficient, self.assume_non_linear, test=self.use_test_functions, 
-            dont_want_to_add_KUn = self.dont_want_to_add_KUn )
+            dont_want_to_add_KUn = self.dont_want_to_add_KUn, use_subs_instead_of_diff = self.use_subs_instead_of_diff )
     res['N']['i'] = indices
     res['N']['o'] = offsets
     form = form.subs( dN, 0 )
@@ -524,7 +525,7 @@ class Formulation:
     dV_part += form.diff(dE).subs(EM(unk_subs)) / nb_pts_gauss_if_not_integration_totale
     form = form.subs( dE, 0 )
     res['V'] = calculate_matrix( dV_part, unknown_symbols, unknown_test_symbols, {}, self.allow_surtension_coefficient, self.assume_non_linear, test=self.use_test_functions, 
-            dont_want_to_add_KUn = self.dont_want_to_add_KUn )
+            dont_want_to_add_KUn = self.dont_want_to_add_KUn, use_subs_instead_of_diff = self.use_subs_instead_of_diff )
     res['V']['i'] = indices
     res['V']['o'] = offsets
     
@@ -601,7 +602,7 @@ class Formulation:
     form = gauss_integration.gauss_integration(form,max_nb_der+self.supplementary_order_for_time_integration, \
            extrapolation.time,0,extrapolation.time_steps[0] * 2.0 )
     res['N'] = calculate_matrix( form, unknown_symbols, unknown_test_symbols, {}, self.allow_surtension_coefficient, self.assume_non_linear, test=self.use_test_functions, 
-            dont_want_to_add_KUn = self.dont_want_to_add_KUn )
+            dont_want_to_add_KUn = self.dont_want_to_add_KUn, use_subs_instead_of_diff = self.use_subs_instead_of_diff )
     res['N']['i'] = indices
     res['N']['o'] = offsets
     
@@ -612,7 +613,7 @@ class Formulation:
     form = gauss_integration.gauss_integration(form,max_nb_der+self.supplementary_order_for_time_integration, \
            extrapolation.time,0,extrapolation.time_steps[0] * 2.0)
     res['V'] = calculate_matrix( form, add_unknown_symbols, add_unknown_test_symbols, {}, self.allow_surtension_coefficient, self.assume_non_linear, test=self.use_test_functions, 
-            dont_want_to_add_KUn = self.dont_want_to_add_KUn )
+            dont_want_to_add_KUn = self.dont_want_to_add_KUn, use_subs_instead_of_diff = self.use_subs_instead_of_diff )
     res['V']['i'] = indices
     res['V']['o'] = offsets
     

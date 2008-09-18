@@ -241,16 +241,16 @@ namespace LMT {
 
     // ---------------------------------------------------------------------------------------------------------------------------------------
     /*! \relates Vec */
-    template<class TT,int s> SimdVec<typename Vec<TT,s>::template SubType<0>::T,1> get_simd(const Vec<TT,s> &v,unsigned i,const Number<1> &) {
-        return SimdVec<typename Vec<TT,s>::template SubType<0>::T,1>( v[i+0] );
+    template<typename TV> SimdVec<typename TV::template SubType<0>::T,1> get_simd(const TV &v,unsigned i,Number<1>) {
+        return SimdVec<typename TV::template SubType<0>::T,1>( v[i+0] );
     }
     /*! \relates Vec */
-    template<class TT,int s> SimdVec<typename Vec<TT,s>::template SubType<0>::T,2> get_simd(const Vec<TT,s> &v,unsigned i,const Number<2> &) {
-        return SimdVec<typename Vec<TT,s>::template SubType<0>::T,2>( v[i+1], v[i+0] );
+    template<typename TV> SimdVec<typename TV::template SubType<0>::T,2> get_simd(const TV &v,unsigned i,Number<2>) {
+        return SimdVec<typename TV::template SubType<0>::T,2>( v[i+1], v[i+0] );
     }
     /*! \relates Vec */
-    template<class TT,int s> SimdVec<typename Vec<TT,s>::template SubType<0>::T,4> get_simd(const Vec<TT,s> &v,unsigned i,const Number<4> &) {
-        return SimdVec<typename Vec<TT,s>::template SubType<0>::T,4>( v[i+3], v[i+2], v[i+1], v[i+0] );
+    template<typename TV> SimdVec<typename TV::template SubType<0>::T,4> get_simd(const TV &v,unsigned i,Number<4>) {
+        return SimdVec<typename TV::template SubType<0>::T,4>( v[i+3], v[i+2], v[i+1], v[i+0] );
     }
     
     /*! \relates Vec */
@@ -277,8 +277,10 @@ namespace std {
 }
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------
-#include "vecstdop.h"
 #include "vecfull.h"
+
+#include "vecstdop.h"
+
 #include "vecref.h"
 #include "vecsubvec.h"
 #include "vecsparse.h"
