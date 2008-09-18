@@ -35,13 +35,13 @@ namespace LMT {
 /*!
 \generic_comment apply_on_number
 
-    Cette fonction sert à appliquer un opérateur sur un seul élément d'un vecteur. Elle est surtout intéressante pour les vecteurs hétérogènes ( \a Vec<Heterogeneous<Carac,nt,TT>,static_size_,int> ). 
+    Cette fonction sert à appliquer un opérateur sur un seul élément d'un vecteur. Elle est surtout intéressante pour les vecteurs hétérogènes ( \\a Vec<Heterogeneous<Carac,nt,TT>,static_size_,int> ). 
     Sa syntaxe générale est :
     \code
         apply_on_number( vecteur, indice, opérateur, paramètres faculatatifs de l'opérateur ) 
-    
+    Pour avoir un exemple de code, voir \\a "Exemples d'utilisation des vecteurs hétérogènes" .
     Remarque : 
-        * Pour un vecteur hétérogène, on n'a pas accès à l'indice d'un élément particulier. Donc on utilisera cette fonction avec \a find_with_index pour récupérer l'indice de l'élément.
+        * Pour un vecteur hétérogène, on n'a pas accès à l'indice d'un élément particulier. Donc on utilisera cette fonction avec \\a find_with_index pour récupérer l'indice de l'élément.
         * Excepté pour un vecteur hétérogène, il est préférable d'utiliser les crochets [] .
     
     \\relates apply
@@ -60,7 +60,8 @@ namespace LMT {
     \code
          booléen find( vecteur, opérateur, paramètres faculatatifs de l'opérateur ) 
 
-    <strong>Remarque : L'opérateur doit renvoyer un booléen.</strong>
+    <strong> Remarque : L'opérateur doit renvoyer un booléen.</strong>
+    Remarque : la fonction find() arrête sa recherche dès qu'elle a trouvé un élément qui convient.
     \\keyword Algorithme/Extraire
     \\relates Vec 
     \\friend hugo.leclerc@lmt.ens-cachan.fr

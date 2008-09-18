@@ -7,18 +7,31 @@ namespace Codegen {
 
 class Write_code_language;
 
-/**
-Ex :
-    Write_code wc;
-    wc.add( a+b, "toto", Write_code::Declare )
-    wc.add( pow(a+b,10), "opza", Write_code::Add )
-    cout << wc.to_string() << endl;
-Result :
-    T toto = a+b;
-    T tmp = pow(toto,10);
-    opza += toto;
-    
-TODO : place "Return" var at the end of operations
+/*!
+
+La classe Write_code permet de générer le code C++ du corps d'une fonction. On ajoute du code à l'aide de la fonction add() puis à la fin on appelle la fonction to_string() qui renvoie le code dans une chaine de caractères. 
+Voici un exemple de code :
+\code C/C++
+    int main() {
+        Write_code wc("float");
+        Ex pi(3.14),R,S,tmp;
+        wc.add(pi,"pi");
+        S = pi*R*R;
+        tmp = R / 2 ;
+        wc.add(S,"S");
+        for(i=0;i<10;i++) {
+            wc.add(tmp,"R",Write_code.Set);
+            wc.add( S,"S",Write_code.Add);
+        }
+        std::cout wc.to_string() std::endl;
+    }
+
+
+<strong> REMARQUE : </strong> place "Return" var at the end of operations
+
+\friend raphael.pasquier@lmt.ens-cachan.fr
+\friend hugo.leclerc@lmt.ens-cachan.fr
+\relates Ex
 */
 class Write_code {
 public:
