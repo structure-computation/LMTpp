@@ -20,10 +20,13 @@ def calculate_matrix( expr, unknown_symbols, unknown_test_symbols, subs={}, allo
             pM = []
             dexpr = expr.subs( test_unk, 1 ).subs_with_test(EM( subs_tes ))
             for expr_unk in unknown_symbols:
-                m = dexpr.subs( expr_unk, 1 ).subs_with_test(EM( subs_lin ))
+                m = dexpr.subs( expr_unk, 1 ).subs_with_test(EM( subs_lin )).subs_with_test(EM( subs ))
                 pM.append( m )
             M.append( pM )
-            V.append( dexpr.subs_with_test(EM( subs_lin )) )
+            if linear:
+                V.append( dexpr.subs_with_test(EM( subs_lin )).subs_with_test(EM( subs )) )
+            else:
+                V.append( dexpr.subs_with_test(EM( subs )) )
     else: # -> differenciation
         for i in unknown_test_symbols:
             pM = []
