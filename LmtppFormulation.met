@@ -1,0 +1,265 @@
+import "EF/std_elements.met"
+
+# @see Variable
+def type_for_nb_dim_and_sym( nb_dim, sym ) when nb_dim.size == 0
+    return Op
+# @see Variable
+def type_for_nb_dim_and_sym( nb_dim, sym ) when nb_dim.size == 1
+    return Vec[ Op, nb_dim[0] ]
+# @see Variable
+def type_for_nb_dim_and_sym( nb_dim, sym ) when nb_dim.size == 2
+    if sym
+        assert( nb_dim[0] == nb_dim[1], "symm pb" )
+        return Mat[ Op, Sym[ nb_dim[0] ] ]
+    return Mat[ Op, Gen[ nb_dim[0], nb_dim[1] ] ]
+
+#~
+
+~#
+class VariableAncestor
+    #
+    class Symbol
+        sym  := Op()
+        node := -1
+        elem := -1
+        skin := -1
+        glob := -1
+        
+    # parameters
+    interpolation := "nodal"
+    default_value := 0
+    unit          := ""
+    unknown       := false
+    nb_der        := 0
+    tex_name      := ""
+    
+    # computed
+    expr_symbols  := Vec[Symbol]()
+    test_symbols  := Vec[Symbol]()
+    name          := ""
+    
+    virtual def make_expr_subs( from, to )
+        abstract
+
+    def _get_scalar_var_wo_der( e, n, t, sym_lst = Vec[Symbol]() )
+        if interpolation == "nodal"
+            for num_node in 0 .. e.nb_nodes
+                sym_lst.push_back( sym = symbol( "elem.node($num_node)->$n", "$(t)^{$num_node}" ), node = num_node )
+            return e.interpolation( sym_lst.map( _0.sym ) )
+        if interpolation == "elementary"
+            return sym_lst.push_back( sym = symbol( "elem.$n"     , "$t" ), elem = 0 )->sym
+        if interpolation == "global"
+            return sym_lst.push_back( sym = symbol( "f.$n"        , "$t" ), glob = 0 )->sym
+        if interpolation == "skin_elementary"
+            return sym_lst.push_back( sym = symbol( "skin_elem.$n", "$t" ), skin = 0 )->sym
+        assert( 0, "unknown interpolation '$interpolation'" )
+        
+    def _get_scalar_var( time, e, n, t, sym_lst, want_ders )
+        r := _get_scalar_var_wo_der( e, n, t, sym_lst )
+        for num_der in 1 .. ( nb_der + 1 ) * want_ders
+            r += _get_scalar_var_wo_der( e, n + "_der$num_der", t + "^{" + "'" * num_der + "}" ) * time ^ num_der / factorial( num_der )
+        return r
+
+#~
+
+
+~#
+class Variable[ nb_dim = [], sym = false ] inherits VariableAncestor
+    property is_a_LmtppVariable
+    
+    # computed
+    TS        := type_for_nb_dim_and_sym( nb_dim, sym )
+    expr      := TS()
+    test      := TS()
+        
+    def update_computed_attributes( time, e, n )
+        name = n
+        if not tex_name.size
+            tex_name = n
+        # for val, ind in values
+        def index_access( ind )
+            if ind.size
+                return "[" + join( ind, "," ) + "]"
+            return ""
+        def intex_access( ind )
+            if ind.size
+                return "[" + join( ind, "," ) + "]"
+            return ""
+        for ind, val in indices_and_values_of( expr )
+            val = _get_scalar_var( time, e,           name + index_access( ind ), tex_name + intex_access( ind )           , expr_symbols, want_ders = not unknown )
+        for ind, val in indices_and_values_of( test )
+            val = _get_scalar_var( time, e, "test_" + name + index_access( ind ), tex_name + intex_access( ind ) + "{^*}{}", test_symbols, want_ders = false       )
+            
+    virtual def make_expr_subs( from, to )
+        expr = expr.subs( from, to )
+
+#~
+
+~#
+class LmtppFormulationAncestor
+    # std variables
+    time                     := symbol("time","t")
+    time_steps               := Vec[ Op ]( size = 32, function = x => symbol("time_steps[$x]","\\delta t_$x") )
+    dV                       := symbol("dV")
+    dS                       := symbol("dS")
+    dN                       := symbol("dN")
+    dE                       := symbol("dE")
+    pe                       := Ptr[ SymbolicElementAncestor ]()
+    
+    # parameters
+    left_time_integration    := 0
+    right_time_integration   := 1
+    
+    use_subs_instead_of_diff := true
+    
+    # computed
+    unknown_variables := Vec[ Ptr[ VariableAncestor ] ]()
+    variables         := Vec[ Ptr[ VariableAncestor ] ]()
+    max_nb_der        := 0
+    all_K_are_linear  := true
+    
+    K_dV := Mat[ Op ]()       
+    K_dN := Mat[ Op ]()       
+    K_dS := Vec[ Mat[ Op ] ]()
+    
+    F_dV := Vec[ Op ]()
+    F_dN := Vec[ Op ]()
+    F_dS := Vec[ Vec[ Op ] ]()
+
+
+#~
+
+~#
+class LmtppFormulation[ dim ] inherits LmtppFormulationAncestor
+    #
+    def update_variable_expr_and_test( e )
+        pe = &e
+    
+        # update expr and test
+        unknown_variables.size = 0
+        max_nb_der             = 0
+        all_K_are_linear       = true
+        for name, var in AttributeExplorer( self )
+            if var.is_a_LmtppVariable
+                variables.push_back( &var )
+                var.update_computed_attributes( time, e, name )
+                if var.unknown
+                    unknown_variables.push_back( &var )
+                    max_nb_der = max( max_nb_der, var.nb_der )
+                    
+        # subs list to have unknown_variables in vectors[0]
+        mesh_subs      := Vec[Op]()
+        vect_subs      := Vec[Op]()
+        num_in_indices := 0
+        has_node_unknowns := false; nb_node_unk := 0
+        has_elem_unknowns := false; nb_elem_unk := 0
+        has_glob_unknowns := false; nb_glob_unk := 0
+        has_skin_unknowns := false; nb_skin_unk := 0
+        for num_node in 0 .. e.nb_nodes
+            nb_node_unk = 0
+            _update_unk( unknown_variables, mesh_subs, vect_subs, num_in_indices, has_node_unknowns, nb_node_unk, _0.node == num_node )
+        _update_unk( unknown_variables, mesh_subs, vect_subs, num_in_indices, has_elem_unknowns, nb_elem_unk, _0.elem == 0 )
+        _update_unk( unknown_variables, mesh_subs, vect_subs, num_in_indices, has_glob_unknowns, nb_glob_unk, _0.glob == 0 )
+        _update_unk( unknown_variables, mesh_subs, vect_subs, num_in_indices, has_skin_unknowns, nb_skin_unk, _0.skin == 0 )
+
+        # apply subs list
+        for v in unknown_variables
+            v->make_expr_subs( mesh_subs, vect_subs )
+                
+    # @see update_variable_expr_and_test
+    def _update_unk( unknown_variables, mesh_subs, vect_subs, num_in_indices, has__unknowns, nb__unk, function_crit )
+        for v in unknown_variables
+            for s in v->expr_symbols
+                if function_crit( s )
+                    mesh_subs.push_back( s.sym )
+                    syms := Vec[ Op ]( size = v->nb_der + 1, function = symbol("f.vectors[$_0][indices[$num_in_indices]+$nb__unk]","V_{$_0,$num_in_indices,$nb__unk}") )
+                    tims := Vec[ Op ]( size = v->nb_der + 1, function = time_steps[0] - sum( time_steps[ 0 .. _0 ] ) )
+                    vect_subs.push_back( lagrange( tims, syms, time ) )
+                    s.sym = syms[ 0 ]
+                    nb__unk++; has__unknowns = true
+        num_in_indices += has__unknowns
+
+    #
+    def make_matrices( e )
+        residual := formulation( e )
+        
+        # time integration
+        if max_nb_der
+            residual = integration( residual, time, left_time_integration * time_steps[1], right_time_integration * time_steps[0] )
+        
+        # volumic part
+        volumic_part := residual.diff( dV )
+        volumic_part = e.integration( volumic_part )
+        volumic_part += residual.diff( dE )
+        _compute_KF_from_residual( volumic_part, K_dV, F_dV, _volumic_vars( x => x->expr_symbols ), _volumic_vars( x => x->test_symbols ) )
+        
+        #
+        
+    #
+    def _volumic_vars( var_to_sym_lst_function )
+        res := Vec[Op]()
+        for v in unknown_variables
+            for s in var_to_sym_lst_function( v )
+                if s.skin < 0
+                    res.push_back( s.sym )
+        return res
+        
+    #
+    def _compute_KF_from_residual( residual, K, F, expr_symbols, test_symbols )
+        # minimization ?
+        if assumed( norm_1( expr_symbols - test_symbols ) == 0 )
+            qe := quadratic_expansion( residual, expr_symbols )
+            K = qe.m
+            F = qe.v
+        # else, use test_symbols
+        else
+            K.resize( test_symbols.size, expr_symbols.size )
+            F.resize( test_symbols.size )
+            # K and F
+            res_diff_test := Vec[Op]()
+            for test_symbol, cpt_test in test_symbols, 0...
+                F[ cpt_test ] = residual.diff( test_symbol )
+            for expr_symbol, cpt_expr in expr_symbols, 0...
+                K.col( cpt_expr ) = diff( F, expr_symbol )
+            # if non linear / test_symbols
+            K =  K.subs( test_symbols, expr_symbols )
+            F = -F.subs( test_symbols, expr_symbols )
+            
+        # if linear simplification, else, we K U_n+1 = F + K U_n
+        linear_expr := not K.depends_on( expr_symbols )
+        all_K_are_linear &= linear_expr
+        if linear_expr
+            F = F.subs( expr_symbols, expr_symbols * 0 )
+        else
+            F += K * expr_symbols
+
+    #
+    def write_mesh_carac( stream )
+        stream <<< ""
+        
+
+    # helpers
+    def grad    ( expr )  return pe->grad    ( expr )
+    def grad_sym( expr )  return pe->grad_sym( expr )
+    def div     ( expr )  return pe->div     ( expr )
+
+#~
+
+~#
+def write_legacy_lmtpp_code( TfList, TeList )
+    fe_set := Vec[ Ptr[ LmtppFormulationAncestor ] ]()
+    for Te in TeList
+        e := SymbolicElement[ Te ]()
+        for f in TfList
+        fe_set
+        f := Tf[ dim = e.dim ]( e )
+        
+    # f.update_variable_expr_and_test( e )
+    # f.make_matrices( e )
+    
+    # f.write_mesh_carac( stdout )
+        
+        
+    # print "pouet"
+    
+    

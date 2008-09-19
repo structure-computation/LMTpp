@@ -33,7 +33,6 @@ class Formulation:
       "make_expensive_simplifications" : False,
       "important_variation_of_volume" : False,
       "integration_totale" : True,
-      "time_integration" : "gauss",
       "left_time_integration" : -sqrt(2) / 2,
       "right_time_integration" : sqrt(2) / 2,
       "supplementary_order_for_time_integration" : 0,
