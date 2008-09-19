@@ -59,6 +59,14 @@ class VariableAncestor
         for num_der in 1 .. ( nb_der + 1 ) * want_ders
             r += _get_scalar_var_wo_der( e, n + "_der$num_der", t + "^{" + "'" * num_der + "}" ) * time ^ num_der / factorial( num_der )
         return r
+        
+    def eq( v )
+        if name == v.name
+            assert( interpolation == v.interpolation, "variables with same names in different formulations but with different interpolations" )
+            assert( true_type( self ) != true_type( v ), "variables with same names in different formulations but with different tensor sizes" )
+            return true
+        return false
+            
 
 #~
 
@@ -131,6 +139,11 @@ class LmtppFormulationAncestor
 
 ~#
 class LmtppFormulation[ dim ] inherits LmtppFormulationAncestor
+    #
+    def init( e )
+        init_using_default_values( self )
+        update_variable_expr_and_test( e )
+
     #
     def update_variable_expr_and_test( e )
         pe = &e
@@ -242,19 +255,43 @@ class LmtppFormulation[ dim ] inherits LmtppFormulationAncestor
     def grad    ( expr )  return pe->grad    ( expr )
     def grad_sym( expr )  return pe->grad_sym( expr )
     def div     ( expr )  return pe->div     ( expr )
-
+    
+#
+def write_legacy_lmtpp_mesh_carac( stream, pb_name, fe_set )
+    variable_list  := Set[ Ptr[ VariableAncestor ], ( x, y ) => x->eq( @y ) ]()
+    name_elem_list := Set[ String ]()
+    for f in fe_set
+        name_elem_list.insert( f->pe->name )
+        for v in f->variables
+            variable_list.insert( v )
+    
+    # ifndef
+    stream <<< "#ifndef Mesh_carac_$(pb_name)_HEADER"
+    stream <<< "#define Mesh_carac_$(pb_name)_HEADER"
+    stream <<< "#include <mesh/displayparaview.h>"
+    for name_elem in name_elem_list
+        stream <<< "#include <mesh/$name_elem.h>"
+    stream <<< "namespace LMT {"
+    stream <<< "template<class TP,unsigned dim> struct Mesh_carac_$(pb_name) {};"
+    # mesh data structs
+    # for v in variable_list
+        
+    stream <<< "}"
+    stream <<< "#endif // Mesh_carac_$(pb_name)_HEADER"
+    
 #~
 
 ~#
-def write_legacy_lmtpp_code( TfList, TeList )
+def write_legacy_lmtpp_code( pb_name, TfList, TeList, dim_function = x => x::nvi )
     fe_set := Vec[ Ptr[ LmtppFormulationAncestor ] ]()
-    for Te in TeList
-        e := SymbolicElement[ Te ]()
-        for f in TfList
-        fe_set
-        f := Tf[ dim = e.dim ]( e )
+    for Tf in TfList
+        for Te in TeList
+            e := new SymbolicElement[ Te, dim_function( Te ) ]
+            f := new Tf[ dim = e->dim ]( @e )
+            fe_set.push_back( f )
         
-    # f.update_variable_expr_and_test( e )
+    write_legacy_lmtpp_mesh_carac( stdout, pb_name, fe_set )
+    # 
     # f.make_matrices( e )
     
     # f.write_mesh_carac( stdout )
