@@ -27,7 +27,7 @@ class VariableAncestor
         
     # parameters
     interpolation := "nodal"
-    default_value := 0
+    default_value := ""
     unit          := ""
     unknown       := false
     nb_der        := 0
@@ -60,6 +60,9 @@ class VariableAncestor
             r += _get_scalar_var_wo_der( e, n + "_der$num_der", t + "^{" + "'" * num_der + "}" ) * time ^ num_der / factorial( num_der )
         return r
         
+    virtual def get_cpp_type
+        abstract
+    
     def eq( v )
         if name == v.name
             assert( interpolation == v.interpolation, "variables with same names in different formulations but with different interpolations" )
@@ -100,6 +103,16 @@ class Variable[ nb_dim = [], sym = false ] inherits VariableAncestor
             
     virtual def make_expr_subs( from, to )
         expr = expr.subs( from, to )
+        
+    virtual def get_cpp_type
+        if nb_dim.size == 0  return "T"
+        if nb_dim.size == 1  return "Vec<T,$(nb_dim[0])>"
+        if nb_dim.size == 2
+            if sym
+                return "Mat<T,Sym<$(nb_dim[0])> >"
+            return "Mat<T,Gen<$(nb_dim[0]),$(nb_dim[1])> >"
+        assert( 0, "TODO if nb_dim.size > 2 for C++" )
+        
 
 #~
 
@@ -134,6 +147,8 @@ class LmtppFormulationAncestor
     F_dN := Vec[ Op ]()
     F_dS := Vec[ Vec[ Op ] ]()
 
+    virtual def get_nb_dim
+        abstract
 
 #~
 
@@ -144,6 +159,10 @@ class LmtppFormulation[ dim ] inherits LmtppFormulationAncestor
         init_using_default_values( self )
         update_variable_expr_and_test( e )
 
+    #
+    virtual def get_nb_dim
+        return dim
+    
     #
     def update_variable_expr_and_test( e )
         pe = &e
@@ -257,11 +276,42 @@ class LmtppFormulation[ dim ] inherits LmtppFormulationAncestor
     def div     ( expr )  return pe->div     ( expr )
     
 #
+def write_legacy_lmtpp_mesh_StaticData( bn, variable_list, sym_select, sp = "    " )
+    type_variable_list := Map[String,String]()
+    for v in variable_list
+        if sym_select( v )
+            if not ( v->cpp_type in type_variable_list )
+                type_variable_list[ v->cpp_type ] = "T" + type_variable_list.size
+    res := ""
+    res <<< sp + "struct $bn {"
+    for tc, tv in type_variable_list
+        res <<< sp + "    typedef $tc $tv;"
+    cpt := 0; cpt_def := 0
+    init_const := ""
+    for v in variable_list
+        if sym_select( v )
+            res <<< sp + "    CARACDMEXTNAME( $(cpt++), $( type_variable_list[ v->cpp_type ] ), $( v->name ), \"$( v->unit )\" );"
+            if v->default_value.size
+                init_const << (":,"[cpt_def++!=0]) << " $( v->name )( $( v->default_value ) )"
+    res <<< sp + "    static const unsigned nb_params = $cpt;"
+    res <<< sp + "    $bn() $init_const {}"
+    res <<< sp + "};"
+    return res
+    # void dm_data_set_field( const std::string field_name, Tpos value ) {
+        # std::cerr << \"There's no variable named \" << field_name << \" in data struct\" << std::endl;
+    # }
+    # void dm_data_set_field( const std::string field_name, const Vec<Tpos,1> &value ) {
+        # std::cerr << \"There's no variable named \" << field_name << \" in data struct\" << std::endl;
+    # }
+
+#
 def write_legacy_lmtpp_mesh_carac( stream, pb_name, fe_set )
     variable_list  := Set[ Ptr[ VariableAncestor ], ( x, y ) => x->eq( @y ) ]()
     name_elem_list := Set[ String ]()
+    dim_list       := Set[ Int32 ]()
     for f in fe_set
         name_elem_list.insert( f->pe->name )
+        dim_list.insert( f->nb_dim )
         for v in f->variables
             variable_list.insert( v )
     
@@ -273,8 +323,49 @@ def write_legacy_lmtpp_mesh_carac( stream, pb_name, fe_set )
         stream <<< "#include <mesh/$name_elem.h>"
     stream <<< "namespace LMT {"
     stream <<< "template<class TP,unsigned dim> struct Mesh_carac_$(pb_name) {};"
+    
     # mesh data structs
-    # for v in variable_list
+    for v in variable_list
+        stream <<<<
+            #ifndef IFNDEF_$(v->name)_DM
+            #define IFNDEF_$(v->name)_DM
+                struct $(v->name)_DM {};
+            #endif // IFNDEF_$(v->name)_DM
+        
+    # CARACDMEXTNAMES
+    CARACDM_NodalStaticData  := write_legacy_lmtpp_mesh_StaticData( "NodalStaticData" , variable_list, x => x->interpolation == "nodal"  )
+    CARACDM_GlobalStaticData := write_legacy_lmtpp_mesh_StaticData( "GlobalStaticData", variable_list, x => x->interpolation == "global" )
+    
+    # mesh carac
+    for d in dim_list
+        stream <<<<
+            template<class TP>
+            struct Mesh_carac_$(pb_name)<TP,$d> {
+                typedef TP Tpos;
+                static const unsigned dim = $d;
+                typedef Vec<TP,dim> Pvec;
+            $CARACDM_NodalStaticData
+            $CARACDM_GlobalStaticData
+                template<unsigned nvi_to_subs,unsigned skin,unsigned num_sub_element,unsigned inner=0> struct ElementChoice { typedef void NE; typedef DefaultBehavior BE; typedef VoidDMSet TData; };
+                template<unsigned skin,unsigned inner> struct ElementChoice<0,skin,0,inner> { typedef Tetra NE; typedef DefaultBehavior BE; 
+                    struct TData {
+                    };
+                };
+                template<unsigned skin,unsigned inner> struct ElementChoice<0,skin,1,inner> { typedef Hexa NE; typedef DefaultBehavior BE; 
+                    struct TData {
+                    };
+                };
+                template<unsigned skin,unsigned inner> struct ElementChoice<1,skin,0,inner> { typedef Triangle NE; typedef DefaultBehavior BE; 
+                    struct TData {
+                    };
+                };
+                template<unsigned skin,unsigned inner> struct ElementChoice<1,skin,1,inner> { typedef Quad NE; typedef DefaultBehavior BE; 
+                    struct TData {
+                    };
+                };
+                template<unsigned skin,unsigned inner> struct ElementChoice<2,skin,0,inner> { typedef Bar NE; typedef DefaultBehavior BE; typedef VoidDMSet TData;    };
+                template<unsigned skin,unsigned inner> struct ElementChoice<3,skin,0,inner> { typedef NodalElement NE; typedef DefaultBehavior BE; typedef VoidDMSet TData;    };
+            };
         
     stream <<< "}"
     stream <<< "#endif // Mesh_carac_$(pb_name)_HEADER"
