@@ -215,7 +215,8 @@ typename TNG::T measure( const Element<Quad,TN,TNG,TD,NET> &e ) {
 template<class TN,class TNG,class TD,unsigned NET>
 typename TNG::Pvec sample_normal(const Element<Quad,TN,TNG,TD,NET> &e) {
     DEBUGASSERT( (TNG::dim==3) );
-    typename TNG::Pvec res = vect_prod( e.node(1)->pos-e.node(0)->pos, e.node(2)->pos-e.node(0)->pos );
+    typedef typename TNG::Pvec Pvec;
+    Pvec res = vect_prod( Pvec( e.node(1)->pos-e.node(0)->pos ), Pvec( e.node(2)->pos-e.node(0)->pos ) );
     return res / length( res );
 }
 

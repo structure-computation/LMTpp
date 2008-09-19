@@ -491,6 +491,8 @@ struct MatWithTinyBlocks<T,Sym<3> > {
                 T res_f_2 = 0;
                 for ( ST ci=0; ci < ST( lbs.indices.size() ); ++ci, d += RB::Block::nb_values_for_alignement ) {
                     ST real_col = lbs.indices[ci];
+                    
+                    __builtin_prefetch( d + 128/4, 0, 0 );
     
                     SimdVecAl<T,2> vec_s_0( r[real_col+0], r[real_col+1] );
                     T vec_f_0 ( r[real_col+2] );

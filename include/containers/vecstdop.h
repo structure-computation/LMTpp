@@ -256,14 +256,27 @@ inline bool at_least_one(const Vec<T,s> &c) {
 
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------
+#ifdef __ICC
+inline Vec<double,3> vect_prod(const Vec<double,3> &p1,const Vec<double,3> &p2) {
+    return Vec<double,3>(
+        p1[1]*p2[2] - p1[2]*p2[1],
+        p1[2]*p2[0] - p1[0]*p2[2],
+        p1[0]*p2[1] - p1[1]*p2[0]
+    );
+}
+
+inline double vect_prod(const Vec<double,2> &p1,const Vec<double,2> &p2) {
+    return p1[0]*p2[1] - p1[1]*p2[0];
+}
+#else
 /*! vectorial product 3D case (return a vector).
  \relates Vec
  */
-template<class T1,class T2>
-inline Vec<typename TypePromote<Multiplies,typename Vec<T1,3>::template SubType<0>::T,typename Vec<T2,3>::template SubType<0>::T>::T,3> vect_prod(const Vec<T1,3> &p1,const Vec<T2,3> &p2) {
+template<class T1,typename V1,class T2,typename V2>
+inline Vec<typename TypePromote<Multiplies,typename Vec<T1,3,V1>::template SubType<0>::T,typename Vec<T2,3,V2>::template SubType<0>::T>::T,3> vect_prod(const Vec<T1,3,V1> &p1,const Vec<T2,3,V2> &p2) {
     DEBUGASSERT(( Vec<T1,3>::nb_sub_type == 1 ));
     DEBUGASSERT(( Vec<T2,3>::nb_sub_type == 1 ));
-    return Vec<typename TypePromote<Multiplies,typename Vec<T1,3>::template SubType<0>::T,typename Vec<T2,3>::template SubType<0>::T>::T,3>(
+    return Vec<typename TypePromote<Multiplies,typename Vec<T1,3,V1>::template SubType<0>::T,typename Vec<T2,3,V2>::template SubType<0>::T>::T,3>(
         p1[1]*p2[2] - p1[2]*p2[1],
         p1[2]*p2[0] - p1[0]*p2[2],
         p1[0]*p2[1] - p1[1]*p2[0]
@@ -273,16 +286,17 @@ inline Vec<typename TypePromote<Multiplies,typename Vec<T1,3>::template SubType<
 /*! vectorial product 2D case (return a scalar). \warning in the 3D case, vect_prod return a vector
  \relates Vec
  */
-template<class T1,class T2>
-inline typename TypePromote<Multiplies,typename Vec<T1,2>::template SubType<0>::T,typename Vec<T2,2>::template SubType<0>::T>::T vect_prod(const Vec<T1,2> &p1,const Vec<T2,2> &p2) {
+template<class T1,typename V1,class T2,typename V2>
+inline typename TypePromote<Multiplies,typename Vec<T1,2,V1>::template SubType<0>::T,typename Vec<T2,2,V2>::template SubType<0>::T>::T vect_prod(const Vec<T1,2,V1> &p1,const Vec<T2,2,V2> &p2) {
     return p1[0]*p2[1] - p1[1]*p2[0];
 }
+#endif
 
 /*! \f$ \sqrt{ \sum_i c_i^2 } \f$
  \relates Vec
  */
 template<class T,int s>
-        inline typename FloatType<typename TypeReduction<Multiplies,Vec<T,s> >::T>::T length(const Vec<T,s> &c) {
+inline typename FloatType<typename TypeReduction<Multiplies,Vec<T,s> >::T>::T length(const Vec<T,s> &c) {
     return sqrt(dot(c,c));
 }
 
