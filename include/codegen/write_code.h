@@ -12,22 +12,60 @@ class Write_code_language;
 La classe Write_code permet de générer le code C++ du corps d'une fonction. On ajoute du code à l'aide de la fonction add() puis à la fin on appelle la fonction to_string() qui renvoie le code dans une chaine de caractères. 
 Voici un exemple de code :
 \code C/C++
+    #include <containers/mat.h>
+    #include <codegen/ex.h>
+    #include <codegen/write_code.h>
+    using namespace LMT;
+    using namespace Codegen;
     int main() {
-        Write_code wc("float");
-        Ex pi(3.14),R,S,tmp;
-        wc.add(pi,"pi");
-        S = pi*R*R;
-        tmp = R / 2 ;
-        wc.add(S,"S");
-        for(i=0;i<10;i++) {
-            wc.add(tmp,"R",Write_code.Set);
-            wc.add( S,"S",Write_code.Add);
+        Ex R = symbol("R"), S(0);
+        for(int i=0;i<2;i++) {
+            R /= 2;
+            S += M_PI * R * R;
         }
-        std::cout wc.to_string() std::endl;
+        PRINT( S );
+        //  
+        Write_code wc("float");
+        wc.add( S,"",Write_code::Return);
+        std::cout << wc.to_string() << std::endl;
+    
+        return 0;
     }
 
+avec le fichier SConstruct :
+\code Python
+    from LMT import *
+    env = Environment(
+        CPPPATH = [ '#LMT/include' ],
+        LIBS = [ 'pthread' ],
+        CPPFLAGS = cppflags( ['xml2-config'] ),
+        LINKFLAGS = linkflags( ['xml2-config'] )
+    )
+    
+    # LMT
+    BuildDir('build/LMT', 'LMT/include', duplicate=0)
+    libs = SConscript( 'LMT/include/SConscript', exports='env', build_dir='build/LMT' )
+    
+    make_dep_py(env)
+    env.Program( "test", ["tes.cpp"] + libs ) 
 
-<strong> REMARQUE : </strong> place "Return" var at the end of operations
+et le fichier Makefile :
+\code
+    all: codegen
+        scons
+        ./test
+    codegen:
+        cd LMT/include/codegen; scons
+
+<strong> REMARQUE : </strong> n'oubliez pas la ligne wc.add(tmp,"R",Write_code.Return); pour le retour de la fonction.
+
+Les deux fonctions utiles sont add() pour ajouter du code. Son premier paramètre est l'expression, le deuxième est le nom de la variable et le troisième est le type d'"affectation". On  a le choix entre :
+    * <strong> Declare </strong> pour une déclaration,
+    * <strong> Set </strong> pour une affectation,
+    * <strong> Add </strong> pour l'opération +=,
+    * <strong> Sub </strong> pour l'opération -=,
+    * <strong> Return </strong> pour le retour de la fonction ( return ).  
+
 
 \friend raphael.pasquier@lmt.ens-cachan.fr
 \friend hugo.leclerc@lmt.ens-cachan.fr
