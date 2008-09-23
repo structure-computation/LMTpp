@@ -544,7 +544,7 @@ template<class TL,class Op,class TP> typename TypeReduction<Plus,TL>::T max_elem
     \friend hugo.leclerc@lmt.ens-cachan.fr
     \friend raphael.pasquier@lmt.ens-cachan.fr 
 */
-template<class TL> typename TypeReduction<Plus,TL>::T max_element(const TL &l) { return max_element(l,C_1()); }
+template<class TL> typename TypeReduction<Plus,TL>::T max_element(const TL &l) { return max_element(l,Function<C_1>()); }
 
 
 /*!
@@ -595,7 +595,7 @@ template<class TL,class Op,class TP> typename TypeReduction<Plus,TL>::T min_elem
     \friend hugo.leclerc@lmt.ens-cachan.fr
     \friend raphael.pasquier@lmt.ens-cachan.fr 
 */
-template<class TL> typename TypeReduction<Plus,TL>::T min_element(const TL &l) { return min_element(l,C_1()); }
+template<class TL> typename TypeReduction<Plus,TL>::T min_element(const TL &l) { return min_element(l,Function<C_1>()); }
 
 /*!
 
