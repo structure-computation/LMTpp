@@ -16,14 +16,16 @@
 
         \code Python
             from LMT import *
+            from LMT.formal_lf import *
  
             timdaviscppflags = file("/opt/MATH/timdavis/cppflags","r").read().strip()
             timdavisldflags = file("/opt/MATH/timdavis/ldflags","r").read().strip()
             
             env = Environment(
-            CPPPATH = [ '#LMT/include' ],
-            CPPFLAGS = cppflags( ['xml2-config'] ) + " " + timdaviscppflags + " -g3 -Wall",
-            LINKFLAGS = linkflags( ['xml2-config'] ) + " " + timdavisldflags,
+                LIBS = [ 'pthread' ],
+                CPPPATH = [ '#LMT/include' ],
+                CPPFLAGS = cppflags( ['xml2-config'] ) + " " + timdaviscppflags + " -g3 -Wall",
+                LINKFLAGS = linkflags( ['xml2-config'] ) + " " + timdavisldflags,
             )
             make_dep_py(env)
             
@@ -39,7 +41,7 @@
                 elements          = ['Triangle','Tetra'],
                 options           = {"behavior_simplification" : 'plane stress'},
                 additional_fields = { "qtrans" : Variable(unit='mm',nb_dim=['DIM']), "typmat" : Variable(interpolation='elementary',unit='',default_value='0')},
-                T                 = ['float'],
+                types             = ['float'],
                 use_asm           = True,
                 name_der_var      = ['dep','E']
             )

@@ -26,6 +26,7 @@ struct DefaultBehavior {};
 
 /*! 
 
+    Modèle de classe qui sert de paramètre à la classe \a Mesh . On peut aussi consulter  \a MeshCaracStd pour un exemple exploitable de ce modèle et aussi tous les exemples dans le dossier formulation. 
 
     Example of data that can be contained in a child
     \code C/C++
@@ -38,6 +39,7 @@ struct DefaultBehavior {};
         ...
 
     \relates Mesh
+    \relates MeshCaracStd
 */ 
 template<unsigned d,class T>
 struct MeshCarac {

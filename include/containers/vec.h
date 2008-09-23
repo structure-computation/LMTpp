@@ -74,6 +74,7 @@ namespace LMT {
             On peut facilement récupérer les données de Matlab et les mettre dans un "Vec", travailler avec des threads Linux.
             Exemple de déclaration et d'utilisation :
             \code C/C++
+                Vec<double> v( std::ifstream("monfichier.txt") ); // stocke dans v le contenu du fichier "monfichier.txt"
                 Vec<double> vx,vy,vz; // vecteur de double de taille variable.
                 Vec<string,3> v1,v2,v3,v4("if","then","else"); // vecteur de taille 3 de chaine de caracères.
                 double* tab ;
@@ -89,6 +90,7 @@ namespace LMT {
         = Methodes et fonctions les plus utiles
 
             Les méthodes de la classe Vec sont :
+                * 
                 * push_back(a) ajoute une copie de a dans le vecteur,
                 * pop_back() retire le dernier élément ajouté,
                 * back() retourne une copie du dernier élément ajouté,
