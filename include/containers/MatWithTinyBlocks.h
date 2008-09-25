@@ -13,7 +13,7 @@ struct MatWithTinyBlocks;
  */
 template<class T,int n>
 struct RowOfMatWithTinyBlocks {
-    static const int tiny_block_size = 10;
+    static const int tiny_block_size = ( SimdSize<T>::res == 2 ? 10 : 12 );
     typedef int ST;
     Vec<ST> indices;
     Vec<T> data;
@@ -153,9 +153,10 @@ struct MatWithTinyBlocks<T,Sym<3> > {
             rows[r].indices = m.rows[r].indices;
             rows[r].data    = m.rows[r].data   ;
         }
+        diags = m.diag;
     }
     
-    template<class T2> MatWithTinyBlocks( Mat<T2,Sym<>,SparseLine<> > &m ) {
+    template<class T2> MatWithTinyBlocks( const Mat<T2,Sym<>,SparseLine<> > &m ) {
         resize( m.nb_rows(), m.nb_cols() );
         for(unsigned r=0;r<rows.size();++r) {
             rows[r].indices.reserve( m.data[ r * 3 ].indices.size() / 3 );
@@ -565,6 +566,243 @@ struct MatWithTinyBlocks<T,Sym<3> > {
         }
     }
 };
+
+
+
+
+
+
+
+
+
+
+
+/**
+ */
+template<class T>
+struct MatWithTinyBlocks<T,Gen<3> > {
+    static const int n = 3;
+    typedef int ST;
+    typedef RowOfMatWithTinyBlocks<T,n> RB;
+    
+    Vec<RB> rows;
+    ST nb_rows_, nb_cols_;
+
+    ST nb_rows() const { return nb_rows_; }
+    ST nb_cols() const { return nb_cols_; }
+
+    void resize( ST r, ST c ) {
+        assert( r % n == 0 );
+        assert( c % n == 0 );
+        nb_rows_ = r;
+        nb_cols_ = c;
+        rows.resize( r / n );
+    }
+
+    MatWithTinyBlocks( ST r = 0, ST c = 0 ) {
+        resize( r, c );
+    }
+    
+    void reserve_lines( const Vec<ST> &nb_tiny_blocks_per_line ) {
+        for(unsigned i=0;i<rows.size();++i) {
+            rows[ i ].indices.reserve( nb_tiny_blocks_per_line[i] );
+            rows[ i ].data   .reserve( nb_tiny_blocks_per_line[i] * RB::tiny_block_size );
+        }
+    }
+    
+    template<class T2> MatWithTinyBlocks( const MatWithTinyBlocks<T2,Sym<3> > &m ) {
+        resize( m.nb_rows_, m.nb_rows_ );
+        for(unsigned r=0;r<rows.size();++r) {
+            rows[r].indices = m.rows[r].indices;
+            rows[r].data    = m.rows[r].data   ;
+        }
+    }
+    
+    template<class T2> MatWithTinyBlocks( const Mat<T2,Gen<>,SparseLine<> > &m ) {
+        resize( m.nb_rows(), m.nb_cols() );
+        for(unsigned r=0;r<rows.size();++r) {
+            rows[r].indices.reserve( m.data[ r * 3 ].indices.size() / 3 );
+            rows[r].data   .reserve( m.data[ r * 3 ].indices.size() / 3 * RB::Block::nb_values_for_alignement );
+        }
+        //
+        for( ST r=0; r<ST( m.nb_rows() );  ) {
+            for(ST j=0;j<ST( m.data[r].indices.size() );) {
+                ST in = m.data[r].indices[j] / n;
+                T v_0 = 0, v_1 = 0, v_2 = 0;
+                if ( j < ST( m.data[r].indices.size() ) and ST( m.data[r].indices[j] / n ) == in and m.data[r].indices[j] % n == 0 )
+                    v_0 = m.data[r].data[j++];
+                if ( j < ST( m.data[r].indices.size() ) and ST( m.data[r].indices[j] / n ) == in and m.data[r].indices[j] % n == 1 )
+                    v_1 = m.data[r].data[j++];
+                if ( j < ST( m.data[r].indices.size() ) and ST( m.data[r].indices[j] / n ) == in and m.data[r].indices[j] % n == 2 )
+                    v_2 = m.data[r].data[j++];
+                add( r-0, in * n, v_0, v_1, v_2, 0, 0, 0, 0, 0, 0 );
+            }
+            ++r;
+            for(ST j=0;j<ST( m.data[r].indices.size() );) {
+                ST in = m.data[r].indices[j] / n;
+                T v_0 = 0, v_1 = 0, v_2 = 0;
+                if ( j < ST( m.data[r].indices.size() ) and ST( m.data[r].indices[j] / n ) == in and m.data[r].indices[j] % n == 0 )
+                    v_0 = m.data[r].data[j++];
+                if ( j < ST( m.data[r].indices.size() ) and ST( m.data[r].indices[j] / n ) == in and m.data[r].indices[j] % n == 1 )
+                    v_1 = m.data[r].data[j++];
+                if ( j < ST( m.data[r].indices.size() ) and ST( m.data[r].indices[j] / n ) == in and m.data[r].indices[j] % n == 2 )
+                    v_2 = m.data[r].data[j++];
+                add( r-1, in * n, 0, 0, 0, v_0, v_1, v_2, 0, 0, 0 );
+            }
+            ++r;
+            for(ST j=0;j<ST( m.data[r].indices.size() );) {
+                ST in = m.data[r].indices[j] / n;
+                T v_0 = 0, v_1 = 0, v_2 = 0;
+                if ( j < ST( m.data[r].indices.size() ) and ST( m.data[r].indices[j] / n ) == in and m.data[r].indices[j] % n == 0 )
+                    v_0 = m.data[r].data[j++];
+                if ( j < ST( m.data[r].indices.size() ) and ST( m.data[r].indices[j] / n ) == in and m.data[r].indices[j] % n == 1 )
+                    v_1 = m.data[r].data[j++];
+                if ( j < ST( m.data[r].indices.size() ) and ST( m.data[r].indices[j] / n ) == in and m.data[r].indices[j] % n == 2 )
+                    v_2 = m.data[r].data[j++];
+                add( r-2, in * n, 0, 0, 0, 0, 0, 0, v_0, v_1, v_2 );
+            }
+            ++r;
+        }
+    }
+
+    void add( ST row, ST col, T v_0_0, T v_0_1, T v_0_2, T v_1_0, T v_1_1, T v_1_2, T v_2_0, T v_2_1, T v_2_2 ) {
+        assert( row % n == 0 );
+        assert( col % n == 0 );
+        rows[ row / n ].add( col, v_0_0, v_0_1, v_0_2, v_1_0, v_1_1, v_1_2, v_2_0, v_2_1, v_2_2 );
+    }
+    
+    T operator()( ST row, ST col ) const {
+        return rows[ row / n ]( row % n, col );
+    }
+    
+    void partial_mul( const Vec<T> &v, Vec<T> &r, ST num_thread, ST nb_thread ) const {
+        ST beg = (ST)rows.size() * ( num_thread + 0 ) / nb_thread;
+        ST end = (ST)rows.size() * ( num_thread + 1 ) / nb_thread;
+        for( ST num_block_set=beg; num_block_set<end; ++num_block_set ) {
+            ST real_row = num_block_set * 3;
+            const RB &lbs = rows[ num_block_set ];
+            const T *d = lbs.data.ptr();
+            
+            //             SimdVecAl<T,2> res_s_0 = SimdVecAl<T,2>::zero();
+            //             SimdVecAl<T,2> res_s_1 = SimdVecAl<T,2>::zero();
+            //             SimdVecAl<T,2> res_s_2 = SimdVecAl<T,2>::zero();
+            //             T res_f_0 = 0;
+            //             T res_f_1 = 0;
+            //             T res_f_2 = 0;
+            //             for(ST ci=0; ci<(ST)lbs.indices.size(); ++ci, d += RB::tiny_block_size ) {
+            //                 ST real_col = lbs.indices[ci];
+            //                            
+            //                 SimdVecAl<T,2> vec_s_0( v[real_col+0], v[real_col+1] );
+            //                 T vec_f_0( v[real_col+2] );
+            //                 
+            //                 res_s_0 += reinterpret_cast<const SimdVecAl<T,2> &>( d[ 0 ] ) * vec_s_0;
+            //                 res_f_0 += d[ 6 ] * vec_f_0;
+            //                 res_s_1 += reinterpret_cast<const SimdVecAl<T,2> &>( d[ 2 ] ) * vec_s_0;
+            //                 res_f_1 += d[ 7 ] * vec_f_0;
+            //                 res_s_2 += reinterpret_cast<const SimdVecAl<T,2> &>( d[ 4 ] ) * vec_s_0;
+            //                 res_f_2 += d[ 8 ] * vec_f_0;
+            //             }
+            //             r[ num_block_set * 3 + 0 ] += res_s_0[0] + res_s_0[1] + res_f_0;
+            //             r[ num_block_set * 3 + 1 ] += res_s_1[0] + res_s_1[1] + res_f_1;
+            //             r[ num_block_set * 3 + 2 ] += res_s_2[0] + res_s_2[1] + res_f_2;
+            SimdVecAl<T,4> res_s_0 = SimdVecAl<T,4>::zero();
+            SimdVecAl<T,4> res_s_2 = SimdVecAl<T,4>::zero();
+            T res_f_0 = 0;
+            T res_f_1 = 0;
+            T res_f_2 = 0;
+            SimdVecAl<T,4> _1100( 1, 1, 0, 0 );
+            for(ST ci=0; ci<(ST)lbs.indices.size(); ++ci, d += RB::tiny_block_size ) {
+                ST real_col = lbs.indices[ci];
+                           
+                SimdVecAl<T,4> vec_s_0( v[real_col+0], v[real_col+1], v[real_col+0], v[real_col+1] );
+                T vec_f_0( v[real_col+2] );
+                
+                res_s_0 += reinterpret_cast<const SimdVecAl<T,4> &>( d[ 0 ] ) * vec_s_0;
+                vec_s_0 *= _1100;
+                res_f_0 += d[ 6 ] * vec_f_0;
+                res_f_1 += d[ 7 ] * vec_f_0;
+                res_s_2 += reinterpret_cast<const SimdVecAl<T,4> &>( d[ 4 ] ) * vec_s_0;
+                res_f_2 += d[ 8 ] * vec_f_0;
+            }
+            r[ num_block_set * 3 + 0 ] += res_s_0[0] + res_s_0[1] + res_f_0;
+            r[ num_block_set * 3 + 1 ] += res_s_0[2] + res_s_0[3] + res_f_1;
+            r[ num_block_set * 3 + 2 ] += res_s_2[0] + res_s_2[1] + res_f_2;
+        }
+    }
+    
+    struct Mul {
+        void operator()( int num_thread, const MatWithTinyBlocks &m, const Vec<T> &v, Vec<Vec<T> > &r ) const {
+            m.partial_mul( v, r[num_thread], num_thread, nb_thread );
+        }
+        unsigned nb_thread;
+    };
+    
+    Vec<T> mul( const Vec<T> &v, unsigned nb_thread ) const {
+        if ( nb_thread == 1 ) {
+            Vec<T> r; r.resize( nb_rows_, 0.0 );
+            partial_mul( v, r, 0, 1 );
+            return r;
+        }
+        //
+        Vec<Vec<T> > r; r.resize( nb_thread );
+        for(unsigned i=0;i<nb_thread;++i)
+            r[i].resize( nb_rows_, 0 );
+        //
+        Mul m; m.nb_thread = nb_thread;
+        apply_mt( range(nb_thread), nb_thread, m, *this, v, r );
+        //
+        for(int n=0;n<nb_rows_;++n) {
+            T z = r[0][n];
+            for(unsigned i=1;i<nb_thread;++i)
+                z += r[i][n];
+            r[0][n] = z;
+        }
+        return r[0];
+    }
+    
+    Vec<T> operator*( const Vec<T> &v ) const {
+        return mul( v, 1 );
+    }
+    
+    inline static bool find_corresponding_blocks( const RB &bs_0, const RB &bs_1, ST &ind_0, ST &ind_1 ) {
+        if ( --ind_0 < 0 or --ind_1 < 0 )
+            return false;
+        while ( true ) {
+            if ( bs_0.indices[ind_0] == bs_1.indices[ind_1] ) {
+                return true;
+            } else if ( bs_0.indices[ind_0] < bs_1.indices[ind_1] ) {
+                if ( --ind_1 < 0 )
+                    return false;
+            } else {
+                if ( --ind_0 < 0 )
+                    return false;
+            }
+        }
+    }
+    
+    ST size_in_bytes() const {
+        return row_size_in_bytes();
+    }
+    
+    ST row_size_in_bytes() const {
+        ST res = 0;
+        for(unsigned i=0;i<rows.size();++i)
+            res += rows[i].indices.size_in_bytes() + rows[i].data.size_in_bytes();
+        return res;
+    }
+};
+
+
+
+
+
+
+
+
+
+
+
+
 
 template<class T,class TO>
 std::ostream &operator<<( std::ostream &os, const MatWithTinyBlocks<T,TO> &m ) {
