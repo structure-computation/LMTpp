@@ -367,7 +367,7 @@ private:
         
         if ( c0->reg >= 0 ) {
             int c0_reg = c0->reg;
-            int reg = ( c0->parents.size() == 1 ? reg = c0_reg : find_free_reg( os ) );
+            int reg = ( c0->parents.size() == 1 ? c0_reg : find_free_reg( os ) );
             //
             os << "    " << op_name << " xmm" << reg << ", xmm" << c0_reg << "\n";
             wop->reg = reg;

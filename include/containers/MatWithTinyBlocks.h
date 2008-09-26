@@ -705,6 +705,7 @@ struct MatWithTinyBlocks<T,Gen<3> > {
             //             r[ num_block_set * 3 + 0 ] += res_s_0[0] + res_s_0[1] + res_f_0;
             //             r[ num_block_set * 3 + 1 ] += res_s_1[0] + res_s_1[1] + res_f_1;
             //             r[ num_block_set * 3 + 2 ] += res_s_2[0] + res_s_2[1] + res_f_2;
+            
             SimdVecAl<T,4> res_s_0 = SimdVecAl<T,4>::zero();
             SimdVecAl<T,4> res_s_2 = SimdVecAl<T,4>::zero();
             T res_f_0 = 0;
@@ -727,6 +728,28 @@ struct MatWithTinyBlocks<T,Gen<3> > {
             r[ num_block_set * 3 + 0 ] += res_s_0[0] + res_s_0[1] + res_f_0;
             r[ num_block_set * 3 + 1 ] += res_s_0[2] + res_s_0[3] + res_f_1;
             r[ num_block_set * 3 + 2 ] += res_s_2[0] + res_s_2[1] + res_f_2;
+
+
+//             SimdVecAl<T,4> res_s_0 = SimdVecAl<T,4>::zero();
+//             SimdVecAl<T,4> res_s_2 = SimdVecAl<T,4>::zero();
+//             SimdVecAl<T,4> res_f_0 = SimdVecAl<T,4>::zero();
+//             T res_f_2 = 0;
+//             SimdVecAl<T,4> _1100( 1, 1, 0, 0 );
+//             for(ST ci=0; ci<(ST)lbs.indices.size(); ++ci, d += RB::tiny_block_size ) {
+//                 ST real_col = lbs.indices[ci];
+//                            
+//                 SimdVecAl<T,4> vec_s_0( v[real_col+0], v[real_col+1], v[real_col+0], v[real_col+1] );
+//                 SimdVecAl<T,4> vec_f_0( 0, 0, v[real_col+2], v[real_col+2] );
+//                 
+//                 res_s_0 += reinterpret_cast<const SimdVecAl<T,4> &>( d[ 0 ] ) * vec_s_0;
+//                 vec_s_0 *= _1100;
+//                 res_f_0 += reinterpret_cast<const SimdVecAl<T,4> &>( d[ 4 ] ) * vec_f_0;
+//                 res_s_2 += reinterpret_cast<const SimdVecAl<T,4> &>( d[ 4 ] ) * vec_s_0;
+//                 res_f_2 += d[ 8 ] * v[real_col+2];
+//             }
+//             r[ num_block_set * 3 + 0 ] += res_s_0[0] + res_s_0[1] + res_f_0[2];
+//             r[ num_block_set * 3 + 1 ] += res_s_0[2] + res_s_0[3] + res_f_0[3];
+//             r[ num_block_set * 3 + 2 ] += res_s_2[0] + res_s_2[1] + res_f_2;
         }
     }
     
