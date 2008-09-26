@@ -45,7 +45,7 @@ struct Tetra_10;
             TM m;
             make_rect( m, Hexa(), Pvec( 0, 0, 0 ), Pvec( 2., 1., 1. ), Pvec( 100,50,50 ) );
 
-            trturn 0;
+            return 0;
         }
     \friend raphael.pasquier@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
