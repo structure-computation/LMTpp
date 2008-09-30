@@ -88,6 +88,15 @@ template<class T1,class T2,class T3> typename TypePromote<Max,T1,typename TypePr
     return max( a, max(b,c) );
 }
 
+/*! 
+    fonction puissance
+    
+*/
+template<class T1,class T2>
+typename TypePromote<Pow,T1,T2>::T pow( const T1 &a, const T2 &b ) {
+    return std::pow( a, b );
+}
+
 /*!
 \generic_comment ceil
     
@@ -180,6 +189,7 @@ for op in lst:
     //     template<class T> inline std::complex<T> conj(const std::complex<T> &val) { return std::conj(val); }
     inline std::complex<double> conj(const std::complex<double> &val) { return std::conj(val); }
     inline std::complex<long double> conj(const std::complex<long double> &val) { return std::conj(val); }
+    
     
     //     template<class T> inline T real(const std::complex<T> &val) { return std::real(val); }
     inline double real(const std::complex<double> &val) { return std::real(val); }
