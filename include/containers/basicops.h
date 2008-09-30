@@ -96,8 +96,8 @@ struct Pow;
 */
 template<class T1,class T2>
 typename TypePromote<Pow,T1,T2>::T pow( const T1 &a, const T2 &b ) {
-    // typedef typename TypePromote<Pow,T1,T2>::T T;
-    return std::pow( a, b );
+    typedef typename TypePromote<Pow,T1,T2>::T T;
+    return std::pow( T( a ), T( b ) );
 }
 
 template<class T>
