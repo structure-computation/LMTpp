@@ -88,13 +88,38 @@ template<class T1,class T2,class T3> typename TypePromote<Max,T1,typename TypePr
     return max( a, max(b,c) );
 }
 
+struct Pow;
+
 /*! 
     fonction puissance
     
 */
 template<class T1,class T2>
 typename TypePromote<Pow,T1,T2>::T pow( const T1 &a, const T2 &b ) {
+    // typedef typename TypePromote<Pow,T1,T2>::T T;
     return std::pow( a, b );
+}
+
+template<class T>
+inline T pow( T x, unsigned y ) {
+    T res = 1;
+    while (y--)
+        res *= x;
+    return res;
+}
+
+template<class T>
+inline T pow( T x, int y ) {
+    T res = 1;
+    if ( y < 0 ) {
+        x = 1 / x;
+        while (y++)
+            res *= x;
+    } else {
+        while (y--)
+            res *= x;
+    }
+    return res;
 }
 
 /*!
@@ -308,8 +333,6 @@ template<class T> inline typename FloatType<T>::T tan(const T &val) { return std
     \keyword Mathématiques/Fonctions classiques 
 */
 template<class T> inline typename FloatType<T>::T tanh(const T &val) { return std::tanh(val); }
-
-// inline unsigned pow(unsigned x,unsigned y) { unsigned res = 1; while(y--) res *= x; return res; }
 
 /*!
     La fonction résout l'équation Ax=b 
