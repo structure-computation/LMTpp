@@ -81,6 +81,45 @@ Vec<typename TV::template SubType<0>::T *> radix_sort( const TV &vn ) {
     return radix_sort( vn, UnsignedExtractionStd() );
 }
 
+/**
+    \code
+        Vec<unsigned> l( 700,6,4,5,1,3,5,4,9 );
+        Vec<unsigned> ind = radix_sort_with_index( l );
+        PRINT( l[ind] );
+*/
+Vec<unsigned> radix_sort_with_index( const Vec<unsigned> &vn ) {
+    static const unsigned nb_bits  = 8;
+    static const unsigned nb_steps = 32 / nb_bits;
+    static const unsigned nb_terms = 2 << nb_bits;
+    
+    Vec<unsigned> res; res = range( vn.size() );
+    for(unsigned num_step=0, shift=0; num_step<nb_steps; ++num_step, shift += nb_bits ) {
+        // nb items per bucket
+        unsigned sizes[ nb_terms ];
+        for(unsigned i=0;i<nb_terms;++i)
+            sizes[ i ] = 0;
+        for(unsigned i=0;i<res.size();++i) {
+            unsigned int_val = vn[ res[ i ] ] >> shift;
+            sizes[ int_val % nb_terms ]++;
+        }
+        
+        // accumulation
+        unsigned offsets[ nb_terms ];
+        for( unsigned i=0, acc=0; i<nb_terms; acc += sizes[ i ], ++i )
+            offsets[ i ] = acc;
+        
+        // partially sorted list
+        Vec<unsigned> new_res; new_res.resize( res.size() );
+        for(unsigned i=0;i<res.size();++i) {
+            unsigned int_val = vn[ res[ i ] ] >> shift;
+            new_res[ offsets[ int_val % nb_terms ] ++ ] = res[ i ];
+        }
+        res = new_res;
+    }
+    
+    return res;
+}
+
 }
 
 
