@@ -271,6 +271,13 @@ public:
 """+SELFOP+"""
 """+GETRANGE+"""
     
+    template<class T2> bool contains( const T2 &v ) const {
+        for( unsigned i=0; i<size(); ++i )
+            if ( val[i] == v )
+                return true;
+        return false;
+    }
+    
     Vec &set(const TT &v) { for(unsigned i=0;i<size();++i) val[i]=v; return *this; }
 
     /// return a Vec with random values in [-1,1]. if s_dim==-1, user must specify size, else size must be = s_dim
@@ -292,9 +299,22 @@ private:
     TT *val;
     unsigned s,r;
     Allocator allocator;
+    
+    template<class U> friend void swap(Vec<U> &v1,Vec<U> &v2);
+    
     """ * (1-static_size) + """
 };
 }
 """
 
+print """
+namespace LMT {
+template<class T> void swap(Vec<T> &v1,Vec<T> &v2) {
+    swap( v1.val      , v2.val       );
+    swap( v1.s        , v2.s         );
+    swap( v1.r        , v2.r         );
+    swap( v1.allocator, v2.allocator );
+}
+}
 
+"""

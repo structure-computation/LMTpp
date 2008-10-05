@@ -222,6 +222,13 @@ public:
     template<class T2,class STR2,class STO2> Mat &operator*=(const Mat<T2,STR2,STO2> &val) { *this = *this * val; return *this; }
     template<class T2,class STR2,class STO2> Mat &operator/=(const Mat<T2,STR2,STO2> &val) { *this = *this / val; return *this; }
 
+    TT trace() const {
+        TT tmp = 0;
+        for (unsigned k=0;k<nb_rows();k++)
+            tmp += operator()(k,k);
+        return tmp;
+    }
+    
     template<class TVEC> Mat<SubMat<Mat,true ,TVEC>,STRUCTURE,STORAGE,int> operator[](const TVEC &v) const {
         return Mat<SubMat<Mat,true ,TVEC>,STRUCTURE,STORAGE,int>( *this, v );
     }
