@@ -391,6 +391,7 @@ inline Vec<typename TypeReduction<Multiplies,Vec<T,s> >::T,s> normalized(const V
 }
 
 /*! Only for 2D vec. get p rotated by \f$ \frac{\Pi}{2} \f$
+Rotaion de 90 ° dans le sens direct.
  \relates Vec
  */
 template<class T>

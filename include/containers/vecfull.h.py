@@ -276,7 +276,13 @@ public:
     /// return a Vec with random values in [-1,1]. if s_dim==-1, user must specify size, else size must be = s_dim
     static Vec random("""+'unsigned size_vec'*(1-static_size)+""") { Vec res; """+'res.resize(size_vec);'*(1-static_size)+""" for(unsigned i=0;i<res.size();res[i++]=TT(rand()/(double)RAND_MAX)); return res; }
     
-    /// return \f$ [ \frac{ v \& 2^i }{ 2^i } ]_i \f$. if s_dim==-1, user must specify size, else size must be = s_dim
+    /*! 
+    return 
+    \latex 
+        $$ [ \\frac{ v \& 2^i }{ 2^i } ]_i $$
+
+    if s_dim==-1, user must specify size, else size must be = s_dim
+    */
     static Vec binary_decomp(unsigned v"""+',unsigned size_vec'*(1-static_size)+""") {
         Vec res; """+'res.resize(size_vec);'*(1-static_size)+"""
         for(unsigned i=0,p2i=1;i<res.size();++i,p2i*=2) res[i] = bool( v & p2i );

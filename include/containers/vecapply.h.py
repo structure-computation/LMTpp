@@ -74,7 +74,7 @@ namespace LMT {
     Cette fonction est une variante de \\a apply . 
     La syntaxe générale est 
     \code
-         booléen range( vecteur, début, fin, opérateur, paramètres faculatatifs de l'opérateur ) 
+         booléen aply_range( vecteur, début, fin, opérateur, paramètres faculatatifs de l'opérateur ) 
          
     Elle permet d'appliquer l'opérateur sur les indices de l'intervalle [début;fin[ (<strong> Attention : fin n'est pas compris </strong>).
 

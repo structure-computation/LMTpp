@@ -64,6 +64,8 @@ template<class T1,class T2> typename TypePromote<Min,T1,T2>::T min(T1 a,T2 b) {
 
     Fonction clasique à deux ou trois paramètres.
     \keyword Mathématiques/Fonctions classiques
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
 */
 /// max
 template<class T1,class T2> typename TypePromote<Max,T1,T2>::T max(T1 a,T2 b) {
@@ -93,6 +95,8 @@ template<class T1,class T2,class T3> typename TypePromote<Max,T1,typename TypePr
     
     Excepté la fonction à deux paramètres, la fonction ceil de la LMT++ correspond à celle de la librairie standard du C.
     \keyword Mathématiques/Fonctions classiques
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
 */
 /// identité.
 inline int ceil(int a) { return a; }
@@ -115,7 +119,9 @@ inline int floor( int a, int m ) { return a - a % m; }
 \generic_comment heavyside
 
     C'est la fonction de Heavyside qui renvoie un si son argument est supérieur ou égal à zéro et zéro sinon.
-    \keyword Mathématiques/Fonctions classiques 
+    \keyword Mathématiques/Fonctions classiques
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr 
 */
 /// 1 if equal 0
 template<class T> bool heavyside(const T &val) { return (val>=0); }
@@ -151,6 +157,8 @@ template<class T> int sgn(const T &val) { return ( val>0 ? 1 : -1 ); }
     \relates abs_indication
     \keyword Mathématiques/Fonctions classiques 
     \keyword Algorithme/Extraire
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
 */
 /// retourne abs(val)
 template<class T> T length(const T &val) { return abs(val); }
@@ -199,6 +207,8 @@ for op in lst:
 
     \relates abs
     \relates abs_indication
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
 */
 
 /// abs
@@ -223,12 +233,28 @@ struct Abs;
 template<class T> inline typename TypePromote<Abs,T>::T abs(const T &val) { return typename TypePromote<Abs,T>::T(std::abs(val)); }
 template<class T> inline typename TypePromote<Abs,T>::T abs_indication(const T &val) { return LMT::abs(val); } // if val is a function, return abs( something_close_to_mean(val) )
 /*!
+\generic_comment acos
+    fonction réciproque de la la fonction cosinus
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \relates asin
+    \relates atan
+*/
+/*!
     C'est la fonction de la librairie standard du C.
     \keyword Mathématiques/Fonctions classiques 
     \relates asin
     \relates atan
 */
 template<class T> inline typename FloatType<T>::T acos(const T &val) { return std::acos(val); }
+/*!
+\generic_comment acos
+    fonction réciproque de la la fonction sinus
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \relates acos
+    \relates atan
+*/
 /*!
     C'est la fonction de la librairie standard du C.
     \keyword Mathématiques/Fonctions classiques 
@@ -237,6 +263,14 @@ template<class T> inline typename FloatType<T>::T acos(const T &val) { return st
 */
 template<class T> inline typename FloatType<T>::T asin(const T &val) { return std::asin(val); }
 /*!
+\generic_comment atan
+    fonction réciproque de la la fonction cosinus
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \relates asin 
+    \relates acos
+*/
+/*!
     C'est la fonction de la librairie standard du C.
     \keyword Mathématiques/Fonctions classiques 
     \relates asin 
@@ -244,55 +278,124 @@ template<class T> inline typename FloatType<T>::T asin(const T &val) { return st
 */
 template<class T> inline typename FloatType<T>::T atan(const T &val) { return std::atan(val); }
 /*!
+\generic_comment cos
+    fonction cosinus
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+*/
+/*!
     C'est la fonction de la librairie standard du C.
     \keyword Mathématiques/Fonctions classiques 
+    \relates sin 
+    \relates tan
 */
 template<class T> inline typename FloatType<T>::T cos(const T &val) { return std::cos(val); }
+/*!
+\generic_comment cosh
+    Fonction cosinus hyperbolique
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+*/
 /*!
     C'est la fonction de la librairie standard du C.
     \keyword Mathématiques/Fonctions classiques 
 */
 template<class T> inline typename FloatType<T>::T cosh(const T &val) { return std::cosh(val); } /// cosinus hyperbolique
 /*!
+\generic_comment exp
+    Fonction exponentielle
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+*/
+/*!
     C'est la fonction de la librairie standard du C.
     \keyword Mathématiques/Fonctions classiques 
 */
 template<class T> inline typename FloatType<T>::T exp(const T &val) { return std::exp(val); }
+/*!
+\generic_comment log
+    Fonction logarithme népérien
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+*/
 /*!
     C'est la fonction de la librairie standard du C.
     \keyword Mathématiques/Fonctions classiques 
 */
 template<class T> inline typename FloatType<T>::T log(const T &val) { return std::log(val); }
 /*!
+\generic_comment log10
+    Fonction logarithme en base 10
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+*/
+/*!
     C'est la fonction de la librairie standard du C.
     \keyword Mathématiques/Fonctions classiques 
 */
 template<class T> inline typename FloatType<T>::T log10(const T &val) { return std::log10(val); }
+/*!
+\generic_comment acos
+    Fonction sinus
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+*/
 /*!
     C'est la fonction de la librairie standard du C.
     \keyword Mathématiques/Fonctions classiques 
 */
 template<class T> inline typename FloatType<T>::T sin(const T &val) { return std::sin(val); }
 /*!
+\generic_comment sinh
+    Fonction sinus hyperbolique
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+*/
+/*!
     C'est la fonction de la librairie standard du C.
     \keyword Mathématiques/Fonctions classiques 
 */
 template<class T> inline typename FloatType<T>::T sinh(const T &val) { return std::sinh(val); }
+/*!
+\generic_comment sqrt
+    Fonction racine carrée
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+*/
 /*!
     C'est la fonction de la librairie standard du C.
     \keyword Mathématiques/Fonctions classiques 
 */
 template<class T> inline typename FloatType<T>::T sqrt(const T &val) { return std::sqrt(val); }
 /*!
+\generic_comment rsqrt
+    Fonction inverse de la fonction racine carré :    
+    x -> 1/sqrt(x) ou x -> x^(-0.5)
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+*/
+/*!
     c'est la fonction x -> 1/sqrt(x) ou x -> x^(-0.5)
     \keyword Mathématiques/Fonctions classiques 
 */
 template<class T> inline typename FloatType<T>::T rsqrt(const T &val) { return pow(val,-0.5); }
 /*!
+\generic_comment tan
+    Fonction tangente
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+*/
+/*!
     C'est la fonction de la librairie standard du C.
     \keyword Mathématiques/Fonctions classiques 
 */
 template<class T> inline typename FloatType<T>::T tan(const T &val) { return std::tan(val); }
+/*!
+\generic_comment tanh
+    fonction tangente hyperbolique
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+*/
 /*!
     C'est la fonction de la librairie standard du C++.
     \keyword Mathématiques/Fonctions classiques 
