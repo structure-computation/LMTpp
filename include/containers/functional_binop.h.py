@@ -20,12 +20,13 @@ lst = [
 #    ('ShiftRight', '>>' , ''                                  , '' ),
     ('Min'       , 'min', 'std::numeric_limits<T>::max()' , '' ),
     ('Max'       , 'max', '-std::numeric_limits<T>::max()', '' ),
+    ('Pow'       , 'pow', '1', '1' ),
 ]
 for op,sop,dr,conserve_sp in lst:
     ret = 'typename TypePromote<'+op+',P1,P2>::T'
     
     csop = 'p1 '+sop+' p2'
-    if sop=='min' or sop=='max':
+    if sop=='min' or sop=='max' or sop=='pow':
         csop = sop+'(p1,p2)'
     
     print '/// \\relates Lambda'

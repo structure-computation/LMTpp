@@ -116,7 +116,7 @@ public:
         return &last_atom->data[size_last_atom++];
     }
     ///
-    template<class T2> void push_back(const T2 &val) { *new_elem() = val; }
+    template<class T2> T *push_back(const T2 &val) { T *res = new_elem(); *res = val; return res; }
     ///
     void resize(unsigned n) {
         if ( n==0 ) {

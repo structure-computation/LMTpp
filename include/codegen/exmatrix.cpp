@@ -436,7 +436,7 @@ ExVector ExMatrix::solve_using_ldl( const ExVector &b ) const {
         res[r] *= operator()(r,r);
     // L^T
     for(int c=s-1;c>=0;--c)
-        for(unsigned r=0;r<c;++r)
+        for(int r=0;r<c;++r)
             res[r] -= operator()(c,r) * res[c];
     return res;
 }

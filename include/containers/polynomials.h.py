@@ -152,13 +152,19 @@ void Pol<nd,"""+nx+""",T>::initialize_puissances() {
 template <int nd, """+temp+"""class T>
 template <class T2>
 Pol<nd,"""+nx+""",T>::Pol(const Vec<T2> &V) {
-    coefs=V;
+    for(unsigned i=0; i<min(V.size(),coefs.size()); ++i)
+        coefs[i] = V[i];
+    for(unsigned i=V.size(); i<coefs.size(); ++i)
+        coefs[i] = 0;
 }
 
 template <int nd, """+temp+"""class T>
 template <class T2>
 Pol<nd,"""+nx+""",T>::Pol(const Vec<T2,Pol<nd,"""+nx+""",T2>::dim> &V) {
-    coefs=V;
+    for(unsigned i=0; i<min(V.size(),coefs.size()); ++i)
+        coefs[i] = V[i];
+    for(unsigned i=V.size(); i<coefs.size(); ++i)
+        coefs[i] = 0;
 }
 
 template <int nd, """+temp+"""class T>
@@ -181,12 +187,10 @@ Pol<nd,"""+nx+""",T>::Pol(const Pol<nd2,"""+nx+""",T2> &P) {"""
         coefs=P.coefficients();"""
     else :
         print """
-    if (nd2>nd) 
-        coefs=P.coefficients()[range(0,nd)];
-    else if(nd2<nd)
-        coefs[range(0,nd2)]=P.coefficients();
-    else
-        coefs=P.coefficients();"""
+    for(unsigned i=0;i<=min(nd,nd2);++i)
+        coefs[ i ] = P.coefficients()[i];
+    for(unsigned i=nd2+1;i<=nd;++i)
+        coefs[ i ] = 0;"""
     print """
 }
 
@@ -803,6 +807,13 @@ Pol<nd,"""+nx+""",typename TypePromote<Multiplies,T1,T2>::T> operator* (const Po
         print '        for (int j=0;j<=i;j++)'
         print '            res_vec[i]+=P.coefficients()[j]*Q.coefficients()[i-j];'
     print """    return PdxT(res_vec);
+}
+
+template <int nd1, int nd2, """+temp+"""class T1, class T2>
+Pol<(nd1>nd2?nd1:nd2),"""+nx+""",typename TypePromote<Multiplies,T1,T2>::T> operator* (const Pol<nd1,"""+nx+""",T1> &P, const Pol<nd2,"""+nx+""",T2> &Q) {
+    static const int nd = ( nd1 > nd2 ? nd1 : nd2 );
+    typedef Pol<nd,"""+nx+""",typename TypePromote<Multiplies,T1,T2>::T> TP;
+    return TP( P ) * TP( Q );
 }
 
 template <int nd, """+temp+"""class T1, class T2>
