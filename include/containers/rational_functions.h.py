@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 print """// file generated from rational_functions.h.py. Do not modify
 
 ////////////////////////////////////
@@ -16,6 +17,25 @@ namespace LMT {
 
 /**
   @author Gouttebroze
+*/
+
+/*!
+\\generic_comment Rat 
+    \\brief fonctions rationnelles à plusieurs indéterminées et de degré quelconque bornés
+
+    Rat est une classe qui représente les fonctions rationnelles à plusieurs indéterminés et de degré quelconque mais on fixe à la compilation le nombre d'indéterminés (paramètre template nx) ainsi que le même degré partiel maximum de chaque indéterminé (paramètre template nd) du numérateur et dénominateur. 
+    Attention : Le stockage est de type dense ; cad on stocke la valeur de tous les monômes donc la taille augmente très vite avec le nombre d'indéterminées...
+
+    \\relates PolApprox
+    \\relates RatApprox
+    \\relates Pol
+    \\friend camille.gouttebroze@lmt.ens-cachan.fr
+    \\friend raphael.pasquier@lmt.ens-cachan.fr
+    \\friend hugo.leclerc@lmt.ens-cachan.fr
+
+    \\keyword Mathématiques/Objet
+
+    \\author Camille Gouttebroze
 */
 
 template <unsigned nd, unsigned nx>
