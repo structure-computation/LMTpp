@@ -40,7 +40,7 @@ template<> struct TypeInformation<void> {
     template<class TV> struct DeepVariant { typedef TV T; };
 };
 
-/**
+/*!
 m = [
     ('bool',0),
     ('unsigned',1),
@@ -177,11 +177,10 @@ template<class Op,class T1> struct TypePromote<Op,T1,void,void> {
 
 
 // --------------------------------------------------------------------------------------------------------------------
-/** gives the best type for result of op(A,B) where A is of type T1 and B is of type T2.
+/*! gives the best type for result of op(A,B) where A is of type T1 and B is of type T2.
   Example :
     \code
-TypePromoteAdd<Plus,bool,double>::T -> double
-    \endcode
+        TypePromoteAdd<Plus,bool,double>::T -> double
     say that double contains more informations than bool. TypePromote works for Vec, Mat, ...
 */
 template<class Op,class T1,class T2>

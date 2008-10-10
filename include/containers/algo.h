@@ -46,10 +46,75 @@ Structure interne à la LMT++
         template<class T> struct MonOp {
             bool operator() (T &val1, T &val2) const { le code C++ }
         }
-
     où operator() renvoie vrai si val1 <= val2 et faux sinon.
-
     <strong> Si le vecteur est de type hétérogène, le trie sera partiel.</strong>
+    Voici quelques exemples :
+    \code C/C++
+        #include <containers/vec.h>
+        #include <containers/algo.h>
+        using namespace LMT;
+        using namespace std;
+        
+        bool ineg(const string s, const string s2) { return (s.size() <= s2.size()); }
+        
+        int main() {
+        
+            Vec<int> v;
+            v.resize(10);
+            //apply(v,rand());
+            for(int i=0;i<10;i++)
+                v[i] = rand() % 20;
+            PRINT(v);
+            sort(v);
+            PRINT(v);
+        
+            typedef HeteroExplPack<double,char > C; 
+            Vec<Heterogeneous<C> > h; 
+            h.push_back('j');
+            h.push_back(3.14);
+            h.push_back('9');
+            h.push_back('k');
+            h.push_back(-2.71);
+            h.push_back(10.);
+            h.push_back(100.);
+            h.push_back('b');
+            h.push_back('p');
+            h.push_back('u');
+            h.push_back(1000.);
+            h.push_back('d');
+            h.push_back(10000.);
+            PRINTN(h);
+            sort(h);
+            PRINT(h);
+        
+            Vec<string> vc,vc2;
+            vc.resize(6);
+            vc[0] = "bobby";
+            vc[1] = "gaston";
+            vc[2] = "edvige";
+            vc[3] = "eva";
+            vc[4] = "laurence";
+            vc[5] = "tom";
+            vc2 = vc ;
+            PRINT(vc);
+            sort(vc2);
+            PRINT(vc2);
+            sort(vc,ineg);
+            PRINT(vc);
+        
+            return 0;
+        }
+    L'affichage donne :
+    \verbatim
+            v -> 3 6 17 15 13 15 6 12 9 1
+            v -> 1 3 6 6 9 12 13 15 15 17
+            h ->
+            3.14 -2.71 10 100 1000 10000 j 9 k b p u d
+            h -> 16 106 107 100 112 117 d b 9
+            � �
+            vc -> bobby gaston edvige eva laurence tom
+            vc2 -> bobby edvige eva gaston laurence tom
+            vc -> tom eva bobby edvige gaston laurence
 
     \relates Vec
     \relates apply
@@ -470,7 +535,11 @@ namespace ALGOPRIVATE {
 
     Voici les syntaxes possibles de cette fonction :
     \code
+        max_element( vecteur )
+        max_element( vecteur, opérateur )
 
+    Cette fonction retourne une copie du plus grand élément pour la première syntaxe.
+    Pour la deuxième forme, l'opérateur doit prendre en paramètre un élément du vecteur et renvoyer un scalaire. La fonction renvoie le premier des éléments ayant la plus grande image par l'opérateur. 
 
     \relates Vec
     \relates apply
@@ -486,7 +555,7 @@ namespace ALGOPRIVATE {
 
     Voici les syntaxes possibles de cette fonction :
     \code
-
+        min_element( vecteur, opérateur )
 
     \relates Vec
     \relates apply

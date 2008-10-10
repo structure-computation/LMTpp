@@ -1,12 +1,6 @@
 /*!
 \tutorial Mon premier programme
 
-    Allez voir les pages de :
-    \relates Mesh
-    \relates MeshAncestor
-    \relates MeshCarac
-    \relates MeshTransfer
-
     \friend raphael.pasquier@lmt.ens-cachan.fr
 
     On procède en plusieurs étapes :
@@ -52,8 +46,8 @@
     Ensuite on lance kdevelop (taper kdevelop&).
         Remarque : il se peut qu'un projet se lance automatiquement.
     
-    Importer un projet (menu Project->Import existing project... et validez autant de fois que nécessaire sans faire de changement).
+    Importer un projet (menu Project->Import existing project... et validez autant de fois que nécessaire sans rien modifier).
     
-    Taper F8 pour lancer la compilation. Youpi! Ca marche !
+    Taper F8 pour lancer la compilation. Youpi! Ca marche ! ... normalement.
 
 */ 

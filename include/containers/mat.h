@@ -38,7 +38,8 @@ template<class MATOP> struct IsMatOp { typedef void T; };
         Pour des utilisations particulières, il est préférable d'utiliser des spécialisations de la classe Mat pour économiser des ressources ou pour aller plus vite.
 
             = Matrice creuse
-                A faire
+                Les classes qui servent à préciser les types de stockage creux sont \a Sparse , \a SparseCholMod , \a SparseLU , \a SparseLine , \a SparseUMFPACK . Le format \a SparseLU qui sert pour la décomposition LU est traité à la dernière section. 
+                A FINIR
             = Matrice à symétrique
                 Les matrices symétriques se définissent en spécialisant le type \a Mat de base. On a les possibilités \a Sym , \a AntiSym , \a Herm . Pour des détails et des exemples, allez à la FAQ \a #1 
             = Matrice spéciale pour la décomposition LU
@@ -60,7 +61,7 @@ template<class MATOP> struct IsMatOp { typedef void T; };
             * \a #13 Pour concaténer deux matrices
             * \a #22 Pour extraire une sous-matrice (à faire).
         * Manipulation
-            *  pour accéder à l'élément de ligne i et de colonne j, on fait M(i,j) sachant que les indices commencent à zéro.
+            *  pour accéder à l'élément de ligne i et de colonne j, on fait M(i,j) (les indices commencent à zéro).
             * \a #7 Pour faire des operations matrice-vecteur  
             * \a #9 Pour obtenir le nombre de colonnes ou de lignes 
             * \a #10 Pour transposer une matrice 
@@ -302,11 +303,13 @@ std::istream &line_input( std::istream &s, Mat<TT,Structure,Storage,OP> &m ) {
         }
     return s;
 }
-/**
+/*!
 Pour les fichiers du genre
  0 1 2
  3 4 5
  6 7 8
+
+\keyword Mathématiques/Algèbre linéaire/Opération
 */
 template<class T,class Structure,class Storage,class OP>
 void read_ascii_mat_file( Mat<T,Structure,Storage,OP> &mat, std::istream &f ) {
@@ -429,8 +432,11 @@ T min(const Mat<T,STR,STO,IO> &m) {
 
 namespace LMT {
 
-/**
+/*!
 Pour construire une matrice diagonale à partir d'un vecteur
+\friend hugo.leclerc@lmt.ens-cachan.fr
+\keyword Mathématiques/Algèbre linéaire/Opération
+\relates Mat
 */
 template<class TV,int s>
 Mat<TV,Diag<s> > diag(const Vec<TV,s> &vec) {
@@ -446,7 +452,7 @@ Mat<TV,Diag<s> > diag(const Vec<TV,s> &vec) {
 
     Convert a LMT::Mat to a matlab one
     \friend hugo.leclerc@lmt.ens-cachan.fr
-    \keyword Mathématiques/Algèbre linéaire
+    \keyword Mathématiques/Algèbre linéaire/Opération
     \author Hugo Leclerc
 */
     template<class TT,class STR,class O,class IO>
