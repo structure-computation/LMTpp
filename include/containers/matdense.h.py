@@ -129,6 +129,16 @@ public:
     
     void clear() { data.set((TT)0); } /// set all values to 0
     
+    double trace()
+    {
+        double tmp = 0;
+        for (unsigned k=0; k<nr.val; k++)
+        {
+            tmp += data[k];
+        }
+        return tmp;
+    }
+    
     """ + (structure=='Gen') * """
     typedef T& RetOp;
     typedef const T& RetOpConst;
