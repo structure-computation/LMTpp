@@ -39,6 +39,13 @@ extern std::map<std::string,long long> total_allocated;
 
 /*!
     Cette fonction affiche le nombre d'octets que prend chaque fonction. Elle s'utilise avec la classe \a Allocator .
+    
+    Pour l'utiliser :
+        "-DPRINT_ALLOC" dans les flags de compilation
+        "std::map<std::string,long long> total_allocated;" dans un .cpp (quelconque)
+        et après, disp_alloc("toto"); affichera toto puis une liste de types d'objets et la place qu'ils prennent en mémoire.
+        ou sum_alloc(); renvoie la taille totale utilisée par les objets LMTpp
+    
     \friend raphael.pasquier@lmt.ens-cachan.fr
 */
 inline void disp_alloc(const char *prefix="") {
