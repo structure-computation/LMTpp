@@ -23,8 +23,8 @@
 
     = Ecrire de la documentation
 
-        Vous pouvez aussi compléter et corriger la documentaion. Vous pouvez utiliser git comme dans la section précédente.
-        Pour écrire des commentaires qui seront inclus dans les pages web de la documentation, vous devez respecter une syntaxe proche de celle de wiki.
+        Vous pouvez aussi compléter et corriger la documentaion. Et pour soumettre votre proposition, utilisez git comme dans la section précédente.
+        Pour écrire des commentaires qui seront inclus dans les pages web de la documentation, vous devez respecter une syntaxe (proche de celle de wiki).
 
         = Introduction
 

@@ -1,15 +1,9 @@
 /*!
 \webpage rappportdebug Rapport de bug
 
-    à compléter (ne pas effacer la ligne ci dessus et indenter le texte).
-
-
-
-
-
-
-
-
-
+    Il est très incertain que la librairie ait un bug. Souvent les erreurs proviennent d'une tentative d'écriture ou de lecture hors d'un vecteur.
+    n'hésitez pas à demander de l'aide à vos voisins ou bien à :
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \friend raphael.pasquier@lmt.ens-cachan.fr
 
 */

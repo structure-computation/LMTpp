@@ -291,5 +291,13 @@ print_apply_ext('apply_nz_wi',TT,TV,'for(unsigned i=0;i<v.indices.size();++i) op
 
 print_apply_ext('filter_sp',TT,TV,"""for(unsigned i=0;i<v.indices.size();++i) if ( op(v.data[i],PARALIST) == false ) { v.indices.erase_elem_nb(i); v.data.erase_elem_nb(i); } """,onlyfornonconstvec=True)
 
+print """
+/// ajout de Raphaël. Position provisoire
+template<class TT > void swap(Vec<Sparse<TT> > &v1, Vec<Sparse<TT> > &v2) {
+    swap( v1.indices      , v2.indices       );
+    swap( v1.data        , v2.data         );
+    swap( v1.si        , v2.si         );
+}
+"""
 
 print """}"""

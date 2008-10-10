@@ -45,6 +45,15 @@ struct HashCH {
     unsigned v[n];
 };
 
+/*!
+    Cette fonction effectue la factorisation de Cholesky. La matrice m, de format spécial \a Mat<T,TS,SparseLine<>> , contient le résultat.
+    Pour un exemple d'utilisation, consulter l'exemple \a "Décomposition d'une matrice" .
+
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \keyword Mathématiques/Algèbre linéaire/Décomposition de matrices
+    \author Hugo Leclerc
+*/
 template<class T,class TS> void chol_factorize( Mat<T,TS,SparseLine<> > &m ) {
     static const unsigned NN = 16;
     Vec<HashCH<NN> > hash; hash.resize( m.nb_rows() );

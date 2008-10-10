@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import string
 from vecgenhelp import *
 
@@ -51,10 +52,17 @@ private:
     StaticValIf<unsigned,fixed_size,static_size_> si;
 };
 
-/** Create a constant vec of size $size \\relates Vec */
+/*!
+ Create a constant vec of size $size 
+\\relates Vec 
+\\relates static_cst_vec
+*/
 template<class T> Vec<VecCst<T>,-1> cst_vec(const T &val,unsigned size) { return Vec<VecCst<T>,-1>(val,size); }
-
-/** Create a constant vec of size $s \\relates Vec */
+/*! 
+Crée un vecteur constant de taille s à la compilaion
+\\relates Vec 
+\\relates cst_vec
+*/
 template<int s,class T> Vec<VecCst<T>,s> static_cst_vec(const T &val) { return Vec<VecCst<T>,s>(val); }
 
 } // namespace LMT
