@@ -49,7 +49,7 @@ namespace LMT {
             return formulations[i].pb->formulation_nb( formulations[i].num_formulation );
         }
         //
-        bool solve(T iterative_criterium=0.0) {
+        bool solve(T iterative_criterium=T(0)) {
             allocate_matrices();
             assemble();
             solve_system();
@@ -63,10 +63,10 @@ namespace LMT {
                 return;
             mat_already_allocated = true;
             for(unsigned i=0;i<formulations.size();++i)
-                formulation(i)->allocate_matrices(amd);
+                formulation(i)->allocate_matrices();
             //
             pos.resize( 0 );
-            unsigned nb_ddl_per_node = unsigned nb_ddl_per_node = formulations[0].pb->formulation_nb(formulations[0].num_formulation)->get_nb_nodal_unknowns();
+            unsigned nb_ddl_per_node = formulations[0].pb->formulation_nb(formulations[0].num_formulation)->get_nb_nodal_unknowns();
             for(unsigned i=0;i<formulations.size();++i) {
                 MeshAndForm &maf = formulations[i];
                 maf.local_unknowns_to_global_ones.reserve( maf.m->node_list.size() );
@@ -110,10 +110,10 @@ namespace LMT {
         //
         void assemble(bool assemble_mat=true,bool assemble_vec=true) {
             K.clear();
-            F.set(0.0);
-            F_before_contraints.set(0.0);
-            X_before_contraints.set(0.0);
-            diag_before_contraints.set(0.0);
+            F.set(T(0));
+            F_before_contraints.set(T(0));
+            X_before_contraints.set(T(0));
+            diag_before_contraints.set(T(0));
             F.resize( pos.size() * dim, 0 );
             F_before_contraints.resize( pos.size() * dim, 0 );
             X_before_contraints.resize( pos.size() * dim, 0 );
@@ -161,7 +161,7 @@ namespace LMT {
             f_reaction = mat * X;
         }
         //
-        bool solve_system(T iterative_criterium=0.0) {
+        bool solve_system(T iterative_criterium=T(0)) {
             X = inv(K) * F;
             dispatch_results();
             return false;
