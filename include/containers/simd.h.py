@@ -37,9 +37,9 @@ template<class T> struct SimdSize { static const unsigned res = 1; };
 template<class T,unsigned s = SimdSize<T>::res>
 struct SimdVec {
     SimdVec() {}
-    SimdVec(const T &v) { for(unsigned i=0;i<s;++i) val[i] = v; }
-    SimdVec(const T &v0,const T &v1) { val[0] = v0; val[1] = v1; }
-    SimdVec(const T &v0,const T &v1,const T &v2,const T &v3) { val[0] = v0; val[1] = v1; val[2] = v2; val[3] = v3; }
+    template<class T2> SimdVec(const T2 &v) { for(unsigned i=0;i<s;++i) val[i] = v; }
+    template<class T2> SimdVec(const T2 &v0,const T2 &v1) { val[0] = v0; val[1] = v1; }
+    template<class T2> SimdVec(const T2 &v0,const T2 &v1,const T2 &v2,const T2 &v3) { val[0] = v0; val[1] = v1; val[2] = v2; val[3] = v3; }
     template<class T2> SimdVec(const SimdVec<T2,s> &v) { for(unsigned i=0;i<s;++i) val[i] = (T)v[i]; }
     static const unsigned nb_elem = s;
     const T &operator[](unsigned i) const { return val[i]; }
@@ -60,6 +60,11 @@ template<class TT,unsigned s> struct TypeInformation<SimdVec<TT,s> > {
     static std::string type() { return "SimdVec<"+TypeInformation<TT>::type()+"> "; }
     static const bool float_type = TypeInformation<TT>::float_type;
 };
+
+template<class Op,class T1,class T2,unsigned s> struct TypePromote<Op,SimdVec<T1,s>,SimdVec<T2,s> > {
+    typedef SimdVec<typename TypePromote<Op,T1,T2 >::T,s> T;
+};
+
 
 """
 
