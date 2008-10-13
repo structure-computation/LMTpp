@@ -94,6 +94,11 @@ public:
     T &back() { return *end; }
     ///
     const T &back() const { return *end; }
+    
+    ///
+    T &front() { return *beg; }
+    ///
+    const T &front() const { return *beg; }
    
     /// assuming that v > all element in this
     void push_sup( T *v ) {

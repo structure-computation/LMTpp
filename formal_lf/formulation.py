@@ -516,12 +516,16 @@ class Formulation:
     dV_part += e.sub_integration( form.diff(dSubInter), self.order_integration ).subs(EM(unk_subs))
 
     #
-    nb_pts_gauss_if_not_integration_totale = 1.0
-    if not self.integration_totale:
-        k = min( filter(lambda x:x>=self.order_integration,e.gauss_points.keys()) )
-        nb_pts_gauss_if_not_integration_totale = len( e.gauss_points[k] )
+    #nb_pts_gauss_if_not_integration_totale = 1.0
+    #if not self.integration_totale:
+        #k = min( filter(lambda x:x>=self.order_integration,e.gauss_points.keys()) )
+        #nb_pts_gauss_if_not_integration_totale = len( e.gauss_points[k] )
     
-    dV_part += form.diff(dE).subs(EM(unk_subs)) / nb_pts_gauss_if_not_integration_totale
+    dE_part = form.diff(dE).subs(EM(unk_subs))
+    if not self.integration_totale:
+        dE_part *= symbol("ponderation") / e.integration( 1, 2, False )
+    dV_part += dE_part
+        
     form = form.subs( dE, 0 )
     res['V'] = calculate_matrix( dV_part, unknown_symbols, unknown_test_symbols, {}, self.allow_surtension_coefficient, self.assume_non_linear, test=self.use_test_functions, 
             dont_want_to_add_KUn = self.dont_want_to_add_KUn, use_subs_instead_of_diff = self.use_subs_instead_of_diff )
