@@ -39,7 +39,10 @@ Cette macro permet l'introspection du code C++ pour obtenir par exemple les attr
     static const char *unit_member_nb(const Number<number> &__n__) { return unit; } \
     static unsigned nb_comp(const Number<number> &__n__) { return DM::NbComponents<mytype>::n; } \
     template<class NDM,class TTT> void set_member_named##number( const NDM &ndm, const TTT &val ) {} \
+    template<class NDM,class TTT> void set_member_named_if_same_type##number( const NDM &ndm, const TTT &val ) {} \
     template<class TTT> void set_member_named0( const myname##_DM &ndm, const TTT &val ) { myname = val; } \
+    void set_member_named_if_same_type0( const myname##_DM &ndm, const mytype &val ) { myname = val; } \
+    template<class TTT> void set_member_named_if_same_type0( const myname##_DM &ndm, const TTT &val ) {} \
     mytype myname
 
 /// Ex : CARACDM(0,double,pressure);
@@ -163,7 +166,7 @@ namespace DM {
         void copy(const DMSet1 &dm_set1,DMSet2 &dm_set2,const Number<total_number> &n1,const Number<total_number> &nt) {}
         template<class DMSet1,class DMSet2,unsigned number,unsigned total_number>
         void copy(const DMSet1 &dm_set1,DMSet2 &dm_set2,const Number<number> &n1,const Number<total_number> &nt) {
-            dm_set2.set_member_named0( typename DMSet1::template SubType0<number,0>::NT(), dm_set1.member_nb(n1) );
+            dm_set2.set_member_named_if_same_type0( typename DMSet1::template SubType0<number,0>::NT(), dm_set1.member_nb(n1) );
             copy(dm_set1,dm_set2,Number<number+1>(),nt);
         }
         template<class Tpond,class DMSet1,class DMSet2,unsigned total_number>
