@@ -184,6 +184,14 @@ public:
     void pop_back(unsigned nb_val) { s -= nb_val; } /// remove the nb_val elements at end.
     void fit_memory() { reserve(size()); } /// if size() is lesser than reserved, reallocate memory with 'right' size.
     void erase_elem_nb(unsigned i) { for(unsigned j=i;j<s-1;++j) val[j]=val[j+1]; pop_back(); } /// erase element number i. This procedure maintains the order of elements
+    void erase_elem_strip(unsigned i,unsigned j) {
+        if ( j > i ) {
+            unsigned d = j - i;
+            s -= d;
+            for(unsigned k=i;k<s;++k)
+                val[k]=val[k+d];
+        }
+    } /// erase elements from number i to number j (excluded). This procedure maintains the order of elements
     template<class T2> void erase_first(const T2 &v) { for(unsigned i=0;i<size();++i) if (val[i]==v) { val[i]=back(); pop_back(); } } /// erase first element==v. This procedure DOES NOT maintain the order of elements
     void erase_elem_nb_unordered(unsigned i) { val[i] = val[--s]; } /// erase element number i. This procedure does not maintain the order of elements
     
@@ -209,6 +217,16 @@ public:
         for( ST i = os - 1; i >= from; --i )
             val[ i + n ] = val[ i ];
         return val + from;
+    }
+    
+    void insert_before( ST i, const TT &v ) {
+        *make_room_to_insert( i, 1 ) = v;
+    }
+    
+    void insert_ordered( const TT &v ) {
+        ST i=0;
+        for( ; i < size() and val[ i ] < v; ++i );
+        *make_room_to_insert( i, 1 ) = v;
     }
     
     // res will contain data of this and this is cleared.

@@ -168,7 +168,7 @@ class MakePbFE:
         
         for f,e in self.fe_set:
             if e.dim == self.d:
-                f.write( e, output, asmout = asmout, use_asm = self.use_asm, name_der_vars = self.name_der_vars )
+                f.write( e, output, asmout = asmout, name_der_vars = self.name_der_vars )
     
         output.close()
         asmout.close()
@@ -190,6 +190,12 @@ class MakePbFE:
                 output.write( 'FormulationAncestor<'+PN+'::T> *' + PN + '::new_formulation_' + f.name + '( Number<'+b+'>, ' + PN + '::TM &m ) { return new '+TF+'(m); }\n' )
             output.write( '}\n' )
         
+    def use_asm( self ):
+        res = False
+        for f,e in self.fe_set:
+            res |= f.use_asm
+        return res
+
 
 def make_pb( env,
              opt,
@@ -203,7 +209,6 @@ def make_pb( env,
              additional_fields = {},
              types = ['double'],
              dep_py = True,
-             use_asm = False,
              name_der_vars = [] ):
    # find formulation and element files
    f_files, e_files = [], []
@@ -268,11 +273,10 @@ def make_pb( env,
             pbc.name = name
             pbc.f_name = f_name
             pbc.fe_set = map_f[ f_name ]
-            pbc.use_asm = use_asm
             pbc.name_der_vars = []
             f_h, f_asm = env.Command( [ directory + bh, directory + ba ], pb_h, pbc.write_formulation_h_from_scons )
             all_cpp += env.Command( directory + bn, f_h, pbc.write_formulation_cpp_from_scons , TARGET = bn + '_opt' * opt +'_debug'*(1-opt) + '.o' )
-            if use_asm:
+            if pbc.use_asm():
                 all_cpp += [ f_asm ]
    
    return all_cpp
