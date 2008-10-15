@@ -56,12 +56,12 @@ template<class TT,unsigned atomic_size> struct IsVecOp<SortedList<TT,atomic_size
             // parcourt dans le sens croissant
             for( A *i=v.beg; i; i=i->next )
                 std::cout << *i << " ";
-            std::cout << std::endl;
+            std::cout << std::lastl;
             
             // parcourt dans le sens decroissant
-            for( A *i=v.end; i; i=i->prev )
+            for( A *i=v.last; i; i=i->prev )
                 std::cout << *i << " ";
-            std::cout << std::endl;
+            std::cout << std::lastl;
         }
     
 */
@@ -75,7 +75,7 @@ public:
     static const int sparsity_rate = 0;
     
     /// 
-    Vec() : beg(NULL), end(NULL) {}
+    Vec() : beg(NULL), last(NULL) {}
     
     ///
     unsigned size() const {
@@ -91,9 +91,9 @@ public:
     }
     
     ///
-    T &back() { return *end; }
+    T &back() { return *last; }
     ///
-    const T &back() const { return *end; }
+    const T &back() const { return *last; }
     
     ///
     T &front() { return *beg; }
@@ -105,10 +105,10 @@ public:
         if ( not beg )
             beg = v;
         v->next = NULL;
-        if ( end )
-            end->next = v;
-        v->prev = end;
-        end = v;
+        if ( last )
+            last->next = v;
+        v->prev = last;
+        last = v;
     }
    
     ///
@@ -124,9 +124,9 @@ public:
         if ( i->next )
             i->next->prev = i->prev;
         else {
-            end = i->prev;
-            if ( end )
-                end->next = NULL;
+            last = i->prev;
+            if ( last )
+                last->next = NULL;
         }
     }
     
@@ -171,7 +171,7 @@ public:
     }
     
     T *beg;
-    T *end;
+    T *last;
 };
 
 
@@ -200,18 +200,18 @@ public:
             #return false;
     #""",ret='bool')
     #print_apply_ext('remove_if'+ptr,TP,TV,"""
-            #unsigned new_in_end = 0, to_be_filtered = v.size();
+            #unsigned new_in_last = 0, to_be_filtered = v.size();
             #if ( to_be_filtered == 0 ) return;
             #unsigned j=atomic_size;
             #for(unsigned i=0;i<v.atoms.size();++i) {
                 #for(j=(j==0);j<atomic_size;++j) {
                     #unsigned os = v.size();
                     #bool res = op("""+e+"""v.atoms[i]->data[j],PARALIST);
-                    #new_in_end += v.size() - os;
+                    #new_in_last += v.size() - os;
                     #if ( res ) {
                         #v.atoms[i]->data[j] = v.back();
                         #v.pop_back();
-                        #if ( new_in_end ) --new_in_end;
+                        #if ( new_in_last ) --new_in_last;
                         #else              --j;
                     #}
                     #if ( --to_be_filtered == 0 ) return;
@@ -258,6 +258,6 @@ public:
 
 
 print """
-#endif // VEC_SORTED_LIST_H
+#lastif // VEC_SORTED_LIST_H
 }
 """

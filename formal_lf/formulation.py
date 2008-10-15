@@ -43,6 +43,7 @@ class Formulation:
       "use_test_functions" : True,
       "assume_symmetric_matrix" : True,
       "need_skin_assembly" : False,
+      "use_asm" : False,
       "dim" : dim,
       "nb_form" : nb_form,
       # variables
@@ -805,9 +806,8 @@ class Formulation:
 
     if T=='N': f.write( '#endif\n' )
   
-  def write( self, e, f = sys.stdout, asmout = sys.stdout, use_asm = False, name_der_vars = [] ):
+  def write( self, e, f = sys.stdout, asmout = sys.stdout, name_der_vars = [] ):
     self.asmout  = asmout
-    self.use_asm = use_asm
     if isinstance(e,str): e = Element(e,self.dim)
     self.e = e
     f.write( '/// @author hugo LECLERC\n' )

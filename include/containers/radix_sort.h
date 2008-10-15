@@ -87,7 +87,8 @@ Vec<typename TV::template SubType<0>::T *> radix_sort( const TV &vn ) {
         Vec<unsigned> ind = radix_sort_with_index( l );
         PRINT( l[ind] );
 */
-Vec<unsigned> radix_sort_with_index( const Vec<unsigned> &vn ) {
+template<class T,int s,class UE>
+Vec<unsigned,s> radix_sort_with_index( const Vec<T,s> &vn, const UE &ue ) {
     static const unsigned nb_bits  = 8;
     static const unsigned nb_steps = 32 / nb_bits;
     static const unsigned nb_terms = 2 << nb_bits;
@@ -99,7 +100,7 @@ Vec<unsigned> radix_sort_with_index( const Vec<unsigned> &vn ) {
         for(unsigned i=0;i<nb_terms;++i)
             sizes[ i ] = 0;
         for(unsigned i=0;i<res.size();++i) {
-            unsigned int_val = vn[ res[ i ] ] >> shift;
+            unsigned int_val = ue( vn[ res[ i ] ] ) >> shift;
             sizes[ int_val % nb_terms ]++;
         }
         
@@ -111,7 +112,7 @@ Vec<unsigned> radix_sort_with_index( const Vec<unsigned> &vn ) {
         // partially sorted list
         Vec<unsigned> new_res; new_res.resize( res.size() );
         for(unsigned i=0;i<res.size();++i) {
-            unsigned int_val = vn[ res[ i ] ] >> shift;
+            unsigned int_val = ue( vn[ res[ i ] ] ) >> shift;
             new_res[ offsets[ int_val % nb_terms ] ++ ] = res[ i ];
         }
         res = new_res;
@@ -119,6 +120,12 @@ Vec<unsigned> radix_sort_with_index( const Vec<unsigned> &vn ) {
     
     return res;
 }
+
+template<class T,int s,class UE>
+Vec<unsigned,s> radix_sort_with_index( const Vec<unsigned,s> &vn ) {
+    return radix_sort_with_index( vn, Function<C_1>() );
+}
+
 
 }
 
