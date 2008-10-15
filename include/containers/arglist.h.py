@@ -15,9 +15,10 @@ for i in range(1,5):
         
         namecl = 'ArgList'+str(i)+'_'+str(ci)
         
+        structures += '/*!\n  \\internal\n */\n'
         structures += 'template<'+tcl+'> struct '+namecl+' { '+namecl+'('+args+'):'+constr+' {} '+struct+' };\n'
         
-        functions += '/// \\relates arglist  Convenience function to pass multiple parameters to apply\n'
+        functions += '/*!\n \\relates arglist\n  Convenience function to pass multiple parameters to apply\n \\internal\n */\n'
         functions += 'template<'+tcl+'> '+namecl+'<'+spe+'> arglist('+args+') { return '+namecl+'<'+spe+'>('+arc+'); }\n'
     
 print '#ifndef LMT_arglist_HEADER'
@@ -32,7 +33,7 @@ print functions
 
 for i in range(2,5):
     for k in range(2**(i-1)):
-        print '/// \\relates arglist  Convenience function to pass multiple parameters to apply'
+        print '/*! \\relates arglist\n  Convenience function to pass multiple parameters to apply\n \\internal\n   */\n'
         tp  = string.join(['class T%i'%j for j in range(i)],',')
         ta  = string.join(['T%i'%j for j in range(i)],',')
         tab = string.join(['T%i'%j for j in range(i-1)],',')

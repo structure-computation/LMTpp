@@ -101,7 +101,7 @@ namespace LMT {
                 * random( size_vec) qui est une méthode statique de Vec pour générer un vecteur aléatoire de double
 
             <strong> IMPORTANT : </strong> On ne peut pas parler de la classe Vec sans parler de la fonction \a apply et de ses varaintes qui permettent de manipuler les éléments d'un vecteur sans les parcourir avec une boucle for. Alors n'hésitez pas à consulter la doc de \a apply . 
-            De plus il existe des exemples \a "Utilisation des conteneurs"
+            De plus il existe des exemples \a [Utilisation des conteneurs]
 
         = Des classes spécialisées
 
