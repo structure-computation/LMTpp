@@ -173,7 +173,7 @@ dot(const Vec<T1,s1,IO1> &p1,const Vec<T2,s2,IO2> &p2) {
 template<class T1,int s1,class IO1,class T2,int s2,class IO2>
 inline typename TypePromote<Multiplies,typename Vec<T1,s1,IO1>::template SubType<0>::T,typename Vec<T2,s2,IO2>::template SubType<0>::T>::T
 dot_md(const Vec<T1,s1,IO1> &p1,const Vec<T2,s2,IO2> &p2) {
-    typename TypePromote<Multiplies,typename Vec<T1,s1,IO1>::template SubType<0>::T,typename Vec<T2,s2,IO2>::template SubType<0>::T>::T res = 0.0;
+    typename TypePromote<Multiplies,typename Vec<T1,s1,IO1>::template SubType<0>::T,typename Vec<T2,s2,IO2>::template SubType<0>::T>::T res = typename TypePromote<Multiplies,typename Vec<T1,s1,IO1>::template SubType<0>::T,typename Vec<T2,s2,IO2>::template SubType<0>::T>::T(0);
     for(unsigned i=0;i<min(p1.size(),p2.size());++i)
         res += p1[i]*p2[i];
     return res;
@@ -411,7 +411,7 @@ inline Vec<typename Vec<T,2>::template SubType<0>::T,2> find_orthonormal(const V
 template<class TO,int s>
 inline Vec<typename Vec<TO,s>::template SubType<0>::T,s> find_orthonormal(Vec<TO,s> p) {
     typedef typename Vec<TO,s>::template SubType<0>::T T;
-    if ( length(p)==0.0 ) return 0.0;
+    if ( length(p)==0.0 ) return T(0);
     p /= length(p);
     for(unsigned i=0;i<p.size();++i) {
         if ( abs(p[i]) > 1e-6 ) {
@@ -427,7 +427,7 @@ inline Vec<typename Vec<TO,s>::template SubType<0>::T,s> find_orthonormal(Vec<TO
             return res / length(res);
         }
     }
-    return 0.0;
+    return T(0);
 }
 
 /*!

@@ -230,7 +230,7 @@ def make_pb( env,
                e_files.append( n )
                break
       else:
-         txt = 'impossible to find %s in %s'%(f,incpaths)
+         txt = 'impossible to find %s in %s'%(e,incpaths)
          raise NameError, txt
    #
    directory = 'build/problem_'+name+'/'

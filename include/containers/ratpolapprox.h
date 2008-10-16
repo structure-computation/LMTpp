@@ -20,7 +20,7 @@ struct RatPolApprox {
     static const unsigned p_order = p_order_;
     static const unsigned q_order = q_order_;
     
-    RatPolApprox( const T &v = 0.0 ) {
+    RatPolApprox( const T &v = T(0) ) {
         P = v;
         Q = T(1.0);
     }

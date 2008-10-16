@@ -459,9 +459,9 @@ struct MatWithTinyBlocks<T,Sym<3> > {
                 register __v2df res_s_0 = _mm_setzero_pd();
                 register __v2df res_s_1 = _mm_setzero_pd();
                 register __v2df res_s_2 = _mm_setzero_pd();
-                register T res_f_0 = 0.0;
-                register T res_f_1 = 0.0;
-                register T res_f_2 = 0.0;
+                register T res_f_0 = T(0);
+                register T res_f_1 = T(0);
+                register T res_f_2 = T(0);
                 for ( ST ci=0; ci < ST( lbs.indices.size() ); ++ci, d += RB::Block::nb_values_for_alignement ) {
                     ST real_col = lbs.indices[ci];
     
@@ -762,7 +762,7 @@ struct MatWithTinyBlocks<T,Gen<3> > {
     
     Vec<T> mul( const Vec<T> &v, unsigned nb_thread ) const {
         if ( nb_thread == 1 ) {
-            Vec<T> r; r.resize( nb_rows_, 0.0 );
+            Vec<T> r; r.resize( nb_rows_, T(0) );
             partial_mul( v, r, 0, 1 );
             return r;
         }
@@ -843,7 +843,7 @@ std::ostream &operator<<( std::ostream &os, const MatWithTinyBlocks<T,TO> &m ) {
 template<class TM,class TO,class TA,class T> void solve_using_incomplete_chol_factorize( const MatWithTinyBlocks<TM,TO> &mp, const TA &A, const Vec<T> &b, Vec<T> &x, T crit = 1e-4, bool disp_r = false ) {
     // bool disp_timing = true;
     if ( x.size() <= (unsigned)A.nb_rows() )
-        x.resize( A.nb_rows(), 0.0 );
+        x.resize( A.nb_rows(), T(0) );
         
     //
     Vec<T> r, d, q, s;

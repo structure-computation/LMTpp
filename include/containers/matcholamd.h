@@ -132,7 +132,7 @@ public:
             for ( unsigned i = mat.beg_row[ line ];i < mat.beg_row[ line + 1 ];++i )
                 if ( mat.row_ind[ i ] == (unsigned)col )
                     return mat.x[i];
-            return 0.0;
+            return T(0);
         }
         template <class Op, class TT> void apply( const Op &op, const TT &v ) {
             unsigned i;

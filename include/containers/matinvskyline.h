@@ -127,7 +127,7 @@ bool get_factorization( const Mat<T,Sym<s,false>,SparseLine<Col>,IO> &m, TF &mat
     }
     mat.resize( m.nb_rows(), m.nb_rows(), lb );
     //PRINT( lb );
-    mat.values.set(0.0);
+    mat.values.set(T(0));
     for(unsigned i=0;i<m.nb_rows();++i)
         for(unsigned j=0;j<m.data[i].indices.size();++j)
             mat.cum_index[i][ m.data[i].indices[j] ] = m.data[i].data[j];
@@ -142,7 +142,7 @@ bool get_factorization( const Mat<T,Sym<s,false>,SparseLine<Col>,IO> &m, TF &mat
             ptr[col] = ( ptr[col] - dot_aligned_with_offset(mat.cum_index[col]+lb,ptr+lb,col-lb) ) / mat.cum_index[col][col];
         }
         T reg = ptr[line] - norm_2_p2( ptr + lbl, line - lbl );
-        if (reg<=(T)0.0)
+        if (reg<=T(0))
             return false;
         ptr[line] = sqrt( reg );
     }
@@ -286,7 +286,7 @@ bool get_factorization( const Mat<T,Herm<s,false>,SparseLine<Col>,IO> &m, TF &ma
     }
     mat.resize( m.nb_rows(), m.nb_rows(), lb );
     //PRINT( lb );
-    mat.values.set(0.0);
+    mat.values.set(T(0));
     for(unsigned i=0;i<m.nb_rows();++i)
         for(unsigned j=0;j<m.data[i].indices.size();++j)
             mat.cum_index[i][ m.data[i].indices[j] ] = m.data[i].data[j];

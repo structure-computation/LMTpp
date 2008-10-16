@@ -17,7 +17,7 @@ namespace LMT {
 typedef AlternativeOnType<sizeof(long long)==sizeof(int *),int,long long>::T SizeType;
     
 template<class T> inline T dot_aligned(const T *a,const T *b,unsigned size) {
-    T res1 = 0.0;
+    T res1 = T(0);
     switch ( size & 3 ) {
         case 3: res1  = a[ size-3 ] * b[ size-3 ];
         case 2: res1 += a[ size-2 ] * b[ size-2 ];
@@ -25,7 +25,7 @@ template<class T> inline T dot_aligned(const T *a,const T *b,unsigned size) {
     }
     size -= size & 3;
     if ( size==0 ) return res1;
-    T res2 = 0.0, res3 = 0.0, res4 = 0.0;
+    T res2 = T(0), res3 = T(0), res4 = T(0);
     for(unsigned i=0;i<size;i+=4) {
         res1 += a[i+0] * b[i+0];
         res2 += a[i+1] * b[i+1];

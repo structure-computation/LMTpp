@@ -7,7 +7,7 @@ Mat<T,Gen<> > operator*(const Mat<T,Gen<> > &a,const Mat<T,Sym<>,SparseLine<> > 
     // upper part of b
     for(unsigned i=0;i<a.nb_rows();++i) {
         for(unsigned j=0;j<b.nb_cols();++j) {
-            T r = 0.0;
+            T r = T(0);
             for(unsigned k=0;k<b.data[j].indices.size();++k)
                 r += a(i,b.data[j].indices[k]) * b.data[j].data[k];
             res(i,j) = r;
@@ -27,7 +27,7 @@ Mat<T,Gen<> > operator*(const Mat<T,Sym<>,SparseLine<> > &a,const Mat<T,Gen<> > 
     // upper part of b
     for(unsigned i=0;i<a.nb_rows();++i) {
         for(unsigned j=0;j<b.nb_cols();++j) {
-            T r = 0.0;
+            T r = T(0);
             for(unsigned k=0;k<a.data[i].indices.size();++k)
                 r += a.data[i].data[k] * b(a.data[i].indices[k],j);
             res(i,j) = r;

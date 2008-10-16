@@ -19,7 +19,7 @@ T determinant( const Mat<T> &m ) {
     if ( m.nb_rows()==0 ) return 1;
     if ( m.nb_rows()==1 ) return m(0,0);
     //
-    T res = 0.0;
+    T res = T(0);
     Mat<T> Ac = m( range(0,m.nb_rows()), range(1,m.nb_cols()) );
     for(unsigned l=0;l<m.nb_rows();++l) {
         Mat<T> Ar = Ac( 

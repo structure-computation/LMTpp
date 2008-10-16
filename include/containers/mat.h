@@ -377,7 +377,7 @@ template<int s,class Op> struct StructureTypeWithOp<Herm<s>,Op> {
 ///
 template<class T,class STR,class STO,class IO>
 T mean(const Mat<T,STR,STO,IO> &m) {
-    T res = 0.0;
+    T res = T(0);
     for(unsigned i=0;i<m.nb_rows();++i)
         res += sum( m.row(i) );
     return res / T( m.nb_rows() * m.nb_cols() );
