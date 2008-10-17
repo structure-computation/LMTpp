@@ -223,10 +223,12 @@ public:
         *make_room_to_insert( i, 1 ) = v;
     }
     
-    void insert_ordered( const TT &v ) {
+    TT *insert_ordered( const TT &v ) {
         ST i=0;
         for( ; i < size() and val[ i ] < v; ++i );
-        *make_room_to_insert( i, 1 ) = v;
+        TT *res = make_room_to_insert( i, 1 );
+        *res = v;
+        return res;
     }
     
     // res will contain data of this and this is cleared.

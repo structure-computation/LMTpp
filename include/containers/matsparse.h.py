@@ -66,7 +66,7 @@ public:
         data = val.data;
     }
     
-    template<class T2> Mat(const Mat<T2,STRUCTURE,STORAGE > &val) {
+    template<class T2> Mat(const Mat<T2,STRUCTURE,STORAGE,void> &val) {
         resize( val.nb_rows(), val.nb_cols() );
         data = val.data;
     }
