@@ -286,7 +286,7 @@ std::string Write_code::asm_caller( std::string asm_function_name ) {
     return os.str();
 }
 
-std::string Write_code::to_asm() {
+std::string Write_code::to_asm( std::string function_name ) {
     typedef std::map<const Op *,int,std::less<const Op *> > MapOp;
     
     
@@ -297,7 +297,13 @@ std::string Write_code::to_asm() {
         ma.add_op_to_write( lst_var[i].ex.op );
     
     //
-    return ma.write_asm();
+    std::string res;
+    if ( function_name.size() ) {
+        res += "global " + function_name + "\n";
+        res += function_name + ":\n";
+    }
+    res += ma.write_asm();
+    return res;
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------

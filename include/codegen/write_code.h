@@ -90,7 +90,7 @@ public:
     std::string to_string();    
     unsigned node_count() const;
     
-    std::string to_asm();
+    std::string to_asm( std::string function_name="" );
     std::string asm_caller( std::string asm_function_name );
     
     std::vector<Var> lst_var;
