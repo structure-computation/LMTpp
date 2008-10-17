@@ -47,7 +47,7 @@ struct HashCH {
 
 /*!
     Cette fonction effectue la factorisation de Cholesky. La matrice m, de format spécial \a Mat<T,TS,SparseLine<>> , contient le résultat.
-    Pour un exemple d'utilisation, consulter l'exemple \a "Décomposition d'une matrice" .
+    Pour un exemple d'utilisation, consulter l'exemple \a [Décomposition d'une matrice] .
 
     \friend raphael.pasquier@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr

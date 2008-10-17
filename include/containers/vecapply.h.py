@@ -39,7 +39,7 @@ namespace LMT {
     Sa syntaxe générale est :
     \code
         apply_on_number( vecteur, indice, opérateur, paramètres faculatatifs de l'opérateur ) 
-    Pour avoir un exemple de code, voir \\a "Exemples d'utilisation des vecteurs hétérogènes" .
+    Pour avoir un exemple de code, voir \\a [Exemples d'utilisation des vecteurs hétérogènes].
     Remarque : 
         * Pour un vecteur hétérogène, on n'a pas accès à l'indice d'un élément particulier. Donc on utilisera cette fonction avec \\a find_with_index pour récupérer l'indice de l'élément.
         * Excepté pour un vecteur hétérogène, il est préférable d'utiliser les crochets [] .
