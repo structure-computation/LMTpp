@@ -326,6 +326,11 @@ struct MatWithTinyBlocks<T,Sym<3> > {
         }
     }
     
+    void chol() {
+        assert( 0 ); // TODO
+        chol_incomp();
+    }
+    
     void chol_incomp() {
         for ( ST num_block_set=0;num_block_set<ST( rows.size() );++num_block_set ) {
             // ST real_row = num_block_set * 3;
@@ -853,7 +858,6 @@ template<class TM,class TO,class TA,class T> void solve_using_incomplete_chol_fa
     if ( disp_r ) PRINT( max(abs(r)) );
     
     T t1 = time_of_day_in_sec();
-    PRINT( ( 2 * A.row_size_in_bytes() + A.diag_size_in_bytes() + 2 * b.size_in_bytes() ) / (t1-t0) );
     
     for(unsigned i=0;;++i) { if ( i==r.size() ) return; if ( abs(r[i]) > crit ) break; }
     
@@ -862,7 +866,6 @@ template<class TM,class TO,class TA,class T> void solve_using_incomplete_chol_fa
     d = mp.solve( r );
     
     t1 = time_of_day_in_sec();
-    PRINT( ( 2 * ( A.row_size_in_bytes() + A.diag_size_in_bytes() ) + 3 * b.size_in_bytes() ) / (t1-t0) );
     
     //     if ( disp_timing ) { T t1 = time_of_day_in_sec(); std::cout << "solve -> " << t1 - t0 << std::endl; t0 = t1; }
     

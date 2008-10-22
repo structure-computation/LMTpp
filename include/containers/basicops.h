@@ -79,15 +79,26 @@ template<class T1,class T2> typename TypePromote<Max,T1,T2>::T max(T1 a,T2 b) {
 #define SGNPLUS1(x) ( (x)>=0 + (x)>0 )
 
 /// min ternaire
-template<class T1,class T2,class T3> typename TypePromote<Min,T1,typename TypePromote<Min,T2,T3>::T>::T min(T1 a,T2 b,T3 c) {
+template<class T1,class T2,class T3> typename TypePromote<Min,T1,typename TypePromote<Min,T2,T3>::T>::T min(const T1 &a,const T2 &b,const T3 &c) {
     return min( a, min(b,c) );
 }
+
+/// min quaternaire
+template<class T1,class T2,class T3,class T4> typename TypePromote<Min,T1,typename TypePromote<Min,T2,typename TypePromote<Min,T3,T4>::T>::T>::T min(const T1 &a,const T2 &b,const T3 &c,const T4 &d) {
+    return min( min( a, b), min( c, d ) );
+}
+
 /*! 
     maximum ternaire
     
 */
-template<class T1,class T2,class T3> typename TypePromote<Max,T1,typename TypePromote<Max,T2,T3>::T>::T max(T1 a,T2 b,T3 c) {
+template<class T1,class T2,class T3> typename TypePromote<Max,T1,typename TypePromote<Max,T2,T3>::T>::T max(const T1 &a,const T2 &b,const T3 &c) {
     return max( a, max(b,c) );
+}
+
+/// max quaternaire
+template<class T1,class T2,class T3,class T4> typename TypePromote<Min,T1,typename TypePromote<Min,T2,typename TypePromote<Min,T3,T4>::T>::T>::T max(const T1 &a,const T2 &b,const T3 &c,const T4 &d) {
+    return max( max( a, b), max( c, d ) );
 }
 
 struct Pow;
@@ -195,7 +206,7 @@ template<class T> int sgn(const T &val) { return ( val>0 ? 1 : -1 ); }
     \friend hugo.leclerc@lmt.ens-cachan.fr
 */
 /// retourne abs(val)
-template<class T> T length(const T &val) { return abs(val); }
+template<class T> T length(const T &val) { using namespace std; return abs(val); }
 
 /*
 lst = [
