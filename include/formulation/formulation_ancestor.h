@@ -82,6 +82,7 @@ public:
     virtual ScalarType get_next_time_step() const = 0; ///
     virtual ScalarType get_time() const = 0; ///
     virtual void set_time( ScalarType ts ) = 0; /// Attention, pilotage a faire soi-meme si utilisation de cette fonction....
+    virtual void clean_mats() = 0; /// 0 in all matrices
     
     virtual unsigned nb_constraints() const = 0;
     virtual void erase_constraints_from(unsigned number) = 0;

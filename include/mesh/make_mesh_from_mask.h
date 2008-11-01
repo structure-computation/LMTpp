@@ -96,7 +96,7 @@ void make_mesh_from_mask( const std::string &filename, TM &m, typename TM::Tpos 
         for (int xi=0;xi<nb_x;++xi,++cpt) {
             Pvec p( tdim_min[0] + ( xi - 0.5 * ( yi & 1 ) ) * sx, tdim_min[1] + yi * sy );
             pos[ cpt ] = p;
-            out[ cpt ] = ( p[1] >= M.nb_rows() or p[0] >= M.nb_cols() or p[1] < 0 or p[0] < 0 or M( int(p[1]), int(p[0]) ) >= 128 );
+            out[ cpt ] = ( p[1] >= M.nb_rows() or p[0] >= M.nb_cols() or p[1] < 0 or p[0] < 0 or M( M.nb_rows() - 1 - int(p[1]), int(p[0]) ) >= 128 );
         }
     }
     
@@ -161,7 +161,7 @@ void make_mesh_from_mask( const std::string &filename, TM &m, typename TM::Tpos 
             T l, step = 1.0;
             for( l = step; l <= elem_size / 3; l += step ) {
                 Pvec t = p + l * n;
-                if ( t[1] >= M.nb_rows() or t[0] >= M.nb_cols() or t[1] < 0 or t[0] < 0 or M( int(t[1]), int(t[0]) ) >= 128 ) {
+                if ( t[1] >= M.nb_rows() or t[0] >= M.nb_cols() or t[1] < 0 or t[0] < 0 or M( M.nb_rows() - 1 - int(t[1]), int(t[0]) ) >= 128 ) {
                     l -= step;
                     can_break &= ( l == 0 );
                     break;
@@ -182,14 +182,11 @@ void make_mesh_from_mask( const std::string &filename, TM &m, typename TM::Tpos 
         if ( fc.break_out[ i ] ) {
             Pvec p = m.node_list[i].pos;
             Pvec n = m.node_list[i].normal;
-            Pvec t = ortho( n );
+            Pvec t( -n[1], n[0] ); // = ortho( n );
             for( T y = elem_size; y >= 0; y-- ) {
                 for( T x = -elem_size; x <= elem_size; x += 1 ) {
                     Pvec np = p + t * x + n * y;
-                    if ( np[0] >= 0 and np[1] >= 0 and np[0] < M.nb_cols() and np[1] < M.nb_rows() and M( int(t[1]), int(t[0]) ) < 128 ) {
-                        PRINT( np );
-                        PRINT( m.node_list[i].pos );
-                        PRINT( y );
+                    if ( np[0] >= 0 and np[1] >= 0 and np[0] < M.nb_cols() and np[1] < M.nb_rows() and M( M.nb_rows() - 1 - int(np[1]), int(np[0]) ) < 128 ) {
                         m.node_list[i].pos = np;
                         y = -1;
                         break;

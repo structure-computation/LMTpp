@@ -391,6 +391,10 @@ public:
         return res;
     }
     ///
+    virtual void clean_mats() {
+        matrices.apply( ClearMat() );
+    }
+    ///
     virtual void assemble_clean_mat(bool assemble_mat=true,bool assemble_vec=true) {
         if ( not initialized ) { // old_vectors
             get_initial_conditions();
@@ -403,7 +407,7 @@ public:
             m->update_skin();
 
         if ( assemble_mat ) {
-            matrices.apply( ClearMat() );
+            clean_mats();
             if ( assemble_vec ) {
                 add_global_matrix( *this, Number<true>(), Number<true>(), indice_glob ); // global
                 apply( m->node_list, AssembleNode<true,true >(), indice_noda, *this ); // nodal
