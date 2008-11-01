@@ -116,7 +116,7 @@ void display_image(const Mat<T,Str,Sto,IO> &mat, const std::string &name_file="t
     f.close();
     
     ostringstream s2;
-    s2 << "convert -depth 8 -size " << mat.nb_cols() << "x" << mat.nb_rows() << " gray:" << name_file << " " << name_file << ".png";
+    s2 << "convert -depth 8 -size " << mat.nb_cols() << "x" << mat.nb_rows() << " gray:" << name_file << " " << name_file << ".png; rm " << name_file;
     system(s2.str().c_str());
 }
 

@@ -90,7 +90,6 @@ public:
         time_symbol = Codegen::symbol("time");
         symbols.push_back( time_symbol );
         
-        want_amd = false;
         allocated = false;
     }
     virtual std::string get_name() const { return Carac::name(); }
@@ -229,7 +228,7 @@ public:
      */
     virtual void allocate_matrices() {
         allocated = true;
-        mat_has_been_allocated_with_symamd = want_amd;
+        mat_has_been_allocated_with_symamd = this->want_amd;
         
         unsigned size = 0;
         // global unknowns
@@ -263,7 +262,7 @@ public:
             nb_unk_elem += nb_unknowns_for_type[i];
         }
         
-        if ( want_amd ) {
+        if ( this->want_amd ) {
             assert( indice_glob==0 ); // not managed
             assert( nb_unk_elem==0 ); // not managed
             Vec<Vec<unsigned> > ind; ind.resize( m->node_list.size() );
@@ -301,6 +300,18 @@ public:
             time_steps[nb_vectors-1]=time_steps[nb_vectors-2];
             vectors[nb_vectors-1]=vectors[nb_vectors-2];
         }
+    }
+    virtual Vec<ScalarType> get_nodal_forces() {
+        ScalarType old_premul_KUn_in_sollicitation = this->premul_KUn_in_sollicitation;
+        this->premul_KUn_in_sollicitation = 0.0;
+        Vec<ScalarType> old_sollicitation = sollicitation;
+        //
+        assemble_clean_mat( false, true );
+        Vec<ScalarType> res = sollicitation;
+        //
+        sollicitation = old_sollicitation;
+        this->premul_KUn_in_sollicitation = old_premul_KUn_in_sollicitation;
+        return res;
     }
 private:
     template<bool assemble_mat,bool assemble_vec>
@@ -678,6 +689,29 @@ public:
         call_after_solve();
         return true;
     }
+    
+    /// assumes that operator inv() si available for matrices(Number<0>()) and system is linear symmetric
+    virtual bool solve_and_get_derivatives( Vec<Vec<ScalarType> > &der ) {
+        assert( this->non_linear_iterative_criterium == 0 );
+        assert( MatCarac<0>::symm );
+        //
+        allocate_matrices();
+        shift();
+        assemble();
+        
+        //
+        Inv<double,Sym<>,SparseLine<> > I( matrices(Number<0>()) );
+        vectors[ 0 ] = I * sollicitation;
+        update_variables();
+        call_after_solve();
+        
+        der.resize( nb_der_var );
+        for(unsigned i=0;i<nb_der_var;++i) {
+            assemble_vector_der_var( i );
+            der[ i ] = I * sollicitation;
+        }
+    }
+    
     virtual void get_precond() { get_precond( Number<MatCarac<0>::symm>() ); }
     virtual void solve_system_using_precond(ScalarType iterative_criterium) { solve_system_using_precond( iterative_criterium, Number<MatCarac<0>::symm>() ); }
     virtual void get_factorization_matrix() { get_factorization_matrix( Number<MatCarac<0>::symm>() ); }
@@ -1125,7 +1159,7 @@ public:
     Vec<unsigned> indice_noda;
     unsigned indice_glob;
     bool mat_def_pos_if_sym, initialized, user_want_pierre_precond, mat_has_been_allocated_with_symamd;
-    bool want_amd, allocated;
+    bool allocated;
     
     std::vector<Codegen::Ex> symbols;
     Codegen::Ex time_symbol;

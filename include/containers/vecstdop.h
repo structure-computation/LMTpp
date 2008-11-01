@@ -300,12 +300,20 @@ inline typename FloatType<typename TypeReduction<Multiplies,Vec<T,s> >::T>::T le
     return sqrt(dot(c,c));
 }
 
+/*! \f$ \sum_i c_i^2 \f$
+        \relates Vec
+ */
+template<class T,int s>
+inline typename TypeReduction<Multiplies,Vec<T,s> >::T norm_2_p2(const Vec<T,s> &c) {
+    return dot(c,c);
+}
+
 /*! \f$ \sqrt{ \sum_i c_i^2 } \f$
         \relates Vec
  */
 template<class T,int s>
 inline typename FloatType<typename TypeReduction<Multiplies,Vec<T,s> >::T>::T norm_2(const Vec<T,s> &c) {
-    return sqrt(dot(c,c));
+    return sqrt(norm_2_p2(c));
 }
 
 /*! 

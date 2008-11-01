@@ -28,6 +28,8 @@ public:
         non_linear_iterative_criterium = 0.0;
         assume_skin_not_needed = false;
         max_non_linear_iteration = 50;
+        premul_KUn_in_sollicitation = 1.0;
+        want_amd = true;
     }
     virtual ~FormulationAncestor() {}
     
@@ -35,11 +37,13 @@ public:
     virtual void set_mesh( void *m ) = 0; /// 
     
     virtual bool solve( ScalarType iterative_criterium=0.0, bool disp_timing=false ) = 0; ///  The all-in-one procedure -> allocate if necessary, assemble, solve, update_variables, call_after_solve
+    virtual bool solve_and_get_derivatives( Vec<Vec<ScalarType> > &der ) = 0;  /// get value and derivative respective to "der_var" defined in SConsruct or in python
     virtual void allocate_matrices() = 0; ///
     virtual void shift(int nb=1) = 0;
     virtual void unshift(int nb=1) = 0;
     virtual void assemble(bool assemble_mat=true,bool assemble_vec=true) = 0;
     virtual bool solve_system(ScalarType iterative_criterium=0.0,bool disp_timing=false) = 0;
+    virtual Vec<ScalarType> get_nodal_forces() = 0;
     
     virtual void assemble_clean_mat(bool assemble_mat=true,bool assemble_vec=true) = 0;
     virtual void assemble_constraints(bool assemble_mat=true,bool assemble_vec=true) = 0;
@@ -105,6 +109,8 @@ public:
     unsigned order_integration_when_integration_totale;
     bool assume_skin_not_needed;
     unsigned max_non_linear_iteration;
+    ScalarType premul_KUn_in_sollicitation;
+    bool want_amd;
 };
 
 }

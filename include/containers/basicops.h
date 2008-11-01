@@ -32,6 +32,8 @@ namespace LMT {
 
 #define PRINT( A ) \
     std::cout << "  " << __STRING(A) << std::flush << " -> " << (A) << std::endl
+#define PRINTCERR( A ) \
+     std::cerr << "  " << __STRING(A) << std::flush << " -> " << (A) << std::endl
 #define PRINTN( A ) \
     std::cout << "  " << __STRING(A) << std::flush << " ->\n" << (A) << std::endl
 #define PRINTUCSTR( A ) { \

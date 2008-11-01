@@ -1,7 +1,7 @@
 from LMT.include.codegen import *
 import sys
 
-def calculate_matrix( expr, unknown_symbols, unknown_test_symbols, subs={}, allow_surtension_coefficient=False, assume_non_linear=False, test=True, dont_want_to_add_KUn=False, use_subs_instead_of_diff = False ):
+def calculate_matrix( expr, unknown_symbols, unknown_test_symbols, subs={}, allow_surtension_coefficient=False, assume_non_linear=False, test=True, premul_KUn_in_sollicitation=False, use_subs_instead_of_diff = False ):
     M = []
     V = []
 
@@ -51,9 +51,8 @@ def calculate_matrix( expr, unknown_symbols, unknown_test_symbols, subs={}, allo
                 sur = 1
             for i in range(len(unknown_test_symbols)):
                 V[i] = - V[i] * sur
-                if dont_want_to_add_KUn == False:
-                    for j in range(len(unknown_symbols)):
-                        V[i] += M[i][j] * unknown_symbols[j]
+                for j in range(len(unknown_symbols)):
+                    V[i] += M[i][j] * unknown_symbols[j] * premul_KUn_in_sollicitation
                         
     return { 'M':matrix( M ), 'V':vector( V ), 'U':unknown_symbols }
 
