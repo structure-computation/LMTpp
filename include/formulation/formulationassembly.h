@@ -114,11 +114,12 @@ namespace LMT {
             F_before_contraints.set(T(0));
             X_before_contraints.set(T(0));
             diag_before_contraints.set(T(0));
-            F.resize( pos.size() * dim, 0 );
-            F_before_contraints.resize( pos.size() * dim, 0 );
-            X_before_contraints.resize( pos.size() * dim, 0 );
-            diag_before_contraints.resize( pos.size() * dim, 0 );
-            X.resize( pos.size() * dim, 0 );
+            unsigned nb_ddl_per_node = formulations[0].pb->formulation_nb(formulations[0].num_formulation)->get_nb_nodal_unknowns();
+            F.resize( pos.size() * nb_ddl_per_node, 0 );
+            F_before_contraints.resize( pos.size() * nb_ddl_per_node, 0 );
+            X_before_contraints.resize( pos.size() * nb_ddl_per_node, 0 );
+            diag_before_contraints.resize( pos.size() * nb_ddl_per_node, 0 );
+            X.resize( pos.size() * nb_ddl_per_node, 0 );
             X.set(0,0);
             for(unsigned i=0;i<formulations.size();++i) {
                 formulation(i)->assemble_clean_mat( assemble_mat, assemble_vec );
@@ -215,6 +216,13 @@ namespace LMT {
         void get_initial_conditions() {
             for(unsigned i=0;i<formulations.size();++i)
                 formulation(i)->get_initial_conditions();
+        }
+        //
+        bool is_unknown(const std::string &s) {
+            for(unsigned i=0;i<formulations.size();++i)
+                if (formulation(i)->is_unknow(s))
+                    return true;
+            return false;
         }
         //
         Vec<MeshAndForm> formulations;
