@@ -30,6 +30,7 @@ public:
         max_non_linear_iteration = 50;
         premul_KUn_in_sollicitation = 1.0;
         want_amd = true;
+        levenberg_marquadt = 0.0;
     }
     virtual ~FormulationAncestor() {}
     
@@ -112,6 +113,7 @@ public:
     unsigned max_non_linear_iteration;
     ScalarType premul_KUn_in_sollicitation;
     bool want_amd;
+    ScalarType levenberg_marquadt; /// K += levenberg_marquadt * max( abs( K ) ) * Id; 0 by default
 };
 
 }

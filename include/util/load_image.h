@@ -17,7 +17,7 @@
 namespace LMT {
 
 template<class Mat>
-void load_image_pgm( std::string file, Mat &m, int ceil_size = 1 ) {
+void load_image_pgm( std::string file, Mat &m, int ceil_size = 1, int border_size = 0, typename Mat::T border_color = 0 ) {
     std::ifstream f( file.c_str() );
     if (!f) {
         std::cerr << "Impossible to open " << file << std::endl;
@@ -43,19 +43,21 @@ void load_image_pgm( std::string file, Mat &m, int ceil_size = 1 ) {
         unsigned char *pen = new unsigned char[ ( r * c + 7 ) / 8 ];
         f.read( (char *)pen, ( r * c + 7 ) / 8 );
         
-        m.resize( r, ceil( c, ceil_size ) );
+        m.resize( r + 2 * border_size, ceil( c, ceil_size ) + 2 * border_size );
+        m.set( border_color );
         for(unsigned i=0,cpt=0;i<r;++i)
             for(unsigned j=0;j<c;++j,++cpt)
-                m(i,j) = bool( pen[ cpt / 8 ] & ( 1 << (cpt&7) ) );
+                m(i+border_size,j+border_size) = bool( pen[ cpt / 8 ] & ( 1 << (cpt&7) ) );
         delete [] pen;
     } else if ( depth <= 255 ) {
         unsigned char *pen = new unsigned char[ r * c * cpt_jump ];
         f.read( (char *)pen, sizeof(unsigned char) * r * c * cpt_jump );
     
-        m.resize( r, ceil( c, ceil_size ) );
+        m.resize( r + 2 * border_size, ceil( c, ceil_size ) + 2 * border_size );
+        m.set( border_color );
         for(unsigned i=0,cpt=0;i<r;++i)
             for(unsigned j=0;j<c;++j,cpt+=cpt_jump)
-                m(i,j) = pen[cpt];
+                m(i+border_size,j+border_size) = pen[cpt];
         delete [] pen;
     } else if ( depth <= 65535 ) {
         unsigned short *pen = new unsigned short[ r * c ];
@@ -64,10 +66,11 @@ void load_image_pgm( std::string file, Mat &m, int ceil_size = 1 ) {
         for(unsigned i=0;i<r*c;++i)
             swap( *( (char *)pen + 2 * i + 0 ), *( (char *)pen + 2 * i + 1 ) );
             
-        m.resize( r, ceil( c, ceil_size ) );
+        m.resize( r + 2 * border_size, ceil( c, ceil_size ) + 2 * border_size );
+        m.set( border_color );
         for(unsigned i=0,cpt=0;i<r;++i)
             for(unsigned j=0;j<c;++j,++cpt)
-                m(i,j) = pen[cpt];
+                m(i+border_size,j+border_size) = pen[cpt];
         delete [] pen;
     } else {
         PRINT( depth );
@@ -77,19 +80,20 @@ void load_image_pgm( std::string file, Mat &m, int ceil_size = 1 ) {
 
 
 /*!
-  Read PNM images only
+    m.nb_rows() = img_nb_rows + 2 * border_size
+    m.nb_cols() = ceil( img_nb_cols, ceil_size ) + 2 * border_size
 */
 template<class Mat>
-void load_image( std::string file, Mat &m, int ceil_size = 1 ) {
+void load_image( std::string file, Mat &m, int ceil_size = 1, int border_size = 0, typename Mat::T border_color = 0 ) {
     if ( std::string(file.end()-4,file.end()) == ".pgm" or std::string(file.end()-4,file.end()) == ".pnm" ) {
-        load_image_pgm( file, m, ceil_size );
+        load_image_pgm( file, m, ceil_size, border_size, border_color );
         return;
     }
     //
     std::ostringstream s,s2;
     s << "convert -colorspace gray -depth 8 " << file << " " << "toto.pnm";
     system(s.str().c_str());
-    load_image_pgm( "toto.pnm", m, ceil_size );
+    load_image_pgm( "toto.pnm", m, ceil_size, border_size, border_color );
 }
 
 /*!

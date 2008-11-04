@@ -460,8 +460,11 @@ public:
     virtual void assemble_constraints(bool assemble_mat=true,bool assemble_vec=true) {
         // constraints
         if ( constraints.size() ) {
-            if ( assemble_mat )
+            if ( assemble_mat ) {
                 max_diag = max(abs(matrices(Number<0>()).diag()));
+                if ( this->levenberg_marquadt )
+                    matrices( Number<0>() ).diag() += max_diag * this->levenberg_marquadt;
+            }
             for(unsigned i=0;i<constraints.size();++i) {
                 // calculation of res
                 using namespace Codegen;
@@ -540,6 +543,7 @@ public:
         l.get_factorization(matrices(Number<0>()),false);
         l.solve( vectors[0] );
         #elif WITH_CHOLMOD
+        PRINT("yop");
       	if ( not matrices(Number<0>()).get_factorization() ) {
             std::cout << "Bing. Inversion error" << std::endl;
             return false;

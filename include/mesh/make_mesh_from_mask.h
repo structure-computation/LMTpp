@@ -4,6 +4,7 @@
 #include "calculate_normals.h"
 #include "make_rect.h"
 #include <util/load_image.h>
+#include <util/img_dist_from_front.h>
 
 namespace LMT {
 
@@ -13,6 +14,7 @@ struct MakeMeshFromMaskFindCorners {
     typedef typename TM::Tpos T;
     MakeMeshFromMaskFindCorners( const TM &m ) {
         normals.resize( m.node_list.size(), Pvec( 0.0 ) );
+        centers.resize( m.node_list.size(), Pvec( 0.0 ) );
         break_out.resize( m.node_list.size(), false );
         dot_prod.resize( m.node_list.size() );
         apply( m.skin.elem_list, *this );
@@ -24,13 +26,20 @@ struct MakeMeshFromMaskFindCorners {
             unsigned n = e.node(i)->number_in_original_mesh();
             if ( all( normals[ n ] == 0.0 ) ) {
                 normals[ n ] = N;
+                centers[ n ] = center( e );
             } else {
                 dot_prod[ n ] = abs( dot( normals[ n ], N ) );
-                break_out[ n ] = dot_prod[ n ] < 0.7;
+                break_out[ n ] = false;
+                if ( dot_prod[ n ] < 0.5 ) {
+                    T a = length( center(e) - centers[n] );
+                    T b = length( center(e) + a * N - ( centers[n] + a * normals[n] ) );
+                    break_out[ n ] = ( b >= a );
+                }
             }
         }
     }
     Vec<Pvec> normals;
+    Vec<Pvec> centers;
     Vec<T   > dot_prod;
     Vec<bool> break_out;
 };
@@ -72,14 +81,22 @@ struct MakeMeshFromMaskNbParents {
     Vec<unsigned> nb_parents;
 };
 
+
 template<class TM>
-void make_mesh_from_mask( const std::string &filename, TM &m, typename TM::Tpos elem_size ) {
+void make_mesh_from_mask( const std::string &filename, TM &m, typename TM::Tpos elem_size, bool want_smoothing = true ) {
     typedef typename TM::Pvec Pvec;
     typedef typename TM::Tpos T;
-
-    Mat<float> M;
-    load_image( filename, M );
     
+    int border_size = int( 2 * elem_size );
+
+    //
+    Mat<float> M;
+    load_image( filename, M, 1, border_size, /*value on borders*/255 );
+    
+    //
+    Mat<double> dist = img_dist_from_front( M, border_size, /*gray level*/ 0.5 * ( max( M ) + min( M ) ) );
+    
+    //
     T sx = elem_size;
     T sy = sqrt(3.0/4.0) * elem_size;
     int nb_x = int( M.nb_cols() / sx );
@@ -96,7 +113,10 @@ void make_mesh_from_mask( const std::string &filename, TM &m, typename TM::Tpos 
         for (int xi=0;xi<nb_x;++xi,++cpt) {
             Pvec p( tdim_min[0] + ( xi - 0.5 * ( yi & 1 ) ) * sx, tdim_min[1] + yi * sy );
             pos[ cpt ] = p;
-            out[ cpt ] = ( p[1] >= M.nb_rows() or p[0] >= M.nb_cols() or p[1] < 0 or p[0] < 0 or M( M.nb_rows() - 1 - int(p[1]), int(p[0]) ) >= 128 );
+            out[ cpt ] = ( p[1] >= M.nb_rows() or p[0] >= M.nb_cols() or p[1] < 0 or p[0] < 0 or 
+                //( M( M.nb_rows() - 1 - int(p[1]), int(p[0]) ) >= 128 and dist( M.nb_rows() - 1 - int(p[1]), int(p[0]) ) > elem_size / 3 )
+                ( M( int(p[1]), int(p[0]) ) >= 128 and dist( int(p[1]), int(p[0]) ) > elem_size / 3 )
+            );
         }
     }
     
@@ -129,18 +149,19 @@ void make_mesh_from_mask( const std::string &filename, TM &m, typename TM::Tpos 
                         indices[2] = o + nb_x;
                     }
                 }
-                for (int i=0;;++i) {
-                    if ( i==3 ) {
-                        connectivity.push_back( indices );
-                        break;
+                bool ok = true;
+                for (int i=0;i<3;++i)
+                    ok &= ( out[indices[i]] == false );
+                //
+                if ( ok ) {
+                    for (int i=0;i<3;++i) {
+                        if ( ref[ indices[i] ] == -1 ) {
+                            ref[indices[i]] = m.node_list.size();
+                            m.add_node( pos[ indices[i] ] );
+                        }
+                        indices[i] = ref[indices[i]];
                     }
-                    if ( out[indices[i]] )
-                        break;
-                    if ( ref[ indices[i] ] == -1 ) {
-                        ref[indices[i]] = m.node_list.size();
-                        m.add_node( pos[ indices[i] ] );
-                    }
-                    indices[i] = ref[indices[i]];
+                    connectivity.push_back( indices );
                 }
             }
         }
@@ -152,49 +173,94 @@ void make_mesh_from_mask( const std::string &filename, TM &m, typename TM::Tpos 
 
     // projection
     m.update_skin();
-    while ( true ) {
-        bool can_break = true;
-        calculate_normals( m.skin );
+    for(unsigned k=0;k<2;++k) {
         for(unsigned i=0;i<m.skin.node_list.size();++i) {
-            Pvec &p = m.skin.node_list[i].pos;
-            const Pvec &n = m.skin.node_list[i].normal;
-            T l, step = 1.0;
-            for( l = step; l <= elem_size / 3; l += step ) {
-                Pvec t = p + l * n;
-                if ( t[1] >= M.nb_rows() or t[0] >= M.nb_cols() or t[1] < 0 or t[0] < 0 or M( M.nb_rows() - 1 - int(t[1]), int(t[0]) ) >= 128 ) {
-                    l -= step;
-                    can_break &= ( l == 0 );
-                    break;
-                }
-            }
-            p += l * n;
+            Pvec P = m.skin.node_list[i].pos;
+            // int y = dist.nb_rows() - 1 - int(P[1]);
+            int y = int(P[1]);
+            int x = int(P[0]);
+            T d = dist( y, x );
+            T grad_x = dist( y, x + 1 ) - dist( y, x - 1 );
+            T grad_y = dist( y + 1, x ) - dist( y - 1, x );
+            Pvec grad = normalized( Pvec( grad_x, grad_y ) );
+            m.skin.node_list[i].pos -= grad * d;
         }
-        if ( can_break )
-            break;
     }
     
+    //     m.skin.update_node_neighbours();
+    //     while ( true ) {
+    //         bool can_break = true;
+    //         
+    //         //
+    //         calculate_normals( m.skin );
+    //             
+    //         // for(unsigned i=0;i<m.skin.node_list.size();++i) {
+    //         //     assert( m.skin.get_node_neighbours(i).size() == 2 );
+    //         //     Pvec P0 = m.skin.get_node_neighbours(i)[0]->pos;
+    //         //     Pvec P1 = m.skin.get_node_neighbours(i)[1]->pos;
+    //         //     Pvec OR = ortho( Pvec( P1 - P0 ) );
+    //         //     OR *= ( dot( OR, m.skin.node_list[i].normal ) >= 0 ? 1 : -1 );
+    //         //     Pvec P2 = 0.5 * ( P0 + P1 ) + 4 * OR - m.skin.node_list[i].pos;
+    //         //     m.skin.node_list[i].normal = P2 / length( P2 );
+    //         // }
+    //         
+    //         //
+    //         for(unsigned i=0;i<m.skin.node_list.size();++i) {
+    //             Pvec &p = m.skin.node_list[i].pos;
+    //             const Pvec &n = m.skin.node_list[i].normal;
+    //             T l, step = 0.5;
+    //             for( l = step; l <= elem_size / 8; l += step ) {
+    //                 Pvec t = p + l * n;
+    //                 if ( t[1] >= M.nb_rows() or t[0] >= M.nb_cols() or t[1] < 0 or t[0] < 0 or M( M.nb_rows() - 1 - int(t[1]), int(t[0]) ) >= 128 ) {
+    //                     l -= step;
+    //                     can_break &= ( l <= step / 2 );
+    //                     break;
+    //                 }
+    //             }
+    //             p += l * n;
+    //         }
+    //         // break;
+    //         //   static int z = 0;
+    //         //   dp.add_mesh( m, "tmp/toto", Vec<std::string>("all"), z++ );
+    //         if ( can_break )
+    //             break;
+    //     }
+    
     // find corners
+    calculate_normals( m.skin );
+    
     MakeMeshFromMaskFindCorners<TM> fc( m );
     MakeMeshFromMaskNbParents  <TM> np( m );
     apply( m.skin.elem_list, np, fc.dot_prod, fc.break_out );
     
     for(unsigned i=0;i<m.node_list.size();++i) {
         if ( fc.break_out[ i ] ) {
+            m.node_list[i].is_on_skin = true;
             Pvec p = m.node_list[i].pos;
             Pvec n = m.node_list[i].normal;
             Pvec t( -n[1], n[0] ); // = ortho( n );
-            for( T y = elem_size; y >= 0; y-- ) {
-                for( T x = -elem_size; x <= elem_size; x += 1 ) {
+            T d = elem_size;
+            for( T y = d; y >= -d; y-- ) {
+                for( T x = -d; x <= d; x += 1 ) {
                     Pvec np = p + t * x + n * y;
-                    if ( np[0] >= 0 and np[1] >= 0 and np[0] < M.nb_cols() and np[1] < M.nb_rows() and M( M.nb_rows() - 1 - int(np[1]), int(np[0]) ) < 128 ) {
+                    //if ( np[0] >= 0 and np[1] >= 0 and np[0] < M.nb_cols() and np[1] < M.nb_rows() and M( M.nb_rows() - 1 - int(np[1]), int(np[0]) ) < 128 ) {
+                    if ( np[0] >= 0 and np[1] >= 0 and np[0] < M.nb_cols() and np[1] < M.nb_rows() and M( int(np[1]), int(np[0]) ) < 128 ) {
                         m.node_list[i].pos = np;
-                        y = -1;
+                        y = - d - 1;
                         break;
                     }
                 }
             }
         }
     }
+
+//     
+//     // smoothing
+//     if ( want_smoothing ) {
+//         
+//     }
+    for(unsigned i=0;i<m.node_list.size();++i)
+        m.node_list[i].pos -= border_size;
 }
 
 

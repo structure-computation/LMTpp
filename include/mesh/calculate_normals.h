@@ -30,6 +30,7 @@ void calculate_normals(TM &m) {
         m.node_list[i].normal /= length( m.node_list[i].normal, 1e-40 );
 }
 
+
 };
 
 #endif // LMT_calculate_normals_HEADER
