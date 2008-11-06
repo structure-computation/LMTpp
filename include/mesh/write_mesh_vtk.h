@@ -14,6 +14,7 @@
 
 #include <fstream>
 #include <map>
+#include <string.h>
 #include "mesh.h"
 #include "zlib.h"
 
@@ -65,7 +66,7 @@ void set_vtk_cell_type_and_offsets( const TE &elem, Vec<unsigned> &connectivity,
         cell_type = 0;
         nb_points = 0;
     }
-
+    
     for(unsigned i=0;i<nb_points;++i)
         connectivity.push_back( m->node_list.number(*elem.node(i)) );
     cell_types.push_back( cell_type );

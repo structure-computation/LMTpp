@@ -20,6 +20,8 @@
 #include <assert.h>
 #include <assert.h>
 #include <iomanip>
+#include <algorithm>
+#include <stdlib.h>
 
 namespace Codegen {
 

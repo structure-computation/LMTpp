@@ -12,6 +12,7 @@
 #include "exvector.h"
 #include <sstream>
 #include <assert.h>
+#include <algorithm>
 
 namespace Codegen {
 

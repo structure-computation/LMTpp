@@ -21,6 +21,7 @@ print """// generated file from simd.h.py. Do not modify
 #endif
 
 #include "typepromote.h"
+#include <limits>
 
 namespace LMT {
 

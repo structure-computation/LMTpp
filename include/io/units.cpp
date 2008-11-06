@@ -2,6 +2,8 @@
 #include "xmlnode.h"
 #include <math.h>
 #include <iostream>
+#include <algorithm>
+#include <string.h>
 
 using namespace std;
 namespace LMT {

@@ -15,6 +15,7 @@
 #include "config.h"
 #include "basicops.h"
 #include <assert.h>
+#include <stdlib.h>
 #ifndef WITHOUT_MALLOC
     #include <malloc.h>
 #endif

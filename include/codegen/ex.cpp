@@ -18,6 +18,8 @@
 #include <sstream>
 #include <iostream>
 #include <math.h>
+#include <stdlib.h>
+#include <algorithm>
 #include <assert.h>
 
 namespace Codegen {

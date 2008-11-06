@@ -396,8 +396,8 @@ inline T standard_deviation(const Mat<T,STR,STO,IO> &m) {
 
 ///
 template<class T,class STR,class STO,class IO>
-T max(const Mat<T,STR,STO,IO> &m) {
-    T res = -std::numeric_limits<T>::max();
+typename Mat<T,STR,STO,IO>::T max(const Mat<T,STR,STO,IO> &m) {
+    typename Mat<T,STR,STO,IO>::T res = -std::numeric_limits<T>::max();
     for(unsigned i=0;i<m.nb_rows();++i)
         res = max( res, max( m.row(i) ) );
     return res;
@@ -405,8 +405,8 @@ T max(const Mat<T,STR,STO,IO> &m) {
 
 ///
 template<class T,class STR,class STO,class IO>
-T min(const Mat<T,STR,STO,IO> &m) {
-    T res = std::numeric_limits<T>::max();
+typename Mat<T,STR,STO,IO>::T min(const Mat<T,STR,STO,IO> &m) {
+    typename Mat<T,STR,STO,IO>::T res = std::numeric_limits<T>::max();
     for(unsigned i=0;i<m.nb_rows();++i)
         res = min( res, min( m.row(i) ) );
     return res;

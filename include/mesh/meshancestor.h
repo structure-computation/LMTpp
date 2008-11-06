@@ -21,6 +21,7 @@
 #include "nodelist.h"
 #include "meshcarac.h"
 #include "elemlist.h"
+#include <algorithm>
 
 /*!
     \brief Classes et Fonctions utiliser pour définir ou travailler sur des maillages

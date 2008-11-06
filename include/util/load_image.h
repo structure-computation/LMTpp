@@ -107,7 +107,7 @@ void load_image( std::string file, Mat &m, int ceil_size = 1, int border_size = 
     \keyword Algorithme/Affichage  
 */
 template<class T,class Str,class Sto,class IO>
-void display_image(const Mat<T,Str,Sto,IO> &mat, const std::string &name_file="toto") {
+void display_image(const Mat<T,Str,Sto,IO> &mat, const std::string &name_file="toto", bool disp_screen = false ) {
     typedef typename Mat<T,Str,Sto,IO>::T TT;
     using namespace std;
     
@@ -121,6 +121,8 @@ void display_image(const Mat<T,Str,Sto,IO> &mat, const std::string &name_file="t
     
     ostringstream s2;
     s2 << "convert -depth 8 -size " << mat.nb_cols() << "x" << mat.nb_rows() << " gray:" << name_file << " " << name_file << ".png; rm " << name_file;
+    if ( disp_screen )
+        s2 << "; display " << name_file << ".png";
     system(s2.str().c_str());
 }
 

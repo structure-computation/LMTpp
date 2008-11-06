@@ -6,6 +6,8 @@
 #include <iostream>
 #include <fstream>
 #include <assert.h>
+#include <algorithm>
+#include <stdlib.h>
 
 #include "MakeAsm.h"
 
