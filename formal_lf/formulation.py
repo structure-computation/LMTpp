@@ -755,6 +755,82 @@ class Formulation:
 
     if T=='N': f.write( '#endif\n' )
 
+  def write_matrix_2(self,f,T,assemble_mat,assemble_vec,symmetric,matrices,e):
+    asm_fname = 'elem_matrix_%s_%s_%i' % ( self.name, self.e.name, self.num_func_write_matrix )
+    if self.use_asm:
+      self.num_func_write_matrix += 1
+      f.write( 'extern "C" void %s( double * );\n' % asm_fname )
+    #
+    f.write( '// \n' )
+    BU = ',unsigned symmetric_version'*(assemble_mat==False)
+    if T=='V':
+      #f.write( 'template<class TM,class T,bool wont_add_nz,class T_pos,class ND,class ED,unsigned nim'+BU+'>\n' )
+      f.write( 'template<class TM, class T,bool wont_add_nz,class TMA, class TVE, class TVEVE,class T_pos,class ND,class ED,unsigned nim'+BU+'>\n' )
+      if self.integration_totale:
+          f.write( 'void add_elem_matrix(\n' )
+      else:
+          f.write( 'void add_local_elem_matrix(T ponderation,const T *var_inter,\n' )
+      f.write( '      Formulation<TM,%s,DefaultBehavior,T,wont_add_nz> &f,\n' % self.name )
+      f.write( '      TMA &matrix,\n' )
+      f.write( '      TVE &sollicitation,\n' )
+      f.write( '      TVEVE &vectors,\n' )
+      f.write( '      const Number<%s> &matrix_is_sym,\n'%( ['false','true','symmetric_version'][symmetric+(assemble_mat==False)] ) )
+      f.write( '      const Number<%s> &assemble_mat,\n'%( ['false','true'][assemble_mat] ) )
+      f.write( '      const Number<%s> &assemble_vec,\n'%( ['false','true'][assemble_vec] ) )
+      f.write( '      const Element<%s,DefaultBehavior,Node<%i,T_pos,ND>,ED,nim> &elem,\n'%(e.name,self.dim) )
+#      f.write( '      const unsigned *indices){ \n' )
+      f.write( '      const unsigned *indices,\n' )
+      f.write( '      pthread_mutex_t *mutex){ \n' )
+      f.write( '  #define PNODE(N) (*elem.node(N))\n' )
+    
+    elif T[0]=='S':
+      num_child = string.atoi(T[1:])
+      #f.write( 'template<class TM,class T,bool wont_add_nz,class T_pos,class ND,class ED,unsigned nim,class ED2,unsigned nim2'+BU+'>\n' )
+      f.write( 'template<class TM, class T,bool wont_add_nz,class TMA, class TVE,class TVEVE, class T_pos, class ND,class ED, unsigned nim,class ED2,unsigned nim2'+BU+'>\n' )
+      f.write( 'void add_skin_elem_matrix(\n' )
+      f.write( '      Formulation<TM,%s,DefaultBehavior,T,wont_add_nz> &f,\n' % self.name )
+      f.write( '      TMA &matrix,\n')
+      f.write( '      TVE &sollicitation,\n' )
+      f.write( '      TVEVE &vectors,\n' )
+      f.write( '      const Number<%s> &matrix_is_sym,\n'%( ['false','true','symmetric_version'][symmetric+(assemble_mat==False)] ) )
+      f.write( '      const Number<%s> &assemble_mat,\n'%( ['false','true'][assemble_mat] ) )
+      f.write( '      const Number<%s> &assemble_vec,\n'%( ['false','true'][assemble_vec] ) )
+      f.write( '      const Element<%s,DefaultBehavior,Node<%i,T_pos,ND>,ED,nim> &elem,\n'%(e.name,self.dim) )
+      f.write( '      const Element<%s,DefaultBehavior,Node<%i,T_pos,ND>,ED2,nim2> &skin_elem,\n'%(e.children[num_child]['name'],self.dim) )
+      f.write( '      const Number<%s> &num_child,\n'%(num_child) )
+#      f.write( '      const unsigned *indices){\n ' )
+      f.write( '      const unsigned *indices,\n' )
+      f.write( '      pthread_mutex_t *mutex){ \n' )
+      f.write( '  #define PNODE(N) (*elem.node(N))\n' )
+      
+    elif T=='N':
+      txt = 'ADD_NODAL_MATRIX_%s_%s_%s_%s_2' % ( self.name, ['false','true','symmetric_version'][symmetric+(assemble_mat==False)], \
+            ['false','true'][assemble_mat], ['false','true'][assemble_vec] )
+      f.write( '#ifndef '+txt+'\n' )
+      f.write( '#define '+txt+'\n' )
+#      f.write( 'template<class TM,class T,bool wont_add_nz'+BU+'>\n' )
+      f.write( 'template<class TM,class T, class TMA, class TVE,class TVEVE, bool wont_add_nz '+BU+'>\n' )
+      f.write( 'void add_nodal_matrix(\n' )
+      f.write( '      Formulation<TM,%s,DefaultBehavior,T,wont_add_nz> &f,\n' % self.name )
+      f.write( '      TMA &matrix,\n' )
+      f.write( '      TVE &sollicitation,\n' )
+      f.write( '      TVEVE &vectors,\n' )
+      f.write( '      const typename TM::TNode &node,\n' )
+      f.write( '      const Number<%s> &matrix_is_sym,\n'%( ['false','true','symmetric_version'][symmetric+(assemble_mat==False)] ) )
+      f.write( '      const Number<%s> &assemble_mat,\n'%( ['false','true'][assemble_mat] ) )
+      f.write( '      const Number<%s> &assemble_vec,\n'%( ['false','true'][assemble_vec] ) )
+#      f.write( '      const unsigned *indices){ \n' )
+      f.write( '      const unsigned *indices,\n' )
+      f.write( '      pthread_mutex_t *mutex){ \n' )
+      f.write( '  #define PNODE(N) node\n' )
+      
+    write_matrix_2( f, matrices[T]['M'], matrices[T]['V'], symmetric, matrices[T]['i'], matrices[T]['o'], assemble_mat, assemble_vec )  
+    
+    f.write( '  #undef PNODE\n' )
+    f.write( '}\n' )
+
+    if T=='N': f.write( '#endif\n' )
+
   def write_der_var_vector(self,f,T,matrices,e,der_var,num_der_var):
     asm_fname = 'elem_matrix_%s_%s_%i' % ( self.name, self.e.name, self.num_func_write_matrix )
     if self.use_asm:
@@ -843,6 +919,13 @@ class Formulation:
             for assemble_vec in [True,False]:
                 for symmetric in [False,True][(assemble_mat==False):]:
                     self.write_matrix( f, T, assemble_mat, assemble_vec, symmetric, matrices, e )
+    
+    # main matrices
+    for T in ['V','N']+['S'+str(i) for i in range(len(e.children))]:
+        for assemble_mat in [True,False]:
+            for assemble_vec in [True,False]:
+                for symmetric in [False,True][(assemble_mat==False):]:
+                    self.write_matrix_2( f, T, assemble_mat, assemble_vec, symmetric, matrices, e )
     
     # der_var matrices
     for n in range(len(der_var_syms)):
