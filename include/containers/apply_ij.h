@@ -21,6 +21,7 @@ namespace LMTPRIVATE {
 /*!
     structure privée!
     \friend hugo.leclerc@lmt.ens-cachan.fr
+    \internal
 
 */
     struct Apply_IJB {
@@ -56,6 +57,7 @@ namespace LMTPRIVATE {
 /*!
     structure privée!
     \friend hugo.leclerc@lmt.ens-cachan.fr
+    \internal
 
 */
     struct Apply_IJ {
@@ -94,7 +96,7 @@ namespace LMTPRIVATE {
 /*!
     structure privée!
     \friend hugo.leclerc@lmt.ens-cachan.fr
-
+    \internal
 */
     template<bool eq> struct Apply_ISJ {
         Apply_ISJ() { a.i=0; }
