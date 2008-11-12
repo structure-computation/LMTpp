@@ -42,8 +42,8 @@
                 options           = {"behavior_simplification" : 'plane stress'},
                 additional_fields = { "qtrans" : Variable(unit='mm',nb_dim=['DIM']), "typmat" : Variable(interpolation='elementary',unit='',default_value='0')},
                 types             = ['float'],
-                use_asm           = True,
-                name_der_var      = ['dep','E']
+                #use_asm           = True,
+                name_der_vars     = ['dep','E']
             )
 
             libs += [

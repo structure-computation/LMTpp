@@ -3,7 +3,7 @@
 
 namespace LMT {
 
-/**
+/*!
     \keyword Traitement_dimages
     
 */

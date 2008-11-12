@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import string
 
 print """
@@ -15,6 +16,9 @@ for nb_param in range(5):
         ALL_T = string.join( map(lambda x:'class '+x, Tparam), ',' )
     
         print """
+/*!
+ \\internal
+*/
 template<class TV,"""+ALL_T+""">
 struct Param_partial_apply_"""+str(cpt)+""" {
     unsigned begin, end, inc;
@@ -24,7 +28,7 @@ struct Param_partial_apply_"""+str(cpt)+""" {
 """
         for wi in ['','_wi']:
             print """
-/// @see apply_mt()
+/*!\n \\relates apply_mt()\n \\internal\n*/\n
 template<class T,"""+ALL_T+""">
 void *partial_apply_"""+str(cpt)+wi+"""(void *params) {
     Param_partial_apply_"""+str(cpt)+"""<T,"""+string.join(Tparam,',')+"""> &ppa( *static_cast<Param_partial_apply_"""+str(cpt)+"""<T,"""+string.join(Tparam,',')+"""> *>(params) );
@@ -32,7 +36,9 @@ void *partial_apply_"""+str(cpt)+wi+"""(void *params) {
     return (void *)NULL;
 }
 
-///
+/*!
+ \\relates apply
+*/
 template<class TT,int s,"""+ALL_T+""">
 void apply_mt"""+wi+"""("""+Const[0]+""" Vec<TT,s> &v,unsigned nb_threads,"""+string.join( map(lambda (c,x,y):c+' '+x+' &'+y+'', zip(Const[1:],Tparam,param)), ',' )+""") {
     if ( nb_threads > 1 && v.size() >= nb_threads ) {
@@ -58,7 +64,9 @@ void apply_mt"""+wi+"""("""+Const[0]+""" Vec<TT,s> &v,unsigned nb_threads,"""+st
         apply"""+wi+"""(v,"""+string.join( map(lambda (x):x,param), ',' )+""");
     }
 }
-///
+/*!
+ \\internal
+*/
 template<class TT,int s,"""+ALL_T+""">
 void apply_mt_stride"""+wi+"""("""+Const[0]+""" Vec<TT,s> &v,unsigned nb_threads,"""+string.join( map(lambda (c,x,y):c+' '+x+' &'+y+'', zip(Const[1:],Tparam,param)), ',' )+""") {
     if ( nb_threads > 1 && v.size() >= nb_threads ) {
