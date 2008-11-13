@@ -154,7 +154,6 @@ namespace LMT {
         }
         //
         void assemble_constraints( Mat<T,Sym<>,SparseLine<> > &K , Vec<double> &F,T M,  bool assemble_mat=true,bool assemble_vec=true) {
-//            PRINTCERR(M);
             for(unsigned i=0;i<formulations.size();++i) {
                 formulation(i)->assemble_constraints(K, F, vectors, formulations[i].local_ddl_to_global_ones, M, assemble_mat, assemble_vec );
             }
@@ -260,18 +259,18 @@ namespace LMT {
             formulation(0)->update_connectivity();
             MeshAndForm &maf = formulations[0];
             maf.local_unknowns_to_global_ones.resize(0);
-            maf.local_unknowns_to_global_ones.reserve( maf.m->node_list.size() );
+            maf.local_unknowns_to_global_ones.resize( maf.m->node_list.size() );
             for(unsigned num_node=0;num_node < maf.m->node_list.size();++num_node) {
                 if(maf.m->node_list[num_node].is_on_skin ){
                     pos_skin.push_back( maf.m->node_list[num_node].pos );
                     j_skin.push_back( pos.size() );
                 }
-                maf.local_unknowns_to_global_ones.push_back( pos.size() );
+                maf.local_unknowns_to_global_ones[num_node] = pos.size() ;
                 pos.push_back( maf.m->node_list[num_node].pos );
-            } 
+            }
             maf.local_ddl_to_global_ones.resize(0);
             maf.local_ddl_to_global_ones.reserve( maf.local_unknowns_to_global_ones.size() * nb_ddl_per_node );
-            maf.indice_noda = (formulations[0].local_unknowns_to_global_ones * formulation(0)->get_nb_nodal_unknowns());
+            maf.indice_noda = formulations[0].local_unknowns_to_global_ones * formulation(0)->get_nb_nodal_unknowns();
             for(unsigned i=0;i<maf.local_unknowns_to_global_ones.size();++i)
                 for(unsigned d=0;d<nb_ddl_per_node;++d)
                     maf.local_ddl_to_global_ones.push_back( maf.local_unknowns_to_global_ones[i] * nb_ddl_per_node + d );
@@ -304,7 +303,7 @@ namespace LMT {
                         }
                     }
                 //
-                maf.indice_noda = (formulations[i].local_unknowns_to_global_ones * formulation(i)->get_nb_nodal_unknowns());
+                maf.indice_noda = formulations[i].local_unknowns_to_global_ones * formulation(i)->get_nb_nodal_unknowns();
                 maf.local_ddl_to_global_ones.resize(maf.local_unknowns_to_global_ones.size() * nb_ddl_per_node );
                 for(unsigned j=0;j<maf.local_unknowns_to_global_ones.size();++j)
                     for(unsigned d=0;d<nb_ddl_per_node;++d){

@@ -456,7 +456,7 @@ class Element:
         if type(expr)==ExVector:
             res = ExVector( expr.size() )
             for i in range( expr.size() ):
-                res[i] = self.mean( expr[i] )
+                res[i] = self.mean( expr[i] , order)
             return res
         else:
             if order:
