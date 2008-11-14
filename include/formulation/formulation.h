@@ -1418,6 +1418,21 @@ void add_elem_matrix(
         
 }
 
+template<class TF,class TK,class TFE,class TVE,unsigned _ms,unsigned _am,unsigned _av,class TE,class Mutex>
+void add_elem_matrix(
+        const TF &f,
+        const TK &K,
+        const TFE &F,
+        const TVE &vectors,
+        const Number<_ms> &matrix_is_sym,
+        const Number<_am> &assemble_mat,
+        const Number<_av> &assemble_vec,
+        const TE &elem,
+        const unsigned *indices,
+        Mutex mutex 
+//  f, K, F, *vectors, Number<MatCarac<0>::symm>(), Number<assemble_mat>(), Number<assemble_vec>(), e, in, mutex
+) {}
+
 
 /** To be redefined for each new formulations
 */
