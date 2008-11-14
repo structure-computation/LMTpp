@@ -25,12 +25,13 @@ pouet  = Variable( interpolation='elementary', nb_dim=[dim], default_value='0', 
 
 #assume_symmetric_matrix = False
 integration_totale = False
+
 # --------------------------------------------------------------------------------------------------------------------------------
 def formulation():
     E = elastic_modulus.expr # * ( 2 + cos( pos.expr[0] ) )
     epsilon = grad_sym_col(dep.expr)
     epstest = grad_sym_col(dep.test)
-    H = hooke_isotrope( E * ( 1 - d ), poisson_ratio.expr, dim, options['behavior_simplification'] )[0]
+    H = hooke_isotrope( E, poisson_ratio.expr, dim, options['behavior_simplification'] )[0]
     sigma = mul( H, epsilon )
     
     res = density.expr * dot( dep.expr.diff(time).diff(time) - f_vol.expr, dep.test )

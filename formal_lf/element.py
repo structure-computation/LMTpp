@@ -467,3 +467,10 @@ class Element:
     def measure( self ):
         return self.integration( number(1), 2 )
         
+    #
+    def get_value_on_node_number( self, expr, node_number ):
+        #print dict( zip( self.var_inter, map( number, self.var_inter_of_node_number[ node_number ]+number() ) ) )
+        return expr.subs( EM( dict( zip( self.var_inter, map( number, self.var_inter_of_node_number[ node_number ] ) ) ) ) )
+        
+        
+        

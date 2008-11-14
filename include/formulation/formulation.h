@@ -921,6 +921,8 @@ public:
             assemble_vector_der_var( i );
             der[ i ] = I * sollicitation;
         }
+        
+        return true;
     }
     
     virtual void get_precond() { get_precond( Number<MatCarac<0>::symm>() ); }
