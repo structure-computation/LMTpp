@@ -46,6 +46,28 @@ public:
     TF fact;
 };
 
+template<class TT, int s>
+class Inv<TT,Sym<s>,SparseLine<>,typename IsMatOp<TT>::T,typename Mat<TT,Sym<s>,SparseLine<>,typename IsMatOp<TT>::T>::T> {
+public:
+    typedef Sym<s> Str;
+    typedef SparseLine<> Sto;
+    typedef typename IsMatOp<TT>::T IO;
+    typedef typename Mat<TT,Str,Sto,IO>::T AltT;
+    typedef typename Mat<TT,Str,Sto,IO>::T T;
+    typedef SkyLine<typename Sto::TO> STOF;
+    typedef std::pair< Mat<AltT,Str,STOF> , Vec<AltT,s> > TF;
+    
+    Inv() { }
+    Inv(const Mat<TT,Str,Sto,IO> &mm):m(&mm) {
+        bool res = get_factorization(mm,fact);
+        if ( res == false )
+            throw SolveException();
+    }
+    
+    const Mat<TT,Str,Sto,IO> *m;
+    TF fact;
+};
+
 /*! \relates Mat
     Return an Inv<> object with factorization matrix
     \friend raphael.pasquier@lmt.ens-cachan.fr

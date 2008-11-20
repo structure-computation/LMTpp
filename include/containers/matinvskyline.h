@@ -125,27 +125,27 @@ bool get_factorization( const Mat<T,Sym<s,false>,SparseLine<Col>,IO> &m, TF &mat
         }
         lb[i] = m.data[i].indices.front();
     }
-    mat.resize( m.nb_rows(), m.nb_rows(), lb );
+    mat.first.resize( m.nb_rows(), m.nb_rows(), lb );
+    mat.second.resize( m.nb_rows() );
     //PRINT( lb );
-    mat.values.set(T(0));
+    mat.first.values.set(T(0));
     for(unsigned i=0;i<m.nb_rows();++i)
         for(unsigned j=0;j<m.data[i].indices.size();++j)
-            mat.cum_index[i][ m.data[i].indices[j] ] = m.data[i].data[j];
+            mat.first.cum_index[i][ m.data[i].indices[j] ] = m.data[i].data[j];
 
     //
-    for(unsigned line=0;line<mat.nb_rows();++line) {
+    for(unsigned line=0;line<mat.first.nb_rows();++line) {
         // first step : factorization of a first triangle
-        T *ptr = mat.cum_index[line];
-        unsigned lbl = mat.lbounds[line];
-        for(unsigned col=mat.lbounds[line];col<line;++col) {
-            unsigned lb = max( mat.lbounds[col], lbl );
-            ptr[col] = ( ptr[col] - dot_aligned_with_offset(mat.cum_index[col]+lb,ptr+lb,col-lb) ) / mat.cum_index[col][col];
+        T *ptr = mat.first.cum_index[line];
+        unsigned lbl = mat.first.lbounds[line];
+        for(unsigned col=mat.first.lbounds[line];col<line;++col) {
+            unsigned lb = max( mat.first.lbounds[col], lbl );
+            ptr[col] = ( ptr[col] - dot_aligned_with_offset(mat.first.cum_index[col]+lb,ptr+lb,mat.second.ptr()+lb,col-lb) ) / mat.second[col];
         }
-        T reg = ptr[line] - norm_2_p2( ptr + lbl, line - lbl );
-        if (reg<=T(0))
-            return false;
-        ptr[line] = sqrt( reg );
+        mat.second[line] = ptr[line] - dot_aligned_with_offset ( ptr + lbl, ptr + lbl, mat.second.ptr()+lbl, line - lbl );
+        ptr[line] = T(1);
     }
+
     return true;
 //     //PRINTN(mat);
 //     //
@@ -237,29 +237,31 @@ bool get_factorization( const Mat<T,Sym<s,false>,SparseLine<Col>,IO> &m, TF &mat
 /** \relates Mat
 */
 template<class T,int s,class IO,class TF,class TV>
-Vec< typename TypePromote< Multiplies, typename TF::T, typename TV::template SubType<0> ::T >::T ,s >
+Vec< typename TypePromote< Multiplies, typename TF::first_type::T, typename TV::template SubType<0> ::T >::T ,s >
 solve_using_factorization( const Mat<T,Sym<s,false>,SparseLine<Col>,IO> &mtoto, const TF &mat, const TV &b ) {
-    typedef typename TypePromote< Multiplies, typename TF::T, typename TV::template SubType<0> ::T >::T TR;
-    unsigned nb_lines=mat.nb_rows();
+    typedef typename TypePromote< Multiplies, typename TF::first_type::T, typename TV::template SubType<0> ::T >::T TR;
+    unsigned nb_lines=mat.first.nb_rows();
     
     Vec<TR,s> vec;
     vec.resize( nb_lines );
     for(unsigned i=0;i<b.size();++i)
         vec[i] = b[i];
     //
-    for(unsigned line=0;line<mat.nb_rows();++line) {
-        T *ptr = mat.cum_index[line];
-        unsigned lb = mat.lbounds[line];
+    for(unsigned line=0;line<mat.first.nb_rows();++line) {
+        T *ptr = mat.first.cum_index[line];
+        unsigned lb = mat.first.lbounds[line];
         vec[line] = ( vec[line] - dot_aligned_with_offset(ptr+lb,&vec[0]+lb,line-lb) ) / *(ptr+line);
     }
 
+    for(unsigned i=0;i<nb_lines;i++)
+        vec[i]=vec[i]/mat.second[i];
     //
     Vec<TR,s> tmpvec = vec;
 
     TR tmp;
     while (nb_lines--) {
-        T *ptr = mat.cum_index[nb_lines];
-        unsigned lb = mat.lbounds[nb_lines];
+        T *ptr = mat.first.cum_index[nb_lines];
+        unsigned lb = mat.first.lbounds[nb_lines];
         tmp = tmpvec[nb_lines] / ptr[nb_lines];
         for(;lb<nb_lines;++lb)
             tmpvec[lb] -= ptr[lb] * tmp;
