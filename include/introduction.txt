@@ -1,0 +1,12 @@
+/*!
+\webpage introduction Introduction
+
+    La librairie LMT++ est un ensemble de classes et de fonctions C++ permettant d'accélérer le développement d'applications pour la simulation numérique intensive en mécanique. Elle utilise la conception orientée objet et surtout la conception générique ( ou méta-programmation) garante de flexibilité, de longivité. Sa base est un ensemble de conteneurs \a Vec , \a Mat et \a Mesh optimisés en vitesse d'exécution et en ressource mémoire et simple d'utilisation, accompagnés de nombreuses fonctions pour les calculs ( e.g. d'éléments finis). 
+    Elle contient aussi des scripts Python pour la génération de code. En effet on peut exprimer son problème de mécanique dans le langage Python sous une forme très proche de la notation mathématique puis générer les classes et les fonctions C++ correspondant au problème. Il reste alors à implémenter les méthodes de résolution.  
+    
+    
+    \author Hugo Leclerc
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+
+*/

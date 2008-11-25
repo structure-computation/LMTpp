@@ -1,0 +1,9 @@
+/*!
+\webpage quickstart Bien commencer avec la LMT++
+
+    Dans un premier temps, consulter le tutoriel \a [Mon premier programme]. C'est un exemple typique de programme sans maillage, ni formulation.
+    Pour un exemple avec une formulation, reportez-vous au tutorial \a [Comment résoudre un problème éléments finis de façon générale].
+
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+*/

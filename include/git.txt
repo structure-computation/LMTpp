@@ -1,0 +1,64 @@
+/*!
+\webpage git git
+
+    git est un programme de gestion des fichiers sources et la documentation de la librairie LMT++. Pour la culture, git fut créé par Linus Torwarld, l'initiateur du système d'exploitation Linux et il sert à la gestion de son système.
+    git vous servira pour installer la LMT++, pour faire une mise à jour ou une soumission de modification de code ou de commentaire.
+ 
+    <strong> REMARQUE IMPORTANTE </strong> : Avant d'utiliser git, il faut se connecter sur la machine ssh (id madiran), sur laquelle tous les logiciels sont installés. 
+
+    = SE PRESENTER A GIT 
+        Il faut d'abord se presenter au monsieur: 
+        \verbatim
+            git config --global user.name "Your Name Comes Here" 
+            git config --global user.email you@yourdomain.com 
+    
+    = MIS A JOUR DESCENDANTE 
+        Pour mettre à jour vos sources à partir des sources centrales: 
+        \verbatim
+            cd LMT/ 
+            git pull 
+    
+    = MIS A JOUR ASCENDANTE 
+        Si vous avez fait une modification, correction ou apport à la bibliothèque que vous trouvez pertinent, et dont vous voulez faire part à la communauté, il vous faut faire un commit afin de soumettre l'idée à Hugo. 
+        Il faut se mettre dans votre répertoire LMT puis taper la commande : 
+        \verbatim
+            git commit -a 
+        Et la, vous vous retrouvez comme dans une fenêtre vi. Il suffit d'insérer (touche 'i') un commentaire (ex:"J'ai fait un super fonction dans le fichier kidéchir.h"), puis arreter l'insertion (touche 'echap') puis sauvegarder et quitter ( ':wq' + touche 'entrer' ) 
+        # Please enter the commit message for your changes. 
+        # (Comment lines starting mith '#' will not be included) 
+        # On branch master 
+        # Changes to be committed: 
+        # (use "git reset HEAD <file>..." to unstage) 
+        j'ai fait une super fonction dans le fichier kidechir.h 
+        # modified: include/mesh/kidechir.h 
+        # Untracked files 
+        Puis, si tout va bien, dans votre terminal, vous avez un message qui ressemble à ça : 
+        Created commit b095f72: j'ai fait une super fonction dans le fichier kidechir.h 
+        1 files changed, 1 insertions(+), 1 deletions(-) 
+        Enfin, il faut faire de ce patch un fichier *.patch que vous pouvez envoyer par mail à leclerc@lmt.ens-cachan.fr grâce à: 
+        \verbatim
+            git-format-patch -1 
+    
+    = CLONAGE 
+        Pour obtenir une version actuelle complète: 
+        \verbatim
+            git clone /ul/multi/LMT/ 
+    
+    
+    
+    = THE GIT REPOSITORY BROWSER 
+        Pour avoir une information sur les derniers patchs et leur utilité dans une fenetre : 
+        gitk
+    
+    source : intranet page \a http://intranet/mediawiki/index.php/GIT
+
+        \verbatim
+            = Mise à jour
+                il suffit de taper simplement dans le répertoire LMT/ :
+                \verbatim
+                    git pull
+        
+            = Soumission
+                Reportez-vous à la page \a Contribution .
+
+*/

@@ -1,0 +1,7 @@
+/*!
+\webpage Metil metil
+
+    Metil est un langage de programmation orienté objet créé par Hugo Leclerc. Pour la LMT++, il est utilisé pour les formulations.
+
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+*/

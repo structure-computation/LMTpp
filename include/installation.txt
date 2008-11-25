@@ -1,0 +1,9 @@
+/*!
+\webpage installation Installation
+
+    Page en construction.
+    Mais pas d'inquiétude, la LMT++ est déjà installée sur cette machine.
+
+
+
+*/
