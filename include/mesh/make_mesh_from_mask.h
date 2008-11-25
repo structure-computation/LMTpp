@@ -94,10 +94,10 @@ void make_mesh_from_mask( const std::string &filename, TM &m, typename TM::Tpos 
     load_image( filename, M, 1, border_size, /*value on borders*/255 );
     // display_image( M, "tmp/img", true );
     // PRINT( mean( M ) );
-    PRINT( max( M.row(0) ) );
-    PRINT( max( M.diag() ) );
-    PRINT( max( M.row(1) ) );
-    PRINT( max( M.row(1)[range(50)] ) );
+    //     PRINT( max( M.row(0) ) );
+    //     PRINT( max( M.diag() ) );
+    //     PRINT( max( M.row(1) ) );
+    //     PRINT( max( M.row(1)[range(50)] ) );
     
     // 0.5 * ( max( M ) + min( M ) )
     Mat<double> dist = img_dist_from_front( M, border_size, /*gray level*/ 125 );
