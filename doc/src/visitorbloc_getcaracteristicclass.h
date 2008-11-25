@@ -1,0 +1,36 @@
+#ifndef VISITOR_BLOC_GET_CARACTERISTIC_CLASS_H
+#define VISITOR_BLOC_GET_CARACTERISTIC_CLASS_H
+
+#include<iostream>
+#include<cstdlib>
+#include<fstream>
+#include<vector>
+#include<string>
+
+using namespace std ;
+
+//struct CommentItem ;
+//struct LangRef ;
+
+struct Bloc ;
+struct Classe ;
+struct Function ;
+struct Struct ;
+struct VisitorBloc ;
+
+
+    struct VisitorBloc_GetCaracteristicClass : public VisitorBloc {
+    VisitorBloc_GetCaracteristicClass( ) { }
+    virtual ~VisitorBloc_GetCaracteristicClass() ;
+    virtual void function_at_Bloc( Bloc* b ) ;
+    virtual void function_at_Classe( Classe* c ) ;
+    virtual void function_at_Struct( Struct* s ) ;
+    virtual void function_at_Function( Function* f ) ;
+
+    bool enphase ;
+    ListParameter* ptr_listHerited ;
+} ;
+
+
+#endif
+

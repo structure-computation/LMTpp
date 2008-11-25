@@ -1,0 +1,29 @@
+#ifndef OP_ALL_CLASS_H
+#define OP_ALL_CLASS_H
+
+#include <map>
+#include <string>
+
+//#include "pagecomment.h"
+#include "op.h"
+
+struct PageComment ;
+struct VisitorBloc_NameBaseClass ;
+struct ListTarget ;
+
+
+
+struct OpAllClass : Op {
+    OpAllClass( ListTarget* pllink  ) { ptr_list_target = pllink ; }
+    virtual ~OpAllClass() {}
+    virtual void operator()( PageComment* page ) ;
+
+  
+
+
+    ListTarget* ptr_list_target ;
+    map<string,string>* ptr_tree ;
+};
+
+#endif
+

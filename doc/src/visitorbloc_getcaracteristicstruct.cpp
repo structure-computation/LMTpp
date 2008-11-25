@@ -1,0 +1,60 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include<fstream>
+#include<iomanip>
+#include<cstdlib>
+
+#include<cmath>
+#include"time.h"
+
+using namespace std ;
+
+#include "op.h"
+#include "parameter.h"
+#include "classe.h"
+#include "struct.h"
+#include "bloc.h"
+#include "visitorbloc.h"
+#include "visitorbloc_getcaracteristicstruct.h"
+#include "visitorbloc_namebaseclass.h"
+#include "util2html.h"
+#include "token.h"
+#include "templateparameter.h"
+
+
+VisitorBloc_GetCaracteristicStruct :: ~VisitorBloc_GetCaracteristicStruct() {
+
+}
+
+void VisitorBloc_GetCaracteristicStruct :: function_at_Bloc( Bloc* b ) {
+
+    enphase = false ;
+}
+
+void VisitorBloc_GetCaracteristicStruct :: function_at_Classe( Classe* c ) {
+
+    enphase = false ;
+}
+
+void VisitorBloc_GetCaracteristicStruct :: function_at_Struct( Struct* s ) { 
+
+    enphase = true ;
+    ptr_listHerited = &s->listHerited ;
+}
+
+void VisitorBloc_GetCaracteristicStruct :: function_at_Function( Function* f ) {
+
+    enphase = false ;
+}
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,175 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include<fstream>
+#include<iomanip>
+#include<cstdlib>
+#include<vector>
+#include<string>
+
+using namespace std ;
+
+//#include "visitorcommentitem_is_extuge.h"
+#include "visitorcommentitem_genericcomment_tohtml.h"
+#include "pagecomment.h"
+#include "opallgenericcomment.h"
+//#include "visitorcommentitem_setpath_html.h"
+#include "listtarget.h"
+#include "util2html.h"
+#include "target.h"
+#include "token.h"
+
+
+
+// cette fonction génère la page web d'un objet/fonction générique ou hérité qui n'a pas d'item generic_comment
+void OpAllGenericComment :: generate_web_page_of_created_generic_comment( Target* pt ) {
+
+    string stmp ;
+    string stmp2 ;
+    int i,n,pos,end ;
+    ListTarget list_target_of_principal_name ;
+
+    stmp = pt->reference() ;
+    //cout << " -------------->>>>>>>>>>>  CommentItemTutorial->reference() " << stmp << endl ;
+    ofstream pageWeb( stmp.c_str() ,ios::out);
+    //VisitorCommentItem_toHTML vivi( &pageWeb, ptr_list_target ) ;
+    stmp = french2HTML( pt->name.principalName ) ;
+
+    generate_header(pageWeb, stmp ) ;
+
+
+    pageWeb << "<p class=\"commentaire_generique\">" << std::endl ;
+
+    pageWeb << "<div class=\"avertissement\">" << std::endl ;
+    pageWeb << "<strong>" << std::endl ;
+    pageWeb << "Cet objet n' a pas de description" << std::endl ;
+    pageWeb << "<strong>" << std::endl ;
+    pageWeb << "</div>" << std::endl ;
+
+    ///ptr_list_target->isPrincipalName( list_target_of_principal_name, pt->name.principalName ) ;
+    //cout << "------------- list Target " << endl ;
+    //cout << *ptr_list_target << endl ;
+    //cout << "------------- list Target of c " << endl ;
+    //cout << list_target_of_principal_name << endl ;
+
+    pageWeb << "<hr />" << std::endl ;
+    pageWeb <<  "<h1> liste des diff&eacuterentes sp&eacutecialisations" << " </h1> " << std::endl ;
+    pageWeb << "<div class=\"list_specialisation\">" << std::endl ;
+    n = list_target_of_principal_name.list.size() ;
+    if (n>0) {
+        pageWeb << "<ul>" << std::endl ;
+        for(i=0;i<n;i++) {
+            stmp  = list_target_of_principal_name.list[i]->name.name ;
+            end = stmp.size() ;
+            if (!chercher_motif( stmp,"generic_comment_",&pos,end)) {
+                stmp2 = linkHTML( pt->reference(), list_target_of_principal_name.list[i]->reference(),stmp ) ;
+                pageWeb << "<li> " << stmp2 << " </li>" << std::endl ;
+            }
+        }
+    pageWeb << "</ul>" << std::endl ;
+    pageWeb << "</div>" << std::endl ;
+    }
+
+    pageWeb << "</p>" << std::endl ;
+    // remarque : comme j'utilise un objet VisitorCommentItem_toHTML les éventuels tutoriaux,exemples contenu dans CommentItemTutorial *c ne seront pas affichés.
+
+    pageWeb << "<hr />" << std::endl ;
+    for(i=0;i<NB_FINAL_LINE;i++)
+        pageWeb << "<br>" << std::endl ;
+    pageWeb << "</body>" << std::endl ;
+    pageWeb << "</html>" << std::endl ;
+    pageWeb <<std::endl;
+}
+
+/*
+ cette fonction a pour objet de créer la page web de chaque generic_comment qu'il proviennent d'un commentItem du type generic_comment ou
+ qu'il soit créer au besoin dans le cas où il n'y ait pas de commentItem du type generic_comment ayant le nom principal de la structure ou de la fonction 
+ générique ou dérivée... ouf! pas simple à expliquer.
+
+*/
+void OpAllGenericComment :: operator()( PageComment* page ) {
+/*
+    // on génère les pages web des generaux generic comment de ce PageComment.
+    vector<string> list_principalName ;
+    string stmp ;
+    int i,k,n,N,pos,end ;
+    bool deja_dans_la_liste ;
+    bool mettre_dans_la_liste ;
+    Target* pt ;
+
+    ///VisitorCommentItem_GenericComment_toHTML g_toHTML( ptr_list_target ) ;
+    N = page->listComment.size() ;
+    for(k=0;k<N;k++) {
+        n = page->listComment[k]->items.size() ;
+        for(i=0;i<n;i++)
+            ;///page->listComment[k]->items[i]->execute_function( &g_toHTML ) ;
+    }
+
+    // génération des pages coresspondantes aux Target ayant des PrincipalName égaux et n'ayant pas de commentaire à item du type generic_comment.
+    // on commence par créer une liste de ces principalName 
+    ///N = ptr_list_target->list.size() ;
+    for(i=0;i<N;i++)
+        ;///cout << *ptr_list_target->list[i] << endl ;
+
+    for(i=0;i<N;i++) {
+        ///stmp = ptr_list_target->list[i]->name.principalName ;
+        ///end = ptr_list_target->list[i]->name.name.size() ;
+        if (chercher_motif( ptr_list_target->list[i]->name.name,"generic_comment_",&pos,end))
+            continue ;
+        deja_dans_la_liste = false ;
+        for(k=0;k<list_principalName.size();k++)
+            if (stmp == list_principalName[k]) {
+                deja_dans_la_liste = true ;
+                break ;
+            }
+        if (deja_dans_la_liste)
+            continue ;
+        mettre_dans_la_liste = false ;
+        for(k=i+1;k<N;k++) {
+            end = ptr_list_target->list[k]->name.name.size() ;
+            if (stmp == ptr_list_target->list[k]->name.principalName) {
+                if ( !chercher_motif( ptr_list_target->list[k]->name.name,"generic_comment_",&pos,end)) {
+                    mettre_dans_la_liste = true ;
+                }
+                else {
+                    mettre_dans_la_liste = false ;
+                    break ;
+                }
+            }
+        }
+        if (mettre_dans_la_liste)
+            list_principalName.push_back( stmp ) ;
+    }
+
+    // on crée les objets Target correspondants aux futures pages web.
+    N = list_principalName.size() ;
+    //for(i=0;i<N;i++) {
+    //    cout << "list_principalName[" << i << "] = " << list_principalName[i] << endl ;
+    //}
+    
+    for(i=0;i<N;i++) {
+        pt = new Target() ;
+        pt->name.name = "generic_comment_" + list_principalName[i] ;
+        pt->name.principalName = list_principalName[i] ;
+        pt->path = "html/generic_comment/" ;
+        ///pt->id = ptr_list_target->list.size() ;
+        pt->ancestor = 0 ;
+        ///ptr_list_target->addRealTarget( pt ) ;
+        // on génère la page web.
+        generate_web_page_of_created_generic_comment( pt ) ;
+    }
+    */
+}
+
+
+
+
+
+
+
+
+
+
+
+
+

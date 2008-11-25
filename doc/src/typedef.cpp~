@@ -1,0 +1,31 @@
+#include <iostream>
+#include <string>
+#include <vector>
+
+
+using namespace std ;
+#include "token.h"
+#include "op.h"
+#include "class.h"
+
+
+Class :: ~Class() /*: ~Bloc()*/ {
+
+    int i ;
+    
+    for(i=0;i< listSubType.size() ;i++) {
+        delete listSubType[i] ;
+    }
+    for(i=0;i< listFunction.size() ;i++) {
+        delete listFunction[i] ;
+    }
+}
+
+
+
+
+
+
+
+
+

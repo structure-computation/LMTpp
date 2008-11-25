@@ -1,0 +1,83 @@
+#ifndef NOEUD_H
+#define NOEUD_H
+
+#include <vector>
+
+template <class T> struct arbre ;
+
+template <class T> struct noeud
+{
+ friend struct arbre<T> ;
+
+	T info ;
+	vector<noeud<T>* > enfant ;
+
+	noeud() {}
+	noeud( T* i , vector< noeud<T>* >& children ) : info(*i) , enfant(children)  {}
+	noeud( noeud<T> & n ) {
+
+        int i,nb ;
+
+        nb = n.enfant.size() ;
+        for(i=0;i<nb;i++)
+            enfant.push_back( new noeud<T> (*(n.enfant[i])) ;
+        //if ( n.g != NULL) g = new noeud<T> (*(n.g) ) ; else g = NULL ;
+        //if ( n.d != NULL) d = new noeud<T> (*(n.d) ) ; else d = NULL ;
+        info = n.info ;
+    }
+	~noeud() { 
+
+        int i,nb ;
+        nb = n.enfant.size() ;
+        for(i=0;i<nb;i++)
+            delete enfant[i] ;
+        //enfant.clear() ;
+        //delete g ; delete d ;
+    }
+
+	void infixe() {
+
+        int i,nb ;
+        //if (g != NULL) infixe(*g) ;
+        std::cout << info << " " ;
+        nb = n.enfant.size() ;
+        for(i=0;i<nb;i++)
+            enfant[i]->infixe() ;
+        //if (d != NULL) infixe(*d) ;
+
+    }
+
+	int nbDescendants() {
+
+        int i,nb,n = 0 ;
+        nb = n.enfant.size() ;
+        for(i=0;i<nb;i++)
+            n += enfant[i]->nbDescendants() ;
+        return n ;
+    }
+	int hauteurDescendants() {
+ /*
+        int i,nb,n = 0 ;
+        int temp ;
+        
+        nb = n.enfant.size() ;
+        for(i=0;i<nb;i++)
+            n += enfant[i]->
+        if (g != NULL) nb   = 1 + g.hauteurDescendants() ;
+        if (d != NULL) temp = 1 + d.hauteurDescendants() ;
+        if (nb<temp) return temp ; else return n ;
+*/
+        return 0 ;
+    }
+	int nbFeuillesDescendants() {
+
+        int nb = 0 ;
+
+        if (g != NULL) nb  = g.nbFeuillesDescendants() ;
+        if (d != NULL) nb += d.nbFeuillesDescendants() ;
+
+        return( nb ) ;
+    }
+} ;
+
+#endif

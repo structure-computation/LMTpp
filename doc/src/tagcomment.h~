@@ -1,0 +1,28 @@
+#ifndef TAG_COMMENT_H
+#define TAG_COMMENT_H
+
+#include<iostream>
+#include<cstdlib>
+#include<fstream>
+#include<vector>
+
+using namespace std ;
+
+//struct CommentItem ;
+//struct LangRef ;
+//struct  Op ;
+#include "op.h"
+#include "comment.h"
+//struct Comment ;
+
+
+struct TagComment {
+    TagComment( ) { }
+    ~TagComment() { } 
+
+    vector<Comment*> listTag ;
+} ;
+
+
+#endif
+

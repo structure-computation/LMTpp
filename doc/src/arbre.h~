@@ -1,0 +1,35 @@
+#ifndef ARBRE_H
+#define ARBRE_H
+
+//#include <iostream>
+//using namespace std ;
+#include "noeud.h"
+
+template <class T> struct arbre
+{
+	noeud<T> * racine ;
+	int nbElements ;
+
+	void infixe() ;
+	//noeud<T> * copie( noeud<T> *  ) ;
+
+	arbre() : racine(NULL), nbElements(0) {} ;
+	arbre( arbre<T> & a ) : racine ( new noeud<T> (a.racine)) { }
+	~arbre() { delete racine ; }
+	int nombreElements() {
+        if (racine != NULL) return( racine->nbDescendants()) ;
+ 	  else reuturn 0 ; 
+    }
+	int hauteur() {
+        if (racine != NULL) return( racine->hauteurDescendants()) ;
+	   else return 0 ;
+    }
+	int nombreFeuilles() {
+        if (racine != NULL) return( racine->nbFeuillesDescendants()) ;
+	   else return 0 ;
+    }
+
+	void arbreComplet( int hauteur ) {  /* à faire  */ }
+} ;
+
+#endif

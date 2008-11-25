@@ -1,0 +1,15 @@
+/*!
+\webpage Licence de la librairie licence
+
+    à compléter (ne pas effacer la ligne ci dessus et indenter le texte).
+
+
+
+
+
+
+
+
+
+
+*/

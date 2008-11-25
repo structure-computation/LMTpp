@@ -1,0 +1,72 @@
+void PageComment :: extract_returnType_name( int* suivant, Names& returnType, Names& name, string& t ,int end, int start ) {
+
+    deque<int> localListIndex ;
+    string localtype ;
+    string localname ;
+    int n,next,i,pos,ioperator ;
+    char delim,c,cnext ;
+
+
+    extract_list_lexem( &next,localListIndex,&delim,"(",t,end,start ) ;
+    n = localListIndex.size() ;
+    for(i=0;i<n;i+=2) 
+        if (t.substr( localListIndex[i], localListIndex[i+1] - localListIndex[i] ) == "operator")
+            break ;
+    ioperator = i ;
+
+    if (ioperator < n ) {
+        // c'est un opérateur
+        if (n>=2) {
+            if (ioperator == n-2 ) {
+                // ce cas correspond à l'opérateur operator()
+                for(i=0;i<ioperator;i+=2)
+                    localtype += t.substr( localListIndex[i], localListIndex[i+1] - localListIndex[i] ) + ' ' ;
+                cut_space( localtype ) ;
+                returnType.name = localname ;
+                returnType.principalName = principal_type_of( localname ) ;
+                localname = "operator()" ;
+                name.name = localname ;
+                name.principalName = localname ;
+                //extract_list_lexem( &next,localListIndex,&delim,"(",t,end,next ) ;
+                chercher_motif(t,"(",&next,end,next) ;
+
+            } else {
+                for(i=ioperator;i<n;i+=2)
+                    localname += t.substr( localListIndex[i], localListIndex[i+1] - localListIndex[i] ) ;
+                cut_space( localname ) ;
+                name.name = localname ;
+                name.principalName = localname ;
+                for(i=0;i<ioperator;i+=2)
+                    localtype += t.substr( localListIndex[i], localListIndex[i+1] - localListIndex[i] ) + ' ' ;
+                cut_space( localtype ) ;
+                returnType.name = localtype ;
+                returnType.principalName = principal_type_of( localtype ) ;
+            }
+        } else {
+            returnType.name = "" ;
+            returnType.principalName = "" ;
+            name.name = "__unknown" ;
+            name.principalName = "__unknown" ;
+        }
+    }
+    else {
+        // c'est un nom de fonction normal.
+        if (n>=4) {
+            localtype = t.substr( localListIndex[0], localListIndex[n-3] - localListIndex[0] ) ;
+            cut_space( localtype ) ;
+            returnType.name = localtype ;
+            returnType.principalName = principal_type_of( localtype ) ;
+            localname = t.substr( localListIndex[n-2], localListIndex[n-1] - localListIndex[n-2] ) ;
+            cut_space( localname ) ;
+            name.name = localname ;
+            name.principalName = principal_type_of( localname ) ;
+        } else {
+            returnType.name = "" ;
+            returnType.principalName = "" ;
+            name.name = "__unknown" ;
+            name.principalName = "__unknown" ;
+        }
+    }
+
+    *suivant = next ;
+}
