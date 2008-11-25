@@ -1,0 +1,143 @@
+/*!
+\example Exemple de formulation
+
+    L'objet de cet exemple est de montrer les codes sources d'un mini projet avec formulation d'un problème thermique. Vous trouverez dans le tutoriel \a "Comment résoudre un problème éléments finis de façon générale" toutes les explications nécessaires pour concevoir vos propres formulations.
+    Ici nous voulons résoudre un problème thermique dont la formulation est déjà écrite dans le fichier \a file:///home/pasquier/LMT/formulations/formulation_difftherm.py formulation_difftherm.py (à consulter). 
+
+    = Fichier Sconstruct
+        \code
+            from LMT import *
+            from LMT.formal_lf import *
+            
+            timdaviscppflags = file("/opt/MATH/timdavis/cppflags","r").read().strip()
+            timdavisldflags = file("/opt/MATH/timdavis/ldflags","r").read().strip()
+            
+            env = Environment(
+                CPPPATH = [ '#LMT/include' ],
+                LIBS = [ 'pthread' ],
+                CPPFLAGS = cppflags( ['xml2-config'] ) + " " + timdaviscppflags + " -O3",
+                LINKFLAGS = linkflags( ['xml2-config'] ) + " " + timdavisldflags ,
+            )
+            make_dep_py(env)
+            
+            env.BuildDir( 'build/LMT', 'LMT/include', duplicate=0 )
+            libs = SConscript( 'LMT/include/SConscript', exports='env', build_dir='build/LMT' )
+            
+            pb_libs = make_pb(
+                env,
+                opt = 0,
+                name = 'zebulon_thermique',
+                formulations = ['difftherm'],
+                elements = ['Triangle'],
+                #options = { 'behavior_simplification' : 'plane stress' },
+            )
+            
+            libs += [
+                '/opt/MATH/CHOLAMD/CHOLMOD/Lib/libcholmod.a',
+                '/opt/MATH/CHOLAMD/UMFPACK/Lib/libumfpack.a',
+                '/opt/MATH/CHOLAMD/AMD/Lib/libamd.a',
+                '/opt/MATH/CHOLAMD/COLAMD/libcolamd.a',
+                '/opt/MATH/CHOLAMD/CCOLAMD/libccolamd.a',
+                '/opt/MATH/metis-4.0/libmetis.a',
+                '/opt/MATH/CHOLAMD/UFconfig/xerbla/libcerbla.a',
+            ]
+
+            env.Program( "main", ["main.cpp"] + pb_libs + libs, build_dir='build/LMT' )
+
+    La partie importante est l'appel de la fonction make_pb() avec comme paramètre le nom du problème, le nom de la formulation et le type d'éléments.
+    <strong> Imortant : </strong> n'oubliez pas d'ajouter pb_libs à votre liste de code source dans l'appel de la fonction env.Program().
+
+    
+    = Fichier Makefile
+        \code
+            all: codegen
+                scons
+                ./main
+            codegen:
+                cd LMT/include/codegen; scons 
+    
+    = Fichier main.cpp
+        \code
+            #include "build/problem_zebulon_thermique/problem.h"
+            #include "mesh/read_msh_2.h"
+            #include "mesh/make_rect.h"
+            
+            using namespace LMT;
+            using namespace std;
+            
+            void testformulation() {
+                typedef Problem_zebulon_thermique<double,2> PB;
+                typedef PB::TM TM;
+                typedef TM::Pvec Pvec;
+                
+                TM m; // declaration d'un maillage
+                //read_msh_2( m, "m.rect.msh" ); // chargement d'un maillage au format de gmsh dans m
+                make_rect(m,Triangle(),Pvec(0.,0.),Pvec(1.,1.),Pvec(10,10)); // création d'un maillage rectangulaire avec 10 noeuds par côté. Le coin en bas à gauche a pour coordonnées cartésiennes (0,0) et le coin en haut à droite (1,1)
+            
+                // création d'un problème du type Problem_zebulon_thermique<double,2> avec le maillage m.
+                PB pb( m );
+            
+                if (m.node_list.size()) {
+                    Pvec xmax = m.node_list[0].pos;
+                    Pvec xmin = m.node_list[0].pos;
+                    double pen = 40.;
+            
+                    // détermination du noeud le plus en bas à gauche et du plus haut à droite.
+                    for(unsigned i=0;i<m.node_list.size();++i) { 
+                        xmax = LMT::max( xmax, m.node_list[i].pos );
+                        xmin = LMT::min( xmin, m.node_list[i].pos );
+                    }
+                    PRINT(xmin);
+                    PRINT(xmax);
+                    // Cette boucle parcours tous les noeuds et suivant leur position par rapport au point xmin et xman, le champ temperature reçoit une valeur correspondant à une contrainte.
+                    for(unsigned i=0;i<m.node_list.size();++i) {
+                        // X min
+                        // pos[0] <-> x
+                        // pos[1] <-> y
+                        if ( m.node_list[i].pos[0] < xmin[0] + 1e-6 ) {
+                            //             pb.formulation_difftherm->add_constraint( "node["+to_string(i)+"].dep[0] - 0.3*time", pen );
+                            //             pb.formulation_difftherm->add_constraint( "node["+to_string(i)+"].dep[1]", pen );
+                            pb.formulation_difftherm->add_constraint( "node["+to_string(i)+"].temperature - 1", pen+30.*m.node_list[i].pos[1] );
+                        }
+                        // X max
+                        if ( m.node_list[i].pos[0] > xmax[0] - 1e-6 ) {
+                            pb.formulation_difftherm->add_constraint( "node["+to_string(i)+"].temperature", pen );
+                            //             pb.formulation_difftherm->add_constraint( "node["+to_string(i)+"].dep[0] + 0.3*time", pen );
+                            //             pb.formulation_difftherm->add_constraint( "node["+to_string(i)+"].dep[1]", pen );
+                        }
+                    }
+                }
+                pb.formulation_difftherm->solve();
+            
+                display_mesh( m );
+                //     DisplayParaview dp;
+                //     dp.add_mesh( m );
+                //     dp.exec();
+            }
+            
+            int main(int argc,char **argv) {
+                testformulation();
+            }
+
+        <strong> Important : </strong> le premier #include est absolument NECESSAIRE. c'est lui qui va forcer le logiciel scons à générer le répertoire build et ses codes sources .h et .cpp correspondant à votre formulation.
+        Les deux autres servent à définir les deux fonctions read_msh_2(), pour charger un maillage à partir d'un fichier .msh, et make_rect() qui sert à fabriquer un maillage rectangulaire.
+        Le code 
+        \code
+            typedef Problem_zebulon_thermique<double,2> PB;
+        définit un synonyme du type de votre problème.
+        \code
+            typedef PB::TM TM;
+        définit un synonyme du type du maillage correspondant à votre formulation. Remarquez au passage que la classe PB contient donc des attributs mais aussi des types ( des classes si vous préférez)!
+        Par exemple PB::T contient le type scalaire et PB::Pvec le type pour représenter la position d'un point.  
+        Ensuite on définit un maillage (TM m;) et un problème (PB pb;).
+        Remarquer comment on accède à un noeud du maillage m, m.node_lis[indice] puis à l'attribut temperature, m.node_lis[indice].temperature. L'attribut le plus important est pos du type PB::TM::Pvec. La liste des attributs d'un noeud, d'un élément, de votre maillage est dans votre fichier de formulation python.
+        Puis pour utiliser la formulation, le plus simple est de se servir du pointeur pb.formulation_difftherm.
+        Enfin pour fixer une contrainte à un noeud, on utilise la méthode add_constraint(). Son premier paramètre est une chaine de caractère représentant une expression fonction du noeud et éventuellement du nom time qui correspond au temps. Le deuxième paramètre est la valeur de l'expression.
+ 
+
+        Merci à Renaud Gras pour son idée de mini-projet!
+
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+
+*/ 
