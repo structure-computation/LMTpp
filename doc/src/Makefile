@@ -10,8 +10,8 @@ all: main
 clean: rm -f  *.o
 
 main: $(OBJS)
-	  g++ $(OBJS) -lm -o main
-	  cd ../..;./doc/src/main . doc
+	g++ $(OBJS) -lm -o main
+	# cd ../..;./doc/src/main . doc
 
 token.o: token.cpp
 opdisplay.o: opdisplay.cpp
