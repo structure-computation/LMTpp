@@ -125,7 +125,14 @@ template<class T> void incomplete_chol_factorize( Mat<T,Sym<>,SparseLine<> > &m 
     }
 }
 
-/// m is assumed to be factorized
+/*! 
+    m is assumed to be factorized
+    sol sontient le second membre et res contiendra la solution.
+
+    \keyword Mathématiques/Algèbre linéaire/Décomposition de matrices
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+*/
 template<class T,int s,int s2> void solve_using_chol_factorize( const Mat<T,Sym<s>,SparseLine<> > &mat, const Vec<T> &sol, Vec<T,s2> &res ) {
     unsigned nb_lines = mat.nb_rows();
     
@@ -148,7 +155,14 @@ template<class T,int s,int s2> void solve_using_chol_factorize( const Mat<T,Sym<
     }
 }
 
-/// m is assumed to be factorized
+/*! 
+    m is assumed to be factorized
+    sol sontient le second membre et res contiendra la solution.
+
+    \keyword Mathématiques/Algèbre linéaire/Décomposition de matrices
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+*/
 template<class T,int s,int s2> void solve_using_chol_factorize( const Mat<T,Herm<s>,SparseLine<> > &mat, const Vec<T> &sol, Vec<T,s2> &res ) {
     unsigned nb_lines = mat.nb_rows();
     
