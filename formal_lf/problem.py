@@ -114,7 +114,7 @@ class Problem:
                             output.write( ' '*nb_sp+'        if ( field_name == "'+namevar+'" ) { '+namevar+' = value; return; }\n' )
             output.write( ' '*nb_sp+'        std::cerr << "There is no variable named " << field_name << " in data struct" << std::endl;\n' )
             output.write( ' '*nb_sp+"    }\n" )
-            for d in range( 1, 4 ):
+            for d in range( 1, 7 ):
                 output.write( ' '*nb_sp+"    void dm_data_set_field( const std::string field_name, const Vec<Tpos,"+str(d)+"> &value ) {\n" )
                 for namevar, var in all_vars.items():
                     if cond( var ) and var.nb_dim == [d]:
@@ -141,7 +141,7 @@ class Problem:
                             output.write( ' '*nb_sp+'        if ( field_name == "'+namevar+'" ) { return '+namevar+'; }\n' )
             output.write( ' '*nb_sp+'        std::cerr << "There is no variable named " << field_name << " in data struct" << std::endl;\n' )
             output.write( ' '*nb_sp+"    }\n" )
-            for d in range( 1, 4 ):
+            for d in range( 1, 7 ):
                 output.write( ' '*nb_sp+"    Vec<Tpos,"+str(d)+"> dm_data_get_field( const std::string field_name, StructForType<Vec<Tpos,"+str(d)+"> > ) const {\n" )
                 for namevar, var in all_vars.items():
                     if cond( var ) and var.nb_dim == [d]:
