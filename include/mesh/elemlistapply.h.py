@@ -13,7 +13,7 @@ print_apply_ext('apply_range',TP,TV, 'apply_range(v.hp,from,to,op,PARALIST);', s
 print_apply_ext('apply_simd',TP,TV,'apply_simd(v.hp,op,PARALIST);')
 print_apply_ext('apply_simd_wi',TP,TV,'apply_simd_wi(v.hp,op,PARALIST);')
 
-print_apply_ext('apply_mt',TP,TV,'apply_mt(v.hp,nb_threads,op,PARALIST);', suppar=['int nb_threads'] )
+print_apply_ext('apply_mt',TP,TV,'apply_mt(v.hp,nb_threads,op,PARALIST);', suppar=['unsigned nb_threads'] )
 
 
 print '} // namespace LMT'
