@@ -41,7 +41,7 @@ public:
         std::string pvu_name = prefix;
         //if ( prefix.rfind(".vtu") != prefix.size() - 4 )
         pvu_name += "_" + to_string( time_step ) + "_" + to_string( pvu_files[time_step].size() ) + ".vtu";
-        std::cout << pvu_name << std::endl;
+        // std::cout << pvu_name << std::endl;
     
         pvu_files[ time_step ].push_back( pvu_name );
         std::ofstream f( pvu_name.c_str() );
