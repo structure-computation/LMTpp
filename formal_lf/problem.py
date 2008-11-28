@@ -101,7 +101,7 @@ class Problem:
             if cpt==0: output.write( ' '*nb_sp+"    VOIDDMSET;\n" )
             else: output.write( ' '*nb_sp+"    static const unsigned nb_params = "+str(cpt)+";\n" )
             
-            #
+            # dm_data_set_field
             output.write( ' '*nb_sp+"    void dm_data_set_field( const std::string field_name, Tpos value ) {\n" )
             for namevar, var in all_vars.items():
                 if cond( var ) and len( var.nb_dim ) <= 1:
@@ -112,7 +112,7 @@ class Problem:
                     else:
                         if len( var.T ) == 0:
                             output.write( ' '*nb_sp+'        if ( field_name == "'+namevar+'" ) { '+namevar+' = value; return; }\n' )
-            output.write( ' '*nb_sp+'        std::cerr << "There s no variable named " << field_name << " in data struct" << std::endl;\n' )
+            output.write( ' '*nb_sp+'        std::cerr << "There is no variable named " << field_name << " in data struct" << std::endl;\n' )
             output.write( ' '*nb_sp+"    }\n" )
             for d in range( 1, 4 ):
                 output.write( ' '*nb_sp+"    void dm_data_set_field( const std::string field_name, const Vec<Tpos,"+str(d)+"> &value ) {\n" )
@@ -125,7 +125,34 @@ class Problem:
                         else:
                             if len( var.T ) == 0:
                                 output.write( ' '*nb_sp+'        if ( field_name == "'+namevar+'" ) { '+namevar+' = value; return; }\n' )
-                output.write( ' '*nb_sp+'        std::cerr << "There s no variable named " << field_name << " in data struct" << std::endl;\n' )
+                output.write( ' '*nb_sp+'        std::cerr << "There is no variable named " << field_name << " in data struct" << std::endl;\n' )
+                output.write( ' '*nb_sp+"    }\n" )
+            
+            # dm_data_get_field
+            output.write( ' '*nb_sp+"    Tpos dm_data_get_field( const std::string field_name, StructForType<Tpos> ) const {\n" )
+            for namevar, var in all_vars.items():
+                if cond( var ) and len( var.nb_dim ) == 0:
+                    if in_vec( var ):
+                        for i in range( cond(var) ):
+                            if len( var.T ) == 0:
+                                output.write( ' '*nb_sp+'        if ( field_name == "'+namevar+'" ) { return '+namevar+'['+str(i)+']; } // hum\n' )
+                    else:
+                        if len( var.T ) == 0:
+                            output.write( ' '*nb_sp+'        if ( field_name == "'+namevar+'" ) { return '+namevar+'; }\n' )
+            output.write( ' '*nb_sp+'        std::cerr << "There is no variable named " << field_name << " in data struct" << std::endl;\n' )
+            output.write( ' '*nb_sp+"    }\n" )
+            for d in range( 1, 4 ):
+                output.write( ' '*nb_sp+"    Vec<Tpos,"+str(d)+"> dm_data_get_field( const std::string field_name, StructForType<Vec<Tpos,"+str(d)+"> > ) const {\n" )
+                for namevar, var in all_vars.items():
+                    if cond( var ) and var.nb_dim == [d]:
+                        if in_vec( var ):
+                            for i in range( cond(var) ):
+                                if len( var.T ) == 0:
+                                    output.write( ' '*nb_sp+'        if ( field_name == "'+namevar+'" ) { return '+namevar+'['+str(i)+']; } // hum\n' )
+                        else:
+                            if len( var.T ) == 0:
+                                output.write( ' '*nb_sp+'        if ( field_name == "'+namevar+'" ) { return '+namevar+'; }\n' )
+                output.write( ' '*nb_sp+'        std::cerr << "There is no variable named " << field_name << " in data struct" << std::endl;\n' )
                 output.write( ' '*nb_sp+"    }\n" )
             
             output.write( ' '*nb_sp+"};\n" )
