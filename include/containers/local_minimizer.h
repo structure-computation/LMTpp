@@ -21,7 +21,7 @@ namespace LMT {
 template <class TF, class TA=BfgsAlgorithm<>, class TS=ArmijoStep<>, class TC=RelativeStepCriterion<> >
 struct LocalMinimizer {
 
-    LocalMinimizer (const TF &func, bool print_x=0 ) { f=&func; print_res=print_x; }
+    LocalMinimizer (TF &func, bool print_x=0 ) { f=&func; print_res=print_x; }
 
     template <class T, int s> Vec<T,s> solve(const Vec<T,s> &input) {
         Vec<T,s> res=input;
@@ -35,7 +35,7 @@ struct LocalMinimizer {
         return res;
     }
 
-    const TF *f;
+    TF *f;
     TA algorithm;
     TS step;
     TC criterion;

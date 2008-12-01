@@ -18,7 +18,7 @@ namespace LMT {
 template <int g=0, class T=double>
 struct GradAlgorithm {
     GradAlgorithm (const T &e=T(0.000001)) { epsilon=e; }
-    template <class TF, int s> Vec<T,s> get_direction(const TF &f,const Vec<T,s> &x) {
+    template <class TF, int s> Vec<T,s> get_direction(TF &f,const Vec<T,s> &x) {
         return -lm_gradient(f,x,Number<g>(),epsilon);
     }
     T epsilon;
@@ -29,7 +29,7 @@ struct BfgsAlgorithm {
 
     BfgsAlgorithm (const T &e=T(0.000001)) { epsilon=e; }
 
-    template <class TF> Vec<T,s> get_direction(const TF &f,const Vec<T,s> &x) {
+    template <class TF> Vec<T,s> get_direction(TF &f,const Vec<T,s> &x) {
         if (not initialisation_done) {
             B.resize(x.size());
             B.set(T(0));
@@ -60,7 +60,7 @@ struct BfgsAlgorithm {
 template <int g=0, class T=double>
 struct NewtonAlgorithm {
     NewtonAlgorithm (const T &e=T(0.000001)) { epsilon=e; }
-    template <class TF, int s> Vec<T,s> get_direction(const TF &f,const Vec<T,s> &x) {
+    template <class TF, int s> Vec<T,s> get_direction(TF &f,const Vec<T,s> &x) {
         return -(inv(lm_hessian(f,x,Number<g>(),epsilon))*lm_gradient(f,x,Number<g>(),epsilon));
     }
     T epsilon;

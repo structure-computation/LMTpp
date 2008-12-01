@@ -16,7 +16,7 @@ namespace LMT {
 
 struct IterationNumberCriterion {
     IterationNumberCriterion (const unsigned imax=100u) { iteration=0u; iteration_max=imax;}
-    template <class TF, class T, int s> bool update(const TF &f,const Vec<T,s> &x) {
+    template <class TF, class T, int s> bool update(TF &f,const Vec<T,s> &x) {
         iteration++;
         return (iteration<iteration_max);
     }
@@ -27,7 +27,7 @@ struct IterationNumberCriterion {
 template <class T=double>
 struct AbsoluteValueCriterion {
     AbsoluteValueCriterion (const T &v=T(0.000001)) { value=v;}
-    template <class TF, int s> bool update(const TF &f,const Vec<T,s> &x) {
+    template <class TF, int s> bool update(TF &f,const Vec<T,s> &x) {
         return (abs(f->operator()(x))>value);
     }
     T value;
@@ -36,7 +36,7 @@ struct AbsoluteValueCriterion {
 template <class T=double>
 struct RelativeValueCriterion {
     RelativeValueCriterion (const T &v=T(0.000001)) { value=v; initialisation_done=false; }
-    template <class TF, int s> bool update(const TF &f,const Vec<T,s> &x) {
+    template <class TF, int s> bool update(TF &f,const Vec<T,s> &x) {
         if (not initialisation_done) {
             initial_value=f->operator()(x);
             initialisation_done=true;
@@ -51,7 +51,7 @@ struct RelativeValueCriterion {
 template <class T=double, int s=-1>
 struct AbsoluteStepCriterion {
     AbsoluteStepCriterion (const T &v=T(0.001)) { value=v;}
-    template <class TF> bool update(const TF &f,const Vec<T,s> &x) {
+    template <class TF> bool update(TF &f,const Vec<T,s> &x) {
         if (not initialisation_done) {
             input_before=x;
             initialisation_done=true;
@@ -69,7 +69,7 @@ struct AbsoluteStepCriterion {
 template <class T=double, int s=-1>
 struct RelativeStepCriterion {
     RelativeStepCriterion (const T &v=T(0.001)) { value=v;}
-    template <class TF> bool update(const TF &f,const Vec<T,s> &x) {
+    template <class TF> bool update(TF &f,const Vec<T,s> &x) {
         if (not initialisation_done) {
             input_before=x;
             initialisation_done=true;

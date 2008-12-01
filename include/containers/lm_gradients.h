@@ -15,7 +15,7 @@ namespace LMT {
   @author Gouttebroze
 */
 
-template <class TF, class T, int s> Vec<T,s> lm_gradient(const TF &f,const Vec<T,s> &x, Number<0>, const T &epsilon=T(0.000001) ) {
+template <class TF, class T, int s> Vec<T,s> lm_gradient(TF &f,const Vec<T,s> &x, Number<0>, const T &epsilon=T(0.000001) ) {
     Vec<T,s> res;
     res.resize(x.size());
     T local_value=f->operator()(x);
@@ -28,11 +28,11 @@ template <class TF, class T, int s> Vec<T,s> lm_gradient(const TF &f,const Vec<T
     return res;
 };
 
-template <class TF, class T, int s> Vec<T,s> lm_gradient(const TF &f,const Vec<T,s> &x, Number<1>, const T &epsilon=T(0) ) {
+template <class TF, class T, int s, unsigned n> Vec<T,s> lm_gradient(TF &f,const Vec<T,s> &x, Number<n>, const T &epsilon=T(0) ) {
     return f->grad(x);
 };
 
-template <class TF, class T, int s> Mat<T,Gen<s> > lm_hessian(const TF &f,const Vec<T,s> &x, Number<0>, const T &epsilon=T(0.000001) ) {
+template <class TF, class T, int s> Mat<T,Gen<s> > lm_hessian(TF &f,const Vec<T,s> &x, Number<0>, const T &epsilon=T(0.000001) ) {
     Mat<T,Gen<s> > res;
     res.resize(x.size());
     T local_value=f->operator()(x);
@@ -50,7 +50,7 @@ template <class TF, class T, int s> Mat<T,Gen<s> > lm_hessian(const TF &f,const 
     return res;
 };
 
-template <class TF, class T, int s> Mat<T,Gen<s> > lm_hessian(const TF &f,const Vec<T,s> &x, Number<1>, const T &epsilon=T(0.000001) ) {
+template <class TF, class T, int s> Mat<T,Gen<s> > lm_hessian(TF &f,const Vec<T,s> &x, Number<1>, const T &epsilon=T(0.000001) ) {
     Mat<T,Gen<s> > res;
     res.resize(x.size());
     Vec<T,s> local_gradient=f->grad(x);
@@ -64,7 +64,7 @@ template <class TF, class T, int s> Mat<T,Gen<s> > lm_hessian(const TF &f,const 
     return res;
 };
 
-template <class TF, class T, int s> Mat<T,Gen<s> > lm_hessian(const TF &f,const Vec<T,s> &x, Number<2>, const T &epsilon=T(0) ) {
+template <class TF, class T, int s, unsigned n> Mat<T,Gen<s> > lm_hessian(TF &f,const Vec<T,s> &x, Number<n>, const T &epsilon=T(0) ) {
     return f->hessian(x);
 };
 
