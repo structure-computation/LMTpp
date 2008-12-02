@@ -527,24 +527,36 @@ void display_structure(const Mat<T,Str,Sto,IO> &mat,const char *name_file="res")
     system(s2.str().c_str());
 }
 
-template <class T, class STR, class STO>
-Mat<T,Sym<>,STO> sym (const Mat<T,STR,STO> &M) {
+template <class T, class STR, class STO, class IO>
+Mat<T,Sym<>,STO,IO> sym (const Mat<T,STR,STO,IO> &M) {
     return T(0.5)*(M+trans(M));
 }
-template <class T, int s, class STO>
-const Mat<T,Sym<>,STO> &sym (const Mat<T,Sym<s>,STO> &M) {
+
+template <class T, int s, bool b, class STO, class IO>
+const Mat<T,Sym<s,b>,STO,IO> &sym (const Mat<T,Sym<s,b>,STO,IO> &M) {
     return M;
 }
+
 #ifndef WITHOUTCOMPLEX
-    template <class T, class STR, class STO>
-    Mat<T,Sym<>,STO> sym (const Mat<std::complex<T>,STR,STO> &M) {
+    template <class T, class STR, class STO, class IO>
+    Mat<T,Sym<>,STO,IO> sym (const Mat<std::complex<T>,STR,STO,IO> &M) {
         return T(0.5)*(M+trans(conj(M)));
     }
-    template <class T, int s, class STO>
-    const Mat<T,Sym<>,STO> &sym (const Mat<std::complex<T>,Herm<s>,STO> &M) {
+    template <class T, int s, class STO, class IO>
+    const Mat<T,Sym<s>,STO,IO> &sym (const Mat<std::complex<T>,Herm<s>,STO,IO> &M) {
         return M;
     }
 #endif
+
+template <class T, int s>
+Mat<T,Sym<s>,Dense<> > vec2matsym (const Vec<T,s> &v) {
+    Mat<T,Sym<>,Dense<> > res;
+    res.resize(v.size());
+    for (int i=0;i<v.size();i++)
+        for (int j=i;j<v.size();j++)
+            res(i,j)=v[i]*v[j];
+    return res;
+}
 
 };
 

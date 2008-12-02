@@ -129,7 +129,7 @@ public:
     
     void clear() { data.set((TT)0); } /// set all values to 0
     
-    double trace()
+    TT trace()
     {
         double tmp = 0;
         for (unsigned k=0; k<nr.val; k++)

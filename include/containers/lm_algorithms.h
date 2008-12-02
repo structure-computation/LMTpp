@@ -42,7 +42,7 @@ struct BfgsAlgorithm {
             grad_before=grad;
             grad=lm_gradient(f,x,Number<g>(),epsilon);
             Vec<T> grad_diff=grad-grad_before;
-            B=B+vec2mat(grad_diff)/dot(grad_diff,direction)-(B*vec2mat(direction)*B)/dot(direction,B*direction);
+            B=B+vec2matsym(grad_diff)/dot(grad_diff,direction)-(B*vec2matsym(direction)*B)/dot(direction,B*direction);
         }
         direction=-(inv(B)*grad);
         return direction;
