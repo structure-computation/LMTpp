@@ -549,13 +549,15 @@ public:
     }
     ///
     virtual void assemble_constraints(bool assemble_mat=true,bool assemble_vec=true) {
+        if ( constraints.size() or this->levenberg_marquadt )
+            max_diag = max(abs(matrices(Number<0>()).diag()));
+        
+        //
+        if ( assemble_mat and this->levenberg_marquadt )
+            matrices( Number<0>() ).diag() += max_diag * this->levenberg_marquadt;
+        
         // constraints
         if ( constraints.size() ) {
-            if ( assemble_mat ) {
-                max_diag = max(abs(matrices(Number<0>()).diag()));
-                if ( this->levenberg_marquadt )
-                    matrices( Number<0>() ).diag() += max_diag * this->levenberg_marquadt;
-            }
             for(unsigned i=0;i<constraints.size();++i) {
                 // calculation of res
                 using namespace Codegen;
