@@ -548,7 +548,7 @@ public:
     }
     ///
     virtual void assemble_constraints(bool assemble_mat=true,bool assemble_vec=true) {
-        if ( constraints.size() or this->levenberg_marquadt )
+        if ( assemble_mat and ( constraints.size() or this->levenberg_marquadt ) )
             this->max_diag = max(abs(matrices(Number<0>()).diag()));
         
         //
