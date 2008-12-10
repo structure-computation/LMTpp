@@ -86,7 +86,6 @@ public:
         user_want_pierre_precond = true;
         this->order_integration_when_integration_totale = Carac::order_integration;
     
-        max_diag = 0;
         time_symbol = Codegen::symbol("time");
         symbols.push_back( time_symbol );
         
@@ -550,11 +549,11 @@ public:
     ///
     virtual void assemble_constraints(bool assemble_mat=true,bool assemble_vec=true) {
         if ( constraints.size() or this->levenberg_marquadt )
-            max_diag = max(abs(matrices(Number<0>()).diag()));
+            this->max_diag = max(abs(matrices(Number<0>()).diag()));
         
         //
         if ( assemble_mat and this->levenberg_marquadt )
-            matrices( Number<0>() ).diag() += max_diag * this->levenberg_marquadt;
+            matrices( Number<0>() ).diag() += this->max_diag * this->levenberg_marquadt;
         
         // constraints
         if ( constraints.size() ) {
@@ -579,7 +578,7 @@ public:
                 }
                 // add to vec and mat
                 for(unsigned j=0;j<coeffs.size();++j) {
-                    ScalarType C = coeffs[j] * max_diag * constraints[i].penalty_value;
+                    ScalarType C = coeffs[j] * this->max_diag * constraints[i].penalty_value;
                     if ( assemble_vec )
                         sollicitation[num_in_fmat[j]] += C * ress;
                     if ( assemble_mat ) {
@@ -1374,7 +1373,6 @@ public:
     
     TM *m;
     Carac carac;
-    ScalarType max_diag;
     
     HeterogeneousPack<PackMatrices> matrices;
     TMAT0 precond_matrix; /// in case user has called get_precond()

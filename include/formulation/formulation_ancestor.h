@@ -31,6 +31,7 @@ public:
         premul_KUn_in_sollicitation = 1.0;
         want_amd = true;
         levenberg_marquadt = 0.0;
+        max_diag = 0;
     }
     virtual ~FormulationAncestor() {}
     
@@ -124,6 +125,7 @@ public:
     ScalarType premul_KUn_in_sollicitation;
     bool want_amd;
     ScalarType levenberg_marquadt; /// K += levenberg_marquadt * max( abs( K ) ) * Id; 0 by default
+    ScalarType max_diag;
 };
 
 }

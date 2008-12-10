@@ -25,7 +25,7 @@ p = Variable( interpolation='skin_elementary', default_value='0.0', unit='N/m^2'
 
 #assume_symmetric_matrix = False
 integration_totale = False
-use_asm = True
+#use_asm = True
 
 # --------------------------------------------------------------------------------------------------------------------------------
 def formulation():

@@ -140,6 +140,7 @@ class Problem:
                         if len( var.T ) == 0:
                             output.write( ' '*nb_sp+'        if ( field_name == "'+namevar+'" ) { return '+namevar+'; }\n' )
             output.write( ' '*nb_sp+'        std::cerr << "There is no variable named " << field_name << " in data struct" << std::endl;\n' )
+            output.write( ' '*nb_sp+"        return 0;\n" )
             output.write( ' '*nb_sp+"    }\n" )
             for d in range( 1, 7 ):
                 output.write( ' '*nb_sp+"    Vec<Tpos,"+str(d)+"> dm_data_get_field( const std::string field_name, StructForType<Vec<Tpos,"+str(d)+"> > ) const {\n" )
@@ -153,6 +154,7 @@ class Problem:
                             if len( var.T ) == 0:
                                 output.write( ' '*nb_sp+'        if ( field_name == "'+namevar+'" ) { return '+namevar+'; }\n' )
                 output.write( ' '*nb_sp+'        std::cerr << "There is no variable named " << field_name << " in data struct" << std::endl;\n' )
+                output.write( ' '*nb_sp+"        return 0;\n" )
                 output.write( ' '*nb_sp+"    }\n" )
             
             output.write( ' '*nb_sp+"};\n" )
