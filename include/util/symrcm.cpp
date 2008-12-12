@@ -11,6 +11,7 @@
 //
 #include "symrcm.h"
 #include <list>
+#include <algorithm>
 
 namespace LMT {
 

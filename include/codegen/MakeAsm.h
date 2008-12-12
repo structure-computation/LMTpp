@@ -4,6 +4,7 @@
 #include "SimpleSplittedVec.h"
 #include <set>
 #include <cmath>
+#include <limits>
 
 namespace Codegen {
 
