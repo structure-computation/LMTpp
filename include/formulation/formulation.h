@@ -912,7 +912,7 @@ public:
         assemble();
         
         //
-        Inv<double,Sym<>,SparseLine<> > I( matrices(Number<0>()) );
+        Inv<ScalarType,Sym<>,SparseLine<> > I( matrices(Number<0>()) );
         vectors[ 0 ] = I * sollicitation;
         update_variables();
         call_after_solve();
