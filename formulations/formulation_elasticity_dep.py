@@ -42,33 +42,32 @@ def formulation():
 
 
 # --------------------------------------------------------------------------------------------------------------------------------
-def apply_on_elements_after_solve(unk_subs): # return a string
-    E = elastic_modulus.expr # * ( 1 + heavyside( fibres_matrice_level_set.expr ) )
-    epsilon = grad_sym_col(dep.expr)
-    tr_epsilon = sum([ epsilon[i] for i in range(dim) ])
-    sigma = mul( hooke_isotrope( E, poisson_ratio.expr,  dim, options['behavior_simplification'] )[0] , epsilon )
+#def apply_on_elements_after_solve(unk_subs): # return a string
+    #E = elastic_modulus.expr # * ( 1 + heavyside( fibres_matrice_level_set.expr ) )
+    #epsilon = grad_sym_col(dep.expr)
+    #tr_epsilon = sum([ epsilon[i] for i in range(dim) ])
+    #sigma = mul( hooke_isotrope( E, poisson_ratio.expr,  dim, options['behavior_simplification'] )[0] , epsilon )
   
-    my_subs = unk_subs
-    my_subs[ time ] = time_steps[0]
-    for vi in e.var_inter: my_subs[vi] = number(0.5)
+    #my_subs = unk_subs
+    #my_subs[ time ] = time_steps[0]
+    #for vi in e.var_inter: my_subs[vi] = number(0.5)
 
-    sigma = sigma.subs(EM(my_subs))
-    epsilon = epsilon.subs(EM(my_subs))
-    tr_epsilon = tr_epsilon.subs(EM(my_subs))
+    #sigma = sigma.subs(EM(my_subs))
+    #epsilon = epsilon.subs(EM(my_subs))
+    #tr_epsilon = tr_epsilon.subs(EM(my_subs))
 
-    cw = Write_code('T')
-    #cw.add( e.integration( trace_sym_col( sigma, epsilon ), 2 ), 'f.m->integration_ener', Write_code.Add )
-    #cw.add( tr_epsilon, 'elem.tr_epsilon', Write_code.Set )
-    for i in range(dim*(dim+1)/2):
-        cw.add( sigma[i], 'elem.sigma[0]['+str(i)+']', Write_code.Set )
-        cw.add( epsilon[i], 'elem.epsilon[0]['+str(i)+']', Write_code.Set )
+    #cw = Write_code('T')
+    ##cw.add( e.integration( trace_sym_col( sigma, epsilon ), 2 ), 'f.m->integration_ener', Write_code.Add )
+    ##cw.add( tr_epsilon, 'elem.tr_epsilon', Write_code.Set )
+    #for i in range(dim*(dim+1)/2):
+        #cw.add( sigma[i], 'elem.sigma[0]['+str(i)+']', Write_code.Set )
+        #cw.add( epsilon[i], 'elem.epsilon[0]['+str(i)+']', Write_code.Set )
         
         
     #d_evol = 1e3 * abs( e.mean( dot( epsilon, epsilon ), 2 ) )
     #cw.add( d_evol, 'elem.d_evol', Write_code.Set )
     
-    return cw.to_string()
-
+    #return cw.to_string()
 
 
 

@@ -80,8 +80,8 @@ public:
     Formulation(TM &mm) {
         m = &mm;
         mat_def_pos_if_sym = Carac::matrix_will_be_definite_positive;
-        time = 0.0;
-        time_steps = 1e40;
+        time = ScalarType(0);
+        time_steps = ScalarType(1e40);
         initialized = false;
         user_want_pierre_precond = true;
         this->order_integration_when_integration_totale = Carac::order_integration;
@@ -912,7 +912,7 @@ public:
         assemble();
         
         //
-        Inv<double,Sym<>,SparseLine<> > I( matrices(Number<0>()) );
+        Inv<ScalarType,Sym<>,SparseLine<> > I( matrices(Number<0>()) );
         vectors[ 0 ] = I * sollicitation;
         update_variables();
         call_after_solve();
