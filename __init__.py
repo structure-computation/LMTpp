@@ -117,6 +117,9 @@ class MakePb:
              
         output.write( '#include "mesh_carac.h"\n' )
         output.write( '#include "formulation/problem_ancestor.h"\n' )
+        for T in self.types:
+            if T[:3]=='Pol' :
+                output.write( '#include "containers/polynomials.h"\n' )
         output.write( 'namespace LMT {\n\n' )
         output.write( 'template<class T,unsigned dim> class Problem_'+self.name+';\n\n' )
         for d in self.all_dims.keys():
