@@ -11,6 +11,8 @@ using namespace std ;
 #include <sys/stat.h>   // pour avoir des infos sur les fichiers : par exemple le type
 #include <stdio.h>
 #include <cerrno>
+#include <algorithm>
+#include <string.h>
 
 #include "token.h"
 #include "op.h"

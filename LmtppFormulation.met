@@ -261,6 +261,8 @@ class LmtppFormulationAncestor
         
     #
     virtual def write_add_elem_matrices( stream )
+        name := String( true_type( self ) )
+        info name
         for assemble_mat in 0 .. 2
             for assemble_vec in 0 .. 2
                 stream <<<<
@@ -401,13 +403,23 @@ class LmtppFormulation[ dim ] inherits LmtppFormulationAncestor
     
 #
 def write_legacy_lmtpp_mesh_dm_data_set_field( res, bn, variable_list, sym_select, sp )
-    for n in 0 .. 4
+    for n in 0 .. 7
+        # dm_data_set_field
         TV := [ "Tpos", "Vec<Tpos,$n>" ][ n > 0 ]
         res << sp <<< "    void dm_data_set_field( const std::string field_name, $TV value ) {"
         for v in variable_list
             if sym_select( v ) and v->nb_values == n
                 res << sp <<< "        if ( field_name == \"$( v->name )\" ) { $( v->name ) = value; return; }"
         res << sp <<< "        std::cerr << \"There's no variable named \" << field_name << \" in data struct\" << std::endl;"
+        res << sp <<< "    }"
+        
+        # dm_data_get_field
+        res << sp <<< "    $TV dm_data_get_field( const std::string field_name, StructForType<$TV > ) const {"
+        for v in variable_list
+            if sym_select( v ) and v->nb_values == n
+                res << sp <<< "        if ( field_name == \"$( v->name )\" ) { return $( v->name ); }"
+        res << sp <<< "        std::cerr << \"There's no variable named \" << field_name << \" in data struct\" << std::endl;"
+        res << sp <<< "        return 0;"
         res << sp <<< "    }"
 
 #
