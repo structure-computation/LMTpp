@@ -120,11 +120,11 @@ public:
         f << "</VTKFile>" << std::endl;
    }
 
-    void exec( const std::string &filename = "paraview.pvd" ) {
+    int exec( const std::string &filename = "paraview.pvd" ) {
         make_pvd_file( filename );
 
         std::string t = "paraview --data=" + filename;
-        system( t.c_str() );
+        return system( t.c_str() );
     
         /*
         std::string tmp_file = prefix + ".pvs";

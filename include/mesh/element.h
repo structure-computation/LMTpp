@@ -293,6 +293,9 @@ template<class TE,class Pvec,class TVI> void get_var_inter(const TE &elem,const 
     }
 }
 
+/** contains res -> true if eq to find var!inter from pos is non linear (recquires iterations) */
+template<class NE> struct ElemVarInterFromPosNonLinear { };
+
 /*! 
     La fonction renvoie vrai si pos est à l'intérieur de l'élément avec une tolérance tol.
 
