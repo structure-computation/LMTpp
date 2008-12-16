@@ -4,6 +4,7 @@
 #include <correlation/ImgInterp.h>
 #include <containers/mat.h>
 #include <util/rectilinear_iterator.h>
+#include <util/symamd.h>
 #include <mesh/make_rect.h>
 #include "mesh_carac_correlation.h"
 
@@ -65,8 +66,8 @@ struct DicCPU {
                 
                 for(int n=0;n<dim*TE::nb_nodes;++n) {
                     F[ n ] += sham_grad[ n ] * diff_fg;
-                    for(int m=0;m<dim*TE::nb_nodes;++m)
-                        M( m, n ) += sham_grad[ n ] * sham_grad[ m ];
+                    for(int m=n;m<dim*TE::nb_nodes;++m)
+                        M( n, m ) += sham_grad[ n ] * sham_grad[ m ];
                 }
             }
             
@@ -77,13 +78,13 @@ struct DicCPU {
                         for(int j=0,m=0;j<TE::nb_nodes;++j)
                             for(int c=0;c<dim;++c,++m)
                                 if ( n <= m )
-                                    dic.M( dim * e.node(i)->number + d, dim * e.node(j)->number + c ) += M( n, m );
+                                    dic.M( dic.indice_noda[ e.node(i)->number ] + d, dic.indice_noda[ e.node(j)->number ] + c ) += M( n, m );
             }
             //
             if ( want_vec ) {
                 for(int i=0,n=0;i<TE::nb_nodes;++i)
                     for(int d=0;d<dim;++d,++n)
-                        dic.F[ dim * e.node(i)->number + d ] += F[ n ];
+                        dic.F[ dic.indice_noda[ e.node(i)->number ] + d ] += F[ n ];
             }
         }
         bool want_mat, want_vec;
@@ -93,7 +94,7 @@ struct DicCPU {
     struct MakeDefImg {
         template<class TE,class TIMG> void operator()( const TE &e, const TIMG &f, TIMG &r ) const {
             ExtractDM<NAME_VAR> ed;
-            Vec<T,dim> P[TE::nb_nodes], D[TE::nb_nodes], MA( e.pos(0) ), MI( e.pos(0) );
+            Vec<T,dim> P[TE::nb_nodes], D[TE::nb_nodes], MA( e.pos(0) + ed( *e.node(0) ) ), MI( e.pos(0) + ed( *e.node(0) ) );
             for(int i=0;i<TE::nb_nodes;++i) P[ i ] = e.pos(i);
             for(int i=0;i<TE::nb_nodes;++i) D[ i ] = e.pos(i) + ed( *e.node(i) );
             for(int i=1;i<TE::nb_nodes;++i) MI = min( MI, D[ i ] ); // hum
@@ -120,6 +121,9 @@ struct DicCPU {
     template<class TIMG,class TM,class NAME_VAR> void assemble( const TIMG &f, const TIMG &g, const TM &m, const NAME_VAR &name_var, bool want_mat = true, bool want_vec = true ) {
         unsigned nb_ddl = m.node_list.size() * dim;
         if ( want_mat ) {
+            //indice_noda = dim * symamd( m );
+            indice_noda = dim * range( m.node_list.size() );
+            
             M.clear();
             M.resize( nb_ddl );
         }
@@ -127,46 +131,52 @@ struct DicCPU {
             F.resize( nb_ddl );
             F.set( 0.0 );
         }
+        
         //
         Assemble<NAME_VAR> ass;
         ass.want_mat = want_mat;
         ass.want_vec = want_vec;
         sum_residual = 0;
         apply( m.elem_list, ass, *this, f, g );
+            
+        M.diag() += 1e-12;
+        
         //
         if ( want_mat ) {
-            PC_M = M;
-            incomplete_chol_factorize( PC_M );
+            C_M = M;
+            PRINT( C_M.diag() );
+            //incomplete_chol_factorize( PC_M );
+            chol_factorize( C_M );
         }
     }
 
-    template<class TIMG,class TM,class NAME_VAR> void exec( const TIMG &f, const TIMG &g, TM &m, const NAME_VAR &name_var ) {
+    template<class TIMG,class TM,class NAME_VAR> void exec( const TIMG &f, const TIMG &g, TM &m, const NAME_VAR &name_var, bool want_mat = true ) {
         // read_from_mesh( m, name_var );
-        assemble( f, g, m, name_var, true, true );
+        assemble( f, g, m, name_var, want_mat, true );
         solve_linear_system();
         update_mesh( m, name_var );
     }
     
     void solve_linear_system() {
-        //solve_using_incomplete_chol_factorize( PC_M, M, F, U, prec_linear_system );
-        Mat<T,Gen<> > m( M );
-        dU = inv( m ) * F;
+        solve_using_chol_factorize( C_M, F, dU );
+        // Mat<T,Gen<> > m( M );
+        // dU = inv( m ) * F;
     }
     
     template<class TM,class NAME_VAR> void update_mesh( TM &m, const NAME_VAR &name_var ) const {
         ExtractDM<NAME_VAR> ed;
         for(int i=0;i<m.node_list.size();++i)
             for(int d=0;d<dim;++d)
-                ed( m.node_list[i] )[ d ] += dU[ i * dim + d ];
+                ed( m.node_list[i] )[ d ] += dU[ indice_noda[ i ] + d ];
     }
 
-    template<class TM,class NAME_VAR> void read_from_mesh( const TM &m, const NAME_VAR &name_var ) {
-        ExtractDM<NAME_VAR> ed;
-        U.resize( dim * m.node_list.size() );
-        for(int i=0;i<m.node_list.size();++i)
-            for(int d=0;d<dim;++d)
-                U[ i * dim + d ] = ed( m.node_list[i] )[ d ];
-    }
+    //     template<class TM,class NAME_VAR> void read_from_mesh( const TM &m, const NAME_VAR &name_var ) {
+    //         ExtractDM<NAME_VAR> ed;
+    //         U.resize( dim * m.node_list.size() );
+    //         for(int i=0;i<m.node_list.size();++i)
+    //             for(int d=0;d<dim;++d)
+    //                 U[ indice_noda[ i ] + d ] = ed( m.node_list[i] )[ d ];
+    //     }
     
     template<class TIMG,class TM,class NAME_VAR> void get_def_img( const TIMG &f, TM &m, const NAME_VAR &name_var, TIMG &r ) {
         r.resize( f.sizes );
@@ -180,9 +190,10 @@ struct DicCPU {
             r( p.pos ) = ( r( p.pos ) >= 0 ? abs( r( p.pos ) - g( p.pos ) ) : -1 );
     }
     
-    Mat<T,Sym<>,SparseLine<> > M, PC_M;
+    Mat<T,Sym<>,SparseLine<> > M, C_M;
+    Vec<int> indice_noda;
     Vec<T> F;
-    Vec<T> U, dU;
+    Vec<T> dU;
     T sum_residual;
     
     T prec_linear_system;
