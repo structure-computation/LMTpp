@@ -1,7 +1,7 @@
 #ifndef LMT_IMG_INTERP_H
 #define LMT_IMG_INTERP_H
 
-#include <containers/vec.h>
+#include <containers/mat.h>
 #include <QtGui/QImage>
 #include <assert.h>
 
@@ -53,30 +53,39 @@ struct ImgInterp {
     }
     
     ///
-    operator QImage() const {
+    QImage to_QImage( bool normalize = false ) const {
+        T o = 0.0, m = 1.0;
+        if ( normalize ) {
+            T mi = min( data );
+            T ma = max( data );
+            o = mi;
+            m = 255 / ( ma - mi );
+        }
+            
+        //
         QImage img( sizes[0], sizes[1], QImage::Format_ARGB32 );
         uchar *ptr = img.bits();
         int total_size = product( sizes );
         for(int i=0;i<total_size;++i,ptr+=4) {
-            ptr[ 0 ] = data[ i ];
-            ptr[ 1 ] = data[ i ];
-            ptr[ 2 ] = data[ i ];
+            ptr[ 0 ] = m * ( data[ i ] - o );
+            ptr[ 1 ] = m * ( data[ i ] - o );
+            ptr[ 2 ] = m * ( data[ i ] - o );
             ptr[ 3 ] = 255 * ( data[ i ] >= 0 );
         }
         return img;
     }
     
     ///
-    void save( std::string filename ) const {
+    void save( std::string filename, bool normalize = false ) const {
         if ( dim == 2 ) {
-            QImage img( *this );
+            QImage img = to_QImage( normalize );
             img.save( filename.c_str() );
         }
     }
     
     ///
-    int display() {
-        save( "pouet.png" );
+    int display( bool normalize = false ) {
+        save( "pouet.png", normalize );
         return system( "display pouet.png" );
     }
     
@@ -146,13 +155,32 @@ struct ImgInterp {
                operator()( xi + 1, yi + 1, zi + 1 ) * ( 0 + xf ) * ( 0 + yf ) * ( 0 + zf );
     }
     
+    void load_binary( int width, int height, const std::string &filename ) {
+        sizes.set( 1 );
+        assert( dim >= 2 );
+        sizes[ 0 ] = width;
+        sizes[ 1 ] = height;
+        
+        data.resize( product( sizes ) );
+        
+        std::ifstream f( filename.c_str() );
+        for(unsigned i=0;i<data.size();++i) {
+            int a = f.get();
+            int b = f.get();
+            data[i] = b + a / 256.0;
+        }
+    }
+    
+    
     ///
-    inline T operator()( Vec<PT,2> p ) const {
+    template<class PTT>
+    inline T operator()( Vec<PTT,2> p ) const {
         return operator()( p[0], p[1] );
     }
     
     ///
-    inline T operator()( Vec<PT,3> p ) const {
+    template<class PTT>
+    inline T operator()( Vec<PTT,3> p ) const {
         return operator()( p[0], p[1], p[2] );
     }
     
@@ -165,11 +193,38 @@ struct ImgInterp {
     }
     
     ///
+    void load_if_necessary( Vec<int,dim> MI, Vec<int,dim> MA, bool may_be_modified = false ) const {}
+    
+    ///
     Vec<T> data;
     Vec<int,dim> sizes;
 };
 
 
+/** */
+template<class T,unsigned dim,class PT=T>
+struct ImgInterByBlock {
+    typedef long long Int64;
+    typedef ImgInterp<T,dim,PT> Img;
+    
+    ImgInterByBlock() {
+        allowed_memory_size = 2 << 31;
+        PRINT( allowed_memory_size );
+    }
+    
+    void load( const std::string &filename ) {
+        int n = 0;
+        int m = 0;
+        blocks.resize( n, m );
+        blocks.set( (Img *)NULL );
+    }
+    
+    ///
+    inline void load_if_necessary( Vec<int,dim> MI, Vec<int,dim> MA, bool may_be_modified = false ) const {}
+    
+    Mat<Img *> blocks;
+    Int64 allowed_memory_size;
+};
 
 
 }

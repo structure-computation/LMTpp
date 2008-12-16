@@ -6,6 +6,7 @@
 #include <util/rectilinear_iterator.h>
 #include <util/symamd.h>
 #include <mesh/make_rect.h>
+#include <QtCore/QMutex>
 #include "mesh_carac_correlation.h"
 
 namespace LMT {
@@ -15,18 +16,22 @@ struct DicCPU {
     typedef Mesh<Mesh_carac_pb_correlation_basic<double,2> > TM_exemple;
 
     DicCPU() {
+        levenberg_marq = 0.0;
         prec_linear_system = 1e-4;
+        nb_threads_for_assembly = 4;
     }
 
     template<class NAME_VAR>
     struct Assemble {
-        template<class TE,class TIMG> void operator()( const TE &e, DicCPU &dic, const TIMG &f, const TIMG &g ) const {
+        template<class TE,class TIMG> void operator()( const TE &e, DicCPU &dic, const TIMG &f, const TIMG &g ) {
             ExtractDM<NAME_VAR> ed;
             Vec<T,dim> P[TE::nb_nodes], D[TE::nb_nodes], MA( e.pos(0) ), MI( e.pos(0) );
             for(int i=0;i<TE::nb_nodes;++i) P[ i ] = e.pos(i);
             for(int i=0;i<TE::nb_nodes;++i) D[ i ] = e.pos(i) + ed( *e.node(i) );
             for(int i=1;i<TE::nb_nodes;++i) MI = min( MI, P[ i ] ); // hum
             for(int i=1;i<TE::nb_nodes;++i) MA = max( MA, P[ i ] ); // hum
+            f.load_if_necessary( MI, MA );
+            g.load_if_necessary( MI, MA );
             //
             Vec<T,dim*TE::nb_nodes> F( 0 );
             Mat<T,Gen<dim*TE::nb_nodes> > M; M.set( 0 ); // hum
@@ -44,7 +49,7 @@ struct DicCPU {
                         break;
                 }
                 if ( not var_inter_is_inside( typename TE::NE(), var_inter, 1e-6 ) )
-                    break;
+                    continue;
                 
                 //
                 Vec<T,dim> DO;
@@ -72,6 +77,7 @@ struct DicCPU {
             }
             
             //
+            mutex.lock();
             if ( want_mat ) {
                 for(int i=0,n=0;i<TE::nb_nodes;++i)
                     for(int d=0;d<dim;++d,++n)
@@ -86,8 +92,10 @@ struct DicCPU {
                     for(int d=0;d<dim;++d,++n)
                         dic.F[ dic.indice_noda[ e.node(i)->number ] + d ] += F[ n ];
             }
+            mutex.unlock();
         }
         bool want_mat, want_vec;
+        QMutex mutex;
     };
 
     template<class NAME_VAR>
@@ -99,6 +107,8 @@ struct DicCPU {
             for(int i=0;i<TE::nb_nodes;++i) D[ i ] = e.pos(i) + ed( *e.node(i) );
             for(int i=1;i<TE::nb_nodes;++i) MI = min( MI, D[ i ] ); // hum
             for(int i=1;i<TE::nb_nodes;++i) MA = max( MA, D[ i ] ); // hum
+            f.load_if_necessary( MI, MA );
+            r.load_if_necessary( MI, MA, true );
             //
             Vec<T,TE::nb_var_inter> var_inter( 0 );
             Vec<T,dim> O, old_O;
@@ -137,15 +147,15 @@ struct DicCPU {
         ass.want_mat = want_mat;
         ass.want_vec = want_vec;
         sum_residual = 0;
-        apply( m.elem_list, ass, *this, f, g );
-            
-        M.diag() += 1e-12;
+        apply_mt( m.elem_list, nb_threads_for_assembly, ass, *this, f, g );
         
         //
         if ( want_mat ) {
+            if ( levenberg_marq ) {
+                T ni =  norm_inf( M.diag() );
+                M.diag() += levenberg_marq * ( ni + ( ni == 0 ) );
+            }
             C_M = M;
-            PRINT( C_M.diag() );
-            //incomplete_chol_factorize( PC_M );
             chol_factorize( C_M );
         }
     }
@@ -186,8 +196,11 @@ struct DicCPU {
     
     template<class TIMG,class TM,class NAME_VAR> void get_residual_img( const TIMG &f, const TIMG &g, TM &m, const NAME_VAR &name_var, TIMG &r ) {
         get_def_img( f, m, name_var, r );
-        for( Rectilinear_iterator<int,dim> p( 0, Vec<int,dim>( f.sizes - 1 ), 1 ); p; ++p )
+        for( Rectilinear_iterator<int,dim> p( 0, Vec<int,dim>( f.sizes - 1 ), 1 ); p; ++p ) {
+            g.load_if_necessary( p.pos, p.pos );
+            r.load_if_necessary( p.pos, p.pos, true );
             r( p.pos ) = ( r( p.pos ) >= 0 ? abs( r( p.pos ) - g( p.pos ) ) : -1 );
+        }
     }
     
     Mat<T,Sym<>,SparseLine<> > M, C_M;
@@ -197,6 +210,8 @@ struct DicCPU {
     T sum_residual;
     
     T prec_linear_system;
+    T levenberg_marq;
+    unsigned nb_threads_for_assembly;
 };
 
 }
