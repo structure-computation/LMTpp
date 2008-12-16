@@ -15,12 +15,15 @@ template<class T,unsigned dim>
 struct DicCPU {
     typedef Mesh<Mesh_carac_pb_correlation_basic<double,2> > TM_exemple;
 
+    ///
     DicCPU() {
         levenberg_marq = 0.0;
         prec_linear_system = 1e-4;
         nb_threads_for_assembly = 4;
+        div_pixel = 4;
     }
 
+    ///
     template<class NAME_VAR>
     struct Assemble {
         template<class TE,class TIMG> void operator()( const TE &e, DicCPU &dic, const TIMG &f, const TIMG &g ) {
@@ -38,7 +41,7 @@ struct DicCPU {
             //
             Vec<T,TE::nb_var_inter> var_inter( 0 );
             Vec<T,dim> O, old_O;
-            for( Rectilinear_iterator<int,dim> p( MI, MA + 1, 1 ); p; ++p ) {
+            for( Rectilinear_iterator<T,dim> p( Vec<int,dim>(MI), Vec<int,dim>(MA) + 1, 1.0 / dic.div_pixel ); p; ++p ) {
                 get_var_inter( typename TE::NE(), P, Vec<T,dim>( p.pos ), var_inter );
                 get_interp( typename TE::NE(), Nodal(), var_inter, P, O );
                 while ( ElemVarInterFromPosNonLinear<typename TE::NE>::res ) { // TODO : linear case
@@ -98,6 +101,7 @@ struct DicCPU {
         QMutex mutex;
     };
 
+    ///
     template<class NAME_VAR>
     struct MakeDefImg {
         template<class TE,class TIMG> void operator()( const TE &e, const TIMG &f, TIMG &r ) const {
@@ -122,12 +126,15 @@ struct DicCPU {
                     if ( max( old_O - O ) < 1e-2 )
                         break;
                 }
+                if ( not var_inter_is_inside( typename TE::NE(), var_inter, 1e-6 ) )
+                    continue;
+                //
                 r( p.pos ) = f( O );
             }
         }
     };
     
-    
+    ///
     template<class TIMG,class TM,class NAME_VAR> void assemble( const TIMG &f, const TIMG &g, const TM &m, const NAME_VAR &name_var, bool want_mat = true, bool want_vec = true ) {
         unsigned nb_ddl = m.node_list.size() * dim;
         if ( want_mat ) {
@@ -160,6 +167,7 @@ struct DicCPU {
         }
     }
 
+    ///
     template<class TIMG,class TM,class NAME_VAR> void exec( const TIMG &f, const TIMG &g, TM &m, const NAME_VAR &name_var, bool want_mat = true ) {
         // read_from_mesh( m, name_var );
         assemble( f, g, m, name_var, want_mat, true );
@@ -167,12 +175,14 @@ struct DicCPU {
         update_mesh( m, name_var );
     }
     
+    ///
     void solve_linear_system() {
         solve_using_chol_factorize( C_M, F, dU );
         // Mat<T,Gen<> > m( M );
         // dU = inv( m ) * F;
     }
     
+    ///
     template<class TM,class NAME_VAR> void update_mesh( TM &m, const NAME_VAR &name_var ) const {
         ExtractDM<NAME_VAR> ed;
         for(int i=0;i<m.node_list.size();++i)
@@ -188,12 +198,14 @@ struct DicCPU {
     //                 U[ indice_noda[ i ] + d ] = ed( m.node_list[i] )[ d ];
     //     }
     
+    ///
     template<class TIMG,class TM,class NAME_VAR> void get_def_img( const TIMG &f, TM &m, const NAME_VAR &name_var, TIMG &r ) {
         r.resize( f.sizes );
         r.set( -1 );
         apply( m.elem_list, MakeDefImg<NAME_VAR>(), f, r );
     }
     
+    ///
     template<class TIMG,class TM,class NAME_VAR> void get_residual_img( const TIMG &f, const TIMG &g, TM &m, const NAME_VAR &name_var, TIMG &r ) {
         get_def_img( f, m, name_var, r );
         for( Rectilinear_iterator<int,dim> p( 0, Vec<int,dim>( f.sizes - 1 ), 1 ); p; ++p ) {
@@ -202,6 +214,13 @@ struct DicCPU {
             r( p.pos ) = ( r( p.pos ) >= 0 ? abs( r( p.pos ) - g( p.pos ) ) : -1 );
         }
     }
+    
+    ///
+    template<class TIMG,class TF,class NAME_VAR>
+    void femu_fit( const TIMG &f, const TIMG &g, TF &formulation, const NAME_VAR &name_var ) {
+        formulation.erase_constraints_from( 0 );
+    }
+    
     
     Mat<T,Sym<>,SparseLine<> > M, C_M;
     Vec<int> indice_noda;
@@ -212,6 +231,7 @@ struct DicCPU {
     T prec_linear_system;
     T levenberg_marq;
     unsigned nb_threads_for_assembly;
+    unsigned div_pixel; // for "correct" integration
 };
 
 }

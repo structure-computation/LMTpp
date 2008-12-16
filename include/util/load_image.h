@@ -84,16 +84,17 @@ void load_image_pgm( std::string file, Mat &m, int ceil_size = 1, int border_siz
     m.nb_cols() = ceil( img_nb_cols, ceil_size ) + 2 * border_size
 */
 template<class Mat>
-void load_image( std::string file, Mat &m, int ceil_size = 1, int border_size = 0, typename Mat::T border_color = 0 ) {
+int load_image( std::string file, Mat &m, int ceil_size = 1, int border_size = 0, typename Mat::T border_color = 0 ) {
     if ( std::string(file.end()-4,file.end()) == ".pgm" or std::string(file.end()-4,file.end()) == ".pnm" ) {
         load_image_pgm( file, m, ceil_size, border_size, border_color );
-        return;
+        return 0;
     }
     //
     std::ostringstream s,s2;
     s << "convert -colorspace gray -depth 8 " << file << " " << "toto.pnm";
-    system(s.str().c_str());
+    int res = system(s.str().c_str());
     load_image_pgm( "toto.pnm", m, ceil_size, border_size, border_color );
+    return res;
 }
 
 /*!

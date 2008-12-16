@@ -1314,10 +1314,10 @@ public:
                 for(unsigned j=0;j<nb_der_var;++j)
                     M( i, j ) = dot( dUi, der_U[j] );
             }
-            M.diag() += max( abs( M.diag() ) ) * 1e-9; // HUM
+            // M.diag() += max( abs( M.diag() ) ) * 1e-20; // HUM
             //
             Vec<ScalarType> dD = inv( M ) * V;
-            PRINT( dD );
+            // PRINT( dD );
             history.push_back( norm_2( dD ) );
             Carac::add_to_der_vars( *this, dD );
             if ( all( abs( dD ) < conv ) )
@@ -1431,7 +1431,7 @@ void add_elem_vector_der_var(
     typedef typename TF::ScalarType T;
 
     for( const double *gp = gauss_point_for_order( f.order_integration_when_integration_totale, typename TE::NameElem() ); *gp!=0.0; gp += elem.nb_var_inter + 1 )
-        add_local_elem_vector_der_var( *gp, gp+1, f, elem, indices );
+        add_local_elem_vector_der_var( *gp, gp+1, f, elem, indices, Number<num_der_var>() );
         
 }
 

@@ -96,7 +96,7 @@ public:
     std::vector<Var> lst_var;
     
     void write_graphviz(std::ostream &os);
-    void display_graphviz();
+    int display_graphviz();
 
 private:
     struct Node {

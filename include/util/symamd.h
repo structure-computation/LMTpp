@@ -13,6 +13,7 @@
 #define LMT_symamd_HEADER
 
 #include "containers/vec.h"
+#include <algorithm>
 
 namespace LMT {
 

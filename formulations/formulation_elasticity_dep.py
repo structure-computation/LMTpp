@@ -6,6 +6,7 @@ poisson_ratio = Variable( interpolation='global', default_value='0.33', unit='1'
 density = Variable( interpolation='global', default_value='7800', unit='kg/m^3' ) # 
 
 dep = Variable( unknown=True, nb_dim=[dim], nb_der=0, default_value='0.0', unit='m' )
+
 temperature = Variable( default_value='0.0', unit='K' )
 
 sigma = Variable( interpolation='der_nodal', default_value='0', nb_dim=[dim*(dim+1)/2], unit='N/m^2' )
@@ -16,15 +17,10 @@ f_nodal = Variable( nb_dim=[dim], nb_der=0, default_value='0.0,'*(dim-1)+'0.0', 
 f_surf = Variable( interpolation='skin_elementary', nb_dim=[dim], default_value='0.0,'*(dim-1)+'0.0', unit='N/m^2' )
 p = Variable( interpolation='skin_elementary', default_value='0.0', unit='N/m^2' )
 
-
-#d      = Variable( interpolation='elementary', default_value='0', unit='1' ) # 
-#d_evol = Variable( interpolation='elementary', default_value='0', unit='1' ) # 
-#d_pond = Variable( interpolation='elementary', default_value='0', unit='1' ) # 
-#d_sum  = Variable( interpolation='elementary', default_value='0', unit='1' ) # 
-#pouet  = Variable( interpolation='elementary', nb_dim=[dim], default_value='0', unit='1' ) # 
+normal = Variable( nb_dim=[dim], default_value='0.0', unit='1' )
 
 #assume_symmetric_matrix = False
-integration_totale = False
+#integration_totale = False
 #use_asm = True
 
 # --------------------------------------------------------------------------------------------------------------------------------

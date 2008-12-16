@@ -33,6 +33,8 @@ struct ImgInterp {
     void load( const std::string &s ) {
         //
         QImage img( QString( s.c_str() ) );
+        if ( img.depth() == 0 )
+            throw "Failed to load img" + s;
         
         sizes.set( 1 );
         assert( dim >= 2 );
@@ -48,6 +50,8 @@ struct ImgInterp {
             for(int i=0;i<data.size();++i,ptr+=4)
                 data[ i ] = ( ptr[0] + ptr[1] + ptr[2] ) / 3.0;
         } else {
+            PRINT( sizes );
+            PRINT( img.depth() );
             throw "img.depth() not supported " + to_string( img.depth() );
         }
     }
@@ -86,7 +90,7 @@ struct ImgInterp {
     ///
     int display( bool normalize = false ) {
         save( "pouet.png", normalize );
-        return system( "display pouet.png" );
+        return system( "display pouet.png &" );
     }
     
     ///
