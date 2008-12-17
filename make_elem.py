@@ -62,13 +62,18 @@ def print_get_var_inter( e_, name_file, non_linear ):
     ma = calculate_matrix( expr, e.var_inter, test_symbols, my_subs, False, non_linear )
     dv = ma['M'].inverse() * ma['V']
     
-    
     cw = Write_code('T')
     cw.add( dv, 'var_inter', [Write_code.Set,Write_code.Add][non_linear] )
     print cw.to_string()
     
-    
     print '}'
+    
+    if non_linear:
+        truly_non_linear = 0
+        for vi in e.var_inter:
+            truly_non_linear += ma['M'].depends_on( vi )
+        print 'template<> struct ElemVarInterFromPosNonLinear<'+e.name+'> { static const bool res = '+str( truly_non_linear )+'; };'
+    
 
 def print_interpolations(e):
     for name_interpolation, interpolation in e.interpolation.items():
@@ -85,6 +90,24 @@ def print_interpolations(e):
         
         print '}'
         
+def print_shape_functions( e ):
+    print 'template<class TVI,class TVAL> void get_shape_functions(const '+e.name+' &ne,const TVI &var_inter,TVAL &res) {'
+    print '    typedef typename TVAL::template SubType<0>::T T;'
+    
+    r = ExVector( e.nb_nodes )
+    for i in range( e.nb_nodes ):
+        s = {}
+        for j in range( e.nb_nodes ):
+            s[ e.val[j] ] = number( i==j )
+        r[i] = e.interpolation['nodal'].subs(EM(s))
+    
+    cw = Write_code('T')
+    cw.add( r, 'res', Write_code.Set )
+    print cw.to_string()
+    
+    print '}'
+    
+    
 def print_authorized_permutations(e):
     print '#ifndef AUTORIZEDPERM'
     print '#define AUTORIZEDPERM'
@@ -125,6 +148,7 @@ for non_linear in [False,True]:
     print_get_var_inter(e,name_file,non_linear)
     
 print_interpolations(e)
+print_shape_functions(e)
 print_authorized_permutations(e)
 
 print '}'

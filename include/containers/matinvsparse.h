@@ -58,7 +58,7 @@ template<class T,class TS> void chol_factorize( Mat<T,TS,SparseLine<> > &m ) {
     static const unsigned NN = 16;
     Vec<HashCH<NN> > hash; hash.resize( m.nb_rows() );
     for(unsigned line=0;line<m.nb_rows();++line) {
-        for(unsigned ind=0;ind<m.data[line].indices.size()-1;++ind) {
+        for(int ind=0;ind<(int)m.data[line].indices.size()-1;++ind) {
             // m_ij != 0
             unsigned col = m.data[line].indices[ind];
             m.data[line].data[ind] = ( m.data[line].data[ind] - dot_chol_factorize( m.data[col], m.data[line] ) ) / m.data[col].data.back();
@@ -204,6 +204,9 @@ template<class T,int s2> int solve_using_incomplete_chol_factorize( const Mat<T,
         q = A * d;
         T alpha = deltn / dot( d, q );
         x += alpha * d;
+        PRINT( alpha );
+        PRINT( x );
+        PRINT( max(abs(r)) );
         //r -= alpha * q;
         r = b - A * x;
         for(unsigned i=0;;++i) { if ( i==r.size() ) return cpt; if ( LMT::abs(r[i]) > crit ) break; }

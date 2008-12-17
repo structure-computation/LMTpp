@@ -153,13 +153,13 @@ namespace LMT {
             assemble_sollicitations(K, F);
         }
         //
-        void assemble_constraints( Mat<T,Sym<>,SparseLine<> > &K , Vec<double> &F,T M,  bool assemble_mat=true,bool assemble_vec=true) {
+        void assemble_constraints( Mat<T,Sym<>,SparseLine<> > &K , Vec<T> &F,T M,  bool assemble_mat=true,bool assemble_vec=true) {
             for(unsigned i=0;i<formulations.size();++i) {
                 formulation(i)->assemble_constraints(K, F, vectors, formulations[i].local_ddl_to_global_ones, M, assemble_mat, assemble_vec );
             }
         }
         //
-        void assemble_sollicitations( Mat<T,Sym<>,SparseLine<> > &K , Vec<double> &F, bool assemble_mat=true,bool assemble_vec=true) {
+        void assemble_sollicitations( Mat<T,Sym<>,SparseLine<> > &K , Vec<T> &F, bool assemble_mat=true,bool assemble_vec=true) {
             for(unsigned i=0;i<formulations.size();++i) {
                 formulation(i)->assemble_sollicitations(K, F, vectors, formulations[i].local_ddl_to_global_ones, assemble_mat, assemble_vec );
             }

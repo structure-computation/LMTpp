@@ -80,13 +80,12 @@ public:
     Formulation(TM &mm) {
         m = &mm;
         mat_def_pos_if_sym = Carac::matrix_will_be_definite_positive;
-        time = 0.0;
-        time_steps = 1e40;
+        time = ScalarType(0);
+        time_steps = ScalarType(1e40);
         initialized = false;
         user_want_pierre_precond = true;
         this->order_integration_when_integration_totale = Carac::order_integration;
     
-        max_diag = 0;
         time_symbol = Codegen::symbol("time");
         symbols.push_back( time_symbol );
         
@@ -175,18 +174,6 @@ private:
     };
     
     struct ClearMat { template<class TM2> void operator()(TM2 &m) const { m.clear(); } };
-    struct GetLink {
-        template<class TE> void operator()(const TE &e,const TM &m,Vec<Vec<unsigned> > &v) const {
-            for(unsigned i=0;i<TE::nb_nodes;++i) {
-                unsigned a = m.node_list.number(*e.node(i));
-                for(unsigned j=0;j<TE::nb_nodes;++j) {
-                    unsigned b = m.node_list.number(*e.node(j));
-                    if ( std::find(v[a].begin(),v[a].end(),b)==v[a].end() )
-                        v[a].push_back( b );
-                }
-            }
-        }
-    };
 public:
     struct PackMatrices {
         template<unsigned n> struct SubType {
@@ -260,15 +247,7 @@ public:
         if ( amd ) {
             assert( indice_glob==0 ); // not managed
             assert( nb_unk_elem==0 ); // not managed
-            Vec<Vec<unsigned> > ind; ind.resize( m->node_list.size() );
-            apply( m->elem_list, GetLink(), *m, ind );
-            for(unsigned i=0;i<ind.size();++i)
-                std::sort( ind[i].begin(), ind[i].end() );
-            Vec<unsigned> perm = symamd( ind );
-            Vec<unsigned> inv_perm; inv_perm.resize(perm.size());
-            for(unsigned i=0;i<perm.size();++i)
-                inv_perm[perm[i]] = i;
-            indice_noda = inv_perm * nnu;
+            indice_noda = symamd( *m ) * nnu;
         }
         return size;
     }
@@ -312,15 +291,7 @@ public:
         if ( this->want_amd ) {
             assert( indice_glob==0 ); // not managed
             assert( nb_unk_elem==0 ); // not managed
-            Vec<Vec<unsigned> > ind; ind.resize( m->node_list.size() );
-            apply( m->elem_list, GetLink(), *m, ind );
-            for(unsigned i=0;i<ind.size();++i)
-                std::sort( ind[i].begin(), ind[i].end() );
-            Vec<unsigned> perm = symamd( ind );
-            Vec<unsigned> inv_perm; inv_perm.resize(perm.size());
-            for(unsigned i=0;i<perm.size();++i)
-                inv_perm[perm[i]] = i;
-            indice_noda = inv_perm * nnu;
+            indice_noda = symamd( *m ) * nnu;
         }
 
         // matrice allocation
@@ -549,13 +520,15 @@ public:
     }
     ///
     virtual void assemble_constraints(bool assemble_mat=true,bool assemble_vec=true) {
+        if ( assemble_mat and ( constraints.size() or this->levenberg_marquadt ) )
+            this->max_diag = max(abs(matrices(Number<0>()).diag()));
+        
+        //
+        if ( assemble_mat and this->levenberg_marquadt )
+            matrices( Number<0>() ).diag() += this->max_diag * this->levenberg_marquadt;
+        
         // constraints
         if ( constraints.size() ) {
-            if ( assemble_mat ) {
-                max_diag = max(abs(matrices(Number<0>()).diag()));
-                if ( this->levenberg_marquadt )
-                    matrices( Number<0>() ).diag() += max_diag * this->levenberg_marquadt;
-            }
             for(unsigned i=0;i<constraints.size();++i) {
                 // calculation of res
                 using namespace Codegen;
@@ -577,7 +550,7 @@ public:
                 }
                 // add to vec and mat
                 for(unsigned j=0;j<coeffs.size();++j) {
-                    ScalarType C = coeffs[j] * max_diag * constraints[i].penalty_value;
+                    ScalarType C = coeffs[j] * this->max_diag * constraints[i].penalty_value;
                     if ( assemble_vec )
                         sollicitation[num_in_fmat[j]] += C * ress;
                     if ( assemble_mat ) {
@@ -911,7 +884,7 @@ public:
         assemble();
         
         //
-        Inv<double,Sym<>,SparseLine<> > I( matrices(Number<0>()) );
+        Inv<ScalarType,Sym<>,SparseLine<> > I( matrices(Number<0>()) );
         vectors[ 0 ] = I * sollicitation;
         update_variables();
         call_after_solve();
@@ -1341,10 +1314,10 @@ public:
                 for(unsigned j=0;j<nb_der_var;++j)
                     M( i, j ) = dot( dUi, der_U[j] );
             }
-            M.diag() += max( abs( M.diag() ) ) * 1e-9; // HUM
+            // M.diag() += max( abs( M.diag() ) ) * 1e-20; // HUM
             //
             Vec<ScalarType> dD = inv( M ) * V;
-            PRINT( dD );
+            // PRINT( dD );
             history.push_back( norm_2( dD ) );
             Carac::add_to_der_vars( *this, dD );
             if ( all( abs( dD ) < conv ) )
@@ -1372,7 +1345,6 @@ public:
     
     TM *m;
     Carac carac;
-    ScalarType max_diag;
     
     HeterogeneousPack<PackMatrices> matrices;
     TMAT0 precond_matrix; /// in case user has called get_precond()
@@ -1459,7 +1431,7 @@ void add_elem_vector_der_var(
     typedef typename TF::ScalarType T;
 
     for( const double *gp = gauss_point_for_order( f.order_integration_when_integration_totale, typename TE::NameElem() ); *gp!=0.0; gp += elem.nb_var_inter + 1 )
-        add_local_elem_vector_der_var( *gp, gp+1, f, elem, indices );
+        add_local_elem_vector_der_var( *gp, gp+1, f, elem, indices, Number<num_der_var>() );
         
 }
 

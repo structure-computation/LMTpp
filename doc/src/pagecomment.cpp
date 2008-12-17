@@ -1,13 +1,13 @@
-#include<iostream>
-#include<iomanip>
-#include<cstdlib>
-#include<cstdio>
-#include<fstream>
-#include<istream>
-#include<sstream>
-#include<string>
-#include<vector>
-
+#include <iostream>
+#include <iomanip>
+#include <cstdlib>
+#include <cstdio>
+#include <fstream>
+#include <istream>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <string.h>
 
 using namespace std ;
 

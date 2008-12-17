@@ -112,6 +112,8 @@ public:
     template <class T2> bool operator!= (const Pol<nd,"""+nx+""",T2> &P) const; /// Verifie si le polynome est different de P
     template <class T2> void operator+= (const Pol<nd,"""+nx+""",T2> &P); /// Ajoute P au polynome
     template <class T2> void operator-= (const Pol<nd,"""+nx+""",T2> &P); /// Retranche P au polynome
+    template <class T2> void operator*= (const Pol<nd,"""+nx+""",T2> &P); /// Multiplie le polynome par P
+    template <class T2> void operator/= (const Pol<nd,"""+nx+""",T2> &P); /// Divise le polynome par P
     """
     if nx=='nx':
         print 'private:'
@@ -365,6 +367,19 @@ template <class T2>
 void Pol<nd,"""+nx+""",T>::operator-= (const Pol<nd,"""+nx+""",T2> &P) {
     coefs-=P.coefficients();
 }
+
+template <int nd, """+temp+"""class T>
+template <class T2>
+void Pol<nd,"""+nx+""",T>::operator*= (const Pol<nd,"""+nx+""",T2> &P) {
+    coefs=(*this*P).coefficients();
+}
+
+template <int nd, """+temp+"""class T>
+template <class T2>
+void Pol<nd,"""+nx+""",T>::operator/= (const Pol<nd,"""+nx+""",T2> &P) {
+    coefs-=(*this/P).coefficients();
+}
+
 """
 
     if nx=='nx':
@@ -866,6 +881,12 @@ Pol<nd,"""+nx+""",typename TypePromote<Divides,T1,T2>::T> operator/ (const Pol<n
 }
 
 template <int nd, """+temp+"""class T>
+Pol<nd,"""+nx+""",T> sqrt (const Pol<nd,"""+nx+""",T> &P) {
+    assert(0);
+    /* TODO */
+}
+
+template <int nd, """+temp+"""class T>
 std::ostream &operator<<(std::ostream &os, const Pol<nd,"""+nx+""",T> &P) {"""
     if nx=='nx':
         print '    if (Pol<nd,nx,T>::init_puissances)'
@@ -1052,7 +1073,7 @@ template<int m, int n,class TT> struct TypeInformation<Pol<m,n,TT> > {
     static const bool is_scalar = true;
     typedef TT SubType;
     template<class TV> struct Variant { typedef Pol<m,n,TV> T; };
-    template<class TV> struct DeepVariant { typedef Pol<m,n,class TypeInformation<TT>::template DeepVariant<TV>::T> T; };
+    template<class TV> struct DeepVariant { typedef Pol<m,n,typename TypeInformation<TT>::template DeepVariant<TV>::T> T; };
     static std::string type() { return "Pol<"+TypeInformation<TT>::type()+"> "; }
     static const bool float_type = TypeInformation<TT>::float_type;
 };

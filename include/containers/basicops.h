@@ -124,15 +124,15 @@ inline T pow( T x, unsigned y ) {
 }
 
 template<class T>
-inline T pow( T x, int y ) {
+inline T pow( const T &x_, int y ) {
     T res = 1;
     if ( y < 0 ) {
-        x = 1 / x;
+        T x = 1 / x_;
         while (y++)
             res *= x;
     } else {
         while (y--)
-            res *= x;
+            res *= x_;
     }
     return res;
 }

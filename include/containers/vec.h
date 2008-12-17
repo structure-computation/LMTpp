@@ -185,7 +185,7 @@ namespace LMT {
         template<class S,class BOP,class T2> void operator()(DelayedAssignement<S> val,const BOP &op,const T2 &a) const { val.source.apply(op,a); }
         
         template<class TM,class Structure,class Storage,unsigned alignement,int nr,class BOP,class T2>
-        void operator()(MatElem<TM,Structure,Storage,alignement,nr> val,const BOP &op,const T2 &a) const { val = op((typename MatElem<TM,Structure,Storage,alignement,nr>::T0)val,a); }
+        void operator()(MatElem<TM,Structure,Storage,alignement,nr> val,const BOP &op,const T2 &a) const { val = op( val.conv(), a ); }
 
         
 /*    

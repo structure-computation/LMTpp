@@ -72,7 +72,11 @@ Cette macro permet l'introspection du code C++ pour obtenir par exemple les attr
 struct VoidDMSet {
     VOIDDMSET;
     template<class TT> void dm_data_set_field( const std::string field_name, TT value ) {
-        std::cerr << "There s no variable named " << field_name << " in data struct" << std::endl;
+        std::cerr << "There is no variable named " << field_name << " in data struct" << std::endl;
+    }
+    template<class TT> TT dm_data_get_field( const std::string field_name, StructForType<TT> ) const {
+        std::cerr << "There is no variable named " << field_name << " in data struct" << std::endl;
+        return TT(0);
     }
 };
 

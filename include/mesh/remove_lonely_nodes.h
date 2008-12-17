@@ -12,6 +12,8 @@
 #ifndef LMT_REMOVE_LONELY_NODES_H
 #define LMT_REMOVE_LONELY_NODES_H
 
+#include <mesh/mesh.h>
+
 namespace LMT {
 
 struct GetLonelyNodes {

@@ -193,13 +193,13 @@ const Op *Write_code::set_depth_rec(const Ex &ex,unsigned depth) {
     return NULL;
 }
 
-void Write_code::display_graphviz() {
+int Write_code::display_graphviz() {
     const char *filename = "tmq.dot";
     std::ofstream f( filename );
     write_graphviz( f );
     std::string fi( filename );
     std::string com( "dot -Tps "+fi+" > "+fi+".eps && gv "+fi+".eps" );
-    system( com.c_str() );
+    return system( com.c_str() );
 }
 
 void Write_code::write_graphviz(ostream &os) {

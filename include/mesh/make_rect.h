@@ -11,6 +11,7 @@ struct Triangle_6;
 struct Triangle;
 struct Quad;
 struct Quad_8;
+struct Quad_9;
 struct Quad_6;
 struct Quad_42;
 struct Hexa;
@@ -300,6 +301,46 @@ void make_rect(TM &m,const Quad_8 &t,typename TM::Pvec X0,typename TM::Pvec X1,t
                          );
         }
     }    
+}
+
+/**
+ * Quad_9
+ */
+template<class TM>
+void make_rect(TM &m,const Quad_9 &t,typename TM::Pvec X0,typename TM::Pvec X1,typename TM::Pvec nb_points_) {
+    typedef typename TM::Pvec Pvec;
+    typedef typename TM::Tpos Tpos;
+    Vec<unsigned,TM::dim> nb_points(nb_points_); 
+
+    // nodes
+    unsigned nb_x = (unsigned)nb_points[0] * 2 - 1, nb_y = (unsigned)nb_points[1] * 2 - 1;
+    for(unsigned j=0;j<nb_y;++j)
+        for(unsigned i=0;i<nb_x;++i)
+            m.add_node( X0 + Pvec( i * (X1[0]-X0[0]) / (nb_x-1), j * (X1[1]-X0[1]) / (nb_y-1) ) );
+    
+    // #  3    6    2
+    // #  x----x----x
+    // #  |         |
+    // # 7|    x8   x5
+    // #  |         |
+    // #  x----x----x
+    // #  0    4    1
+    // elements
+    for(unsigned j=0;j<nb_y-2;j+=2)
+        for(unsigned i=0;i<nb_x-2;i+=2)
+            m.add_element( Quad_9(), DefaultBehavior(),
+                           (i  ) + (j  )*nb_x,
+                           (i+2) + (j  )*nb_x,
+                           (i+2) + (j+2)*nb_x,
+                           (i  ) + (j+2)*nb_x,
+                           
+                           (i+1) + (j  )*nb_x,
+                           (i+2) + (j+1)*nb_x,
+                           (i+1) + (j+2)*nb_x,
+                           (i  ) + (j+1)*nb_x,
+                           
+                           (i+1) + (j+1)*nb_x
+                         );
 }
 
 /**

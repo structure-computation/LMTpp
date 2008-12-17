@@ -42,7 +42,18 @@ public:
     virtual void set_field( const std::string field_name, Vec<T,1> value ) = 0;
     virtual void set_field( const std::string field_name, Vec<T,2> value ) = 0;
     virtual void set_field( const std::string field_name, Vec<T,3> value ) = 0;
+    virtual void set_field( const std::string field_name, Vec<T,4> value ) = 0;
+    virtual void set_field( const std::string field_name, Vec<T,5> value ) = 0;
+    virtual void set_field( const std::string field_name, Vec<T,6> value ) = 0;
 
+    virtual T        get_field( const std::string field_name, StructForType<T        > ) const = 0;
+    virtual Vec<T,1> get_field( const std::string field_name, StructForType<Vec<T,1> > ) const = 0;
+    virtual Vec<T,2> get_field( const std::string field_name, StructForType<Vec<T,2> > ) const = 0;
+    virtual Vec<T,3> get_field( const std::string field_name, StructForType<Vec<T,3> > ) const = 0;
+    virtual Vec<T,4> get_field( const std::string field_name, StructForType<Vec<T,4> > ) const = 0;
+    virtual Vec<T,5> get_field( const std::string field_name, StructForType<Vec<T,5> > ) const = 0;
+    virtual Vec<T,6> get_field( const std::string field_name, StructForType<Vec<T,6> > ) const = 0;
+    
     unsigned number;
     unsigned absolute_number;
     
@@ -146,7 +157,18 @@ public:
     virtual void set_field( const std::string field_name, Vec<T,1> value ) { TData::dm_data_set_field( field_name, value ); }
     virtual void set_field( const std::string field_name, Vec<T,2> value ) { TData::dm_data_set_field( field_name, value ); }
     virtual void set_field( const std::string field_name, Vec<T,3> value ) { TData::dm_data_set_field( field_name, value ); }
+    virtual void set_field( const std::string field_name, Vec<T,4> value ) { TData::dm_data_set_field( field_name, value ); }
+    virtual void set_field( const std::string field_name, Vec<T,5> value ) { TData::dm_data_set_field( field_name, value ); }
+    virtual void set_field( const std::string field_name, Vec<T,6> value ) { TData::dm_data_set_field( field_name, value ); }
 
+    virtual T        get_field( const std::string field_name, StructForType<T        > e ) const { return TData::dm_data_get_field( field_name, e ); }
+    virtual Vec<T,1> get_field( const std::string field_name, StructForType<Vec<T,1> > e ) const { return TData::dm_data_get_field( field_name, e ); }
+    virtual Vec<T,2> get_field( const std::string field_name, StructForType<Vec<T,2> > e ) const { return TData::dm_data_get_field( field_name, e ); }
+    virtual Vec<T,3> get_field( const std::string field_name, StructForType<Vec<T,3> > e ) const { return TData::dm_data_get_field( field_name, e ); }
+    virtual Vec<T,4> get_field( const std::string field_name, StructForType<Vec<T,4> > e ) const { return TData::dm_data_get_field( field_name, e ); }
+    virtual Vec<T,5> get_field( const std::string field_name, StructForType<Vec<T,5> > e ) const { return TData::dm_data_get_field( field_name, e ); }
+    virtual Vec<T,6> get_field( const std::string field_name, StructForType<Vec<T,6> > e ) const { return TData::dm_data_get_field( field_name, e ); }
+    
     ///
     TNode *nodes[nb_nodes];
     /// nb fields
@@ -270,6 +292,9 @@ template<class TE,class Pvec,class TVI> void get_var_inter(const TE &elem,const 
         old_var_inter = var_inter;
     }
 }
+
+/** contains res -> true if eq to find var!inter from pos is non linear (recquires iterations) */
+template<class NE> struct ElemVarInterFromPosNonLinear { };
 
 /*! 
     La fonction renvoie vrai si pos est à l'intérieur de l'élément avec une tolérance tol.

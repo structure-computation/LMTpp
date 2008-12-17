@@ -1,11 +1,12 @@
-#include<iostream>
-#include<cstdlib>
-#include<cstdio>
-#include<fstream>
-#include<istream>
-#include<string>
+#include <iostream>
+#include <cstdlib>
+#include <cstdio>
+#include <fstream>
+#include <istream>
+#include <string>
 #include <vector>
-#include<deque>
+#include <deque>
+#include <string.h>
 using namespace std ;
 
 //#include "token.h"

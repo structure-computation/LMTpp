@@ -45,7 +45,7 @@ public:
     }
     /// 
     void print(const char *str) {
-        fprintf(tube,str);
+        fprintf(tube,"%s",str);
         fflush(tube);
     }
     /// Pour effacer les courbes d'avant

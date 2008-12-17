@@ -168,7 +168,7 @@ public:
         apply( m.node_list, AppendDataFrom(), this, new_nodes );
     }
     /*!
-        Append data, nodes and elements of m to this. 
+        Append data, nodes and elements of a mesh m to this. 
     */
     template<class TM2> void append(const TM2 &m) {
         Vec<TNode *> new_nodes;
