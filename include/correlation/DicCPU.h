@@ -21,6 +21,7 @@ struct DicCPU {
         prec_linear_system = 1e-4;
         nb_threads_for_assembly = 4;
         div_pixel = 4;
+        delta_gray = 1;
     }
 
     ///
@@ -40,16 +41,13 @@ struct DicCPU {
             Mat<T,Gen<dim*TE::nb_nodes> > M; M.set( 0 ); // hum
             //
             Vec<T,TE::nb_var_inter> var_inter( 0 );
-            Vec<T,dim> O, old_O;
-            for( Rectilinear_iterator<T,dim> p( Vec<int,dim>(MI), Vec<int,dim>(MA) + 1, 1.0 / dic.div_pixel ); p; ++p ) {
-                get_var_inter( typename TE::NE(), P, Vec<T,dim>( p.pos ), var_inter );
-                get_interp( typename TE::NE(), Nodal(), var_inter, P, O );
-                while ( ElemVarInterFromPosNonLinear<typename TE::NE>::res ) { // TODO : linear case
-                    old_O = O;
-                    get_var_inter( typename TE::NE(), P, Vec<T,dim>( p.pos ), var_inter );
+            for( Rectilinear_iterator<T,dim> p( Vec<int,dim>(MI), Vec<int,dim>(MA) + 2, 1.0 / dic.div_pixel ); p; ++p ) {
+                while ( true ) {
+                    get_var_inter( typename TE::NE(), P, p.pos, var_inter );
+                    if ( not ElemVarInterFromPosNonLinear<typename TE::NE>::res ) break;
+                    Vec<T,dim> O;
                     get_interp( typename TE::NE(), Nodal(), var_inter, P, O );
-                    if ( max( old_O - O ) < 1e-2 )
-                        break;
+                    if ( max( p.pos - O ) < 1e-2 ) break;
                 }
                 if ( not var_inter_is_inside( typename TE::NE(), var_inter, 1e-6 ) )
                     continue;
@@ -61,7 +59,7 @@ struct DicCPU {
                 //
                 Vec<T,TE::nb_nodes> shape_functions;
                 get_shape_functions( typename TE::NE(), var_inter, shape_functions );
-                Vec<T,dim> grad = 0.5 * ( f.grad( O ) + g.grad( DO ) );
+                Vec<T,dim> grad = 0.5 * ( f.grad( p.pos ) + g.grad( DO ) );
                 
                 Vec<T,dim*TE::nb_nodes> sham_grad;
                 for(int i=0,n=0;i<TE::nb_nodes;++i)
@@ -69,7 +67,7 @@ struct DicCPU {
                         sham_grad[ n ] = shape_functions[ i ] * grad[ d ];
                         
                 
-                T diff_fg = f( O ) - g( DO );
+                T diff_fg = f( p.pos ) - g( DO );
                 dic.sum_residual += abs( diff_fg );
                 
                 for(int n=0;n<dim*TE::nb_nodes;++n) {
@@ -115,12 +113,12 @@ struct DicCPU {
             r.load_if_necessary( MI, MA, true );
             //
             Vec<T,TE::nb_var_inter> var_inter( 0 );
-            Vec<T,dim> O, old_O;
+            Vec<T,dim> O;
             for( Rectilinear_iterator<int,dim> p( MI, MA + 1, 1 ); p; ++p ) {
                 get_var_inter( typename TE::NE(), D, Vec<T,dim>( p.pos ), var_inter );
                 get_interp( typename TE::NE(), Nodal(), var_inter, P, O );
                 while ( ElemVarInterFromPosNonLinear<typename TE::NE>::res ) { // TODO : linear case
-                    old_O = O;
+                    Vec<T,dim> old_O = O;
                     get_var_inter( typename TE::NE(), D, Vec<T,dim>( p.pos ), var_inter );
                     get_interp( typename TE::NE(), Nodal(), var_inter, P, O );
                     if ( max( old_O - O ) < 1e-2 )
@@ -199,14 +197,14 @@ struct DicCPU {
     //     }
     
     ///
-    template<class TIMG,class TM,class NAME_VAR> void get_def_img( const TIMG &f, TM &m, const NAME_VAR &name_var, TIMG &r ) {
+    template<class TIMGf,class TM,class NAME_VAR,class TIMGr> void get_def_img( const TIMGf &f, TM &m, const NAME_VAR &name_var, TIMGr &r ) {
         r.resize( f.sizes );
         r.set( -1 );
         apply( m.elem_list, MakeDefImg<NAME_VAR>(), f, r );
     }
     
     ///
-    template<class TIMG,class TM,class NAME_VAR> void get_residual_img( const TIMG &f, const TIMG &g, TM &m, const NAME_VAR &name_var, TIMG &r ) {
+    template<class TIMGf,class TIMGg,class TM,class NAME_VAR,class TIMGr> void get_residual_img( const TIMGf &f, const TIMGg &g, TM &m, const NAME_VAR &name_var, TIMGr &r ) {
         get_def_img( f, m, name_var, r );
         for( Rectilinear_iterator<int,dim> p( 0, Vec<int,dim>( f.sizes - 1 ), 1 ); p; ++p ) {
             g.load_if_necessary( p.pos, p.pos );
@@ -216,17 +214,132 @@ struct DicCPU {
     }
     
     ///
-    template<class TIMG,class TF,class NAME_VAR>
-    void femu_fit( const TIMG &f, const TIMG &g, TF &formulation, const NAME_VAR &name_var ) {
-        formulation.erase_constraints_from( 0 );
+    template<class TIMGf,class TIMGg,class TM,class NAME_VAR> void display_residual_img( const TIMGf &f, const TIMGg &g, TM &m, const NAME_VAR &name_var ) {
+        ImgInterp<T,dim> r;
+        get_residual_img( f, g, m, name_var, r );
+        r.display( true );
     }
     
+    /// assuming the non free borders are on the "min-max" box borders
+    template<class TIMGf,class TIMGg,class TF,class NAME_VAR>
+    void femu_fit( const TIMGf &f, const TIMGg &g, TF &formulation, const NAME_VAR &name_var, Vec<T,TF::nb_der_var> prec = 1e-4, T min_elem_size = 4 ) {
+        typedef typename TF::TM TM;
+        typedef typename TM::Pvec Pvec;
+        TM &m = *formulation.m;
+        ExtractDM<NAME_VAR> ed;
+        
+        // constraints
+        Pvec mi, ma, me; get_min_max( generate( m.node_list, ExtractDM<pos_DM>() ), mi, ma );
+        mi += min_elem_size / 4;
+        ma -= min_elem_size / 4;
+        
+        unsigned old_nb_constraints = formulation.nb_constraints();
+        for(unsigned i=0;i<m.node_list.size();++i)                                           
+            if ( m.node_list[i].pos[0] < mi[0] or m.node_list[i].pos[1] < mi[1] or m.node_list[i].pos[0] > ma[0] or m.node_list[i].pos[1] > ma[1] )
+                for(unsigned d=0;d<TM::dim;++d)                                                                                                        
+                    formulation.add_constraint( "node[" + to_string( i ) + "]." + name_var.name() + "[" + to_string( d ) + "] - " + to_string( ed( m.node_list[i] )[d] ), 1e5 );   
+        
+        // exp_val
+        formulation.allocate_matrices();
+        Vec<T> exp_val; exp_val.resize( m.node_list.size() * dim );
+        for(int i=0;i<m.node_list.size();++i)
+            for(int d=0;d<dim;++d)
+                exp_val[ formulation.indice_noda[i] + d ] = ed( m.node_list[i] )[d];
+        
+        // fit
+        formulation.fit( M, exp_val, 0.0, prec );
+        
+        //
+        formulation.erase_constraints_from( old_nb_constraints );
+    }
+    
+    template<class NAME_VAR>
+    struct GetSensitivity {
+        GetSensitivity( DicCPU *dc ) : dc( dc ), inv_M( dc->C_M.nb_rows() ) {
+            Vec<T> res;
+            for(unsigned i=0;i<dc->C_M.nb_rows();++i) {
+                solve_using_chol_factorize( dc->C_M, Vec<T>( dirac_vec( 1, i, dc->C_M.nb_rows() ) ), res );
+                for(int j=0;j<dc->C_M.nb_rows();++j)
+                    inv_M( j, i ) = res[ j ];
+            }
+            dU.resize( dc->nb_threads_for_assembly );
+            for(unsigned i=0;i<dc->nb_threads_for_assembly;++i)
+                dU[i].resize( dc->C_M.nb_rows(), 0.0 );
+        }
+        template<class TE,class TIMGf,class TIMGg> void operator()( const TE &e, unsigned num_thread, const TIMGf &f, const TIMGg &g ) {
+            ExtractDM<NAME_VAR> ed;
+            Vec<T,dim> P[TE::nb_nodes], D[TE::nb_nodes], MA( e.pos(0) ), MI( e.pos(0) );
+            for(int i=0;i<TE::nb_nodes;++i) P[ i ] = e.pos(i);
+            for(int i=0;i<TE::nb_nodes;++i) D[ i ] = e.pos(i) + ed( *e.node(i) );
+            for(int i=1;i<TE::nb_nodes;++i) MI = min( MI, e.pos(i) ); // hum
+            for(int i=1;i<TE::nb_nodes;++i) MA = max( MA, e.pos(i) ); // hum
+            f.load_if_necessary( MI, MA );
+            g.load_if_necessary( MI, MA );
+            //
+            Vec<T,TE::nb_var_inter> var_inter( 0 );
+            Vec<T> &locU = dU[ num_thread ];
+            for( Rectilinear_iterator<T,dim> p( Vec<int,dim>(MI), Vec<int,dim>(MA) + 2, 1.0 / dc->div_pixel ); p; ++p ) {
+                while ( true ) {
+                    get_var_inter( typename TE::NE(), P, p.pos, var_inter );
+                    if ( not ElemVarInterFromPosNonLinear<typename TE::NE>::res ) break;
+                    Vec<T,dim> O;
+                    get_interp( typename TE::NE(), Nodal(), var_inter, P, O );
+                    if ( max( p.pos - O ) < 1e-2 ) break;
+                }
+                if ( not var_inter_is_inside( typename TE::NE(), var_inter, 1e-6 ) )
+                    continue;
+                
+                //
+                Vec<T,dim> DO;
+                get_interp( typename TE::NE(), Nodal(), var_inter, D, DO );
+                
+                //
+                Vec<T,TE::nb_nodes> shape_functions;
+                get_shape_functions( typename TE::NE(), var_inter, shape_functions );
+                Vec<T,dim> grad = 0.5 * ( f.grad( p.pos ) + g.grad( DO ) );
+                        
+                //
+                for(int j=0;j<locU.size();++j) {
+                    T locU_sgn = 0.0;
+                    for(int i=0;i<TE::nb_nodes;++i) {
+                        for(int d=0;d<dim;++d) {
+                            T sham_grad = shape_functions[ i ] * grad[ d ];
+                            locU_sgn += inv_M( j, dc->indice_noda[ e.node(i)->number ] + d ) * sham_grad;
+                        }
+                    }
+                    locU[ j ] += 2 * dc->delta_gray * abs( locU_sgn );
+                }
+            }
+        }
+        Mat<T,Sym<> > inv_M;
+        Vec<Vec<T> > dU;
+        QMutex mutex;
+        DicCPU *dc;
+    };
+    
+    ///
+    template<class TIMGf,class TIMGg,class TM,class NAME_VAR,class NAME_RES>
+    T get_sensitivity( const TIMGf &f, const TIMGg &g, TM &m, const NAME_VAR &name_var, const NAME_RES &name_res ) {
+        GetSensitivity<NAME_VAR> gs( this );
+        apply_mt_with_num_thread( m.elem_list, nb_threads_for_assembly, gs, f, g );
+        Vec<T> dU = gs.dU[ 0 ]; for(int i=1;i<gs.dU.size(); dU += gs.dU[ i++ ] );
+            
+        //
+        ExtractDM<NAME_RES> ed;
+        for(int i=0;i<m.node_list.size();++i)
+            for(int d=0;d<dim;++d)
+                ed( m.node_list[i] )[ d ] = dU[ indice_noda[ i ] + d ];
+        
+        //
+        return mean( dU );
+    }
     
     Mat<T,Sym<>,SparseLine<> > M, C_M;
     Vec<int> indice_noda;
     Vec<T> F;
     Vec<T> dU;
     T sum_residual;
+    T delta_gray;
     
     T prec_linear_system;
     T levenberg_marq;
