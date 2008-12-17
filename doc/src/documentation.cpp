@@ -717,7 +717,7 @@ void Documentation :: generate_index() {
     list_webpage.push_back(stmp);
     list_titre_of_webpage.push_back("Bien commencer avec la LMT++");
     pageWeb<< "<td><a href=\"" << "webpage_"+stmp <<".html\">D&eacute;part rapide</a> (quick start) </td>" << std::endl;
-    pageWeb<< "<td><a href=\"list_touteslesfonctions.html\">Toutes les fonctions</a></td>" << std::endl;
+    pageWeb<< "<td><a href=\"list_lesfonctionsprincipales.html\">Les fonctions principales</a></td>" << std::endl;
     stmp = "python";
     list_webpage.push_back(stmp);
     stmp2 = "Python";

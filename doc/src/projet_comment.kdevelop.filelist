@@ -108,8 +108,6 @@ target_type_without_genericcomment.h
 templateparam.h
 templateparameter.cpp
 templateparameter.h
-test
-test/test_parse_cpp.h
 token.cpp
 token.h
 typedef.cpp
