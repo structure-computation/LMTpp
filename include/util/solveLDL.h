@@ -11,13 +11,17 @@ class LDL_solver {
 public:
     typedef double T;
     
-    LDL_solver() {}
+    LDL_solver() {pseudo_inverse=false;}
+    bool pseudo_inverse;
     
     /// after that, data in mat won't be used anymore.
     void get_factorization( LMT::Mat<double,LMT::Sym<>,LMT::SparseLine<> > &mat, bool want_free=true, bool want_semi_morse=false, bool want_amd_order=true );
     /// after that, data in mat won't be used anymore.
     void get_factorization( LMT::Mat<double,LMT::Gen<>,LMT::SparseLine<> > &mat, bool want_free=true, bool want_semi_morse=false, bool want_amd_order=true );
-    /// 
+    /// after that, data in mat won't be used anymore.
+    void get_factorization( LMT::Mat<double,LMT::Sym<>,LMT::SparseLine<> > &mat, LMT::Vec<LMT::Vec<double> > &Kernel, bool want_free=true, bool want_semi_morse=false, bool want_amd_order=true ); // PK et PG (pseudo-inverse)
+    void get_factorization( LMT::Mat<double,LMT::Gen<>,LMT::SparseLine<> > &mat, LMT::Vec<LMT::Vec<double> > &Kernel, bool want_free=true, bool want_semi_morse=false, bool want_amd_order=true ); // PK et PG (pseudo-inverse)
+    /// ...
     template<class TM> void get_factorization( const TM &mat, bool want_free=true, bool want_semi_morse=false, bool want_amd_order=true ) { assert(0); /* TODO */ }
     /// ...
     void solve( LMT::Vec<double> &vec );
