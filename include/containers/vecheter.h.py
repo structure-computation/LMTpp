@@ -393,6 +393,8 @@ print_apply_ext(
 print_apply_ext('remove_if' ,TP,TV,'remove_if(v.vec,op,PARALIST); remove_if(v.next,op,PARALIST);',onlyfornonconstvec=True)
 
 print_apply_ext('apply_mt',TP,TV,'apply_mt(v.vec,nb_threads,op,PARALIST); apply_mt(v.next,nb_threads,op,PARALIST);', suppar=['int nb_threads'] )
+print_apply_ext('apply_mt_with_num_thread',TP,TV,'apply_mt_with_num_thread(v.vec,nb_threads,op,PARALIST); apply_mt_with_num_thread(v.next,nb_threads,op,PARALIST);', suppar=['int nb_threads'] )
+
 
 # without data
 TP = ['class Carac','unsigned nt']
@@ -407,6 +409,7 @@ for inc in [1,2,4]:
 print_apply_ext('apply_on_number',TP,TV,'',suppar=['int num'])
 print_apply_ext('remove_if' ,TP,TV,'',onlyfornonconstvec=True)
 print_apply_ext('apply_mt',TP,TV,'', suppar=['int nb_threads'] )
+print_apply_ext('apply_mt_with_num_thread',TP,TV,'', suppar=['int nb_threads'] )
 
 print '} // namespace LMT'
 

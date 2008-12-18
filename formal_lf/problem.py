@@ -51,7 +51,7 @@ class Problem:
                 nn = ('der'+str(d)+'_')*(d!=0) + n
                 output.write( "#ifndef IFNDEF_%s_DM\n" % nn )
                 output.write( "#define IFNDEF_%s_DM\n" % nn )
-                output.write( "    struct %s_DM {};\n" % nn )
+                output.write( "    struct %s_DM { static std::string name() { return \"%s\"; } };\n" % ( nn, nn ) )
                 output.write( "#endif // IFNDEF_%s_DM\n" % nn )
                 output.write( "\n" )
         
