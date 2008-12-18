@@ -8,8 +8,13 @@
 namespace LMT {
 
 /** */
-template<class T,unsigned dim,class PT=T>
+template<class T_,unsigned dim_,class PT_=T_>
 struct ImgInterp {
+    typedef T_ T;
+    static const unsigned dim = dim_;
+    typedef PT_ PT;
+    typedef ImgInterp T_NewImg;
+    
     ///
     ImgInterp() : sizes( 1 ) {}
     
@@ -56,6 +61,46 @@ struct ImgInterp {
         }
     }
     
+    template<class TB>
+    void load_binary( const std::string &filename, Vec<int,dim> S, Vec<int,dim> X0 = 0, Vec<int,dim> X1 = -1 ) {
+        assert( dim >= 2 );
+        
+        for(unsigned i=0;i<dim;++i)
+            if ( X1[i] < 0 )
+                X1[i] = S[i];
+        
+        sizes = X1 - X0;
+        
+        // data in tmp
+        data.resize( product( sizes ) );
+        std::ifstream f( filename.c_str() );
+        Vec<TB> tmp;
+        tmp.resize( sizes[0] );
+        if ( dim == 2 ) {
+            f.seekg( S[0] * X0[1] * sizeof(TB), std::ios::beg );
+            for(unsigned y=0,od=0;y<sizes[1];++y) {
+                f.seekg( X0[0] * sizeof(TB), std::ios::cur );
+                f.read( (char *)tmp.ptr(), sizes[0] * sizeof(TB) );
+                for(unsigned x=0;x<sizes[0];++x,++od)
+                    data[ od ] = tmp[ x ];
+                f.seekg( ( S[0] - X1[0] ) * sizeof(TB), std::ios::cur );
+            }
+        } else if ( dim == 3 ) {
+            f.seekg( S[0] * S[1] * X0[2] * sizeof(TB), std::ios::beg );
+            for(unsigned z=0,od=0;z<sizes[2];++z) {
+                f.seekg( S[0] * X0[1] * sizeof(TB), std::ios::cur );
+                for(unsigned y=0;y<sizes[1];++y) {
+                    f.seekg( X0[0] * sizeof(TB), std::ios::cur );
+                    f.read( (char *)tmp.ptr(), sizes[0] * sizeof(TB) );
+                    for(unsigned x=0;x<sizes[0];++x,++od)
+                        data[ od ] = tmp[ x ];
+                    f.seekg( ( S[0] - X1[0] ) * sizeof(TB), std::ios::cur );
+                }
+            }
+        } else
+            assert( 0 /* TODO */ );
+    }
+    
     ///
     QImage to_QImage( bool normalize = false ) const {
         T o = 0.0, m = 1.0;
@@ -69,7 +114,7 @@ struct ImgInterp {
         //
         QImage img( sizes[0], sizes[1], QImage::Format_ARGB32 );
         uchar *ptr = img.bits();
-        int total_size = product( sizes );
+        int total_size = sizes[0] * sizes[1];
         for(int i=0;i<total_size;++i,ptr+=4) {
             ptr[ 0 ] = m * ( data[ i ] - o );
             ptr[ 1 ] = m * ( data[ i ] - o );
@@ -81,10 +126,8 @@ struct ImgInterp {
     
     ///
     void save( std::string filename, bool normalize = false ) const {
-        if ( dim == 2 ) {
-            QImage img = to_QImage( normalize );
-            img.save( filename.c_str() );
-        }
+        QImage img = to_QImage( normalize );
+        img.save( filename.c_str() );
     }
     
     ///
@@ -94,27 +137,27 @@ struct ImgInterp {
     }
     
     ///
-    inline T &operator()( int x, int y ) {
+    inline T &tex_int( int x, int y ) {
         return data[ sizes[0] * y + x ];
     }
     
     ///
-    inline T operator()( int x, int y ) const {
+    inline T tex_int( int x, int y ) const {
         return data[ sizes[0] * y + x ];
     }
     
     ///
-    inline T &operator()( int x, int y, int z ) {
+    inline T &tex_int( int x, int y, int z ) {
         return data[ sizes[1] * sizes[0] * z + sizes[0] * y + x ];
     }
     
     ///
-    inline T operator()( int x, int y, int z ) const {
+    inline T tex_int( int x, int y, int z ) const {
         return data[ sizes[1] * sizes[0] * z + sizes[0] * y + x ];
     }
     
     ///
-    inline T &operator()( Vec<int,dim> p ) {
+    inline T &tex_int( Vec<int,dim> p ) {
         int o = p[0];
         for(int i=1, m=sizes[0]; i<dim; m*=sizes[i], ++i )
             o += m * p[i];
@@ -122,7 +165,7 @@ struct ImgInterp {
     }
     
     ///
-    inline T operator()( Vec<int,dim> p ) const {
+    inline T tex_int( Vec<int,dim> p ) const {
         int o = p[0];
         for(int i=1, m=sizes[0]; i<dim; m*=sizes[i], ++i )
             o += m * p[i];
@@ -135,10 +178,10 @@ struct ImgInterp {
         int yi = int( y );
         PT xf = x - xi;
         PT yf = y - yi;
-        return operator()( xi + 0, yi + 0 ) * ( 1 - xf ) * ( 1 - yf ) + 
-               operator()( xi + 1, yi + 0 ) * ( 0 + xf ) * ( 1 - yf ) + 
-               operator()( xi + 0, yi + 1 ) * ( 1 - xf ) * ( 0 + yf ) + 
-               operator()( xi + 1, yi + 1 ) * ( 0 + xf ) * ( 0 + yf );
+        return tex_int( xi + 0, yi + 0 ) * ( 1 - xf ) * ( 1 - yf ) + 
+               tex_int( xi + 1, yi + 0 ) * ( 0 + xf ) * ( 1 - yf ) + 
+               tex_int( xi + 0, yi + 1 ) * ( 1 - xf ) * ( 0 + yf ) + 
+               tex_int( xi + 1, yi + 1 ) * ( 0 + xf ) * ( 0 + yf );
     }
     
     ///
@@ -149,30 +192,14 @@ struct ImgInterp {
         PT xf = x - xi;
         PT yf = y - yi;
         PT zf = z - zi;
-        return operator()( xi + 0, yi + 0, zi + 0 ) * ( 1 - xf ) * ( 1 - yf ) * ( 1 - zf ) + 
-               operator()( xi + 1, yi + 0, zi + 0 ) * ( 0 + xf ) * ( 1 - yf ) * ( 1 - zf ) + 
-               operator()( xi + 0, yi + 1, zi + 0 ) * ( 1 - xf ) * ( 0 + yf ) * ( 1 - zf ) + 
-               operator()( xi + 1, yi + 1, zi + 0 ) * ( 0 + xf ) * ( 0 + yf ) * ( 1 - zf ) +
-               operator()( xi + 0, yi + 0, zi + 1 ) * ( 1 - xf ) * ( 1 - yf ) * ( 0 + zf ) + 
-               operator()( xi + 1, yi + 0, zi + 1 ) * ( 0 + xf ) * ( 1 - yf ) * ( 0 + zf ) + 
-               operator()( xi + 0, yi + 1, zi + 1 ) * ( 1 - xf ) * ( 0 + yf ) * ( 0 + zf ) + 
-               operator()( xi + 1, yi + 1, zi + 1 ) * ( 0 + xf ) * ( 0 + yf ) * ( 0 + zf );
-    }
-    
-    void load_binary( int width, int height, const std::string &filename ) {
-        sizes.set( 1 );
-        assert( dim >= 2 );
-        sizes[ 0 ] = width;
-        sizes[ 1 ] = height;
-        
-        data.resize( product( sizes ) );
-        
-        std::ifstream f( filename.c_str() );
-        for(unsigned i=0;i<data.size();++i) {
-            int a = f.get();
-            int b = f.get();
-            data[i] = b + a / 256.0;
-        }
+        return tex_int( xi + 0, yi + 0, zi + 0 ) * ( 1 - xf ) * ( 1 - yf ) * ( 1 - zf ) + 
+               tex_int( xi + 1, yi + 0, zi + 0 ) * ( 0 + xf ) * ( 1 - yf ) * ( 1 - zf ) + 
+               tex_int( xi + 0, yi + 1, zi + 0 ) * ( 1 - xf ) * ( 0 + yf ) * ( 1 - zf ) + 
+               tex_int( xi + 1, yi + 1, zi + 0 ) * ( 0 + xf ) * ( 0 + yf ) * ( 1 - zf ) +
+               tex_int( xi + 0, yi + 0, zi + 1 ) * ( 1 - xf ) * ( 1 - yf ) * ( 0 + zf ) + 
+               tex_int( xi + 1, yi + 0, zi + 1 ) * ( 0 + xf ) * ( 1 - yf ) * ( 0 + zf ) + 
+               tex_int( xi + 0, yi + 1, zi + 1 ) * ( 1 - xf ) * ( 0 + yf ) * ( 0 + zf ) + 
+               tex_int( xi + 1, yi + 1, zi + 1 ) * ( 0 + xf ) * ( 0 + yf ) * ( 0 + zf );
     }
     
     
@@ -228,6 +255,38 @@ struct ImgInterByBlock {
     
     Mat<Img *> blocks;
     Int64 allowed_memory_size;
+};
+
+
+template<class TIMG>
+struct ImgInterpDec {
+    typedef typename TIMG::T T;
+    static const unsigned dim = TIMG::dim;
+    typedef typename TIMG::PT PT;
+    typedef TIMG T_NewImg;
+
+    ImgInterpDec( TIMG *orig, Vec<PT,dim> offset ) : orig( orig ), offset( offset ) {}
+    
+    inline void load_if_necessary( Vec<int,dim> MI, Vec<int,dim> MA, bool may_be_modified = false ) const {
+        orig->load_if_necessary( MI-offset, MA-offset, may_be_modified );
+    }
+    
+    inline T &tex_int( int x, int y ) { return orig->tex_int( x - offset[0], y - offset[1] ); }
+    inline T tex_int( int x, int y ) const { return orig->tex_int( x - offset[0], y - offset[1] ); }
+    inline T &tex_int( int x, int y, int z ) { return orig->tex_int( x - offset[0], y - offset[1], z - offset[2] ); }
+    inline T tex_int( int x, int y, int z ) const { return orig->tex_int( x - offset[0], y - offset[1], z - offset[2] ); }
+    inline T &tex_int( Vec<int,dim> p ) { return orig->tex_int( p - offset ); }
+    inline T tex_int( Vec<int,dim> p ) const { return orig->tex_int( p - offset ); }
+    
+    inline T operator()( PT x, PT y ) const { return orig->operator()( x - offset[0], y - offset[1] ); }
+    inline T operator()( PT x, PT y, PT z ) const { return orig->operator()( x - offset[0], y - offset[1], z - offset[2] ); }
+    template<class PTT> inline T operator()( Vec<PTT,dim> p ) const { return orig->operator()( p - offset ); }
+    
+    inline Vec<T,dim> grad( Vec<PT,dim> p ) const { return orig->grad( p - offset ); }
+    
+    
+    TIMG *orig;
+    Vec<PT,dim> offset;
 };
 
 

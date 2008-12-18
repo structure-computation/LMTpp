@@ -1289,7 +1289,7 @@ public:
         allocate_matrices();
         shift();
         Vec<ScalarType> history;
-        for(unsigned num_iter=0;num_iter<15;++num_iter) {
+        for(unsigned num_iter=0;;++num_iter) {
             assemble();
             
             //matrices(Number<0>()) += exp_mat_coeff * exp_mat;
@@ -1316,13 +1316,30 @@ public:
             }
             // M.diag() += max( abs( M.diag() ) ) * 1e-20; // HUM
             //
-            Vec<ScalarType> dD = inv( M ) * V;
+            Inv<ScalarType> IM( M );
+            Vec<ScalarType> dD = IM * V;
             // PRINT( dD );
             history.push_back( norm_2( dD ) );
             Carac::add_to_der_vars( *this, dD );
-            if ( all( abs( dD ) < conv ) )
+            if ( all( abs( dD ) < conv ) or num_iter == 20 ) {
+                // sensitivity analysis
+                Mat<ScalarType> du_exp_mat( nb_der_var, sollicitation.size() );
+                for(unsigned r=0;r<nb_der_var;++r)
+                    du_exp_mat.row( r ) = exp_mat * der_U[r];
+                Mat<ScalarType> Minv_du_exp_mat( nb_der_var, sollicitation.size() );
+                for(unsigned c=0;c<sollicitation.size();++c)
+                    Minv_du_exp_mat.col( c ) = IM * du_exp_mat.col( c );
+                    
+                //
+                sensitivity_after_fit.resize( nb_der_var );
+                for(unsigned i=0;i<nb_der_var;++i)
+                    sensitivity_after_fit[ i ] = sum( abs( Minv_du_exp_mat.row( i ) ) );
+                    
+                //
                 break;
+            }
         }
+        
         return history;
     }
     
@@ -1364,6 +1381,8 @@ public:
     unsigned indice_glob;
     bool mat_def_pos_if_sym, initialized, user_want_pierre_precond, mat_has_been_allocated_with_symamd;
     bool allocated;
+    
+    Vec<ScalarType> sensitivity_after_fit;
     
     std::vector<Codegen::Ex> symbols;
     Codegen::Ex time_symbol;

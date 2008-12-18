@@ -26,7 +26,7 @@ struct DicCPU {
     ///
     template<class NAME_VAR>
     struct Assemble {
-        template<class TE,class TIMG> void operator()( const TE &e, DicCPU &dic, const TIMG &f, const TIMG &g ) {
+        template<class TE,class TIMGf,class TIMGg> void operator()( const TE &e, DicCPU &dic, const TIMGf &f, const TIMGg &g ) {
             ExtractDM<NAME_VAR> ed;
             Vec<T,dim> P[TE::nb_nodes], D[TE::nb_nodes], MA( e.pos(0) ), MI( e.pos(0) );
             for(int i=0;i<TE::nb_nodes;++i) P[ i ] = e.pos(i);
@@ -41,7 +41,7 @@ struct DicCPU {
             //
             Vec<T,TE::nb_var_inter> var_inter( 0 );
             Vec<T,dim> O, old_O;
-            for( Rectilinear_iterator<T,dim> p( Vec<int,dim>(MI), Vec<int,dim>(MA) + 1, 1.0 / dic.div_pixel ); p; ++p ) {
+            for( Rectilinear_iterator<T,dim> p( Vec<int,dim>(MI), Vec<int,dim>(MA) + 2, 1.0 / dic.div_pixel ); p; ++p ) {
                 get_var_inter( typename TE::NE(), P, Vec<T,dim>( p.pos ), var_inter );
                 get_interp( typename TE::NE(), Nodal(), var_inter, P, O );
                 while ( ElemVarInterFromPosNonLinear<typename TE::NE>::res ) { // TODO : linear case
@@ -104,7 +104,7 @@ struct DicCPU {
     ///
     template<class NAME_VAR>
     struct MakeDefImg {
-        template<class TE,class TIMG> void operator()( const TE &e, const TIMG &f, TIMG &r ) const {
+        template<class TE,class TIMGf,class TIMGr> void operator()( const TE &e, const TIMGf &f, TIMGr &r ) const {
             ExtractDM<NAME_VAR> ed;
             Vec<T,dim> P[TE::nb_nodes], D[TE::nb_nodes], MA( e.pos(0) + ed( *e.node(0) ) ), MI( e.pos(0) + ed( *e.node(0) ) );
             for(int i=0;i<TE::nb_nodes;++i) P[ i ] = e.pos(i);
@@ -135,7 +135,7 @@ struct DicCPU {
     };
     
     ///
-    template<class TIMG,class TM,class NAME_VAR> void assemble( const TIMG &f, const TIMG &g, const TM &m, const NAME_VAR &name_var, bool want_mat = true, bool want_vec = true ) {
+    template<class TIMGf,class TIMGg,class TM,class NAME_VAR> void assemble( const TIMGf &f, const TIMGg &g, const TM &m, const NAME_VAR &name_var, bool want_mat = true, bool want_vec = true ) {
         unsigned nb_ddl = m.node_list.size() * dim;
         if ( want_mat ) {
             //indice_noda = dim * symamd( m );
@@ -168,7 +168,7 @@ struct DicCPU {
     }
 
     ///
-    template<class TIMG,class TM,class NAME_VAR> void exec( const TIMG &f, const TIMG &g, TM &m, const NAME_VAR &name_var, bool want_mat = true ) {
+    template<class TIMGf,class TIMGg,class TM,class NAME_VAR> void exec( const TIMGf &f, const TIMGg &g, TM &m, const NAME_VAR &name_var, bool want_mat = true ) {
         // read_from_mesh( m, name_var );
         assemble( f, g, m, name_var, want_mat, true );
         solve_linear_system();
@@ -199,14 +199,14 @@ struct DicCPU {
     //     }
     
     ///
-    template<class TIMG,class TM,class NAME_VAR> void get_def_img( const TIMG &f, TM &m, const NAME_VAR &name_var, TIMG &r ) {
+    template<class TIMGf,class TM,class NAME_VAR,class TIMGr> void get_def_img( const TIMGf &f, TM &m, const NAME_VAR &name_var, TIMGr &r ) {
         r.resize( f.sizes );
         r.set( -1 );
         apply( m.elem_list, MakeDefImg<NAME_VAR>(), f, r );
     }
     
     ///
-    template<class TIMG,class TM,class NAME_VAR> void get_residual_img( const TIMG &f, const TIMG &g, TM &m, const NAME_VAR &name_var, TIMG &r ) {
+    template<class TIMGf,class TIMGg,class TM,class NAME_VAR,class TIMGr> void get_residual_img( const TIMGf &f, const TIMGg &g, TM &m, const NAME_VAR &name_var, TIMGr &r ) {
         get_def_img( f, m, name_var, r );
         for( Rectilinear_iterator<int,dim> p( 0, Vec<int,dim>( f.sizes - 1 ), 1 ); p; ++p ) {
             g.load_if_necessary( p.pos, p.pos );

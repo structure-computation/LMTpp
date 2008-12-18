@@ -343,6 +343,13 @@ return false;
 //    return true;
 //}
 
+template<class TV,class T>
+bool var_inter_is_inside( const Hexa &, const TV &var_inter, T tol = 0 ) {
+    return heaviside( var_inter[0] + tol ) * heaviside( 1 - var_inter[0] + tol ) * 
+           heaviside( var_inter[1] + tol ) * heaviside( 1 - var_inter[1] + tol ) *
+           heaviside( var_inter[2] + tol ) * heaviside( 1 - var_inter[2] + tol );
+}
+
 };
 
 #include "element_Hexa.h"

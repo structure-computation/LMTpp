@@ -16,7 +16,7 @@ namespace LMT {
 
 struct SolveException { };
 
-template<class TT,class Str,class Sto,class IO=typename IsMatOp<TT>::T,class AltT=typename Mat<TT,Str,Sto,IO>::T>
+template<class TT,class Str=Gen<>,class Sto=Dense<>,class IO=typename IsMatOp<TT>::T,class AltT=typename Mat<TT,Str,Sto,IO>::T>
 class Inv {
 public:
     typedef typename Mat<TT,Str,Sto,IO>::T T;

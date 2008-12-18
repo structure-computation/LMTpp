@@ -43,4 +43,4 @@ private:
 };
 
 #endif // SOLVE_LDL_H
- 
+

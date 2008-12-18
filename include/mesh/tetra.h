@@ -349,7 +349,13 @@ typename TNG::T measure( const Element<Tetra,TN,TNG,TD,NET> &e ) {
     D0 = 0.133333*D0; D0 = D1-D0; D0 = D0+D1; D0 = D0+D1; D0 = D0+D1; D0 = abs(D0); return D0; 
 }
 
+template<class TV,class T>
+bool var_inter_is_inside( const Tetra &e, const TV &var_inter, T tol = 0 ) {
+    return heaviside( var_inter[0] + tol ) * heaviside( var_inter[1] + tol ) * heaviside( var_inter[2] + tol ) * heaviside( 1 - var_inter[0] - var_inter[1] - var_inter[2] + tol );
+}
+
 };
+
 
 #include "element_Tetra.h"
 
