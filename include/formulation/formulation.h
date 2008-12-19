@@ -65,9 +65,10 @@ public:
 /**
 
 */
-template<class TM,class NameFormulation,class NameVariant=DefaultBehavior,class ScalarType_=typename TM::Tpos,bool wont_add_nz=false>
+template<class TM_,class NameFormulation,class NameVariant=DefaultBehavior,class ScalarType_=typename TM_::Tpos,bool wont_add_nz=false>
 class Formulation : public FormulationAncestor<ScalarType_> {
 public:
+    typedef TM_ TM;
     typedef ScalarType_ ScalarType;
     typedef CaracFormulation<NameFormulation,TM::dim,ScalarType,NameVariant> Carac;
     static const unsigned nb_nodal_unknowns = Carac::nb_nodal_unknowns;
@@ -1285,70 +1286,12 @@ public:
         os << matrices( Number<0>() );
     }
     
-    Vec<ScalarType> fit( const Mat<ScalarType,Sym<>,SparseLine<> > &exp_mat, const Vec<ScalarType> &exp_val, ScalarType exp_mat_coeff, const Vec<ScalarType> &conv ) {
-        allocate_matrices();
-        shift();
-        Vec<ScalarType> history;
-        for(unsigned num_iter=0;;++num_iter) {
-            assemble();
-            
-            //matrices(Number<0>()) += exp_mat_coeff * exp_mat;
-            //sollicitation += exp_mat_coeff * exp_mat * exp_val;
-            Inv<ScalarType,Sym<>,SparseLine<> > I( matrices(Number<0>()) );
-            vectors[ 0 ] = I * sollicitation;
-            
-            update_variables();
-            call_after_solve();
-            //
-            Vec<Vec<ScalarType> > der_U; der_U.resize( nb_der_var );
-            for(unsigned i=0;i<nb_der_var;++i) {
-                assemble_vector_der_var( i );
-                der_U[ i ] = I * sollicitation;
-            }
-            //
-            Mat<ScalarType> M( nb_der_var );
-            Vec<ScalarType> V; V.resize( nb_der_var );
-            for(unsigned i=0;i<nb_der_var;++i) {
-                Vec<ScalarType> dUi = exp_mat * der_U[i];
-                V[ i ] = dot( dUi, exp_val - vectors[0] );
-                for(unsigned j=0;j<nb_der_var;++j)
-                    M( i, j ) = dot( dUi, der_U[j] );
-            }
-            // M.diag() += max( abs( M.diag() ) ) * 1e-20; // HUM
-            //
-            Inv<ScalarType> IM( M );
-            Vec<ScalarType> dD = IM * V;
-            // PRINT( dD );
-            history.push_back( norm_2( dD ) );
-            Carac::add_to_der_vars( *this, dD );
-            if ( all( abs( dD ) < conv ) or num_iter == 20 ) {
-                // sensitivity analysis
-                Mat<ScalarType> du_exp_mat( nb_der_var, sollicitation.size() );
-                for(unsigned r=0;r<nb_der_var;++r)
-                    du_exp_mat.row( r ) = exp_mat * der_U[r];
-                Mat<ScalarType> Minv_du_exp_mat( nb_der_var, sollicitation.size() );
-                for(unsigned c=0;c<sollicitation.size();++c)
-                    Minv_du_exp_mat.col( c ) = IM * du_exp_mat.col( c );
-                    
-                //
-                sensitivity_after_fit.resize( nb_der_var );
-                for(unsigned i=0;i<nb_der_var;++i)
-                    sensitivity_after_fit[ i ] = sum( abs( Minv_du_exp_mat.row( i ) ) );
-                    
-                //
-                break;
-            }
-        }
-        
-        return history;
-    }
-    
-    Vec<ScalarType> fit( const Vec<ScalarType> &exp_val, ScalarType conv ) {
-        Vec<ScalarType> conv_vec; conv_vec.resize( nb_der_var, conv );
-        Mat<ScalarType,Sym<>,SparseLine<> > exp_mat( exp_val.size() );
-        exp_mat.diag() = 1.0;
-        return fit( exp_mat, exp_val, 0.0, conv_vec );
-    }
+    //     Vec<ScalarType> fit( const Vec<ScalarType> &exp_val, ScalarType conv ) {
+    //         Vec<ScalarType> conv_vec; conv_vec.resize( nb_der_var, conv );
+    //         Mat<ScalarType,Sym<>,SparseLine<> > exp_mat( exp_val.size() );
+    //         exp_mat.diag() = 1.0;
+    //         return fit( exp_mat, exp_val, 0.0, conv_vec );
+    //     }
     
     void get_der_var_on_mesh( unsigned num_der_var ) {
         allocate_matrices();
@@ -1381,8 +1324,6 @@ public:
     unsigned indice_glob;
     bool mat_def_pos_if_sym, initialized, user_want_pierre_precond, mat_has_been_allocated_with_symamd;
     bool allocated;
-    
-    Vec<ScalarType> sensitivity_after_fit;
     
     std::vector<Codegen::Ex> symbols;
     Codegen::Ex time_symbol;

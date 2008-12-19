@@ -19,6 +19,15 @@ p = Variable( interpolation='skin_elementary', default_value='0.0', unit='N/m^2'
 
 normal = Variable( nb_dim=[dim], default_value='0.0', unit='1' )
 
+# dirichlet
+lim_cond_0 = Variable( interpolation='global', default_value='1', unit='1' )
+lim_cond_1 = Variable( interpolation='global', default_value='0', unit='1' )
+
+dep_imp_val_0_0 = Variable( nb_dim=[dim], default_value='0', unit='1' )
+dep_imp_val_0_1 = Variable( nb_dim=[dim], default_value='0', unit='1' )
+
+dep_imp_coef_0 = Variable( default_value='0', unit='1' )
+
 #assume_symmetric_matrix = False
 #integration_totale = False
 #use_asm = True
@@ -34,7 +43,12 @@ def formulation():
     res = density.expr * dot( dep.expr.diff(time).diff(time) - f_vol.expr, dep.test )
     res += trace_sym_col( sigma, epstest )
     
-    return res * dV + dot( f_nodal.expr, dep.test ) * dN - dot( f_surf.expr, dep.test ) * dS - dot( p.expr * dS_normal, dep.test ) * dS
+    dmp = dep_imp_coef_0.expr * dot( dep.expr
+        - lim_cond_0 * dep_imp_val_0_0.expr
+        - lim_cond_1 * dep_imp_val_0_1.expr
+        , dep.test )
+    
+    return res * dV + dot( f_nodal.expr, dep.test ) * dN - dot( f_surf.expr, dep.test ) * dS - dot( p.expr * dS_normal, dep.test ) * dS + dmp * dN
 
 
 # --------------------------------------------------------------------------------------------------------------------------------

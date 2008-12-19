@@ -149,9 +149,26 @@ public:
         return r + e->number;
     }
 
+
 private:
-   struct AbsoluteNumberUpdate { template<class TE> void operator()( TE &e, unsigned &n ) const { e.absolute_number = n++; } };
+    struct AbsoluteNumberUpdate { template<class TE> void operator()( TE &e, unsigned &n ) const { e.absolute_number = n++; } };
+   
+    struct FindMinNodeDist {
+        template<class TE> void operator()( const TE &e, Tpos &min_node_dist ) const {
+            for(unsigned i=0;i<TE::nb_nodes;++i)
+                for(unsigned j=i+1;j<TE::nb_nodes;++j)
+                    min_node_dist = min( min_node_dist, norm_2( e.pos( i ) - e.pos( j ) ) );
+        }
+    };
+    
 public:
+    
+    /// min dist between nodes
+    Tpos min_node_dist() const {
+        Tpos min_node_dist = std::numeric_limits<Tpos>::max();
+        apply( elem_list, FindMinNodeDist(), min_node_dist );
+        return min_node_dist;
+    }
     
     /// 
     void absolute_number_update() {
