@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from string import *
 from matstructure import *
 
@@ -37,17 +38,17 @@ public:
     typedef Vec<TVI,"""+['static_rows','static_cols'][row_oriented]+"""> TV;
 
     void clear() { for(unsigned i=0;i<data.size();++i) { data[i].indices.free(); data[i].data.free(); } } /// set all values to 0
-    
+
     """ + (structure=='Gen') * ("""
     typedef DelayedAssignement<DelayedAssignementSparseSource<TT> > RetOp;
     typedef T RetOpConst;
-    
+
     RetOp operator()(unsigned line,unsigned column) { return data["""+['line','column'][row_oriented]+"""]["""+['line','column'][1-row_oriented]+"""]; }
     RetOpConst operator()(unsigned line,unsigned column) const { return data["""+['line','column'][row_oriented]+"""]["""+['line','column'][1-row_oriented]+"""]; }
     """) + (structure!='Gen') * ("""
     typedef MatElem<TV,STRUCTURE,STORAGE > RetOp;
     typedef T RetOpConst;
-    
+
     MatElem<TV,STRUCTURE,STORAGE > operator()(unsigned line,unsigned column) {
         return MatElem<TV,STRUCTURE,STORAGE >(data,line,column);
     }
@@ -66,44 +67,30 @@ public:
         resize( val.nb_rows(), val.nb_cols() );
         data = val.data;
     }
-    
+
     template<class T2> Mat(const Mat<T2,STRUCTURE,STORAGE,void> &val) {
         resize( val.nb_rows(), val.nb_cols() );
         data = val.data;
     }
-    
+
     template<bool const_TM,class TVEC>
     Mat(const Mat<SubMat<Mat,const_TM,TVEC>,STRUCTURE,STORAGE,int> &val) { // from SubMat
         resize( val.v.size(), val.v.size() );
-    
+
         //
         std::map<int,int> val_set;
         for( unsigned i = 0; i < val.v.size(); ++i )
             val_set[ val.v[ i ] ] = i;
-                
+
         //
         for( unsigned r = 0; r < data.size(); ++r ) {
             TVI &vec_sparse = val.m.val->data[ val.v[r] ];
-            
-            //
-            unsigned size = 0;
             for( unsigned i = 0; i < vec_sparse.indices.size(); ++i )
-                size += val_set.count( vec_sparse.indices[i] );
-            
-            //
-            data[ r ].indices.reserve( size );
-            data[ r ].data   .reserve( size );
-            
-            //
-            for( unsigned i = 0; i < vec_sparse.indices.size(); ++i ) {
-                if ( val_set.count( vec_sparse.indices[i] ) ) {
-                    data[ r ].indices.push_back( val_set[ vec_sparse.indices[i] ] );
-                    data[ r ].data   .push_back( vec_sparse.data   [ i ] );
-                }
-            }
+                if ( val_set.count( vec_sparse.indices[i] ) )
+                    operator()( r, val_set[ vec_sparse.indices[i] ] ) = vec_sparse.data[ i ];
         }
     }
-    
+
     template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
         resize( val.nb_rows(), val.nb_cols() );
         if ( (STRUCTURE::need_upper and STRUCTURE::need_lower)==false and STRUCTURE::need_diag )
@@ -132,7 +119,7 @@ public:
             data[i].data.resize( v[i].size(), 0.0 );
         }
     }
-    
+
     void resize(unsigned nr) { resize( nr, nr ); }
     void resize(unsigned nr,unsigned nc) { this->nr.set(nr); """+'this->nc.set(nc);'*nsquare+"""
         data.resize("""+['nr','nc'][row_oriented]+""");
@@ -143,7 +130,7 @@ public:
         for(unsigned i=0;i<nb_rows();++i)
             data[i].reserve(n);
     }
-    
+
     void free() { resize(0); data.free(); }
 
     unsigned nb_nz() const {
@@ -152,13 +139,13 @@ public:
             res += data[i].indices.size();
         return res;
     }
-    
+
     template<class Op,unsigned n>
     void sweep_by_rc_set( Op &op, Number<n> ) const {
         for(unsigned r=0;r<data.size();r+=n)
             sweep_by_rc_set( op, Number<n>(), r );
     }
-    
+
     template<class Op,unsigned n>
     void sweep_by_rc_set( Op &op, Number<n>, unsigned r ) const {
         unsigned c[ n ];
@@ -186,18 +173,18 @@ public:
             }
         }
     }
-    
+
     typedef RETDIAG RetDiag;
     typedef CONSTRETDIAG RetDiagConst;
     typedef CONSTRETCOL RetColConst;
     typedef RETCOL RetCol;
     typedef CONSTRETROW RetRowConst;
     typedef RETROW RetRow;
-    
+
     // LINEVEC get_line() { return ; }
     RETDIAG diag() { return FORMDIAG; }
     CONSTRETDIAG diag() const { return CONSTFORMDIAG; }
-    
+
     RETROW row(unsigned i) { return FORMROW; }
     CONSTRETROW row(unsigned i) const { return CONSTFORMROW; }
     RETCOL col(unsigned i) { return FORMCOL; }
@@ -229,7 +216,7 @@ public:
     template<class TVEC1,int s1,class TVEC2,int s2> Mat<SubMat<Mat,false,Vec<TVEC1,s1>,Vec<TVEC2,s2> > > operator()(const Vec<TVEC1,s1> &v1,const Vec<TVEC2,s2> &v2) {
         return Mat<SubMat<Mat,false,Vec<TVEC1,s1>,Vec<TVEC2,s2> > >( *this, v1, v2 );
     }
-    
+
     #ifdef MATLAB_MEX_FILE
          Mat(const mxArray *variable) /*throw(std::runtime_error)*/ {
             if ( mxIsEmpty(variable) ) {
@@ -250,9 +237,9 @@ public:
                 printf("Size error");
                 return;
             }
-            
+
             resize( m, n );
-            
+
             double *pr = mxGetPr(variable);
             int *irs = mxGetIr(variable); // vecteur des numeros de ligne taille nnz
             int *jcs = mxGetJc(variable); // vecteur de la taille n+1 contenant des pointeurs vers le 1er element non nul de irs ou point
@@ -261,7 +248,7 @@ public:
                 pi = mxGetPi(variable);
             for(unsigned c=0;c<n;++c) {
                 // specif de la colonne de la matrice : c
-                
+
                 // reperage de la composante dans irs et valmat par JC[i];
                 int rep=jcs[c];
                 int nbelem=jcs[c+1]-jcs[c];
@@ -270,17 +257,17 @@ public:
                     TT val = (TT)pr[l+rep];
                     data[ indligne ].indices.push_back( c );
                     data[ indligne ].data.push_back( val );
-                    
+
                     if ( mxIsComplex(variable) )
                         set_imag( data[ indligne ].data.back(), pi[l+rep] );
                 }
-                    
+
             }
-            
-            
+
+
         } /// matlab -> LMT::Vec
     #endif
-    
+
 
     TV data;
 private:
@@ -312,7 +299,7 @@ struct MatElem<TV,STRUCTURE,STORAGE > {
                     I2 = ['line','column'][1-row_oriented]
                     IN1 = rep(IN, {'I2':I2, 'I1':I1} )
                     IN2 = rep(IN, {'I2':I1, 'I1':I2} )
-                    
+
                     I1 = ['line','column'][upper_part]
                     I2 = ['line','column'][1-upper_part]
 
@@ -328,7 +315,7 @@ struct MatElem<TV,STRUCTURE,STORAGE > {
                     if structure == 'TriLower':
                         R1 = 'if (line<column) return (T0)0; return data[%s][%s];' % ( ['line','column'][row_oriented], ['line','column'][1-row_oriented] )
                         R2 = 'if (line>=column) { data[%s][%s] OP= val; }' % ( ['line','column'][row_oriented], ['line','column'][1-row_oriented] )
-                
+
                     res = replace(res,'RDATALC',R1)
                     for op in lst_op:
                         res = replace(res,'MATELEM'+op,replace(R2,'OP',op))
@@ -339,7 +326,7 @@ struct MatElem<TV,STRUCTURE,STORAGE > {
             res = replace(res,'RETDIAG'      , replace(ret,'CST','false') )
             res = replace(res,'CONSTFORMDIAG', replace(ret,'CST','true ')+'(*this)' )
             res = replace(res,'FORMDIAG'     , replace(ret,'CST','false')+'(*this)' )
-                            
+
             # get row
             if orientation=='Col' and structure=='Gen':
                 ret = 'Vec<Sparse<TT>,'+['sr','sc'][nsquare]+'> &'
