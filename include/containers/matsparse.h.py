@@ -10,6 +10,7 @@ def rep(r,m):
 
 print """// file generated from matsparse.h.py. Do not modify
 #include <containers/vec_mt.h>
+#include <map>
 
 namespace LMT {
 
@@ -71,10 +72,36 @@ public:
         data = val.data;
     }
     
-    template<class T2> Mat(const Mat<SubMat<Mat,true ,TVEC>,STRUCTURE,STORAGE,int> &val) { // from SubMat
-        return ( *this, v );
-        resize( val.nb_rows(), val.nb_cols() );
-        data = val.data;
+    template<bool const_TM,class TVEC>
+    Mat(const Mat<SubMat<Mat,const_TM,TVEC>,STRUCTURE,STORAGE,int> &val) { // from SubMat
+        resize( val.v.size(), val.v.size() );
+    
+        //
+        std::map<int,int> val_set;
+        for( unsigned i = 0; i < val.v.size(); ++i )
+            val_set[ val.v[ i ] ] = i;
+                
+        //
+        for( unsigned r = 0; r < data.size(); ++r ) {
+            TVI &vec_sparse = val.m.val->data[ val.v[r] ];
+            
+            //
+            unsigned size = 0;
+            for( unsigned i = 0; i < vec_sparse.indices.size(); ++i )
+                size += val_set.count( vec_sparse.indices[i] );
+            
+            //
+            data[ r ].indices.reserve( size );
+            data[ r ].data   .reserve( size );
+            
+            //
+            for( unsigned i = 0; i < vec_sparse.indices.size(); ++i ) {
+                if ( val_set.count( vec_sparse.indices[i] ) ) {
+                    data[ r ].indices.push_back( val_set[ vec_sparse.indices[i] ] );
+                    data[ r ].data   .push_back( vec_sparse.data   [ i ] );
+                }
+            }
+        }
     }
     
     template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
