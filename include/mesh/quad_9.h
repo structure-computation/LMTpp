@@ -118,6 +118,10 @@ bool divide_element_using_elem_children(Element<Quad_9,TN,TNG,TD,NET> &e,TM &m,T
     return divide_element(e,m,nnodes);
 }
 
+template<class TV,class T>
+bool var_inter_is_inside( const Quad_9 &, const TV &var_inter, T tol = 0 ) {
+    return heaviside( var_inter[0] + tol ) * heaviside( var_inter[1] + tol ) * heaviside( 1 - var_inter[0] + tol ) * heaviside( 1 - var_inter[1] + tol );
+}
 
 };
 

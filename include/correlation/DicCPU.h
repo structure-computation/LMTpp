@@ -19,11 +19,15 @@ struct DicCPU {
     ///
     DicCPU() {
         levenberg_marq = 0.0;
-        prec_linear_system = 1e-4;
         nb_threads_for_assembly = 4;
-        div_pixel = 4;
+        div_pixel = 1;
         delta_gray = 1;
         relaxation = 1;
+        max_cpt_iter = 50;
+        min_norm_inf_dU = 0;
+        min_norm_2_dU = 0;
+        display_norm_inf_dU = true;
+        display_norm_2_dU = false;
     }
 
     ///
@@ -169,11 +173,27 @@ struct DicCPU {
 
     ///
     template<class TIMGf,class TIMGg,class TM,class NAME_VAR> void exec( const TIMGf &f, const TIMGg &g, TM &m, const NAME_VAR &name_var, bool want_mat = true, bool want_vec = true ) {
-        assemble( f, g, m, name_var, want_mat, want_vec );
-        if ( want_vec ) {
+        for(cpt_iter=0;cpt_iter<max_cpt_iter;++cpt_iter) {
+            assemble( f, g, m, name_var, want_mat, want_vec );
+            // simple break conditions
+            if ( want_vec == false or ( min_norm_inf_dU == 0 and min_norm_2_dU == 0 ) )
+                break;
+            
+            //
             solve_linear_system();
             dU *= relaxation;
             update_mesh( m, name_var );
+            
+            history_norm_inf_dU.push_back( norm_inf( dU ) );
+            history_norm_2_dU  .push_back( norm_2  ( dU ) );
+            if ( display_norm_inf_dU )
+                PRINT( norm_inf( dU ) );
+            if ( display_norm_2_dU )
+                PRINT( norm_2( dU ) );
+            
+            // convergence
+            if ( norm_inf( dU ) <= min_norm_inf_dU or norm_2( dU ) <= min_norm_2_dU )
+                break;
         }
     }
     
@@ -303,18 +323,27 @@ struct DicCPU {
         return mean( dU );
     }
     
+    // output
     Mat<T,Sym<>,SparseLine<> > M, C_M;
     Vec<int> indice_noda;
     Vec<T> F;
     Vec<T> dU;
     T sum_residual;
-    T delta_gray;
+    unsigned cpt_iter; // nombre d'itérations pour converger
+    Vec<T> history_norm_inf_dU;
+    Vec<T> history_norm_2_dU;
     
-    T prec_linear_system;
+    // input
     T levenberg_marq;
     T relaxation;
+    T delta_gray; /// erreur capteur
+    T min_norm_inf_dU; /// norm_inf( dU ) < min_norm_inf_dU pour que ça s'arrête
+    T min_norm_2_dU; /// à moins que norm_2( dU ) < min_norm_2_dU
+    unsigned max_cpt_iter; /// à moins que nb_iter >= max_cpt_iter
     unsigned nb_threads_for_assembly;
-    unsigned div_pixel; // for "correct" integration
+    unsigned div_pixel; /// for "correct" integration
+    bool display_norm_inf_dU; /// display norm_inf( dU ) au cours des itérations, vrai par défaut
+    bool display_norm_2_dU; /// display norm_2( dU ) au cours des itérations, faux par défaut
 };
 
 }

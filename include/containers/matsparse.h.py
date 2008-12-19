@@ -71,6 +71,12 @@ public:
         data = val.data;
     }
     
+    template<class T2> Mat(const Mat<SubMat<Mat,true ,TVEC>,STRUCTURE,STORAGE,int> &val) { // from SubMat
+        return ( *this, v );
+        resize( val.nb_rows(), val.nb_cols() );
+        data = val.data;
+    }
+    
     template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
         resize( val.nb_rows(), val.nb_cols() );
         if ( (STRUCTURE::need_upper and STRUCTURE::need_lower)==false and STRUCTURE::need_diag )
