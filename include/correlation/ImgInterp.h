@@ -4,6 +4,8 @@
 #include <containers/mat.h>
 #include <QtGui/QImage>
 #include <assert.h>
+#include <fstream>
+#include <sstream>
 
 namespace LMT {
 
@@ -123,6 +125,33 @@ struct ImgInterp {
         }
         return img;
     }
+    
+    ///
+    void load_ascii_mat_file( std::string filename ) {
+        using namespace std;
+        
+        // sizes
+        sizes = 0;
+        ifstream f( filename.c_str() );
+        string line;
+        if ( getline( f, line ) ) {
+            istringstream is( line );
+            T val;
+            while ( is >> val )
+                sizes[0]++;
+            sizes[1] = 1;
+            while ( getline( f, line ) )
+                sizes[1]++;
+        }
+            
+        // data
+        data.resize( product( sizes ) );
+        f.clear();
+        f.seekg( 0, ios::beg );
+        for(unsigned i=0;i<data.size();++i)
+            f >> data[ i ];
+    }
+    
     
     ///
     void save( std::string filename, bool normalize = false ) const {

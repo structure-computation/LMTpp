@@ -197,6 +197,72 @@ struct DicCPU {
         }
     }
     
+    template<class TIMGf,class TIMGg,class TM,class NAME_VAR> void exec_rigid_body( const TIMGf &f, const TIMGg &g, TM &m, const NAME_VAR &name_var, bool want_mat = true, bool want_vec = true ) {
+        typedef typename TM::Pvec Pvec;
+        for(cpt_iter=0;cpt_iter<max_cpt_iter;++cpt_iter) {
+            assemble( f, g, m, name_var, want_mat, want_vec );
+            // simple break conditions
+            if ( want_vec == false or ( min_norm_inf_dU == 0 and min_norm_2_dU == 0 ) )
+                break;
+            
+            // search_dir
+            const unsigned nb_search_dir = 3 + 3 * ( dim == 3 );
+            Pvec C = center( m );
+            Vec<Vec<T>,nb_search_dir> search_dir;
+            for(unsigned i=0;i<nb_search_dir;++i)
+                search_dir[ i ].resize( F.size() );
+            if ( dim == 2 ) {
+                for(unsigned i=0;i<m.node_list.size();++i) {
+                    search_dir[ 0 ][ indice_noda[i] + 0 ] = 1;
+                    search_dir[ 0 ][ indice_noda[i] + 1 ] = 0;
+                    search_dir[ 1 ][ indice_noda[i] + 0 ] = 0;
+                    search_dir[ 1 ][ indice_noda[i] + 1 ] = 1;
+                    search_dir[ 2 ][ indice_noda[i] + 0 ] = C[1] - m.node_list[i].pos[1];
+                    search_dir[ 2 ][ indice_noda[i] + 1 ] = m.node_list[i].pos[0] - C[0];
+                }
+            } else {
+                assert( 0 /*TODO*/ );
+            }
+            
+            // system to solve
+            Vec<T> F_red; F_red.resize( nb_search_dir );
+            Mat<T> M_red( F_red.size() );
+            for(unsigned i=0;i<nb_search_dir;++i) {
+                F_red[ i ] = dot( F, search_dir[ i ] );
+                for(unsigned j=0;j<nb_search_dir;++j)
+                    M_red( i, j ) = dot( M * search_dir[ i ], search_dir[ j ] );
+            }
+            if ( levenberg_marq ) {
+                T ni =  norm_inf( M_red.diag() );
+                M_red.diag() += levenberg_marq * ( ni + ( ni == 0 ) );
+            }
+            Vec<T> dU_red = inv( M_red ) * F_red;
+            
+            // update_mesh
+            dU = dU_red[ 0 ] * search_dir[ 0 ];
+            for(unsigned i=1;i<nb_search_dir;++i)
+                dU += dU_red[ i ] * search_dir[ i ];
+            //             ExtractDM<NAME_VAR> ed;
+            //             for(int i=0;i<m.node_list.size();++i)
+            //                 for(int d=0;d<dim;++d)
+            //                     ed( m.node_list[i] )[ d ] += dU[ indice_noda[ i ] + d ];
+            
+            //
+            update_mesh( m, name_var );
+            
+            history_norm_inf_dU.push_back( norm_inf( dU ) );
+            history_norm_2_dU  .push_back( norm_2  ( dU ) );
+            if ( display_norm_inf_dU )
+                PRINT( norm_inf( dU ) );
+            if ( display_norm_2_dU )
+                PRINT( norm_2( dU ) );
+            
+            // convergence
+            if ( norm_inf( dU ) <= min_norm_inf_dU or norm_2( dU ) <= min_norm_2_dU )
+                break;
+        }
+    }
+    
     ///
     void solve_linear_system() {
         solve_using_chol_factorize( C_M, F, dU );
