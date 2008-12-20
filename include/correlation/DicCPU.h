@@ -211,17 +211,23 @@ struct DicCPU {
             Vec<Vec<T>,nb_search_dir> search_dir;
             for(unsigned i=0;i<nb_search_dir;++i)
                 search_dir[ i ].resize( F.size() );
+            for(unsigned i=0;i<m.node_list.size();++i)
+                for(int j=0;j<dim;++j)
+                    for(int k=0;k<dim;++k)
+                        search_dir[ j ][ indice_noda[i] + k ] = ( j == k );
             if ( dim == 2 ) {
                 for(unsigned i=0;i<m.node_list.size();++i) {
-                    search_dir[ 0 ][ indice_noda[i] + 0 ] = 1;
-                    search_dir[ 0 ][ indice_noda[i] + 1 ] = 0;
-                    search_dir[ 1 ][ indice_noda[i] + 0 ] = 0;
-                    search_dir[ 1 ][ indice_noda[i] + 1 ] = 1;
                     search_dir[ 2 ][ indice_noda[i] + 0 ] = C[1] - m.node_list[i].pos[1];
                     search_dir[ 2 ][ indice_noda[i] + 1 ] = m.node_list[i].pos[0] - C[0];
                 }
             } else {
-                assert( 0 /*TODO*/ );
+                for(unsigned i=0;i<m.node_list.size();++i) {
+                    for(int j=0;j<dim;++j) {
+                        Pvec D = vect_prod( C - m.node_list[i].pos, static_dirac_vec<dim>( 1, j ) );
+                        for(int k=0;k<dim;++k)
+                            search_dir[ dim + j ][ indice_noda[i] + k ] = D[ k ];
+                    }
+                }
             }
             
             // system to solve
@@ -238,27 +244,27 @@ struct DicCPU {
             }
             Vec<T> dU_red = inv( M_red ) * F_red;
             
-            // update_mesh
-            dU = dU_red[ 0 ] * search_dir[ 0 ];
-            for(unsigned i=1;i<nb_search_dir;++i)
-                dU += dU_red[ i ] * search_dir[ i ];
-            //             ExtractDM<NAME_VAR> ed;
-            //             for(int i=0;i<m.node_list.size();++i)
-            //                 for(int d=0;d<dim;++d)
-            //                     ed( m.node_list[i] )[ d ] += dU[ indice_noda[ i ] + d ];
+            // update_mesh ( translation + "true" rotation )
+            ExtractDM<NAME_VAR> ed;
+            for(int i=0;i<m.node_list.size();++i) {
+                Pvec cp = m.node_list[i].pos + ed( m.node_list[i] ) - C, nv = cp;
+                for(int j=0;j<1+2*(dim==3);++j)
+                    nv += dU_red[ dim + j ] * search_dir[ dim + j ][ indice_noda[i] + range( dim ) ];
+                Pvec rot = nv * norm_2( cp, 1e-40 ) / norm_2( nv, 1e-40 ) - cp; // length conservation
+                //
+                ed( m.node_list[i] ) += rot + dU_red[ range(dim) ];
+                //ed( m.node_list[i] ) += nv - cp + dU_red[ range(dim) ];
+            }
             
-            //
-            update_mesh( m, name_var );
-            
-            history_norm_inf_dU.push_back( norm_inf( dU ) );
-            history_norm_2_dU  .push_back( norm_2  ( dU ) );
+            history_norm_inf_dU.push_back( norm_inf( dU_red ) );
+            history_norm_2_dU  .push_back( norm_2  ( dU_red ) );
             if ( display_norm_inf_dU )
-                PRINT( norm_inf( dU ) );
+                PRINT( norm_inf( dU_red ) );
             if ( display_norm_2_dU )
-                PRINT( norm_2( dU ) );
+                PRINT( norm_2( dU_red ) );
             
             // convergence
-            if ( norm_inf( dU ) <= min_norm_inf_dU or norm_2( dU ) <= min_norm_2_dU )
+            if ( norm_inf( dU_red ) <= min_norm_inf_dU or norm_2( dU_red ) <= min_norm_2_dU )
                 break;
         }
     }
