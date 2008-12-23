@@ -27,7 +27,7 @@ void VisitorBloc_getListKeyword :: function_at_Classe( Classe* c ) {
 
     int i,n,j,m ;
 
-    // on veut récupérer tous les keyword de tous les commentaires associés à cette classe.
+    /// on veut récupérer tous les keyword de tous les commentaires associés à cette classe.
     VisitorCommentItem_getKeyword_of_ExTuGe visi ;
     n = c->listTag.size() ;
     for(i=0;i<n;i++) {

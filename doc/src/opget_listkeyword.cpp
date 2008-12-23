@@ -40,7 +40,7 @@ void OpGet_listKeyword :: operator()( PageComment* page ) {
     VisitorBloc_getListKeyword viso ;
     int i,n,j,m,t,S ;
 
-    //  on parcourt tous les commentaires à la recherche de keyword dans les exemples, les tutoriels et les commentaires génériques
+    ///  on parcourt tous les commentaires à la recherche de keyword dans les exemples, les tutoriels et les commentaires génériques
 
     n = page->listComment.size() ;
     for(i=0;i<n;i++) {
@@ -83,7 +83,7 @@ void OpGet_listKeyword :: operator()( PageComment* page ) {
     }
 
 
-    // Ensuite on cherche les mot-clés dans les commentaires de classes, et de fonctions en excluant les commentaires génériques.
+    /// Ensuite on cherche les mot-clés dans les commentaires de classes, et de fonctions en excluant les commentaires génériques.
     n = page->code.list_subType_function.size() ;
     for(i=0;i<n;i++) {
         viso.init() ;

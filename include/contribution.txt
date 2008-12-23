@@ -3,6 +3,10 @@
 
     Il y a plusieurs façon de contribuer à la librairie LMT++. 
 
+    = Faire une suggestion
+
+        Il n'est pas toujours facile d'anticiper les besoins et les difficultés de chacun. Si vous voulez des précisions, des exemples, des explications, écrivez-moi à l'adresse \a pasquier@lm.ens-cachan.fr ou venez me voir à mon bureau (je n'ai encore jamais mangé personne). 
+
     = Signaler un bug
 
         En fait, la librairie a été beaucoup testé et si votre programme plante ou si les résultats ne sont pas conformes, il est fort probable que vous ayez fait une erreur. La plus courante est un accès en lecture ou en écriture sur des éléments d'un tableau non initialisés. Demandez aussi à vos voisins de vérifier votre code.
@@ -30,9 +34,14 @@
 
             Pour commencer il faut savoir que les commentaires qui seront examinés par le générateur de documentation sont entre les balises :
             \verbatim 
-                / *!   / et *! sont attachés
+                / *!    ATENTION les symboles / et *! sont en fait attachés
+
+                    ...
                     je commente mon code
+                    ...
+
                 * /  / * sont attachés
+
             ou s'ils logent sur une seule ligne par trois slash.
             Ainsi si vous souhaitez faire des commentaires personnels qui n'apparaîtront pas dans la doc, utilisez les balises standardsdu C++ ou celles de doxygen.
             Ensuite <strong> LA REGLE D'OR </strong> pour écrire de la documentaion est de se souvenir que les sous-parties sont identifées par leur <strong> INDENTATION </strong> et la <strong> FIN DE LIGNE </strong>. Par exemple pour écrire un bout de code dans un commentaire, vous écrirez :

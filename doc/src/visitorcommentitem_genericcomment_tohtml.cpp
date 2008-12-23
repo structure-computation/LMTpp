@@ -93,7 +93,7 @@ void VisitorCommentItem_GenericComment_toHTML :: function_at_CommentItemGenericC
                 else {
                     pageWeb << "<div class=\"avertissement\">" << std::endl ;
                     //pageWeb << "<strong>" << std::endl ;
-                    pageWeb << "pas de mot cl&eacute; brief dans la documentation" << std::endl ;
+                    //pageWeb << "pas de mot cl&eacute; brief dans la documentation" << std::endl ;
                     //pageWeb << "<strong>" << std::endl ;
                     pageWeb << "</div>" << std::endl ;
                 }

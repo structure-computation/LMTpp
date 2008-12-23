@@ -1,8 +1,8 @@
 /*!
 \example Minimiser une fonctionnelle simple 
 
-    On va se servir de la plate-forme qui contient des fonctions pour le calul formelle.
-    Imaginons qu'on veuille minimiser la fonction x -> (x-a)**2 on écrira dans un fichier py, disons titi.py :
+    On va se servir de la plate-forme qui contient des fonctions pour le calul formel.
+    Imaginons qu'on veuille minimiser la fonction x -> (x-a)**2. on écrira dans un fichier py, disons titi.py, le code :
     \code Python
         from LMT.formal_lf import *
         
@@ -20,7 +20,7 @@
         print wc.to_string()
         print "}"
 
-    Ce code envoie sur la sortie standard le code C++ une fonction calculant ce minimum. Donc en tapant en console :
+    Ce code envoie sur la sortie standard le code C++ d'une fonction calculant ce minimum. Donc en tapant en console :
     \verbatim
         python titi.py > titi.cpp
     On obtient le code de notre fonction.
