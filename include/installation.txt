@@ -1,9 +1,29 @@
 /*!
 \webpage installation Installation
 
-    Page en construction.
-    Mais pas d'inquiétude, la LMT++ est déjà installée sur cette machine.
+    = Récupération
 
+        Pour installer la librairie LMT++, on récupère les sources dans le dépot git de l'utilisateur multi en faisant :
+        \code 
+            git clone votre-nom@givry:/u/multi/LMT
 
+    = Utilisation de la librairie
+
+        Pour générer certaines parties de la libriaire LMT++ et aussi pour compiler vos propres programmes, vous aurez besoin d'installer quelques programmes et en-têtes :
+            * g++ et oui en faisant sur ubuntu sudo apt-get install g++
+            * python (commande : sudo apt-get install python ou python2.4 ).
+            * scons (commande : sudo apt-get install scons ).
+            * swig  (commande : sudo apt-get install swig ).
+            * readline (commande : sudo apt-get install libreadline5-dev ).
+            * en-têtes python (commande : sudo apt-get install python-dev ).
+            
+        cela devrait suffire!
+
+    = Dépendances
+
+        Ensuite si vous avez besoin de la librairie cholamd, récupérer le répertoire MATH dans le dépot git :
+        \code    
+            git clone votre-nom@givry:/u/multi/MATH
+        puis copier ce répertoire dans le répoertoire /opt.
 
 */

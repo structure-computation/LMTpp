@@ -384,7 +384,7 @@ void VisitorBloc_AllClass_toHTML :: generate_page_HTML_for_class_or_struct( cons
     
     /// namespace
     if (b->_namespace.size() > 0) {
-        pageWeb << "<br> <strong>  namespace is </strong> " << b->_namespace << std::endl ;
+        pageWeb << "<br> <strong>  namespace : </strong> " << b->_namespace << std::endl ;
     }
 
     /// les héritages
