@@ -100,12 +100,12 @@ void Documentation :: addDirSource( const char* name_dir,vector<string>& listsou
         if ( (err = lstat(stmp.c_str(),&st)) != -1) {
             if ((S_ISDIR(st.st_mode)) && (dp->d_name[0] != '.')) { 
                 /// dp->d_name est le nom d'un répertoire qui ne commence pas un point
-                cout << " fichier = |" << dp->d_name << "| est un répertoire" << endl ;
+                //cout << " fichier = |" << dp->d_name << "| est un répertoire" << endl ;
                 /// on teste si ce répertoire n'est pas un répertoire à exclure.
                 if (ptr_list_excluded_directories != NULL) {
                     bool on_le_parse = true;
                     for(int i=0;i<(*ptr_list_excluded_directories).size();i++) {
-                        cout << " (*ptr_list_excluded_directories)[i] = |" << (*ptr_list_excluded_directories)[i] << "|" << endl ;
+                        //cout << " (*ptr_list_excluded_directories)[i] = |" << (*ptr_list_excluded_directories)[i] << "|" << endl ;
                         if (strcmp(dp->d_name,(*ptr_list_excluded_directories)[i]) == 0) {
                             on_le_parse = false;
                             break;
@@ -300,21 +300,24 @@ typedef map<string,Target*>::const_iterator const_iter ;
 
 void display_multi_list( map<string,Target*>& ma, int level, const_iter first, const_iter end, ofstream& pageWeb, Target* pt ) {
 
-    string stmp,stmp2 ;
+    string stmp,stmp2,stmp_local_path ;
     const_iter iter, iter2 ;
 
-    // liste vide
+    /// liste vide
     if (first == end)
         return ;
     pageWeb << "<ul>" << std::endl ;
     for(iter = first;iter != end; ) {
         if (extract_name_of_path( stmp,iter->first,level)) {
-            // au niveau level, on a une feuille
+            /// au niveau level, on a une feuille
+            stmp_local_path = stmp;// on récupère le chemin courant
             pageWeb << "<li>" << linkHTML( pt->reference(), iter->second->reference(),stmp ) << "</li>" << std::endl ;
             iter++ ;
         } else {
-            // au niveau level, on a un "sous-répertoire"
-            pageWeb << "<li>" << french2HTML( stmp ) << "</li>" << std::endl ;
+            /// au niveau level, on a un "sous-répertoire"
+            if (stmp != stmp_local_path)
+                pageWeb << "<li>" << french2HTML( stmp ) << "</li>" << std::endl ;
+            stmp_local_path.clear();
             for( iter2 = iter ; iter2 != end; iter2++ ) {
                 extract_name_of_path( stmp2,iter2->first,level) ;
                 if (stmp2 != stmp)
@@ -497,7 +500,7 @@ void Documentation :: generate_webpage_vacuum( const string& name_of_path, const
 
 }
 
-    /*
+    /**
     génère la pages web des objets génériques (i.e. lorsque plusieurs Target ont le même nom principal).
     Il y a deux cas à traités; Celui où l'objet générique a un commentaire générique et l'autre où il n' en a pas.
     s'il y a un commentaire générique, on parcourt la structure pour faire la page, sinon on fait directement la page !
@@ -515,7 +518,7 @@ void Documentation::generate_webpage_of_summary() {
     map<string,Target*> map_keyword_Target ;
     Target* pt;
 
-     /*
+     /**
      On génére les pages web de résumé de toutes les fonctions, toutes les structures, tous les tutoriaux, tous les exemples.
      On commence par récupérer les brief des fonctions, structures, classes, exemples, et exemples qui ne sont pas génériques.
      Puis avec ces données, on créera les pages web recapitulatives des structures/classes, des fonctions, des exemples et des tutoriaux.
@@ -563,13 +566,14 @@ void Documentation::generate_webpage_of_summary() {
     generate_webpage_list( list_function,"root","list", "Toutes les  fonctions", false ) ; // false signifie que l'id d target n'est pas incrémenté
     generate_webpage_list( list_struct_class,"root","list", "Toutes les classes", false ) ; // false signifie que l'id d target n'est pas incrémenté
 
-    /*
+    /**
      On crée ensuite la page web affichant la liste des mots clés .
      on récupère tous les mots clés avec les pages web associées dans op_get_list_keyword.
     
     */
     scan( op_get_list_keyword ) ;
     for(iter = op_get_list_keyword.list_keyword.begin();iter != op_get_list_keyword.list_keyword.end(); ++iter) {
+        /// cette boucle sert à créer la page web de chaque feuille de l'arboresence correspondant aux mot-clés.
         stmp = extract_path( iter->first ) ;
         stmp = "keyword_" + replace_delimitateur( stmp,'/','_') ;
         map_keyword_Target[iter->first] = generate_webpage_list_by_type(iter->second,"keyword",stmp,extract_last_name_of_path(iter->first),false) ;
@@ -577,6 +581,7 @@ void Documentation::generate_webpage_of_summary() {
         //cerr << " extract_last_name_of_path(iter->first) = " << extract_last_name_of_path(iter->first) << endl ;
         //cerr << " replace_delimitateur(iter->first,'/','_') = " << replace_delimitateur(iter->first,'/','_') << endl ;
     }
+    /// cette fonction génère les pages web correspondants aux branches de l'arbre
     generate_webpage_multi_list( map_keyword_Target,"root","list", "Tous les mot-clés", false ) ; // false signifie que l'id d target n'est pas incrémenté
 
 }
@@ -616,7 +621,7 @@ void Documentation::generate_webpage_of_main_object() {
         }
     }
 
-    // ensuite on trie les 4 listes.
+    // ensuite on trie les 2 listes.
     stable_sort( list_function.begin(),list_function.end(), inferior ) ;
     stable_sort( list_struct_class.begin(),list_struct_class.end(), inferior ) ;
     // on crée les pages web.
