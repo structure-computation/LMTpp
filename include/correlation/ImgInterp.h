@@ -9,11 +9,69 @@
 
 namespace LMT {
 
+/** kernel exemple for ImgInterp */
+struct ImgInterpBilinearKernel {
+    // 2D
+    template<class T,class Img,class PT>
+    T operator()( StructForType<T>, const Img &f, PT x, PT y ) const {
+        int xi = int( x );
+        int yi = int( y );
+        PT xf = x - xi;
+        PT yf = y - yi;
+        return f.tex_int( xi + 0, yi + 0 ) * ( 1 - xf ) * ( 1 - yf ) + 
+               f.tex_int( xi + 1, yi + 0 ) * ( 0 + xf ) * ( 1 - yf ) + 
+               f.tex_int( xi + 0, yi + 1 ) * ( 1 - xf ) * ( 0 + yf ) + 
+               f.tex_int( xi + 1, yi + 1 ) * ( 0 + xf ) * ( 0 + yf );
+    }
+    // 3D
+    template<class T,class Img,class PT>
+    T operator()( StructForType<T>, const Img &f, PT x, PT y, PT z ) const {
+        int xi = int( x );
+        int yi = int( y );
+        int zi = int( z );
+        PT xf = x - xi;
+        PT yf = y - yi;
+        PT zf = z - zi;
+        return f.tex_int( xi + 0, yi + 0, zi + 0 ) * ( 1 - xf ) * ( 1 - yf ) * ( 1 - zf ) + 
+               f.tex_int( xi + 1, yi + 0, zi + 0 ) * ( 0 + xf ) * ( 1 - yf ) * ( 1 - zf ) + 
+               f.tex_int( xi + 0, yi + 1, zi + 0 ) * ( 1 - xf ) * ( 0 + yf ) * ( 1 - zf ) + 
+               f.tex_int( xi + 1, yi + 1, zi + 0 ) * ( 0 + xf ) * ( 0 + yf ) * ( 1 - zf ) +
+               f.tex_int( xi + 0, yi + 0, zi + 1 ) * ( 1 - xf ) * ( 1 - yf ) * ( 0 + zf ) + 
+               f.tex_int( xi + 1, yi + 0, zi + 1 ) * ( 0 + xf ) * ( 1 - yf ) * ( 0 + zf ) + 
+               f.tex_int( xi + 0, yi + 1, zi + 1 ) * ( 1 - xf ) * ( 0 + yf ) * ( 0 + zf ) + 
+               f.tex_int( xi + 1, yi + 1, zi + 1 ) * ( 0 + xf ) * ( 0 + yf ) * ( 0 + zf );
+    }
+};
+
+/** kernel exemple for ImgInterp */
+struct ImgInterpIntegralKernel {
+    // 2D
+    template<class T,class Img,class PT>
+    T operator()( StructForType<T>, const Img &f, PT x, PT y ) const {
+        int xi = int( x );
+        int yi = int( y );
+        PT xf = x - xi;
+        PT yf = y - yi;
+        return f.tex_int( xi + 0, yi + 0 ) * ( 1 - xf ) * ( 1 - yf ) + 
+               f.tex_int( xi + 1, yi + 0 ) * ( 0 + xf ) * ( 1 - yf ) + 
+               f.tex_int( xi + 0, yi + 1 ) * ( 1 - xf ) * ( 0 + yf ) + 
+               f.tex_int( xi + 1, yi + 1 ) * ( 0 + xf ) * ( 0 + yf );
+    }
+    // 3D
+    template<class T,class Img,class PT>
+    T operator()( StructForType<T>, const Img &f, PT x, PT y, PT z ) const {
+        assert( 0 /*TODO*/ );
+        return 0;
+    }
+};
+
+
 /** */
-template<class T_,unsigned dim_,class PT_=T_>
+template<class T_,unsigned dim_,class Kernel_=ImgInterpBilinearKernel,class PT_=T_>
 struct ImgInterp {
     typedef T_ T;
     static const unsigned dim = dim_;
+    typedef Kernel_ Kernel;
     typedef PT_ PT;
     typedef ImgInterp T_NewImg;
     
@@ -203,32 +261,12 @@ struct ImgInterp {
     
     ///
     inline T operator()( PT x, PT y ) const {
-        int xi = int( x );
-        int yi = int( y );
-        PT xf = x - xi;
-        PT yf = y - yi;
-        return tex_int( xi + 0, yi + 0 ) * ( 1 - xf ) * ( 1 - yf ) + 
-               tex_int( xi + 1, yi + 0 ) * ( 0 + xf ) * ( 1 - yf ) + 
-               tex_int( xi + 0, yi + 1 ) * ( 1 - xf ) * ( 0 + yf ) + 
-               tex_int( xi + 1, yi + 1 ) * ( 0 + xf ) * ( 0 + yf );
+        return kernel( StructForType<T>(), *this, x, y );
     }
     
     ///
     inline T operator()( PT x, PT y, PT z ) const {
-        int xi = int( x );
-        int yi = int( y );
-        int zi = int( z );
-        PT xf = x - xi;
-        PT yf = y - yi;
-        PT zf = z - zi;
-        return tex_int( xi + 0, yi + 0, zi + 0 ) * ( 1 - xf ) * ( 1 - yf ) * ( 1 - zf ) + 
-               tex_int( xi + 1, yi + 0, zi + 0 ) * ( 0 + xf ) * ( 1 - yf ) * ( 1 - zf ) + 
-               tex_int( xi + 0, yi + 1, zi + 0 ) * ( 1 - xf ) * ( 0 + yf ) * ( 1 - zf ) + 
-               tex_int( xi + 1, yi + 1, zi + 0 ) * ( 0 + xf ) * ( 0 + yf ) * ( 1 - zf ) +
-               tex_int( xi + 0, yi + 0, zi + 1 ) * ( 1 - xf ) * ( 1 - yf ) * ( 0 + zf ) + 
-               tex_int( xi + 1, yi + 0, zi + 1 ) * ( 0 + xf ) * ( 1 - yf ) * ( 0 + zf ) + 
-               tex_int( xi + 0, yi + 1, zi + 1 ) * ( 1 - xf ) * ( 0 + yf ) * ( 0 + zf ) + 
-               tex_int( xi + 1, yi + 1, zi + 1 ) * ( 0 + xf ) * ( 0 + yf ) * ( 0 + zf );
+        return kernel( StructForType<T>(), *this, x, y, z );
     }
     
     
@@ -249,6 +287,7 @@ struct ImgInterp {
         Vec<T,dim> res;
         for(int i=0;i<dim;++i)
             res[ i ] = operator()( Vec<PT,dim>( p + static_dirac_vec<dim>( 1, i ) ) ) - operator()( p );
+        // res[ i ] = 0.5 * operator()( Vec<PT,dim>( p + static_dirac_vec<dim>( 1, i ) ) ) - operator()( p - static_dirac_vec<dim>( 1, i ) );
         return res;
     }
     
@@ -258,6 +297,7 @@ struct ImgInterp {
     ///
     Vec<T> data;
     Vec<int,dim> sizes;
+    Kernel kernel;
 };
 
 

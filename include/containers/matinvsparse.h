@@ -61,6 +61,8 @@ template<class T,class TS> void chol_factorize( Mat<T,TS,SparseLine<> > &m ) {
         for(int ind=0;ind<(int)m.data[line].indices.size()-1;++ind) {
             // m_ij != 0
             unsigned col = m.data[line].indices[ind];
+            if ( m.data[col].data.size() == 0 )
+                continue;
             m.data[line].data[ind] = ( m.data[line].data[ind] - dot_chol_factorize( m.data[col], m.data[line] ) ) / m.data[col].data.back();
             hash[ line ].add( col );
             // m_ij == 0
@@ -85,7 +87,8 @@ template<class T,class TS> void chol_factorize( Mat<T,TS,SparseLine<> > &m ) {
             }
         }
         // on diag
-        m.data[line].data.back() = sqrt( m.data[line].data.back() - norm_2_p2( m.data[line].data.begin(), m.data[line].data.size()-1 ) );
+        if ( m.data[line].data.size() )
+            m.data[line].data.back() = sqrt( m.data[line].data.back() - norm_2_p2( m.data[line].data.begin(), m.data[line].data.size()-1 ) );
     }
     //PRINT( hash );
 }
