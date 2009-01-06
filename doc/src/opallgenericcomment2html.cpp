@@ -70,7 +70,7 @@ void OpAllGenericComment2HTML :: generate_webPage_of_generic_object_without_gene
     pageWeb << "<strong>" << std::endl ;
     pageWeb << "<br> " << std::endl ;
     pageWeb << "Cet objet n' a pas de description g&eacute;n&eacute;rale." << std::endl ;
-    pageWeb << "<br> Pour cr&eacute;er une description g&eacute;n&eacute;rale, veuillez consulter la page \a Contribution ." << std::endl ;
+    pageWeb << "<br> Pour cr&eacute;er une description g&eacute;n&eacute;rale, veuillez consulter la page \\a Contribution ." << std::endl ;
     pageWeb << "<br> " << std::endl ;
     pageWeb << "<strong>" << std::endl ;
     pageWeb << "</div>" << std::endl ;
