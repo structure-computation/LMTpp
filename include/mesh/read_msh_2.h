@@ -28,7 +28,7 @@ namespace LMT {
 
 /*!
 \internal
-Fonction interne
+    Fonction interne
 
 */
 template<class TE,class VarTag,unsigned n,unsigned m>
