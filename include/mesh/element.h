@@ -319,7 +319,7 @@ template<class TE,class Pvec> bool pos_is_inside( const TE &elem,const Pvec &pos
 */
 template<class TE> typename TE::Pvec sample_tangent( const TE &e ) {
     assert( 0 ); // non défini
-    return typename TE::Pvec(0);
+    return typename TE::Pvec(typename TE::T(0));
 }
 
 };

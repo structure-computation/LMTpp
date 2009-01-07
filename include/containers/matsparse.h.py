@@ -116,7 +116,7 @@ public:
         resize( v.size(), v.size() );
         for(unsigned i=0;i<nb_rows();++i) {
             data[i].indices = v[i];
-            data[i].data.resize( v[i].size(), 0.0 );
+            data[i].data.resize( v[i].size(), TT(0.0) );
         }
     }
 

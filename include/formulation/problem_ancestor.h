@@ -27,7 +27,7 @@ public:
     virtual FormulationAncestor<ScalarType> *formulation_nb(unsigned i) { return NULL; }
 
     ProblemAncestor() {
-        time = 0.0;
+        time = T(0);
         has_been_initialised = false;
         verbose = true;
     }

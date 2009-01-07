@@ -25,7 +25,7 @@ struct ConstantStep {
 template <int g=0, class T=double>
 struct ArmijoStep {
     ArmijoStep (const T &v=T(1), const T &p=T(1)/T(2), const T &e=T(0.000001)) { value=v; parameter=p; epsilon=e; }
-    template <class TF, int s1, int s2> void update(TF &j,const Vec<T,s1> &c, const Vec<T,s2> &d) {
+    template <class TF, int s> void update(TF &j,const Vec<T,s> &c, const Vec<T,s> &d) {
         T f=T(1);
         T y=T(0);
         T toto=parameter*dot(lm_gradient(j,c,Number<g>(),epsilon),d);

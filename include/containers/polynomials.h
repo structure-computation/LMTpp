@@ -77,6 +77,8 @@ public:
 private :
     Vec<T,dim> coefs;
 public:
+    static const int degree=nd;
+    static const int variables_number=nx;
     static bool init_puissances;
     static void initialize_puissances();
     static Vec<Vec<unsigned,nx>,Pol<nd,nx,T>::dim> puissances;
@@ -145,9 +147,9 @@ template <int nd, int nx, class T>
 template <class T2>
 Pol<nd,nx,T>::Pol(const Vec<T2> &V) {
     for(unsigned i=0; i<min(V.size(),coefs.size()); ++i)
-        coefs[i] = V[i];
+        coefs[i] = T(V[i]);
     for(unsigned i=V.size(); i<coefs.size(); ++i)
-        coefs[i] = 0;
+        coefs[i] = T(0);
 }
 
 template <int nd, int nx, class T>
@@ -554,6 +556,14 @@ Pol<nd,nx,T> sqrt (const Pol<nd,nx,T> &P) {
 }
 
 template <int nd, int nx, class T>
+std::istream &operator>>(std::istream &is, Pol<nd,nx,T> &P) {
+    T coefs;
+    is >> coefs;
+    P=Pol<nd,nx,T>(coefs);
+    return is;
+}
+
+template <int nd, int nx, class T>
 std::ostream &operator<<(std::ostream &os, const Pol<nd,nx,T> &P) {
     if (Pol<nd,nx,T>::init_puissances)
         Pol<nd,nx,T>::initialize_puissances();
@@ -599,6 +609,8 @@ public:
 private :
     Vec<T,dim> coefs;
 public:
+    static const int degree=nd;
+    static const int variables_number=1;
     static bool init_puissances;
     static void initialize_puissances();
     static Vec<Vec<unsigned,1>,Pol<nd,1,T>::dim> puissances;
@@ -660,9 +672,9 @@ template <int nd, class T>
 template <class T2>
 Pol<nd,1,T>::Pol(const Vec<T2> &V) {
     for(unsigned i=0; i<min(V.size(),coefs.size()); ++i)
-        coefs[i] = V[i];
+        coefs[i] = T(V[i]);
     for(unsigned i=V.size(); i<coefs.size(); ++i)
-        coefs[i] = 0;
+        coefs[i] = T(0);
 }
 
 template <int nd, class T>
@@ -1123,6 +1135,14 @@ Pol<nd,1,T> sqrt (const Pol<nd,1,T> &P) {
 }
 
 template <int nd, class T>
+std::istream &operator>>(std::istream &is, Pol<nd,1,T> &P) {
+    T coefs;
+    is >> coefs;
+    P=Pol<nd,1,T>(coefs);
+    return is;
+}
+
+template <int nd, class T>
 std::ostream &operator<<(std::ostream &os, const Pol<nd,1,T> &P) {
     os << " " << P.coefficients()[0] << " ";
     for (unsigned i=1;i<Pol<nd,1,T>::dim;i++) {
@@ -1261,7 +1281,7 @@ Pol<nd,nx,typename TypePromote<Multiplies,T1,typename IsScalar<T2>::T>::T> opera
 
 template <int nd, int nx, class T1, class T2>
 Pol<nd,nx,typename TypePromote<Divides,T1,typename IsScalar<T2>::T>::T> operator/(const T2 &t, const Pol<nd,nx,T1> &P) {
-    return Pol<nd,nx,typename TypePromote<Divides,T1,typename IsScalar<T2>::T>::T>(t) / P;
+    return Pol<nd,nx,typename TypePromote<Divides,T1,typename IsScalar<T2>::T>::T> ( Vec<typename TypePromote<Divides,T1,typename IsScalar<T2>::T>::T,Pol<nd,nx,T1>::dim>(P.coefficients()) / typename TypePromote<Divides,T1,typename IsScalar<T2>::T>::T(t) );
 }
 
 template <int nd, int nx, class T1, class T2>
@@ -1270,11 +1290,17 @@ Pol<nd,nx,typename TypePromote<Divides,T1,typename IsScalar<T2>::T>::T> operator
 }
 
 template <int nd, int nx, class T>
-Pol<nd,nx,T> pow(const Pol<nd,1,T> &P, int a) {
+Pol<nd,nx,T> pow(const Pol<nd,nx,T> &P, int a) {
     Pol<nd,nx,T> res = P;
     for (int i=1;i<a;i++)
         res = res * P;
     return res;
+}
+
+template <int nd, int nx, class T>
+Pol<nd,nx,T> pow(const Pol<nd,nx,T> &P, const double &a) {
+    assert(0);
+    /*TODO*/
 }
 
 template <int nd, int nx, class T>
