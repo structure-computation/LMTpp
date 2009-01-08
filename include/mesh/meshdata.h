@@ -38,11 +38,11 @@ Cette macro permet l'introspection du code C++ pour obtenir par exemple les attr
     static const char *name_member_nb(const Number<number> &__n__) { return __STRING(myname); } \
     static const char *unit_member_nb(const Number<number> &__n__) { return unit; } \
     static unsigned nb_comp(const Number<number> &__n__) { return DM::NbComponents<mytype>::n; } \
-    template<class NDM,class TTT> void set_member_named##number( const NDM &ndm, const TTT &val ) {} \
-    template<class NDM,class TTT> void set_member_named_if_same_type##number( const NDM &ndm, const TTT &val ) {} \
-    template<class TTT> void set_member_named0( const myname##_DM &ndm, const TTT &val ) { myname = val; } \
-    void set_member_named_if_same_type0( const myname##_DM &ndm, const mytype &val ) { myname = val; } \
-    template<class TTT> void set_member_named_if_same_type0( const myname##_DM &ndm, const TTT &val ) {} \
+    template<class NDM,class TTT> void set_member_named##number( const NDM &ndm, const TTT &__val__ ) {} \
+    template<class NDM,class TTT> void set_member_named_if_same_type##number( const NDM &ndm, const TTT &__val__ ) {} \
+    template<class TTT> void set_member_named0( const myname##_DM &ndm, const TTT &__val__ ) { myname = __val__; } \
+    void set_member_named_if_same_type0( const myname##_DM &ndm, const mytype &__val__ ) { myname = __val__; } \
+    template<class TTT> void set_member_named_if_same_type0( const myname##_DM &ndm, const TTT &__val__ ) {} \
     mytype myname
 
 /// Ex : CARACDM(0,double,pressure);
@@ -60,12 +60,12 @@ Cette macro permet l'introspection du code C++ pour obtenir par exemple les attr
     template<unsigned dn> static const char *name_member_nb(const Number<dn> &__n__) { return PARENT::name_member_nb(__n__); } \
     template<unsigned dn> static const char *unit_member_nb(const Number<dn> &__n__) { return PARENT::unit_member_nb(__n__); } \
     template<unsigned dn> static unsigned nb_comp(const Number<dn> &__n__) { return PARENT::nb_comp(__n__); } \
-    template<class NDM,class TTT> void set_member_named0( const NDM &ndm, const TTT &val ) { PARENT::set_member_named0(ndm,val); } \
+    template<class NDM,class TTT> void set_member_named0( const NDM &ndm, const TTT &__val__ ) { PARENT::set_member_named0(ndm,__val__); } \
     static const unsigned nb_var_parent = DM::NbFields<PARENT>::res
 
 #define VOIDDMSET \
     template<unsigned dntoto,unsigned ioenatoto=0> struct SubType0 { typedef void TT; }; \
-    template<class NDM,class TTT> void set_member_named0( const NDM &ndm, const TTT &val ) {} \
+    template<class NDM,class TTT> void set_member_named0( const NDM &ndm, const TTT &__val__ ) {} \
     static const unsigned nb_params = 0
     
 /// struct Foo : public VoidDMSet {}; create a DMset with 0 fields
