@@ -129,6 +129,7 @@ class MakePb:
                 output.write( 'class '+PN+' : public ProblemAncestor<'+T+'> {\n' )
                 output.write( 'public:\n' )
                 output.write( '    typedef Mesh<Mesh_carac_'+self.name+'<'+T+','+str(d)+'> > TM;\n' )
+                output.write( '    '+PN+'() {}\n' )
                 output.write( '    '+PN+'( TM &m, bool use_tim_davis=false ) {\n' )
                 output.write( '        if ( use_tim_davis ) {\n' )
                 for f_name in self.map_f.keys():
