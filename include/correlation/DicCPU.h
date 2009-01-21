@@ -23,7 +23,7 @@ template<class TE,class  TIMG_f,class TIMG_g,class TM,class TV,class T> void dic
 */
 template<class T,unsigned dim>
 struct DicCPU {
-    typedef Mesh<Mesh_carac_pb_correlation_basic<double,2> > TM_exemple;
+    typedef Mesh<Mesh_carac_pb_correlation_basic<double,dim> > TM_exemple;
     static const bool want_lum_corr = true;
 
     ///
@@ -236,6 +236,7 @@ struct DicCPU {
                 break;
             
             solve_linear_system();
+            PRINT( dU );
             
             //
             dU *= relaxation;
@@ -255,11 +256,12 @@ struct DicCPU {
         }
     }
     
-    template<class TIMGf,class TIMGg,class TM,class NAME_VAR> void exec_rigid_body( const TIMGf &f, const TIMGg &g, TM &m, const NAME_VAR &name_var, bool want_mat = true, bool want_vec = true ) {
+    template<class TIMGf,class TIMGg,class TM,class NAME_VAR,class NAME_LUM>
+    void exec_rigid_body( const TIMGf &f, const TIMGg &g, TM &m, const NAME_VAR &name_var, const NAME_LUM &name_lum, bool want_mat = true, bool want_vec = true ) {
         typedef typename TM::Pvec Pvec;
         double time_old = time_of_day_in_sec();
         for(cpt_iter=0;cpt_iter<max_cpt_iter;++cpt_iter) {
-            assemble( f, g, m, name_var, want_mat, want_vec );
+            assemble( f, g, m, name_var, name_lum, want_mat, want_vec );
             // simple break conditions
             if ( want_vec == false or ( min_norm_inf_dU == 0 and min_norm_2_dU == 0 ) )
                 break;

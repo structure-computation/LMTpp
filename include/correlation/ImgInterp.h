@@ -210,11 +210,29 @@ struct ImgInterp {
             f >> data[ i ];
     }
     
+    ///
+    ImgInterp<T,dim> simple_blur() {
+        ImgInterp<T,dim> res;
+        res.resize( sizes - 2 );
+        if ( dim == 3 ) {
+            for(int z=1;z<sizes[2]-1;++z)
+                for(int y=1;y<sizes[1]-1;++y)
+                    for(int x=1;x<sizes[0]-1;++x)
+                        res.tex_int( x-1, y-1, z-1 ) = ( tex_int( x, y, z ) + tex_int( x+1, y, z ) + tex_int( x-1, y, z ) + tex_int( x, y+1, z ) + tex_int( x, y-1, z ) + tex_int( x, y, z+1 ) + tex_int( x, y, z-1 ) ) / 7.0;
+        }
+        return res;
+    }
     
     ///
     void save( std::string filename, bool normalize = false ) const {
         QImage img = to_QImage( normalize );
         img.save( filename.c_str() );
+    }
+    
+    ///
+    void save_binary( std::string filename ) const {
+        std::ofstream f( filename.c_str() );
+        f.write( (char *)data.ptr(), sizeof(T) * data.size() );
     }
     
     ///
@@ -240,6 +258,9 @@ struct ImgInterp {
     
     ///
     inline T tex_int( int x, int y, int z ) const {
+        x = max( 0, min( x, sizes[0]-1 ) );
+        y = max( 0, min( y, sizes[1]-1 ) );
+        z = max( 0, min( z, sizes[2]-1 ) );
         return data[ sizes[1] * sizes[0] * z + sizes[0] * y + x ];
     }
     
@@ -357,6 +378,71 @@ struct ImgInterpDec {
     TIMG *orig;
     Vec<PT,dim> offset;
 };
+
+
+
+/*!
+    \keyword Traitement_dimages
+    
+*/
+template<class TT>
+ImgInterp<double,3> img_dist_from_front( const ImgInterp<TT,3> &mat, int max_dist, double diff_pix ) {
+    typedef double T;
+    typedef Vec<int,3> P;
+    
+    ImgInterp<double,3> dist;
+    dist.resize( mat.sizes );
+    dist.set( max_dist );
+    
+    Vec<P> front;
+    for(int z=0;z<mat.sizes[2];++z) {
+        for(int y=0;y<mat.sizes[1];++y) {
+            for(int x=0;x<mat.sizes[0];++x) {
+                if ( mat.tex_int(x,y,z) >= diff_pix ) {
+                    if ( mat.tex_int(x-1,y,z) < diff_pix ) { front.push_back( P( x, y, z ) ); dist.tex_int( x, y, z ) = 0.0; dist.tex_int( x-1,y,z ) = 0.0; }
+                    if ( mat.tex_int(x,y-1,z) < diff_pix ) { front.push_back( P( x, y, z ) ); dist.tex_int( x, y, z ) = 0.0; dist.tex_int( x,y-1,z ) = 0.0; }
+                    if ( mat.tex_int(x,y,z-1) < diff_pix ) { front.push_back( P( x, y, z ) ); dist.tex_int( x, y, z ) = 0.0; dist.tex_int( x,y,z-1 ) = 0.0; }
+                } else {
+                    if ( mat.tex_int(x-1,y,z) >= diff_pix ) { front.push_back( P( x, y, z ) ); dist.tex_int( x, y, z ) = 0.0; dist.tex_int( x-1,y,z ) = 0.0; }
+                    if ( mat.tex_int(x,y-1,z) >= diff_pix ) { front.push_back( P( x, y, z ) ); dist.tex_int( x, y, z ) = 0.0; dist.tex_int( x,y-1,z ) = 0.0; }
+                    if ( mat.tex_int(x,y,z-1) >= diff_pix ) { front.push_back( P( x, y, z ) ); dist.tex_int( x, y, z ) = 0.0; dist.tex_int( x,y,z-1 ) = 0.0; }
+                }
+            }
+        }
+    }
+    
+    //
+    unsigned of_front = 0;
+    while ( of_front < front.size() ) {
+        P p = front[ of_front++ ];
+        int x = p[0];
+        int y = p[1];
+        int z = p[2];
+        for(int oz=-1;oz<=1;++oz) {
+            for(int oy=-1;oy<=1;++oy) {
+                for(int ox=-1;ox<=1;++ox) {
+                    if ( ox == 0 and oy == 0 and oz == 0 )
+                        continue;
+                    if ( x+ox >= 0 and y+oy >= 0 and z+oz >= 0 and x+ox < mat.sizes[0] and y+oy < mat.sizes[1] and z+oz < mat.sizes[2] ) {
+                        T ndist = dist.tex_int( x, y, z ) + sqrt( ox * ox + oy * oy + oz * oz );
+                        if ( ndist < dist.tex_int( x+ox, y+oy, z+oz ) ) {
+                            front.push_back( P( x+ox, y+oy, z+oz ) );
+                            dist.tex_int( x+ox, y+oy, z+oz ) = ndist;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    //
+    for(int z=0;z<mat.sizes[2];++z)
+        for(int y=0;y<mat.sizes[1];++y)
+            for(int x=0;x<mat.sizes[0];++x)
+                dist.tex_int( x, y, z ) *= ( mat.tex_int(x,y,z) >= diff_pix ? 1 : -1 );
+            
+    return dist;
+}
 
 
 }
