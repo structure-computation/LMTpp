@@ -219,6 +219,10 @@ struct ImgInterp {
                 for(int y=1;y<sizes[1]-1;++y)
                     for(int x=1;x<sizes[0]-1;++x)
                         res.tex_int( x-1, y-1, z-1 ) = ( tex_int( x, y, z ) + tex_int( x+1, y, z ) + tex_int( x-1, y, z ) + tex_int( x, y+1, z ) + tex_int( x, y-1, z ) + tex_int( x, y, z+1 ) + tex_int( x, y, z-1 ) ) / 7.0;
+        } else if ( dim == 2 ) {
+            for(int y=1;y<sizes[1]-1;++y)
+                for(int x=1;x<sizes[0]-1;++x)
+                    res.tex_int( x-1, y-1 ) = ( tex_int( x, y ) + tex_int( x+1, y ) + tex_int( x-1, y ) + tex_int( x, y+1 ) + tex_int( x, y-1 ) ) / 5.0;
         }
         return res;
     }
@@ -308,7 +312,14 @@ struct ImgInterp {
         Vec<T,dim> res;
         for(int i=0;i<dim;++i)
             res[ i ] = operator()( Vec<PT,dim>( p + static_dirac_vec<dim>( 1, i ) ) ) - operator()( p );
-        // res[ i ] = 0.5 * operator()( Vec<PT,dim>( p + static_dirac_vec<dim>( 1, i ) ) ) - operator()( p - static_dirac_vec<dim>( 1, i ) );
+        return res;
+    }
+    
+    ///
+    inline Vec<T,dim> grad( Vec<PT,dim> p, PT dec ) const {
+        Vec<T,dim> res;
+        for(int i=0;i<dim;++i)
+            res[ i ] = ( operator()( Vec<PT,dim>( p + static_dirac_vec<dim>( dec / 2, i ) ) ) - operator()( p - static_dirac_vec<dim>( dec / 2, i ) ) ) / dec;
         return res;
     }
     
@@ -395,9 +406,9 @@ ImgInterp<double,3> img_dist_from_front( const ImgInterp<TT,3> &mat, int max_dis
     dist.set( max_dist );
     
     Vec<P> front;
-    for(int z=0;z<mat.sizes[2];++z) {
-        for(int y=0;y<mat.sizes[1];++y) {
-            for(int x=0;x<mat.sizes[0];++x) {
+    for(int z=1;z<mat.sizes[2];++z) {
+        for(int y=1;y<mat.sizes[1];++y) {
+            for(int x=1;x<mat.sizes[0];++x) {
                 if ( mat.tex_int(x,y,z) >= diff_pix ) {
                     if ( mat.tex_int(x-1,y,z) < diff_pix ) { front.push_back( P( x, y, z ) ); dist.tex_int( x, y, z ) = 0.0; dist.tex_int( x-1,y,z ) = 0.0; }
                     if ( mat.tex_int(x,y-1,z) < diff_pix ) { front.push_back( P( x, y, z ) ); dist.tex_int( x, y, z ) = 0.0; dist.tex_int( x,y-1,z ) = 0.0; }
@@ -440,6 +451,62 @@ ImgInterp<double,3> img_dist_from_front( const ImgInterp<TT,3> &mat, int max_dis
         for(int y=0;y<mat.sizes[1];++y)
             for(int x=0;x<mat.sizes[0];++x)
                 dist.tex_int( x, y, z ) *= ( mat.tex_int(x,y,z) >= diff_pix ? 1 : -1 );
+            
+    return dist;
+}
+
+
+/*!
+    \keyword Traitement_dimages
+    
+*/
+template<class TT>
+ImgInterp<double,2> img_dist_from_front( const ImgInterp<TT,2> &mat, int max_dist, double diff_pix ) {
+    typedef double T;
+    typedef Vec<int,2> P;
+    
+    ImgInterp<double,2> dist;
+    dist.resize( mat.sizes );
+    dist.set( max_dist );
+    
+    Vec<P> front;
+    for(int y=1;y<mat.sizes[1];++y) {
+        for(int x=1;x<mat.sizes[0];++x) {
+            if ( mat.tex_int(x,y) >= diff_pix ) {
+                if ( mat.tex_int(x-1,y) < diff_pix ) { front.push_back( P( x, y ) ); dist.tex_int( x, y ) = 0.0; dist.tex_int( x-1,y ) = 0.0; }
+                if ( mat.tex_int(x,y-1) < diff_pix ) { front.push_back( P( x, y ) ); dist.tex_int( x, y ) = 0.0; dist.tex_int( x,y-1 ) = 0.0; }
+            } else {
+                if ( mat.tex_int(x-1,y) >= diff_pix ) { front.push_back( P( x, y ) ); dist.tex_int( x, y ) = 0.0; dist.tex_int( x-1,y ) = 0.0; }
+                if ( mat.tex_int(x,y-1) >= diff_pix ) { front.push_back( P( x, y ) ); dist.tex_int( x, y ) = 0.0; dist.tex_int( x,y-1 ) = 0.0; }
+            }
+        }
+    }
+    
+    //
+    unsigned of_front = 0;
+    while ( of_front < front.size() ) {
+        P p = front[ of_front++ ];
+        int x = p[0];
+        int y = p[1];
+        for(int oy=-1;oy<=1;++oy) {
+            for(int ox=-1;ox<=1;++ox) {
+                if ( ox == 0 and oy == 0 )
+                    continue;
+                if ( x+ox >= 0 and y+oy >= 0 and x+ox < mat.sizes[0] and y+oy < mat.sizes[1] ) {
+                    T ndist = dist.tex_int( x, y ) + sqrt( ox * ox + oy * oy );
+                    if ( ndist < dist.tex_int( x+ox, y+oy ) ) {
+                        front.push_back( P( x+ox, y+oy ) );
+                        dist.tex_int( x+ox, y+oy ) = ndist;
+                    }
+                }
+            }
+        }
+    }
+    
+    //
+    for(int y=0;y<mat.sizes[1];++y)
+        for(int x=0;x<mat.sizes[0];++x)
+            dist.tex_int( x, y ) *= ( mat.tex_int(x,y) >= diff_pix ? 1 : -1 );
             
     return dist;
 }

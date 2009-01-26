@@ -87,7 +87,7 @@ class Problem:
                     for i in range(0,var.nb_der+1):
                         if str(default_value[i])=="":
                             continue
-                        output.write( [':',','][cpt!=0]+('der%i_'%i)*(i!=0)+namevar+'(Tpos('+str(default_value[i])+'))' )
+                        output.write( [':',','][cpt!=0]+('der%i_'%i)*(i!=0)+namevar+'('+str(default_value[i])+')' )
                         cpt += 1
             output.write( " {}\n" )
             # fields
