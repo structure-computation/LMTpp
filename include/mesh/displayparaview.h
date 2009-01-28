@@ -47,7 +47,7 @@ public:
         std::ofstream f( pvu_name.c_str() );
         
         write_mesh_vtk<true>( f, m, display_fields );
-
+    
         typename TM::Pvec xmi,xma;
         get_min_max( m.node_list, ExtractDM<pos_DM>(), xmi, xma );
         if ( m.node_list.size() )
