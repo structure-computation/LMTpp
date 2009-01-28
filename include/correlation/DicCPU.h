@@ -9,6 +9,7 @@
 #include <formulation/FormulationFit.h>
 #include <QtCore/QMutex>
 #include "mesh_carac_correlation.h"
+#include "containers/eig_lapack.h"
 // #include <correlation/pixelotomie.h>
 
 namespace LMT {
@@ -39,6 +40,8 @@ struct DicCPU {
         display_norm_inf_dU = true;
         display_norm_2_dU = false;
         display_iteration_time = false;
+        multi_resolution = 0;
+        remove_eig_val_if_lower_than = 0;
     }
 
     ///
@@ -187,7 +190,7 @@ struct DicCPU {
     
     ///
     template<class TIMGf,class TIMGg,class TM,class NAME_VAR_DEPL,class NAME_VAR_GREY>
-    void assemble( const TIMGf &f, const TIMGg &g, const TM &m, const NAME_VAR_DEPL &name_var_depl, const NAME_VAR_GREY &name_var_grey, bool want_mat = true, bool want_vec = true ) {
+    void assemble( const TIMGf &f, const TIMGg &g, const TM &m, const NAME_VAR_DEPL &name_var_depl, const NAME_VAR_GREY &name_var_grey, bool want_mat = true, bool want_vec = true, int resol_level = 0 ) {
         unsigned nb_ddl = ( dim + want_lum_corr ) * m.node_list.size();
         if ( want_mat ) {
             // indice_noda_grey = range( m.node_list.size() );
@@ -217,6 +220,17 @@ struct DicCPU {
         
         //
         if ( want_mat ) {
+            //             if ( remove_eig_val_if_lower_than ) {
+            //                 Vec<double> eig_val;
+            //                 Mat<double> eig_vec;
+            //                 get_eig_sym( M, eig_val, eig_vec );
+            //                 PRINT( eig_val );
+            //                 for(unsigned i=0;i<eig_val.size()-1;++i)
+            //                     if ( eig_val[i] < remove_eig_val_if_lower_than )
+            //                         for(unsigned j=0;j<M.nb_rows();++j)
+            //                             for(unsigned k=0;k<M.nb_cols();++k)
+            //                                 M( j, k ) += remove_eig_val_if_lower_than * eig_vec[j] * eig_vec[k];
+            //             }
             if ( levenberg_marq ) {
                 T ni =  norm_inf( M.diag() );
                 M.diag() += levenberg_marq * ( ni + ( ni == 0 ) );
@@ -226,17 +240,32 @@ struct DicCPU {
         }
     }
 
-    ///
+    /// resol_level must be managed internally
     template<class TIMGf,class TIMGg,class TM,class NAME_VAR_DEPL,class NAME_VAR_GREY> 
-    void exec( const TIMGf &f, const TIMGg &g, TM &m, const NAME_VAR_DEPL &name_var_depl, const NAME_VAR_GREY &name_var_grey, bool want_mat = true, bool want_vec = true ) {
+    void exec( const TIMGf &f, const TIMGg &g, TM &m, const NAME_VAR_DEPL &name_var_depl, const NAME_VAR_GREY &name_var_grey, bool want_mat = true, bool want_vec = true, int resol_level = 0 ) {
+        if ( resol_level < multi_resolution ) {
+            ExtractDM<NAME_VAR_DEPL> pd;
+            for(unsigned i=0;i<m.node_list.size();++i) {
+                m.node_list[i].pos -= 0.5;
+                m.node_list[i].pos /= 2;
+                pd( m.node_list[i] ) /= 2;
+            }
+            exec( f.pyramidal_filter(), g.pyramidal_filter(), m, name_var_depl, name_var_grey, want_mat, want_vec, resol_level + 1 );
+            for(unsigned i=0;i<m.node_list.size();++i) {
+                m.node_list[i].pos *= 2;
+                m.node_list[i].pos += 0.5;
+                pd( m.node_list[i] ) *= 2;
+            }
+        }
+        PRINT( resol_level );
+        //
         for(cpt_iter=0;cpt_iter<max_cpt_iter;++cpt_iter) {
-            assemble( f, g, m, name_var_depl, name_var_grey, want_mat, want_vec );
+            assemble( f, g, m, name_var_depl, name_var_grey, want_mat, want_vec, resol_level );
             // simple break conditions
             if ( want_vec == false or ( min_norm_inf_dU == 0 and min_norm_2_dU == 0 ) )
                 break;
             
             solve_linear_system();
-            PRINT( dU );
             
             //
             dU *= relaxation;
@@ -253,15 +282,34 @@ struct DicCPU {
             // convergence
             if ( norm_inf( dU ) <= min_norm_inf_dU or norm_2( dU ) <= min_norm_2_dU )
                 break;
+        
+            if ( name_tmp_paraview_file.size() ) {
+                std::ofstream fout( ( name_tmp_paraview_file + to_string( cpt_iter ) + ".vtu" ).c_str() );
+                write_mesh_vtk<true>( fout, m );
+            }
         }
     }
     
-    template<class TIMGf,class TIMGg,class TM,class NAME_VAR,class NAME_LUM>
-    void exec_rigid_body( const TIMGf &f, const TIMGg &g, TM &m, const NAME_VAR &name_var, const NAME_LUM &name_lum, bool want_mat = true, bool want_vec = true ) {
+    template<class TIMGf,class TIMGg,class TM,class NAME_VAR_DEPL,class NAME_VAR_GREY>
+    void exec_rigid_body( const TIMGf &f, const TIMGg &g, TM &m, const NAME_VAR_DEPL &name_var_depl, const NAME_VAR_GREY &name_var_grey, bool want_mat = true, bool want_vec = true, int resol_level = 0 ) {
+        if ( resol_level < multi_resolution ) {
+            ExtractDM<NAME_VAR_DEPL> pd;
+            for(unsigned i=0;i<m.node_list.size();++i) {
+                m.node_list[i].pos /= 2;
+                pd( m.node_list[i] ) /= 2;
+            }
+            exec_rigid_body( f.pyramidal_filter(), g.pyramidal_filter(), m, name_var_depl, name_var_grey, want_mat, want_vec, resol_level + 1 );
+            for(unsigned i=0;i<m.node_list.size();++i) {
+                m.node_list[i].pos *= 2;
+                pd( m.node_list[i] ) *= 2;
+            }
+        }
+        PRINT( resol_level );
+        //
         typedef typename TM::Pvec Pvec;
         double time_old = time_of_day_in_sec();
         for(cpt_iter=0;cpt_iter<max_cpt_iter;++cpt_iter) {
-            assemble( f, g, m, name_var, name_lum, want_mat, want_vec );
+            assemble( f, g, m, name_var_depl, name_var_grey, want_mat, want_vec, resol_level );
             // simple break conditions
             if ( want_vec == false or ( min_norm_inf_dU == 0 and min_norm_2_dU == 0 ) )
                 break;
@@ -271,7 +319,7 @@ struct DicCPU {
             Pvec C = center( m );
             Vec<Vec<T>,nb_search_dir> search_dir;
             for(unsigned i=0;i<nb_search_dir;++i)
-                search_dir[ i ].resize( F.size() );
+                search_dir[ i ].resize( F.size(), 0 );
             for(unsigned i=0;i<m.node_list.size();++i)
                 for(int j=0;j<dim;++j)
                     for(int k=0;k<dim;++k)
@@ -306,7 +354,7 @@ struct DicCPU {
             Vec<T> dU_red = inv( M_red ) * F_red;
             
             // update_mesh ( translation + "true" rotation )
-            ExtractDM<NAME_VAR> ed;
+            ExtractDM<NAME_VAR_DEPL> ed;
             for(int i=0;i<m.node_list.size();++i) {
                 Pvec cp = m.node_list[i].pos + ed( m.node_list[i] ) - C, nv = cp;
                 for(int j=0;j<1+2*(dim==3);++j)
@@ -335,7 +383,7 @@ struct DicCPU {
     
     ///
     void solve_linear_system() {
-        solve_using_chol_factorize( C_M     , F     , dU      );
+        solve_using_chol_factorize( C_M, F, dU );
     }
     
     ///
@@ -475,6 +523,9 @@ struct DicCPU {
     bool display_norm_inf_dU; /// display norm_inf( dU ) au cours des itérations, vrai par défaut
     bool display_norm_2_dU; /// display norm_2( dU ) au cours des itérations, faux par défaut
     bool display_iteration_time; ///
+    int multi_resolution; /// div = 2^multi_resolution meaning that 0 = no multi res.
+    std::string name_tmp_paraview_file; /// base name to save intermediate results during iterations
+    T remove_eig_val_if_lower_than;
 };
 
 }

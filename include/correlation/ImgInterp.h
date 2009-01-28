@@ -6,6 +6,7 @@
 #include <assert.h>
 #include <fstream>
 #include <sstream>
+#include <util/rectilinear_iterator.h>
 
 namespace LMT {
 
@@ -76,10 +77,10 @@ struct ImgInterp {
     typedef ImgInterp T_NewImg;
     
     ///
-    ImgInterp() : sizes( 1 ) {}
+    ImgInterp() : sizes( 1 ), div_2( NULL ) {}
     
     ///
-    ImgInterp( const std::string &s ) : sizes( 1 ) {
+    ImgInterp( const std::string &s ) : sizes( 1 ), div_2( NULL ) {
         load( s );
     }
     
@@ -92,6 +93,17 @@ struct ImgInterp {
     ///
     void set( T default_val ) {
         data.set( default_val );
+    }
+    
+    ///
+    ImgInterp &pyramidal_filter() const {
+        if ( div_2 )
+            return *div_2;
+        div_2 = new ImgInterp;
+        div_2->resize( sizes / 2 );
+        for( Rectilinear_iterator<int,dim> p( 0, Vec<int,dim>(sizes-1), 2 ); p; ++p )
+            div_2->tex_int( p.pos / 2 ) = operator()( p.pos + 0.5  );
+        return *div_2;
     }
     
     ///
@@ -156,6 +168,7 @@ struct ImgInterp {
                         data[ od ] = tmp[ x ];
                     f.seekg( ( S[0] - X1[0] ) * sizeof(TB), std::ios::cur );
                 }
+                f.seekg( S[0] * ( S[1] - X1[1] ) * sizeof(TB), std::ios::cur );
             }
         } else
             assert( 0 /* TODO */ );
@@ -311,7 +324,7 @@ struct ImgInterp {
     inline Vec<T,dim> grad( Vec<PT,dim> p ) const {
         Vec<T,dim> res;
         for(int i=0;i<dim;++i)
-            res[ i ] = operator()( Vec<PT,dim>( p + static_dirac_vec<dim>( 1, i ) ) ) - operator()( p );
+            res[ i ] = operator()( Vec<PT,dim>( p + 0.5 * static_dirac_vec<dim>( 1, i ) ) ) - operator()( p - 0.5 * static_dirac_vec<dim>( 1, i ) );
         return res;
     }
     
@@ -330,6 +343,7 @@ struct ImgInterp {
     Vec<T> data;
     Vec<int,dim> sizes;
     Kernel kernel;
+    mutable ImgInterp<T,dim> *div_2;
 };
 
 
