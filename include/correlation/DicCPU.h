@@ -18,6 +18,10 @@ namespace LMT {
 template<class TE,class  TIMG_f,class TIMG_g,class TM,class TV,class T> void dic_elem_matrix( const TE &elem, const TIMG_f &f, const TIMG_g &g, TM &M, TV &V, int x, int y, StructForType<T> ) {
     assert( 0 );
 }
+template<class TE,class TIMG_f,class TIMG_g,class TDIC,class Pvec,class T,class MT>
+void dic_elem_matrix_( const TE &elem, const TIMG_f &f, const TIMG_g &g, TDIC &dic, const Pvec &MI, const Pvec &MA, StructForType<T>, MT &mutex ) {
+    assert( 0 );
+}
 
 /**
 
@@ -42,6 +46,7 @@ struct DicCPU {
         display_iteration_time = false;
         multi_resolution = 0;
         remove_eig_val_if_lower_than = 0;
+        want_epsilon = true;
     }
 
     ///
@@ -55,99 +60,103 @@ struct DicCPU {
             for(int i=1;i<TE::nb_nodes;++i) MA = max( MA, P[ i ] ); // hum
             f.load_if_necessary( MI, MA );
             g.load_if_necessary( MI, MA );
-            //
-            Vec<T,    (dim+want_lum_corr)*TE::nb_nodes  > F( 0 );
-            Mat<T,Gen<(dim+want_lum_corr)*TE::nb_nodes> > M; M.set( 0 );
             
-            if ( dic.div_pixel <= 0 ) {
-                for( Rectilinear_iterator<int,dim> p( Vec<int,dim>(MI), Vec<int,dim>(MA) + 1, 1 ); p; ++p )
-                    dic_elem_matrix( e, f, g, M, F, p.pos[0], p.pos[1], StructForType<T>() );
+            if ( dic.div_pixel < 0 ) {
+                dic_elem_matrix_( e, f, g, dic, MI, MA, StructForType<T>(), mutex );
             } else {
+                Vec<T,    (dim+want_lum_corr)*TE::nb_nodes  > F( 0 );
+                Mat<T,Gen<(dim+want_lum_corr)*TE::nb_nodes> > M; M.set( 0 );
                 //
-                Vec<T,TE::nb_var_inter> var_inter( 0 );
-                for( Rectilinear_iterator<T,dim> p( Vec<int,dim>(MI), Vec<int,dim>(MA) + 2, 1.0 / dic.div_pixel ); p; ++p ) {
-                    while ( true ) {
-                        get_var_inter( typename TE::NE(), P, p.pos, var_inter );
-                        if ( not ElemVarInterFromPosNonLinear<typename TE::NE>::res ) break;
-                        Vec<T,dim> O;
-                        get_interp( typename TE::NE(), Nodal(), var_inter, P, O );
-                        if ( max( p.pos - O ) < 1e-2 ) break;
-                    }
-                    if ( not var_inter_is_inside( typename TE::NE(), var_inter, 1e-6 ) )
-                        continue;
-                    
+                if ( dic.div_pixel == 0 ) {
+                    for( Rectilinear_iterator<int,dim> p( Vec<int,dim>(MI), Vec<int,dim>(MA) + 1, 1 ); p; ++p )
+                        dic_elem_matrix( e, f, g, M, F, p.pos[0], p.pos[1], StructForType<T>() );
+                } else {
                     //
-                    Vec<T,TE::nb_nodes> shape_functions;
-                    get_shape_functions( typename TE::NE(), var_inter, shape_functions );
-                    
-                    T val_grey = 0;
-                    for(int i=0;i<TE::nb_nodes;++i)
-                        val_grey += shape_functions[ i ] * ed_grey( *e.node(i) ); // dic.U_grey[ dic.indice_noda_grey[ e.node( i )->number ] ];
-                        
-                    //
-                    Vec<T,dim> DO;
-                    get_interp( typename TE::NE(), Nodal(), var_inter, D, DO );
-                    
-                    Vec<T,dim> PF( use_g_as_ref ? DO : p.pos );
-                    Vec<T,dim> PG( use_g_as_ref ? p.pos : DO );
-                    T val_f = f( PF );
-                    T val_g = val_grey * g( PG );
-                    Vec<T,dim> grad = 0.5 * ( f.grad( PF ) + val_grey * g.grad( PG ) );
-                    
-                    T diff_fg = val_f - val_g;
-                    
-                    // dU part
-                    Vec<T,dim*TE::nb_nodes> sham_grad;
-                    for(int i=0,n=0;i<TE::nb_nodes;++i)
-                        for(int d=0;d<dim;++d,++n)
-                            sham_grad[ n ] = shape_functions[ i ] * grad[ d ];
-                            
-                    //
-                    for(int i=0;i<TE::nb_nodes;++i) {
-                        for(int d=0;d<dim;++d) {
-                            F[ i * ( dim + 1 ) + d ] += sham_grad[ i * dim + d ] * diff_fg;
-                            for(int j=0;j<TE::nb_nodes;++j)
-                                for(int c=0;c<dim;++c)
-                                    M( i * ( dim + 1 ) + d, j * ( dim + 1 ) + c ) += sham_grad[ i * dim + d ] * sham_grad[ j * dim + c ];
+                    Vec<T,TE::nb_var_inter> var_inter( 0 );
+                    for( Rectilinear_iterator<T,dim> p( Vec<int,dim>(MI), Vec<int,dim>(MA) + 2, 1.0 / dic.div_pixel ); p; ++p ) {
+                        while ( true ) {
+                            get_var_inter( typename TE::NE(), P, p.pos, var_inter );
+                            if ( not ElemVarInterFromPosNonLinear<typename TE::NE>::res ) break;
+                            Vec<T,dim> O;
+                            get_interp( typename TE::NE(), Nodal(), var_inter, P, O );
+                            if ( max( p.pos - O ) < 1e-2 ) break;
                         }
-                    }
-                    
-                    
-                    // dG part
-                    Vec<T,TE::nb_nodes> sham_grey;
-                    for(int i=0;i<TE::nb_nodes;++i)
-                        sham_grey[ i ] = shape_functions[ i ] * val_g;
+                        if ( not var_inter_is_inside( typename TE::NE(), var_inter, 1e-6 ) )
+                            continue;
                         
-                    //
-                    for(int i=0;i<TE::nb_nodes;++i) {
-                        for(int j=0;j<TE::nb_nodes;++j)
-                            M( i * ( dim + 1 ) + dim, j * ( dim + 1 ) + dim ) += sham_grey[ i ] * sham_grey[ j ];
-                        F[ i * ( dim + 1 ) + dim ] += sham_grey[ i ] * diff_fg;
+                        //
+                        Vec<T,TE::nb_nodes> shape_functions;
+                        get_shape_functions( typename TE::NE(), var_inter, shape_functions );
+                        
+                        T val_grey = 0;
+                        for(int i=0;i<TE::nb_nodes;++i)
+                            val_grey += shape_functions[ i ] * ed_grey( *e.node(i) ); // dic.U_grey[ dic.indice_noda_grey[ e.node( i )->number ] ];
+                            
+                        //
+                        Vec<T,dim> DO;
+                        get_interp( typename TE::NE(), Nodal(), var_inter, D, DO );
+                        
+                        Vec<T,dim> PF( use_g_as_ref ? DO : p.pos );
+                        Vec<T,dim> PG( use_g_as_ref ? p.pos : DO );
+                        T val_f = f( PF );
+                        T val_g = val_grey * g( PG );
+                        Vec<T,dim> grad = 0.5 * ( f.grad( PF ) + val_grey * g.grad( PG ) );
+                        
+                        T diff_fg = val_f - val_g;
+                        
+                        // dU part
+                        Vec<T,dim*TE::nb_nodes> sham_grad;
+                        for(int i=0,n=0;i<TE::nb_nodes;++i)
+                            for(int d=0;d<dim;++d,++n)
+                                sham_grad[ n ] = shape_functions[ i ] * grad[ d ];
+                                
+                        //
+                        for(int i=0;i<TE::nb_nodes;++i) {
+                            for(int d=0;d<dim;++d) {
+                                F[ i * ( dim + 1 ) + d ] += sham_grad[ i * dim + d ] * diff_fg;
+                                for(int j=0;j<TE::nb_nodes;++j)
+                                    for(int c=0;c<dim;++c)
+                                        M( i * ( dim + 1 ) + d, j * ( dim + 1 ) + c ) += sham_grad[ i * dim + d ] * sham_grad[ j * dim + c ];
+                            }
+                        }
+                        
+                        
+                        // dG part
+                        Vec<T,TE::nb_nodes> sham_grey;
+                        for(int i=0;i<TE::nb_nodes;++i)
+                            sham_grey[ i ] = shape_functions[ i ] * val_g;
+                            
+                        //
+                        for(int i=0;i<TE::nb_nodes;++i) {
+                            for(int j=0;j<TE::nb_nodes;++j)
+                                M( i * ( dim + 1 ) + dim, j * ( dim + 1 ) + dim ) += sham_grey[ i ] * sham_grey[ j ];
+                            F[ i * ( dim + 1 ) + dim ] += sham_grey[ i ] * diff_fg;
+                        }
+                        
+                        // residual
+                        dic.sum_residual += abs( diff_fg );
                     }
-                    
-                    // residual
-                    dic.sum_residual += abs( diff_fg );
                 }
+                
+                
+                //
+                mutex.lock();
+                if ( want_mat ) {
+                    for(int i=0,n=0;i<TE::nb_nodes;++i)
+                        for(int d=0;d<dim+want_lum_corr;++d,++n)
+                            for(int j=0,m=0;j<TE::nb_nodes;++j)
+                                for(int c=0;c<dim+want_lum_corr;++c,++m)
+                                    if ( n <= m )
+                                        dic.M( dic.indice_noda[ e.node(i)->number ] + d, dic.indice_noda[ e.node(j)->number ] + c ) += M( n, m );
+                }
+                //
+                if ( want_vec ) {
+                    for(int i=0,n=0;i<TE::nb_nodes;++i)
+                        for(int d=0;d<dim+want_lum_corr;++d,++n)
+                            dic.F[ dic.indice_noda[ e.node(i)->number ] + d ] += F[ n ];
+                }
+                mutex.unlock();
             }
-            
-            
-            //
-            mutex.lock();
-            if ( want_mat ) {
-                for(int i=0,n=0;i<TE::nb_nodes;++i)
-                    for(int d=0;d<dim+want_lum_corr;++d,++n)
-                        for(int j=0,m=0;j<TE::nb_nodes;++j)
-                            for(int c=0;c<dim+want_lum_corr;++c,++m)
-                                if ( n <= m )
-                                    dic.M( dic.indice_noda[ e.node(i)->number ] + d, dic.indice_noda[ e.node(j)->number ] + c ) += M( n, m );
-            }
-            //
-            if ( want_vec ) {
-                for(int i=0,n=0;i<TE::nb_nodes;++i)
-                    for(int d=0;d<dim+want_lum_corr;++d,++n)
-                        dic.F[ dic.indice_noda[ e.node(i)->number ] + d ] += F[ n ];
-            }
-            mutex.unlock();
         }
         bool want_mat, want_vec;
         QMutex mutex;
@@ -156,13 +165,16 @@ struct DicCPU {
     };
 
     ///
-    template<class NAME_VAR>
+    template<class NAME_VAR_DEPL,class NAME_VAR_GREY>
     struct MakeDefImg {
         template<class TE,class TIMGf,class TIMGr> void operator()( const TE &e, const TIMGf &f, TIMGr &r ) const {
-            ExtractDM<NAME_VAR> ed;
+            ExtractDM<NAME_VAR_DEPL> ed;
+            ExtractDM<NAME_VAR_GREY> eg;
             Vec<T,dim> P[TE::nb_nodes], D[TE::nb_nodes], MA( e.pos(0) + ed( *e.node(0) ) ), MI( e.pos(0) + ed( *e.node(0) ) );
+            T G[TE::nb_nodes];
             for(int i=0;i<TE::nb_nodes;++i) P[ i ] = e.pos(i);
             for(int i=0;i<TE::nb_nodes;++i) D[ i ] = e.pos(i) + ed( *e.node(i) );
+            for(int i=0;i<TE::nb_nodes;++i) G[ i ] = eg( *e.node(i) );
             for(int i=1;i<TE::nb_nodes;++i) MI = min( MI, D[ i ] ); // hum
             for(int i=1;i<TE::nb_nodes;++i) MA = max( MA, D[ i ] ); // hum
             f.load_if_necessary( MI, MA );
@@ -182,8 +194,10 @@ struct DicCPU {
                     continue;
                 //
                 Vec<T,dim> O;
+                T g;
                 get_interp( typename TE::NE(), Nodal(), var_inter, P, O );
-                r.tex_int( p.pos ) = f( O );
+                get_interp( typename TE::NE(), Nodal(), var_inter, G, g );
+                r.tex_int( p.pos ) = g * f( O );
             }
         }
     };
@@ -232,8 +246,8 @@ struct DicCPU {
             //                                 M( j, k ) += remove_eig_val_if_lower_than * eig_vec[j] * eig_vec[k];
             //             }
             if ( levenberg_marq ) {
-                T ni =  norm_inf( M.diag() );
-                M.diag() += levenberg_marq * ( ni + ( ni == 0 ) );
+                //T ni =  norm_inf( M.diag() );
+                M.diag() += levenberg_marq; // * ( ni + ( ni == 0 ) );
             }
             C_M = M;
             chol_factorize( C_M );
@@ -260,12 +274,20 @@ struct DicCPU {
         PRINT( resol_level );
         //
         for(cpt_iter=0;cpt_iter<max_cpt_iter;++cpt_iter) {
+            double time_old = time_of_day_in_sec();
+            
             assemble( f, g, m, name_var_depl, name_var_grey, want_mat, want_vec, resol_level );
             // simple break conditions
             if ( want_vec == false or ( min_norm_inf_dU == 0 and min_norm_2_dU == 0 ) )
                 break;
             
             solve_linear_system();
+            
+            if ( display_iteration_time ) {
+                double time_cur = time_of_day_in_sec();
+                PRINT( time_cur - time_old );
+                time_old = time_cur;
+            }
             
             //
             dU *= relaxation;
@@ -288,6 +310,18 @@ struct DicCPU {
                 write_mesh_vtk<true>( fout, m );
             }
         }
+        
+        //
+        if ( resol_level == 0 and want_epsilon ) {
+            get_epsilon( m );
+        }
+    }
+    
+    /// fill epsilon field in TM
+    template<class TM>
+    void get_epsilon( TM &m ) {
+        Formulation< TM, correlation_basic > f( m );
+        f.call_after_solve();
     }
     
     template<class TIMGf,class TIMGg,class TM,class NAME_VAR_DEPL,class NAME_VAR_GREY>
@@ -347,10 +381,6 @@ struct DicCPU {
                 for(unsigned j=0;j<nb_search_dir;++j)
                     M_red( i, j ) = dot( M * search_dir[ i ], search_dir[ j ] );
             }
-            if ( levenberg_marq ) {
-                T ni =  norm_inf( M_red.diag() );
-                M_red.diag() += levenberg_marq * ( ni + ( ni == 0 ) );
-            }
             Vec<T> dU_red = inv( M_red ) * F_red;
             
             // update_mesh ( translation + "true" rotation )
@@ -398,15 +428,17 @@ struct DicCPU {
     }
     
     ///
-    template<class TIMGf,class TM,class NAME_VAR,class TIMGr> void get_def_img( const TIMGf &f, TM &m, const NAME_VAR &name_var, TIMGr &r ) {
+    template<class TIMGf,class TM,class NAME_VAR_DEPL,class NAME_VAR_GREY,class TIMGr>
+    void get_def_img( const TIMGf &f, TM &m, const NAME_VAR_DEPL &name_var_depl, const NAME_VAR_GREY &name_var_grey, TIMGr &r ) {
         r.resize( f.sizes );
         r.set( -1 );
-        apply( m.elem_list, MakeDefImg<NAME_VAR>(), f, r );
+        apply( m.elem_list, MakeDefImg<NAME_VAR_DEPL,NAME_VAR_GREY>(), f, r );
     }
     
     ///
-    template<class TIMGf,class TIMGg,class TM,class NAME_VAR,class TIMGr> void get_residual_img( const TIMGf &f, const TIMGg &g, TM &m, const NAME_VAR &name_var, TIMGr &r ) {
-        get_def_img( f, m, name_var, r );
+    template<class TIMGf,class TIMGg,class TM,class NAME_VAR_DEPL,class NAME_VAR_GREY,class TIMGr>
+    void get_residual_img( const TIMGf &f, const TIMGg &g, TM &m, const NAME_VAR_DEPL &name_var_depl, const NAME_VAR_GREY &name_var_grey, TIMGr &r ) {
+        get_def_img( f, m, name_var_depl, name_var_grey, r );
         for( Rectilinear_iterator<int,dim> p( 0, Vec<int,dim>( f.sizes - 1 ), 1 ); p; ++p ) {
             g.load_if_necessary( p.pos, p.pos );
             r.load_if_necessary( p.pos, p.pos, true );
@@ -415,9 +447,10 @@ struct DicCPU {
     }
     
     ///
-    template<class TIMGf,class TIMGg,class TM,class NAME_VAR> void display_residual_img( const TIMGf &f, const TIMGg &g, TM &m, const NAME_VAR &name_var ) {
+    template<class TIMGf,class TIMGg,class TM,class NAME_VAR_DEPL,class NAME_VAR_GREY>
+    void display_residual_img( const TIMGf &f, const TIMGg &g, TM &m, const NAME_VAR_DEPL &name_var_depl, const NAME_VAR_GREY &name_var_grey ) {
         ImgInterp<T,dim> r;
-        get_residual_img( f, g, m, name_var, r );
+        get_residual_img( f, g, m, name_var_depl, name_var_grey, r );
         r.display( true );
     }
     
@@ -519,13 +552,14 @@ struct DicCPU {
     T min_norm_2_dU; /// à moins que norm_2( dU ) < min_norm_2_dU
     unsigned max_cpt_iter; /// à moins que nb_iter >= max_cpt_iter
     unsigned nb_threads_for_assembly;
-    unsigned div_pixel; /// for "correct" integration. 0 means analytical integration
+    int div_pixel; /// for "correct" integration. 0 means analytical integration
     bool display_norm_inf_dU; /// display norm_inf( dU ) au cours des itérations, vrai par défaut
     bool display_norm_2_dU; /// display norm_2( dU ) au cours des itérations, faux par défaut
     bool display_iteration_time; ///
     int multi_resolution; /// div = 2^multi_resolution meaning that 0 = no multi res.
     std::string name_tmp_paraview_file; /// base name to save intermediate results during iterations
     T remove_eig_val_if_lower_than;
+    bool want_epsilon; /// true by default
 };
 
 }

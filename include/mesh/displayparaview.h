@@ -241,6 +241,17 @@ template<class TM> void display_mesh(const TM &m,const char *nodal_field_to_disp
  */
 struct DpExec { void operator()(DisplayParaview &dp,unsigned i) const { dp.exec( "tmp/conf"+to_string(i)+".pvs"); } };
 
+/**
+*/
+template<class Carac,unsigned nvi_to_subs,unsigned skin>
+int display( const MeshAncestor<Carac,nvi_to_subs,skin> &m, std::string pvsm_file ) {
+    DisplayParaview dp;
+    dp.add_mesh( m );
+    
+    std::string t = "paraview --state=" + pvsm_file;
+    return system( t.c_str() );
+}
+
 };
 
 #endif

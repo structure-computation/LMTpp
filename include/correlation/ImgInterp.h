@@ -411,11 +411,11 @@ struct ImgInterpDec {
     
 */
 template<class TT>
-ImgInterp<double,3> img_dist_from_front( const ImgInterp<TT,3> &mat, int max_dist, double diff_pix ) {
-    typedef double T;
+ImgInterp<TT,3> img_dist_from_front( const ImgInterp<TT,3> &mat, int max_dist, double diff_pix ) {
+    typedef TT T;
     typedef Vec<int,3> P;
     
-    ImgInterp<double,3> dist;
+    ImgInterp<TT,3> dist;
     dist.resize( mat.sizes );
     dist.set( max_dist );
     
@@ -475,8 +475,8 @@ ImgInterp<double,3> img_dist_from_front( const ImgInterp<TT,3> &mat, int max_dis
     
 */
 template<class TT>
-ImgInterp<double,2> img_dist_from_front( const ImgInterp<TT,2> &mat, int max_dist, double diff_pix ) {
-    typedef double T;
+ImgInterp<TT,2> img_dist_from_front( const ImgInterp<TT,2> &mat, int max_dist, TT diff_pix ) {
+    typedef TT T;
     typedef Vec<int,2> P;
     
     ImgInterp<double,2> dist;

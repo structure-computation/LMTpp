@@ -162,6 +162,12 @@ Dans le cas où a et m sont positifs, la fonction renvoie le plus grand multiple
 */
 inline int floor( int a, int m ) { return a - a % m; }
 
+/**
+*/
+template<class T>
+inline T floor( T m ) { return std::floor( m ); }
+
+
 /*!
 \generic_comment heavyside
 
