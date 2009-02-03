@@ -48,6 +48,9 @@ public:
         fprintf(tube,"%s",str);
         fflush(tube);
     }
+    void command(const char *str) {
+        print(str);
+    }
     /// Pour effacer les courbes d'avant
     void reset() {
         print("reset\n\n");
@@ -61,6 +64,22 @@ public:
         template<class TX,class TY> void operator()(const TY &val,const TX &x,FILE *tube) const { fprintf(tube,"%10.6f %10.6f\n",(double)x,(double)val); }
         template<class TX,class TY> void operator()(const TX &val,unsigned i,const TY &y,FILE *tube) const { fprintf(tube,"%10.6f %10.6f\n",(double)val,(double)y[i]); }
     };
+    /*!
+        mat doit être une matrice de 4 colonnes au moins tel que :
+            * la première colonne soit les x
+            * la deuxième colonne soit les y
+            * la troisième soit vx la première composante du vecteur
+            * la quatrième soit vy
+        \friend pasquier@lmt.ens-cachan.fr
+        \friend witz@lmt.ens-cachan.fr
+    */
+    template<class T,class STR,class STO>
+    void plot_field(const Mat<T,STR,STO> &mat,const char *params="") {
+        fprintf(tube,"plot '-' using 1:2:(0.01*$3/sqrt($3*$3+$4*$4)):(0.01*$4/sqrt($3*$3+$4*$4)) title \"%s\" with vectors\n",params);
+        std::ostringstream ss; ss << mat;
+        fprintf(tube,"%s\ne\n",ss.str().c_str());
+        fflush(tube);
+    }
     /// Dans le cas o une seule variable est fournie. x=num�o. vec=ordonn�
     template<class T,int s,class O>
     void plot(const Vec<T,s,O> &vec,const char *params="") {
