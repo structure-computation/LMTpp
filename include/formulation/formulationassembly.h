@@ -314,7 +314,7 @@ namespace LMT {
             pos.fit_memory();
             for(unsigned i=0;i<vectors.size();++i) {
                 vectors[i].resize( pos.size() * nb_ddl_per_node );
-                vectors[i].set(0);
+                vectors[i].set(T(0));
             }
         }
         //

@@ -30,7 +30,7 @@ struct ArmijoStep {
         T y=T(0);
         T toto=parameter*dot(lm_gradient(j,c,Number<g>(),epsilon),d);
         for(T aux=2*value; f>y; aux=aux*0.5) {
-            f=j->operator()(c+aux*d);
+            f=j->operator()(Vec<T,s>(c+aux*d));
             y=j->operator()(c)+aux*toto;
             value=aux;
         }
