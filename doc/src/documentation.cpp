@@ -32,13 +32,13 @@ using namespace std ;
 //#include "noeud.h"
 //#include "visitorbloc_namebaseclass.h"
 
-Documentation :: ~Documentation() {
+Documentation::~Documentation() {
 
     for(int i=0;i<listPageComment.size() ; i++)
         delete listPageComment[i] ;
 }
 
-void Documentation :: add_source( const char* name_dir, vector<const char*>& list_excluded_directories ) {
+void Documentation::add_source( const char* name_dir, vector<const char*>& list_excluded_directories ) {
 
     vector<string> list_source ;
     string stmp, stmp2 ;
@@ -64,7 +64,7 @@ void Documentation :: add_source( const char* name_dir, vector<const char*>& lis
 //     cerr << " >>>>>>>>>>>>> "  << endl ;
 }
 
-void Documentation :: addFileSource( const char* file ) {
+void Documentation::addFileSource( const char* file ) {
 
     PageComment* ptr_pc = NULL ;
 
@@ -75,7 +75,7 @@ void Documentation :: addFileSource( const char* file ) {
     }
 }
 
-void Documentation :: addDirSource( const char* name_dir,vector<string>& listsource, vector<const char*>* ptr_list_excluded_directories ) {
+void Documentation::addDirSource( const char* name_dir,vector<string>& listsource, vector<const char*>* ptr_list_excluded_directories ) {
 
     string stmp ;
     string path ;
@@ -165,7 +165,7 @@ void Documentation :: addDirSource( const char* name_dir,vector<string>& listsou
     closedir(dir) ;
 }
 
-void Documentation :: generate_ListTarget() {
+void Documentation::generate_ListTarget() {
 
     string stmp ;
     int i,n,j,m ;
@@ -194,7 +194,7 @@ void Documentation :: generate_ListTarget() {
     listTarget.set_type_of_listPrincipalName();
 }
 
-void Documentation :: display_ListTarget() {
+void Documentation::display_ListTarget() {
 
     int i,n ;
 
@@ -203,7 +203,7 @@ void Documentation :: display_ListTarget() {
     cout << "============== fin de la liste de Targets =================" << endl;
 }
 
-void Documentation :: display_ListPrincipalName() {
+void Documentation::display_ListPrincipalName() {
 
     int i,n ;
 
@@ -212,7 +212,7 @@ void Documentation :: display_ListPrincipalName() {
         cout << " nom principal = " << listTarget.list[listTarget.listPrincipalName[i]].pt->name.principalName << " avec un commentaire générique : " << listTarget.list[listTarget.listPrincipalName[i]].pt->ancestor << endl ;
 }
 
-void Documentation :: scan( Op& op ) {
+void Documentation::scan( Op& op ) {
 
     //for_each(listPageComment.begin(),listPageComment.end(), op ) ;
     int i ;
@@ -220,7 +220,7 @@ void Documentation :: scan( Op& op ) {
         op( listPageComment[i] ) ;
 }
 
-void Documentation :: parse() {
+void Documentation::parse() {
 
     //VisitorBloc_NameBaseClass visitorbloc_name_all_base_class( &listLink  ) ;
     //VisitorBloc_NameBaseIsoledFunction visitorbloc_name_all_base_isoled_function( &listLink  ) ;
@@ -233,7 +233,7 @@ void Documentation :: parse() {
     }
 }
 
-void Documentation :: generate_webpage_list( vector<Target*>& v, const string& name_of_path, const string& suffix,const string& nom, bool incrementID) {
+void Documentation::generate_webpage_list( vector<Target*>& v, const string& name_of_path, const string& suffix,const string& nom, bool incrementID) {
 
     string stmp ;
     string stmp2 ;
@@ -330,7 +330,7 @@ void display_multi_list( map<string,Target*>& ma, int level, const_iter first, c
     pageWeb << "</ul>" << std::endl ;
 }
 
-void Documentation :: generate_webpage_multi_list( map<string,Target*>& ma, const string& name_of_path, const string& suffix,const string& nom, bool incrementID) {
+void Documentation::generate_webpage_multi_list( map<string,Target*>& ma, const string& name_of_path, const string& suffix,const string& nom, bool incrementID) {
 
     string cur_dir,stmp ;
     string dir ;
@@ -366,7 +366,7 @@ void Documentation :: generate_webpage_multi_list( map<string,Target*>& ma, cons
     pageWeb <<std::endl;
 }
 
-Target* Documentation :: generate_webpage_list_by_type( const ListTargetByType& li, const string& name_of_path, const string& suffix,const string& nom, bool incrementID) {
+Target* Documentation::generate_webpage_list_by_type( const ListTargetByType& li, const string& name_of_path, const string& suffix,const string& nom, bool incrementID) {
 
     string stmp ;
     string stmp2 ;
@@ -464,7 +464,7 @@ Target* Documentation :: generate_webpage_list_by_type( const ListTargetByType& 
     return pt ;
 }
 
-void Documentation :: generate_webpage_vacuum( const string& name_of_path, const string& suffix,const string& nom, const string& titre,bool incrementID) {
+void Documentation::generate_webpage_vacuum( const string& name_of_path, const string& suffix,const string& nom, const string& titre,bool incrementID) {
 
     string stmp ;
     string stmp2 ;
@@ -629,7 +629,7 @@ void Documentation::generate_webpage_of_main_object() {
     generate_webpage_list( list_struct_class,"root","list", "Les classes principales", false ) ; // false signifie que l'id d target n'est pas incrémenté
 }
 
-void Documentation :: generate_file_for_webpage( const string& titre, const string& nom_web ) {
+void Documentation::generate_file_for_webpage( const string& titre, const string& nom_web ) {
 
     string stmp ;
 
@@ -653,7 +653,7 @@ void Documentation :: generate_file_for_webpage( const string& titre, const stri
 }
 
 // génère la page d'accueil du site (avec des a priori...)
-void Documentation :: generate_index() {
+void Documentation::generate_index() {
 
     OpWebPage_exists op_webpage_exists ;
     vector<string> list_webpage;
@@ -793,6 +793,14 @@ void Documentation :: generate_index() {
     pageWeb<< " </tr>"  << std::endl;
     pageWeb<< " </table>"  << std::endl;
     pageWeb<< "<hr/>" << std::endl;
+    pageWeb<< "<form action=\"search.php\" method=\"get\">" << std::endl;
+    pageWeb<< "        <table cellspacing=\"0\" cellpadding=\"0\" border=\"0\">" << std::endl;
+    pageWeb<< "          <tr>" << std::endl;
+    pageWeb<< "            <td><label>&nbsp;<u>S</u>earch&nbsp;for&nbsp;</label></td>" << std::endl;
+    pageWeb<< "            <td><input type=\"text\" name=\"query\" value=\"\" size=\"20\" accesskey=\"s\"/></td>" << std::endl;
+    pageWeb<< "          </tr>" << std::endl;
+    pageWeb<< "        </table>" << std::endl;
+    pageWeb<< "      </form>" << std::endl;
     pageWeb<< "</body>" << std::endl;
     pageWeb<< "</html>" << std::endl;
 
@@ -810,7 +818,60 @@ void Documentation :: generate_index() {
     }
 }
 
-void Documentation :: generate_file_css() {
+void Documentation::generate_file_for_search_engine() { 
+
+    string stmp ;
+    bool hiPriority;
+
+    for(int i=0;i<listTarget.list.size();i++) {
+        searchIndex.setCurrentDoc(listTarget.list[i].pt);
+        if (listTarget.list[i].pt->name.name == listTarget.list[i].pt->name.principalName)
+            hiPriority = true;
+        else
+            hiPriority = false;
+        cerr << " ajoute " << listTarget.list[i].pt->name.name << endl;
+        searchIndex.addWord(listTarget.list[i].pt->name.name,hiPriority);
+    }
+
+    stmp = tree["root"] + "search.idx";
+    searchIndex.write(stmp.c_str());
+//     ifstream entree("search_php_provisoire");
+//     if (!entree.is_open()) {
+//         cerr << " problème pour ouvrir search_php_provisoire" << endl;
+//         return;
+//     }
+
+//     stmp = tree["root"] + "search_choupette_string";
+//     ofstream sortie(stmp.c_str());
+//     if (!sortie.is_open()) {
+//         cerr << " problème pour ouvrir " << stmp << endl;
+//         return;
+//     }
+//     sortie << "const char Documentation::text_search_php[] = \"";
+//     while (true) {
+//         stmp.clear();
+//         getline(entree,stmp);
+//         if (!entree.good())
+//             break;
+//         sortie << stmp << "\\n";
+//     }
+//     sortie << "\"" << endl;
+//     sortie.close();
+
+
+
+    stmp = tree["root"] + "search.php";
+    ofstream sortie(stmp.c_str());
+    if (!sortie.is_open()) {
+        cerr << " problème pour ouvrir " << stmp << endl;
+        return;
+    }
+    sortie << text_search_php << endl;
+    sortie.close();
+//     entree.close();
+}
+
+void Documentation::generate_file_css() {
 
     string stmp ;
 
@@ -896,6 +957,14 @@ void Documentation :: generate_file_css() {
     pageWeb << std::endl;
     pageWeb << std::endl;
 }
+
+const char Documentation::text_search_php[] = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">\n<html >\n<head>\n <META HTTP-EQUIV=\"CONTENT-TYPE\" CONTENT=\"text/html; charset=utf-8\">\n<link href=\"classic.css\" rel=\"stylesheet\" type=\"text/css\" />\n<title> Documentation (Officielle) de la librairie LMT++ </title>\n</head>\n<body text=\"#000000\" bgcolor=\"#fcfcdf\" link=\"#0000cc\" vlink=\"#551a8b\" >\n<ul class=\"navigation\" >\n<li> <a href=\"index.html\" >Accueil</a></li>\n<li> <a href=\"list_touslesmot-cles.html\" >Tous les MOT-CL&Eacute;S</a> </li>\n<li> <a href=\"list_touslesexemples.html\" >Tous les exemples</a> </li>\n<li> <a href=\"list_touslestutoriels.html\" >Tous les tutoriels</a> </li>\n<li> <a href=\"list_lesclassesprincipales.html\" >Les classes principales</a> </li>\n<li> <a href=\"list_lesfonctionsprincipales.html\" >Les fonctions principales</a> </li>\n</ul>\n\n<?php\n\nfunction search_results()\n{\n  return \"Search Results\";\n}\n\nfunction matches_text($num)\n{\n  if ($num==0)\n  {\n    return \"Sorry, no documents matching your query.\";\n  }\n  else if ($num==1)\n  {\n    return \"Found <b>1</b> document matching your query.\";\n  }\n  else // $num>1\n  {\n    return \"Found <b>$num</b> documents matching your query. Showing best matches first.\";\n  }\n}\n\nfunction report_matches()\n{\n  return \"Matches: \";\n}\nfunction end_form($value)\n{\n  echo \"            <td><input type=\\\"text\\\" name=\\\"query\\\" value=\\\"$value\\\" size=\\\"20\\\" accesskey=\\\"s\\\"/></td>\\n          </tr>\\n        </table>\\n      </form>\\n    </li>\\n  </ul>\\n</div>\\n\";\n}\n\nfunction readInt($file)\n{\n  $b1 = ord(fgetc($file)); $b2 = ord(fgetc($file));\n  $b3 = ord(fgetc($file)); $b4 = ord(fgetc($file));\n  return ($b1<<24)|($b2<<16)|($b3<<8)|$b4;\n}\n\nfunction readString($file)\n{\n  $result=\"\";\n  while (ord($c=fgetc($file))) $result.=$c;\n  return $result;\n}\n\nfunction readHeader($file)\n{\n  $header =fgetc($file); $header.=fgetc($file);\n  $header.=fgetc($file); $header.=fgetc($file);\n  return $header;\n}\n\nfunction computeIndex($word)\n{\n  // Fast string hashing\n  //$lword = strtolower($word);\n  //$l = strlen($lword);\n  //for ($i=0;$i<$l;$i++)\n  //{\n  //  $c = ord($lword{$i});\n  //  $v = (($v & 0xfc00) ^ ($v << 6) ^ $c) & 0xffff;\n  //}\n  //return $v;\n\n  // Simple hashing that allows for substring search\n  if (strlen($word)<2) return -1;\n  // high char of the index\n  $hi = ord($word{0});\n  if ($hi==0) return -1;\n  // low char of the index\n  $lo = ord($word{1});\n  if ($lo==0) return -1;\n  // return index\n  return $hi*256+$lo;\n}\n\nfunction search($file,$word,&$statsList)\n{\n  $index = computeIndex($word);\n  if ($index!=-1) // found a valid index\n  {\n    fseek($file,$index*4+4); // 4 bytes per entry, skip header\n    $index = readInt($file);\n    if ($index) // found words matching the hash key\n    {\n      $start=sizeof($statsList);\n      $count=$start;\n      fseek($file,$index);\n      $w = readString($file);\n      while ($w)\n      {\n        $statIdx = readInt($file);\n        if ($word==substr($w,0,strlen($word)))\n        { // found word that matches (as substring)\n          $statsList[$count++]=array(\n              \"word\"=>$word,\n              \"match\"=>$w,\n              \"index\"=>$statIdx,\n              \"full\"=>strlen($w)==strlen($word),\n              \"docs\"=>array()\n              );\n        }\n        $w = readString($file);\n      }\n      $totalHi=0;\n      $totalFreqHi=0;\n      $totalFreqLo=0;\n      for ($count=$start;$count<sizeof($statsList);$count++)\n      {\n        $statInfo = &$statsList[$count];\n        $multiplier = 1;\n        // whole word matches have a double weight\n        if ($statInfo[\"full\"]) $multiplier=2;\n        fseek($file,$statInfo[\"index\"]); \n        $numDocs = readInt($file);\n        $docInfo = array();\n        // read docs info + occurrence frequency of the word\n        for ($i=0;$i<$numDocs;$i++)\n        {\n          $idx=readInt($file); \n          $freq=readInt($file); \n          $docInfo[$i]=array(\"idx\"  => $idx,\n                             \"freq\" => $freq>>1,\n                             \"rank\" => 0.0,\n                             \"hi\"   => $freq&1\n                            );\n          if ($freq&1) // word occurs in high priority doc\n          {\n            $totalHi++;\n            $totalFreqHi+=$freq*$multiplier;\n          }\n          else // word occurs in low priority doc\n          {\n            $totalFreqLo+=$freq*$multiplier;\n          }\n        }\n        // read name and url info for the doc\n        for ($i=0;$i<$numDocs;$i++)\n        {\n          fseek($file,$docInfo[$i][\"idx\"]);\n          $docInfo[$i][\"name\"]=readString($file);\n          $docInfo[$i][\"url\"]=readString($file);\n        }\n        $statInfo[\"docs\"]=$docInfo;\n      }\n      $totalFreq=($totalHi+1)*$totalFreqLo + $totalFreqHi;\n      for ($count=$start;$count<sizeof($statsList);$count++)\n      {\n        $statInfo = &$statsList[$count];\n        $multiplier = 1;\n        // whole word matches have a double weight\n        if ($statInfo[\"full\"]) $multiplier=2;\n        for ($i=0;$i<sizeof($statInfo[\"docs\"]);$i++)\n        {\n          $docInfo = &$statInfo[\"docs\"];\n          // compute frequency rank of the word in each doc\n          $freq=$docInfo[$i][\"freq\"];\n          if ($docInfo[$i][\"hi\"])\n          {\n            $statInfo[\"docs\"][$i][\"rank\"]=\n              (float)($freq*$multiplier+$totalFreqLo)/$totalFreq;\n          }\n          else\n          {\n            $statInfo[\"docs\"][$i][\"rank\"]=\n              (float)($freq*$multiplier)/$totalFreq;\n          }\n        }\n      }\n    }\n  }\n  return $statsList;\n}\n\nfunction combine_results($results,&$docs)\n{\n  foreach ($results as $wordInfo)\n  {\n    $docsList = &$wordInfo[\"docs\"];\n    foreach ($docsList as $di)\n    {\n      $key=$di[\"url\"];\n      $rank=$di[\"rank\"];\n      if (in_array($key, array_keys($docs)))\n      {\n        $docs[$key][\"rank\"]+=$rank;\n      }\n      else\n      {\n        $docs[$key] = array(\"url\"=>$key,\n            \"name\"=>$di[\"name\"],\n            \"rank\"=>$rank\n            );\n      }\n      $docs[$key][\"words\"][] = array(\n               \"word\"=>$wordInfo[\"word\"],\n               \"match\"=>$wordInfo[\"match\"],\n               \"freq\"=>$di[\"freq\"]\n               );\n    }\n  }\n  return $docs;\n}\n\nfunction filter_results($docs,&$requiredWords,&$forbiddenWords)\n{\n  $filteredDocs=array();\n  while (list ($key, $val) = each ($docs)) \n  {\n    $words = &$docs[$key][\"words\"];\n    $copy=1; // copy entry by default\n    if (sizeof($requiredWords)>0)\n    {\n      foreach ($requiredWords as $reqWord)\n      {\n        $found=0;\n        foreach ($words as $wordInfo)\n        { \n          $found = $wordInfo[\"word\"]==$reqWord;\n          if ($found) break;\n        }\n        if (!$found) \n        {\n          $copy=0; // document contains none of the required words\n          break;\n        }\n      }\n    }\n    if (sizeof($forbiddenWords)>0)\n    {\n      foreach ($words as $wordInfo)\n      {\n        if (in_array($wordInfo[\"word\"],$forbiddenWords))\n        {\n          $copy=0; // document contains a forbidden word\n          break;\n        }\n      }\n    }\n    if ($copy) $filteredDocs[$key]=$docs[$key];\n  }\n  return $filteredDocs;\n}\n\nfunction compare_rank($a,$b)\n{\n  if ($a[\"rank\"] == $b[\"rank\"]) \n  {\n    return 0;\n  }\n  return ($a[\"rank\"]>$b[\"rank\"]) ? -1 : 1; \n}\n\nfunction sort_results($docs,&$sorted)\n{\n  $sorted = $docs;\n  usort($sorted,\"compare_rank\");\n  return $sorted;\n}\n\nfunction report_results(&$docs)\n{\n  echo \"<table cellspacing=\\\"2\\\">\\n\";\n  echo \"  <tr>\\n\";\n  echo \"    <td colspan=\\\"2\\\"><h2>\".search_results().\"</h2></td>\\n\";\n  echo \"  </tr>\\n\";\n  $numDocs = sizeof($docs);\n  if ($numDocs==0)\n  {\n    echo \"  <tr>\\n\";\n    echo \"    <td colspan=\\\"2\\\">\".matches_text(0).\"</td>\\n\";\n    echo \"  </tr>\\n\";\n  }\n  else\n  {\n    echo \"  <tr>\\n\";\n    echo \"    <td colspan=\\\"2\\\">\".matches_text($numDocs);\n    echo \"\\n\";\n    echo \"    </td>\\n\";\n    echo \"  </tr>\\n\";\n    $num=1;\n    foreach ($docs as $doc)\n    {\n      echo \"  <tr>\\n\";\n      echo \"    <td align=\\\"right\\\">$num.</td>\";\n      echo     \"<td><a class=\\\"el\\\" href=\\\"\".$doc[\"url\"].\"\\\">\".$doc[\"name\"].\"</a></td>\\n\";\n      echo \"  <tr>\\n\";\n      echo \"    <td></td><td class=\\\"tiny\\\">\".report_matches().\" \";\n      foreach ($doc[\"words\"] as $wordInfo)\n      {\n        $word = $wordInfo[\"word\"];\n        $matchRight = substr($wordInfo[\"match\"],strlen($word));\n        echo \"<b>$word</b>$matchRight(\".$wordInfo[\"freq\"].\") \";\n      }\n      echo \"    </td>\\n\";\n      echo \"  </tr>\\n\";\n      $num++;\n    }\n  }\n  echo \"</table>\\n\";\n}\n\nfunction main()\n{\n  if(strcmp('4.1.0', phpversion()) > 0) \n  {\n    die(\"Error: PHP version 4.1.0 or above required!\");\n  }\n  if (!($file=fopen(\"search.idx\",\"rb\"))) \n  {\n    die(\"Error: Search index file could NOT be opened!\");\n  }\n  if (readHeader($file)!=\"DOXS\")\n  {\n    die(\"Error: Header of index file is invalid!\");\n  }\n  $query=\"\";\n  if (array_key_exists(\"query\", $_GET))\n  {\n    $query=$_GET[\"query\"];\n  }\n  end_form(ereg_replace(\"[^[:alnum:]:\\\\.\\\\t ]\", \" \", $query ));\n  echo \"&nbsp;\\n<div class=\\\"searchresults\\\">\\n\";\n  $results = array();\n  $requiredWords = array();\n  $forbiddenWords = array();\n  $foundWords = array();\n  $word=strtok($query,\" \");\n  while ($word) // for each word in the search query\n  {\n    if (($word{0}=='+')) { $word=substr($word,1); $requiredWords[]=$word; }\n    if (($word{0}=='-')) { $word=substr($word,1); $forbiddenWords[]=$word; }\n    if (!in_array($word,$foundWords))\n    {\n      $foundWords[]=$word;\n      search($file,strtolower($word),$results);\n    }\n    $word=strtok(\" \");\n  }\n  $docs = array();\n  combine_results($results,$docs);\n  // filter out documents with forbidden word or that do not contain\n  // required words\n  $filteredDocs = filter_results($docs,$requiredWords,$forbiddenWords);\n  // sort the results based on rank\n  $sorted = array();\n  sort_results($filteredDocs,$sorted);\n  // report results to the user\n  report_results($sorted);\n  echo \"</div>\\n\";\n  fclose($file);\n}\n\nmain();\n\n\n?>\n<hr />\n<br>\n<br>\n<br>\n<br>\n<br>\n<br>\n<br>\n</body>\n</html>\n";
+
+
+//const char Documentation::text_search_php[] = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE html\n   PUBLIC \"-//W3C//DTDXHTML 1.0 Strict//EN\" \"DTD/xhtml1-strict.dtd\">\n<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"fr\" lang=\"fr\">\n<head>\n <META HTTP-EQUIV=\"CONTENT-TYPE\" CONTENT=\"text/html; charset=utf-8\">\n<link href=\"classic.css\" rel=\"stylesheet\" type=\"text/css\" />\n<title> Documentation (Officielle) de la librairie LMT++ </title>\n</head>\n<body text=\"#000000\" bgcolor=\"#fcfcdf\" link=\"#0000cc\" vlink=\"#551a8b\" >\n<ul class=\"navigation\" >\n<li> <a href=\"index.html\" >Accueil</a></li>\n<li> <a href=\"list_touslesmot-cles.html\" >Tous les MOT-CL&Eacute;S</a> </li>\n<li> <a href=\"list_touslesexemples.html\" >Tous les exemples</a> </li>\n<li> <a href=\"list_touslestutoriels.html\" >Tous les tutoriels</a> </li>\n<li> <a href=\"list_lesclassesprincipales.html\" >Les classes principales</a> </li>\n<li> <a href=\"list_lesfonctionsprincipales.html\" >Les fonctions principales</a> </li>\n</ul>\n\n<?php\n\nfunction search_results()\n{\n  return \"Search Results\";\n}\n\nfunction matches_text($num)\n{\n  if ($num==0)\n  {\n    return \"Sorry, no documents matching your query.\";\n  }\n  else if ($num==1)\n  {\n    return \"Found <b>1</b> document matching your query.\";\n  }\n  else // $num>1\n  {\n    return \"Found <b>$num</b> documents matching your query. Showing best matches first.\";\n  }\n}\n\nfunction report_matches()\n{\n  return \"Matches: \";\n}\nfunction end_form($value)\n{\n  echo \"            <td><input type=\"text\" name=\"query\" value=\"$value\" size=\"20\" accesskey=\"s\"/></td>\n          </tr>\n        </table>\n      </form>\n    </li>\n  </ul>\n</div>\n\";\n}\n\nfunction readInt($file)\n{\n  $b1 = ord(fgetc($file)); $b2 = ord(fgetc($file));\n  $b3 = ord(fgetc($file)); $b4 = ord(fgetc($file));\n  return ($b1<<24)|($b2<<16)|($b3<<8)|$b4;\n}\n\nfunction readString($file)\n{\n  $result=\"\";\n  while (ord($c=fgetc($file))) $result.=$c;\n  return $result;\n}\n\nfunction readHeader($file)\n{\n  $header =fgetc($file); $header.=fgetc($file);\n  $header.=fgetc($file); $header.=fgetc($file);\n  return $header;\n}\n\nfunction computeIndex($word)\n{\n  // Fast string hashing\n  //$lword = strtolower($word);\n  //$l = strlen($lword);\n  //for ($i=0;$i<$l;$i++)\n  //{\n  //  $c = ord($lword{$i});\n  //  $v = (($v & 0xfc00) ^ ($v << 6) ^ $c) & 0xffff;\n  //}\n  //return $v;\n\n  // Simple hashing that allows for substring search\n  if (strlen($word)<2) return -1;\n  // high char of the index\n  $hi = ord($word{0});\n  if ($hi==0) return -1;\n  // low char of the index\n  $lo = ord($word{1});\n  if ($lo==0) return -1;\n  // return index\n  return $hi*256+$lo;\n}\n\nfunction search($file,$word,&$statsList)\n{\n  $index = computeIndex($word);\n  if ($index!=-1) // found a valid index\n  {\n    fseek($file,$index*4+4); // 4 bytes per entry, skip header\n    $index = readInt($file);\n    if ($index) // found words matching the hash key\n    {\n      $start=sizeof($statsList);\n      $count=$start;\n      fseek($file,$index);\n      $w = readString($file);\n      while ($w)\n      {\n        $statIdx = readInt($file);\n        if ($word==substr($w,0,strlen($word)))\n        { // found word that matches (as substring)\n          $statsList[$count++]=array(\n              \"word\"=>$word,\n              \"match\"=>$w,\n              \"index\"=>$statIdx,\n              \"full\"=>strlen($w)==strlen($word),\n              \"docs\"=>array()\n              );\n        }\n        $w = readString($file);\n      }\n      $totalHi=0;\n      $totalFreqHi=0;\n      $totalFreqLo=0;\n      for ($count=$start;$count<sizeof($statsList);$count++)\n      {\n        $statInfo = &$statsList[$count];\n        $multiplier = 1;\n        // whole word matches have a double weight\n        if ($statInfo[\"full\"]) $multiplier=2;\n        fseek($file,$statInfo[\"index\"]); \n        $numDocs = readInt($file);\n        $docInfo = array();\n        // read docs info + occurrence frequency of the word\n        for ($i=0;$i<$numDocs;$i++)\n        {\n          $idx=readInt($file); \n          $freq=readInt($file); \n          $docInfo[$i]=array(\"idx\"  => $idx,\n                             \"freq\" => $freq>>1,\n                             \"rank\" => 0.0,\n                             \"hi\"   => $freq&1\n                            );\n          if ($freq&1) // word occurs in high priority doc\n          {\n            $totalHi++;\n            $totalFreqHi+=$freq*$multiplier;\n          }\n          else // word occurs in low priority doc\n          {\n            $totalFreqLo+=$freq*$multiplier;\n          }\n        }\n        // read name and url info for the doc\n        for ($i=0;$i<$numDocs;$i++)\n        {\n          fseek($file,$docInfo[$i][\"idx\"]);\n          $docInfo[$i][\"name\"]=readString($file);\n          $docInfo[$i][\"url\"]=readString($file);\n        }\n        $statInfo[\"docs\"]=$docInfo;\n      }\n      $totalFreq=($totalHi+1)*$totalFreqLo + $totalFreqHi;\n      for ($count=$start;$count<sizeof($statsList);$count++)\n      {\n        $statInfo = &$statsList[$count];\n        $multiplier = 1;\n        // whole word matches have a double weight\n        if ($statInfo[\"full\"]) $multiplier=2;\n        for ($i=0;$i<sizeof($statInfo[\"docs\"]);$i++)\n        {\n          $docInfo = &$statInfo[\"docs\"];\n          // compute frequency rank of the word in each doc\n          $freq=$docInfo[$i][\"freq\"];\n          if ($docInfo[$i][\"hi\"])\n          {\n            $statInfo[\"docs\"][$i][\"rank\"]=\n              (float)($freq*$multiplier+$totalFreqLo)/$totalFreq;\n          }\n          else\n          {\n            $statInfo[\"docs\"][$i][\"rank\"]=\n              (float)($freq*$multiplier)/$totalFreq;\n          }\n        }\n      }\n    }\n  }\n  return $statsList;\n}\n\nfunction combine_results($results,&$docs)\n{\n  foreach ($results as $wordInfo)\n  {\n    $docsList = &$wordInfo[\"docs\"];\n    foreach ($docsList as $di)\n    {\n      $key=$di[\"url\"];\n      $rank=$di[\"rank\"];\n      if (in_array($key, array_keys($docs)))\n      {\n        $docs[$key][\"rank\"]+=$rank;\n      }\n      else\n      {\n        $docs[$key] = array(\"url\"=>$key,\n            \"name\"=>$di[\"name\"],\n            \"rank\"=>$rank\n            );\n      }\n      $docs[$key][\"words\"][] = array(\n               \"word\"=>$wordInfo[\"word\"],\n               \"match\"=>$wordInfo[\"match\"],\n               \"freq\"=>$di[\"freq\"]\n               );\n    }\n  }\n  return $docs;\n}\n\nfunction filter_results($docs,&$requiredWords,&$forbiddenWords)\n{\n  $filteredDocs=array();\n  while (list ($key, $val) = each ($docs)) \n  {\n    $words = &$docs[$key][\"words\"];\n    $copy=1; // copy entry by default\n    if (sizeof($requiredWords)>0)\n    {\n      foreach ($requiredWords as $reqWord)\n      {\n        $found=0;\n        foreach ($words as $wordInfo)\n        { \n          $found = $wordInfo[\"word\"]==$reqWord;\n          if ($found) break;\n        }\n        if (!$found) \n        {\n          $copy=0; // document contains none of the required words\n          break;\n        }\n      }\n    }\n    if (sizeof($forbiddenWords)>0)\n    {\n      foreach ($words as $wordInfo)\n      {\n        if (in_array($wordInfo[\"word\"],$forbiddenWords))\n        {\n          $copy=0; // document contains a forbidden word\n          break;\n        }\n      }\n    }\n    if ($copy) $filteredDocs[$key]=$docs[$key];\n  }\n  return $filteredDocs;\n}\n\nfunction compare_rank($a,$b)\n{\n  if ($a[\"rank\"] == $b[\"rank\"]) \n  {\n    return 0;\n  }\n  return ($a[\"rank\"]>$b[\"rank\"]) ? -1 : 1; \n}\n\nfunction sort_results($docs,&$sorted)\n{\n  $sorted = $docs;\n  usort($sorted,\"compare_rank\");\n  return $sorted;\n}\n\nfunction report_results(&$docs)\n{\n  echo \"<table cellspacing=\"2\">\n\";\n  echo \"  <tr>\n\";\n  echo \"    <td colspan=\"2\"><h2>\".search_results().\"</h2></td>\n\";\n  echo \"  </tr>\n\";\n  $numDocs = sizeof($docs);\n  if ($numDocs==0)\n  {\n    echo \"  <tr>\n\";\n    echo \"    <td colspan=\"2\">\".matches_text(0).\"</td>\n\";\n    echo \"  </tr>\n\";\n  }\n  else\n  {\n    echo \"  <tr>\n\";\n    echo \"    <td colspan=\"2\">\".matches_text($numDocs);\n    echo \"\n\";\n    echo \"    </td>\n\";\n    echo \"  </tr>\n\";\n    $num=1;\n    foreach ($docs as $doc)\n    {\n      echo \"  <tr>\n\";\n      echo \"    <td align=\"right\">$num.</td>\";\n      echo     \"<td><a class=\"el\" href=\"\".$doc[\"url\"].\"\">\".$doc[\"name\"].\"</a></td>\n\";\n      echo \"  <tr>\n\";\n      echo \"    <td></td><td class=\"tiny\">\".report_matches().\" \";\n      foreach ($doc[\"words\"] as $wordInfo)\n      {\n        $word = $wordInfo[\"word\"];\n        $matchRight = substr($wordInfo[\"match\"],strlen($word));\n        echo \"<b>$word</b>$matchRight(\".$wordInfo[\"freq\"].\") \";\n      }\n      echo \"    </td>\n\";\n      echo \"  </tr>\n\";\n      $num++;\n    }\n  }\n  echo \"</table>\n\";\n}\n\nfunction main()\n{\n  if(strcmp('4.1.0', phpversion()) > 0) \n  {\n    die(\"Error: PHP version 4.1.0 or above required!\");\n  }\n  if (!($file=fopen(\"search.idx\",\"rb\"))) \n  {\n    die(\"Error: Search index file could NOT be opened!\");\n  }\n  if (readHeader($file)!=\"DOXS\")\n  {\n    die(\"Error: Header of index file is invalid!\");\n  }\n  $query=\"\";\n  if (array_key_exists(\"query\", $_GET))\n  {\n    $query=$_GET[\"query\"];\n  }\n  end_form(ereg_replace(\"[^[:alnum:]:\\\\.\\\\t ]\", \" \", $query ));\n  echo \"&nbsp;\n<div class=\"searchresults\">\n\";\n  $results = array();\n  $requiredWords = array();\n  $forbiddenWords = array();\n  $foundWords = array();\n  $word=strtok($query,\" \");\n  while ($word) // for each word in the search query\n  {\n    if (($word{0}=='+')) { $word=substr($word,1); $requiredWords[]=$word; }\n    if (($word{0}=='-')) { $word=substr($word,1); $forbiddenWords[]=$word; }\n    if (!in_array($word,$foundWords))\n    {\n      $foundWords[]=$word;\n      search($file,strtolower($word),$results);\n    }\n    $word=strtok(\" \");\n  }\n  $docs = array();\n  combine_results($results,$docs);\n  // filter out documents with forbidden word or that do not contain\n  // required words\n  $filteredDocs = filter_results($docs,$requiredWords,$forbiddenWords);\n  // sort the results based on rank\n  $sorted = array();\n  sort_results($filteredDocs,$sorted);\n  // report results to the user\n  report_results($sorted);\n  echo \"</div>\n\";\n  fclose($file);\n}\n\nmain();\n\n\n?>\n<hr />\n<br>\n<br>\n<br>\n<br>\n<br>\n<br>\n<br>\n</body>\n</html>\n";
+
+
+
 
 
 

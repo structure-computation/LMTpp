@@ -289,7 +289,7 @@ bool isURL(string& res, string& s,int end,int start) {
 
 string text2HTML(string& s,Target* ptr_parent, ListTarget* ptr_lt ) {
 
-    int end,start,suite,pos,suite2 ;
+    int end,start,suite,pos,suite2,pos2 ;
     string stmp,stmp2 ;
     string html ;
     char c;
@@ -320,71 +320,122 @@ string text2HTML(string& s,Target* ptr_parent, ListTarget* ptr_lt ) {
         if (isURL(stmp2,s,suite,pos)) {
             html += linkHTML("",stmp2,stmp2) ;
             html.push_back(c) ;
-        } else {
-            /// le lexem n'est pas une url donc soit c'est un mot, soit un mot-clé \anchor ou \a
-            /// cf la page comment.cpp pour connaître tous les mots-clés.
-            if (stmp == "\\a") {
-                //cerr << "::|" << stmp << "|" << endl ;
-                if ((pos = extraire_token(&suite,&c," \t\n[]",s,end,suite+1)) >= 0) {
-                    /// les différents cas possibles :
-                    /// * \a url
-                    /// * \a Mesh
-                    /// * \a [titre]
-                    /// * \a [url] Texte de la balise
-                    /// * \a [href=url,type=val] Mesh
-                    /// * \a [type=val,href=url] Mesh
-                    stmp = s.substr(pos,suite-pos) ;
-                    //cerr << "<<|" << stmp << "|" << endl ;
-                    if (isURL(stmp2,s,suite,pos)) {
-                        html += linkHTML("",stmp2,stmp2) ;
-                        html.push_back(c) ;
-                    } else {
-                        if (s[pos] == '[') {
-                            get_block(&suite,"[]",s,end,pos+1); // +1 pour dépasser le [
-                            if (isURL(stmp2,s,suite-1,pos+1)) {
-                                    html += linkHTML("",stmp2,stmp2) ;
-                                    html.push_back(' ') ;
-                            } else {
-                                /// soit c'est un titre , soit c'est une suite de id=val.
-                                stmp = s.substr(pos+1,suite-pos-2);
-                                cut_space( stmp ) ;
-                                /// * un titre
-                                //cerr << "<<||" << stmp << "||>>" << endl ;
-                                ptr_t = ptr_lt->isName( stmp ) ;
-                                if (ptr_t != NULL) {
-                                    html += linkHTML( ptr_parent->reference(), ptr_t->reference(), stmp ) ;
-                                    html.push_back(' ') ;
-                                } else {
-                                    // * une suite de id=val
-                                    /// à faire...
-                                }
-                            }
-
-
+            start = suite + 1 ;
+            continue;
+        }
+        /// le lexem n'est pas une url donc soit c'est un mot, soit un mot-clé \anchor ou \a
+        /// cf la page comment.cpp pour connaître tous les mots-clés.
+        /// soit un lien wiki
+        if (stmp == "\\a") {
+            //cerr << "::|" << stmp << "|" << endl ;
+            if ((pos = extraire_token(&suite,&c," \t\n[]",s,end,suite+1)) >= 0) {
+                /// les différents cas possibles :
+                /// * \a url
+                /// * \a Mesh
+                /// * \a [titre de la page]
+                /// * \a [url] Texte de la balise
+                /// * \a [href=url,type=val] Mesh
+                /// * \a [type=val,href=url] Mesh
+                stmp = s.substr(pos,suite-pos) ;
+                //cerr << "<<|" << stmp << "|" << endl ;
+                if (isURL(stmp2,s,suite,pos)) {
+                    html += linkHTML("",stmp2,stmp2) ;
+                    html.push_back(c) ;
+                } else {
+                    if (s[pos] == '[') {
+                        get_block(&suite,"[]",s,end,pos+1); // +1 pour dépasser le [
+                        if (isURL(stmp2,s,suite-1,pos+1)) {
+                                html += linkHTML("",stmp2,stmp2) ;
+                                html.push_back(' ') ;
                         } else {
-                            // c'est probablement un nom de fonction ou de classe.
+                            /// soit c'est un titre , soit c'est une suite de id=val.
+                            stmp = s.substr(pos+1,suite-pos-2);
+                            cut_space( stmp ) ;
+                            /// * un titre
+                            //cerr << "<<||" << stmp << "||>>" << endl ;
                             ptr_t = ptr_lt->isName( stmp ) ;
                             if (ptr_t != NULL) {
                                 html += linkHTML( ptr_parent->reference(), ptr_t->reference(), stmp ) ;
-                                html.push_back(c) ;
+                                html.push_back(' ') ;
+                            } else {
+                                // * une suite de id=val
+                                /// à faire...
                             }
+                        }
+
+
+                    } else {
+                        /// c'est probablement un nom de fonction ou de classe.
+                        ptr_t = ptr_lt->isName( stmp ) ;
+                        if (ptr_t != NULL) {
+                            html += linkHTML( ptr_parent->reference(), ptr_t->reference(), stmp ) ;
+                            html.push_back(c) ;
                         }
                     }
                 }
-            } else {
-                if (stmp == "\\anchor") {
-                    if ((pos = extraire_token(&suite,&c," \t\n",s,end,suite+1)) >= 0) {
-                        stmp = s.substr(pos,suite-pos) ;
-                        html += ancreHTML(stmp) ;
-                        html.push_back(c) ;
+            }
+            start = suite + 1 ;
+            continue;
+        }
+        if (stmp == "\\anchor") {
+            if ((pos = extraire_token(&suite,&c," \t\n",s,end,suite+1)) >= 0) {
+                stmp = s.substr(pos,suite-pos) ;
+                html += ancreHTML(stmp) ;
+                html.push_back(c) ;
+            }
+            start = suite + 1 ;
+            continue;
+        }
+        if ( (pos2 = stmp.find("[[")) == 0) {
+            /// syntaxe wiki possible :
+            /// * [[url]]
+            /// * [[url|étiquette]]
+            /// * [[Mesh]]
+            if ((suite2 = s.find("]]",pos+2)) != string::npos) {
+                stmp = s.substr(pos+2,suite2-pos-2);
+                //cerr << "------ stmp = |" << stmp << "|  et pos2 = " << stmp.find('|') << endl;
+                start = pos+2;
+                if ((pos2 = stmp.find('|')) == string::npos) {
+                    if (isURL(stmp2,s,suite2,start)) {
+                        html += linkHTML("",stmp2,stmp2) + " " ;
+                        start = suite2 + 2 ;
+                        continue;
+                    } else {
+                        stmp = s.substr(start,suite2-start);
+                        /// c'est probablement un nom de fonction ou de classe.
+                        ptr_t = ptr_lt->isName( stmp ) ;
+                        if (ptr_t != NULL) {
+                            html += linkHTML( ptr_parent->reference(), ptr_t->reference(), stmp ) + " ";
+                            start = suite2 + 2 ;
+                            continue;
+                        }
                     }
                 } else {
-                    // c'est un mot normal.
-                    html += french2HTML(stmp) ;
-                    html.push_back(c) ;
+                    stmp = s.substr(start+pos2+1,suite2-pos2-start-1);
+                    if (isURL(stmp2,s,start+pos2,start)) {
+                        html += linkHTML("",stmp2,stmp) + " ";
+                        start = suite2 + 2 ;
+                        continue;
+                    } else {
+                        /// c'est probablement un nom de fonction ou de classe.
+                        stmp2 = s.substr(start,pos2);
+                        ptr_t = ptr_lt->isName( stmp2 ) ;
+                        if (ptr_t != NULL) {
+                            if (stmp.size()==0)
+                                html += linkHTML( ptr_parent->reference(), ptr_t->reference(), stmp2 ) + " ";
+                            else 
+                                html += linkHTML( ptr_parent->reference(), ptr_t->reference(), stmp ) + " ";
+                            start = suite2 + 2 ;
+                            continue;
+                        }
+                    }
                 }
             }
         }
+
+        /// c'est un mot normal.
+        html += french2HTML(stmp) ;
+        html.push_back(c) ;
         start = suite + 1 ;
     }
     return html ;

@@ -16,6 +16,7 @@ using namespace std ;
 #include "op.h"
 #include "visitorbloc.h"
 #include "listtarget.h"
+#include "searchindex.h"
 
 struct PageComment ;
 struct ListTargetByType ;
@@ -54,16 +55,32 @@ struct Documentation {
     void generate_file_for_webpage( const string& titre, const string& nom_web ) ;
     void generate_index() ;
     void generate_file_css() ;
+    void generate_file_for_search_engine();
     void parse() ; // cette fonction parse le code c++ de tout le projet ainsi que tous les commentaires.
     void scan( Op& op ) ; // cette fonction permet d'appliquer un opérateur/fonction op sur tous les objets PageComment du projet.
 
     vector<PageComment*> listPageComment ;
     ListTarget listTarget ;
-    //vector<string> listPrincipalName ;
-    //string repertory ;
     string name_software ;
     map<string,string> tree ;
+    /**
+        temporaire : c'est un objet qui génère le fichier search.idx contenant la table de correspondance servant à la recherche par mot clés.
+        Cette classe fur récupérée et adaptée du programme doxygen.
+    */
+    SearchIndex searchIndex;
+    static const char text_search_php[];
 } ;
+
+
+
+
+
+
+
+
+
+
+
 
 
 #endif

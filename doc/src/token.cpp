@@ -36,6 +36,13 @@ string directory(string& s) {
     if (i == string::npos ) return s ; else return s.substr(0,i) ;
 }
 
+void tolower(string& s) {
+
+    for(unsigned int i=0 ; i<s.size();i++) {
+        s[i] = (char) tolower(s[i]);
+    }
+}
+
 // fonction qui convertit un string en char*.
 // renvoie 1 s'il y a dépassement et 0 sinon.
 int string2chaine(char* res, int res_t, string& s )
