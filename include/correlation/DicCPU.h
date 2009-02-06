@@ -9,7 +9,7 @@
 #include <formulation/FormulationFit.h>
 #include <QtCore/QMutex>
 #include "mesh_carac_correlation.h"
-#include "containers/eig_lapack.h"
+// #include "containers/eig_lapack.h"
 // #include <correlation/pixelotomie.h>
 
 namespace LMT {

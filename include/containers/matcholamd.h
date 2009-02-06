@@ -74,13 +74,47 @@ public:
         L = NULL;
         allocate( indices );
     }
+    /// 
+    template<class T2>
+    Mat( const Mat<T2,Sym<>,SparseLine<> > &mat ) {
+        init_from_mat( mat );
+    }
+private:
     ///
-    ~Mat() {
+    template<class T2>
+    void init_from_mat( const Mat<T2,Sym<>,SparseLine<> > &mat ) {
+        Vec<Vec<unsigned> > indices;
+        indices.resize( mat.nb_rows() );
+        for(unsigned i=0;i<mat.nb_rows();++i)
+            indices[i] = mat.data[i].indices;
+        //
+        L = NULL;
+        allocate( indices );
+        //
+        for(unsigned i=0;i<mat.nb_rows();++i)
+            for(unsigned k=0;k<mat.data[i].indices.size();++k)
+                operator()( i, mat.data[i].indices[k] ) = mat.data[i].data[k];
+    }
+public:
+    /// 
+    template<class T2>
+    Mat &operator=( const Mat<T2,Sym<>,SparseLine<> > &mat ) {
+        free_data();
+        init_from_mat( mat );
+        return *this;
+    }
+    ///
+    void free_data() {
         if ( A ) {
             cholmod_free_factor ( &L, &c );
             cholmod_free_sparse ( &A, &c );
             cholmod_finish ( &c );
+            A = NULL;
         }
+    }
+    ///
+    ~Mat() {
+        free_data();
     }
     ///
     void clear() { for(unsigned i=0;i<beg_row[A->nrow];++i) x[i] = 0.0; }

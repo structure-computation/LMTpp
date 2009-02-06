@@ -1299,7 +1299,8 @@ public:
         shift();
         assemble();
         assemble_vector_der_var( num_der_var );
-        vectors[ 0 ] = inv( matrices(Number<0>()) ) * sollicitation;
+        //vectors[ 0 ] = inv( matrices(Number<0>()) ) * sollicitation;
+        solve_system();
         update_variables();
     }
     
