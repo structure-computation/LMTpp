@@ -23,12 +23,81 @@ namespace LMT {
 \\generic_comment Pol 
     \\brief polynômes à plusieurs indéterminées et de degré quelconque bornés
 
-    Pol est une classe qui représente les polynômes à plusieurs indéterminés et de degré quelconque mais on fixe à la compilation le nombre d'indéterminés (paramètre template nx) ainsi que le même degré partiel maximum de chaque indéterminé (paramètre template nd). 
-    Attention : Le stockage est de type dense ; cad on stocke la valeur de tous les monômes donc la taille augmente très vite avec le nombre d'indéterminées...
+     = Remarque générale
+        Pour pouvoir manipuler des polynômes (mono et multivariables), il faut utiliser le fichier polynomials.h
 
-    \\relates PolApprox
-    \\relates RatApprox
-    \\relates Rat
+        \\relates PolApprox
+        \\relates RatApprox
+        \\relates Rat
+
+    = Parametres templates pour les polynômes 
+        Il y a trois parametres templates pour définir un polynome : Pol<nd,nx,T>
+    
+        * nd est le degré maximal du polynome (valeur par défaut : 4)
+        * nx est le nombre de variables du polynome (valeur par défaut : 1)
+        * T est le type des coefficients du polynomes (valeur par défaut : double)
+    
+        Pour diminuer les temps de calcus, il y a une spécialisation de la classe Pol pour les polynomes monovariables (nx=1). Ils s'utilisent donc légèrement différement que les polynomes multivariables. 
+
+    = Foire aux questions pour les polynômes :
+    
+        * [[#1| Comment créer un polynome constant ?]]
+        * [[#2| Comment afficher un polynome ?]]
+        * [[#3| Comment récupérer les coefficients d'un polynome ?]]
+        * [[#4| Comment récupérer les puissances d'un polynome ?]]
+        * [[#5| Comment évaluer un polynome multivariables en un point ?]]
+        * [[#6| Comment évaluer un polynome monovariable en un point ?]]
+        * [[#7| Comment dériver un polynome multivariables ?]]
+        * [[#8| Comment dériver un polynome monovariable ?]]
+        * [[#9| Comment intégrer un polynome monovariable ?]]
+        * [[#10| Comment effectuer des opérations algébriques sur des polynomes ?]]
+        * [[#11| Comment obtenir les racines d'un polynome monovariable ?]]
+
+    = Réponses :
+
+        * \\anchor 1 Pour créer un polynome constant égal a 4 :
+            \\code C/C++
+                Pol<nd,nx,T> P(4);
+        
+        * \\anchor 2 Pour afficher le polynome P :
+            \\code C/C++
+                cout << P << endl;
+                OU
+                PRINT(P);
+        * \\anchor 3 Pour récupérer les coefficients du polynome P :
+            \\code C/C++
+                Vec<T> V=P.coefficients();
+        * \\anchor 4 Pour récupérer les puissances du polynome P :
+            \\code C/C++
+                Vec<Vec<unsigned,nx> > V=P.powers();
+        * \\anchor 5 Pour évaluer le polynome de 3 variables P au point (4,-2,1) :
+            \\code C/C++
+                Pol<nd,3,T> P = ... blabla ...
+                Vec<T,3> V(4,-2,1);
+                Vec<T> W=P(V);
+        * \\anchor 6 Pour évaluer le polynome monovariable P au point 4 :
+            \\code C/C++
+                Pol<nd,1,T> P = ... blabla ...
+                T s=P(V);
+        * \\anchor 7 Pour obtenir les dérivées du polynome multivariables P :
+            \\code C/C++
+                Vec<Pol<nd-1,nx,T>,nx> V=P.derivative();
+        * \\anchor 8 Pour obtenir la dérivée du polynome monovariable P :
+            \\code C/C++
+                Pol<nd-1,nx,T> Q=P.derivative();
+        * \\anchor 9 Pour obtenir la primitive du polynome monovariable P qui s'annule en a:
+            \\code C/C++
+                T a; Pol<nd-1,nx,T> Q=P.integral(a);
+        * \\anchor 10 Pour effectuer des opérations algébriques sur des polynomes P et Q :
+            \\code C/C++
+                Pol<nd,nx,T> R=P+Q;
+                Pol<nd,nx,T> R=P-Q;
+                Pol<nd,nx,T> R=P*Q;
+                Pol<nd,nx,T> R=P/Q; (pour la division, un développement de Taylor est effectué autour de 0)
+        * \\anchor 11 Pour obtenir les racines du polynome monovariable P :
+            \\code C/C++
+                Vec<T> V=P.roots(); 
+
     \\friend camille.gouttebroze@lmt.ens-cachan.fr
     \\friend raphael.pasquier@lmt.ens-cachan.fr
     \\friend hugo.leclerc@lmt.ens-cachan.fr
