@@ -116,9 +116,18 @@
                         code
             * Pour faire un <strong> lien </strong> dans du texte avec le mot-clé a. Exemple :
                 \verbatim
-                    \a Vec
+                    \a Vec fait un lien sur la page de Vec
                     \a www.google.fr
                     \a truc@fai.fr
+                On peut aussi utiliser la syntaxe wiki; cad :
+                \verbatim
+                    [[Vec]]
+                    [[www.google.fr]]
+                    [[www.google.fr|ceci est un lien vers le moteur Google]]
+                Cela donne :
+                    [[Vec]]
+                    [[www.google.fr]]
+                    [[www.google.fr|ceci est un lien vers le moteur Google]]
             * Pour une <strong> ancre </strong> , cible d'un lien, avec le mot-clé anchor. Exemple :
                 \verbatim
                     \a #titi

@@ -26,7 +26,7 @@ struct LocalMinimizer {
     template <class T, int s> Vec<T,s> solve(const Vec<T,s> &input) {
         Vec<T,s> res=input;
         for (;criterion.update(f,res);) {
-            Vec<T> direction=algorithm.get_direction(f,res);
+            Vec<T,s> direction=algorithm.get_direction(f,res);
             step.update(f,res,direction);
             res+=step.value*direction;
             if (print_res)

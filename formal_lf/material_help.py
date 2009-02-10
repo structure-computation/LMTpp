@@ -27,7 +27,7 @@ def simplification_behaviour(Kglo,Hglo,epsth,dim,type_stress_2D='plane stress'):
             epsth2d=mul(K2d.inverse(),sigth2d)
             return K2d,epsth2d
    elif dim==1:
-      return K2d(0,0),epsth[0]
+      return Kglo(0,0),epsth[0]
 
 def reconstruction_quantites_3d(epsilon,Kglo,Hglo,epsth,deltaT,dim,type_stress_2D='plane stress'):
    if dim==3:

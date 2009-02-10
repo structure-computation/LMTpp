@@ -86,6 +86,10 @@ namespace LMT {
     template<class T,unsigned s> SimdVecAl<T,s> neg      (const SimdVecAl<T,s> &a) { SimdVecAl<T,s> res; for(unsigned i=0;i<s;++i) res[i] =    - a[i] ; return res; }
     template<class T,unsigned s> SimdVecAl<T,s> conj     (const SimdVecAl<T,s> &a) { SimdVecAl<T,s> res; for(unsigned i=0;i<s;++i) res[i] = conj(a[i]); return res; }
     
+    template<class T,unsigned s> SimdVecAl<T,s> floor    (const SimdVecAl<T,s> &a) { SimdVecAl<T,s> res; for(unsigned i=0;i<s;++i) res[i] = floor(a[i]); return res; }
+    template<class T,unsigned s> SimdVecAl<T,s> heaviside(const SimdVecAl<T,s> &a) { SimdVecAl<T,s> res; for(unsigned i=0;i<s;++i) res[i] = (a[i]>=0)  ; return res; }
+    
+    
     #ifdef __SSE__
     template<> struct SimdSizeAl<float> { static const unsigned res = 4; };
     

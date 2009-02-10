@@ -23,7 +23,7 @@ template <class TF, class T, int s> Vec<T,s> lm_gradient(TF &f,const Vec<T,s> &x
         Vec<T,s> v_epsilon;
         v_epsilon.resize(x.size(),T(0));
         v_epsilon[i]=epsilon;
-        res[i]=(f->operator()(x+v_epsilon)-local_value)/epsilon;
+        res[i]=(f->operator()(Vec<T,s>(x+v_epsilon))-local_value)/epsilon;
     }
     return res;
 };

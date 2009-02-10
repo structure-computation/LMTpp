@@ -125,9 +125,9 @@ inline T pow( T x, unsigned y ) {
 
 template<class T>
 inline T pow( const T &x_, int y ) {
-    T res = 1;
+    T res = T(1);
     if ( y < 0 ) {
-        T x = 1 / x_;
+        T x = T(1) / x_;
         while (y++)
             res *= x;
     } else {
@@ -161,6 +161,12 @@ Dans le cas où a et m sont positifs, la fonction renvoie le plus grand multiple
 \keyword Mathématiques/Fonctions classiques 
 */
 inline int floor( int a, int m ) { return a - a % m; }
+
+/**
+*/
+template<class T>
+inline T floor( T m ) { return std::floor( m ); }
+
 
 /*!
 \generic_comment heavyside

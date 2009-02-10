@@ -265,17 +265,20 @@ void LDL_solver::get_factorization( LMT::Mat<double,LMT::Gen<>,LMT::SparseLine<>
 void LDL_solver::solve( LMT::Vec<double> &B ) {
     //    TicToc tt; tt.start();    
     
-    ldl_perm( n, Y.ptr(), B.ptr(), P.ptr() ) ;                /* y = Pb */
+    ldl_perm( n, Y.ptr(), B.ptr(), P.ptr() ) ;                    /* y = Pb */
     if ( want_semi_morse_ )
         semi_morse_lsolve( Y );
     else
         ldl_lsolve( n, Y.ptr(), Lp.ptr(), Li.ptr(), Lx.ptr()) ;   /* y = L\y */
-    ldl_dsolve( n, Y.ptr(), D.ptr() ) ;                       /* y = D\y */
+    if ( pseudo_inverse )
+        ldl_dsolve_pg( n, Y.ptr(), D.ptr() );                     /*PK&PG pseudo inverse */ 
+    else
+        ldl_dsolve( n, Y.ptr(), D.ptr() );                        /*normal inversion*/    
     if ( want_semi_morse_ )
         semi_morse_ltsolve( Y );
     else
         ldl_ltsolve( n, Y.ptr(), Lp.ptr(), Li.ptr(), Lx.ptr() ) ; /* y = L'\y */
-    ldl_permt( n, B.ptr(), Y.ptr(), P.ptr() ) ;               /* x = P'y */
+    ldl_permt( n, B.ptr(), Y.ptr(), P.ptr() ) ;                   /* x = P'y */
     
     //     tt.stop();
 }

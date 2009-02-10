@@ -39,7 +39,7 @@ template<class TT> struct DelayedAssignementSparseSource {
                     (*indices)[e] = (*indices)[e-1];
                 }
                 (*indices)[pos] = i;
-                (*data)[pos] = op(0,v);
+                (*data)[pos] = op(TT(0),v);
                 found = true;
             }
         }

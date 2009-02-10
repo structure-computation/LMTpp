@@ -70,6 +70,7 @@ class Formulation : public FormulationAncestor<ScalarType_> {
 public:
     typedef TM_ TM;
     typedef ScalarType_ ScalarType;
+    typedef typename TypePromote<Abs,ScalarType>::T AbsScalarType;
     typedef CaracFormulation<NameFormulation,TM::dim,ScalarType,NameVariant> Carac;
     static const unsigned nb_nodal_unknowns = Carac::nb_nodal_unknowns;
     static const unsigned nb_global_unknowns = Carac::nb_global_unknowns;
@@ -81,8 +82,8 @@ public:
     Formulation(TM &mm) {
         m = &mm;
         mat_def_pos_if_sym = Carac::matrix_will_be_definite_positive;
-        time = ScalarType(0);
-        time_steps = ScalarType(1e40);
+        time = AbsScalarType(0);
+        time_steps = AbsScalarType(1e40);
         initialized = false;
         user_want_pierre_precond = true;
         this->order_integration_when_integration_totale = Carac::order_integration;
@@ -322,7 +323,7 @@ public:
     }
     virtual Vec<ScalarType> get_nodal_forces() {
         ScalarType old_premul_KUn_in_sollicitation = this->premul_KUn_in_sollicitation;
-        this->premul_KUn_in_sollicitation = 0.0;
+        this->premul_KUn_in_sollicitation = ScalarType(0);
         Vec<ScalarType> old_sollicitation = sollicitation;
         //
         assemble_clean_mat( false, true );
@@ -465,7 +466,7 @@ public:
         }
 
         if ( assemble_vec ) // preinitialisation
-            sollicitation.set(0.0);
+            sollicitation.set(ScalarType(0));
         if ( not this->assume_skin_not_needed )
             m->update_skin();
 
@@ -651,7 +652,7 @@ public:
         pthread_mutex_destroy(&mutex);
     }
     ///
-    virtual void assemble_constraints(Mat<ScalarType,Sym<>,SparseLine<> > &K, Vec<ScalarType> &F, Vec<Vec<ScalarType> > &vectors_, const Vec<unsigned> &local_ddl_to_global_ones,const double &M, bool assemble_mat=true,bool assemble_vec=true) {
+    virtual void assemble_constraints(Mat<ScalarType,Sym<>,SparseLine<> > &K, Vec<ScalarType> &F, Vec<Vec<ScalarType> > &vectors_, const Vec<unsigned> &local_ddl_to_global_ones,const ScalarType &M, bool assemble_mat=true,bool assemble_vec=true) {
         // constraints
         if ( constraints.size() ) {
             for(unsigned i=0;i<constraints.size();++i) {
@@ -711,7 +712,7 @@ public:
         }
     }
     ///
-    bool solve_system_(ScalarType iterative_criterium, const Number<1> &n_wont_add_nz, const Number<0> &sym) {
+    bool solve_system_(AbsScalarType iterative_criterium, const Number<1> &n_wont_add_nz, const Number<0> &sym) {
         //matrices(Number<0>()).get_factorization();
         #if LDL
         //          std::cout << "Resolution LDL " << std::endl;
@@ -735,7 +736,7 @@ public:
         return true;
     }
     ///
-    bool solve_system_(ScalarType iterative_criterium, const Number<1> &n_wont_add_nz, const Number<1> &sym) {
+    bool solve_system_(AbsScalarType iterative_criterium, const Number<1> &n_wont_add_nz, const Number<1> &sym) {
         #if WITH_CHOLMOD
         if ( not matrices(Number<0>()).get_factorization() ) {
             std::cout << "Bing. Inversion error" << std::endl;
@@ -757,7 +758,7 @@ public:
     }
     
     ///
-    bool solve_system_(ScalarType iterative_criterium, const Number<0> &n_wont_add_nz, const Number<0> &sym) {
+    bool solve_system_(AbsScalarType iterative_criterium, const Number<0> &n_wont_add_nz, const Number<0> &sym) {
         try {
             //if ( MatCarac<0>::symm and matrices(Number<0>()).nb_rows() > 1000000 ) {
             //    LDL_solver ls;
@@ -769,7 +770,7 @@ public:
         } catch(const SolveException &e) { std::cerr << "system not inversible" << std::endl; return false; }
         return true;
     }
-    bool solve_system_(ScalarType iterative_criterium, const Number<0> &n_wont_add_nz, const Number<1> &sym) {
+    bool solve_system_(AbsScalarType iterative_criterium, const Number<0> &n_wont_add_nz, const Number<1> &sym) {
         try {
             if ( iterative_criterium ) {
                 Mat<ScalarType,Sym<>,SparseLine<> > mm = matrices(Number<0>());
@@ -800,14 +801,14 @@ public:
         return false;
     }
     ///
-    bool solve_system_iterative_block(ScalarType iterative_criterium, Number<3>/*nb_nodal_unknowns*/, Number<true>/*sym*/,StructForType<double>, Number<false>/*wont_add_nz*/ ) {
+    bool solve_system_iterative_block(AbsScalarType iterative_criterium, Number<3>/*nb_nodal_unknowns*/, Number<true>/*sym*/,StructForType<double>, Number<false>/*wont_add_nz*/ ) {
         MatWithTinyBlocks<ScalarType,Sym<3> > M( matrices(Number<0>()) );
         MatWithTinyBlocks<ScalarType,Sym<3> > F = M; F.chol_incomp();
         solve_using_incomplete_chol_factorize( F, M, sollicitation, vectors[0], iterative_criterium );
         return true;
     }
     ///
-    bool solve_system(ScalarType iterative_criterium=0.0,bool disp_timing=false) {
+    bool solve_system(AbsScalarType iterative_criterium=AbsScalarType(0),bool disp_timing=false) {
         bool res;
         double t0 = time_of_day_in_sec();
         if ( iterative_criterium and nb_nodal_unknowns==3 and sollicitation.size() % 3 == 0 and TypeInformation<ScalarType>::type()=="double" and wont_add_nz == false )
@@ -830,7 +831,7 @@ public:
      * call all functions to get solution...
      * @return 
      */
-    bool solve( ScalarType iterative_criterium=0.0, bool disp_timing=false ) {
+    bool solve( AbsScalarType iterative_criterium=AbsScalarType(0), bool disp_timing=false ) {
         allocate_matrices();
         shift();
         //
@@ -900,7 +901,7 @@ public:
     }
     
     virtual void get_precond() { get_precond( Number<MatCarac<0>::symm>() ); }
-    virtual void solve_system_using_precond(ScalarType iterative_criterium) { solve_system_using_precond( iterative_criterium, Number<MatCarac<0>::symm>() ); }
+    virtual void solve_system_using_precond(AbsScalarType iterative_criterium) { solve_system_using_precond( iterative_criterium, Number<MatCarac<0>::symm>() ); }
     virtual void get_factorization_matrix() { get_factorization_matrix( Number<MatCarac<0>::symm>() ); }
     virtual void solve_system_using_factorization_matrix() { solve_system_using_factorization_matrix( Number<MatCarac<0>::symm>() ); }
     
@@ -969,7 +970,7 @@ public:
     template<unsigned num_der_var>
     void assemble_clean_vector_der_var( Number<num_der_var>, unsigned n ) {
         if ( num_der_var == n ) {
-            sollicitation.set(0.0);
+            sollicitation.set(ScalarType(0.0));
     
             add_global_vector_der_var( *this, indice_glob, Number<num_der_var>() ); // global
             apply( m->node_list, AssembleNodeDerVar<num_der_var>(), indice_noda, *this ); // nodal
@@ -999,12 +1000,12 @@ private:
         incomplete_chol_factorize( precond_matrix );
         #endif
     }
-    void solve_system_using_precond(ScalarType iterative_criterium,const Number<0> &sym) {
+    void solve_system_using_precond(AbsScalarType iterative_criterium,const Number<0> &sym) {
         #ifndef WITH_UMFPACK
         solve_using_incomplete_lu_factorize( precond_matrix, matrices(Number<0>()), sollicitation, vectors[0], iterative_criterium );
         #endif
     }
-    void solve_system_using_precond(ScalarType iterative_criterium,const Number<1> &sym) {
+    void solve_system_using_precond(AbsScalarType iterative_criterium,const Number<1> &sym) {
         #ifndef WITH_UMFPACK
         solve_using_incomplete_chol_factorize( precond_matrix, matrices(Number<0>()), sollicitation, vectors[0], iterative_criterium );
         #endif
@@ -1250,10 +1251,10 @@ public:
     virtual void add_sollicitation(int type_var,const std::string &val,unsigned nb_in_type,unsigned num_in_vec=0) {
         sollicitations.push_back( Sollicitation<Formulation>(type_var,val,nb_in_type,num_in_vec) );
     }
-    virtual void set_initial_time_step( ScalarType ts ) { time_steps = ts; }
+    virtual void set_initial_time_step( AbsScalarType ts ) { time_steps = ts; }
     virtual ScalarType get_next_time_step() const { return time_steps[0]; }
     virtual ScalarType get_time() const { return time; }
-    virtual void set_time( ScalarType ts ) { time = ts; } /// Attention, pilotage a faire soi-meme si utilisation de cette fonction....
+    virtual void set_time( AbsScalarType ts ) { time = ts; } /// Attention, pilotage a faire soi-meme si utilisation de cette fonction....
 private:
     template<class TMAT> void get_mat_( TMAT *&mat, const Number<0> &n ) {
         std::cerr << "Wrong matrix type. We expected a " << std::endl;
@@ -1298,7 +1299,8 @@ public:
         shift();
         assemble();
         assemble_vector_der_var( num_der_var );
-        vectors[ 0 ] = inv( matrices(Number<0>()) ) * sollicitation;
+        //vectors[ 0 ] = inv( matrices(Number<0>()) ) * sollicitation;
+        solve_system();
         update_variables();
     }
     
@@ -1312,8 +1314,8 @@ public:
     Vec<Vec<ScalarType> >* vectors_assembly;      ///< vectors from formulationassembly;
     Vec<unsigned>* indice_noda_assembly;                    ///< indice_noda from formulationassembly;
     Vec<ScalarType> sollicitation;
-    Vec<ScalarType,nb_vectors> time_steps;
-    ScalarType time; /// at end of current step
+    Vec<AbsScalarType,nb_vectors> time_steps;
+    AbsScalarType time; /// at end of current step
     Vec<ScalarType> old_vec;
 
     Vec<Constraint<Formulation> > constraints;

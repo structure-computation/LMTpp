@@ -8,6 +8,7 @@ namespace LMT {
     struct FormulationAssembly {
         typedef typename PB::TM TM;
         typedef typename PB::T T;
+        typedef typename TypePromote<Abs,T>::T AbsT;
         typedef typename TM::Pvec Pvec;
         static const unsigned dim = TM::dim;
 
@@ -28,11 +29,11 @@ namespace LMT {
         //
         FormulationAssembly() {
             set_nb_vectors(unsigned (1));
-            time = T(0);
-            time_steps[0] = T(1e40);
+            time = AbsT(0);
+            time_steps[0] = AbsT(1e40);
             mat_already_allocated = false;
             connectivity_calculated =false;
-            tol = T(0.000001);
+            tol = AbsT(0.000001);
         }
         //
         ~FormulationAssembly() {
@@ -119,6 +120,7 @@ namespace LMT {
             mat_already_allocated = true;
             //
             update_connectivity();
+            
             unsigned nb_ddl_per_node = formulations[0].pb->formulation_nb(formulations[0].num_formulation)->get_nb_nodal_unknowns();
             for(unsigned i=0;i<vectors.size();++i)
                 vectors[i].resize( pos.size() * nb_ddl_per_node );
@@ -126,12 +128,12 @@ namespace LMT {
             K.resize( pos.size() * nb_ddl_per_node );
             K_before_constraints.clear();
             K_before_constraints.resize( pos.size() * nb_ddl_per_node );
-            F.resize( pos.size() * nb_ddl_per_node, 0.0 );
-            F_before_contraints.resize( pos.size() * nb_ddl_per_node, 0.0 );
-            f_reaction.resize( pos.size() * nb_ddl_per_node, 0.0 );
-            f_reaction.set(0);
-            X_before_contraints.resize( pos.size() * nb_ddl_per_node, 0.0 );
-            diag_before_contraints.resize( pos.size() * nb_ddl_per_node, 0.0 );
+            F.resize( pos.size() * nb_ddl_per_node, T(0) );
+            F_before_contraints.resize( pos.size() * nb_ddl_per_node, T(0) );
+            f_reaction.resize( pos.size() * nb_ddl_per_node, T(0) );
+            f_reaction.set(T(0));
+            X_before_contraints.resize( pos.size() * nb_ddl_per_node, T(0) );
+            diag_before_contraints.resize( pos.size() * nb_ddl_per_node, T(0) );
 //            X.resize( pos.size() * nb_ddl_per_node, 0.0 );
         }
         //
@@ -139,14 +141,14 @@ namespace LMT {
             allocate_matrices();
             K.clear();
             K.resize(vectors[0].size());
-            F.set(0.0);
+            F.set(T(0));
             for(unsigned i=0;i<formulations.size();++i) {
                 formulation(i)->assemble_clean_mat(K, F, vectors, formulations[i].indice_noda, assemble_mat, assemble_vec );
             }
             F_before_contraints  = F;
             K_before_constraints = K;
             if (K.nb_rows() == 0 )
-                M = 0;
+                M = T(0);
             else
                 M = max(abs(K.diag()));
             assemble_constraints(K, F, M);
@@ -261,7 +263,7 @@ namespace LMT {
             maf.local_unknowns_to_global_ones.resize(0);
             maf.local_unknowns_to_global_ones.resize( maf.m->node_list.size() );
             for(unsigned num_node=0;num_node < maf.m->node_list.size();++num_node) {
-                if(maf.m->node_list[num_node].is_on_skin ){
+                if( abs( maf.m->node_list[num_node].is_on_skin ) ){
                     pos_skin.push_back( maf.m->node_list[num_node].pos );
                     j_skin.push_back( pos.size() );
                 }
@@ -283,7 +285,7 @@ namespace LMT {
                 j_skin.reserve(j_skin.size() + maf.m->node_list.size() );
                 for(unsigned num_node=0;num_node < maf.m->node_list.size();++num_node) {
                     const Vec<T,dim>* node_pos = &(maf.m->node_list[num_node].pos);
-                    if(maf.m->node_list[num_node].is_on_skin ){
+                    if ( abs( maf.m->node_list[num_node].is_on_skin ) ) {
                         for(unsigned j=0;;++j) {
                             if ( j == pos_skin.size() ) { // not found
                                 maf.local_unknowns_to_global_ones[num_node]= pos.size();
@@ -292,28 +294,27 @@ namespace LMT {
                                 pos.push_back( *node_pos );
                                 break;
                             }
-                            if ( norm_2(pos_skin[j] - *node_pos)< tol ) {
-                               maf.local_unknowns_to_global_ones[num_node] = j_skin[j] ;
+                            if ( abs_indication(norm_1(pos_skin[j] - *node_pos)) < abs_indication(tol) ) {
+                                maf.local_unknowns_to_global_ones[num_node] = j_skin[j];
                                 break;
-                                }
                             }
-                        } else {
-                            maf.local_unknowns_to_global_ones[num_node] = pos.size();
-                            pos.push_back( *node_pos );
                         }
+                    } else {
+                        maf.local_unknowns_to_global_ones[num_node] = pos.size();
+                        pos.push_back( *node_pos );
                     }
+                }
                 //
                 maf.indice_noda = formulations[i].local_unknowns_to_global_ones * formulation(i)->get_nb_nodal_unknowns();
                 maf.local_ddl_to_global_ones.resize(maf.local_unknowns_to_global_ones.size() * nb_ddl_per_node );
                 for(unsigned j=0;j<maf.local_unknowns_to_global_ones.size();++j)
-                    for(unsigned d=0;d<nb_ddl_per_node;++d){
+                    for(unsigned d=0;d<nb_ddl_per_node;++d)
                         maf.local_ddl_to_global_ones[j*nb_ddl_per_node+d] = maf.local_unknowns_to_global_ones[j] * nb_ddl_per_node + d ;
-                    }
             }
             pos.fit_memory();
             for(unsigned i=0;i<vectors.size();++i) {
                 vectors[i].resize( pos.size() * nb_ddl_per_node );
-                vectors[i].set(0);
+                vectors[i].set(T(0));
             }
         }
         //
@@ -322,13 +323,13 @@ namespace LMT {
         Vec<T> F, F_before_contraints, diag_before_contraints, X_before_contraints, f_reaction;
         unsigned nb_vectors; 
         Vec<Vec<T> > vectors;
-        Vec<T> time_steps;
+        Vec<AbsT> time_steps;
         T M;                                ///< Factor de penalisation
-        T time;                             ///< at end of current step
+        AbsT time;                             ///< at end of current step
         bool mat_already_allocated;
         bool connectivity_calculated;
         Vec<Pvec > pos;
-        double tol;
+        AbsT tol;
     };
     
 }

@@ -27,7 +27,7 @@ struct GradAlgorithm {
 template <int g=0, class T=double, int s=-1>
 struct BfgsAlgorithm {
 
-    BfgsAlgorithm (const T &e=T(0.000001)) { epsilon=e; }
+    BfgsAlgorithm (const T &e=T(0.000001)) { epsilon=e; initialisation_done=false; }
 
     template <class TF> Vec<T,s> get_direction(TF &f,const Vec<T,s> &x) {
         if (not initialisation_done) {
@@ -37,7 +37,7 @@ struct BfgsAlgorithm {
                 B(i,i)=T(1);
             grad=lm_gradient(f,x,Number<g>(),epsilon);
             initialisation_done=true;
-        }        
+        }
         else {
             grad_before=grad;
             grad=lm_gradient(f,x,Number<g>(),epsilon);
@@ -54,7 +54,7 @@ struct BfgsAlgorithm {
     Vec<T,s> grad_before;
     Vec<T,s> direction;
     T epsilon;
-    
+
 };
 
 template <int g=0, class T=double>

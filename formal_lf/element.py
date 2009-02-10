@@ -190,21 +190,21 @@ class Element:
       nm = ExMatrix(n,n)
       for i in range(n):
         for j in range(n):
-          #  nm[i,j] = (m[i,j]+m[j,i])/2
+          #  nm[i,j] = (m[i,j]+m[j,i])*0.5
           if i<m.nb_rows() and j<m.nb_cols(): m_ij = m[i,j]
           else: m_ij = 0    
           if j<m.nb_rows() and i<m.nb_cols(): m_ji = m[j,i]
           else: m_ji = 0
     
           if i==j: nm[i,j] = m_ij
-          else: nm[i,j] = (m_ij+m_ji)/2
+          else: nm[i,j] = (m_ij+m_ji)*0.5
 #       m = self.grad(v)
 #       if isinstance(m,ExVector): return m
 #       nm = ExMatrix(m.nb_rows(),m.nb_cols())
 #       for i in range(m.nb_rows()):
 #         for j in range(m.nb_cols()):
 #           if i==j: nm[i,j] = m[i,j]
-#           else: nm[i,j] = (m[i,j]+m[j,i])/2
+#           else: nm[i,j] = (m[i,j]+m[j,i])*0.5
       return nm
           
     def grad_sym_col(self,v): return mat_sym_to_vec_col(self.grad_sym(v))
@@ -215,11 +215,11 @@ class Element:
       tmp = ExMatrix(self.nb_var_inter,self.nb_var_inter)
       for i in range(self.nb_var_inter):
         for j in range(self.nb_var_inter):
-          tmp[i,j] = ( res[i,j] + res[j,i] ) / 2
+          tmp[i,j] = ( res[i,j] + res[j,i] ) * 0.5
       for i in range(self.nb_var_inter):
         for j in range(self.nb_var_inter):
           for k in range(self.nb_var_inter):
-            tmp[i,j] += res[k,i] * res[k,j] / 2
+            tmp[i,j] += res[k,i] * res[k,j] * 0.5
       return tmp
       
     def green_lagrange_col(self,v): return mat_sym_to_vec_col(self.green_lagrange(v))

@@ -126,9 +126,10 @@ class MakePb:
             cmpt = 0
             for T in self.types:
                 PN = 'Problem_'+self.name+'_type'+str(cmpt)+'_'+str(d)
-                output.write( 'class '+PN+' : public ProblemAncestor<'+T+'> {\n' )
+                output.write( 'class '+PN+' : public ProblemAncestor<'+T+(T[-1:]=='>')*' '+'> {\n' )
                 output.write( 'public:\n' )
                 output.write( '    typedef Mesh<Mesh_carac_'+self.name+'<'+T+','+str(d)+'> > TM;\n' )
+                output.write( '    '+PN+'() {}\n' )
                 output.write( '    '+PN+'( TM &m, bool use_tim_davis=false ) {\n' )
                 output.write( '        if ( use_tim_davis ) {\n' )
                 for f_name in self.map_f.keys():
@@ -139,7 +140,7 @@ class MakePb:
                 output.write( '        }\n' )
                 output.write( '    }\n' )
                 output.write( '    virtual unsigned nb_formulations() const { return '+str(len(self.map_f))+'; }\n' )
-                output.write( '    virtual FormulationAncestor<'+T+'> *formulation_nb(unsigned i) {\n' )
+                output.write( '    virtual FormulationAncestor<'+T+(T[-1:]=='>')*' '+'> *formulation_nb(unsigned i) {\n' )
                 output.write( '        switch(i) {\n' )
                 cpt = 0
                 for f_name in self.map_f.keys():
@@ -149,10 +150,10 @@ class MakePb:
                 output.write( '        }\n' )
                 output.write( '    }\n' )
                 for f_name in self.map_f.keys():
-                    output.write( '    static FormulationAncestor<'+T+'> *new_formulation_'+f_name+'( Number<false>, TM &m );\n' )
-                    output.write( '    static FormulationAncestor<'+T+'> *new_formulation_'+f_name+'( Number<true >, TM &m );\n' )
+                    output.write( '    static FormulationAncestor<'+T+(T[-1:]=='>')*' '+'> *new_formulation_'+f_name+'( Number<false>, TM &m );\n' )
+                    output.write( '    static FormulationAncestor<'+T+(T[-1:]=='>')*' '+'> *new_formulation_'+f_name+'( Number<true >, TM &m );\n' )
                 for f_name in self.map_f.keys():
-                    output.write( '    FormulationAncestor<'+T+'> *formulation_'+f_name+';\n' )
+                    output.write( '    FormulationAncestor<'+T+(T[-1:]=='>')*' '+'> *formulation_'+f_name+';\n' )
                 output.write( '};\n' )
                 NPN = 'Problem_'+self.name+'<'+T+','+str(d)+'>'
                 output.write( 'template<> class '+NPN+' : public '+PN+' {\npublic:\n    '+NPN+'(TM &m,bool use_tim_davis=false):'+PN+'(m,use_tim_davis) {}\n};\n\n' )
@@ -280,7 +281,7 @@ def make_pb( env,
             pbc.name = name
             pbc.f_name = f_name
             pbc.fe_set = map_f[ f_name ]
-            pbc.name_der_vars = []
+            pbc.name_der_vars = name_der_vars
             f_h, f_asm = env.Command( [ directory + bh, directory + ba ], pb_h, pbc.write_formulation_h_from_scons )
             all_cpp += env.Command( directory + bn, f_h, pbc.write_formulation_cpp_from_scons , TARGET = bn + '_opt' * opt +'_debug'*(1-opt) + '.o' )
             if pbc.use_asm():
