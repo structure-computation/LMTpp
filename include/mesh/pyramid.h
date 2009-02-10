@@ -19,6 +19,13 @@
 namespace LMT {
 
 // --------------------------------------------------------------------------------------------------------
+/*!
+    
+
+    \keyword Maillage/Elément
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+*/
 struct Pyramid {
     static const unsigned nb_var_inter = 3;
     static const unsigned nb_nodes = 5;

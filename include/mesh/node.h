@@ -17,8 +17,17 @@ namespace LMT {
 template<class CaracName,unsigned max_sub_meshes> class Mesh;
 template<class Carac,unsigned nvi_to_subs,unsigned skin> class MeshAncestor;
 
-/**
-@author Hugo LECLERC
+/*!
+
+    Cette classe sert à décrire un noeud. Elle stocke au moins les coordonnées du noeud et d'autres informations si nécessaire.
+    Les paramètres template sont :
+        * _dim_ la dimension de l'espace
+        * _T_ le type scalaire
+        * TNodalStaticData est la classe stockant les coordonnées cartésiennes du noeud. Pour simplifier l'accès, Node hérite aussi de TNodalStaticData.
+
+    \author Hugo LECLERC
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
 */
 template<unsigned _dim_,class _T_,class TNodalStaticData>
 class Node : public TNodalStaticData {

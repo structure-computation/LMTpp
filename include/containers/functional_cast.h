@@ -7,7 +7,7 @@ lst = [
     'float',
 ]
 for i in lst:
-    print '/// \\ingroup Lambda'
+    print '/// \\keyword Lambda'
     I = 'Cast_'+i
     print 'struct '+I+' {'
     print '    template<class P1,class P2=void,class P3=void,class P4=void> struct ReturnType { typedef '+i+' T; };'
@@ -20,7 +20,7 @@ for i in lst:
     print '}'
     print ''
 */
-/// \ingroup Lambda
+/// \keyword Lambda
 struct Cast_int {
     template<class P1,class P2=void,class P3=void,class P4=void> struct ReturnType { typedef int T; };
     template<class P1> int operator()(const P1 &p1) const { return int(p1); }
@@ -30,7 +30,7 @@ Function<ALGOCompose1,Cast_int,Function<O1,O2,O3,O4,O5>,void,void> cast_int(cons
     return Function<ALGOCompose1,Cast_int,Function<O1,O2,O3,O4,O5>,void,void>( Cast_int(), f );
 }
 
-/// \ingroup Lambda
+/// \keyword Lambda
 struct Cast_unsigned {
     template<class P1,class P2=void,class P3=void,class P4=void> struct ReturnType { typedef unsigned T; };
     template<class P1> unsigned operator()(const P1 &p1) const { return unsigned(p1); }
@@ -40,7 +40,7 @@ Function<ALGOCompose1,Cast_unsigned,Function<O1,O2,O3,O4,O5>,void,void> cast_uns
     return Function<ALGOCompose1,Cast_unsigned,Function<O1,O2,O3,O4,O5>,void,void>( Cast_unsigned(), f );
 }
 
-/// \ingroup Lambda
+/// \keyword Lambda
 struct Cast_bool {
     template<class P1,class P2=void,class P3=void,class P4=void> struct ReturnType { typedef bool T; };
     template<class P1> bool operator()(const P1 &p1) const { return bool(p1); }
@@ -50,7 +50,7 @@ Function<ALGOCompose1,Cast_bool,Function<O1,O2,O3,O4,O5>,void,void> cast_bool(co
     return Function<ALGOCompose1,Cast_bool,Function<O1,O2,O3,O4,O5>,void,void>( Cast_bool(), f );
 }
 
-/// \ingroup Lambda
+/// \keyword Lambda
 struct Cast_double {
     template<class P1,class P2=void,class P3=void,class P4=void> struct ReturnType { typedef double T; };
     template<class P1> double operator()(const P1 &p1) const { return double(p1); }
@@ -60,7 +60,7 @@ Function<ALGOCompose1,Cast_double,Function<O1,O2,O3,O4,O5>,void,void> cast_doubl
     return Function<ALGOCompose1,Cast_double,Function<O1,O2,O3,O4,O5>,void,void>( Cast_double(), f );
 }
 
-/// \ingroup Lambda
+/// \keyword Lambda
 struct Cast_float {
     template<class P1,class P2=void,class P3=void,class P4=void> struct ReturnType { typedef float T; };
     template<class P1> float operator()(const P1 &p1) const { return float(p1); }

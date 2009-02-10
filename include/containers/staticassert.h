@@ -20,11 +20,11 @@ namespace LMT {
 template<unsigned n> struct OperationNotAllowed {};
 
 template<> struct OperationNotAllowed<true> {
-    void pouet() {}
+    void it_seems_that_you_are_doing_nasty_things() {}
 };
 
 #define STATICASSERT( cond ) { OperationNotAllowed<bool(cond)> IT_SEEMS_THAT_YOU_MADE_A_MISTAKE___please_look_in_your_source; \
-    IT_SEEMS_THAT_YOU_MADE_A_MISTAKE___please_look_in_your_source.pouet(); }
+    IT_SEEMS_THAT_YOU_MADE_A_MISTAKE___please_look_in_your_source.it_seems_that_you_are_doing_nasty_things(); }
 
 // #define STATICASSERT(cond) DEBUGASSERT( cond )
 

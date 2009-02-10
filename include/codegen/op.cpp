@@ -20,6 +20,8 @@
 #include <assert.h>
 #include <assert.h>
 #include <iomanip>
+#include <algorithm>
+#include <stdlib.h>
 
 namespace Codegen {
 
@@ -120,6 +122,7 @@ Op::T Op::operation(Op::TypeEx type,Op::T a) {
         case Abs:       return std::abs(a);
         case Heavyside: return (a>=0);
         case Heavyside_if: return (a>=0);
+        case Dirac:     return (a==0);
         case Eqz:       return (a==0);
         case Sin:       return sin(a);
         case Cos:       return cos(a);
@@ -145,13 +148,14 @@ Op::T Op::operation(Op::TypeEx type,Op::T a,Op::T b) {
         case Pow:       return ( b==0.0 ? (T)1.0 : pow(a,b) );
         case Atan2:     return atan2(a,b);
         case Max:       return ( a>b ? a : b );
+        case Min:       return ( a<b ? a : b );
         default:        assert( 0 );
     }
     return 0;
 }
 
-bool makeAbsVal(Op::TypeEx t) { return ( t==Op::Abs || t==Op::Cos ); }
-bool makeSymVal(Op::TypeEx t) { return ( t==Op::Sin || t==Op::Tan || t==Op::Sgn || t==Op::Eqz || t==Op::Asin || t==Op::Atan ); }
+bool makeAbsVal(Op::TypeEx t) { return ( t==Op::Abs || t==Op::Cos || t==Op::Eqz ); }
+bool makeSymVal(Op::TypeEx t) { return ( t==Op::Sin || t==Op::Tan || t==Op::Sgn || t==Op::Asin || t==Op::Atan ); }
 
 void Op::set_val_should_be_updated() const {
     if ( val_should_be_updated )
@@ -265,7 +269,7 @@ const Op *make_function_2(Op::TypeEx t,const Op *a,const Op *b) {
             if ( a->val<0.0 )  return make_function_2(Op::Sub,b,op_number(-a->val));
             if ( a->val==0.0 ) return b;
         }
-        if ( b->type==Op::Number && b->val<0.0 ) return make_function_2(Op::Sub,a,op_number(-b->val));
+        //if ( b->type==Op::Number && b->val<0.0 ) return make_function_2(Op::Sub,a,op_number(-b->val));
     }
     // a-(-b), (-a)-b, a-(-5), -5-b
     if ( t==Op::Sub ) {
@@ -290,29 +294,22 @@ const Op *make_function_2(Op::TypeEx t,const Op *a,const Op *b) {
             // 2*(3*a)
             if ( b->type==Op::Mul && b->data.children[0]->type==Op::Number )
                 return make_function_2( Op::Mul, op_number(a->val*b->data.children[0]->val), b->data.children[1] );
+            //2*(3/a)
+            //if ( b->type==Op::Div && b->data.children[0]->type==Op::Number )
+            //return make_function_2( Op::Div, op_number(a->val*b->data.children[0]->val), b->data.children[1] );
         }
     }
     if ( t==Op::Div ) {
         if ( a==b ) return op_number(1);
-        if ( a->type==Op::Number && a->val==1 ) {
-            if ( a->val==1 ) return make_function_2(Op::Pow,b,op_number(-1));
-            if ( a->val==0 ) return op_number(0);
-        }
+        if ( a->type==Op::Number && a->val==1 ) return make_function_2(Op::Pow,b,op_number(-1));
         if ( a->type==Op::Number && a->val==0 ) return op_number(0);
         if ( b->type==Op::Number && b->val==1 ) return a;
     }
-    // a**1, a**0, (a**b)**-b, 0**b, 1**b, (-a)**2, (-a)**3
+    // a**1, a**0, 0**b, 1**b, (-a)**2, (-a)**3
     if ( t==Op::Pow ) {
         if ( b->type==Op::Number ) {
             if ( b->val == 1.0 ) return a;
             if ( b->val == 0.0 ) return op_number(1.0);
-        }
-        if ( a->type==Op::Pow ) {
-            const Op *c1 = b;
-            const Op *c2 = a->data.children[1];
-            if ( c1->type==Op::Neg && c1->data.children[0]==c2 ) return op_number(1);
-            if ( c2->type==Op::Neg && c2->data.children[0]==c1 ) return op_number(1);
-            if ( c2->type==Op::Number && c2->type==Op::Number && c1->val+c2->val==0 ) return op_number(1);
         }
         if ( a->type==Op::Number ) {
             if ( a->val == 1 ) return a;
@@ -413,6 +410,7 @@ std::string Op::graphviz_repr() const {
         case Abs:       return "abs";
         case Heavyside: return "heavyside";
         case Heavyside_if: return "heavyside_if";
+        case Dirac:     return "dirac";
         case Eqz:       return "eqz";
         case Sin:       return "sin";
         case Cos:       return "cos";
@@ -427,6 +425,7 @@ std::string Op::graphviz_repr() const {
         case Atan2:     return "atan2";
         
         case Max:       return "max";
+        case Min:       return "min";
         default: ;
     }
     return "Error : type not managed in graphviz_repr.";
@@ -435,6 +434,7 @@ Op::TypeEx Op::getType(const std::string &type) {
     if ( type=="abs" ) return Abs;
     if ( type=="heavyside" ) return Heavyside;
     if ( type=="heavyside_if" ) return Heavyside_if;
+    if ( type=="dirac" ) return Dirac;
     if ( type=="eqz" ) return Eqz;
     if ( type=="sin" ) return Sin;
     if ( type=="cos" ) return Cos;
@@ -450,6 +450,7 @@ Op::TypeEx Op::getType(const std::string &type) {
     if ( type=="pow" )   return Pow;
     if ( type=="Atan2" ) return Atan2;
     if ( type=="max" )   return Max;
+    if ( type=="min" )   return Min;
     if ( ( type[0]>='0' && type[0]<='9' ) || type[0]=='.' )
         return Number;
     return Symbol;
@@ -480,5 +481,34 @@ void Op::depends_on_rec(long unsigned current_id) const {
     }
     // else -> already done
 }
+
+unsigned Op::node_count_rec(long unsigned current_id) const {
+    if ( id == current_id )
+        return 0;
+    id = current_id;
+    if ( is_a_function_1() )
+        return 1 + data.children[0]->node_count_rec(current_id);
+    if ( is_a_function_2() )
+        return 1 + data.children[0]->node_count_rec(current_id) + data.children[1]->node_count_rec(current_id);
+    return 1;
+}
+
+void Op::find_discontinuities( long unsigned current_id, std::vector<const Op *> &lst ) const {
+    if ( id != current_id ) {
+        id = current_id;
+        if ( is_a_function_1() ) {
+            if ( type == Heavyside or type == Heavyside_if or type == Abs or type == Sgn or type == Dirac )
+                lst.push_back( this ); 
+            //
+            data.children[0]->find_discontinuities( current_id, lst );
+        }
+        else if ( is_a_function_2() ) {
+            data.children[0]->find_discontinuities( current_id, lst );
+            data.children[1]->find_discontinuities( current_id, lst );
+        }
+    }
+    // else -> already done
+}
+
 
 };

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import string
 from vecgenhelp import *
 
@@ -35,6 +36,14 @@ namespace LMT {
     Full vector. Elements are contiguous.
     \warning during resize, pop_back, ... and so on, location of data in memory may be moved. Use SplittedVector if you are pointer stability.
 */
+/*!
+    \\brief vecteur a element contigus. Si la taille change , on preferera le type SplittedVector qui assure que le vecteur ne sera pas deplace en memoire apres trop d'ajouts.
+    Full vector. Elements are contiguous.
+    <strong> IMORTANT : during resize, pop_back, ... and so on, location of data in memory may be moved. Use SplittedVector if you are pointer stability. </strong>
+    \\friend raphael.pasquier@lmt.ens-cachan.fr
+    \\friend hugo.leclerc@lmt.ens-cachan.fr
+*/
+
 template<class TT"""+',int static_size_'*static_size+""">
 class Vec<TT,"""+['-1','static_size_'][static_size]+""",void> {
 public:
@@ -168,16 +177,27 @@ public:
     
     template<class T2,int s1> Vec &append(const Vec<T2,s1> &vec) { unsigned os=size(); resize(size()+vec.size()); for(unsigned i=0;i<vec.size();++i,++os) val[os] = (TT)vec[i]; return *this; }
     TT *new_elem() { if ( r==0 ) reserve(1); else if ( s==r ) reserve(2*r); return &val[s++]; } /// resize *this if necessary and return address to last element
-    void push_back(const TT &val) { *new_elem() = val; } /// Add a copy of val as a new element.
-    void push_back_in_reserved(const TT &v) { val[s++] = v; } /// Add a copy of val as a new element. Assumes that room for val is already reserved. Only for dynamic vectors.
+    TT &push_back(const TT &val) { TT &res = *new_elem(); res = val; return res; } /// Add a copy of val as a new element.
+    TT &push_back_in_reserved(const TT &v) { val[s] = v; return val[s++]; } /// Add a copy of val as a new element. Assumes that room for val is already reserved. Only for dynamic vectors.
+    TT &push_back_unique(const TT &v) { for(unsigned i=0;i<size();++i) if ( val[i] == v ) return val[i]; return push_back( v ); } /// Add a copy of val as a new element. Assumes that room for val is already reserved. Only for dynamic vectors.
     void pop_back() { --s; } /// remove the last element.
     void pop_back(unsigned nb_val) { s -= nb_val; } /// remove the nb_val elements at end.
     void fit_memory() { reserve(size()); } /// if size() is lesser than reserved, reallocate memory with 'right' size.
     void erase_elem_nb(unsigned i) { for(unsigned j=i;j<s-1;++j) val[j]=val[j+1]; pop_back(); } /// erase element number i. This procedure maintains the order of elements
+    void erase_elem_strip(unsigned i,unsigned j) {
+        if ( j > i ) {
+            unsigned d = j - i;
+            s -= d;
+            for(unsigned k=i;k<s;++k)
+                val[k]=val[k+d];
+        }
+    } /// erase elements from number i to number j (excluded). This procedure maintains the order of elements
     template<class T2> void erase_first(const T2 &v) { for(unsigned i=0;i<size();++i) if (val[i]==v) { val[i]=back(); pop_back(); } } /// erase first element==v. This procedure DOES NOT maintain the order of elements
+    void erase_elem_nb_unordered(unsigned i) { val[i] = val[--s]; } /// erase element number i. This procedure does not maintain the order of elements
     
     void resize(unsigned ns) { if ( ns > r ) reserve(ns); s = ns; }
     void resize(unsigned ns,const TT &v) { unsigned os=s; resize(ns); if (ns>os) copy_vec_value_aligned(v,val+os,ns-os); }
+    
     void reserve(unsigned ns) {
         Allocator nallocator;
         TT *nvec = nallocator.allocate(ns);
@@ -188,7 +208,9 @@ public:
         allocator = nallocator;
         r = ns;
     } /// Reserve room for new elements if ns > size. If ns is lesser than size, resize *this.
+    
     void free() { allocator.free_mem(val); init(); }
+    
     TT *make_room_to_insert( ST from, ST n ) {
         ST os = s;
         resize( s + n );
@@ -196,6 +218,33 @@ public:
             val[ i + n ] = val[ i ];
         return val + from;
     }
+    
+    void insert_before( ST i, const TT &v ) {
+        *make_room_to_insert( i, 1 ) = v;
+    }
+    
+    TT *insert_ordered( const TT &v ) {
+        ST i=0;
+        for( ; i < size() and val[ i ] < v; ++i );
+        TT *res = make_room_to_insert( i, 1 );
+        *res = v;
+        return res;
+    }
+    
+    // res will contain data of this and this is cleared.
+    void throw_ref_and_clear( Vec &res ) {
+        res.free();
+        res.val = val;
+        res.s = s;
+        res.r = r;
+        res.allocator = allocator;
+        //
+        val = NULL;
+        s = 0;
+        r = 0;
+        allocator.clear();
+    }
+    
     """*(1-static_size) + """
     inline void resize(unsigned s) const { DEBUGASSERT( static_size_==s ); }
     inline void resize(unsigned s,const TT &val) { DEBUGASSERT( static_size_==s ); *this = val; }
@@ -208,6 +257,9 @@ public:
     const TT &get(unsigned i) const { DEBUGASSERT(i<size()); return val[i]; } /// calling get ensure that the const version is called (useful for SparseVec)
     void set(unsigned i,const TT &v) { DEBUGASSERT(i<size()); val[i] = v; } /// set element i
     
+    template<class ST> SimdVec<TT,2> operator[]( const SimdVec<ST,2> &ind ) const { return SimdVec<TT,2>(val[ind[0]],val[ind[1]]); } /// access to element ind[0], ind[1]...
+    
+    
     template<unsigned nne> SimdVec<TT,nne> &simd(unsigned i,const Number<nne> &) { return reinterpret_cast<SimdVec<TT,nne> &>(val[i]); }
     template<unsigned nne> const SimdVec<TT,nne> &simd(unsigned i,const Number<nne> &) const { return reinterpret_cast<const SimdVec<TT,nne> &>(val[i]); }
     
@@ -215,7 +267,7 @@ public:
 
     Vec operator-() const { Vec res = generate(*this,Negate()); return res; }
 
-/*
+    /*
     template<class T2> Vec &operator*=(const T2 &va) { apply_nz(*this,AssignSelfOp(),Multiplies(),va); return *this; }
     template<class T2> Vec &operator/=(const T2 &va) { apply_nz(*this,AssignSelfOp(),Divides   (),va); return *this; }
     template<class T2> Vec &operator%=(const T2 &va) { apply_nz(*this,AssignSelfOp(),Modulus   (),va); return *this; }
@@ -235,16 +287,29 @@ public:
     template<class T2,int s2> Vec &operator-=(const Vec<T2,s2> &val) { apply_simd_wi( *this, AssignSelfOp(), Minus(), val ); return *this; }
     template<class T2,int s2> Vec &operator^=(const Vec<T2,s2> &val) { apply_simd_wi( *this, AssignSelfOp(), Xor()  , val ); return *this; }
     template<class T2,int s2> Vec &operator|=(const Vec<T2,s2> &val) { apply_simd_wi( *this, AssignSelfOp(), Or()   , val ); return *this; }
-*/
+    */
 """+SELFOP+"""
 """+GETRANGE+"""
+    
+    template<class T2> bool contains( const T2 &v ) const {
+        for( unsigned i=0; i<size(); ++i )
+            if ( val[i] == v )
+                return true;
+        return false;
+    }
     
     Vec &set(const TT &v) { for(unsigned i=0;i<size();++i) val[i]=v; return *this; }
 
     /// return a Vec with random values in [-1,1]. if s_dim==-1, user must specify size, else size must be = s_dim
     static Vec random("""+'unsigned size_vec'*(1-static_size)+""") { Vec res; """+'res.resize(size_vec);'*(1-static_size)+""" for(unsigned i=0;i<res.size();res[i++]=TT(rand()/(double)RAND_MAX)); return res; }
     
-    /// return \f$ [ \frac{ v \& 2^i }{ 2^i } ]_i \f$. if s_dim==-1, user must specify size, else size must be = s_dim
+    /*! 
+    return 
+    \latex 
+        $$ [ \\frac{ v \& 2^i }{ 2^i } ]_i $$
+
+    if s_dim==-1, user must specify size, else size must be = s_dim
+    */
     static Vec binary_decomp(unsigned v"""+',unsigned size_vec'*(1-static_size)+""") {
         Vec res; """+'res.resize(size_vec);'*(1-static_size)+"""
         for(unsigned i=0,p2i=1;i<res.size();++i,p2i*=2) res[i] = bool( v & p2i );
@@ -260,9 +325,22 @@ private:
     TT *val;
     unsigned s,r;
     Allocator allocator;
+    
+    template<class U> friend void swap(Vec<U> &v1,Vec<U> &v2);
+    
     """ * (1-static_size) + """
 };
 }
 """
 
+print """
+namespace LMT {
+template<class T> void swap(Vec<T> &v1,Vec<T> &v2) {
+    swap( v1.val      , v2.val       );
+    swap( v1.s        , v2.s         );
+    swap( v1.r        , v2.r         );
+    swap( v1.allocator, v2.allocator );
+}
+}
 
+"""

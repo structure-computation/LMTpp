@@ -14,20 +14,20 @@
 
 namespace LMT {
 
-/** used as parameter of storage styles (Dense, SkyLine, ...) */
+/*! used as parameter of storage styles (Dense, SkyLine, ...) */
 struct Col {
     static const bool col_oriented = true;
     static const bool diag_oriented = false;
 };
-/** used as parameter of storage styles (Dense, SkyLine, ...) */
+/*! used as parameter of storage styles (Dense, SkyLine, ...) */
 struct Row {
     static const bool col_oriented = false;
     static const bool diag_oriented = false;
 };
 
 
-/** type of storage. 
-    \warning incompatible with Lapack in case of alignement != 0
+/*! type of storage. 
+    <strong>IMPORTANT : </strong> incompatible with Lapack in case of alignement != 0
 */
 template<class Orientation = Col>
 struct Dense {
@@ -43,7 +43,7 @@ struct Dense {
     > Trans;
 };
 
-/** type of storage. 
+/*! type of storage. 
 */
 template<class Orientation = Col>
 struct SparseLine {
@@ -60,7 +60,7 @@ struct SparseLine {
 };
 
 
-/** type of storage. 
+/*! type of storage. 
 */
 template<class Orientation = Col>
 struct SkyLine {
@@ -76,7 +76,7 @@ struct SkyLine {
     > Trans;
 };
 
-/** type of storage. 
+/*! type of storage. 
 */
 struct SparseLU {
     typedef Col TO;

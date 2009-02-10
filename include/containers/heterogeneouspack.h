@@ -206,8 +206,8 @@ public:
     typedef LMTPRIVATE::HeterogeneousPackPart<Carac,typename Carac::template SubType<0>::T,0> HP;
     static const unsigned nb_sub_types = HP::NbSubTypes::res;
     
-    template<unsigned nn> typename Carac::template SubType<nn>::T &operator()(const Number<nn> &nnn) { return hp(nnn); }
-    template<unsigned nn> const typename Carac::template SubType<nn>::T &operator()(const Number<nn> &nnn) const { return hp(nnn); }
+    template<unsigned nn> typename Carac::template SubType<nn>::T &operator()( const Number<nn> &nnn = Number<nn>() ) { return hp(nnn); }
+    template<unsigned nn> const typename Carac::template SubType<nn>::T &operator()( const Number<nn> &nnn = Number<nn>() ) const { return hp(nnn); }
     /*
     def print_apply_heterpack():
         for i in range(4):

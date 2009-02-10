@@ -15,21 +15,28 @@
 #include "triangle.h"
 
 namespace LMT {
+/*!
+    \verbatim
+        .                               3
+        .                              /|\
+        .                             / | \
+        .                            /  |  \
+        .                           /  /2\  \
+        .                          / /     \ \
+        .                        0/---------\1
 
-/**
-       3
-      /|\
-     / | \
-    /  |  \
-   /  /2\  \
-  / /     \ \
- 0/---------\1
+    \relates Mesh
+    \keyword Maillage/Elément
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
 */
+
 // --------------------------------------------------------------------------------------------------------
 struct Tetra {
     static const unsigned nb_var_inter = 3;
     static const unsigned nb_nodes = 4;
     static const char *name() { return "Tetra"; }
+    static const char *avs_name() { return "tet"; }
     static const char *can_directly_be_represented_by() { return "Tetra"; }
 };
 
@@ -46,9 +53,9 @@ template<unsigned n> struct TypeChildrenElement<Tetra,3,n> { typedef NodalElemen
 // TODO : attention ordre compatible avec divide_element (ne correspond pas a celui de element_Tetra.py
 template<class TN,class TNG,class TD,unsigned NET,class TC,class HET>
 void append_skin_elements(Element<Tetra,TN,TNG,TD,NET> &e,TC &ch,HET &het,Number<1> nvi_to_subs) {
-    het.add_element(e,ch,Triangle(),e.node(0),e.node(1),e.node(2));
+    het.add_element(e,ch,Triangle(),e.node(0),e.node(2),e.node(1));
     het.add_element(e,ch,Triangle(),e.node(0),e.node(1),e.node(3));
-    het.add_element(e,ch,Triangle(),e.node(0),e.node(2),e.node(3));
+    het.add_element(e,ch,Triangle(),e.node(0),e.node(3),e.node(2));
     het.add_element(e,ch,Triangle(),e.node(1),e.node(2),e.node(3));
 }
 
@@ -342,7 +349,13 @@ typename TNG::T measure( const Element<Tetra,TN,TNG,TD,NET> &e ) {
     D0 = 0.133333*D0; D0 = D1-D0; D0 = D0+D1; D0 = D0+D1; D0 = D0+D1; D0 = abs(D0); return D0; 
 }
 
+template<class TV,class T>
+bool var_inter_is_inside( const Tetra &e, const TV &var_inter, T tol = 0 ) {
+    return heaviside( var_inter[0] + tol ) * heaviside( var_inter[1] + tol ) * heaviside( var_inter[2] + tol ) * heaviside( 1 - var_inter[0] - var_inter[1] - var_inter[2] + tol );
+}
+
 };
+
 
 #include "element_Tetra.h"
 

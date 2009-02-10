@@ -12,11 +12,17 @@
 #ifndef LMT_gnuplot_HEADER
 #define LMT_gnuplot_HEADER
 
-#include "containers/mat.h"
+#include "mat.h"
 #include <sstream>
 
 namespace LMT {
 
+/*!
+    classe servant d'interface avec le célèbre programme gnuplot.
+    \author Hugo Leclerc
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \keyword Graphisme/2D
+*/
 class GnuPlot {
 public:
     struct HD {
@@ -39,8 +45,11 @@ public:
     }
     /// 
     void print(const char *str) {
-        fprintf(tube,str);
+        fprintf(tube,"%s",str);
         fflush(tube);
+    }
+    void command(const char *str) {
+        print(str);
     }
     /// Pour effacer les courbes d'avant
     void reset() {
@@ -55,6 +64,22 @@ public:
         template<class TX,class TY> void operator()(const TY &val,const TX &x,FILE *tube) const { fprintf(tube,"%10.6f %10.6f\n",(double)x,(double)val); }
         template<class TX,class TY> void operator()(const TX &val,unsigned i,const TY &y,FILE *tube) const { fprintf(tube,"%10.6f %10.6f\n",(double)val,(double)y[i]); }
     };
+    /*!
+        mat doit être une matrice de 4 colonnes au moins tel que :
+            * la première colonne soit les x
+            * la deuxième colonne soit les y
+            * la troisième soit vx la première composante du vecteur
+            * la quatrième soit vy
+        \friend pasquier@lmt.ens-cachan.fr
+        \friend witz@lmt.ens-cachan.fr
+    */
+    template<class T,class STR,class STO>
+    void plot_field(const Mat<T,STR,STO> &mat,const char *params="") {
+        fprintf(tube,"plot '-' using 1:2:(0.01*$3/sqrt($3*$3+$4*$4)):(0.01*$4/sqrt($3*$3+$4*$4)) title \"%s\" with vectors\n",params);
+        std::ostringstream ss; ss << mat;
+        fprintf(tube,"%s\ne\n",ss.str().c_str());
+        fflush(tube);
+    }
     /// Dans le cas o une seule variable est fournie. x=num�o. vec=ordonn�
     template<class T,int s,class O>
     void plot(const Vec<T,s,O> &vec,const char *params="") {
@@ -89,6 +114,7 @@ public:
             fflush(tube);
         }
     }
+    
     /// Dans le cas o une seule variable est fournie. x=num�o. vec=ordonn�
     template<class T1,int s1,class O1,class T2,int s2,class O2>
     void plot(const Vec<T1,s1,O1> &x,const Vec<T2,s2,O2> &y1,const Vec<T2,s2,O2> &y2,const char *params="") {
@@ -101,6 +127,25 @@ public:
             apply_wi( x, Disp(), y1, tube );
             fprintf(tube,"e\n");
             apply_wi( x, Disp(), y2, tube );
+            fprintf(tube,"e\n");
+            fflush(tube);
+        }
+    }
+    /// Dans le cas o une seule variable est fournie. x=num�o. vec=ordonn�
+    template<class T1,int s1,class O1,class T2,int s2,class O2>
+    void plot(const Vec<T1,s1,O1> &x,const Vec<T2,s2,O2> &y1,const Vec<T2,s2,O2> &y2,const Vec<T2,s2,O2> &y3,const char *params="") {
+        if ( hold ) {
+            holded_data.push_back( HD( x, y1, params ) );
+            holded_data.push_back( HD( x, y2, params ) );
+            holded_data.push_back( HD( x, y3, params ) );
+        }
+        else {
+            fprintf(tube,"plot '-' %s, '-' %s, '-' %s\n",params,params,params);
+            apply_wi( x, Disp(), y1, tube );
+            fprintf(tube,"e\n");
+            apply_wi( x, Disp(), y2, tube );
+            fprintf(tube,"e\n");
+            apply_wi( x, Disp(), y3, tube );
             fprintf(tube,"e\n");
             fflush(tube);
         }
@@ -135,7 +180,7 @@ public:
     ///
     Vec<HD> holded_data;
 };
-/** plot and wait
+/*! plot avec Gnuplot et attend
 */
 template<class T,int s,class O>
 void plot(const Vec<T,s,O> &vec,const char *params="") {
@@ -144,7 +189,7 @@ void plot(const Vec<T,s,O> &vec,const char *params="") {
     gp.wait();
 }
 
-/** plot and wait
+/*! plot and wait
 */
 template<class T,class STR,class STO>
 void plot(const Mat<T,STR,STO> &mat,const char *params="") {

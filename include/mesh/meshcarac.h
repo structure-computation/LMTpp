@@ -24,14 +24,22 @@ struct DefaultBehavior {};
     struct pos_DM {};
 #endif // IFNDEF_pos_DM
 
-/** Example of data that can be contained in a child
-    typedef double Tpos;
-    static const unsigned dim = 3;
-    template<unsigned nvi_to_subs,unsigned skin,unsigned inner> struct ElementChoice<0,false,0,inner> {
-        typedef Triangle NE;
-        typedef DefaultBehavior BE;
-    };
-    ...
+/*! 
+
+    Modèle de classe qui sert de paramètre à la classe \a Mesh . On peut aussi consulter  \a MeshCaracStd pour un exemple exploitable de ce modèle et aussi tous les exemples dans le dossier formulation. 
+
+    Example of data that can be contained in a child
+    \code C/C++
+        typedef double Tpos;
+        static const unsigned dim = 3;
+        template<unsigned nvi_to_subs,unsigned skin,unsigned inner> struct ElementChoice<0,false,0,inner> {
+            typedef Triangle NE;
+            typedef DefaultBehavior BE;
+        };
+        ...
+
+    \relates Mesh
+    \relates MeshCaracStd
 */ 
 template<unsigned d,class T>
 struct MeshCarac {

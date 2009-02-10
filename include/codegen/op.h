@@ -16,14 +16,15 @@
 #include <set>
 #include "codegen_vector.h"
 
+
 namespace Codegen {
 
 class Ex;
 
-/**
+/*!
 Base node class for Codegen. Can represent a symbol, a number, a multiplication, ...
 
-@author LECLERC Hugo
+\author LECLERC Hugo
 */
 class Op {
 public:
@@ -49,6 +50,8 @@ public:
         Exp = 22,
         Heavyside_if = 23,
         
+        Dirac = 24,
+        
         // functions with 2 variables
         Add = 50,
         Sub = 51,
@@ -57,26 +60,31 @@ public:
         Pow = 54,
         Atan2 = 55,
         
-        Max = 60
+        Max = 60,
+        Min = 61
     } TypeEx;
 
     Op();
     ~Op();
     
     static bool is_a_function_1(TypeEx type) { return ( type>=Abs && type<Add ); }
-    static bool is_a_function_2(TypeEx type) { return ( type>=Add && type<=Max ); }
+    static bool is_a_function_2(TypeEx type) { return ( type>=Add && type<=Min ); }
     static TypeEx getType(const std::string &type);
     bool is_a_function_1() const { return is_a_function_1(type); }
     bool is_a_function_2() const { return is_a_function_2(type); }
+    unsigned nb_children() const { return is_a_function_1(type) + 2 * is_a_function_2(type); }
     float priority() const;
     std::string to_string() const;
     std::string graphviz_repr() const;
+    unsigned node_count_rec(long unsigned current_id) const;
+    bool leave() const { return type == Symbol or type == Number; }
     
 //private:
     mutable long unsigned id;
     mutable const Op *res_op;
     
     void depends_on_rec(long unsigned current_id) const;
+    void find_discontinuities( long unsigned current_id, std::vector<const Op *> &lst ) const;
     bool mustPrecede(const Op *b) const;
     void decreaseCptUse() const;
     const Op *makeChildUsing(const Op *c);
@@ -96,8 +104,8 @@ public:
     };
     Value data;
     TypeEx type;
-    void *additional_data; /// only for symbols
-    int movability_level; /// only for symbols
+    mutable void *additional_data; /// only for symbols
+    mutable int movability_level; /// only for symbols
     mutable Cvector<const Op *> parents;
     mutable unsigned cptUse;
     mutable T val; /// available for all kind of ops

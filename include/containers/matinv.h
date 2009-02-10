@@ -16,7 +16,7 @@ namespace LMT {
 
 struct SolveException { };
 
-template<class TT,class Str,class Sto,class IO=typename IsMatOp<TT>::T,class AltT=typename Mat<TT,Str,Sto,IO>::T>
+template<class TT,class Str=Gen<>,class Sto=Dense<>,class IO=typename IsMatOp<TT>::T,class AltT=typename Mat<TT,Str,Sto,IO>::T>
 class Inv {
 public:
     typedef typename Mat<TT,Str,Sto,IO>::T T;
@@ -46,21 +46,51 @@ public:
     TF fact;
 };
 
-/** \relates Mat
+template<class TT, int s>
+class Inv<TT,Sym<s>,SparseLine<>,typename IsMatOp<TT>::T,typename Mat<TT,Sym<s>,SparseLine<>,typename IsMatOp<TT>::T>::T> {
+public:
+    typedef Sym<s> Str;
+    typedef SparseLine<> Sto;
+    typedef typename IsMatOp<TT>::T IO;
+    typedef typename Mat<TT,Str,Sto,IO>::T AltT;
+    typedef typename Mat<TT,Str,Sto,IO>::T T;
+    typedef SkyLine<typename Sto::TO> STOF;
+    typedef std::pair< Mat<AltT,Str,STOF> , Vec<AltT,s> > TF;
+    
+    Inv() { }
+    Inv(const Mat<TT,Str,Sto,IO> &mm):m(&mm) {
+        bool res = get_factorization(mm,fact);
+        if ( res == false )
+            throw SolveException();
+    }
+    
+    const Mat<TT,Str,Sto,IO> *m;
+    TF fact;
+};
+
+/*! \relates Mat
     Return an Inv<> object with factorization matrix
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
 */
 template<class T,class Str,class Sto,class IO>
 Inv<T,Str,Sto,IO> inv(const Mat<T,Str,Sto,IO> &m) throw(SolveException) {
     return m;
 }
 
-/**
+/*!
+
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
 */
 template<class T1,class Str,class Sto,class IO,class T2,int s2,class IO2>
 typename TypePromote< Divides, typename Vec<T2,s2,IO2>::template SubType<0>::T,typename Mat<T1,Str,Sto,IO>::T>::T
  solve(const Mat<T1,Str,Sto,IO> &A,const Vec<T2,s2,IO2> &b) throw(SolveException) { return inv(A)*b; }
 
-/**
+/*!
+
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
 */
 template<class T,class Str,class Sto,class IO,class AltT,class TT2,int s2>
 Vec<typename TypePromote<Multiplies,AltT,typename Vec<TT2,s2>::template SubType<0>::T>::T> operator*(const Inv<T,Str,Sto,IO,AltT> &i, const Vec<TT2,s2> &b) throw(SolveException) {

@@ -93,19 +93,19 @@ struct cell_output_ascii {
         /// Material ID
         //outfile << int (e.type_formulation) << " ";
         outfile << 0 << " ";
-        if (e.name_virtual() == "Hexa") {
+        if (e.name_virtual() == std::string("Hexa")) {
             /// Number of nodes
             outfile << "hex ";
             for(unsigned i=0;i<8;++i)
                 outfile << (e.node(i)->number_in_original_mesh()+1) << " ";
             outfile  << endl;
-        } else if(e.name_virtual() == "Wedge" ) {
+        } else if(e.name_virtual() == std::string("Wedge") ) {
             /// Number of nodes
             outfile << "prism ";
             for(unsigned i=0;i<6;++i)
                 outfile << (e.node(i)->number_in_original_mesh()+1) << " ";
             outfile  << endl;
-        } else if(e.name_virtual() == "Tetra" ) {
+        } else if(e.name_virtual() == std::string("Tetra") ) {
             /// Number of nodes
             outfile << "tet ";
             for(unsigned i=0;i<4;++i)
@@ -125,6 +125,9 @@ struct node_output_ascii {
     }
 };
 
+/*!
+    \keyword Utilitaires
+*/
 struct Toto {
     template<class T>
     void operator()(unsigned num,const char *name,T val) const {

@@ -16,9 +16,12 @@
 
 namespace Codegen {
 
-/**
+/*!
+    Cette classe sert pour le calcul symbolique des formulations écrites en Python.
 
-@author LECLERC Hugo
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \author LECLERC Hugo
 */
 class ExMatrix {
 public:
@@ -39,6 +42,8 @@ public:
     ExMatrix diff(const Ex &a) const;
     ExMatrix diff(std::map<Ex,Ex,Ex::ExMapCmp> &m) const;
     
+    void resize( unsigned r, unsigned c );
+    
     bool is_null() const;
     bool depends_on(const Ex &ex) const;
     
@@ -46,13 +51,26 @@ public:
     Ex trace() const;
     //ExMatrix transpose() const;
     Ex determinant() const;
+    ExMatrix ldl() const;
+    ExVector solve_using_ldl( const ExVector &b ) const;
+    ExVector solve( const ExVector &b ) const;
+    ExVector solve( const ExVector &b, const Ex &det ) const;
+    ExVector solve_regular_or_not( const ExVector &b ) const; // if matrix is singular, give a non null "solution" if b in Im(m). If not singular, give the unique solution
+    ExVector solve_with_one_at( unsigned index, const ExVector &b, bool zero_at_the_beginning = false ) const; // solve with imposed solution[index]=1
+    ExVector find_eigen_values_sym() const; // assuming matrix is symetric
+    Ex       find_one_eigen_value_sym() const; // assuming matrix is symetric
+    ExMatrix find_eigen_vectors_sym( const ExVector &eigen_values ) const;
+    ExMatrix find_eigen_vectors_sym_bis() const;
     ExMatrix without_col(unsigned col) const;
     ExMatrix without_row(unsigned row) const;
     ExVector col(unsigned col) const;
     ExVector row(unsigned row) const;
+    ExVector diag() const;
     ExMatrix inverse() const;
     ExMatrix transpose() const;
     ExMatrix operator-() const;
+    void add_col( const ExVector &v );
+    void add_row( const ExVector &v );
     
     static ExMatrix differentiate(const ExVector &ex,const ExVector &symbols);
 private:
@@ -63,12 +81,16 @@ private:
     friend Ex dot(const ExVector &a,const ExMatrix &b);
     friend Ex dot(const ExMatrix &a,const ExMatrix &b);
 };
+    
+ExVector mul( const ExMatrix &a, const ExVector &b );
+ExMatrix mul( const ExMatrix &a, const ExMatrix &b );
+
 // if mat.size()=vec.size()+1, do it the OpenGL way
 ExVector operator*(const ExMatrix &mat,const ExVector &vec);
 
 ExMatrix operator+(const ExMatrix &a,const ExMatrix &b);
 ExMatrix operator-(const ExMatrix &a,const ExMatrix &b);
-ExMatrix operator*(const ExMatrix &a,const ExMatrix &b);
+// ExMatrix operator*(const ExMatrix &a,const ExMatrix &b);
 ExMatrix operator/(const ExMatrix &a,const ExMatrix &b);
 ExMatrix operator+(const ExMatrix &a,const Ex &b);
 ExMatrix operator-(const ExMatrix &a,const Ex &b);
@@ -82,6 +104,8 @@ ExMatrix operator/(const Ex &a,const ExMatrix &b);
 ExMatrix abs(const ExMatrix &a);
 ExMatrix heavyside(const ExMatrix &a);
 ExMatrix heavyside_if(const ExMatrix &a);
+inline ExMatrix heaviside(const ExMatrix &a) { return heavyside(a); }
+inline ExMatrix heaviside_if(const ExMatrix &a) { return heavyside_if(a); }
 ExMatrix eqz(const ExMatrix &a);
 ExMatrix sin(const ExMatrix &a);
 ExMatrix cos(const ExMatrix &a);

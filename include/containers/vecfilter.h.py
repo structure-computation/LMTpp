@@ -2,6 +2,9 @@ import string
 from vecgenhelp import *
 
 print """
+#ifndef VEC_SELECT_H
+#define VEC_SELECT_H
+
 namespace LMT {
 /** Works only for linear vectors */
 template<class V0,class V1,bool const_v0=true> struct VecSelect {};
@@ -95,3 +98,5 @@ print_apply_ext('apply',TT,TV,'typename '+TV+'::template FilterI<Op,ONEIFCONSTOP
 print_apply_ext('apply_wi',TT,TV,'OpWithIncrement<Op,ONEIFCONSTOP> opi(op); apply(v,opi,PARALIST);')
 
 print '} // namespace LMT'
+print '#endif // VEC_SELECT_H'
+

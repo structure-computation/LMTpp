@@ -7,13 +7,20 @@
 
 namespace LMT {
 
-/**
-  2
-  |\
-  | \
-  |  \
-  |   \
-  0----1
+/*!
+    \verbatim
+                            2
+                            |\
+                            | \
+                            |  \
+                            |   \
+                            0----1
+
+    \relates Mesh
+    \keyword Maillage/Elément 
+    \author Hugo LECLERC
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \friend raphael.pasquier@lmt.ens-cachan.fr
 */
 
 // --------------------------------------------------------------------------------------------------------
@@ -78,7 +85,8 @@ void intersection(const Element<Triangle,TN,TNG,TD,NET> &e,Pvec P1,Pvec P2,T &nu
 template<class TN,class TNG,class TD,unsigned NET>
 typename TNG::Pvec sample_normal(const Element<Triangle,TN,TNG,TD,NET> &e) {
     DEBUGASSERT( (TNG::dim==3) );
-    typename TNG::Pvec res = vect_prod( e.node(1)->pos-e.node(0)->pos, e.node(2)->pos-e.node(0)->pos );
+    typedef typename TNG::Pvec Pvec;
+    Pvec res = vect_prod( Pvec( e.node(1)->pos-e.node(0)->pos ), Pvec( e.node(2)->pos-e.node(0)->pos ) );
     return res / length( res );
 }
 
@@ -160,7 +168,13 @@ typename TNG::T measure( const Element<Triangle,TN,TNG,TD,NET> &e ) {
     return 0.5 * length( P1-P0 ) * length( P2-P0 );
 }
 
-};
+
+template<class TV,class T>
+bool var_inter_is_inside( const Triangle &e, const TV &var_inter, T tol = 0 ) {
+    return heaviside( var_inter[0] + tol ) * heaviside( var_inter[1] + tol ) * heaviside( 1 - var_inter[0] - var_inter[1] + tol );
+}
+
+}
 
 #include "element_Triangle.h"
 

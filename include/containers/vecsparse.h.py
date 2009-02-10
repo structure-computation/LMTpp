@@ -1,7 +1,9 @@
+# -*- coding: utf-8 -*-
 import string
 from vecgenhelp import *
 
-print """
+print """// file generated from vecsparse.h.py. Do not modify
+
 namespace LMT {
 
 template<class T> struct Sparse {};
@@ -12,12 +14,12 @@ template<class TT> struct DelayedAssignementSparseSource {
     typedef TT T;
     TT get() const {
         if ( found ) return (*data)[pos];
-        return (TT)0;
+        return TT(0);
     }
     template<class Op,class T2> void apply(const Op &op,const T2 &v) {
         if ( found ) {
             (*data)[pos] = op( (*data)[pos], v );
-            if ( TT( (*data)[pos] ) == TT( 0.0 ) ) {
+            if ( TT( (*data)[pos] ) == TT( 0 ) ) {
                 for(;pos<indices->size()-1;++pos) {
                     (*data)[pos] = (*data)[pos+1];
                     (*indices)[pos] = (*indices)[pos+1];
@@ -28,7 +30,7 @@ template<class TT> struct DelayedAssignementSparseSource {
         }
         else  {
             TT r = op((TT)0,v);
-            if ( r != TT( 0.0 ) ) {
+            if ( r != TT( 0 ) ) {
                 // creation
                 indices->new_elem();
                 data->new_elem();
@@ -37,7 +39,7 @@ template<class TT> struct DelayedAssignementSparseSource {
                     (*indices)[e] = (*indices)[e-1];
                 }
                 (*indices)[pos] = i;
-                (*data)[pos] = op(0,v);
+                (*data)[pos] = op(TT(0),v);
                 found = true;
             }
         }
@@ -49,6 +51,24 @@ template<class TT> struct DelayedAssignementSparseSource {
     unsigned i;
 };
 
+/*!
+Cette classe permet de construire des vecteurs creux : cad si le vecteur a de nombreux éléments nuls, il est préférable de choisir ce format de stockage.
+Voici un exemple d'utilisation :
+    \code C/C++
+        Vec<Sparse<float> > vs;
+        Vec<Sparse<std::string>,10> vsf; // au plus dix éléments non nuls (nombre maximal fixé à la compilation).
+        Vec<int> plage ;
+        std::string residu;
+        
+        vsf.set(1000,"fee clochette");
+        residu = vsf.get( 1000 ); // où bien residu = vsf[1000];
+
+    
+
+
+    \\relates Vec
+    \\friend raphael.pasquier@lmt.ens-cachan.fr
+*/
 template<class TT,int static_size_>
 class Vec<Sparse<TT>,static_size_> {
 public:
@@ -72,7 +92,7 @@ public:
         TT operator[](unsigned i) const {
             while ( j < vec->indices.size() && vec->indices[j] < i ) ++j;
             if ( j < vec->indices.size() && vec->indices[j] == i ) return vec->data[j];
-            return 0;
+            return TT(0);
         }
         Vec *vec;
         mutable unsigned j;
@@ -82,7 +102,7 @@ public:
         TT operator[](unsigned i) const {
             while ( j < s && indices[j] < i ) ++j;
             if ( j < s && indices[j] == i ) return data[j];
-            return 0;
+            return TT(0);
         }
         const unsigned *indices;
         const TT *data;
@@ -95,10 +115,17 @@ public:
     struct Assign { template<class T2> void operator()(const T2 &val,unsigned ind,Vec &th) const { if (val==0) return; th.indices.push_back(ind); th.data.push_back(val); } };
     friend struct Assign;
     template<class T2,int s2> Vec &operator=(const Vec<T2,s2> &v) { DEBUGASSERT(v.size()==size()); indices.free(); data.free(); apply_nz(v,Assign(),*this); return *this; }
+    
+    template<class T2> Vec(const Vec<Sparse<T2> > &v) { indices = v.indices; data = v.data; }
        
     typedef DelayedAssignement<DelayedAssignementSparseSource<TT> > RetOp;
     typedef TT RetOpConst;
     
+    void throw_ref_and_clear( Vec &res ) {
+        data   .throw_ref_and_clear( res.data    );
+        indices.throw_ref_and_clear( res.indices );
+        si     .throw_val_and_clear( res.si      );
+    }
     
     RetOp operator[](unsigned i) {
         DEBUGASSERT( i < size() );
@@ -130,7 +157,7 @@ public:
         }
         for( ;b<e && indices[b]<=i; ++b )
             if ( indices[b] == i ) return data[ b ];
-        return 0;
+        return RetOpConst(0);
     } /// access to element i
     TT get(unsigned i) const { return operator[](i); } /// calling get() ensures that the this is the const version of operator[] which is called
     void set(unsigned i,const TT v) { operator[](i)=v; } /// set element i
@@ -264,5 +291,13 @@ print_apply_ext('apply_nz_wi',TT,TV,'for(unsigned i=0;i<v.indices.size();++i) op
 
 print_apply_ext('filter_sp',TT,TV,"""for(unsigned i=0;i<v.indices.size();++i) if ( op(v.data[i],PARALIST) == false ) { v.indices.erase_elem_nb(i); v.data.erase_elem_nb(i); } """,onlyfornonconstvec=True)
 
+print """
+/// ajout de Raphaël. Position provisoire
+template<class TT > void swap(Vec<Sparse<TT> > &v1, Vec<Sparse<TT> > &v2) {
+    swap( v1.indices      , v2.indices       );
+    swap( v1.data        , v2.data         );
+    swap( v1.si        , v2.si         );
+}
+"""
 
 print """}"""

@@ -3,6 +3,9 @@
 
 namespace LMT {
 
+/**
+Renvoie le vrai inverse d'une matrice (couteux)
+*/
 template<class T,class P,class S>
 Mat<T,P,S> true_inv( const Mat<T,P,S> &m ) {
     assert( m.nb_rows() == m.nb_cols() );

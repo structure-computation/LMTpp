@@ -8,6 +8,9 @@
 namespace Codegen {
     inline double heavyside(double a) { return (a>=0); }
     inline double heavyside_if(double a) { return (a>=0); }
+    inline double heaviside(double a) { return (a>=0); }
+    inline double heaviside_if(double a) { return (a>=0); }
+    inline double dirac(double a) { return (a==0); }
     inline double sqrt(double a) { return ::sqrt(a); }
     inline double sin(double a) { return ::sin(a); }
     inline double cos(double a) { return ::cos(a); }
@@ -21,8 +24,10 @@ namespace Codegen {
     inline double exp(double a) { return ::exp(a); }
     inline double abs(double a) { return ::fabs(a); }
     inline double max(double a,double b) { return std::max(a,b); }
+    inline double min(double a,double b) { return std::min(a,b); }
     inline double atan2(double a,double b) { return std::atan2(a,b); }
     inline int max(int a,int b) { return std::max(a,b); }
+    inline int mini(int a,int b) { return std::min(a,b); }
 };
 
 
@@ -40,6 +45,8 @@ namespace std {
 namespace Codegen {
 
 double heavyside(double a);
+double heaviside(double a);
+double dirac(double a);
 double sqrt(double NONNEGATIVE);
 double sin(double);
 double cos(double);
@@ -53,8 +60,10 @@ double log(double POSITIVE);
 double exp(double);
 double abs(double);
 double max(double,double);
+double mini(double,double);
 double atan2(double,double);
 int max(int a,int b);
+int mini(int a,int b);
 
 class Ex {
 public:
@@ -73,7 +82,11 @@ public:
     bool is_a_function_2() const;
     void display_graphviz(const char *filename="tmp.dot") const;
     
-    bool depends_on(const Ex &ex) const;
+    Ex find_discontinuity( const Ex &v ) const;
+    
+    bool depends_on( const Ex &ex ) const;
+    
+    bool is_zero() const;
     
     Ex subs(const Ex &a,const Ex &b) const;
     Ex subs(std::map<Codegen::Ex,Codegen::Ex> &m) const;
@@ -97,6 +110,9 @@ Ex number(const char *val);
 
 Ex heavyside(const Ex &a);
 Ex heavyside_if(const Ex &a);
+Ex heaviside(const Ex &a);
+Ex heaviside_if(const Ex &a);
+Ex dirac(const Ex &a);
 Ex sqrt(const Ex &a);
 Ex sin(const Ex &a);
 Ex cos(const Ex &a);
@@ -112,10 +128,16 @@ Ex abs(const Ex &a);
 Ex max(const Ex &a,const Ex &b);
 Ex max(const Ex &a,double b);
 Ex max(double a,const Ex &b);
+Ex mini(const Ex &a,const Ex &b);
+Ex mini(const Ex &a,double b);
+Ex mini(double a,const Ex &b);
 
 Ex atan2(const Ex &a,const Ex &b);
 Ex atan2(const Ex &a,double b);
 Ex atan2(double a,const Ex &b);
+
+Ex integration(const Ex &expr,const Ex &v,const Ex &beg,const Ex &end,unsigned max_poly_order=5);
+
 }
 
 namespace std {
@@ -207,6 +229,7 @@ public:
     ExVector __div__(const Ex &other) { return *self / other; }
     ExVector __div__(double other) { return *self / other; }
     ExVector __rdiv__(double other) { return other / *self; }
+    ExVector __rdiv__(const Ex &other) { return other / *self; }
     
     ExVector __pow__(const ExVector &other) { return pow(*self,other); }
     ExVector __pow__(const Ex &other) { return pow(*self,other); }
@@ -216,15 +239,21 @@ public:
     ExVector __neg__() { return - *self; }
     ExVector __abs__() { return abs( *self ); }
     
+    ExVector __copy__() { return *self; }
+    ExVector clone() { return *self; }
+    
     std::string __repr__() const { return self->to_string(); }
     std::string __str__() const { return self->to_string(); }
     
     ExVector subs(const Ex &f,double t) const { return self->subs(f,Codegen::number(t)); }
 };
     
+ExVector sqrt(const ExVector &a);
 ExVector abs(const ExVector &a);
 ExVector heavyside(const ExVector &a);
 ExVector heavyside_if(const ExVector &a);
+ExVector heaviside(const ExVector &a);
+ExVector heaviside_if(const ExVector &a);
 ExVector eqz(const ExVector &a);
 ExVector sin(const ExVector &a);
 ExVector cos(const ExVector &a);
@@ -237,9 +266,16 @@ ExVector asin(const ExVector &a);
 ExVector acos(const ExVector &a);
 ExVector atan(const ExVector &a);
     
+ExVector pos_part(const ExVector &a);
+ExVector neg_part(const ExVector &a);
+
 ExVector max(const ExVector &a,const ExVector &b);
 ExVector max(const ExVector &a,const Ex &b);
 ExVector max(const Ex &a,const ExVector &b);
+
+ExVector mini(const ExVector &a,const ExVector &b);
+ExVector mini(const ExVector &a,const Ex &b);
+ExVector mini(const Ex &a,const ExVector &b);
 
 Ex dot(const ExVector &a,const ExVector &b);
 
@@ -266,26 +302,36 @@ public:
     ExMatrix subs(const Ex &a,const Ex &b) const;
     ExMatrix diff(const Ex &a) const;
     
+    void resize( unsigned r, unsigned c );
+    
     Ex max() const;
     Ex trace() const;
     ExMatrix transpose() const;
     Ex determinant() const;
+    ExMatrix ldl() const;
+    ExVector solve_using_ldl( const ExVector &b ) const;
+    ExVector solve( const ExVector &v ) const;
+    ExVector solve( const ExVector &v, const Ex &det ) const;
+    ExVector solve_regular_or_not( const ExVector &v ) const;
+    ExVector solve_with_one_at( unsigned index, const ExVector &v, bool zero_at_the_beginning = false ) const;
+    ExVector find_eigen_values_sym() const;
+    ExMatrix find_eigen_vectors_sym( const ExVector &eigen_values ) const;
+    ExMatrix find_eigen_vectors_sym_bis() const;
     ExVector row(unsigned c) const;
     ExVector col(unsigned c) const;
+    ExVector diag() const;
     ExMatrix without_col(unsigned col) const;
     ExMatrix without_row(unsigned row) const;
     ExMatrix inverse() const;
     ExMatrix operator-() const;
+    void add_col( const ExVector &v );
+    void add_row( const ExVector &v );
 };
     
 %extend ExMatrix {
     Ex __getitem__(std::vector<unsigned> i) { assert(i.size()==2); return (*self)(i[0],i[1]); }
     void __setitem__(std::vector<unsigned> i,const Ex &val) { assert(i.size()==2); (*self)(i[0],i[1]) = val; }
     void __setitem__(std::vector<unsigned> i,double val) { assert(i.size()==2); (*self)(i[0],i[1]) = val; }
-    
-/*     void __init__() {} */
-/*     void __init__(const ExMatrix &other) { *self = other; } */
-/*     void __init__(unsigned nb_rows=0,unsigned nb_cols=0) { *self = Codegen::ExMatrix(nb_rows,nb_cols); } */
     
     ExMatrix __add__(const ExMatrix &other) const { return *self + other; }
     ExMatrix __add__(const Ex &other) const { return *self + other; }
@@ -298,7 +344,7 @@ public:
     ExMatrix __rsub__(double other) { return other - *self; }
     
     ExVector __mul__(const ExVector &other) { return *self * other; }
-    ExMatrix __mul__(const ExMatrix &other) { return *self * other; }
+    /*     ExMatrix __mul__(const ExMatrix &other) { return *self * other; } */
     ExMatrix __mul__(const Ex &other) { return *self * other; }
     ExMatrix __mul__(double other) { return *self * other; }
     ExMatrix __rmul__(double other) { return other * *self; }
@@ -326,6 +372,8 @@ public:
 ExMatrix abs(const ExMatrix &a);
 ExMatrix heavyside(const ExMatrix &a);
 ExMatrix heavyside_if(const ExMatrix &a);
+ExMatrix heaviside(const ExMatrix &a);
+ExMatrix heaviside_if(const ExMatrix &a);
 ExMatrix eqz(const ExMatrix &a);
 ExMatrix sin(const ExMatrix &a);
 ExMatrix cos(const ExMatrix &a);
@@ -355,7 +403,11 @@ public:
     Write_code(const char *default_type="T",unsigned nb_spaces=4);
     enum Method {Declare,Set,Add,Sub,Return}; 
     void add( const Ex &ex, const std::string &name, Method method=Declare );
+    unsigned node_count() const;
     std::string to_string();
+    std::string to_asm( std::string function_name="" );
+    std::string asm_caller( std::string asm_function_name );
+    void display_graphviz();
 };
 %extend Write_code {
     void add( int ex, const std::string &name, Method method ) { self->add( Codegen::number(ex),name,method ); }

@@ -33,4 +33,8 @@ const unsigned Wedge_15::nb_nodes;
 const unsigned Hexa::nb_nodes;
 const unsigned Hexa_20::nb_nodes;
 
+#ifdef PRINT_ALLOC
+std::map<std::string,long long> total_allocated;
+#endif // PRINT_ALLOC
+
 };

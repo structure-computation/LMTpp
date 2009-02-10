@@ -23,6 +23,17 @@ private:
         };
     };
     struct GetNvi { template<class TE> struct Val { static const unsigned res = TE::nb_var_inter; }; };
+    
+    template<class TL,class TE=typename TL::T>
+    struct GetNviFromHeterList {
+        static const unsigned cur = TE::nb_var_inter;
+        static const unsigned nex = GetNviFromHeterList<typename TL::TNext>::res;
+        static const unsigned res = ( nex > cur ? nex : cur );
+    };
+    template<class TL>
+    struct GetNviFromHeterList<TL,void> {
+        static const unsigned res = 0;
+    };
 public:
     static const int static_size = -1;
     static const bool fixed_size = false;
@@ -61,6 +72,8 @@ public:
     /// nb type of elements 
     static const unsigned nb_elem_type = TList::nb_sub_type;
     ///
+    static const unsigned nvi = GetNviFromHeterList<TList>::res;
+    ///
     template<class NE,class BE> struct IndexOf { static const unsigned res = LMT::IndexOf<CaracNEBE,std::pair<NE,BE> >::res; };
     ///
     template<class NE,class BE> struct TElem { typedef typename ElemNum<0>::template SubType<IndexOf<NE,BE>::res>::T TE; };
@@ -97,6 +110,20 @@ public:
     void get_sizes(unsigned *s) const { hp.get_sizes(s); } /// -> get sizes of each type
     
     unsigned index_of_down_cast(const EA *ea) const { return hp.index_of_down_cast(ea); } /// return index of type of EA which can be an ancestor of an element in the list
+
+    template<class DM> const typename ExtractDM<DM>::template ReturnType< typename CaracVec<0>::template SubType<0>::TTClass >::T &val_elem_nb( unsigned i, const DM &dm = DM() ) const {
+        return hp.val_elem_nb( i, dm );
+    }
+    template<class DM> typename ExtractDM<DM>::template ReturnType< typename CaracVec<0>::template SubType<0>::TTClass >::T &val_elem_nb( unsigned i, const DM &dm = DM() ) {
+        return hp.val_elem_nb( i, dm );
+    }
+
+    template<class DM> static const typename ExtractDM<DM>::template ReturnType< typename CaracVec<0>::template SubType<0>::TTClass >::T &val_elem( const EA *e, const DM &dm = DM() ) {
+        return TList::val_elem( e, dm );
+    }
+    template<class DM> static typename ExtractDM<DM>::template ReturnType< typename CaracVec<0>::template SubType<0>::TTClass >::T &val_elem( EA *e, const DM &dm = DM() ) {
+        return TList::val_elem( e, dm );
+    }
 
     template<class Op> static void apply_on_down_cast(const EA *ea,const Op& op) { TList::apply_on_down_cast(ea,op); }
     template<class Op> static void apply_on_down_cast(EA *ea,const Op& op) { TList::apply_on_down_cast(ea,op); }

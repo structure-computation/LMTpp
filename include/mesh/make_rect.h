@@ -6,10 +6,12 @@
 namespace LMT {
 
 struct Bar;
+struct Bar_3;
 struct Triangle_6;
 struct Triangle;
 struct Quad;
 struct Quad_8;
+struct Quad_9;
 struct Quad_6;
 struct Quad_42;
 struct Hexa;
@@ -17,6 +19,7 @@ struct Tetra;
 struct DefaultBehavior;
 struct Wedge;
 struct Hexa_20;
+struct Tetra_10;
 
 /**
  * Bar
@@ -26,6 +29,30 @@ struct Hexa_20;
  * @param nb_x 
  * @param nb_y 
  */
+
+
+/*!
+\generic_comment make_rect
+
+    Cette fonction permet de générer un maillage de forme pavé (oblique) défini par les coordonnées cartésiennes X0 et X1 de sommets opposés, le type d'élément (Hexa, Quad_8, etc...) et le nombre de points par dimension.
+    Voici un exemple de code en dimension 3 générique :
+    \code C/C++
+        #include "mesh/make_rect.h"
+        using namespace LMT;
+        int main(int argc,char* argv[]) {
+            typedef Mesh<MeshCarac<3,double> > TM;
+            typedef TM::Pvec Pvec;
+        
+            TM m;
+            make_rect( m, Hexa(), Pvec( 0, 0, 0 ), Pvec( 2., 1., 1. ), Pvec( 100,50,50 ) );
+
+            return 0;
+        }
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \keyword Maillage/Elément/Opération
+*/
+
 template<class TM>
 void make_rect(TM &m,const Bar &t,typename TM::Pvec X0,typename TM::Pvec X1,typename TM::Pvec nb_points_) {
     typedef typename TM::Pvec Pvec;
@@ -40,6 +67,21 @@ void make_rect(TM &m,const Bar &t,typename TM::Pvec X0,typename TM::Pvec X1,type
         m.add_element( Bar(), DefaultBehavior(), beg+i, beg+i+1 );
     }
 }
+
+/**
+*/
+template<class TM>
+void make_rect(TM &m,const Bar_3 &t,typename TM::Pvec X0,typename TM::Pvec X1,typename TM::Pvec nb_points_) {
+    typedef typename TM::Pvec Pvec;
+    typedef typename TM::Tpos Tpos;
+    unsigned nb_points = 2 * unsigned( nb_points_[ 0 ] ) - 1;
+
+    for( unsigned i=0; i<nb_points; ++i )
+        m.add_node( X0 + i * ( X1 - X0 ) / ( nb_points - 1.0 ) );
+    for( unsigned i=0; i<nb_points-2; i += 2 )
+        m.add_element( Bar_3(), DefaultBehavior(), i, i+2, i+1 );
+}
+
 /**
  * Triangle
  * @param m 
@@ -262,6 +304,46 @@ void make_rect(TM &m,const Quad_8 &t,typename TM::Pvec X0,typename TM::Pvec X1,t
 }
 
 /**
+ * Quad_9
+ */
+template<class TM>
+void make_rect(TM &m,const Quad_9 &t,typename TM::Pvec X0,typename TM::Pvec X1,typename TM::Pvec nb_points_) {
+    typedef typename TM::Pvec Pvec;
+    typedef typename TM::Tpos Tpos;
+    Vec<unsigned,TM::dim> nb_points(nb_points_); 
+
+    // nodes
+    unsigned nb_x = (unsigned)nb_points[0] * 2 - 1, nb_y = (unsigned)nb_points[1] * 2 - 1;
+    for(unsigned j=0;j<nb_y;++j)
+        for(unsigned i=0;i<nb_x;++i)
+            m.add_node( X0 + Pvec( i * (X1[0]-X0[0]) / (nb_x-1), j * (X1[1]-X0[1]) / (nb_y-1) ) );
+    
+    // #  3    6    2
+    // #  x----x----x
+    // #  |         |
+    // # 7|    x8   x5
+    // #  |         |
+    // #  x----x----x
+    // #  0    4    1
+    // elements
+    for(unsigned j=0;j<nb_y-2;j+=2)
+        for(unsigned i=0;i<nb_x-2;i+=2)
+            m.add_element( Quad_9(), DefaultBehavior(),
+                           (i  ) + (j  )*nb_x,
+                           (i+2) + (j  )*nb_x,
+                           (i+2) + (j+2)*nb_x,
+                           (i  ) + (j+2)*nb_x,
+                           
+                           (i+1) + (j  )*nb_x,
+                           (i+2) + (j+1)*nb_x,
+                           (i+1) + (j+2)*nb_x,
+                           (i  ) + (j+1)*nb_x,
+                           
+                           (i+1) + (j+1)*nb_x
+                         );
+}
+
+/**
  * Quad_6
  */
 template<class TM> void make_rect(TM &m,const Quad_6 &t,typename TM::Pvec X0,typename TM::Pvec X1,typename TM::Pvec nb_points_) {
@@ -405,18 +487,19 @@ struct BestialNodeAdder {
 };
 
 /**
- * Hexa_20
-//     7 ---14----6
-//    /|         /|
-//  15 |       13 |
-//  /  19      /  18
-// 4---|-12---5   |
-// |   |      |   |
-// |   3---10-|-- 2
-// 16 /      17  /
-// |11        | 9
-// |/         |/
-// 0-----8----1
+  Hexa_20
+    \verbatim
+        .                        7 ---14----6
+        .                       /|         /|
+        .                    15  |       13 |
+        .                    /  19      /  18
+        .                    4---|-12---5   |
+        .                    |   |      |   |
+        .                    |   3---10-|-- 2
+        .                    16 /      17  /
+        .                    |11        | 9
+        .                    |/         |/
+        .                    0-----8----1
  */
 template<class TM>
 void make_rect(TM &m,const Hexa_20 &t,typename TM::Pvec X0,typename TM::Pvec X1,typename TM::Pvec nb_elements) {
@@ -427,8 +510,8 @@ void make_rect(TM &m,const Hexa_20 &t,typename TM::Pvec X0,typename TM::Pvec X1,
     BestialNodeAdder<TM> ban; ban.m = &m; ban.prec = min( (X1-X0)/nb_elements ) * 1e-6;
     
     Pvec step = (X1-X0) / nb_elements;
-    for(Rectilinear_iterator<Tpos,TM::dim> iter( X0, X1 + 0.1 * step, step ); iter; ++iter ) {
-        typename TM::TNode *n[20] = {
+    for(Rectilinear_iterator<Tpos,TM::dim> iter( X0, X1 - 0.1 * step, step ); iter; ++iter ) {
+        typename TM::TNode *n[] = {
             ban.get_node( iter.pos + step * Pvec(0.0,0.0,0.0) ),
             ban.get_node( iter.pos + step * Pvec(1.0,0.0,0.0) ),
             ban.get_node( iter.pos + step * Pvec(1.0,1.0,0.0) ),
@@ -453,6 +536,43 @@ void make_rect(TM &m,const Hexa_20 &t,typename TM::Pvec X0,typename TM::Pvec X1,
             ban.get_node( iter.pos + step * Pvec(0.0,1.0,0.5) )
         };
         m.add_element( Hexa_20(), DefaultBehavior(), n );
+    }
+}
+
+/**  
+    \verbatim
+        .                        Tetra_10
+        .                            3
+        .                           /|\
+        .                          / |9\
+        .                        7/  |  \8
+        .                        /  /2\  \
+        .                       /  /6 5\  \
+        .                     0/--- 4------\1
+ */
+template<class TM>
+void make_rect(TM &m,const Tetra_10 &t,typename TM::Pvec X0,typename TM::Pvec X1,typename TM::Pvec nb_elements) {
+    typedef typename TM::Pvec Pvec;
+    typedef typename TM::Tpos Tpos;
+
+    BestialNodeAdder<TM> ban; ban.m = &m; ban.prec = min( (X1-X0)/nb_elements ) * 1e-6;
+    
+    Pvec step = (X1-X0) / nb_elements;
+    for(Rectilinear_iterator<Tpos,TM::dim> iter( X0, X1 - 0.1 * step, step ); iter; ++iter ) {
+        typename TM::TNode *n[] = {
+            ban.get_node( iter.pos + step * Pvec(0.0,0.0,0.0) ),
+            ban.get_node( iter.pos + step * Pvec(1.0,0.0,0.0) ),
+            ban.get_node( iter.pos + step * Pvec(0.0,1.0,0.0) ),
+            ban.get_node( iter.pos + step * Pvec(0.0,0.0,1.0) ),
+                       
+            ban.get_node( iter.pos + step * Pvec(0.5,0.0,0.0) ),
+            ban.get_node( iter.pos + step * Pvec(0.5,0.5,0.0) ),
+            ban.get_node( iter.pos + step * Pvec(0.0,0.5,0.0) ),
+            ban.get_node( iter.pos + step * Pvec(0.0,0.0,0.5) ),
+            ban.get_node( iter.pos + step * Pvec(0.5,0.0,0.5) ),
+            ban.get_node( iter.pos + step * Pvec(0.0,0.5,0.5) ),
+        };
+        m.add_element( Tetra_10(), DefaultBehavior(), n );
     }
 }
 

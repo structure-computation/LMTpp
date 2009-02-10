@@ -46,15 +46,15 @@ def make_dep_py(env):
     for i in get_files(".", re.compile( '.*\.problem.py$' ) ):
         corh = i[:-2] + "h"
         env.Command( corh, i, 'LMT/bin/lmtproblem.py %s' % i )
- 
+    
 def linkflags(libs):
     """ find flags for libraries which has exetutables that return them... """
     return string.join([ string.rstrip(os.popen(lib+' --libs').readline()) for lib in libs ])
-
+    
 def cppflags(libs):
     """ find flags for libraries which has exetutables that return them... """
     return string.join([ string.rstrip(os.popen(lib+' --cflags').readline()) for lib in libs ])
-
+    
 def makedist(target,source,env):
     """ dist """
     ere = ".*Cons|Makefile|Doxygen|TODO|Doxyfile|.sconsign"
@@ -117,14 +117,19 @@ class MakePb:
              
         output.write( '#include "mesh_carac.h"\n' )
         output.write( '#include "formulation/problem_ancestor.h"\n' )
+        for T in self.types:
+            if T[:3]=='Pol' :
+                output.write( '#include "containers/polynomials.h"\n' )
         output.write( 'namespace LMT {\n\n' )
         output.write( 'template<class T,unsigned dim> class Problem_'+self.name+';\n\n' )
         for d in self.all_dims.keys():
+            cmpt = 0
             for T in self.types:
-                PN = 'Problem_'+self.name+'_'+T+'_'+str(d)
-                output.write( 'class '+PN+' : public ProblemAncestor<'+T+'> {\n' )
+                PN = 'Problem_'+self.name+'_type'+str(cmpt)+'_'+str(d)
+                output.write( 'class '+PN+' : public ProblemAncestor<'+T+(T[-1:]=='>')*' '+'> {\n' )
                 output.write( 'public:\n' )
                 output.write( '    typedef Mesh<Mesh_carac_'+self.name+'<'+T+','+str(d)+'> > TM;\n' )
+                output.write( '    '+PN+'() {}\n' )
                 output.write( '    '+PN+'( TM &m, bool use_tim_davis=false ) {\n' )
                 output.write( '        if ( use_tim_davis ) {\n' )
                 for f_name in self.map_f.keys():
@@ -135,7 +140,7 @@ class MakePb:
                 output.write( '        }\n' )
                 output.write( '    }\n' )
                 output.write( '    virtual unsigned nb_formulations() const { return '+str(len(self.map_f))+'; }\n' )
-                output.write( '    virtual FormulationAncestor<'+T+'> *formulation_nb(unsigned i) {\n' )
+                output.write( '    virtual FormulationAncestor<'+T+(T[-1:]=='>')*' '+'> *formulation_nb(unsigned i) {\n' )
                 output.write( '        switch(i) {\n' )
                 cpt = 0
                 for f_name in self.map_f.keys():
@@ -145,13 +150,14 @@ class MakePb:
                 output.write( '        }\n' )
                 output.write( '    }\n' )
                 for f_name in self.map_f.keys():
-                    output.write( '    static FormulationAncestor<'+T+'> *new_formulation_'+f_name+'( Number<false>, TM &m );\n' )
-                    output.write( '    static FormulationAncestor<'+T+'> *new_formulation_'+f_name+'( Number<true >, TM &m );\n' )
+                    output.write( '    static FormulationAncestor<'+T+(T[-1:]=='>')*' '+'> *new_formulation_'+f_name+'( Number<false>, TM &m );\n' )
+                    output.write( '    static FormulationAncestor<'+T+(T[-1:]=='>')*' '+'> *new_formulation_'+f_name+'( Number<true >, TM &m );\n' )
                 for f_name in self.map_f.keys():
-                    output.write( '    FormulationAncestor<'+T+'> *formulation_'+f_name+';\n' )
+                    output.write( '    FormulationAncestor<'+T+(T[-1:]=='>')*' '+'> *formulation_'+f_name+';\n' )
                 output.write( '};\n' )
                 NPN = 'Problem_'+self.name+'<'+T+','+str(d)+'>'
                 output.write( 'template<> class '+NPN+' : public '+PN+' {\npublic:\n    '+NPN+'(TM &m,bool use_tim_davis=false):'+PN+'(m,use_tim_davis) {}\n};\n\n' )
+                cmpt += 1
         output.write( '} // namespace LMT\n' )
         output.write( '#endif // PROBLEM_'+self.name+'_H\n' )
 
@@ -164,14 +170,18 @@ class MakePb:
 class MakePbFE:
     def write_formulation_h_from_scons( self, target, source, env ):
         output = file( str(target[0]), 'w' )
+        asmout = file( str(target[1]), 'w' )
         
         for f,e in self.fe_set:
             if e.dim == self.d:
-                f.write( e, output )
+                f.write( e, output, asmout = asmout, name_der_vars = self.name_der_vars )
+    
+        output.close()
+        asmout.close()
     
     def write_formulation_cpp_from_scons( self, target, source, env ):
         output = file( str(target[0]), 'w' )
-        PN = 'Problem_'+self.name+'_'+self.T+'_'+str(self.d)
+        PN = 'Problem_'+self.name+'_type'+self.typenumber+'_'+str(self.d)
         
         output.write( '#include "problem.h"\n' )
         output.write( '#include "formulation_'+str(self.d)+'_'+self.T+'_'+self.f_name+'.h"\n' )
@@ -180,13 +190,18 @@ class MakePbFE:
             if e.dim == self.d:
                 forms[ f.name ] = f
         for f in forms.values():
-            if e.dim == self.d:
-                output.write( 'namespace LMT {\n' )
-                for b in ['false','true ']:
-                    TF = 'Formulation<' + PN + '::TM,'+f.name+',DefaultBehavior,'+self.T+','+b+'>'
-                    output.write( 'FormulationAncestor<'+PN+'::T> *' + PN + '::new_formulation_' + f.name + '( Number<'+b+'>, ' + PN + '::TM &m ) { return new '+TF+'(m); }\n' )
-                output.write( '}\n' )
+            output.write( 'namespace LMT {\n' )
+            for b in ['false','true ']:
+                TF = 'Formulation<' + PN + '::TM,'+f.name+',DefaultBehavior,'+self.T+','+b+'>'
+                output.write( 'FormulationAncestor<'+PN+'::T> *' + PN + '::new_formulation_' + f.name + '( Number<'+b+'>, ' + PN + '::TM &m ) { return new '+TF+'(m); }\n' )
+            output.write( '}\n' )
         
+    def use_asm( self ):
+        res = False
+        for f,e in self.fe_set:
+            res |= f.use_asm
+        return res
+
 
 def make_pb( env,
              opt,
@@ -199,7 +214,8 @@ def make_pb( env,
              options = {},
              additional_fields = {},
              types = ['double'],
-             dep_py = True ):
+             dep_py = True,
+             name_der_vars = [] ):
    # find formulation and element files
    f_files, e_files = [], []
    for f in formulations:
@@ -220,7 +236,7 @@ def make_pb( env,
                e_files.append( n )
                break
       else:
-         txt = 'impossible to find %s in %s'%(f,incpaths)
+         txt = 'impossible to find %s in %s'%(e,incpaths)
          raise NameError, txt
    #
    directory = 'build/problem_'+name+'/'
@@ -239,6 +255,7 @@ def make_pb( env,
    pb.e_files           = e_files
    pb.formulations      = formulations
    pb.elements          = elements
+   pb.name_der_vars     = name_der_vars
    fe_sets, all_dims, map_f = pb.get_fe_sets_and_dims()
    pb.fe_sets, pb.all_dims, pb.map_f = fe_sets, all_dims, map_f
 
@@ -250,31 +267,26 @@ def make_pb( env,
    
    all_cpp = []
    for d in all_dims.keys():
+      cmpt = 0
       for T in types:
           for f_name in map_f.keys():
             bn = 'formulation_%s_%s_%s.cpp' % (d,T,f_name)
-            bh = 'formulation_%s_%s_%s.h' % (d,T,f_name)
+            ba = 'formulation_%s_%s_%s_.asm' % (d,T,f_name)
+            bh = 'formulation_%s_%s_%s.h'   % (d,T,f_name)
             #fos_h.append( env.Command( directory + 'formulation_%s_%s_%i.h'%(f.name,e.name,e.dim), [f.name_file,e.name_file]+base_py_files, cp.write_formulation_h_from_scons ) )
             pbc = MakePbFE()
             pbc.d = d
             pbc.T = T
+            pbc.typenumber = str(cmpt)
             pbc.name = name
             pbc.f_name = f_name
             pbc.fe_set = map_f[ f_name ]
-            f_h = env.Command( directory + bh, pb_h, pbc.write_formulation_h_from_scons )
+            pbc.name_der_vars = name_der_vars
+            f_h, f_asm = env.Command( [ directory + bh, directory + ba ], pb_h, pbc.write_formulation_h_from_scons )
             all_cpp += env.Command( directory + bn, f_h, pbc.write_formulation_cpp_from_scons , TARGET = bn + '_opt' * opt +'_debug'*(1-opt) + '.o' )
-              
-   #fos_h = []
-   #for f,e in fe_sets:
-      #cp = MakePbFE()
-      #cp.f = f
-      #cp.e = e
-      
-   # formulations.h
-   #fo_h = env.Command( directory + 'formulations.h', fos_h, pb.write_formulations_h_from_scons )
-
-   # problem.cpp
-   
+            if pbc.use_asm():
+                all_cpp += [ f_asm ]
+          cmpt += 1
    return all_cpp
 
 

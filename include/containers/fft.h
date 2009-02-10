@@ -19,6 +19,12 @@ extern "C" {
 
 namespace LMT {
 
+/*!
+    Cette classe encapsule les fonctions de la librairie fftw \a http://www.fftw.org/ .
+
+    \relates Vec
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+*/
 class FFT {
 public:
     ///
@@ -55,6 +61,11 @@ public:
             fftw_execute_dft(p,const_cast<fftw_complex *>(in),out);
         }
         return res;
+    }
+    
+    template<int s> Vec<std::complex<double>,s> ffti(const Vec<std::complex<double>,s> &v) {
+        Vec<std::complex<double>,s> res = fft( v );
+        return res / (double)v.size();
     }
     
     bool init; /// true if at least one FFT has been queried.

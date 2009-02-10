@@ -51,10 +51,10 @@ def print_apply(name,code,ret='void',onlyforconstvec=False,onlyfornonconstvec=Fa
     return res
 
 # -------
-def print_apply_ext(name,templ,namevec,code_,ret='void',onlyforconstvec=False,onlyfornonconstvec=False,suppar=[],nsp='',allconst=False):
+def print_apply_ext(name,templ,namevec,code_,ret='void',onlyforconstvec=False,onlyfornonconstvec=False,suppar=[],nsp='',allconst=False,nb_terms=4):
     if nsp: print '  namespace '+nsp+' {'
     code = string.replace( code_, 'NAMEVEC', namevec )
-    for nb_par in range(4):
+    for nb_par in range(nb_terms):
         template_par = string.join( templ+['int s','class Op'] + [ 'class TP%i'%i for i in range(nb_par) ] ,',')
         fun_par = [namevec+' &v','Op& op'] + [ 'TP%i &p%i'%(i,i) for i in range(nb_par) ]
         coder = string.replace( code, ',PARALIST', string.join([',p%i'%i for i in range(nb_par)],'') )

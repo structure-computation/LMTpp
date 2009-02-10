@@ -6,14 +6,19 @@
 #include "triangle.h"
 
 namespace LMT {
+/*!
 
-/**
- 3------2
- |      |
- |      |
- |      |
- 0------1
+\verbatim
+                    3------2
+                    |      |
+                    |      |
+                    |      |
+                    0------1
 
+    \relates Mesh
+    \keyword Maillage/Elément
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
 */
 
 // --------------------------------------------------------------------------------------------------------
@@ -210,9 +215,16 @@ typename TNG::T measure( const Element<Quad,TN,TNG,TD,NET> &e ) {
 template<class TN,class TNG,class TD,unsigned NET>
 typename TNG::Pvec sample_normal(const Element<Quad,TN,TNG,TD,NET> &e) {
     DEBUGASSERT( (TNG::dim==3) );
-    typename TNG::Pvec res = vect_prod( e.node(1)->pos-e.node(0)->pos, e.node(2)->pos-e.node(0)->pos );
+    typedef typename TNG::Pvec Pvec;
+    Pvec res = vect_prod( Pvec( e.node(1)->pos-e.node(0)->pos ), Pvec( e.node(2)->pos-e.node(0)->pos ) );
     return res / length( res );
 }
+
+template<class TV,class T>
+bool var_inter_is_inside( const Quad &, const TV &var_inter, T tol = 0 ) {
+    return heaviside( var_inter[0] + tol ) * heaviside( var_inter[1] + tol ) * heaviside( 1 - var_inter[0] + tol ) * heaviside( 1 - var_inter[1] + tol );
+}
+
 
 };
 

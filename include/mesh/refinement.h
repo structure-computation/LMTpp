@@ -109,10 +109,23 @@ namespace LMTPRIVATE {
 //     }
 // };
 
-/// subdivide each element bar e contained in mesh or sub_meshes such as op(e)==true (true means subdivision). Subdivide parents
+/*!
+    Cette fonction divise les barres (segments) du maillage suivant l'opérateur op.
+    L'opérateur op peut soit renvoyer  un booléen soit un double. Il prend aussi forcément un élément barre en paramètre.
+    S'il renvoie un booléen, il y a opération de division au milieu de la barre s'il renvoie vrai.
+    S'il renvoie un double r, rien n'est fait lorsque r=0, il divise la barre lorsque r est compris entre 0 et 1. La position de la division dépend de r. Lorsque r=1, il divise au milieu.
+    Enfin refinement() renvoie vrai si elle divise au moins une barre et faux sinon.
+
+    \keyword Maillage/Elément/Opération
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+
+    subdivide each element bar e contained in mesh or sub_meshes such as op(e)==true (true means subdivision). Subdivide parents
+*/
 template<class TM,class Op>
 bool refinement(TM &m,Op &op) {
-    m.update_elem_children();
+    // m.update_elem_children();
+    m.update_elem_children( Number<TM::nvi-1>() );
     LMTPRIVATE::Refinment<TM,TM,0,TM::dim+1> r(&m);
     r.update_cut(m,op);
 
@@ -124,13 +137,27 @@ bool refinement(TM &m,Op &op) {
     return res;
 }
 
+/*!
+    opérateur créé pour la fonction \a refinement_if_length_sup .
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+*/
 template<class T>
 struct RafinementOpBasedOnLength {
     template<class TE> bool operator()(const TE &e) const { return length(e.node(1)->pos-e.node(0)->pos) > max_length; }
     T max_length;
 };
 
-/// subdivide each element bar e such as length(e)>max_length (true means subdivision).
+/*!
+
+    Cette fonction divise toutes les barres (segments) du maillage en deux pour lesquelles la longueur est supérieure à max_length.
+    Elle renvoie vrai si elle divise au moins une barre et faux sinon. Ainsi si on souhaite que toutes les barres soient inférieures à max_length, on relancera la fonction autant de fois que nécessaire. 
+
+    \keyword Maillage/Elément/Opération
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    subdivide each element bar e such as length(e)>max_length (true means subdivision).
+*/
 template<class TM,class T>
 bool refinement_if_length_sup(TM &m,T max_length) {
     RafinementOpBasedOnLength<T> rl;

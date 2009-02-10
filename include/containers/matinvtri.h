@@ -18,14 +18,14 @@ namespace LMT {
 */
 template<class T,int s,class Sto,class IO,class TF>
 bool get_factorization( const Mat<T,TriUpper<s>,Sto,IO> &m, TF &fact ) {
-    return false;
+    return true;
 }
 
 /** \relates Mat
 */
 template<class T,int s,class Sto,class IO,class TF>
 bool get_factorization( const Mat<T,TriLower<s>,Sto,IO> &m, TF &fact ) {
-    return false;
+    return true;
 }
 
 

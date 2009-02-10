@@ -21,28 +21,32 @@
 #include "nodelist.h"
 #include "meshcarac.h"
 #include "elemlist.h"
+#include <algorithm>
 
-/** \defgroup maillages Définition et travail sur les maillages
-  \brief Classes et Fonctions utiliser pour d�inir ou travailler sur des maillages
-  \author Hugo LECLERC
-  
-  Pour utiliser la classe maillage il est n�essaire d'inclure le fichier mesh/mesh.h lors de la d�laration d'un maillage.
-  \code #include "mesh/mesh.h" \endcode 
-
+/*!
+    \brief Classes et Fonctions utiliser pour définir ou travailler sur des maillages
+    \author Hugo LECLERC
+    
+    Pour utiliser la classe maillage il est nécessaire d'inclure le fichier mesh/mesh.h lors de la déclaration d'un maillage.
+    \code C/C++
+        #include "mesh/mesh.h" 
+    \keyword 
 */
 
-/** \ingroup maillages
-\brief Classe g��ique pour la d�laration d'un maillage.
-
-La classe Mesh est param�rable par une classe de caract�istiques d�inie et g��� �partir du fichier SConstruct.
-
-Dans tous les exemples le maillage est not�m.
-Supposons que la classe Mesh_carac_pb_elast existe, on d�inira le maillage par :
-\code Mesh<Mesh_carac_pb_elast<2,double> > m; \endcode
-On pourra poser :
-\code typedef Mesh<Mesh_carac_pb_elast<2,double> > TM ;
-TM m;
-\endcode
+/*!
+    \brief Classe générique pour la déclaration d'un maillage.
+    
+    La classe Mesh est paramétrable par une classe de caractéristiques définie et généré à partir du fichier SConstruct.
+    
+    Dans tous les exemples le maillage est noté m.
+    Supposons que la classe Mesh_carac_pb_elast existe, on définira le maillage par :
+    \code C/C++
+        Mesh<Mesh_carac_pb_elast<2,double> > m;
+    On pourra poser :
+    \code C/C++
+        typedef Mesh<Mesh_carac_pb_elast<2,double> > TM ;
+        TM m;
+    \keyword Maillage
 */
 
 namespace LMT {
@@ -61,11 +65,14 @@ public:
     typedef Vec<VecNodeList<TNode,skin> > TNodeList;
     typedef Vec<VecElemList<Carac,TNode,nvi_to_subs,skin> > TElemList;
     template<class NE,class BE=DefaultBehavior> struct TElem { typedef typename TElemList::template TElem<NE,BE>::TE TE; };
+    static const unsigned nvi = TElemList::nvi;
+    
     MeshAncestor() {
         date_last_connectivity_change = 1;
         date_last_node_neighbours_update = 0;
         date_last_node_parents_update = 0;
         date_last_elem_neighbours_update = 0;
+        date_last_absolute_number_update = 0;
         for(unsigned i=0;i<TElemList::nb_elem_type;++i) cpt_elem[i] = 0;
         wanted_hash_size = 1024;
     }
@@ -133,6 +140,45 @@ public:
         this->clear_node_parents();
         this->clear_elem_neighbours();
     }
+    
+    /// without update
+    unsigned get_absolute_number( const EA *e ) const {
+        unsigned r = 0;
+        for(unsigned i=0;i<e->num_in_elem_list_virtual();++i)
+            r += cpt_elem[ i ];
+        return r + e->number;
+    }
+
+
+private:
+    struct AbsoluteNumberUpdate { template<class TE> void operator()( TE &e, unsigned &n ) const { e.absolute_number = n++; } };
+   
+    struct FindMinNodeDist {
+        template<class TE> void operator()( const TE &e, Tpos &min_node_dist ) const {
+            for(unsigned i=0;i<TE::nb_nodes;++i)
+                for(unsigned j=i+1;j<TE::nb_nodes;++j)
+                    min_node_dist = min( min_node_dist, norm_2( e.pos( i ) - e.pos( j ) ) );
+        }
+    };
+    
+public:
+    
+    /// min dist between nodes
+    Tpos min_node_dist() const {
+        Tpos min_node_dist = std::numeric_limits<Tpos>::max();
+        apply( elem_list, FindMinNodeDist(), min_node_dist );
+        return min_node_dist;
+    }
+    
+    /// 
+    void absolute_number_update() {
+        if ( date_last_absolute_number_update == date_last_connectivity_change )
+            return;
+        date_last_absolute_number_update = date_last_connectivity_change;
+        unsigned cpt = 0;
+        apply( elem_list, AbsoluteNumberUpdate(), cpt );
+    }
+    
 
     ///    
     TNodeList node_list;
@@ -171,7 +217,8 @@ protected:
     unsigned date_last_connectivity_change, 
              date_last_node_neighbours_update, 
              date_last_node_parents_update, 
-             date_last_elem_neighbours_update;
+             date_last_elem_neighbours_update,
+             date_last_absolute_number_update;
 
     ///    
     PackedVectorOfVector<TNode *> node_neighbours;

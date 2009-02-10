@@ -51,7 +51,7 @@ class Problem:
                 nn = ('der'+str(d)+'_')*(d!=0) + n
                 output.write( "#ifndef IFNDEF_%s_DM\n" % nn )
                 output.write( "#define IFNDEF_%s_DM\n" % nn )
-                output.write( "    struct %s_DM {};\n" % nn )
+                output.write( "    struct %s_DM { static std::string name() { return \"%s\"; } };\n" % ( nn, nn ) )
                 output.write( "#endif // IFNDEF_%s_DM\n" % nn )
                 output.write( "\n" )
         
@@ -100,6 +100,63 @@ class Problem:
                         cpt += 1
             if cpt==0: output.write( ' '*nb_sp+"    VOIDDMSET;\n" )
             else: output.write( ' '*nb_sp+"    static const unsigned nb_params = "+str(cpt)+";\n" )
+            
+            # dm_data_set_field
+            output.write( ' '*nb_sp+"    void dm_data_set_field( const std::string field_name, Tpos value ) {\n" )
+            for namevar, var in all_vars.items():
+                if cond( var ) and len( var.nb_dim ) <= 1:
+                    if in_vec( var ):
+                        for i in range( cond(var) ):
+                            if len( var.T ) == 0:
+                                output.write( ' '*nb_sp+'        if ( field_name == "'+namevar+'" ) { '+namevar+'['+str(i)+'] = value; return; } // hum\n' )
+                    else:
+                        if len( var.T ) == 0:
+                            output.write( ' '*nb_sp+'        if ( field_name == "'+namevar+'" ) { '+namevar+' = value; return; }\n' )
+            output.write( ' '*nb_sp+'        std::cerr << "There is no variable named " << field_name << " in data struct" << std::endl;\n' )
+            output.write( ' '*nb_sp+"    }\n" )
+            for d in range( 1, 7 ):
+                output.write( ' '*nb_sp+"    void dm_data_set_field( const std::string field_name, const Vec<Tpos,"+str(d)+"> &value ) {\n" )
+                for namevar, var in all_vars.items():
+                    if cond( var ) and var.nb_dim == [d]:
+                        if in_vec( var ):
+                            for i in range( cond(var) ):
+                                if len( var.T ) == 0:
+                                    output.write( ' '*nb_sp+'        if ( field_name == "'+namevar+'" ) { '+namevar+'['+str(i)+'] = value; return; } // hum\n' )
+                        else:
+                            if len( var.T ) == 0:
+                                output.write( ' '*nb_sp+'        if ( field_name == "'+namevar+'" ) { '+namevar+' = value; return; }\n' )
+                output.write( ' '*nb_sp+'        std::cerr << "There is no variable named " << field_name << " in data struct" << std::endl;\n' )
+                output.write( ' '*nb_sp+"    }\n" )
+            
+            # dm_data_get_field
+            output.write( ' '*nb_sp+"    Tpos dm_data_get_field( const std::string field_name, StructForType<Tpos> ) const {\n" )
+            for namevar, var in all_vars.items():
+                if cond( var ) and len( var.nb_dim ) == 0:
+                    if in_vec( var ):
+                        for i in range( cond(var) ):
+                            if len( var.T ) == 0:
+                                output.write( ' '*nb_sp+'        if ( field_name == "'+namevar+'" ) { return '+namevar+'['+str(i)+']; } // hum\n' )
+                    else:
+                        if len( var.T ) == 0:
+                            output.write( ' '*nb_sp+'        if ( field_name == "'+namevar+'" ) { return '+namevar+'; }\n' )
+            output.write( ' '*nb_sp+'        std::cerr << "There is no variable named " << field_name << " in data struct" << std::endl;\n' )
+            output.write( ' '*nb_sp+"        return Tpos(0);\n" )
+            output.write( ' '*nb_sp+"    }\n" )
+            for d in range( 1, 7 ):
+                output.write( ' '*nb_sp+"    Vec<Tpos,"+str(d)+"> dm_data_get_field( const std::string field_name, StructForType<Vec<Tpos,"+str(d)+"> > ) const {\n" )
+                for namevar, var in all_vars.items():
+                    if cond( var ) and var.nb_dim == [d]:
+                        if in_vec( var ):
+                            for i in range( cond(var) ):
+                                if len( var.T ) == 0:
+                                    output.write( ' '*nb_sp+'        if ( field_name == "'+namevar+'" ) { return '+namevar+'['+str(i)+']; } // hum\n' )
+                        else:
+                            if len( var.T ) == 0:
+                                output.write( ' '*nb_sp+'        if ( field_name == "'+namevar+'" ) { return '+namevar+'; }\n' )
+                output.write( ' '*nb_sp+'        std::cerr << "There is no variable named " << field_name << " in data struct" << std::endl;\n' )
+                output.write( ' '*nb_sp+"        return Vec<Tpos,"+str(d)+">(Tpos(0));\n" )
+                output.write( ' '*nb_sp+"    }\n" )
+            
             output.write( ' '*nb_sp+"};\n" )
         
         class Toto:
@@ -193,7 +250,7 @@ class Problem:
         output.write( '#endif // %s\n' % ifndef )
 
     # write all in a single file
-    def write(self,output=sys.stdout):
+    def write( self, output = sys.stdout, name_der_vars = [] ):
         fe_sets, all_dims = self.get_fe_sets_and_dims()
         
         ifndef = self.name
@@ -208,12 +265,12 @@ class Problem:
         
         # formulations
         for f,e in fe_sets:
-            f.write( e, output )
-            
+            f.write( e, output, name_der_vars = name_der_vars )
+        
         output.write( '\n' )
         output.write( '#endif // PROBLEM_' + ifndef + '\n' )
 
-def write_pb(name,formulations,elements,dim='nvi',output=sys.stdout,incpaths=['.','LMT/formulations'],options={},additional_fields={},types=['double']):
+def write_pb(name,formulations,elements,dim='nvi',output=sys.stdout,incpaths=['.','LMT/formulations'],options={},additional_fields={},types=['double'],name_der_vars=[]):
     """    dim -> for one element, say number of dimension we need
         Ex : write_pb('toto',[...],['Triangle','Tetra'],'3') -> Triangle and Tetra will cohabite in a mesh in 3D
         Ex : write_pb('toto',[...],['Triangle','Tetra'],'nvi') -> 2 meshes will be created. One in 2D with triangles and one in 3D with tetras
@@ -226,7 +283,6 @@ def write_pb(name,formulations,elements,dim='nvi',output=sys.stdout,incpaths=['.
         } will cause ... Example of behavior_simplification : 'plane strain', 'axysymmetric', ...
     """
     pb = Problem(name,formulations,elements,dim,incpaths,options,additional_fields)
-    pb.write(output)
-
+    pb.write( output, name_der_vars )
 
     

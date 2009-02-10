@@ -9,6 +9,8 @@ class Interpolation:
 
 std_interpolations = {
     "nodal"      : lambda e : Interpolation( nb_nodal = 1, nb_elementary = 0, nb_global = 0 ),
+    "nodal_2"    : lambda e : Interpolation( nb_nodal = 1, nb_elementary = 0, nb_global = 0 ),
+    "nodal_3"    : lambda e : Interpolation( nb_nodal = 1, nb_elementary = 0, nb_global = 0 ),
     "elementary" : lambda e : Interpolation( nb_nodal = 0, nb_elementary = 1, nb_global = 0 ),
     "global"     : lambda e : Interpolation( nb_nodal = 0, nb_elementary = 0, nb_global = 1 ),
     "bubble"     : lambda e : Interpolation( nb_nodal = 1, nb_elementary = 1, nb_global = 0 ),

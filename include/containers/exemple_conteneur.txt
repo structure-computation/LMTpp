@@ -1,0 +1,20 @@
+/*!
+\example Utilisation des conteneurs 
+
+    On trouve dans la LMT++ trois conteneurs principaux, vecteur \a Vec , matrice \a Mat , maillage \a Mesh .
+
+    = Le type vecteur
+        Il existe de nombreuses variantes de type \a Vec , suivant leurs propriétés mais on les manipule presque toujours de la même façon. Consulter sa page \a Vec pour voir des exemples.
+    = Le type matrice
+        Sur la page du type matrice \a Mat , vous trouverez des exemples et la réponse a de nombreuses questions.
+    = Le type maillage     
+            = Déclaration
+            = opération arithmétique
+            = ajout,réduction
+            = libération
+
+    \keyword Algorithme/Conteneur
+
+    \friend pasquier@lmt.ens-cachan.fr
+    \friend leclerc@lmt.ens-cachan.fr
+*/ 

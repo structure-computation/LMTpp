@@ -12,6 +12,7 @@
 #include "exvector.h"
 #include <sstream>
 #include <assert.h>
+#include <algorithm>
 
 namespace Codegen {
 
@@ -33,6 +34,21 @@ ExVector::ExVector(const Ex &e1,const Ex &e2,const Ex &e3) {
     vec[1] = e2;
     vec[2] = e3;
 }
+ExVector::ExVector(const Ex &e1,const Ex &e2,const Ex &e3,const Ex &e4) {
+    vec.resize( 4 );
+    vec[0] = e1;
+    vec[1] = e2;
+    vec[2] = e3;
+    vec[3] = e4;
+}
+ExVector::ExVector(const Ex &e1,const Ex &e2,const Ex &e3,const Ex &e4,const Ex &e5) {
+    vec.resize( 5 );
+    vec[0] = e1;
+    vec[1] = e2;
+    vec[2] = e3;
+    vec[3] = e4;
+    vec[4] = e5;
+}
 ExVector::ExVector(const Ex &e1,const Ex &e2,const Ex &e3,const Ex &e4,const Ex &e5,const Ex &e6) {
     vec.resize( 6 );
     vec[0] = e1;
@@ -42,6 +58,8 @@ ExVector::ExVector(const Ex &e1,const Ex &e2,const Ex &e3,const Ex &e4,const Ex 
     vec[4] = e5;
     vec[5] = e6;
 }
+    
+ExVector &ExVector::operator/=(const Ex &a) { *this = *this / a; return *this; }
 
 bool ExVector::has(const Ex &ex) const {
     return ( std::find(vec.begin(),vec.end(),ex) != vec.end() );
@@ -201,6 +219,7 @@ ExVector V(const Ex &a,const ExVector &b) { \
     return res; \
 }
 BOP(pow)
+BOP(mini)
 BOP(max)
 #undef BOP    
 
@@ -210,12 +229,21 @@ Ex dot(const ExVector &a,const ExVector &b) {
         res += a(i) * b(i);
     return res;
 }
+
 Ex norm(const ExVector &a,Ex::T additional_val) {
     Ex res;
     for(unsigned i=0;i<a.size();++i)
         res += pow(a(i),2);
     return sqrt(res+additional_val);
 }
+
+Ex norm_2(const ExVector &a,Ex::T additional_val) {
+    Ex res;
+    for(unsigned i=0;i<a.size();++i)
+        res += pow(a(i),2);
+    return sqrt(res+additional_val);
+}
+
 ExVector vect_prod(const ExVector &v1,const ExVector &v2) {
     assert( v1.size()==v2.size() );
     if ( v2.size()==3 )
@@ -231,6 +259,14 @@ std::ostream &operator<<(std::ostream &os,const Codegen::ExVector &vec) {
     for(unsigned i=0;i<vec.size();++i)
         os << vec(i) << ( i==vec.size()-1 ? ' ' : ',' );
     return os;
+}
+
+ExVector pos_part(const ExVector &a) {
+    return a * heaviside( a );
+}
+
+ExVector neg_part(const ExVector &a) {
+    return a * heaviside( - a );
 }
 
 };

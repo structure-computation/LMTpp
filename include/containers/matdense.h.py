@@ -121,7 +121,23 @@ public:
         }
     #endif
 
+    TT &operator[](unsigned index) { return data[ index ]; }
+    const TT &operator[](unsigned index) const { return data[ index ]; }
+    
+    TT &operator[](int index) { return data[ index ]; }
+    const TT &operator[](int index) const { return data[ index ]; }
+    
     void clear() { data.set((TT)0); } /// set all values to 0
+    
+    TT trace()
+    {
+        double tmp = 0;
+        for (unsigned k=0; k<nr.val; k++)
+        {
+            tmp += data[k];
+        }
+        return tmp;
+    }
     
     """ + (structure=='Gen') * """
     typedef T& RetOp;
@@ -159,18 +175,21 @@ public:
     template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
         if ( fixed_size==false )
             resize( val.nb_rows(), val.nb_cols() );
-        if ( (STRUCTURE::need_upper and STRUCTURE::need_lower)==false and STRUCTURE::need_diag )
+        if ( STRUCTURE::need_diag and STRUCTURE::need_upper==false and STRUCTURE::need_lower==false )
+            for(unsigned i=0;i<val.nb_rows();++i)
+                operator()( i, i ) = val(i,i);
+        else if ( (STRUCTURE::need_upper and STRUCTURE::need_lower)==false and STRUCTURE::need_diag )
             for(unsigned i=0;i<val.nb_rows();++i)
                 for(unsigned j=0;j<=i;++j)
-                    operator()( i,j ) = val(i,j);
+                    operator()( i, j ) = val(i,j);
         else if ( (STRUCTURE::need_upper and STRUCTURE::need_lower)==false )
             for(unsigned i=0;i<val.nb_rows();++i)
                 for(unsigned j=0;j<i;++j)
-                    operator()( i,j ) = val(i,j);
+                    operator()( i, j ) = val(i,j);
         else
             for(unsigned i=0;i<val.nb_rows();++i)
                 for(unsigned j=0;j<val.nb_cols();++j)
-                    operator()( i,j ) = val(i,j);
+                    operator()( i, j ) = val(i,j);
     }
 
     
@@ -213,6 +232,13 @@ public:
     template<class T2,class STR2,class STO2> Mat &operator*=(const Mat<T2,STR2,STO2> &val) { *this = *this * val; return *this; }
     template<class T2,class STR2,class STO2> Mat &operator/=(const Mat<T2,STR2,STO2> &val) { *this = *this / val; return *this; }
 
+    TT trace() const {
+        TT tmp = 0;
+        for (unsigned k=0;k<nb_rows();k++)
+            tmp += operator()(k,k);
+        return tmp;
+    }
+    
     template<class TVEC> Mat<SubMat<Mat,true ,TVEC>,STRUCTURE,STORAGE,int> operator[](const TVEC &v) const {
         return Mat<SubMat<Mat,true ,TVEC>,STRUCTURE,STORAGE,int>( *this, v );
     }
@@ -340,6 +366,7 @@ struct MatElem<TV,STRUCTURE,STORAGE,alignement,nrs> {
 
             # STRUCTURE STORAGE
             ab = { 'a' : ['r','c'][1-row_oriented], 'b' : ['r','c'][row_oriented] }
+            mi = 'unsigned m%(a)s = min(n%(a)s,this->n%(a)s.val); unsigned m%(b)s = min(n%(b)s,this->n%(b)s.val); ' % ab
             RNR = ''
             if upper_part!=row_oriented and structure!='Gen':
                 RNR = 'unsigned t=nr+alignement-1; off.set( res-1 );' # '+'-1'*(structure=='AntiSym')+'
@@ -354,7 +381,7 @@ struct MatElem<TV,STRUCTURE,STORAGE,alignement,nrs> {
                                    'MAX(0,sr*(sr-1)/2)' * ( structure=='AntiSym' ) + \
                                    'MIN(sr,sc)' * (structure=='Diag'),
                 # static size
-                'SETDYNDATASIZE' : ('TV od = data; unsigned o_r = real_n%(a)s.val; unsigned r%(a)s=n%(a)s+alignement-1; r%(a)s-=r%(a)s %% alignement; real_n%(a)s.set(r%(a)s); real_n%(b)s.set(n%(b)s); data.resize(real_nr.val*real_nc.val); for(unsigned i=0;i<(unsigned)this->n%(b)s.val;++i) for(unsigned j=0;j<(unsigned)this->n%(a)s.val;++j) data[real_n%(a)s.val*i+j] = od[o_r*i+j];'%ab) * (structure=='Gen') + \
+                'SETDYNDATASIZE' : (mi+'TV od = data; unsigned o_r = real_n%(a)s.val; unsigned r%(a)s=n%(a)s+alignement-1; r%(a)s-=r%(a)s %% alignement; real_n%(a)s.set(r%(a)s); real_n%(b)s.set(n%(b)s); data.resize(real_nr.val*real_nc.val); for(unsigned i=0;i<m%(b)s;++i) for(unsigned j=0;j<m%(a)s;++j) data[real_n%(a)s.val*i+j] = od[o_r*i+j];'%ab) * (structure=='Gen') + \
                                    ('unsigned ri=nr/alignement; unsigned res=ri*(ri+1)/2*alignement*alignement+(nr % alignement)*(ri+1)*alignement; '+ \
                                     'unsigned o=nr+alignement-1; o-=o % alignement; res -= o-nr; data.resize(res);'+RNR) * (structure in ['Sym','Herm','TriUpper','TriLower']
                                    ) + \

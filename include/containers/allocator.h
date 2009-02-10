@@ -15,6 +15,7 @@
 #include "config.h"
 #include "basicops.h"
 #include <assert.h>
+#include <stdlib.h>
 #ifndef WITHOUT_MALLOC
     #include <malloc.h>
 #endif
@@ -35,6 +36,19 @@ template<> struct NextPow2<1> { static const unsigned res = 1; };
 
 #ifdef PRINT_ALLOC
 extern std::map<std::string,long long> total_allocated;
+
+
+/*!
+    Cette fonction affiche le nombre d'octets que prend chaque fonction. Elle s'utilise avec la classe \a Allocator .
+    
+    Pour l'utiliser :
+        "-DPRINT_ALLOC" dans les flags de compilation
+        "std::map<std::string,long long> total_allocated;" dans un .cpp (quelconque)
+        et après, disp_alloc("toto"); affichera toto puis une liste de types d'objets et la place qu'ils prennent en mémoire.
+        ou sum_alloc(); renvoie la taille totale utilisée par les objets LMTpp
+    
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+*/
 inline void disp_alloc(const char *prefix="") {
     long long s = 0;
     for(std::map<std::string,long long>::const_iterator iter=total_allocated.begin();iter!=total_allocated.end();++iter) {
@@ -91,6 +105,14 @@ struct Allocator<T,alignement,AllocateWithMalloc> {
             if ( v ) free(alloc_ptr);
         #endif
     }
+    void clear() {
+        #ifdef WITHOUT_MALLOC
+            alloc_ptr = NULL;
+        #endif
+        #ifdef PRINT_ALLOC
+        allocated = 0;
+        #endif
+    }
     #ifdef WITHOUT_MALLOC
         T *alloc_ptr;
     #endif
@@ -120,6 +142,14 @@ struct Allocator<T,alignement,AllocateWithNew> {
         #endif
         if ( v ) delete [] alloc_ptr;
     }
+    
+    void clear() {
+        alloc_ptr = NULL;
+        #ifdef PRINT_ALLOC
+        allocated = 0;
+        #endif
+    }
+    
     T *alloc_ptr;
     #ifdef PRINT_ALLOC
     long long allocated;

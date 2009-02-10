@@ -39,6 +39,9 @@ template<class TT> struct DelayedAssignementSymTriDiagSource {
 
 struct TriDiag { };
 
+/**
+  Matrice symétrique tridiagonale
+*/
 template<class T>
 class Mat<T,Sym<>,TriDiag,void> {
 public:
@@ -73,6 +76,11 @@ public:
     Vec<T> extra_diag_;
 };
 
+/*!
+    Cette fonction retourne les valeurs et les vecteurs propres d'une matrice symétrique tridiagonale.
+    \keyword Mathématiques/Algèbre linéaire/vecteurs et valeurs propres
+    \friend leclerc@lmt.ens-cachan.fr
+*/
 void get_eigen_values_and_vectors( const Mat<double,Sym<>,TriDiag,void> &m, Vec<double> &eigenvalues, Vec<Vec<double> > &eigenvectors ) {
     //void dstev_( const char &jobz, const int &n, double *diag, double *extradiag, double *Z, const int &LDZ, double *WORK, int &INFO );
 

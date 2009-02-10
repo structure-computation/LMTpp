@@ -19,12 +19,31 @@ namespace LMT {
 template<class Carac,unsigned max_sub_meshes>
 struct MeshNbSubMeshes { enum { res = max_sub_meshes ? MIN( Carac::dim+1, max_sub_meshes ) : Carac::dim+1 }; };
 
+/*!
+    Cette classe représente un maillage du plan ou de l'espace. Ces paramètres sont :
+        * une classe <strong> Carac </strong> qui contient les caractériques du maillage pour une formulation variationnelle.
+        * un entier positif <strong> max_sub_meshes </strong> nul par défaut qui indique le nombre maximum de maillages enfants que possédera le maillage. si on ne connait pas le nombre de maillages enfants nécessaires, on laisse la valeur par défaut.
+    Que représentent les maillages enfants ?
+    Si un maillage se compose d'éléments E, le premier maillage enfant distinct du maillage sera le maillage composé par les sous-éléments de E; Ppar exemple, si E est un tétraèdre (classe \a Tetra ) alors les sous-éléments sont des tiangles ( classes \a Triangle , \a Triangle_6 ) et ce maillage enfant sera un maillage de triangles. Et ainsi de suite le deuxième maillage enfant sera un maillage de barres (classes \a Bar , \a Bar_3 ).
+    REMARQUE : la notion de maillage enfant ne doit pas être confondue avec celle de maillage peau. Si le maillage peau est un maillage de sous-éléments, il ne contient que ceux se trouvant sur le bord.
 
-/**
-  The entry class for all type of meshes. If you want to add elements, nodes, ... you must use Mesh<>
+    La classe Mesh hérite de \a MeshGenericBis qui hérite à son tour de \a MeshGeneric . Elle hérite donc de leurs méthodes (e.g. sub_mesh() ).
+    Pour un exemple complet utilisant la classe Mesh et une formulation, consultez l'exemple \a Comment resoudre un probleme element fini de façon générale .
 
-  \author Hugo LECLERC
+    A finir
+
+    \relates MeshGenericBis
+    \relates MeshGeneric
+    \relates MeshAncestor
+
+    The entry class for all type of meshes. If you want to add elements, nodes, ... you must use Mesh<>
+    \author Hugo LECLERC
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \keyword Maillage
+    \keyword Algorithme/Conteneur
+    \friend raphael.pasquier@lmt.ens-cachan.fr
  */
+
 template<class Carac,unsigned max_sub_meshes=0>
 class Mesh : public MeshGenericBis< Carac, false, MeshNbSubMeshes<Carac,max_sub_meshes>::res > {
 public:
@@ -83,8 +102,43 @@ public:
         this->signal_connectivity_change_rec(this->node_list);
         skin.signal_connectivity_change_rec(skin.node_list);
     }
-    /// 
-    void update_skin( bool rm_intermediate_data = false );
+    /// fonction à créer ou à mettre à jour le maillage de la peau. Pour accéder à la peau, on écrit m.skin().
+    void update_skin( bool rm_intermediate_data = false ) { update_skin_( rm_intermediate_data, Number<MA::dim>() ); }
+    /// Ne fait rien
+    void update_skin_( bool rm_intermediate_data, Number<0> ) { }
+    /// A faire
+    template<unsigned inner>
+    void update_skin_( bool rm_intermediate_data, Number<inner> ) {
+        this->update_elem_parents(Number<1>());
+        LMTPRIVATE::AddElemWith1Parent<Mesh> ae;
+        ae.m = this;
+        ae.marqued.resize( this->node_list.size(), 0 );
+        this->skin.free();
+        this->skin.node_list.nb.free();
+        // elements
+        apply( this->sub_mesh(Number<1>()).elem_list, ae );
+        // nodes
+        // skin.node_list.nb.reserve( this->node_list.size() );
+        for(unsigned i=0,cpt=0;i<this->node_list.size();++i) {
+            if ( ae.marqued[i] ) {
+                this->skin.node_list.hp.push_back( &this->node_list[i] );
+                this->skin.node_list.nb.push_back( cpt++ );
+            }
+            else
+                this->skin.node_list.nb.push_back( 0 );
+        }
+        // parents
+        for(unsigned i=0;i<TSkin::TElemList::nb_elem_type;++i)
+            this->skin.elem_parents[i] = ae.parents[i];
+    
+    
+        // 
+        if ( rm_intermediate_data ) {
+            this->clear_elem_children();
+            this->sub_mesh(Number<1>()).free();
+        }
+    
+    }
     /// 
     void free() {
         MGB::free();
@@ -107,15 +161,15 @@ private:
         }
     };
 public:
-    /** Append nodes of m to *this. addresses of new nodes are appended to new_nodes. Data of nodes is copied using DM::copy()
+    /*! Append nodes of m to *this. addresses of new nodes are appended to new_nodes. Data of nodes is copied using DM::copy()
         Used in append().
     */
     template<class TM2> void append_nodes_of(const TM2 &m,Vec<TNode *> &new_nodes) {
         new_nodes.reserve( new_nodes.size() + m.node_list.size() );
         apply( m.node_list, AppendDataFrom(), this, new_nodes );
     }
-    /**
-        Append data, nodes and elements of m to this. 
+    /*!
+        Append data, nodes and elements of a mesh m to this. 
     */
     template<class TM2> void append(const TM2 &m) {
         Vec<TNode *> new_nodes;
@@ -150,7 +204,7 @@ public:
             signal_connectivity_change();
         return nop.res;
     }
-    /**
+    /*!
         num_sub_list -> type of element
         num_in_sub_list -> number of element in sub_vec<num_sub_list>()
     */
@@ -246,38 +300,6 @@ namespace LMTPRIVATE {
         Vec<Vec<typename TM::EA *,1> > parents[TM::TSkin::TElemList::nb_elem_type+(TM::TSkin::TElemList::nb_elem_type==0)];
     };
 };
-
-template<class Carac,unsigned max_sub_meshes>
-void Mesh<Carac,max_sub_meshes>::update_skin( bool rm_intermediate_data ) {
-    this->update_elem_parents(Number<1>());
-    LMTPRIVATE::AddElemWith1Parent<Mesh> ae;
-    ae.m = this;
-    ae.marqued.resize( this->node_list.size(), 0 );
-    this->skin.free();
-    this->skin.node_list.nb.free();
-    // elements
-    apply( this->sub_mesh(Number<1>()).elem_list, ae );
-    // nodes
-    // skin.node_list.nb.reserve( this->node_list.size() );
-    for(unsigned i=0,cpt=0;i<this->node_list.size();++i) {
-        if ( ae.marqued[i] ) {
-            this->skin.node_list.hp.push_back( &this->node_list[i] );
-            this->skin.node_list.nb.push_back( cpt++ );
-        }
-        else
-            this->skin.node_list.nb.push_back( 0 );
-    }
-    // parents
-    for(unsigned i=0;i<TSkin::TElemList::nb_elem_type;++i)
-         this->skin.elem_parents[i] = ae.parents[i];
-
-
-    // 
-    if ( rm_intermediate_data ) {
-        this->clear_elem_children();
-        this->sub_mesh(Number<1>()).free();
-    }
-}
 
 //
 // struct Copy_data_from_sub_mesh_to_skin {

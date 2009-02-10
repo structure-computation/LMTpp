@@ -20,18 +20,19 @@ lst = [
 #    ('ShiftRight', '>>' , ''                                  , '' ),
     ('Min'       , 'min', 'std::numeric_limits<T>::max()' , '' ),
     ('Max'       , 'max', '-std::numeric_limits<T>::max()', '' ),
+    ('Pow'       , 'pow', '1', '1' ),
 ]
 for op,sop,dr,conserve_sp in lst:
     ret = 'typename TypePromote<'+op+',P1,P2>::T'
     
     csop = 'p1 '+sop+' p2'
-    if sop=='min' or sop=='max':
+    if sop=='min' or sop=='max' or sop=='pow':
         csop = sop+'(p1,p2)'
     
     print '/// \\relates Lambda'
     print 'struct '+op+' {'
     print '    template<class P1,class P2,class P3=void,class P4=void> struct ReturnType { typedef '+ret+' T; };'
-    print '    template<class P1,class P2> '+ret+' operator()(const P1 &p1,const P2 &p2) const { return '+csop+'; }'
+    print '    template<class P1,class P2> '+ret+' operator()(const P1 &p1,const P2 &p2) const { return '+ret+'('+csop+'); }'
     if dr: print '    template<class T> inline void init_reduction(T &p) const { p = '+dr+'; }'
     print '};'
     if conserve_sp:

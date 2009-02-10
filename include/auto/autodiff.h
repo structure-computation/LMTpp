@@ -10,11 +10,11 @@ namespace LMT {
     AutoDiff
  */
 template<class T,int num_unk=-1> struct AutoDiff {
-    AutoDiff(T v=0.0) {
+    AutoDiff(T v=T(0)) {
         val = v;
         if ( num_unk >= 0 ) {
-            der_1 = 0.0;
-            der_2.set( 0.0 );
+            der_1 = T(0);
+            der_2.set( T(0) );
         }
     }
     T val;

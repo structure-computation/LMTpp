@@ -14,11 +14,16 @@
 
 #include "basicops.h"
 #include "simd.h"
+#include "ptrconstif.h"
 
 namespace LMT {
 
-/**
+/*!
     By default, simple function
+
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \keyword Algorithme
+    \author Leclerc
 */
 template<class Op,class O2=void,class O3=void,class O4=void,class O5=void>
 struct Function {
@@ -173,7 +178,7 @@ struct Function<ALGOCst,TT,void,void,void> {
 };
 
 // ----------------------------------------------------------------------------------------------------------------------------
-/// \ingroup Lambda
+/// \keyword Lambda
 struct EquEqu { template<class P1,class P2> void op(P1 &p1,const P2 &p2) const { p1 = p2; } };
 
 struct C_1 {};
@@ -193,7 +198,13 @@ struct PointedData2 {};
 struct PointedData3 {};
 struct PointedData4 {};
 
-/** \relates Vec */
+/*!
+    \relates Vec
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \keyword Mathématiques/Fonction
+    \author Hugo Leclerc
+
+*/
 template<> struct Function<PointedData1> {
     template<class P1,class P2=void,class P3=void,class P4=void> struct ReturnType { typedef void T; };
     template<class P1,class P2,class P3,class P4> struct ReturnType<P1 *,P2,P3,P4> { typedef P1& T; };
@@ -204,7 +215,13 @@ template<> struct Function<PointedData1> {
     template<class P1,class P2,class P3,class P4> const P1& operator()(const P1 *p1,const P2 &p2,const P3 &p3,const P4 &p4) const { return *p1; }
 };
 
-/** \relates Vec */
+/*!
+    \relates Vec
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \keyword Mathématiques/Fonction
+    \author Hugo Leclerc
+
+*/
 template<> struct Function<PointedData2> {
     template<class P1,class P2,class P3=void,class P4=void> struct ReturnType { typedef void T; };
     template<class P1,class P2,class P3,class P4> struct ReturnType<P1,P2 *,P3,P4> { typedef P2& T; };
@@ -214,7 +231,13 @@ template<> struct Function<PointedData2> {
     template<class P1,class P2,class P3,class P4> const P2& operator()(const P1 &p1,const P2 *p2,const P3 &p3,const P4 &p4) const { return *p2; }
 };
 
-/** \relates Vec */
+/*!
+    \relates Vec
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \keyword Mathématiques/Fonction
+    \author Hugo Leclerc
+
+*/
 template<> struct Function<PointedData3> {
     template<class P1,class P2,class P3=void,class P4=void> struct ReturnType { typedef void T; };
     template<class P1,class P2,class P3,class P4> struct ReturnType<P1,P2,P3 *,P4> { typedef P3& T; };
@@ -223,7 +246,13 @@ template<> struct Function<PointedData3> {
     template<class P1,class P2,class P3,class P4> const P3& operator()(const P1 &p1,const P2 &p2,const P3 *p3,const P4 &p4) const { return *p3; }
 };
 
-/** \relates Vec */
+/*!
+    \relates Vec
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \keyword Mathématiques/Fonction
+    \author Hugo Leclerc
+
+*/
 template<> struct Function<PointedData4> {
     template<class P1,class P2,class P3=void,class P4=void> struct ReturnType { typedef void T; };
     template<class P1,class P2,class P3,class P4> struct ReturnType<P1,P2,P3,P4 *> { typedef P4& T; };
@@ -295,6 +324,27 @@ static Function<C_4> _4;
 
 // because we don't want the compiler to complain about unused static variables
 inline void pouet_function() { _1 + _2 + _3 + _4; }
+
+
+// ------------------------------------------------ AbsIndication ---------------------------------------------------------
+/// \keyword Lambda
+struct AbsIndication {
+    //template<class P1,class P2=void,class P3=void,class P4=void> struct ReturnType { typedef typename SubComplex<P1>::T T; };
+    template<class P1> typename SubComplex<P1>::T operator()(const P1 &p1) const { return abs_indication(p1); }
+};
+template<> struct ConserveZeroes<AbsIndication> { static const unsigned res = true; };
+
+template<bool is_scalar,class TT> struct TypePromoteAbsIndicationWithIsScalarBool;
+template<class TT> struct TypePromoteAbsIndicationWithIsScalarBool<true,TT> {
+    typedef typename SubComplex<TT>::T T;
+};
+
+template<class TT>
+struct TypePromote<TT,AbsIndication> {
+    static const bool is_scalar = TypeInformation<TT>::is_scalar;
+    typedef typename TypePromoteAbsIndicationWithIsScalarBool<is_scalar,TT>::T T;
+};
+
 
 }
 

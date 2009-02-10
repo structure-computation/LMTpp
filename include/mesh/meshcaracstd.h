@@ -28,12 +28,17 @@ template<> struct ElementChoiceMeshCaracStd<3,true> { typedef Hexa NE; };
 template<> struct ElementChoiceMeshCaracStd<2,true> { typedef Quad NE; };
 template<> struct ElementChoiceMeshCaracStd<1,true> { typedef Bar NE; };
 template<> struct ElementChoiceMeshCaracStd<0,true> { typedef NodalElement NE; };
+/*!
 
-/// MeshCarac class (usable as Mesh<MeshCaracStd<...> > to instantiate a mesh) with
-/// Tetras if nb_var_inter==3
-/// Triangles if nb_var_inter==2
-/// Bars if nb_var_inter==1
-/// NodalElements if nb_var_inter==0
+Cette classe peut servir de paramètre à une classe Mesh pour définir un maillage sans champs. On ne mémorise que la position des noeuds. On trouve d'autres exemples pour des formualtions dans le dossier formulation (n'hésitez pas à faire du copier/coller). Pour générer un MeshCarac personnel, on peut utiliser la fonction make_pb() dans le fichier Sconstruct (voir le tutorial \a [Comment résoudre un problème éléments finis de façon générale] ).
+
+MeshCarac class (usable as Mesh<MeshCaracStd<...> > to instantiate a mesh) with
+Tetras if nb_var_inter==3
+Triangles if nb_var_inter==2
+Bars if nb_var_inter==1
+NodalElements if nb_var_inter==0
+
+*/
 template<unsigned dim,unsigned nb_var_inter,bool want_cubic=false,class T=double>
 struct MeshCaracStd : public MeshCarac<dim,T> {
     typedef MeshCarac<dim,T> MA;

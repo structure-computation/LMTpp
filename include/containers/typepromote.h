@@ -40,7 +40,7 @@ template<> struct TypeInformation<void> {
     template<class TV> struct DeepVariant { typedef TV T; };
 };
 
-/**
+/*!
 m = [
     ('bool',0),
     ('unsigned',1),
@@ -61,6 +61,7 @@ for i,vi in m:
 template<> struct TypeInformation<bool> {
     static const int res = 0;
     static const int englobing = 0;
+    static const bool is_scalar = true;
     static std::string type() { return "bool"; }
     static const bool float_type = false;
     typedef bool SubType;
@@ -69,6 +70,7 @@ template<> struct TypeInformation<bool> {
 template<> struct TypeInformation<unsigned> {
     static const int res = 1;
     static const int englobing = 0;
+    static const bool is_scalar = true;
     static std::string type() { return "unsigned"; }
     static const bool float_type = false;
     typedef unsigned SubType;
@@ -77,6 +79,7 @@ template<> struct TypeInformation<unsigned> {
 template<> struct TypeInformation<int> {
     static const int res = 2;
     static const int englobing = 0;
+    static const bool is_scalar = true;
     static std::string type() { return "int"; }
     static const bool float_type = false;
     typedef int SubType;
@@ -85,6 +88,7 @@ template<> struct TypeInformation<int> {
 template<> struct TypeInformation<float> {
     static const int res = 3;
     static const int englobing = 0;
+    static const bool is_scalar = true;
     static std::string type() { return "float"; }
     static const bool float_type = true;
     typedef float SubType;
@@ -93,6 +97,7 @@ template<> struct TypeInformation<float> {
 template<> struct TypeInformation<double> {
     static const int res = 4;
     static const int englobing = 0;
+    static const bool is_scalar = true;
     static std::string type() { return "double"; }
     static const bool float_type = true;
     typedef double SubType;
@@ -101,6 +106,7 @@ template<> struct TypeInformation<double> {
 template<> struct TypeInformation<long double> {
     static const int res = 5;
     static const int englobing = 0;
+    static const bool is_scalar = true;
     static std::string type() { return "long double"; }
     static const bool float_type = true;
     typedef long double SubType;
@@ -108,18 +114,19 @@ template<> struct TypeInformation<long double> {
 };
 
 
+template<class TT> struct SubComplex {
+    typedef TT T;
+};
 #ifndef WITHOUTCOMPLEX
     template<class TT> struct TypeInformation<std::complex<TT> > {
         static const int res = TypeInformation<TT>::res;
         static const int englobing = 1 + TypeInformation<TT>::englobing;
+        static const bool is_scalar = true;
         typedef TT SubType;
         template<class TV> struct Variant { typedef std::complex<TV> T; };
         template<class TV> struct DeepVariant { typedef std::complex<typename TypeInformation<TT>::template DeepVariant<TV>::T> T; };
         static std::string type() { return "complex<"+TypeInformation<TT>::type()+"> "; }
         static const bool float_type = TypeInformation<TT>::float_type;
-    };
-    template<class TT> struct SubComplex {
-        typedef TT T;
     };
     template<class TT> struct SubComplex<std::complex<TT> > {
         typedef TT T;
@@ -138,13 +145,15 @@ template<> struct CanBeConvertedTo<float,double> { static const bool res = true;
 template<> struct CanBeConvertedTo<double,double> { static const bool res = true; };
 template<> struct CanBeConvertedTo<long double,double> { static const bool res = true; };
 
-template<class T1,class T2> struct CanBeConvertedTo<T1,std::complex<T2> > { static const bool res = CanBeConvertedTo<T1,T2>::res; };
-template<> struct CanBeConvertedTo<std::complex<float>,std::complex<float> > { static const bool res = true; };
-template<> struct CanBeConvertedTo<std::complex<double>,std::complex<double> > { static const bool res = true; };
+#ifndef WITHOUTCOMPLEX
+    template<class T1,class T2> struct CanBeConvertedTo<T1,std::complex<T2> > { static const bool res = CanBeConvertedTo<T1,T2>::res; };
+    template<> struct CanBeConvertedTo<std::complex<float>,std::complex<float> > { static const bool res = true; };
+    template<> struct CanBeConvertedTo<std::complex<double>,std::complex<double> > { static const bool res = true; };
+#endif
 
 // --------------------------------------------------------------------------------------------------------------------
 
-template<class Op,class T1,class T2> struct TypePromote;
+template<class Op,class T1,class T2=void,class T3=void> struct TypePromote {};
 
 template<class Op,bool eng_t1_sup_t2,bool eng_t2_sup_t1,class T1,class T2,unsigned englobing> struct TypePromoteWithSubType;
 
@@ -162,16 +171,20 @@ template<class Op,class T1,class T2,unsigned englobing> struct TypePromoteWithSu
     typedef typename TypeInformation<T1>::template Variant<BT>::T T;
 };
 
+template<class Op,class T1> struct TypePromote<Op,T1,void,void> {
+    typedef typename Op::template ReturnType<T1>::T T;
+};
+
+
 // --------------------------------------------------------------------------------------------------------------------
-/** gives the best type for result of op(A,B) where A is of type T1 and B is of type T2.
+/*! gives the best type for result of op(A,B) where A is of type T1 and B is of type T2.
   Example :
     \code
-TypePromoteAdd<Plus,bool,double>::T -> double
-    \endcode
+        TypePromoteAdd<Plus,bool,double>::T -> double
     say that double contains more informations than bool. TypePromote works for Vec, Mat, ...
 */
-template<class Op,class T1,class T2=void>
-struct TypePromote {
+template<class Op,class T1,class T2>
+struct TypePromote<Op,T1,T2,void> {
     typedef typename TypePromoteWithSubType<
         Op,
         ( TypeInformation<T1>::englobing > TypeInformation<T2>::englobing ),
@@ -195,6 +208,16 @@ template<class T1,class T2> struct TypePromoteWithSubType<Greater  ,false,false,
 template<class T1,class T2> struct TypePromoteWithSubType<LessEq   ,false,false,T1,T2,0> { typedef bool T; };
 template<class T1,class T2> struct TypePromoteWithSubType<GreaterEq,false,false,T1,T2,0> { typedef bool T; };
 
+#ifndef WITHOUTCOMPLEX
+    template<class T1,class T2>
+    struct TypePromote<Equal,std::complex<T1>,std::complex<T2> > {
+        typedef bool T;
+    };
+    template<class T1,class T2>
+    struct TypePromote<NotEqual,std::complex<T1>,std::complex<T2> > {
+        typedef bool T;
+    };
+#endif
 
 // ------------------------------------------------ scalar type ---------------------------------------------------------
 template<class TV,class Prefered=double> struct FloatType {
@@ -205,12 +228,16 @@ template<class TV,class Prefered=double> struct FloatType {
 };
 
 template<class T> struct IsComplex { static const bool res = false; };
+#ifndef WITHOUTCOMPLEX
 template<class T> struct IsComplex<std::complex<T> > { static const bool res = true; };
+#endif
+
+template<class TT, bool is_scalar=TypeInformation<TT>::is_scalar> struct IsScalar {};
+template<class TT> struct IsScalar<TT,true> {typedef TT T;};
 
 template<class T> void display_type( std::ostream &os, const T & ) {
     os << TypeInformation<T>::type();
 }
-
 
 }
 

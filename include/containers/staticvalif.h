@@ -23,6 +23,7 @@ template<class T,bool want_static_val,int static_val> struct StaticValIf;
 template<class T,int static_val>
 struct StaticValIf<T,true,static_val> {
     void set(T v) { DEBUGASSERT(static_val==v); }
+    void throw_val_and_clear( StaticValIf &res ) {}
     static const int val = static_val;
 };
 
@@ -30,6 +31,7 @@ template<class T,int static_val>
 struct StaticValIf<T,false,static_val> {
     void set(T v) { val = v; }
     StaticValIf():val(0) {}
+    void throw_val_and_clear( StaticValIf &res ) { res.val = val; val = 0; }
     T val;
 };
 

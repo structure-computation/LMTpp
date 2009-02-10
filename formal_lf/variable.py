@@ -18,22 +18,22 @@ class Variable:
   def extr(self,test_expr=False): return self.extrapolation( (self.nb_der+self.sup_nb_der)*(not test_expr) )
     
   def type_to_str(self,in_vec,vec_size):
-    if len(self.T): res = self.T
-    elif len(self.nb_dim)==1: res = "Vec<Tpos,"+str(self.nb_dim[0])+">"
-    elif len(self.nb_dim)==2: res = "Mat<Tpos,Gen<"+str(self.nb_dim[0])+","+str(self.nb_dim[1])+"> >"
-    else: res = "Tpos"
-    
-    if in_vec: res = 'Vec<' + res + ',' + str( vec_size ) + '>'
-    return res
+        if len(self.T): res = self.T
+        elif len(self.nb_dim)==1: res = "Vec<Tpos,"+str(self.nb_dim[0])+">"
+        elif len(self.nb_dim)==2: res = "Mat<Tpos,Gen<"+str(self.nb_dim[0])+","+str(self.nb_dim[1])+"> >"
+        else: res = "Tpos"
+        
+        if in_vec: res = 'Vec<' + res + ',' + str( vec_size ) + '>'
+        return res
 
   def nb_elements(self):
-    res = 1
-    for i in self.nb_dim: res *= i
-    return res
+        res = 1
+        for i in self.nb_dim: res *= i
+        return res
 
   def join(self, obj):
-    self.nb_der = max( self.nb_der, obj.nb_der )
-    obj.nb_der = max( self.nb_der, obj.nb_der )
+        self.nb_der = max( self.nb_der, obj.nb_der )
+        obj.nb_der = max( self.nb_der, obj.nb_der )
 
   def get_scalar_expr(self,name_var,interpolation,element,num_element,symbols,test_expr=False):
     """ Fill gnagna.expr for all gnagna in variables """
@@ -103,49 +103,88 @@ class Variable:
     self.name = name_var
     self.interpolation_inst = interpolation
     self.symbols = []
-    if len(self.nb_dim):
-      self.sub_expr = []
-      self.expr = ExVector(self.nb_elements())
-      for i in range(self.nb_elements()):
-        self.expr[i] = self.get_scalar_expr(self.name,interpolation,element,i,self.symbols)
-        self.sub_expr.append( self.expr[i] )
+    if len(self.nb_dim) == 2:
+        self.sub_expr = []
+        self.expr = ExMatrix(self.nb_dim[0],self.nb_dim[1])
+        cpt = 0
+        for i in range(self.nb_dim[0]):
+            for j in range(self.nb_dim[1]):
+                self.expr[i,j] = self.get_scalar_expr(self.name,interpolation,element,cpt,self.symbols)
+                self.sub_expr.append( self.expr[i,j] )
+                cpt += 1
 
-      #print self.nb_elements()
-      #print len(self.symbols)
-      md = len(self.symbols) / self.nb_elements()
+        md = len(self.symbols) / self.nb_elements()
       
-      self.expr_on_node = []
-      for i in range(md):
-          tmp = ExVector(self.nb_dim[0])
-          for d in range(self.nb_dim[0]): tmp[d] = self.symbols[i+md*d][3][0]
-          self.expr_on_node.append( tmp )
+        self.expr_on_node = []
+        for i in range(md):
+            tmp = ExVector(self.nb_dim[0])
+            for d in range(self.nb_dim[0]):
+                tmp[d] = self.symbols[i+md*d][3][0]
+            self.expr_on_node.append( tmp )
+    elif len(self.nb_dim) == 1:
+        self.sub_expr = []
+        self.expr = ExVector(self.nb_elements())
+        for i in range(self.nb_elements()):
+            self.expr[i] = self.get_scalar_expr(self.name,interpolation,element,i,self.symbols)
+            self.sub_expr.append( self.expr[i] )
+
+        #print self.nb_elements()
+        #print len(self.symbols)
+        md = len(self.symbols) / self.nb_elements()
+      
+        self.expr_on_node = []
+        for i in range(md):
+            tmp = ExVector(self.nb_dim[0])
+            for d in range(self.nb_dim[0]): tmp[d] = self.symbols[i+md*d][3][0]
+            self.expr_on_node.append( tmp )
     else:
-      self.expr = self.get_scalar_expr(self.name,interpolation,element,0,self.symbols)
-      self.sub_expr = [ self.expr ]
+        self.expr = self.get_scalar_expr(self.name,interpolation,element,0,self.symbols)
+        self.sub_expr = [ self.expr ]
     
-      md = len(self.symbols) / self.nb_elements()
-      self.expr_on_node = []
-      for i in range(md):
-          self.expr_on_node.append( self.symbols[i][3][0] )
+        md = len(self.symbols) / self.nb_elements()
+        self.expr_on_node = []
+        for i in range(md):
+            self.expr_on_node.append( self.symbols[i][3][0] )
 
     # test symbols
     self.test_symbols = []
-    if len(self.nb_dim):
-      self.sub_test_expr = []
-      self.test = ExVector(self.nb_elements())
-      for i in range(self.nb_elements()):
-        self.test[i] = self.get_scalar_expr( "T"+self.name, interpolation, element, i, self.test_symbols, True )
-        self.sub_test_expr.append( self.test[i] )
-      #print self.nb_elements()
-      #print len(self.test_symbols)
-      md = len(self.test_symbols) / self.nb_elements()
+    if len(self.nb_dim) == 2:
+        self.sub_test_expr = []
+        self.test = ExMatrix(self.nb_dim[0],self.nb_dim[1])
+        cpt = 0
+        for i in range(self.nb_dim[0]):
+            for j in range(self.nb_dim[1]):
+                self.test[i,j] = self.get_scalar_expr( "T"+self.name, interpolation, element, cpt, self.test_symbols, True )
+                self.sub_test_expr.append( self.test[i,j] )
+                cpt += 1
+        #print self.nb_elements()
+        #print len(self.test_symbols)
+        md = len(self.test_symbols) / self.nb_elements()
       
-      if len(self.test_symbols[0][3]):
-        self.test_on_node = []
-        for i in range(md):
-          tmp = ExVector(self.nb_dim[0])
-          for d in range(self.nb_dim[0]): tmp[d] = self.test_symbols[i+md*d][3][0]
-          self.test_on_node.append( tmp )
+        if len(self.test_symbols[0][3]):
+            self.test_on_node = []
+            for i in range(md):
+                tmp = ExVector(self.nb_dim[0])
+                for d in range(self.nb_dim[0]):
+                    tmp[d] = self.test_symbols[i+md*d][3][0]
+                self.test_on_node.append( tmp )
+    elif len(self.nb_dim):
+        self.sub_test_expr = []
+        self.test = ExVector(self.nb_elements())
+        for i in range(self.nb_elements()):
+            self.test[i] = self.get_scalar_expr( "T"+self.name, interpolation, element, i, self.test_symbols, True )
+            self.sub_test_expr.append( self.test[i] )
+        #print self.nb_elements()
+        #print len(self.test_symbols)
+        md = len(self.test_symbols) / self.nb_elements()
+      
+        if len(self.test_symbols[0][3]):
+            self.test_on_node = []
+            for i in range(md):
+                tmp = ExVector(self.nb_dim[0])
+                for d in range(self.nb_dim[0]):
+                    tmp[d] = self.test_symbols[i+md*d][3][0]
+                self.test_on_node.append( tmp )
     else:
       self.test = self.get_scalar_expr( "test_"+self.name, interpolation, element, 0, self.test_symbols, True )
       self.sub_test_expr = [ self.test ]

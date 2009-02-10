@@ -55,27 +55,20 @@ long long evaluate_nb_cycles(Op &op) {
     return t2-t1;
 }
 
-/** \ingroup  Utilitaires 
-\brief Structure permettant de d�erminer le temps �oul�entre deux instants donn�.
+/** \keyword Utilitaires 
+\brief Structure permettant de déterminer le temps écoulé entre deux instants donnés.
 
-En d�larant une instance de type TicToc, on d�ermine le temps �oul�en ��utant la fonction :
+En délarant une instance de type TicToc, on d�ermine le temps �oul�en ��utant la fonction :
 \code
-TicToc t;
-t.start();
-...code...
-t.stop();
-\endcode
-L'appel de stop renvoit le temps �oul�en secondes. Un appel de start fait intervenir la fonction getTick() qui renvoit une information non exprim� en secondes. Il est alors n�essaire lorsque l'on fait la diff�ence de deux getTick() de diviser par la fr�uence du processeur. 
-
-Pour cela, on peut renseigner le champ freq correspondant �la fr�uence du processeur (par d�aut 3.4 Ghz)
+    TicToc t;
+    t.start();
+    ...code...
+    t.stop();
     
-struct TicToc {
-    TicToc(){freq = 3.4e9;}
-    void start() { v = getTick(); }
-    void stop(const char *sep="\n") { printf( "%f", (getTick()-v)/freq); printf(sep); }
-    long long v;
-    double freq;
-};
+L'appel de stop renvoit le temps éoulé en secondes. Un appel de start fait intervenir la fonction getTick() qui renvoit une information non exprimé en secondes. Il est alors nécessaire lorsque l'on fait la différence de deux getTick() de diviser par la fréquence du processeur. 
+
+Pour cela, on peut renseigner le champ freq correspondant à la fréquence du processeur (par défaut 3.4 Ghz)
+    
 
     @author Alain Caignot
       Dit "el Caignal"

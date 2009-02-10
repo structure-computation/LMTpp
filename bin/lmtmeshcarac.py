@@ -132,6 +132,15 @@ class MeshCarac:
                 res += ' '*sup_spaces + '        static const unsigned nb_params = %i;\n' % len(data)
             else:
                 res += ' '*sup_spaces + '        VOIDDMSET;\n'
+            
+            res += '        void dm_data_set_field( const std::string field_name, Tpos value ) { assert(0); /*TODO*/ }\n'
+            res += '        void dm_data_set_field( const std::string field_name, const Vec<Tpos,1> &value ) { assert(0); /*TODO*/ }\n'
+            res += '        void dm_data_set_field( const std::string field_name, const Vec<Tpos,2> &value ) { assert(0); /*TODO*/ }\n'
+            res += '        void dm_data_set_field( const std::string field_name, const Vec<Tpos,3> &value ) { assert(0); /*TODO*/ }\n'
+            res += '        void dm_data_set_field( const std::string field_name, const Vec<Tpos,4> &value ) { assert(0); /*TODO*/ }\n'
+            res += '        void dm_data_set_field( const std::string field_name, const Vec<Tpos,5> &value ) { assert(0); /*TODO*/ }\n'
+            res += '        void dm_data_set_field( const std::string field_name, const Vec<Tpos,6> &value ) { assert(0); /*TODO*/ }\n'
+            res += '        template<class G> G dm_data_get_field( const std::string field_name, StructForType<G> ) const { assert( 0 /*TODO*/ ); return G( 0.0 );  }\n'
             res += ' '*sup_spaces + '    };\n'
             return res
         carac.nodaldata.append( self.DM( name='pos', dm_type='Pvec', unit='m' ) )
@@ -170,6 +179,14 @@ class MeshCarac:
                             all_edm.append( CDM )
                     else:
                         tmp += '        typedef VoidDMSet TData;\n'
+                    
+                    tmp += '        void dm_data_set_field( const std::string field_name, Tpos value ) { assert(0); /*TODO*/ }\n'
+                    tmp += '        void dm_data_set_field( const std::string field_name, const Vec<Tpos,1> &value ) { assert(0); /*TODO*/ }\n'
+                    tmp += '        void dm_data_set_field( const std::string field_name, const Vec<Tpos,2> &value ) { assert(0); /*TODO*/ }\n'
+                    tmp += '        void dm_data_set_field( const std::string field_name, const Vec<Tpos,3> &value ) { assert(0); /*TODO*/ }\n'
+                    #tmp += '        void dm_data_set_field( const std::string field_name, const Vec<Tpos,4> &value ) { assert(0); /*TODO*/ }\n'
+                    #tmp += '        void dm_data_set_field( const std::string field_name, const Vec<Tpos,5> &value ) { assert(0); /*TODO*/ }\n'
+                    #tmp += '        void dm_data_set_field( const std::string field_name, const Vec<Tpos,6> &value ) { assert(0); /*TODO*/ }\n'
                     tmp += '    };\n'
         res += tmp
         res += '};\n\n'

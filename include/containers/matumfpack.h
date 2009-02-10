@@ -190,7 +190,7 @@ public:
             for ( i = mat.Ap[ line ];i < mat.Ap[ line + 1 ];++i )
                 if ( mat.Ai[ i ] == col )
                     return mat.Ax[i];
-            return 0.0;
+            return T(0);
         }
         template <class Op, class TT>
         void apply( const Op &op, const TT &v ) {
@@ -227,7 +227,7 @@ public:
         for ( int i = Ap[ line ];i < Ap[ line + 1 ];++i )
             if ( Ai[ i ] == column )
                 return Ax[ i ];
-        return 0.0;
+        return T(0);
     }
 
 
@@ -286,7 +286,7 @@ public:
 
 template<class T> LMT::Vec<T> mul(const Mat<double,Gen<>,SparseUMFPACK> &m,const LMT::Vec<T> &v) {
     LMT::Vec<T> res;
-    res.resize( v.size(), 0.0 );
+    res.resize( v.size(), T(0) );
 
     for(unsigned line=0;line<m.r;++line) {
         for(int j=m.Ap[line];j<m.Ap[line+1];++j)

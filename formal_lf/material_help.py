@@ -27,7 +27,7 @@ def simplification_behaviour(Kglo,Hglo,epsth,dim,type_stress_2D='plane stress'):
             epsth2d=mul(K2d.inverse(),sigth2d)
             return K2d,epsth2d
    elif dim==1:
-      return K2d(0,0),epsth[0]
+      return Kglo(0,0),epsth[0]
 
 def reconstruction_quantites_3d(epsilon,Kglo,Hglo,epsth,deltaT,dim,type_stress_2D='plane stress'):
    if dim==3:
@@ -251,3 +251,17 @@ def grad_sym_ext( v, var_inter, inv_jac ):
         for j in range( v.size() ):
             res[ i, j ] = 0.5 * ( gr[ i, j ] + gr[ j, i ] )
     return mat_sym_to_vec_col( res )
+
+#loi de comportement anisotrope 3d
+def hooke_anisotrope_3d(C):
+    H = matrix([
+            [C(0, 0), C(0, 1), C(0, 2), C(0, 3), C(0, 4), C(0, 5)],
+            [C(1, 0), C(1, 1), C(1, 2), C(1, 3), C(1, 4), C(1, 5)],
+            [C(2, 0), C(2, 1), C(2, 2), C(2, 3), C(2, 4), C(2, 5)],
+            [C(3, 0), C(3, 1), C(3, 2), C(3, 3), C(3, 4), C(3, 5)],
+            [C(4, 0), C(4, 1), C(4, 2), C(4, 3), C(4, 4), C(4, 5)],
+            [C(5, 0), C(5, 1), C(5, 2), C(5, 3), C(5, 4), C(5, 5)],
+        ])
+#     K = H.inverse()
+    K = chol_inv(H)
+    return K, H

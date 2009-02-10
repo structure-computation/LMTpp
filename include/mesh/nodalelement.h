@@ -26,7 +26,7 @@ struct NodalElement {
 
 template<class TN,class TNG,class TD,unsigned NET>
 typename TNG::T measure( const Element<NodalElement,TN,TNG,TD,NET> &e ) {
-    return 0.0;
+    return typename TNG::T(0);
 }
 
 template<class TN,class TNG,class TD,unsigned NET,class T>

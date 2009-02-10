@@ -101,7 +101,7 @@ namespace LMTPRIVATE {
         }
     };
 };
-/**
+/*!
     Add delaunay points to mesh already constitued
 */
 template<unsigned nvi,class TM,class Pvec>
@@ -165,14 +165,15 @@ void add_delaunay_points(TM &m,const Vec<Pvec> &new_points) {
     m.signal_connectivity_change();
 }
 
-/** Append to m a delaunay triangulation using NodalElements, Bar and Triangles (if nvi==3) of skin.
+/*!
+   Append to m a delaunay triangulation using NodalElements, Bar and Triangles (if nvi==3) of skin.
    nvi==2 -> uses triangles
    nvi==3 -> uses tetrahedra.
    Data of nodes in skin is transfered in m.
    
    If dim>nvi, pos[i] such as i>nvi is assumed to be constant.
    
-   \relates LMT::Mesh
+   \relates Mesh
 */
 template<unsigned nvi,class TM,class TMskin>
 void make_delaunay_triangulation(TM &m,const TMskin &skin,Vec<typename TM::TNode *> &new_nodes,bool remove_ext=true) {

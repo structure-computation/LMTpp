@@ -1,0 +1,12 @@
+/*! 
+\generic_comment get_var_inter
+
+    Considérons un élément elem auquel est associé des fonctions de forme f1, ..., fn et des noeuds P1, ..., Pn dont les coordonnées sont stockées dans pos_nodes. La fonction get_var_inter() ajoute à var_inter une approximation des coordonnées x dans l'espace de référence du point P, de coordonnées pos (i.e. tel que P = f1(x)P1 + ... + fn(x)Pn).
+
+    ATTENTION : C'est un AJOUT : les valeurs de var_inter avant l'appel de get_var_inter() NE sont PAS ECRASEES !!!!
+
+    \keyword Maillage/Elément/Opération
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \relates Element 
+*/

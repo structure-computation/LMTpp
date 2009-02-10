@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import string
 from vecgenhelp import *
 
@@ -6,6 +7,23 @@ namespace LMT {
 template<class Carac,unsigned nt=0,class T=typename Carac::template SubType<nt>::T> struct Heterogeneous {};
 
 template<class Carac,unsigned nt,class TT> struct IsVecOp<Heterogeneous<Carac,nt,TT> > { typedef int T; };
+
+template<class NameDM>
+struct ExtractDM;
+
+/*!
+\generic_comment apply_range_stride 
+
+    Sa syntaxe générale est :
+    \code 
+        apply_range_stride( vecteur, indice début, indice fin, incrément, opérateur, paramètres facultatifs de l'opérateur)  
+
+    Cette fonction applique un opérateur sur les éléments d'un vecteur à partir de l'indice début et tous les indices debut + i x incrément vérifiant debut + i x incrément < fin.
+
+    \\relates apply
+    \\relates Vec
+    \\friend raphael.pasquier@lmt.ens-cachan.fr
+*/
 
 /// heterogeneous vector. static_size is the number of elements
 template<class Carac,unsigned nt,class TT,int static_size_>
@@ -18,6 +36,9 @@ public:
     static const bool fixed_size = (static_size_>=0);
     static const int sparsity_rate = TV::sparsity_rate;
     template<unsigned n> struct SubVec { typedef Vec<typename Carac::template SubType<n>::T,static_size_> TS; };
+    template<class NT,unsigned inner=0> struct NForSubType { static const unsigned res = TNext::template NForSubType<NT>::res; };
+    template<unsigned inner> struct NForSubType<T,inner> { static const unsigned res = nt; };
+    template<class NT> struct SubVecT { typedef typename SubVec<NForSubType<NT>::res>::TS TS; };
 
     template<unsigned n> struct SubType { typedef typename Vec<typename Carac::template SubType<n>::T>::template SubType<0>::T T; };
     //template<unsigned n> struct SubType { typedef typename Carac::template SubType<n>::T T; };
@@ -37,6 +58,68 @@ public:
 
     void free() { vec.free(); next.free(); }
     
+    // const version
+    template<class DM> const typename ExtractDM<DM>::template ReturnType<T>::T &val_elem_nb_( unsigned i, const DM &dm, const Number<nb_sub_type> & ) const {
+        ExtractDM<DM> ed;
+        return ed( vec[i] );
+    }
+    template<class DM,unsigned nnn> const typename ExtractDM<DM>::template ReturnType<T>::T &val_elem_nb_( unsigned i, const DM &dm, const Number<nnn> & ) const {
+        ExtractDM<DM> ed;
+        if ( i < vec.size() )
+            return ed( vec[i] );
+        return next.val_elem_nb_( i - vec.size(), dm, Number<nnn+1>() );
+    }
+    template<class DM> const typename ExtractDM<DM>::template ReturnType<T>::T &val_elem_nb( unsigned i, const DM &dm = DM() ) const {
+        return val_elem_nb_( i, dm, Number<1>() );
+    }
+    
+    // non-const version
+    template<class DM> typename ExtractDM<DM>::template ReturnType<T>::T &val_elem_nb_( unsigned i, const DM &dm, const Number<nb_sub_type> & ) {
+        ExtractDM<DM> ed;
+        return ed( vec[i] );
+    }
+    template<class DM,unsigned nnn> typename ExtractDM<DM>::template ReturnType<T>::T &val_elem_nb_( unsigned i, const DM &dm, const Number<nnn> & ) {
+        ExtractDM<DM> ed;
+        if ( i < vec.size() )
+            return ed( vec[i] );
+        return next.val_elem_nb_( i - vec.size(), dm, Number<nnn+1>() );
+    }
+    template<class DM> typename ExtractDM<DM>::template ReturnType<T>::T &val_elem_nb( unsigned i, const DM &dm = DM() ) {
+        return val_elem_nb_( i, dm, Number<1>() );
+    }
+
+
+    // const version + ptr
+    template<class EA,class DM> const typename ExtractDM<DM>::template ReturnType<T>::T &val_elem_nb_( const EA *e, const DM &dm, const Number<nb_sub_type> & ) const {
+        ExtractDM<DM> ed;
+        return ed( *static_cast<const T *>( e ) );
+    }
+    template<class EA,class DM,unsigned nnn> const typename ExtractDM<DM>::template ReturnType<T>::T &val_elem_nb_( const EA *e, const DM &dm, const Number<nnn> & ) const {
+        ExtractDM<DM> ed;
+        if ( dynamic_cast<const T *>( e ) )
+            return ed( *static_cast<const T *>( e ) );
+        return TNext::val_elem_( e, dm, Number<nnn+1>() );
+    }
+    template<class EA,class DM> const typename ExtractDM<DM>::template ReturnType<T>::T &val_elem_nb( const EA *e, const DM &dm = DM() ) const {
+        return val_elem_( e, dm, Number<1>() );
+    }
+    
+    // non-const version + ptr
+    template<class EA,class DM> static typename ExtractDM<DM>::template ReturnType<T>::T &val_elem_( EA *e, const DM &dm, const Number<nb_sub_type> & ) {
+        ExtractDM<DM> ed;
+        return ed( *static_cast<T *>( e ) );
+    }
+    template<class EA,class DM,unsigned nnn> static typename ExtractDM<DM>::template ReturnType<T>::T &val_elem_( EA *e, const DM &dm, const Number<nnn> & ) {
+        ExtractDM<DM> ed;
+        if ( dynamic_cast<T *>( e ) )
+            return ed( *static_cast<T *>( e ) );
+        return TNext::val_elem_( e, dm, Number<nnn+1>() );
+    }
+    template<class EA,class DM> static typename ExtractDM<DM>::template ReturnType<T>::T &val_elem( EA *e, const DM &dm = DM() ) {
+        return val_elem_( e, dm, Number<1>() );
+    }
+
+
     void resize(const unsigned *s) { vec.resize(s[nt]); next.resize(s); }
     
     unsigned size() const { return vec.size() + next.size(); } /// total number of elements
@@ -50,6 +133,12 @@ public:
     const TV &sub_vec(const Number<nt> &nn) const { return vec; } ///
     TV &sub_vec(const Number<nt> &nn) { return vec; } ///
 
+    template<class NT> typename SubVecT<NT>::TS &sub_vec(const StructForType<NT> &nn) { return next.sub_vec(nn); } ///
+    template<class NT> const typename SubVecT<NT>::TS &sub_vec(const StructForType<NT> &nn) const { return next.sub_vec(nn); } ///
+
+    const TV &sub_vec(const StructForType<T> &nn) const { return vec; } ///
+    TV &sub_vec(const StructForType<T> &nn) { return vec; } ///
+
     template<unsigned n> typename SubType<n>::T &data(unsigned i,const Number<n> &nn=Number<n>()) { return next.data(i,nn); } ///
     template<unsigned n> const typename SubType<n>::T &data(unsigned i,const Number<n> &nn=Number<n>()) const { return next.data(i,nn); } ///
     
@@ -60,6 +149,35 @@ public:
     
     void remove_nb(unsigned num_list,unsigned num_in_sub_list) { if ( num_list==nt ) vec.erase_elem_nb(num_in_sub_list); else next.remove_nb(num_list,num_in_sub_list); } /// remove num_in_sub_list^th element in num_list^th list
 
+
+    struct AppendPtrToLst {
+        template<class TE,class TL> void operator()( TE &e, TL &l ) const {
+            l.push_back( &e );
+        }
+    };
+    struct AppendToLst {
+        template<class TE,class TL> void operator()( TE &e, TL &l ) const {
+            l.push_back( e );
+        }
+        template<class TE,class TL> void operator()( const TE &e, TL &l ) const {
+            l.push_back( e );
+        }
+    };
+
+    template<class TL>
+    void push_back_ptr_of_item_nb_to( unsigned num_item, TL &list ) {
+        apply_on_number( *this, num_item, AppendPtrToLst(), list );
+    }
+    
+    template<class TL>
+    void push_back_item_nb_to( unsigned num_item, TL &list ) {
+        apply_on_number( *this, num_item, AppendToLst(), list );
+    }
+    
+    template<class TL>
+    void push_back_item_nb_to( unsigned num_item, TL &list ) const {
+        apply_on_number( *this, num_item, AppendToLst(), list );
+    }
 
     template<class EA,class Op> static void apply_on_down_cast(const EA *ea,const Op& op) { if (typeid(*ea)!=typeid(T)) TNext::apply_on_down_cast(ea,op); else op(static_cast<const T&>(*ea)); }
     template<class EA,class Op> static void apply_on_down_cast(EA *ea,const Op& op) { if (typeid(*ea)!=typeid(T)) TNext::apply_on_down_cast(ea,op); else op(static_cast<T&>(*ea)); }
@@ -245,6 +363,26 @@ print_apply_ext(
     suppar=['int from','int to']
 )
 
+print_apply_ext(
+    'apply_on_number',TP,TV,
+    'if ( num < v.vec.size() ) apply_on_number(v.vec,num,op,PARALIST); num -= v.vec.size(); apply_on_number(v.next,num,op,PARALIST);',
+    suppar=['int num']
+)
+
+
+
+print_apply_ext(
+    'apply_range_stride',TP,TV,
+    'apply_range_stride(v.vec,max(0,from),min(to,(int)v.vec.size()),inc,op,PARALIST); from -= v.vec.size(); to -= v.vec.size(); if ( to > 0 ) apply_range_stride(v.next,from,to,inc,op,PARALIST);',
+    suppar=['int from','int to','int inc']
+)
+for inc in [1,2,4]:
+    print_apply_ext(
+        'apply_range_by_n',TP,TV,
+        'apply_range_by_n(v.vec,max(0,from),min(to,(int)v.vec.size()),n_inc,op,PARALIST); from -= v.vec.size(); to -= v.vec.size(); if ( to > 0 ) apply_range_by_n(v.next,from,to,n_inc,op,PARALIST);',
+        suppar=['int from','int to','const Number<'+str(inc)+'> &n_inc']
+    )
+
 print_apply_ext('apply_ptr',TP,TV,'apply_ptr(v.vec,op,PARALIST); apply_ptr(v.next,op,PARALIST);')
 print_apply_ext('find_ptr' ,TP,TV,'if (find_ptr(v.vec,op,PARALIST)) return true; return find_ptr(v.next,op,PARALIST);',ret='bool')
 print_apply_ext(
@@ -254,6 +392,10 @@ print_apply_ext(
 )
 print_apply_ext('remove_if' ,TP,TV,'remove_if(v.vec,op,PARALIST); remove_if(v.next,op,PARALIST);',onlyfornonconstvec=True)
 
+print_apply_ext('apply_mt',TP,TV,'apply_mt(v.vec,nb_threads,op,PARALIST); apply_mt(v.next,nb_threads,op,PARALIST);', suppar=['int nb_threads'] )
+print_apply_ext('apply_mt_with_num_thread',TP,TV,'apply_mt_with_num_thread(v.vec,nb_threads,op,PARALIST); apply_mt_with_num_thread(v.next,nb_threads,op,PARALIST);', suppar=['int nb_threads'] )
+
+
 # without data
 TP = ['class Carac','unsigned nt']
 TV = 'Vec<Heterogeneous<Carac,nt,void>,s,int>'
@@ -261,7 +403,13 @@ print_apply_ext('apply',TP,TV,'')
 print_apply_ext('apply_wi',TP,TV,'')
 print_apply_ext('find' ,TP,TV,'return false;',ret='bool')
 print_apply_ext('apply_range',TP,TV,'',suppar=['int from','int to'])
+print_apply_ext('apply_range_stride',TP,TV,'',suppar=['int from','int to','int inc'])
+for inc in [1,2,4]:
+    print_apply_ext('apply_range_by_n',TP,TV,'',suppar=['int from','int to','const Number<'+str(inc)+'> &n_inc'])
+print_apply_ext('apply_on_number',TP,TV,'',suppar=['int num'])
 print_apply_ext('remove_if' ,TP,TV,'',onlyfornonconstvec=True)
+print_apply_ext('apply_mt',TP,TV,'', suppar=['int nb_threads'] )
+print_apply_ext('apply_mt_with_num_thread',TP,TV,'', suppar=['int nb_threads'] )
 
 print '} // namespace LMT'
 

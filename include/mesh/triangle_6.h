@@ -7,15 +7,22 @@
 
 namespace LMT {
 
-/**
-     2
-    | \
-    |  \
-    5   4
-    |    \
-    |     \
-    0__3___1
+/*!
+    \verbatim
+            2
+            | \
+            |  \
+            5   4
+            |    \
+            |     \
+            0__3___1
 
+
+    \relates Mesh
+    \keyword Maillage/Elément 
+    \author Hugo LECLERC
+    \friend rapahel.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
 */
 
 // --------------------------------------------------------------------------------------------------------
@@ -82,6 +89,12 @@ typename TNG::T measure( const Element<Triangle_6,TN,TNG,TD,NET> &e ) {
     return 0.5 * length( P1-P0 ) * length( P2-P0 );
 }
 
+/*!
+    Cette fonction retourne l'isobarycentre des sommets du triangle.
+
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+*/
 template<class TN,class TNG,class TD,unsigned NET>
 typename TNG::Pvec center(const Element<Triangle_6,TN,TNG,TD,NET> &e) {
     typename TNG::Pvec res = 0.0;

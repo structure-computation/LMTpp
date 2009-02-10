@@ -6,7 +6,8 @@
 
 namespace LMT {
 
-/**  5
+/**
+     5
     /|\
   11 | 10
   /  14  \
@@ -20,6 +21,24 @@ namespace LMT {
 */
 
 // --------------------------------------------------------------------------------------------------------
+/**
+    \verbatim
+        .                            5
+        .                           /|\
+        .                         11 | 10
+        .                         / 14  \
+        .                        3___9___4
+        .                        |   |   |
+        .                        |   2   |
+        .                       12  / \  13
+        .                        | 8   7 |
+        .                        |/     \|
+        .                        0___6__ 1
+
+    \keyword Maillage/Elément
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+*/
 struct Wedge_15 {
     static const unsigned nb_var_inter = 3;
     static const unsigned nb_nodes = 15;

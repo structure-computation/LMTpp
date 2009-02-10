@@ -29,7 +29,7 @@ template<class T>
 struct Convergence_criterium<Norm2_is_inf,T> {
     template<class TS>
     T operator()(const TS &syst) {
-        T res=0.0;
+        T res=T(0);
         for(int i=0;i<syst.size();++i)
             res+=pow(syst.vectors[0](i)-syst.old_vec(i),2);
         return sqrt(res);
@@ -45,7 +45,7 @@ struct Convergence_criterium<Norm1_is_inf,T> {
     template<class TS>
     T operator()(const TS &syst) {
         using namespace std;
-        T res = 0.0;
+        T res = T(0);
         for(unsigned i=0;i<syst.size();++i)
             res = max( res, abs(syst.old_vec(i)-syst.vecs[0](i)) );
         return res;

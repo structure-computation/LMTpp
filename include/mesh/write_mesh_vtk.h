@@ -14,6 +14,7 @@
 
 #include <fstream>
 #include <map>
+#include <string.h>
 #include "mesh.h"
 #include "zlib.h"
 
@@ -65,7 +66,7 @@ void set_vtk_cell_type_and_offsets( const TE &elem, Vec<unsigned> &connectivity,
         cell_type = 0;
         nb_points = 0;
     }
-
+    
     for(unsigned i=0;i<nb_points;++i)
         connectivity.push_back( m->node_list.number(*elem.node(i)) );
     cell_types.push_back( cell_type );
@@ -327,6 +328,10 @@ inline void EncodeSingle(unsigned char i0,
     *o3 = '=';
 }
 
+/*!
+Cette fonction transforme une suite de nombres binaires en une suite de nombres codés en base 64.
+Fontion utillisée par \a write_mesh_vtk .
+*/
 inline void add_encoded( std::string s, std::string &appended ) {
     unsigned s_size = s.size();
     s = std::string( (char *)&s_size, (char *)&s_size + sizeof(s_size) ) + s;
@@ -381,7 +386,7 @@ void write_mesh_vtk(std::ostream &os,const TM &m,const Vec<std::string> &display
         
         for(unsigned i=0;i<TM::TNode::nb_params;++i) {
             if ( std::find(display_fields.begin(),display_fields.end(),std::string(names[i]))!=display_fields.end() or (display_fields.size()>=1 and display_fields[0]=="all") ) {    //continue;
-                if ( names[i]!="pos" and nb_comp[i] ) {
+                if ( names[i]!=const_cast<char *>("pos") and nb_comp[i] ) {
                     os << "                <DataArray Name='" << names[i]
                             << "' NumberOfComponents='" << nb_comp[i] << "' type='" << get_vtk_types.res[i] << "' format='" << (binary ? "appended" : "ascii" ) << "' offset='" << appended.size() << "'>";
                     if ( binary )
@@ -643,8 +648,8 @@ void write_mesh_vtk_v2(std::ostream &os,const TM &m,const Vec<std::string> &disp
 
         for(unsigned i=0;i<TM::TNode::nb_params;++i) {
             if ( std::find(display_fields.begin(),display_fields.end(),std::string(names[i]))!=display_fields.end() or (display_fields.size()>=1 and display_fields[0]=="all") ) {    //continue;
-                if ( names[i]!="pos" and nb_comp[i] ) {
-
+                if ( names[i]!=const_cast<char *>("pos") and nb_comp[i] ) {
+                
                     os << names[i] << " " << nb_comp[i] << " " << m.node_list.size() << " float " <<endl;
                     os << dve.os[i].str();
                     os <<endl;

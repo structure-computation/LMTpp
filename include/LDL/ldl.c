@@ -157,6 +157,9 @@
 
 #include "ldl.h"
 
+#include <math.h>
+#include <stdlib.h>
+
 /* ========================================================================== */
 /* === ldl_symbolic ========================================================= */
 /* ========================================================================== */
@@ -502,7 +505,8 @@ int ldl_numeric_pg    /* returns n if successful, k if D (k,k) is zero */
 ) {
     double yi, l_ki ;
     int i, k, p, kk, p2, len, top ;
-    int kernod [40];
+    const int MAX_KERNOD_SIZE = 40;
+    int kernod[MAX_KERNOD_SIZE];
     double toupiti = 1.e-8 ; //pg this is a paremeter to detect null pivots
     *ksiz=0;
     for (k = 0 ; k < n ; k++) {
@@ -549,6 +553,7 @@ int ldl_numeric_pg    /* returns n if successful, k if D (k,k) is zero */
 //printf("Pivot %d, %e, %e\n",kk,D[k],toupiti/D[0]);
         if (fabs (D [k]) < toupiti / D [0] ) {
             D[k]=0.;
+            assert( *ksiz < MAX_KERNOD_SIZE );
             kernod [*ksiz] = kk;
             ++*ksiz;
         } else { D [ k ] = 1 / D [ k ];} /*pg useful to handle null pivots cleanly*/

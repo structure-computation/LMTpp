@@ -1,0 +1,35 @@
+/*!
+\webpage Metil metil
+
+    = Qu'est-ce ?
+
+        Metil est un langage de programmation orienté objet créé par Hugo Leclerc. Pour la LMT++, il est utilisé par exemple pour générer les formulations en langage C++.
+
+    = Récupération et installation
+
+        Pour récupérer les sources de METIL, on les extrait du dépot git de l'utilisateur multi en faisant :
+        \code 
+            git clone votre-nom@givry:/u/multi/METIL
+
+        Maintenant vous avez une copie dans le répertoire courant.
+        On aura besoin des programmes g++, readline, cmake.
+        Pour les installer sur ubuntu :
+            * g++ et oui en faisant sur ubuntu sudo apt-get install g++
+            * cmake  (commande : sudo apt-get install cmake ).
+            * readline (commande : sudo apt-get install libreadline5-dev ).
+        Créer ensuite les répertoires metil-build, metil-test et metil-bin : 
+        \code
+            mkdir metil-buld;mkdir metil-bin;mkdir metil-test
+        On se déplace dans le repertoire metil-build pour lancer cmake :
+        \code
+            cd metil-buld;cmake -i
+         -i pour le mode intéractif. Les choix par défauts sont corrects sauf l'emplacement des binaires. Préférez /usr à /usr/local.  
+        Lancer make :
+            \code
+                make
+        Après compilation, pour vérifier lancer l'interpréteur metil :
+            \code
+                metil 
+
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+*/

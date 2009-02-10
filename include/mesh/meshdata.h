@@ -12,13 +12,20 @@
 #ifndef LMTMESHDATA_H
 #define LMTMESHDATA_H
 
-#include "io/xmlnode.h"
+#ifndef DONT_WANT_XML
+    #include "io/xmlnode.h"
+#endif
 #include "containers/mat.h"
 
 namespace LMT {
 
 /// Ex : CARACDMEXTNAME(0,double,pressure);
 /// Used when pressure_DM is defined outward
+/**
+Cette macro permet l'introspection du code C++ pour obtenir par exemple les attributs et les méthodes d'une classe.
+
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+*/
 #define CARACDMEXTNAME(number,mytype,myname,unit) \
     template<unsigned n,unsigned ioena=0> struct SubType##number { typedef void TT; typedef void NT; }; \
     template<unsigned ioena> struct SubType0<number,ioena> { typedef mytype TT; typedef myname##_DM NT; }; \
@@ -31,8 +38,11 @@ namespace LMT {
     static const char *name_member_nb(const Number<number> &__n__) { return __STRING(myname); } \
     static const char *unit_member_nb(const Number<number> &__n__) { return unit; } \
     static unsigned nb_comp(const Number<number> &__n__) { return DM::NbComponents<mytype>::n; } \
-    template<class NDM,class TTT> void set_member_named##number( const NDM &ndm, const TTT &val ) {} \
-    template<class TTT> void set_member_named0( const myname##_DM &ndm, const TTT &val ) { myname = val; } \
+    template<class NDM,class TTT> void set_member_named##number( const NDM &ndm, const TTT &__val__ ) {} \
+    template<class NDM,class TTT> void set_member_named_if_same_type##number( const NDM &ndm, const TTT &__val__ ) {} \
+    template<class TTT> void set_member_named0( const myname##_DM &ndm, const TTT &__val__ ) { myname = __val__; } \
+    void set_member_named_if_same_type0( const myname##_DM &ndm, const mytype &__val__ ) { myname = __val__; } \
+    template<class TTT> void set_member_named_if_same_type0( const myname##_DM &ndm, const TTT &__val__ ) {} \
     mytype myname
 
 /// Ex : CARACDM(0,double,pressure);
@@ -50,16 +60,25 @@ namespace LMT {
     template<unsigned dn> static const char *name_member_nb(const Number<dn> &__n__) { return PARENT::name_member_nb(__n__); } \
     template<unsigned dn> static const char *unit_member_nb(const Number<dn> &__n__) { return PARENT::unit_member_nb(__n__); } \
     template<unsigned dn> static unsigned nb_comp(const Number<dn> &__n__) { return PARENT::nb_comp(__n__); } \
-    template<class NDM,class TTT> void set_member_named0( const NDM &ndm, const TTT &val ) { PARENT::set_member_named0(ndm,val); } \
+    template<class NDM,class TTT> void set_member_named0( const NDM &ndm, const TTT &__val__ ) { PARENT::set_member_named0(ndm,__val__); } \
     static const unsigned nb_var_parent = DM::NbFields<PARENT>::res
 
 #define VOIDDMSET \
     template<unsigned dntoto,unsigned ioenatoto=0> struct SubType0 { typedef void TT; }; \
-    template<class NDM,class TTT> void set_member_named0( const NDM &ndm, const TTT &val ) {} \
+    template<class NDM,class TTT> void set_member_named0( const NDM &ndm, const TTT &__val__ ) {} \
     static const unsigned nb_params = 0
     
 /// struct Foo : public VoidDMSet {}; create a DMset with 0 fields
-struct VoidDMSet { VOIDDMSET; };
+struct VoidDMSet {
+    VOIDDMSET;
+    template<class TT> void dm_data_set_field( const std::string field_name, TT value ) {
+        std::cerr << "There is no variable named " << field_name << " in data struct" << std::endl;
+    }
+    template<class TT> TT dm_data_get_field( const std::string field_name, StructForType<TT> ) const {
+        std::cerr << "There is no variable named " << field_name << " in data struct" << std::endl;
+        return TT(typename TypeInformation<TT>::SubType(0));
+    }
+};
 
 namespace DM {
 
@@ -69,7 +88,7 @@ namespace DM {
     template<class T,int dim> struct NbComponents<Vec<T,dim> > { static const unsigned n = int(NbComponents<T>::n*(MAX(dim,0))); };
     template<class T,int d1,int d2> struct NbComponents<Mat<T,Gen<d1,d2> > > { static const unsigned n = NbComponents<T>::n*MAX(d1,0)*MAX(d2,0); };
     template<class T,int d> struct NbComponents<Mat<T,Sym<d> > > { static const unsigned n = NbComponents<T>::n*MAX(d,0)*MAX(d,0); };
-    #ifndef WITHOUT_COMPLEX
+    #ifndef WITHOUTCOMPLEX
         template<class T> struct NbComponents<std::complex<T> > { static const unsigned n = NbComponents<T>::n*2; };
     #endif
 
@@ -130,6 +149,7 @@ namespace DM {
             op( number, dm_set.name_member_nb(Number<number>()), dm_set.member_nb(Number<number>()) );
             apply_with_names(dm_set,op,Number<number+1>(),nt);
         }
+        #ifndef DONT_WANT_XML
         template<class DMSet,unsigned total_number>
         void get_data_from_xml(DMSet &dm_set,const XmlNode &xn,const Number<total_number> &n1,const Number<total_number> &nt) {}
         template<class DMSet,unsigned number,unsigned total_number>
@@ -145,11 +165,12 @@ namespace DM {
             xn.set_attribute_with_unit( DMSet::name_member_nb(n1), DMSet::unit_member_nb(n1), dm_set.member_nb(n1) );
             send_data_to_xml(dm_set,xn,Number<number+1>(),nt);
         }
+        #endif
         template<class DMSet1,class DMSet2,unsigned total_number>
         void copy(const DMSet1 &dm_set1,DMSet2 &dm_set2,const Number<total_number> &n1,const Number<total_number> &nt) {}
         template<class DMSet1,class DMSet2,unsigned number,unsigned total_number>
         void copy(const DMSet1 &dm_set1,DMSet2 &dm_set2,const Number<number> &n1,const Number<total_number> &nt) {
-            dm_set2.set_member_named0( typename DMSet1::template SubType0<number,0>::NT(), dm_set1.member_nb(n1) );
+            dm_set2.set_member_named_if_same_type0( typename DMSet1::template SubType0<number,0>::NT(), dm_set1.member_nb(n1) );
             copy(dm_set1,dm_set2,Number<number+1>(),nt);
         }
         template<class Tpond,class DMSet1,class DMSet2,unsigned total_number>
@@ -162,6 +183,21 @@ namespace DM {
             dm_set2.set_member_named0( typename DMSet1::template SubType0<number,0>::NT(), mean );
             get_ponderation(pond_list,nb_pond,dm_set2,Number<number+1>(),nt);
         }
+        //
+        template<class P>
+        void assign_or_assert_if_same_type_or_not( P *&r, P *v ) { r = v; }
+        template<class P1,class P2>
+        void assign_or_assert_if_same_type_or_not( P1 *&r, P2 *v ) { assert(0); }
+        template<class DMSet,class P,unsigned total_number>
+        void get_ptr_on( DMSet &dmset, const char *name, P *&res,const Number<total_number> &n1,const Number<total_number> &nt ) { res = NULL; }
+        template<class DMSet,class P,unsigned number,unsigned total_number>
+        void get_ptr_on( DMSet &dmset, const char *name, P *&res,const Number<number> &n1,const Number<total_number> &nt ) {
+            if ( strcmp( name, dmset.name_member_nb(n1) ) == 0 )
+                assign_or_assert_if_same_type_or_not( res, &dmset.member_nb(n1) );
+            else
+                get_ptr_on( dmset, name, res, Number<number+1>(), nt );
+        }
+
     };
     
     /// Get number of fields of a structure containing VOIDDMSET; or one or several CARADM(...);
@@ -212,6 +248,7 @@ namespace DM {
     template<class DMSet,unsigned n>
     void get_nb_comp_up_to(unsigned *res,const Number<n> &nn) { DMPRIVATE::get_nb_comp(StructForType<DMSet>(),res,Number<0>(),nn); }
 
+    #ifndef DONT_WANT_XML
     ///
     template<class DMSet>
     void get_data_from_xml(DMSet &dm_set,const XmlNode &xn) { DMPRIVATE::get_data_from_xml(dm_set,xn,Number<0>(),Number<NbFields<DMSet>::res>()); }
@@ -223,6 +260,7 @@ namespace DM {
     void send_data_to_xml(const DMSet &dm_set,XmlNode &xn) { DMPRIVATE::send_data_to_xml(dm_set,xn,Number<0>(),Number<NbFields<DMSet>::res>()); }
     template<class DMSet,unsigned n>
     void send_data_to_xml_up_to(const DMSet &dm_set,XmlNode &xn,const Number<n> &nn) { DMPRIVATE::send_data_to_xml(dm_set,xn,Number<0>(),nn); }
+    #endif
 
     ///
     template<class DMSet1,class DMSet2>
@@ -244,13 +282,18 @@ namespace DM {
     }
     
 
+    ///
+    template<class DMSet,class P>
+    void get_ptr_on( DMSet &dmset, const char *name, P *&res ) { DMPRIVATE::get_ptr_on( dmset, name, res, Number<0>(), Number<NbFields<DMSet>::res>() ); }
+
 }; // namespace DM
 
 template<class NameDM>
 struct ExtractDM {
     template<class TNode> struct ReturnType { typedef typename TNode::template SubTypeByName0<NameDM>::TT T; };
     template<class TNode> struct ReturnType<TNode *> { typedef typename TNode::template SubTypeByName0<NameDM>::TT T; };
-    template<class TNode> typename TNode::template SubTypeByName0<NameDM>::TT operator()(const TNode &node) const { return node.member_named( n ); }
+    template<class TNode> const typename TNode::template SubTypeByName0<NameDM>::TT &operator()(const TNode &node) const { return node.member_named( n ); }
+    template<class TNode> typename TNode::template SubTypeByName0<NameDM>::TT &operator()(TNode &node) const { return node.member_named( n ); }
     NameDM n;
 };
 

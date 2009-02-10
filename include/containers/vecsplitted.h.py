@@ -1,17 +1,29 @@
+# -*- coding: utf-8 -*-
 import string
 from vecgenhelp import *
 
 print """
 namespace LMT {
+
+
+/*!
+    Avec cette structure, on alloue des petits blocs de mémoire séparés. Avantage : on peut ajouter des éléments sans réallouer.
+    \\friend hugo.leclerc@lmt.ens-cachan.fr
+*/
+
 template<class TT,unsigned atomic_size> struct Splitted {};
 
 template<class TT,unsigned atomic_size> struct IsVecOp<Splitted<TT,atomic_size> > { typedef int T; };
 
-/**
- stores blocks as T[atomic_size].<br>
- The main property is that push_back, resize and so on... do not change adress of stored data<br>
- (which is not the case with std::vector or LMT::Vec<T,-1>).<br>
- \warning all operations that implies a walk through data assume that size is not modified. Example : if op in apply(op) add elements, new elements won't be used. <br>
+/*!
+ stores blocks as T[atomic_size].
+ The main property is that push_back, resize and so on... do not change adress of stored data
+ (which is not the case with std::vector or LMT::Vec<T,-1>).
+ <strong> all operations that implies a walk through data assume that size is not modified. Example : if op in apply(op) add elements, new elements won't be used. </strong>
+
+    \\relates Vec
+    \\relates apply_wi_ptr
+    \\relates apply
 */
 template<class TT,unsigned atomic_size>
 class Vec<Splitted<TT,atomic_size>,-1,int> {
@@ -104,7 +116,7 @@ public:
         return &last_atom->data[size_last_atom++];
     }
     ///
-    template<class T2> void push_back(const T2 &val) { *new_elem() = val; }
+    template<class T2> T *push_back(const T2 &val) { T *res = new_elem(); *res = val; return res; }
     ///
     void resize(unsigned n) {
         if ( n==0 ) {
@@ -176,6 +188,10 @@ public:
             for(unsigned j=0;j<nb_to_append;++j)
                 last_atom->data[j] = *(b++);
         }
+    }
+    ///
+    template<class TV> void append( const TV &c ) {
+        apply( c, PushBack(), *this );
     }
     ///
     unsigned size() const { return nb_full_atoms()*atomic_size + size_last_atom; }
@@ -289,6 +305,24 @@ public:
     unsigned size_last_atom;
     bool owning;
 };
+
+/*!
+\generic_comment apply_wi_ptr
+
+    Cette fonction réservée aux vecteurs \a Vec<Splitted<TT,atomic_size>,-1,int> (cad un \a Vec spécialisé par \a Splitted) agit sur un vecteur comme \a apply mais en tenant compte de l'indice de l'élément (d'où le wi pour with index) et l'accés à cet élément se fait par référence.
+    Par conséquent la classe-fonction doit définir correctment operator() de cette façon :
+    \code 
+        template <class Telement> struct operateur {
+            void operator()( const Telement* ptr_e, int i ) const { bla bla }
+        };
+          
+    ptr_e est l'adresse de l'élément dans la mémoire de l'ordinateur.
+    *ptr_e est l'élément lui-même (remarquer l'astérisque).
+
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+*/
+
+
 """
 
 TP = ['class TT','unsigned atomic_size']
@@ -358,6 +392,18 @@ for ptr,e in zip(['','_ptr'],['','*']):
             for(unsigned j=0;j<sl;++j,++cpt) op("""+e+"""v.last_atom->data[j],cpt,PARALIST);
     """)
     print_apply_ext('apply_nz_unique'+ptr,TP,TV,'apply_nz'+ptr+'(op,PARALIST);')
+
+for const in [False,True]:
+    print_apply_ext('find_elem',TP,TV,"""
+            unsigned nf = v.nb_full_atoms(), sl = v.size_last_atom;
+            for(unsigned i=0;i<nf;++i)
+                for(unsigned j=0;j<atomic_size;++j)
+                    if (op(v.atoms[i]->data[j],PARALIST)) return &v.atoms[i]->data[j];
+            for(unsigned j=0;j<sl;++j)
+                if (op(v.last_atom->data[j],PARALIST)) return &v.last_atom->data[j];
+            return NULL;
+    """,ret='const '*const+'TT *',onlyforconstvec=const, onlyfornonconstvec=not const)
+
 
 print """
 }

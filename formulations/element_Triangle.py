@@ -18,12 +18,19 @@ children = [
   { 'name':'Bar', 'nodes':[2, 0], 'var':[   number(0)    , 1-var_inter[0]] },
 ]
 
+var_inter_of_node_number = [
+  [ 0, 0 ],
+  [ 1, 0 ],
+  [ 0, 1 ],
+]
+
 permutation = [ 0, 2, 1 ]
 
 interpolation["nodal"] = (1-var_inter[0]-var_inter[1]) * val[0] + \
                          var_inter[0]                  * val[1] + \
                          var_inter[1]                  * val[2]
 
+interpolation["nodal_3"] = interpolation["nodal"]
 
 
 ni = (1-var_inter[0]-var_inter[1]) * var_inter[0] * var_inter[1] * 81
@@ -32,6 +39,16 @@ interpolation["bubble"] = (1-var_inter[0]-var_inter[1]) * (1-ni) * val[0] + \
                           var_inter[1]                  * (1-ni) * val[2] + \
                           ni                                     * val[3]
 
+# MG
+tmp_authorized_permutations = [
+     [0,1,2]
+]
+
+for i in range(3):
+     authorized_permutations += tmp_authorized_permutations
+     for c in range( len(tmp_authorized_permutations) ):
+         tmp_authorized_permutations[c] = tmp_authorized_permutations[c][1:3] + [ tmp_authorized_permutations[c][0] ]
+authorized_permutations = authorized_permutations[1:]
 
 # interpolations P+
 for i in range( 1, 10 ):

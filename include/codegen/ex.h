@@ -23,15 +23,18 @@ namespace Codegen {
 class Op;
 unsigned nb_children_op(const Op *op);
 
-/**
-Base node class for Codegen. Can represent a symbol, a number, a multiplication, ...
-basic constructor Ex ex(); gives ex=0 by default
+/*!
+    Base node class for Codegen. Can represent a symbol, a number, a multiplication, ...
+    basic constructor Ex ex(); gives ex=0 by default
+    
+    Symbols can contain a name, a latex_name, (void *)additional_data and a value.
+    Thus, all operations between several Ex calculate a number.
+    Ex : cout << (symbol("a",1) + symbol("b",3)).get_val(); gives 4 as result.
 
-Symbols can contain a name, a latex_name, (void *)additional_data and a value.
-Thus, all operations between several Ex calculate a number.
-Ex : cout << (symbol("a",1) + symbol("b",3)).get_val(); gives 4 as result.
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \friend raphael.pasquier@lmt.ens-cachan.fr 
 
-@author LECLERC Hugo
+    \author LECLERC Hugo
 */
 class Ex {
 public:
@@ -39,6 +42,8 @@ public:
     //struct ExMapCmp { bool operator()(const Ex &e1,const Ex &e2) const { return (e1.op<e2.op); } };
     typedef std::less<Ex> ExMapCmp;
     typedef std::map<Ex,Ex,Ex::ExMapCmp> MapEx;
+    typedef std::set<Ex,Ex::ExMapCmp> SetEx;
+    typedef std::set<T> SetNumber;
     
     Ex();
     Ex(const Op *ex);
@@ -68,6 +73,8 @@ public:
     void display_graphviz(const char *filename="tmp.dot") const;
     
     bool depends_on(const Ex &ex) const;
+    
+    Ex find_discontinuity( const Ex &v ) const;
     
     Ex operator-() const;
     Ex operator+=(const Ex &a);
@@ -99,9 +106,12 @@ public:
     Ex diff(const Ex &a) const;
     Ex diff(std::map<Ex,Ex,Ex::ExMapCmp> &m) const; /// beware : m will be modified, adding new elements
     
+    bool is_zero() const;
     
-    typedef std::set<Ex,Ex::ExMapCmp> SetEx;
+    
     void get_sub_symbols(SetEx &sub_symbols) const;
+    void get_sub_numbers(SetNumber &sub_numbers) const;
+    
     void get_sub_nodes(SetEx &sub_nodes) const;
     unsigned nb_children_rec() const { return nb_children_op(op); }
     
@@ -117,8 +127,8 @@ public:
     bool operator<(const Ex &e) const { return ( op < e.op ); }
     
     const Op *op;
-private:
     static long unsigned current_id;
+private:
     
     void diff_rec() const;
     void subs_rec() const;
@@ -159,6 +169,7 @@ private:
     
     friend Ex pow(const Ex &a,const Ex &b);
     friend Ex max(const Ex &a,const Ex &b);
+    friend Ex mini(const Ex &a,const Ex &b);
     friend Ex atan2(const Ex &a,const Ex &b);
 
     friend Ex new_function_1(const std::string &f,const Ex &a);
@@ -191,6 +202,8 @@ Ex sqrt(const Ex &a);
 Ex abs(const Ex &a);        
 Ex heavyside(const Ex &a);  
 Ex heavyside_if(const Ex &a);  
+inline Ex heaviside(const Ex &a) { return heavyside( a ); }
+inline Ex heaviside_if(const Ex &a) { return heavyside_if( a ); }
 Ex eqz(const Ex &a);        
 Ex sin(const Ex &a);        
 Ex cos(const Ex &a);        
@@ -202,14 +215,18 @@ Ex neg(const Ex &a);
 Ex asin(const Ex &a);       
 Ex acos(const Ex &a);       
 Ex atan(const Ex &a);       
+
+Ex dirac(const Ex &a);       
                             
 Ex pow(const Ex &a,const Ex &b);
+Ex mini(const Ex &a,const Ex &b);
 Ex max(const Ex &a,const Ex &b);
 Ex atan2(const Ex &a,const Ex &b);
                             
 Ex new_function_1(const std::string &f,const Ex &a);
 Ex new_function_2(const std::string &f,const Ex &a,const Ex &b);
                             
+Ex integration(const Ex &expr,const Ex &v,const Ex &beg,const Ex &end,unsigned max_poly_order=5);
                             
                             
                             

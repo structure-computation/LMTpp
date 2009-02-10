@@ -6,12 +6,21 @@
 
 namespace LMT {
 
+/*!
+
+    PolApprox est une classe qui représente les polynômes de degré fixé à la compilation.
+
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \keyword Mathématiques/Objet
+*/
+
 template<unsigned order,class T=double>
 struct PolApprox {
-    PolApprox( const T &v = 0.0 ) {
+    PolApprox( const T &v = T(0) ) {
         val[0] = v;
         for(unsigned i=1;i<order;++i)
-            val[i] = T(0.0);
+            val[i] = T(0);
     }
     T operator[](const T &x) const {
         T res = val[0];

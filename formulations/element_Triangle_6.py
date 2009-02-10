@@ -23,6 +23,15 @@ permutation = [ 5,4,3,2,1,0 ]
 #    0__3___1
 #
 
+var_inter_of_node_number = [
+  [ 0.0, 0.0 ],
+  [ 1.0, 0.0 ],
+  [ 0.0, 1.0 ],
+  [ 0.5, 0.0 ],
+  [ 0.5, 0.5 ],
+  [ 0.0, 0.5 ],
+]
+
 X0 = 1 - var_inter[0]-var_inter[1]
 X1 = var_inter[0]
 X2 = var_inter[1]
@@ -33,6 +42,10 @@ interpolation["nodal"] = (2*X0 - 1) * X0 * val[0] + \
                                4*X0 * X1 * val[3] + \
                                4*X1 * X2 * val[4] + \
                                4*X2 * X0 * val[5]
+
+interpolation["nodal_3"] = (1-var_inter[0]-var_inter[1]) * val[0] + \
+                           var_inter[0]                  * val[1] + \
+                           var_inter[1]                  * val[2]
                          
 # ni = (1-var_inter[0]-var_inter[1]) * var_inter[0] * var_inter[1] * 81
 # interpolation["bubble"] = (1-var_inter[0]-var_inter[1]) * (1-ni) * val[0] + \

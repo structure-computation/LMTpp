@@ -18,6 +18,8 @@
 #include <sstream>
 #include <iostream>
 #include <math.h>
+#include <stdlib.h>
+#include <algorithm>
 #include <assert.h>
 
 namespace Codegen {
@@ -101,6 +103,7 @@ Ex Ex::subs_with_test(const Ex &a,const Ex &b) const {
 Ex Ex::subs(std::map<Ex,Ex,Ex::ExMapCmp> &m) const {
     ++current_id;
     for( std::map<Ex,Ex,Ex::ExMapCmp>::const_iterator iter = m.begin(); iter != m.end(); ++iter ) {
+        iter->second.op->cptUse++;
         iter->first.op->res_op = iter->second.op;
         iter->first.op->id = current_id;
     }
@@ -211,13 +214,39 @@ Ex::T Ex::subs_numerical(std::map<Ex,Ex::T,Ex::ExMapCmp> &m) const throw(Subs_nu
     throw Subs_numerical_error( to_string() );
 }
 
-void Ex::get_sub_symbols(SetEx &sub_symbols) const {
-    SetEx lst;
-    get_sub_nodes(lst);
-    for(SetEx::const_iterator iter=lst.begin();iter!=lst.end();++iter)
-        if ( iter->is_a_symbol() )
-            sub_symbols.insert( *iter );
+void get_sub_symbols_rec( const Op *op, Ex::SetEx &sub_symbols ) {
+    if ( op->id == Ex::current_id )
+        return;
+    op->id = Ex::current_id;
+    //
+    if ( op->type == Op::Symbol )
+        sub_symbols.insert( op );
+    else
+        for(unsigned i=0;i<op->nb_children();++i)
+            get_sub_symbols_rec( op->data.children[i], sub_symbols );
 }
+void Ex::get_sub_symbols( SetEx &sub_symbols ) const {
+    ++Ex::current_id;
+    get_sub_symbols_rec( op, sub_symbols );
+}
+
+void get_sub_numbers_rec( const Op *op, Ex::SetNumber &sub_numbers ) {
+    if ( op->id == Ex::current_id )
+        return;
+    op->id = Ex::current_id;
+    //
+    if ( op->type == Op::Number )
+        sub_numbers.insert( op->val );
+    else
+        for(unsigned i=0;i<op->nb_children();++i)
+            get_sub_numbers_rec( op->data.children[i], sub_numbers );
+}
+void Ex::get_sub_numbers( SetNumber &sub_numbers ) const {
+    ++Ex::current_id;
+    get_sub_numbers_rec( op, sub_numbers );
+}
+
+
 void Ex::get_sub_nodes(SetEx &lst) const {
     if ( find( lst.begin(), lst.end(), *this ) != lst.end() )
         return;
@@ -278,6 +307,7 @@ Ex Ex::diff(const Op *op,const Ex &a,const Ex &da) {
         case Op::Asin:      return da*pow(1-pow(a,2),-(T)0.5);
         case Op::Acos:      return -da*pow(1-pow(a,2),-(T)0.5);
         case Op::Atan:      return da/(1+pow(a,2));
+        case Op::Dirac:     return number( 0.0 ); // assert( 0 /* interdit, le prof de math va vous pizzater */ );
         default:            assert( 0 );
     }
     return 0;
@@ -292,6 +322,7 @@ Ex Ex::diff(const Op *op,const Ex &a,const Ex &da,const Ex &b,const Ex &db) {
         case Op::Div:       return da / b - db * a / pow(b,2);
         case Op::Pow:       return b*da*pow(a,b-1) + db*log(a)*Ex(op);
         case Op::Max:       return heavyside(b-a)*db + (1-heavyside(b-a))*da;
+        case Op::Min:       return heavyside(a-b)*db + (1-heavyside(a-b))*da;
         case Op::Atan2:     return ( db/a - da*b/(a*a) ) / ( 1+pow(b/a,2) );
         default:            assert( 0 );
     }
@@ -341,8 +372,11 @@ Ex asin(const Ex &a) { return make_function_1(Op::Asin,a.op); }
 Ex acos(const Ex &a) { return make_function_1(Op::Acos,a.op); }
 Ex atan(const Ex &a) { return make_function_1(Op::Atan,a.op); }
 
+Ex dirac(const Ex &a) { return make_function_1(Op::Dirac,a.op); }
+
 Ex pow(const Ex &a,const Ex &b) { return make_function_2(Op::Pow,a.op,b.op); }
 Ex max(const Ex &a,const Ex &b) { return make_function_2(Op::Max,a.op,b.op); }
+Ex mini(const Ex &a,const Ex &b) { return make_function_2(Op::Min,a.op,b.op); }
 Ex atan2(const Ex &a,const Ex &b) { return make_function_2(Op::Atan2,a.op,b.op); }
 
 Ex::T Ex::get_val() const {
@@ -392,6 +426,127 @@ bool Ex::depends_on(const Ex &ex) const {
     ex.op->res_op = ex.op;
     op->depends_on_rec( current_id );
     return op->res_op;
+}
+    
+Ex Ex::find_discontinuity( const Ex &v ) const {
+    ++current_id;
+    
+    std::vector<const Op *> lst;
+    op->find_discontinuities( current_id, lst );
+    for(int i=lst.size()-1;i>=0;--i)
+        if ( Ex( lst[i] ).depends_on( v ) )
+            return Ex( lst[i] );
+    return 0;
+}
+
+bool Ex::is_zero() const { return op->type == Op::Number and op->val == 0.0; }
+
+/*
+def get_taylor_expansion( expr, beg, var, deg_poly_max ):
+    res = ExVector()
+    r = 1.0
+    for i in range( deg_poly_max + 1 ):
+        res.push_back( r * expr.subs( var, beg ) )
+        if i < deg_poly_max:
+            expr = expr.diff( var )
+            r /= i + 1
+    return res
+
+def integration( expr, var, beg, end, deg_poly_max = 5 ):
+    disc = expr.find_discontinuity( var )
+    #if not disc.is_zero():
+        
+    taylor_expansion =  get_taylor_expansion( expr, beg, var, deg_poly_max )
+    #
+    res = 0
+    for i in range( taylor_expansion.size() ):
+        res += taylor_expansion[i] * ( end - beg ) ** ( i + 1 ) / ( i + 1 )
+    return res;
+
+*/
+std::vector<Ex> taylor_expansion( Ex expr, const Ex &var, unsigned max_poly_order, const Ex &beg = 0 ) {
+    std::vector<Ex> res;
+    Ex::T r = 1;
+    for(unsigned i=0;i<=max_poly_order;++i) {
+        res.push_back( r * expr.subs( var, beg ) );
+        if ( i < max_poly_order ) {
+            expr = expr.diff( var );
+            r /= i + 1;
+        }
+    }
+    return res;
+}
+
+Ex polynomial_integration(const Ex &expr,const Ex &v,const Ex &beg,const Ex &end,unsigned max_poly_order) {
+    std::vector<Ex> te = taylor_expansion( expr, v, max_poly_order, beg );
+    Ex res( 0 );
+    for(unsigned i=0;i<te.size();++i)
+        res += te[i] * pow( end - beg, i + 1 ) / ( i + 1 );
+    return res;
+}
+
+Ex integration(const Ex &expr,const Ex &v,const Ex &beg,const Ex &end,unsigned deg_poly_max) {
+    Ex disc = expr.find_discontinuity( v );
+    if ( disc.op->type != Op::Number ) {
+        Ex ch = disc.op->data.children[0];
+        
+        //
+        Ex mid = ( beg + end ) / 2;
+        std::vector<Ex> expansion_ = taylor_expansion( ch, v, 2, mid );
+        Ex a_0 = expansion_[0], a_1 = expansion_[1];
+        Ex cut = mid - a_0 / ( a_1 + eqz( a_1 ) );
+        
+        
+        // Dirac
+        if ( disc.op->type == Op::Dirac ) {
+            std::cout << "-> " << expr << std::endl;
+            std::cout << a_0  << std::endl;
+            std::cout << a_1  << std::endl;
+            
+            Ex cb = heaviside( cut - beg );
+            Ex ce = heaviside( cut - end );
+            return expr.subs( disc, 1 ).subs( v, cut ) * ( 1 - eqz( a_1 ) ) * ( cb + ce - 2 * cb * ce ) + 
+                   integration( expr.subs( disc, dirac( a_0 ) ), v, beg, end ) * eqz( a_1 );
+        }
+        
+        //
+        Ex subs_n;
+        Ex subs_p;
+        switch ( disc.op->type ) {
+            case Op::Heavyside:
+            case Op::Heavyside_if:
+                subs_n = expr.subs( disc, 0 );
+                subs_p = expr.subs( disc, 1 );
+                break;
+            case Op::Abs:
+                subs_n = expr.subs( disc, - ch );
+                subs_p = expr.subs( disc,   ch );
+                break; 
+            case Op::Sgn:
+                subs_n = expr.subs( disc, -1 );
+                subs_p = expr.subs( disc,  1 );
+                break;
+            default:
+                assert( 0 );
+        }
+        
+        Ex p_beg = heaviside( ch.subs( v, beg ) );
+        Ex p_end = heaviside( ch.subs( v, end ) );
+        Ex n_beg = 1 - p_beg;
+        Ex n_end = 1 - p_end;
+        //
+        //
+        Ex nb = beg + ( cut - beg ) * p_beg * n_end;
+        Ex ne = end + ( beg - end + ( cut - beg ) * n_beg ) * p_end;
+        Ex pb = beg + ( end - beg + ( cut - end ) * p_end ) * n_beg;
+        Ex pe = end + ( cut - end ) * p_beg * n_end;
+        
+        Ex int_n = integration( subs_n, v, nb, ne, deg_poly_max );
+        Ex int_p = integration( subs_p, v, pb, pe, deg_poly_max );
+        return int_n + int_p;
+    }
+    //
+    return polynomial_integration( expr, v, beg, end, deg_poly_max );
 }
 
 

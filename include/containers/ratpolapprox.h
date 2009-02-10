@@ -6,12 +6,21 @@
 
 namespace LMT {
 
+
+/*!
+
+    RatPolApprox est une classe qui représente les fonctions rationnelles dont le degré du numérateur et dénominateur sont fixés à la compilation.
+
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \keyword Mathématiques/Objet
+*/
 template<unsigned p_order_,unsigned q_order_,class T=double>
 struct RatPolApprox {
     static const unsigned p_order = p_order_;
     static const unsigned q_order = q_order_;
     
-    RatPolApprox( const T &v = 0.0 ) {
+    RatPolApprox( const T &v = T(0) ) {
         P = v;
         Q = T(1.0);
     }
