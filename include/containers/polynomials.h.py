@@ -85,12 +85,12 @@ for temp,nx,vd,vf in lst :
         print 'template <int nd, class T>'
         print 'class Pol<nd,1,T> {'
     print """public:
+    static const int degree=nd;
+    static const int variables_number="""+nx+""";
     static const int dim=DimPol<nd,"""+nx+""">::valeur;
 private :
     Vec<T,dim> coefs;
 public:
-    static const int degree=nd;
-    static const int variables_number="""+nx+""";
     static bool init_puissances;
     static void initialize_puissances();
     static Vec<Vec<unsigned,"""+nx+""">,Pol<nd,"""+nx+""",T>::dim> puissances;
@@ -106,7 +106,7 @@ public:
     const Vec<T,dim> &coefficients() const {return coefs;} ///Renvoie les coefficients du polynome
     const Vec<Vec<unsigned,"""+nx+""">,Pol<nd,"""+nx+""",T>::dim> &powers(); ///Renvoie les puissances du polynome
     template <class T2> typename TypePromote<Multiplies,T,T2>::T operator() (const """+vd+"""T2"""+vf+"""&x) const; /// Renvoie la valeur du polynome en x
-    typedef Pol<nd-1,"""+nx+""",T> Derivative;
+    typedef Pol<(nd>0?nd-1:nd),"""+nx+""",T> Derivative;
     """+vd+"""Derivative"""+vf+""" derivative() const; ///Renvoie les polynomes derives
     operator bool() const {return true;}
     Pol<nd,"""+nx+""",T> operator-() const; ///Renvoie le polynome oppose;
@@ -186,9 +186,9 @@ template <int nd, """+temp+"""class T>
 template <class T2>
 Pol<nd,"""+nx+""",T>::Pol(const Vec<T2,Pol<nd,"""+nx+""",T2>::dim> &V) {
     for(unsigned i=0; i<min(V.size(),coefs.size()); ++i)
-        coefs[i] = V[i];
+        coefs[i] = T(V[i]);
     for(unsigned i=V.size(); i<coefs.size(); ++i)
-        coefs[i] = 0;
+        coefs[i] = T(0);
 }
 
 template <int nd, """+temp+"""class T>
@@ -1041,12 +1041,12 @@ Pol<nd,nx,typename TypePromote<Multiplies,T1,typename IsScalar<T2>::T>::T> opera
 
 template <int nd, int nx, class T1, class T2>
 Pol<nd,nx,typename TypePromote<Divides,T1,typename IsScalar<T2>::T>::T> operator/(const T2 &t, const Pol<nd,nx,T1> &P) {
-    return Pol<nd,nx,typename TypePromote<Divides,T1,typename IsScalar<T2>::T>::T> ( Vec<typename TypePromote<Divides,T1,typename IsScalar<T2>::T>::T,Pol<nd,nx,T1>::dim>(P.coefficients()) / typename TypePromote<Divides,T1,typename IsScalar<T2>::T>::T(t) );
+    return Pol<nd,nx,typename TypePromote<Divides,T1,typename IsScalar<T2>::T>::T>(t) / P;
 }
 
 template <int nd, int nx, class T1, class T2>
 Pol<nd,nx,typename TypePromote<Divides,T1,typename IsScalar<T2>::T>::T> operator/(const Pol<nd,nx,T1> &P, const T2 &t) {
-    return Pol<nd,nx,typename TypePromote<Divides,T1,typename IsScalar<T2>::T>::T>(P.coefficients()/t);
+    return Pol<nd,nx,typename TypePromote<Divides,T1,typename IsScalar<T2>::T>::T> ( Vec<typename TypePromote<Divides,T1,typename IsScalar<T2>::T>::T,Pol<nd,nx,T1>::dim>(P.coefficients()) / typename TypePromote<Divides,T1,typename IsScalar<T2>::T>::T(t) );
 }
 
 template <int nd, int nx, class T>

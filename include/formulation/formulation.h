@@ -808,7 +808,7 @@ public:
         return true;
     }
     ///
-    bool solve_system(AbsScalarType iterative_criterium=0.0,bool disp_timing=false) {
+    bool solve_system(AbsScalarType iterative_criterium=AbsScalarType(0),bool disp_timing=false) {
         bool res;
         double t0 = time_of_day_in_sec();
         if ( iterative_criterium and nb_nodal_unknowns==3 and sollicitation.size() % 3 == 0 and TypeInformation<ScalarType>::type()=="double" and wont_add_nz == false )
@@ -831,7 +831,7 @@ public:
      * call all functions to get solution...
      * @return 
      */
-    bool solve( AbsScalarType iterative_criterium=0.0, bool disp_timing=false ) {
+    bool solve( AbsScalarType iterative_criterium=AbsScalarType(0), bool disp_timing=false ) {
         allocate_matrices();
         shift();
         //
