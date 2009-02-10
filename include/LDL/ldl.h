@@ -14,10 +14,16 @@ extern int ldl_numeric (int n, int Ap [ ], int Ai [ ], double Ax [ ],
     double D [ ], double Y [ ], int Pattern [ ], int Flag [ ],
     int P [ ], int Pinv [ ]) ;
 
+extern int ldl_numeric_pg (int n, int Ap [ ], int Ai [ ], double Ax [ ],
+    int Lp [ ], int Parent [ ], int Lnz [ ], int Li [ ], double Lx [ ],
+    double D [ ], double Y [ ], int Pattern [ ], int Flag [ ],
+    int P [ ], int Pinv [ ] , int *kersiz , double  **kernel );
+
 extern void ldl_lsolve (int n, double X [ ], int Lp [ ], int Li [ ],
     double Lx [ ]) ;
 
 extern void ldl_dsolve (int n, double X [ ], double D [ ]) ;
+extern void ldl_dsolve_pg (int n, double X [ ], double D [ ]) ;
 
 extern void ldl_ltsolve (int n, double X [ ], int Lp [ ], int Li [ ],
     double Lx [ ]) ;

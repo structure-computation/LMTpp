@@ -352,6 +352,19 @@ void ldl_dsolve
     }
 }
 
+void ldl_dsolve_pg
+(
+    int n,      /* D is n-by-n, where n >= 0 */
+    double X [ ],   /* size n.  right-hand-side on input, soln. on output */
+    double D [ ]    /* input of size n, not modified */
+) {
+    int j ;
+    for (j = 0 ; j < n ; j++) {
+        X [j] *= D [j] ;
+    }
+}
+
+
 
 /* ========================================================================== */
 /* === ldl_ltsolve: solve L'x=b  ============================================ */
@@ -464,3 +477,105 @@ int ldl_valid_matrix ( int n, int Ap [ ], int Ai [ ] ) {
             return 0;    /* row indices must be in the range 0 to n-1 */
     return 1;        /* matrix is valid */
 }
+
+
+int ldl_numeric_pg    /* returns n if successful, k if D (k,k) is zero */
+(
+    int n,      /* A and L are n-by-n, where n >= 0 */
+    int Ap [ ],     /* input of size n+1, not modified */
+    int Ai [ ],     /* input of size nz=Ap[n], not modified */
+    double Ax [ ],  /* input of size nz=Ap[n], not modified */
+    int Lp [ ],     /* input of size n+1, not modified */
+    int Parent [ ], /* input of size n, not modified */
+    int Lnz [ ],    /* output of size n, not defn. on input */
+    int Li [ ],     /* output of size lnz=Lp[n], not defined on input */
+    double Lx [ ],  /* output of size lnz=Lp[n], not defined on input */
+    double D [ ],   /* output of size n, not defined on input */
+    double Y [ ],   /* workspace of size n, not defn. on input or output */
+    int Pattern [ ],    /* workspace of size n, not defn. on input or output */
+    int Flag [ ],   /* workspace of size n, not defn. on input or output */
+    int P [ ],      /* optional input of size n */
+    int Pinv [ ],    /* optional input of size n */    
+    int *ksiz,       /* output giving the number of null pivots */
+ //   int kernod [ ],   /* output list of null pivots  */
+    double **kernel /* output kernel of the matrix in column format*/
+) {
+    double yi, l_ki ;
+    int i, k, p, kk, p2, len, top ;
+    int kernod [40];
+    double toupiti = 1.e-8 ; //pg this is a paremeter to detect null pivots
+    *ksiz=0;
+    for (k = 0 ; k < n ; k++) {
+        /* compute nonzero Pattern of kth row of L, in topological order */
+        Y [k] = 0.0 ;           /* Y(0:k) is now all zero */
+        top = n ;           /* stack for pattern is empty */
+        Flag [k] = k ;          /* mark node k as visited */
+        Lnz [k] = 0 ;           /* count of nonzeros in column k of L */
+        kk = (P) ? (P [k]) : (k) ;  /* kth original, or permuted, column */
+        p2 = Ap [kk+1] ;
+        for (p = Ap [kk] ; p < p2 ; p++) {
+            i = (Pinv) ? (Pinv [Ai [p]]) : (Ai [p]) ;   /* get A(i,k) */
+            if (i <= k) {
+                Y [i] += Ax [p] ;  /* scatter A(i,k) into Y (sum duplicates) */
+                /* follow path from i to root of etree, stop at flagged node */
+                for (len = 0 ; Flag [i] != k ; i = Parent [i]) {
+                    Pattern [len++] = i ;   /* L(k,i) is nonzero */
+                    Flag [i] = k ;      /* mark i as visited */
+                }
+                while (len > 0)         /* push path on top of stack */
+                {
+                    Pattern [--top] = Pattern [--len] ;
+                }
+            }
+        }
+        /* Pattern [top ... n-1] now contains nonzero pattern of L(:,k) */
+        /* compute numerical values kth row of L (a sparse triangular solve) */
+        D [k] = Y [k] ;         /* get D(k,k) and clear Y(k) */
+        Y [k] = 0.0 ;
+        for ( ; top < n ; top++) {
+            i = Pattern [top] ;
+            yi = Y [i] ;        /* get and clear Y(i) */
+            Y [i] = 0.0 ;
+            p2 = Lp [i] + Lnz [i] ;
+            for (p = Lp [i] ; p < p2 ; p++) {
+                Y [Li [p]] -= Lx [p] * yi ;
+            }
+            l_ki = yi * D [i] ;    /*pg D is inverse pivot i*/
+            D [k] -= l_ki * yi ;
+            Li [p] = k ;        /* store L(k,i) in column form of L */
+            Lx [p] = l_ki ;
+            Lnz [i]++ ;         /* increment count of nonzeros in col i */
+        }
+//printf("Pivot %d, %e, %e\n",kk,D[k],toupiti/D[0]);
+        if (fabs (D [k]) < toupiti / D [0] ) {
+            D[k]=0.;
+            kernod [*ksiz] = kk;
+            ++*ksiz;
+        } else { D [ k ] = 1 / D [ k ];} /*pg useful to handle null pivots cleanly*/
+    }
+    int ker,pc,pp,kker;
+    *kernel = (double*) malloc( n * (*ksiz) * sizeof(double) );
+    for (pc=0;pc<n*(*ksiz);++pc) (*kernel)[pc]=0.;
+    for (ker=0; ker < *ksiz;++ker ){
+       for ( pc = 0 ; pc < kernod[ker] ; ++pc )
+          for ( pp = Ap[pc] ; pp < Ap[pc+1] ; ++pp)
+             if (Ai[pp]==kernod[ker]) {
+                (*kernel)[n*ker +  pc ] = Ax[ pp ];
+                break;
+             }
+       for ( pp = Ap[ kernod[ker] ] ; pp < Ap[kernod[ker]+1] ; ++pp ){
+         (*kernel)[ n*ker + Ai[ pp ] ] = Ax [ pp ];
+       }
+       for ( kker=0 ; kker < *ksiz ; ++kker)  (*kernel)[ n*ker + kernod[kker] ]= 0.;
+       ldl_perm( n, Y, &(*kernel)[ n*ker ], P ) ;
+       ldl_lsolve(n, Y, Lp, Li, Lx);
+       ldl_dsolve_pg(n, Y, D);
+       ldl_ltsolve(n, Y, Lp, Li, Lx);
+       ldl_permt( n, &(*kernel)[ n*ker ], Y, P ) ;   
+       for ( kker=0 ; kker < *ksiz ; ++kker)  (*kernel)[ n*ker + kernod[kker] ]= 0.;
+       (*kernel)[ n*ker + kernod[ker] ]=-1.;
+    }
+    //free(kernod);
+    return (n) ;    /* success, diagonal of D is all nonzero */
+}
+

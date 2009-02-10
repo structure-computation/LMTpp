@@ -38,7 +38,7 @@ public:
     
     ///
     Mesh() {
-        PRINT( nb_sub_meshes );
+        //PRINT( nb_sub_meshes );
         cpt_nodes=0;
     }
     /// add a node using default constructor
