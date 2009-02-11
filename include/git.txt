@@ -47,8 +47,17 @@
     
     
     = THE GIT REPOSITORY BROWSER 
-        Pour avoir une information sur les derniers patchs et leur utilité dans une fenetre : 
-        gitk
+        Pour avoir une information sur les derniers patchs et leur utilité dans une fenetre :  [[http://gitk.sourceforge.net|gitk]]
+
+    = ACCEDER AU LOG DE GIT
+
+        on les obtient en faisant :
+        \code
+            git-log
+            ou
+            git log
+        Cette commande a de nombreux arguments possibles dont certains sont expliqués sur la page [[http://alx.github.com/gitbook/3_analyser_l'historique_-_git_log.html]] .
+
     
     source : intranet page \a http://intranet/mediawiki/index.php/GIT
 
