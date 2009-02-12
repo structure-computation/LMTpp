@@ -264,7 +264,7 @@ void LDL_solver::get_factorization( LMT::Mat<double,LMT::Gen<>,LMT::SparseLine<>
 
 void LDL_solver::solve( LMT::Vec<double> &B ) {
     //    TicToc tt; tt.start();    
-    
+     
     ldl_perm( n, Y.ptr(), B.ptr(), P.ptr() ) ;                    /* y = Pb */
     if ( want_semi_morse_ )
         semi_morse_lsolve( Y );
