@@ -298,7 +298,7 @@ std::istream &line_input( std::istream &s, Mat<TT,Structure,Storage,OP> &m ) {
     for(unsigned i=0;i<m.nb_rows();++i)
         for(unsigned j=(i+(!Structure::need_diag))*(1-Structure::need_lower);
                 j<m.nb_cols()*Structure::need_upper+(i+Structure::need_diag)*(!Structure::need_upper);++j) {
-            s >> t;
+            line_input( s, t);
             m(i,j) = t;
         }
     return s;

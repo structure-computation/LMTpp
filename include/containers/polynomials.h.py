@@ -890,8 +890,16 @@ Pol<nd,"""+nx+""",T> sqrt (const Pol<nd,"""+nx+""",T> &P) {
 
 template <int nd, """+temp+"""class T>
 std::istream &operator>>(std::istream &is, Pol<nd,"""+nx+""",T> &P) {
-    T coefs;
+    Vec<T> coefs;
     is >> coefs;
+    P=Pol<nd,"""+nx+""",T>(coefs);
+    return is;
+}
+
+template <int nd, """+temp+"""class T>
+std::istream &line_input(std::istream &is, Pol<nd,"""+nx+""",T> &P) {
+    Vec<T> coefs;
+    line_input ( is, coefs);
     P=Pol<nd,"""+nx+""",T>(coefs);
     return is;
 }

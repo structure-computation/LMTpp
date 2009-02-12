@@ -1,3 +1,5 @@
+#include <io/lineoutput.h>
+
 namespace LMT {
 
 // -------------------------------------------------------------- INPUT/OUTPUT --------------------------------------------------------------
@@ -13,6 +15,15 @@ std::istream &operator>>( std::istream &s, Vec<TT,stat_dim> &v ) {
 /*!
  \relates Vec
  */
+template<class TT,int stat_dim>
+std::istream &lineinput( std::istream &s, Vec<TT,stat_dim> &v ) {
+    apply(v, LineInput(), s );
+    return s;
+}
+
+/*!
+ \relates Vec
+ */
 template<class T>
 std::istream &operator>>( std::istream &s, Vec<T,-1> &v ) {
     T val;
@@ -23,9 +34,28 @@ std::istream &operator>>( std::istream &s, Vec<T,-1> &v ) {
 /*!
  \relates Vec
  */
+template<class T>
+std::istream &line_input( std::istream &s, Vec<T,-1> &v ) {
+    T val;
+    while( line_input( s, val ) ) v.push_back( val );
+    s.clear();
+    return s;
+}
+
+/*!
+ \relates Vec
+ */
 template<class T,int stat_dim>
 std::ostream &operator<<( std::ostream &s, const Vec<T,stat_dim> &v ) {
     apply( v, Display(), s , " " );
+    return s;
+}
+/*!
+ \relates Vec
+ */
+template<class T,int stat_dim>
+std::ostream &line_output( std::ostream &s, const Vec<T,stat_dim> &v ) {
+    apply( v, LineOutput(), s , " " );
     return s;
 }
 
