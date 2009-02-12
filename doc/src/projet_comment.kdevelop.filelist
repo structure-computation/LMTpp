@@ -97,6 +97,8 @@ pagecomment.cpp
 pagecomment.h
 parameter.cpp
 parameter.h
+searchindex.cpp
+searchindex.h
 struct.cpp
 struct.h
 tagcomment.cpp

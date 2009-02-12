@@ -16,6 +16,8 @@
             * swig  (commande : sudo apt-get install swig ).
             * readline (commande : sudo apt-get install libreadline5-dev ).
             * en-têtes python (commande : sudo apt-get install python-dev ).
+            * libg2c0 (commande : sudo apt-get install libg2c0 ).
+            * lapack (commande : sudo apt-get install liblapack-dev ). 
             
         cela devrait suffire!
 

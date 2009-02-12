@@ -16,6 +16,8 @@ string enleve_suffix(string& s) ;
 string suffix(string& s) ;
 string directory(string& s) ;
 
+void tolower(string& s);
+
 int string2chaine(char* res, int res_t, string& s ) ;
 // fonction qui renvoie vrai si elle trouve le motif motif avec la position en pos dans la chaine s sinon
 // elle renvoie faux avec la valeur -1 dans pos.
