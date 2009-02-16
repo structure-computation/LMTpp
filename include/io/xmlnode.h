@@ -65,7 +65,7 @@ public:
         std::string att( get_attribute(name) );
         std::istringstream is( att );
         line_input(is, res);
-        if ( !is ) { is.clear(); throw IoException( "Error while reading attribute " + std::string( name ) + " value=" + att ); }
+        if ( !is ) { throw IoException( "Error while reading attribute " + std::string( name ) + " value=" + att ); }
         return *this;
     }
     /// 
@@ -75,7 +75,7 @@ public:
             std::string att( get_attribute(name) );
             std::istringstream is( att );
             line_input(is, res);
-            if ( !is ) { is.clear(); throw IoException( "Error while reading attribute " + std::string( name ) + " value=" + att ); }
+            if ( !is ) { throw IoException( "Error while reading attribute " + std::string( name ) + " value=" + att ); }
         }
         else
             res = default_value;
@@ -87,7 +87,7 @@ public:
         std::string att( get_attribute(name) ), unit;
         std::istringstream is( att );
         line_input(is, res);
-        if ( !is ) { is.clear(); throw IoException( "Error while reading attribute " + std::string( name ) + " value=" + att ); }
+        if ( !is ) { throw IoException( "Error while reading attribute " + std::string( name ) + " value=" + att ); }
         is >> unit;
         if ( is )
             res *= getUnitCoeff(unit.c_str()) / getUnitCoeff(final_unit);
@@ -102,7 +102,7 @@ public:
             std::string att( get_attribute(name) ), unit;
             std::istringstream is( att );
             line_input(is, res);
-            if ( !is ) { is.clear(); throw IoException( "Error while reading attribute " + std::string( name ) + " value=" + att ); }
+            if ( !is ) { throw IoException( "Error while reading attribute " + std::string( name ) + " value=" + att ); }
             is >> unit;
             if ( is )
                 res *= getUnitCoeff(unit.c_str()) / getUnitCoeff(final_unit);
