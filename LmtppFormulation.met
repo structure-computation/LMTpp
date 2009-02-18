@@ -1,4 +1,5 @@
 import "EF/std_elements.met"
+import "EF/mechanical_tensors.met"
 
 # @see Variable
 def type_for_nb_dim_and_sym( nb_dim, sym ) when nb_dim.size == 0
@@ -46,7 +47,7 @@ class VariableAncestor
         if interpolation == "nodal"
             for num_node in 0 .. e.nb_nodes
                 sym_lst.push_back( sym = symbol( "elem.node($num_node)->$n", "$(t)^{$num_node}" ), node = num_node, name = n, nder = nb_der )
-            return e.interpolation( sym_lst.map( _0.sym ) )
+            return e.interpolation( sym_lst[ sym_lst.size - e.nb_nodes ... ].map( _0.sym ) )
         if interpolation == "elementary"
             return sym_lst.push_back( sym = symbol( "elem.$n"     , "$t" ), elem = 0, name = n, nder = nb_der )->sym
         if interpolation == "global"
@@ -338,7 +339,8 @@ class LmtppFormulation[ dim ] inherits LmtppFormulationAncestor
                     tims := Vec[ Op ]( size = v->nb_der + 1, function = time_steps[0] - sum( time_steps[ 0 .. _0 ] ) )
                     vect_subs.push_back( lagrange( tims, syms, time ) )
                     s.sym = syms[ 0 ]
-                    nb__unk++; has__unknowns = true
+                    nb__unk++
+                    has__unknowns = true
         num_in_indices += has__unknowns
 
     #
@@ -618,7 +620,8 @@ def write_legacy_lmtpp_carac_formulation_for_element( stream, name_form, fe, dim
     stream <<< "#endif // CARAC_FORMULATION_$(dim)_$(name_form)_FOR_ELEMENT_$(fe->pe->name)_H"
 
 #~
-
+    TfList -> [ FormulationType1, FormulationType2, ... ] ex : FormulationElasticity
+    TEList -> [ ElementType1, Quad, ... ] ex : Triangle, Quad, ...
 ~#
 def write_legacy_lmtpp_code( pb_name, TfList, TeList, dim_function = x => x::nvi, base_rep = "build" )
     fe_set := Map[ Int32#~dim~#, Map[ String#~Formulation~#, Vec[ Ptr[ LmtppFormulationAncestor ] ] ] ]()
@@ -648,7 +651,7 @@ def write_legacy_lmtpp_code( pb_name, TfList, TeList, dim_function = x => x::nvi
                 form_carac_fe_file := File( rep + "/form_carac_$name_form.$dim.$(fe->pe->name).h", "w" )
                 write_legacy_lmtpp_carac_formulation_for_element( form_carac_fe_file, name_form, fe, dim )
     
-    #
+    # nodal, elementary and global matrices
     for dim, fe_set_by_dim in fe_set
         for name_form, fe_set_by_dim_and_name in fe_set_by_dim
             for fe in fe_set_by_dim_and_name
