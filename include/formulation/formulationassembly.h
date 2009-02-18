@@ -41,7 +41,7 @@ namespace LMT {
                 delete formulations[i].pb;
         }
         //
-        bool add( TM &m, std::string name ) {
+        bool add( TM &m, const std::string &name ) {
             MeshAndForm *maf = formulations.new_elem();
             maf->pb = new PB( m );
             maf->m = &m;

@@ -13,6 +13,7 @@
 #define LMT_gnuplot_HEADER
 
 #include "mat.h"
+#include "polynomials.h"
 #include <sstream>
 
 namespace LMT {
@@ -195,6 +196,31 @@ template<class T,class STR,class STO>
 void plot(const Mat<T,STR,STO> &mat,const char *params="") {
     GnuPlot gp;
     gp.plot(mat,params);
+    gp.wait();
+}
+
+template <int nd, class T>
+void plot(const Pol<nd,1,T> &P, std::string s="w l") {
+    T A = P.RootsLowerBound();
+    T B = P.RootsUpperBound();
+    Vec<T> v = range(A,(B-A)/500,B);
+    Vec<T> w;
+    w.resize(v.size());
+    for (int i=0;i<w.size();i++)
+        w[i]=P(v[i]);
+    GnuPlot gp;
+    gp.plot(v,w,s.c_str());
+    gp.wait();
+}
+
+template <int nd, class T>
+void plot(const Vec<T> &v, const Pol<nd,1,T> &P, const std::string &s="w l") {
+    Vec<T> w;
+    w.resize(v.size());
+    for (int i=0;i<w.size();i++)
+        w[i]=P(v[i]);
+    GnuPlot gp;
+    gp.plot(v,w,s.c_str());
     gp.wait();
 }
 
