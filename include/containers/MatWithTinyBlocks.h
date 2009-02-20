@@ -170,17 +170,23 @@ struct MatWithTinyBlocks<T,Sym<3> > {
     }
     
     void reserve_lines( const Vec<ST> &nb_tiny_blocks_per_line ) {
-        for(unsigned i=0;i<rows.size();++i) {
+        for(ST i=0;i<rows.size();++i) {
             rows[ i ].indices.reserve( nb_tiny_blocks_per_line[i] );
             rows[ i ].data   .reserve( nb_tiny_blocks_per_line[i] * RB::tiny_block_size );
         }
     }
     
     template<class T2> MatWithTinyBlocks( const MatWithTinyBlocks<T2,Sym<3> > &m ) {
+        const ST m_tiny_block_size = MatWithTinyBlocks<T2,Sym<3> >::RB::tiny_block_size;
+        //
         resize( m.nb_rows_, m.nb_rows_ );
-        for(unsigned r=0;r<rows.size();++r) {
+        for(ST r=0;r<rows.size();++r) {
             rows[r].indices = m.rows[r].indices;
-            rows[r].data    = m.rows[r].data   ;
+            ST nb_blocks = m.rows[r].data.size() / m_tiny_block_size;
+            rows[r].data.resize( RB::tiny_block_size * nb_blocks );
+            for(ST i=0;i<nb_blocks;++i)
+                for(unsigned j=0;j<n*n;++j)
+                    rows[r].data[ RB::tiny_block_size * i + j ] = m.rows[r].data[ m_tiny_block_size * i + j ];
         }
         diags = m.diags;
     }
