@@ -216,8 +216,8 @@ public:
      * Set matrix and vector sizes...
      * if amd, use a permutation able to minimize fill-in sparse mat... in this case, use chol_factorize and solve_using_chol_factorize
      */
-    virtual unsigned update_connectivity(bool amd=false) {
-        mat_has_been_allocated_with_symamd = amd;
+    virtual unsigned update_connectivity() {
+        mat_has_been_allocated_with_symamd = this->want_amd;
         
         unsigned size = 0;
         // global unknowns
@@ -246,7 +246,7 @@ public:
             ind += nb_unknowns_for_type[i] * nb_elem_of_type[i];
             nb_unk_elem += nb_unknowns_for_type[i];
         }
-        if ( amd ) {
+        if ( this->want_amd ) {
             assert( indice_glob==0 ); // not managed
             assert( nb_unk_elem==0 ); // not managed
             indice_noda = symamd( *m ) * nnu;

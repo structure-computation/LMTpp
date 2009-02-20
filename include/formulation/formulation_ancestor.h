@@ -44,7 +44,7 @@ public:
     virtual void allocate_matrices() = 0; ///
     virtual void shift(int nb=1) = 0;
     virtual void unshift(int nb=1) = 0;
-    virtual unsigned update_connectivity(bool amd=false) =0;
+    virtual unsigned update_connectivity() = 0;
     virtual void assemble(bool assemble_mat=true,bool assemble_vec=true) = 0;
     virtual bool solve_system(AbsScalarType iterative_criterium=AbsScalarType(0),bool disp_timing=false) = 0;
     virtual Vec<ScalarType> get_nodal_forces() = 0;

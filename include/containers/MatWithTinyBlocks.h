@@ -90,6 +90,28 @@ struct RowOfMatWithTinyBlocks {
         }
         return 0;
     }
+    
+    template<class TR>
+    static bool non_nul_scal_prod_row_ij( const TR &row_i, const TR &row_j ) {
+        if ( row_i.indices.size() == 0 or row_j.indices.size() == 0 )
+            return false;
+        //
+        ST ind_i = 0, ind_j = 0;
+        while ( true ) {
+            ST val_ind_i = row_i.indices[ind_i];
+            ST val_ind_j = row_j.indices[ind_j];
+            if ( val_ind_i == val_ind_j ) {
+                return true;
+            } else if ( val_ind_i > val_ind_j ) {
+                if ( ++ind_j >= row_j.indices.size() )
+                    return false;
+            } else {
+                if ( ++ind_i >= row_i.indices.size() )
+                    return false;
+            }
+        }
+        return false; // hum
+    }
 };
 
 /**
@@ -108,6 +130,13 @@ struct MatWithTinyBlocks<T,Sym<3> > {
             for(int i=0;i<s;++i)
                 data[i] = 0;
         }
+        
+        template<class T2>
+        DB( const T2 &d ) {
+            for(int i=0;i<s;++i)
+                data[i] = d.data[i];
+        }
+        
         const T &operator()( int n_r, int n_c ) const {
             if ( n_c > n_r )
                 return operator()( n_c, n_r );
@@ -132,8 +161,8 @@ struct MatWithTinyBlocks<T,Sym<3> > {
         assert( c % n == 0 );
         nb_rows_ = r;
         nb_cols_ = c;
-        rows.resize( r / n );
-        diags.resize( r / n );
+        rows.resize( ( r + n - 1 ) / n );
+        diags.resize( ( r + n - 1 ) / n );
     }
 
     MatWithTinyBlocks( ST r = 0, ST c = 0 ) {
@@ -153,7 +182,7 @@ struct MatWithTinyBlocks<T,Sym<3> > {
             rows[r].indices = m.rows[r].indices;
             rows[r].data    = m.rows[r].data   ;
         }
-        diags = m.diag;
+        diags = m.diags;
     }
     
     template<class T2> MatWithTinyBlocks( const Mat<T2,Sym<>,SparseLine<> > &m ) {
@@ -326,13 +355,37 @@ struct MatWithTinyBlocks<T,Sym<3> > {
         }
     }
     
-    void chol() {
-        assert( 0 ); // TODO
+    
+    void symbolic_chol() {
+        for(ST r=0;r<rows.size();++r) {
+            if ( not rows[r].indices.size() )
+                continue;
+            for(ST c=rows[r].indices[0]/n;c<r;++c)
+                if ( RB::non_nul_scal_prod_row_ij( rows[r], rows[c] ) )
+                    rows[ r ].add( n*c, 0, 0, 0, 0, 0, 0, 0, 0, 0 );
+        }
+    }
+    
+    // diagonal block with one extra-diag (finalisation )
+    template<class TM_ED>
+    void symbolic_chol( const TM_ED &block ) {
+        for(ST r=0;r<rows.size();++r) {
+            for(ST c=0;c<r;++c)
+                if ( RB::non_nul_scal_prod_row_ij( rows[r], block.rows[c] ) )
+                    rows[ r ].add( n*c, 0, 0, 0, 0, 0, 0, 0, 0, 0 );
+        }
+    }
+    
+    void chol( bool want_symbolic_fact = true ) {
+        // symbolic factorisation -> TODO : optimize !
+        symbolic_chol();
+        
+        // numeric factorisation
         chol_incomp();
     }
     
     void chol_incomp() {
-        for ( ST num_block_set=0;num_block_set<ST( rows.size() );++num_block_set ) {
+        for ( ST num_block_set=0;num_block_set<rows.size();++num_block_set ) {
             // ST real_row = num_block_set * 3;
             RB &lbs = rows[ num_block_set ];
 
@@ -346,8 +399,8 @@ struct MatWithTinyBlocks<T,Sym<3> > {
                     if ( find_corresponding_blocks ( rows[ num_new_col_block ], rows[ num_block_set ], num_col_block_0, num_col_block_1 ) ) {
                         // reg initialisation
                         SimdVecAl<T,2> res_s_0_0 = SimdVecAl<T,2>::zero(), res_s_0_1 = SimdVecAl<T,2>::zero(), res_s_0_2 = SimdVecAl<T,2>::zero(), 
-                                            res_s_1_0 = SimdVecAl<T,2>::zero(), res_s_1_1 = SimdVecAl<T,2>::zero(), res_s_1_2 = SimdVecAl<T,2>::zero(), 
-                                            res_s_2_0 = SimdVecAl<T,2>::zero(), res_s_2_1 = SimdVecAl<T,2>::zero(), res_s_2_2 = SimdVecAl<T,2>::zero();
+                                       res_s_1_0 = SimdVecAl<T,2>::zero(), res_s_1_1 = SimdVecAl<T,2>::zero(), res_s_1_2 = SimdVecAl<T,2>::zero(), 
+                                       res_s_2_0 = SimdVecAl<T,2>::zero(), res_s_2_1 = SimdVecAl<T,2>::zero(), res_s_2_2 = SimdVecAl<T,2>::zero();
                         T res_f_0_0 = 0, res_f_0_1 = 0, res_f_0_2 = 0, res_f_1_0 = 0, res_f_1_1 = 0, res_f_1_2 = 0, res_f_2_0 = 0, res_f_2_1 = 0, res_f_2_2 = 0;
                         // dot
                         do {
@@ -423,14 +476,60 @@ struct MatWithTinyBlocks<T,Sym<3> > {
             }
 
             
-            ob( 0,0 ) = sqrt ( ob( 0,0 )-res_s_0_0[0]-res_s_0_0[1]-res_f_0_0 );
+            ob( 0,0 ) = sqrt( ob( 0,0 )-res_s_0_0[0]-res_s_0_0[1]-res_f_0_0 );
             ob( 1,0 ) = ( ob( 1,0 )-res_s_1_0[0]-res_s_1_0[1]-res_f_1_0 ) / ob( 0,0 );
             ob( 2,0 ) = ( ob( 2,0 )-res_s_2_0[0]-res_s_2_0[1]-res_f_2_0 ) / ob( 0,0 );
-            ob( 1,1 ) = sqrt ( ob( 1,1 )-res_s_1_1[0]-res_s_1_1[1]-res_f_1_1-ob( 1,0 ) *ob( 1,0 ) );
-            ob( 2,1 ) = ( ob( 2,1 )-res_s_2_1[0]-res_s_2_1[1]-res_f_2_1-ob( 2,0 ) * ob( 1,0 ) ) / ob( 1,1 );
-            ob( 2,2 ) = sqrt ( ob( 2,2 )-res_s_2_2[0]-res_s_2_2[1]-res_f_2_2-ob( 2,0 ) * ob( 2,0 ) - ob( 2,1 ) * ob( 2,1 ) );
+            ob( 1,1 ) = sqrt( ob( 1,1 )-res_s_1_1[0]-res_s_1_1[1]-res_f_1_1 - ob( 1,0 ) * ob( 1,0 ) );
+            ob( 2,1 ) = ( ob( 2,1 )-res_s_2_1[0]-res_s_2_1[1]-res_f_2_1 - ob( 2,0 ) * ob( 1,0 ) ) / ob( 1,1 );
+            ob( 2,2 ) = sqrt( ob( 2,2 )-res_s_2_2[0]-res_s_2_2[1]-res_f_2_2 - ob( 2,0 ) * ob( 2,0 ) - ob( 2,1 ) * ob( 2,1 ) );
         }
     }
+    
+    
+//     struct CholBlockSet {
+//         static const ST block_size = 512;
+//         struct CholBlockTask {
+//             ST beg_row, end_row, beg_col, end_col, beg_col_scal_prod, end_col_scal_prod;
+//         };
+//         
+//         CholBlockSet( MatWithTinyBlocks *mb ) : block_set( mb->rows.size() / block_size ), mb( mb ) {
+//             date = 0;
+//             todo_block_set.push_back( Vec<ST,2>( 0, 0 ) );
+//         }
+//         
+//         Vec<ST,2> get_todo_block() {
+//             if ( not todo_block_set.size() )
+//                 return -1;
+//             //
+//             pthread_mutex_lock( mutex );
+//             Vec<ST,2> res = todo_block_set[0];
+//             todo_block_set.erase_elem_nb( 0 );
+//             pthread_mutex_unlock( mutex );
+//             return res;
+//         }
+//         
+//         void set_block_is_done( const Vec<ST,2> &coord ) {
+//             block_set( coord[0], coord[1] ).date_cache = date++;
+//             //
+//             pthread_mutex_lock( mutex );
+//             for(unsigned i=0;i<;++i)
+//             Vec<ST,2> res = todo_block_set[0];
+//             todo_block_set.erase_elem_nb( 0 );
+//             pthread_mutex_unlock( mutex );
+//             
+//         }
+//         
+//         Vec<Vec<ST,2> > todo_block_set;
+//         Mat<CholBlock,Sym<> > block_set;
+//         pthread_mutex_t *mutex;
+//         ST date;
+//         MatWithTinyBlocks *mb;
+//     };
+//     
+//     static void *thread_chol_incomp( void *data ) {
+//         CholBlockSet &chol_block_set = *reinterpret_cast<CholBlockSet *>( data );
+//         
+//     }
     
     ST size_in_bytes() const {
         return row_size_in_bytes() + diag_size_in_bytes();
@@ -688,29 +787,6 @@ struct MatWithTinyBlocks<T,Gen<3> > {
             const RB &lbs = rows[ num_block_set ];
             const T *d = lbs.data.ptr();
             
-            //             SimdVecAl<T,2> res_s_0 = SimdVecAl<T,2>::zero();
-            //             SimdVecAl<T,2> res_s_1 = SimdVecAl<T,2>::zero();
-            //             SimdVecAl<T,2> res_s_2 = SimdVecAl<T,2>::zero();
-            //             T res_f_0 = 0;
-            //             T res_f_1 = 0;
-            //             T res_f_2 = 0;
-            //             for(ST ci=0; ci<(ST)lbs.indices.size(); ++ci, d += RB::tiny_block_size ) {
-            //                 ST real_col = lbs.indices[ci];
-            //                            
-            //                 SimdVecAl<T,2> vec_s_0( v[real_col+0], v[real_col+1] );
-            //                 T vec_f_0( v[real_col+2] );
-            //                 
-            //                 res_s_0 += reinterpret_cast<const SimdVecAl<T,2> &>( d[ 0 ] ) * vec_s_0;
-            //                 res_f_0 += d[ 6 ] * vec_f_0;
-            //                 res_s_1 += reinterpret_cast<const SimdVecAl<T,2> &>( d[ 2 ] ) * vec_s_0;
-            //                 res_f_1 += d[ 7 ] * vec_f_0;
-            //                 res_s_2 += reinterpret_cast<const SimdVecAl<T,2> &>( d[ 4 ] ) * vec_s_0;
-            //                 res_f_2 += d[ 8 ] * vec_f_0;
-            //             }
-            //             r[ num_block_set * 3 + 0 ] += res_s_0[0] + res_s_0[1] + res_f_0;
-            //             r[ num_block_set * 3 + 1 ] += res_s_1[0] + res_s_1[1] + res_f_1;
-            //             r[ num_block_set * 3 + 2 ] += res_s_2[0] + res_s_2[1] + res_f_2;
-            
             SimdVecAl<T,4> res_s_0 = SimdVecAl<T,4>::zero();
             SimdVecAl<T,4> res_s_2 = SimdVecAl<T,4>::zero();
             T res_f_0 = 0;
@@ -733,28 +809,6 @@ struct MatWithTinyBlocks<T,Gen<3> > {
             r[ num_block_set * 3 + 0 ] += res_s_0[0] + res_s_0[1] + res_f_0;
             r[ num_block_set * 3 + 1 ] += res_s_0[2] + res_s_0[3] + res_f_1;
             r[ num_block_set * 3 + 2 ] += res_s_2[0] + res_s_2[1] + res_f_2;
-
-
-//             SimdVecAl<T,4> res_s_0 = SimdVecAl<T,4>::zero();
-//             SimdVecAl<T,4> res_s_2 = SimdVecAl<T,4>::zero();
-//             SimdVecAl<T,4> res_f_0 = SimdVecAl<T,4>::zero();
-//             T res_f_2 = 0;
-//             SimdVecAl<T,4> _1100( 1, 1, 0, 0 );
-//             for(ST ci=0; ci<(ST)lbs.indices.size(); ++ci, d += RB::tiny_block_size ) {
-//                 ST real_col = lbs.indices[ci];
-//                            
-//                 SimdVecAl<T,4> vec_s_0( v[real_col+0], v[real_col+1], v[real_col+0], v[real_col+1] );
-//                 SimdVecAl<T,4> vec_f_0( 0, 0, v[real_col+2], v[real_col+2] );
-//                 
-//                 res_s_0 += reinterpret_cast<const SimdVecAl<T,4> &>( d[ 0 ] ) * vec_s_0;
-//                 vec_s_0 *= _1100;
-//                 res_f_0 += reinterpret_cast<const SimdVecAl<T,4> &>( d[ 4 ] ) * vec_f_0;
-//                 res_s_2 += reinterpret_cast<const SimdVecAl<T,4> &>( d[ 4 ] ) * vec_s_0;
-//                 res_f_2 += d[ 8 ] * v[real_col+2];
-//             }
-//             r[ num_block_set * 3 + 0 ] += res_s_0[0] + res_s_0[1] + res_f_0[2];
-//             r[ num_block_set * 3 + 1 ] += res_s_0[2] + res_s_0[3] + res_f_0[3];
-//             r[ num_block_set * 3 + 2 ] += res_s_2[0] + res_s_2[1] + res_f_2;
         }
     }
     
@@ -818,14 +872,155 @@ struct MatWithTinyBlocks<T,Gen<3> > {
             res += rows[i].indices.size_in_bytes() + rows[i].data.size_in_bytes();
         return res;
     }
+    
+    template<class TM_DI>
+    void symbolic_chol( const TM_DI &block ) { // with diagonal block (finalisation)
+        for(ST r=0;r<rows.size();++r) {
+            for(ST c=0;c<nb_cols()/n;++c)
+                if ( RB::non_nul_scal_prod_row_ij( rows[r], block.rows[c] ) )
+                    rows[ r ].add( n*c, 0, 0, 0, 0, 0, 0, 0, 0, 0 );
+        }
+    }
+    
+    template<class TM_ED>
+    void symbolic_chol( const TM_ED &block_i, const TM_ED &block_j ) { // with extra-diagonal blocks
+        for(ST r=0;r<rows.size();++r) {
+            for(ST c=0;c<nb_cols()/n;++c)
+                if ( RB::non_nul_scal_prod_row_ij( block_i.rows[r], block_j.rows[c] ) )
+                    rows[ r ].add( n*c, 0, 0, 0, 0, 0, 0, 0, 0, 0 );
+        }
+    }
+    
 };
 
+///
+template<class T,class TS,int large_block_size=512>
+struct MatWithTinyAndLargeBlocks;
 
-
-
-
-
-
+///
+template<class T,int n,int large_block_size>
+struct MatWithTinyAndLargeBlocks<T,Sym<n>,large_block_size> {
+    typedef int ST;
+    static const ST real_block_size = n * large_block_size;
+    typedef MatWithTinyBlocks<T,Sym<n> > DB;
+    typedef MatWithTinyBlocks<T,Gen<n> > EB;
+    
+    template<class TT>
+    MatWithTinyAndLargeBlocks( const Mat<TT,Sym<>,SparseLine<> > &m ) {
+        nb_rows_ = m.nb_rows();
+        nb_cols_ = m.nb_cols();
+        //
+        ST s = ( m.nb_rows() + real_block_size - 1 ) / real_block_size;
+        extra_diag_block.resize( s );
+        extra_diag_block.set( (EB *)NULL );
+        //
+        diag_block.resize( s );
+        for(unsigned i=0;i<s;++i)
+            diag_block[i].resize(
+                min( real_block_size, m.nb_rows() - i * real_block_size ),
+                min( real_block_size, m.nb_rows() - i * real_block_size )
+            );
+        
+        // TODO : optimize
+        for(unsigned r=0;r<m.nb_rows();++r)
+            for(unsigned i=0;i<m.data[r].indices.size();++i)
+                set( r, m.data[r].indices[i], m.data[r].data[i] );
+    }
+    
+    MatWithTinyAndLargeBlocks() {
+        for(unsigned r=0;r<extra_diag_block.nb_rows();++r)
+            for(unsigned c=0;c<r;++c)
+                delete extra_diag_block( r, c );
+    }
+    
+    void set( ST r, ST c, T val ) {
+        ST br = r / real_block_size;
+        ST bc = c / real_block_size;
+        ST mr = r % real_block_size;
+        ST mc = c % real_block_size;
+        int of = ( r % n ) * n + ( c % n );
+        if ( br == bc ) {
+            diag_block[ br ].add( floor( mr, n ), floor( mc, n ), 
+                val * ( of == 0 ),
+                val * ( of == 1 ),
+                val * ( of == 2 ),
+                val * ( of == 3 ),
+                val * ( of == 4 ),
+                val * ( of == 5 ),
+                val * ( of == 6 ),
+                val * ( of == 7 ),
+                val * ( of == 8 )
+            );
+        }
+        else {
+            if ( not extra_diag_block[ br, bc ] ) {
+                extra_diag_block( br, bc ) = new EB(
+                    min( real_block_size, nb_rows_ - br * real_block_size ),
+                    min( real_block_size, nb_cols_ - bc * real_block_size )
+                );
+            }
+            extra_diag_block( br, bc )->add( floor( mr, n ), floor( mc, n ), 
+                val * ( of == 0 ),
+                val * ( of == 1 ),
+                val * ( of == 2 ),
+                val * ( of == 3 ),
+                val * ( of == 4 ),
+                val * ( of == 5 ),
+                val * ( of == 6 ),
+                val * ( of == 7 ),
+                val * ( of == 8 )
+            );
+        }
+    }
+    
+    bool has_something_in_scal_prod_between_row_i_row_j( ST i, ST j ) const {
+        for(unsigned c=0;c<min(i,j);++c)
+            if ( extra_diag_block[i,c] and extra_diag_block[j,c] )
+                return true;
+        return false;
+    }
+    
+    void symbolic_chol() {
+        for(ST br=0;br<diag_block.size();++br) {
+            for(ST bc=0;bc<br;++bc) {
+                if ( not extra_diag_block[ br, bc ] ) {
+                    if ( has_something_in_scal_prod_between_row_i_row_j( br, bc ) )
+                        extra_diag_block( br, bc ) = new EB(
+                            min( real_block_size, nb_rows_ - br * real_block_size ),
+                            min( real_block_size, nb_cols_ - bc * real_block_size )
+                        );
+                    else
+                        continue;
+                }
+                //
+                for(ST bk=0;bk<bc;++bk)
+                    if ( extra_diag_block( br, bk ) and extra_diag_block( bc, bk ) )
+                        extra_diag_block( br, bc )->symbolic_chol( *extra_diag_block( br, bk ), *extra_diag_block( bc, bk ) );
+                extra_diag_block( br, bc )->symbolic_chol( diag_block[ bc ] );
+            }
+            for(ST bk=0;bk<br;++bk)
+                if ( extra_diag_block( br, bk ) )
+                    diag_block[br].symbolic_chol( *extra_diag_block( br, bk ) );
+            diag_block[br].symbolic_chol();
+        }
+    }
+    
+    void chol_incomp() {
+        diag_block[0].chol_incomp();
+    }
+    
+    Vec<T> solve( const Vec<T> &v ) const {
+        Vec<T> res = v;
+        diag_block[0].solve_down( res );
+        diag_block[0].solve_up( res );
+        return res;
+    }
+    
+    Mat<EB *> extra_diag_block;
+    Vec<DB> diag_block;
+    ST nb_rows_;
+    ST nb_cols_;
+};
 
 
 
@@ -843,7 +1038,7 @@ std::ostream &operator<<( std::ostream &os, const MatWithTinyBlocks<T,TO> &m ) {
 }
 
 /*
- mp -> foactorized mat
+ mp -> precond
 */
 template<class TM,class TO,class TA,class T> void solve_using_incomplete_chol_factorize( const MatWithTinyBlocks<TM,TO> &mp, const TA &A, const Vec<T> &b, Vec<T> &x, T crit = 1e-4, bool disp_r = false ) {
     // bool disp_timing = true;
