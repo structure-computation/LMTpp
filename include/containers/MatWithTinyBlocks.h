@@ -377,7 +377,7 @@ struct MatWithTinyBlocks<T,Sym<3> > {
     void symbolic_chol( const TM_ED &block ) {
         for(ST r=0;r<rows.size();++r) {
             for(ST c=0;c<r;++c)
-                if ( RB::non_nul_scal_prod_row_ij( rows[r], block.rows[c] ) )
+                if ( RB::non_nul_scal_prod_row_ij( block.rows[r], block.rows[c] ) )
                     rows[ r ].add( n*c, 0, 0, 0, 0, 0, 0, 0, 0, 0 );
         }
     }
@@ -392,7 +392,6 @@ struct MatWithTinyBlocks<T,Sym<3> > {
     
     void chol_incomp() {
         for ( ST num_block_set=0;num_block_set<rows.size();++num_block_set ) {
-            // ST real_row = num_block_set * 3;
             RB &lbs = rows[ num_block_set ];
 
             // L
@@ -401,7 +400,7 @@ struct MatWithTinyBlocks<T,Sym<3> > {
                 for ( ST indice_col_block = 0; indice_col_block < ST( lbs.indices.size() ); ++indice_col_block ) {
                     ST num_new_col_block = lbs.indices[indice_col_block] / n;
                     ST num_col_block_0 = rows[ num_new_col_block ].indices.size(), num_col_block_1 = indice_col_block;
-                    const DB &db = diags[ num_new_col_block ]; // *reinterpret_cast<DB *> ( diags.ptr() + num_new_col_block * DB::nb_values_for_alignement );
+                    const DB &db = diags[ num_new_col_block ];
                     if ( find_corresponding_blocks ( rows[ num_new_col_block ], rows[ num_block_set ], num_col_block_0, num_col_block_1 ) ) {
                         // reg initialisation
                         SimdVecAl<T,2> res_s_0_0 = SimdVecAl<T,2>::zero(), res_s_0_1 = SimdVecAl<T,2>::zero(), res_s_0_2 = SimdVecAl<T,2>::zero(), 
@@ -1012,6 +1011,22 @@ struct MatWithTinyAndLargeBlocks<T,Sym<n>,large_block_size> {
     }
     
     void chol_incomp() {
+        for(ST br=0;br<diag_block.size();++br) {
+            for(ST bc=0;bc<br;++bc) {
+                if ( not extra_diag_block[ br, bc ] )
+                    continue;
+                //
+                for(ST bk=0;bk<bc;++bk)
+                    if ( extra_diag_block( br, bk ) and extra_diag_block( bc, bk ) )
+                        extra_diag_block( br, bc )->chol_incomp( *extra_diag_block( br, bk ), *extra_diag_block( bc, bk ) );
+                extra_diag_block( br, bc )->chol_incomp( diag_block[ bc ] );
+            }
+            for(ST bk=0;bk<br;++bk)
+                if ( extra_diag_block( br, bk ) )
+                    diag_block[br].chol_incomp( *extra_diag_block( br, bk ) );
+            diag_block[br].chol_incomp();
+        }
+        //
         diag_block[0].chol_incomp();
     }
     
