@@ -257,6 +257,9 @@ struct DicCPU {
     /// resol_level must be managed internally
     template<class TIMGf,class TIMGg,class TM,class NAME_VAR_DEPL,class NAME_VAR_GREY> 
     void exec( const TIMGf &f, const TIMGg &g, TM &m, const NAME_VAR_DEPL &name_var_depl, const NAME_VAR_GREY &name_var_grey, bool want_mat = true, bool want_vec = true, int resol_level = 0 ) {
+        if ( min_norm_inf_dU == 0 and min_norm_2_dU == 0 )
+            std::cerr << "Il faut préciser au moins un critère d'arrêt (ex : min_norm_inf_dU ou min_norm_2_dU)." << std::endl;
+    
         if ( resol_level < multi_resolution ) {
             ExtractDM<NAME_VAR_DEPL> pd;
             for(unsigned i=0;i<m.node_list.size();++i) {

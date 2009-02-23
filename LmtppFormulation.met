@@ -252,16 +252,27 @@ class LmtppFormulationAncestor
         return res
         
     #
-    static def write_mat( K, F, assemble_mat, assemble_vec )
-        cw := CodeWriter("T")
+    def write_mat( K, F, assemble_mat, assemble_vec )
+        num_inds := Vec[Int32]()
+        off_inds := Vec[Int32]()
+        for v, num_ind in unknown_variables, 0...
+            for s, off_ind in v->expr_symbols, 0...
+                num_inds.push_back( num_ind )
+                off_inds.push_back( off_ind )
+        #
+        symm := symbol("symm")
+        cw := CodeWriterAlt("T")
         for r in 0 .. F.size
-            num_ind := 0
-            off_ind := 0
-            cw.add( "f.vectors[0][indices[$num_ind]+$off_ind]", F[r], add )
+            if assemble_vec and not assumed( F[r] == 0 )
+                cw.add( "f.vectors[0][indices[$(num_inds[r])]+$(off_inds[r])]", F[r], add )
+            if assemble_mat
+                for c in 0 .. F.size
+                    if not assumed( K[r,c] == 0 )
+                        cw.add( "f.matrices(Number<0>())(indices[$(num_inds[r])]+$(off_inds[r]),indices[$(num_inds[c])]+$(off_inds[c]))", K[r,c] * ( 1 - symm * ( c > r ) ), add )
         return cw.to_string()
         
     #
-    virtual def write_add_elem_matrices( stream )
+    def write_add_elem_matrices( stream )
         name := String( true_type( self ) )
         info name
         for assemble_mat in 0 .. 2
@@ -274,7 +285,7 @@ class LmtppFormulationAncestor
                         const Number<symm> &matrix_is_sym,
                         const Number<$assemble_mat> &assemble_mat,
                         const Number<$assemble_vec> &assemble_vec,
-                        const Element<$(pe->name),DefaultBehavior,Node<$dim,T_pos,ND>,ED,nim> &elem,
+                        const Element<$(pe->name),DefaultBehavior,Node<$nb_dim,T_pos,ND>,ED,nim> &elem,
                         const unsigned *indices) {
                     $( write_mat( K_dV, F_dV, assemble_mat, assemble_vec ) )
                     }
