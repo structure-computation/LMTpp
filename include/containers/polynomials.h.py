@@ -729,6 +729,11 @@ template<int m, int n,class TT> struct TypeInformation<Pol<m,n,TT> > {
 
 template<int m, int n,class TT> struct HasTypeInformation<Pol<m,n,TT> > { static const bool res = true; };
 
+template<int m, int n,class TT> struct SubComplex<Pol<m,n,TT> > {
+    typedef Pol<m,n,TT> TP;
+    typedef typename TypeInformation<TP>::template Variant<typename SubComplex<typename TypeInformation<TP>::SubType>::T>::T T;
+};
+
 }
 
 #include "pol_unary.h"
