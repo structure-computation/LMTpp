@@ -27,6 +27,7 @@ class VariableAncestor
         glob := -1
         name := ""
         nder := 0
+        off_ind := 0
         
     # parameters
     interpolation := "nodal"
@@ -51,7 +52,7 @@ class VariableAncestor
         if interpolation == "elementary"
             return sym_lst.push_back( sym = symbol( "elem.$n"     , "$t" ), elem = 0, name = n, nder = nb_der )->sym
         if interpolation == "global"
-            return sym_lst.push_back( sym = symbol( "f.$n"        , "$t" ), glob = 0, name = n, nder = nb_der )->sym
+            return sym_lst.push_back( sym = symbol( "f.m->$n"     , "$t" ), glob = 0, name = n, nder = nb_der )->sym
         if interpolation == "skin_elementary"
             return sym_lst.push_back( sym = symbol( "skin_elem.$n", "$t" ), skin = 0, name = n, nder = nb_der )->sym
         assert( 0, "unknown interpolation '$interpolation'" )
@@ -149,16 +150,20 @@ class LmtppFormulationAncestor
     dN                       := symbol("dN")
     dE                       := symbol("dE")
     pe                       := Ptr[ SymbolicElementAncestor ]()
+    pe_children              := Vec[ Ptr[ SymbolicElementAncestor ] ]()
     
     # parameters
     left_time_integration    := 0
     right_time_integration   := 1
     
     use_subs_instead_of_diff := true
+    assumed_symmetric_matrix := true
     
     # computed
     unknown_variables := Vec[ Ptr[ VariableAncestor ] ]()
     variables         := Vec[ Ptr[ VariableAncestor ] ]()
+    unk_expr_syms     := Vec[ Ptr[ VariableAncestor::Symbol ] ]()
+    unk_test_syms     := Vec[ Ptr[ VariableAncestor::Symbol ] ]()
     max_nb_der        := 0
     all_K_are_linear  := true
     
@@ -171,6 +176,8 @@ class LmtppFormulationAncestor
     F_dG := Vec[ Op ]()
     F_dN := Vec[ Op ]()
     F_dS := Vec[ Vec[ Op ] ]()
+    
+    name := ""
 
     virtual def get_nb_dim
         abstract
@@ -228,7 +235,7 @@ class LmtppFormulationAncestor
         #
         res := ""
         res <<<< 
-                static const unsigned nb_nodal_unknowns = $( nb_unknowns_of_type( sel ) );
+                static const unsigned nb_$(t_unk)_unknowns = $( nb_unknowns_of_type( sel ) );
                 template<class TE,class TTs,class Tvec>
                 inline static void set_$(t_unk)_unknowns(TE &$(n_unk),const TTs &f,const Tvec &vecs,unsigned indice) {
                 $( cw_set.to_string(8) )
@@ -252,33 +259,74 @@ class LmtppFormulationAncestor
         return res
         
     #
-    def write_mat( K, F, assemble_mat, assemble_vec )
+    def write_mat( K, F, assemble_mat, assemble_vec, want_nodal, want_skin_elem, want_elem, want_global )
         num_inds := Vec[Int32]()
         off_inds := Vec[Int32]()
-        for v, num_ind in unknown_variables, 0...
-            for s, off_ind in v->expr_symbols, 0...
-                num_inds.push_back( num_ind )
-                off_inds.push_back( off_ind )
+        num_ind  := 0
+        if want_nodal
+            for s in unk_expr_syms
+                if s->node >= 0
+                    num_inds.push_back( s->node )
+                    off_inds.push_back( s->off_ind )
+            num_ind += pe->nb_nodes_
+            
+        if want_skin_elem
+            for s in unk_expr_syms
+                if s->skin >= 0
+                    num_inds.push_back( num_ind )
+                    off_inds.push_back( s->off_ind )
+            num_ind++
+        
+        if want_elem
+            for s in unk_expr_syms
+                if s->elem >= 0
+                    num_inds.push_back( num_ind )
+                    off_inds.push_back( s->off_ind )
+            num_ind++
+                
+        if want_global
+            for s in unk_expr_syms
+                if s->glob >= 0
+                    num_inds.push_back( num_ind )
+                    off_inds.push_back( s->off_ind )
+            num_ind++
+                
         #
         symm := symbol("symm")
-        cw := CodeWriterAlt("T")
+        cw := CodeWriter("T") # Alt
+        # t0 := time_of_day_in_sec()
         for r in 0 .. F.size
             if assemble_vec and not assumed( F[r] == 0 )
-                cw.add( "f.vectors[0][indices[$(num_inds[r])]+$(off_inds[r])]", F[r], add )
+                cw.add( "F[indices[$(num_inds[r])]+$(off_inds[r])]", F[r], add )
             if assemble_mat
                 for c in 0 .. F.size
                     if not assumed( K[r,c] == 0 )
-                        cw.add( "f.matrices(Number<0>())(indices[$(num_inds[r])]+$(off_inds[r]),indices[$(num_inds[c])]+$(off_inds[c]))", K[r,c] * ( 1 - symm * ( c > r ) ), add )
+                        cw.add( "K(indices[$(num_inds[r])]+$(off_inds[r]),indices[$(num_inds[c])]+$(off_inds[c]))", K[r,c] * ( 1 - symm * ( c > r ) ), add )
+        # info time_of_day_in_sec() - t0
         return cw.to_string()
         
     #
     def write_add_elem_matrices( stream )
-        name := String( true_type( self ) )
-        info name
+        stream <<< "namespace LMT {"
         for assemble_mat in 0 .. 2
             for assemble_vec in 0 .. 2
                 stream <<<<
                     // 
+                    template<class TM,class TK,class TF,class TV,class T,bool wont_add_nz,unsigned symm,class T_pos,class ND,class ED,unsigned nim,class TMUT>
+                    void add_elem_matrix(
+                        Formulation<TM,$name,DefaultBehavior,T,wont_add_nz> &f,
+                        TK &K,
+                        TF &F,
+                        const TV &vectors,
+                        const Number<symm> &matrix_is_sym,
+                        const Number<$assemble_mat> &assemble_mat,
+                        const Number<$assemble_vec> &assemble_vec,
+                        const Element<$(pe->name),DefaultBehavior,Node<$nb_dim,T_pos,ND>,ED,nim> &elem,
+                        const unsigned *indices,
+                        TMUT &mut ) {
+                    $( write_mat( K_dV, F_dV, assemble_mat, assemble_vec, want_nodal=true, want_skin_elem=true, want_elem=true, want_global=true ) )
+                    }
+                    //
                     template<class TM,class T,bool wont_add_nz,unsigned symm,class T_pos,class ND,class ED,unsigned nim>
                     void add_elem_matrix(
                         Formulation<TM,$name,DefaultBehavior,T,wont_add_nz> &f,
@@ -286,9 +334,83 @@ class LmtppFormulationAncestor
                         const Number<$assemble_mat> &assemble_mat,
                         const Number<$assemble_vec> &assemble_vec,
                         const Element<$(pe->name),DefaultBehavior,Node<$nb_dim,T_pos,ND>,ED,nim> &elem,
-                        const unsigned *indices) {
-                    $( write_mat( K_dV, F_dV, assemble_mat, assemble_vec ) )
+                        const unsigned *indices ) {
+                        int fake_mut;
+                        add_elem_matrix( f, f.matrices(Number<0>()), f.sollicitation, f.vectors, matrix_is_sym, assemble_mat, assemble_vec, elem, indices, fake_mut );
                     }
+                
+        #
+                for pc, num_pc in pe_children, 0...
+                    stream <<<<
+                        // 
+                        template<class TM,class TK,class TF,class TV,class T,bool wont_add_nz,unsigned symm,class T_pos,class ND,class ED,unsigned nim,class ED2,unsigned nim2,class TMUT>
+                        void add_skin_elem_matrix(
+                                Formulation<TM,$name,DefaultBehavior,T,wont_add_nz> &f,
+                                TK &K,
+                                TF &F,
+                                const TV &vectors,
+                                const Number<symm> &matrix_is_sym,
+                                const Number<$assemble_mat> &assemble_mat,
+                                const Number<$assemble_vec> &assemble_vec,
+                                const Element<$(pe->name),DefaultBehavior,Node<3,T_pos,ND>,ED,nim> &elem,
+                                const Element<$(pc->name),DefaultBehavior,Node<3,T_pos,ND>,ED2,nim2> &skin_elem,
+                                const Number<$num_pc> &num_child,
+                                const unsigned *indices,
+                                TMUT &mut ) {
+                        $( write_mat( K_dS[num_pc], F_dS[num_pc], assemble_mat, assemble_vec, want_nodal=true, want_skin_elem=true, want_elem=true, want_global=true ) )
+                        }
+                    stream <<<<
+                        // 
+                        template<class TM,class T,bool wont_add_nz,unsigned symm,class T_pos,class ND,class ED,unsigned nim,class ED2,unsigned nim2>
+                        void add_skin_elem_matrix(
+                                Formulation<TM,$name,DefaultBehavior,T,wont_add_nz> &f,
+                                const Number<symm> &matrix_is_sym,
+                                const Number<$assemble_mat> &assemble_mat,
+                                const Number<$assemble_vec> &assemble_vec,
+                                const Element<$(pe->name),DefaultBehavior,Node<3,T_pos,ND>,ED,nim> &elem,
+                                const Element<$(pc->name),DefaultBehavior,Node<3,T_pos,ND>,ED2,nim2> &skin_elem,
+                                const Number<$num_pc> &num_child,
+                                const unsigned *indices ) {
+                            int fake_mut;
+                            add_skin_elem_matrix( f, f.matrices(Number<0>()), f.sollicitation, f.vectors, matrix_is_sym, assemble_mat, assemble_vec, elem, skin_elem, num_child, indices, fake_mut);
+                        }
+        stream <<< "} // namespace LMT"
+        
+    #
+    def write_add_nodal_matrices( stream )
+        stream <<< "namespace LMT {"
+        for assemble_mat in 0 .. 2
+            for assemble_vec in 0 .. 2
+                stream <<<<
+                    template<class TM,class TK,class TF,class TV,class T,bool wont_add_nz,unsigned symm,class TMUT>
+                    void add_nodal_matrix(
+                            Formulation<TM,$name,DefaultBehavior,T,wont_add_nz> &f,
+                            TK &K,
+                            TF &F,
+                            const TV &vectors,
+                            const typename TM::TNode &node,
+                            const Number<symm> &matrix_is_sym,
+                            const Number<$assemble_mat> &assemble_mat,
+                            const Number<$assemble_vec> &assemble_vec,
+                            const unsigned *indices,
+                            TMUT &mut ) {
+                        #define PNODE(N) node
+                    $( write_mat( K_dN, F_dN, assemble_mat, assemble_vec, want_nodal=true, want_skin_elem=false, want_elem=false, want_global=true ) )
+                        #undef PNODE
+                    }
+                    template<class TM,class T,bool wont_add_nz,unsigned symm>
+                    void add_nodal_matrix(
+                            Formulation<TM,$name,DefaultBehavior,T,wont_add_nz> &f,
+                            const typename TM::TNode &node,
+                            const Number<symm> &matrix_is_sym,
+                            const Number<$assemble_mat> &assemble_mat,
+                            const Number<$assemble_vec> &assemble_vec,
+                            const unsigned *indices ) {
+                        int fake_mut;
+                        add_nodal_matrix( f, f.matrices(Number<0>()), f.sollicitation, f.vectors, node, matrix_is_sym, assemble_mat, assemble_vec, indices, fake_mut );
+                    }
+        stream <<< "} // namespace LMT"
+    
     
 #~
 
@@ -308,9 +430,12 @@ class LmtppFormulation[ dim ] inherits LmtppFormulationAncestor
     #
     def update_variable_expr_and_test( e )
         pe = &e
+        pe_children = pe->children( 1 )
     
         # update expr and test
         unknown_variables.size = 0
+        unk_expr_syms    .size = 0
+        unk_test_syms    .size = 0
         max_nb_der             = 0
         all_K_are_linear       = true
         for name, var in AttributeExplorer( self )
@@ -335,23 +460,33 @@ class LmtppFormulation[ dim ] inherits LmtppFormulationAncestor
         _update_unk( unknown_variables, mesh_subs, vect_subs, num_in_indices, has_elem_unknowns, nb_elem_unk, _0.elem == 0 )
         _update_unk( unknown_variables, mesh_subs, vect_subs, num_in_indices, has_glob_unknowns, nb_glob_unk, _0.glob == 0 )
         _update_unk( unknown_variables, mesh_subs, vect_subs, num_in_indices, has_skin_unknowns, nb_skin_unk, _0.skin == 0 )
-
+        
         # apply subs list
         for v in unknown_variables
             v->make_expr_subs( mesh_subs, vect_subs )
+                
                 
     # @see update_variable_expr_and_test
     def _update_unk( unknown_variables, mesh_subs, vect_subs, num_in_indices, has__unknowns, nb__unk, function_crit )
         for v in unknown_variables
             for s in v->expr_symbols
                 if function_crit( s )
+                    s.off_ind = nb__unk
                     mesh_subs.push_back( s.sym )
-                    syms := Vec[ Op ]( size = v->nb_der + 1, function = symbol("f.vectors[$_0][indices[$num_in_indices]+$nb__unk]","V_{$_0,$num_in_indices,$nb__unk}") )
+                    syms := Vec[ Op ]( size = v->nb_der + 1, function = symbol("vectors[$_0][indices[$num_in_indices]+$nb__unk]","V_{$_0,$num_in_indices,$nb__unk}") )
                     tims := Vec[ Op ]( size = v->nb_der + 1, function = time_steps[0] - sum( time_steps[ 0 .. _0 ] ) )
                     vect_subs.push_back( lagrange( tims, syms, time ) )
                     s.sym = syms[ 0 ]
                     nb__unk++
                     has__unknowns = true
+                    #
+                    unk_expr_syms.push_back( &s )
+        #                    
+        for v in unknown_variables
+            for s in v->test_symbols
+                if function_crit( s )
+                    unk_test_syms.push_back( &s )
+        #                    
         num_in_indices += has__unknowns
 
     #
@@ -366,9 +501,28 @@ class LmtppFormulation[ dim ] inherits LmtppFormulationAncestor
         volumic_part := residual.diff( dV )
         volumic_part = e.integration( volumic_part )
         volumic_part += residual.diff( dE )
-        _compute_KF_from_residual( volumic_part, K_dV, F_dV, _volumic_vars( x => x->expr_symbols ), _volumic_vars( x => x->test_symbols ) )
+        _compute_KF_from_residual( volumic_part, K_dV, F_dV, unk_expr_syms.map( _0->sym ), unk_test_syms.map( _0->sym ) )
         
-        #
+        # nodal part
+        nodal_part := residual.diff( dN )
+        nodal_part = nodal_part.subs( e.var_inter, e.points[ 0 ] )
+        _compute_KF_from_residual( nodal_part, K_dN, F_dN, 
+            unk_expr_syms.filter( _0->node >=0 or _0->glob >= 0 ).map( _0->sym ), 
+            unk_test_syms.filter( _0->node >=0 or _0->glob >= 0 ).map( _0->sym )
+        )
+        
+        # surf parts
+        surf_part := residual.diff( dS )
+        K_dS.resize( pe_children.size )
+        F_dS.resize( pe_children.size )
+        for pc_, num_child in pe_children, 0...
+            pc := child_cast( pc_ )
+            loc_surf_part := surf_part.subs( e.var_inter, e.var_inter_from_child_var_inter( sub_nvi = 1, num_child = num_child, child_var_inter = pc->var_inter ) )
+            loc_surf_part = pc->integration( loc_surf_part )
+            _compute_KF_from_residual( loc_surf_part, K_dS[ num_child ], F_dS[ num_child ],
+                unk_expr_syms.map( _0->sym ), 
+                unk_test_syms.map( _0->sym )
+            )
         
     #
     def _volumic_vars( var_to_sym_lst_function )
@@ -380,7 +534,10 @@ class LmtppFormulation[ dim ] inherits LmtppFormulationAncestor
         return res
         
     #
-    def _compute_KF_from_residual( residual, K, F, expr_symbols, test_symbols )
+    def _compute_KF_from_residual( residual, K, F, expr_symbols_, test_symbols_ )
+        expr_symbols := Vec[Op]( expr_symbols_ ) # hum
+        test_symbols := Vec[Op]( test_symbols_ ) # hum
+        
         # minimization ?
         if assumed( norm_1( expr_symbols - test_symbols ) == 0 )
             qe := quadratic_expansion( residual, expr_symbols )
@@ -492,9 +649,11 @@ def write_legacy_lmtpp_mesh_carac( stream, pb_name, fe_set_by_dim, dim )
             #endif // IFNDEF_$(v->name)_DM
         
     # CARACDMEXTNAMES
-    CARACDM_NodalStaticData  := write_legacy_lmtpp_mesh_StaticData( "NodalStaticData"       , variable_list, x => ( x->interpolation in [ "nodal"     , "bubble" ] ) )
-    CARACDM_GlobalStaticData := write_legacy_lmtpp_mesh_StaticData( "GlobalStaticData"      , variable_list, x =>   x->interpolation ==   "global"                   )
-    CARACDM_ElemStaticData   := write_legacy_lmtpp_mesh_StaticData( "TData", variable_list, x => ( x->interpolation in [ "elementary", "bubble" ] ), sp = " " * 8 )
+    CARACDM_NodalStaticData    := write_legacy_lmtpp_mesh_StaticData( "NodalStaticData"  , variable_list, x => ( x->interpolation in [ "nodal"     , "bubble" ] ) )
+    CARACDM_GlobalStaticData   := write_legacy_lmtpp_mesh_StaticData( "GlobalStaticData" , variable_list, x =>   x->interpolation ==   "global"                   )
+    CARACDM_ElemStaticData     := write_legacy_lmtpp_mesh_StaticData( "TData"            , variable_list, x => ( x->interpolation in [ "elementary", "bubble" ] ), sp = " " * 8 )
+    CARACDM_SkinElemStaticData := write_legacy_lmtpp_mesh_StaticData( "TData"            , variable_list, x => ( x->interpolation in [ "skin_elementary" ] ), sp = " " * 8 )
+    CARACDM_GeneElemStaticData := write_legacy_lmtpp_mesh_StaticData( "TData"            , variable_list, x => false, sp = " " * 8 )
     
     # elem lst
     element_choices := ""
@@ -510,7 +669,7 @@ def write_legacy_lmtpp_mesh_carac( stream, pb_name, fe_set_by_dim, dim )
                     template<unsigned skin,unsigned inner> struct ElementChoice<$sub_nvi,skin,$cpt,inner> {
                         typedef $ne NE;
                         typedef DefaultBehavior BE;
-                $CARACDM_ElemStaticData
+                $( [CARACDM_ElemStaticData,CARACDM_SkinElemStaticData,CARACDM_GeneElemStaticData,CARACDM_GeneElemStaticData][ sub_nvi ] )
                     };
     
     # mesh carac
@@ -534,9 +693,9 @@ def write_legacy_lmtpp_carac_formulation( stream, name_form, fe_set_by_dim_and_n
     num_in_vec_unknown := ""
     cpt_unknown        := 0
     for v in fe_set_by_dim_and_name[0]->unknown_variables
-        is_unknown << [""," and "][cpt_unknown!=0] << "s == \"$(v->name)\""
-        num_in_vec_unknown << "if ( s == \"$(v->name)\" ) return $cpt_unknown"
-        cpt_unknown += v->expr_symbols.size
+        is_unknown << [""," or "][cpt_unknown!=0] << "s == \"$(v->name)\""
+        num_in_vec_unknown << "if ( s == \"$(v->name)\" ) return $cpt_unknown;"
+        cpt_unknown += v->nb_values
     #
     stream <<<<
         // generated file. Do not modify
@@ -589,58 +748,146 @@ def write_legacy_lmtpp_carac_formulation( stream, name_form, fe_set_by_dim_and_n
         };
         
         } // namespace LMT
-        #endif CARAC_FORMULATION_$(dim)_$(name_form)_H
+        #endif // CARAC_FORMULATION_$(dim)_$(name_form)_H
 
 #
 def write_legacy_lmtpp_carac_formulation_for_element( stream, name_form, fe, dim )
-    stream <<<<
-        // generated file. Do not modify
-        #ifndef CARAC_FORMULATION_$(dim)_$(name_form)_FOR_ELEMENT_$(fe->pe->name)_H
-        #define CARAC_FORMULATION_$(dim)_$(name_form)_FOR_ELEMENT_$(fe->pe->name)_H
-        namespace LMT {
-        
-        class $(fe->pe->name);
-        template<unsigned A,class B,class C> class Node;
-        template<class A,class B,class C,class D,unsigned E> class Element;
-        
-        // Carac for ...
-        template<class P_T_pos,class P_ND,class TED,unsigned nim,class TM,class T>
-        class CaracFormulationForElement<difftherm,Element<$(fe->pe->name),DefaultBehavior,Node<$dim,P_T_pos,P_ND>,TED,nim>,TM,T> {
-        public:
-            template<unsigned num_mat,unsigned inner=0> struct ElemMatricesCarac {
-                static const bool symm = $( fe->K_dV.is_sym_rt );
-                static const bool herm = symm;
-                static const bool diag = false;
-                static const bool linear = $( fe->all_K_are_linear );
-            };
-            static const bool has_elementary_matrix = $( fe->non_null_system( fe->K_dV, fe->F_dV ) );
-            static const bool has_skin_elementary_matrix = $( fe->need_skin_assembly );
-            template<class TE,class TF> static void after_solve(TE &elem,TF &f,const unsigned *indices) {
-            #define PNODE(N) (*elem.node(N))
-            $( fe->call_after_solve() )
-            #undef PNODE
-            }
-    for n in 2 .. 6
-        stream <<<<
-                template<class TE,class TF> static void after_solve_$n(TE &elem,TF &f,const unsigned *indices) {
-                }
+    # symm := fe->K_dV.get_is_sym_rt()
+    symm := fe->assumed_symmetric_matrix
+    stream <<< "// generated file. Do not edit."
+    stream <<< "#ifndef CARAC_FORMULATION_$(dim)_$(name_form)_FOR_ELEMENT_$(fe->pe->name)_H"
+    stream <<< "#define CARAC_FORMULATION_$(dim)_$(name_form)_FOR_ELEMENT_$(fe->pe->name)_H"
+    stream <<< ""
+    stream <<< "namespace LMT {"
+    stream <<< ""
+    stream <<< "class $(fe->pe->name);"
+    stream <<< "template<unsigned A,class B,class C> class Node;"
+    stream <<< "template<class A,class B,class C,class D,unsigned E> class Element;"
+    stream <<< ""
+    stream <<< "// Carac for ..."
+    stream <<< ""
+    stream <<< "template<class P_T_pos,class P_ND,class TED,unsigned nim,class TM,class T>"
+    stream <<< "class CaracFormulationForElement<$name_form,Element<$(fe->pe->name),DefaultBehavior,Node<$dim,P_T_pos,P_ND>,TED,nim>,TM,T> {"
+    stream <<< "public:"
+    stream <<< "    template<unsigned num_mat,unsigned inner=0> struct ElemMatricesCarac {"
+    stream <<< "        static const bool symm = $symm;"
+    stream <<< "        static const bool herm = $symm;"
+    stream <<< "        static const bool diag = false;"
+    stream <<< "        static const bool linear = $( fe->all_K_are_linear );"
+    stream <<< "    };"
+    stream <<< "    static const bool has_elementary_matrix = $( fe->non_null_system( fe->K_dV, fe->F_dV ) );"
+    stream <<< "    static const bool has_skin_elementary_matrix = $( fe->need_skin_assembly );"
+    stream <<< "    template<class TE,class TF> static void after_solve(TE &elem,TF &f,const unsigned *indices) {"
+    stream <<< "    #define PNODE(N) (*elem.node(N))"
+    stream <<< "    $( fe->call_after_solve() )"
+    stream <<< "    #undef PNODE"
+    stream <<< "    }"
+    for n in 2 .. 7
+        stream <<< "    template<class TE,class TF> static void after_solve_$n(TE &elem,TF &f,const unsigned *indices) {"
+        stream <<< "    }"
     stream <<< fe->legacy_lmtpp_unk_management( "elementary"     , "elem", x => x.elem==0 )
     stream <<< fe->legacy_lmtpp_unk_management( "skin_elementary", "elem", x => x.skin==0 )
     stream <<< "};"
     stream <<< "} // namespace"
     stream <<< "#endif // CARAC_FORMULATION_$(dim)_$(name_form)_FOR_ELEMENT_$(fe->pe->name)_H"
 
+    
+#~ ~#
+def write_legacy_lmtpp_problem_h_file( stream, pb_name, fe_set, type_list )
+    stream <<< "#ifndef PROBLEM_$(pb_name)_H"
+    stream <<< "#define PROBLEM_$(pb_name)_H"
+    for dim, fe_set_by_dim in fe_set
+        for name_form, fe_set_by_dim_and_name in fe_set_by_dim
+            stream <<<<
+                #ifndef has_formulation_$name_form
+                #define has_formulation_$name_form
+                #endif
+    stream <<< "#include \"mesh_carac.h\""
+    stream <<< "#include <formulation/problem_ancestor.h>"
+    stream <<< "namespace LMT {"
+    stream <<< ""
+    stream <<< "template<class T,unsigned dim> class Problem_$pb_name;"
+    for t, num_type in type_list, 0...
+        for dim, fe_set_by_dim in fe_set
+            stream <<<<
+                class Problem_$(pb_name)_type$(num_type)_$dim : public ProblemAncestor<double> {
+                public:
+                    typedef Mesh<Mesh_carac_toto<$t,$dim> > TM;
+                    Problem_$(pb_name)_type$(num_type)_$dim() {}
+                    Problem_$(pb_name)_type$(num_type)_$dim( TM &m, bool use_tim_davis=false ) {
+                        if ( use_tim_davis ) {
+            for name_form, fe_set_by_dim_and_name in fe_set_by_dim
+                stream <<< "            formulation_$name_form = new_formulation_$name_form( Number<true >(), m );"
+            stream <<< "        } else {"
+            for name_form, fe_set_by_dim_and_name in fe_set_by_dim
+                stream <<< "            formulation_$name_form = new_formulation_$name_form( Number<false>(), m );"
+            stream <<<<
+                        }
+                    }
+                    virtual unsigned nb_formulations() const { return $(fe_set_by_dim.size); }
+                    virtual FormulationAncestor<$t> *formulation_nb(unsigned i) {
+                        switch(i) {
+            cpt_form := 0
+            for name_form, fe_set_by_dim_and_name in fe_set_by_dim
+                stream <<< "        case $(cpt_form++): return formulation_$name_form;"
+            stream <<<<
+                        default: return NULL;
+                        }
+                    }
+            for name_form, fe_set_by_dim_and_name in fe_set_by_dim
+                stream <<< "    static FormulationAncestor<$t> *new_formulation_$name_form( Number<false>, TM &m );"
+                stream <<< "    static FormulationAncestor<$t> *new_formulation_$name_form( Number<true >, TM &m );"
+                stream <<< "    FormulationAncestor<$t> *formulation_$name_form;"
+            stream <<<<
+                };
+                template<> class Problem_toto<$t,$dim> : public Problem_$(pb_name)_type$(num_type)_$dim {
+                public:
+                    Problem_toto(TM &m,bool use_tim_davis=false):Problem_$(pb_name)_type$(num_type)_$dim(m,use_tim_davis) {}
+                };
+        
+    stream <<< "} // namespace LMT"
+    stream <<< "#endif // PROBLEM_$(pb_name)_H"
+        
+#~ ~#
+def write_legacy_lmtpp_all_in_one_file( stream, pb_name, fe_set, type_list )
+    stream <<<< 
+        #include <formulation/formulation.h>
+        #include "mesh_carac.h"
+    for dim, fe_set_by_dim in fe_set
+        for name_form, fe_set_by_dim_and_name in fe_set_by_dim
+            stream <<<< 
+                #include "form_carac_$name_form.$dim.h"
+                #include "add_nodal_matrices_$name_form.$dim.h"
+            for fe in fe_set_by_dim_and_name
+                stream <<<< 
+                    #include "form_carac_$name_form.$dim.$(fe->pe->name).h"
+                    #include "add_matrices_$name_form.$dim.$(fe->pe->name).h"
+    #
+
+#~ ~#
+def write_legacy_lmtpp_problem_cpp_file( stream, pb_name, fe_set, type_list )
+    for dim, fe_set_by_dim in fe_set
+        for name_form, fe_set_by_dim_and_name in fe_set_by_dim
+            stream <<<< 
+                #include "form_carac_$name_form.$dim.h"
+            for fe in fe_set_by_dim_and_name
+                stream <<<< 
+                    #include "form_carac_$name_form.$dim.$(fe->pe->name).h"
+                    #include "add_matrices_$name_form.$dim.$(fe->pe->name).h"
+    #
+
 #~
     TfList -> [ FormulationType1, FormulationType2, ... ] ex : FormulationElasticity
     TEList -> [ ElementType1, Quad, ... ] ex : Triangle, Quad, ...
 ~#
-def write_legacy_lmtpp_code( pb_name, TfList, TeList, dim_function = x => x::nvi, base_rep = "build" )
-    fe_set := Map[ Int32#~dim~#, Map[ String#~Formulation~#, Vec[ Ptr[ LmtppFormulationAncestor ] ] ] ]()
+def write_legacy_lmtpp_code( pb_name, TfList, TeList, dim_function = x => x::nvi, base_rep = "build", type_list = ["double"] )
+    fe_set := Map[ Int32 #~dim~#, Map[ String #~Formulation~#, Vec[ Ptr[ LmtppFormulationAncestor ] ] ] ]()
     for Tf in TfList
         for Te in TeList
             e := new SymbolicElement[ Te, dim_function( Te ) ]
             f := new Tf[ dim = e->dim ]( @e )
             fe_set[ f->nb_dim ][ Tf ].push_back( f )
+            f->name = Tf
             #
             f->make_matrices( @e )
         
@@ -648,26 +895,30 @@ def write_legacy_lmtpp_code( pb_name, TfList, TeList, dim_function = x => x::nvi
     rep := base_rep + "/" * Bool( base_rep.size ) + "problem_" + pb_name
     mkdir( rep )
     
+    # all_in_one
+    write_legacy_lmtpp_all_in_one_file( File( rep + "/all_in_one.h", "w" ), pb_name, fe_set, type_list )
+    
+    # problem
+    write_legacy_lmtpp_problem_h_file( File( rep + "/problem.h", "w" ), pb_name, fe_set, type_list )
+    
     # mesh_carac
     mesh_carac_file := File( rep + "/mesh_carac.h", "w" )
     for dim, fe_set_by_dim in fe_set
         write_legacy_lmtpp_mesh_carac( mesh_carac_file, pb_name, fe_set_by_dim, dim )
     
-    # carac_formulation
-    for dim, fe_set_by_dim in fe_set
-        for name_form, fe_set_by_dim_and_name in fe_set_by_dim
-            form_carac_file := File( rep + "/form_carac_$name_form.$dim.h", "w" )
-            write_legacy_lmtpp_carac_formulation( form_carac_file, name_form, fe_set_by_dim_and_name, dim )
-            for fe in fe_set_by_dim_and_name
-                form_carac_fe_file := File( rep + "/form_carac_$name_form.$dim.$(fe->pe->name).h", "w" )
-                write_legacy_lmtpp_carac_formulation_for_element( form_carac_fe_file, name_form, fe, dim )
-    
     # nodal, elementary and global matrices
     for dim, fe_set_by_dim in fe_set
         for name_form, fe_set_by_dim_and_name in fe_set_by_dim
-            for fe in fe_set_by_dim_and_name
-                add_matrices_fe_file := File( rep + "/add_matrices_$name_form.$dim.$(fe->pe->name).h", "w" )
-                fe->write_add_elem_matrices( add_matrices_fe_file )
-        
+            for fe, cpt_elem in fe_set_by_dim_and_name, 0...
+                if not cpt_elem
+                    fe->write_add_nodal_matrices( File( rep + "/add_nodal_matrices_$name_form.$dim.h", "w" ) )
+                fe->write_add_elem_matrices( File( rep + "/add_matrices_$name_form.$dim.$(fe->pe->name).h", "w" ) )
     
+    # carac_formulation
+    for dim, fe_set_by_dim in fe_set
+        for name_form, fe_set_by_dim_and_name in fe_set_by_dim
+            write_legacy_lmtpp_carac_formulation( File( rep + "/form_carac_$name_form.$dim.h", "w" ), name_form, fe_set_by_dim_and_name, dim )
+            for fe in fe_set_by_dim_and_name
+                # info rep + "/form_carac_$name_form.$dim.$(fe->pe->name).h"
+                write_legacy_lmtpp_carac_formulation_for_element( File( rep + "/form_carac_$name_form.$dim.$(fe->pe->name).h", "w" ), name_form, fe, dim )
     

@@ -24,7 +24,9 @@ void dic_elem_matrix_( const TE &elem, const TIMG_f &f, const TIMG_g &g, TDIC &d
 }
 
 /**
-
+    Corrélation sur CPU
+    
+    Il faut spécifier un critère d'arrêt avant exec ou exec_rigid_body (min_norm_inf_dU ou min_norm_2_dU par exemple).
 */
 template<class T,unsigned dim>
 struct DicCPU {
@@ -556,8 +558,8 @@ struct DicCPU {
     unsigned max_cpt_iter; /// à moins que nb_iter >= max_cpt_iter
     unsigned nb_threads_for_assembly;
     int div_pixel; /// for "correct" integration. 0 means analytical integration
-    bool display_norm_inf_dU; /// display norm_inf( dU ) au cours des itérations, vrai par défaut
-    bool display_norm_2_dU; /// display norm_2( dU ) au cours des itérations, faux par défaut
+    bool display_norm_inf_dU; /// affiche norm_inf( dU ) au cours des itérations, vrai par défaut
+    bool display_norm_2_dU; /// affiche norm_2( dU ) au cours des itérations, faux par défaut
     bool display_iteration_time; ///
     int multi_resolution; /// div = 2^multi_resolution meaning that 0 = no multi res.
     std::string name_tmp_paraview_file; /// base name to save intermediate results during iterations

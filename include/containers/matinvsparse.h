@@ -251,7 +251,7 @@ template<class T> bool lu_factorize( Mat<T,Gen<>,SparseLU> &m, Vec<int> &vector_
     int n = m.nb_rows();
     int jj,ii,i,ipivot,j2,ind,indc;
     int ideb, k;
-    typename TypePromote<AbsIndication,T>::T norme_maxi;
+    typename TypePromote<T,AbsIndication>::T norme_maxi;
     T big_in_abs;
     T tmp;
 
@@ -411,4 +411,245 @@ template<class T> bool lu_factorize( Mat<T,Gen<>,SparseLU> &m, Vec<int> &vector_
                         break;
                 // on met l'élément dans U et on enlève celui de L
                 if (k>=0) {
-              
+                    m.U[m.L[j].indices[ind]].indices[k] = j;
+                    m.U[m.L[j].indices[ind]].data[k] = m.L[j].data[ind];
+                }
+            }
+            // on enlève les élements de L de la ligne horizontale line qui dépassent.
+            m.L[j].indices.resize(jj);
+            m.L[j].data.resize(jj);
+
+            // Enfin on échange aussi les éléments de U qui sont horizontalement en indice j et ipivot entre line2 et n (verticalement)...
+            for(j2=ipivot;j2<n;++j2) {
+                // on commence par savoir s'il y a des éléments d'indice line et line2.
+                // il y a trois cas à traiter :
+                // * on a les deux éléments : alors on les permute.
+                // * on a un seul élément : alors on décale et on le place.
+                // * on a aucun élément (mon cas préféré) : on ne fait rien ;-)
+                ii = n;
+                jj = n;
+                for(k=0;k<m.U[j2].indices.size();++k) {
+                    if (m.U[j2].indices[k] == j) {
+                        ii = k;
+                        break;
+                    }
+                }
+                for(k=0;k<m.U[j2].indices.size();++k) {
+                    if (m.U[j2].indices[k] == ipivot) {
+                        jj = k;
+                        break;
+                    }
+                }
+                if ((ii<n) && (jj<n)) {
+                    swap(m.U[j2].data[ii],m.U[j2].data[jj]);
+                } else
+                    if (ii<n) {
+                        tmp = m.U[j2].data[ii];
+                        for(k=ii;k<m.U[j2].indices.size()-1;++k)
+                            if (m.U[j2].indices[k+1]<ipivot) {
+                                m.U[j2].indices[k] = m.U[j2].indices[k+1];
+                                m.U[j2].data[k] = m.U[j2].data[k+1];
+                            } else
+                                break;
+                        m.U[j2].indices[k] = ipivot;
+                        m.U[j2].data[k] = tmp;
+                    } else
+                        if (jj<n) {
+                            tmp = m.U[j2].data[jj];
+                            for(k=jj;k>0;--k)
+                                if (m.U[j2].indices[k-1]>j) {
+                                    m.U[j2].indices[k] = m.U[j2].indices[k-1];
+                                    m.U[j2].data[k] = m.U[j2].data[k-1];
+                                } else
+                                  break;
+                            m.U[j2].indices[k] = j;
+                            m.U[j2].data[k] = tmp;
+                        }
+            }
+
+
+            // on n'oublie pas de permuter aussi le vecteur permutation.
+            k = vector_permutation[ipivot];
+            vector_permutation[ipivot] = vector_permutation[j];
+            vector_permutation[j] = k;
+        }/// fin de la permutation   ////////////////////////////////////////
+
+        
+        
+        if (abs_indication(big_in_abs) )
+            big_in_abs = 1. / big_in_abs;
+        else {
+            std::cerr << " pivot nul" << std::endl;
+            return false;
+        }
+        
+        
+        /// Enfin on multiplie toutes les coefficients des lignes j+1 à n et colonne j par l'inverse du pivot partiel
+        for(i=j+1;i<n;i++) {
+            // on détermine s'il y a un coefficient non nul à la colonne j.
+            for( k=0;k<m.L[i].indices.size();++k)
+                if (m.L[i].indices[k]>=j)
+                    break;
+            if (k<m.L[i].indices.size()) // on a dépassé j.
+                if (m.L[i].indices[k] == j)
+                    m.L[i].data[k] *= big_in_abs;
+        }
+        
+
+    }
+    return true;
+}
+
+/// m is assumed to be factorized
+template<class T,int s,int s2> void solve_using_lu_factorize( const Mat<T,Gen<s>,SparseLU> &mat, const Vec<int> &permutation, const Vec<T> &sol, Vec<T,s2> &res, bool allow_permutation = true ) {
+    if ( allow_permutation ) {
+        Vec<T,s2> tmp_sol = sol[ permutation ];
+        solve_using_lu_factorize( mat, tmp_sol, res );
+        //res = tmp_res; 
+    } else
+        solve_using_lu_factorize( mat, sol, res );
+}
+
+
+
+/// in place...
+template<class T> void lu_factorize( Mat<T,Gen<>,SparseLU> &m ) {
+    unsigned n = m.nb_rows();
+    // something on diag ?
+    for(unsigned line=0;line<n;++line) {
+        if ( m.U[line].indices.back() != line ) {
+            m.U[line].indices.push_back( line );
+            m.U[line].data.push_back( T(0) );
+        }
+    }
+    //
+    for(unsigned line=0;line<n;++line) {
+        // L
+        for(unsigned ind=0;ind<m.L[line].indices.size();++ind) {
+            // l_ij != 0
+            unsigned col = m.L[line].indices[ind];
+            m.L[line].data[ind] = ( m.L[line].data[ind] - dot_chol_factorize( m.U[col], m.L[line] ) ) / m.U[col].data.back();
+            // l_ij == 0
+            unsigned ie = line;
+            if ( ind < m.L[line].indices.size()-1 )
+                ie = m.L[line].indices[ind+1];
+            while ( ++col < ie ) {
+                T v = dot_chol_factorize( m.U[col], m.L[line] );
+                if ( abs_indication( v ) ) {
+                    unsigned os = m.L[line].indices.size();
+                    m.L[line].indices.resize( os+1 );
+                    m.L[line].data.resize( os+1 );
+                    ++ind;
+                    for(unsigned k=os;k>ind;--k) {
+                        m.L[line].indices[k] = m.L[line].indices[k-1];
+                        m.L[line].data[k] = m.L[line].data[k-1];
+                    }
+                    m.L[line].data[ind] = -v / m.U[col].data.back();
+                    m.L[line].indices[ind] = col;
+                }
+            }
+        }
+        // U
+        for(unsigned ind=0;ind<m.U[line].indices.size();++ind) {
+            // u_ij != 0
+            unsigned col = m.U[line].indices[ind];
+            m.U[line].data[ind] = m.U[line].data[ind] - dot_chol_factorize( m.U[line], m.L[col] );
+            // u_ij == 0
+            unsigned ie = line;
+            if ( ind < m.U[line].indices.size()-1 )
+                ie = m.U[line].indices[ind+1];
+            while ( ++col < ie ) {
+                T v = dot_chol_factorize( m.U[line], m.L[col] );
+                if ( abs_indication( v ) ) {
+                    unsigned os = m.U[line].indices.size();
+                    m.U[line].indices.resize( os+1 );
+                    m.U[line].data.resize( os+1 );
+                    ++ind;
+                    for(unsigned k=os;k>ind;--k) {
+                        m.U[line].indices[k] = m.U[line].indices[k-1];
+                        m.U[line].data[k] = m.U[line].data[k-1];
+                    }
+                    m.U[line].data[ind] = -v;
+                    m.U[line].indices[ind] = col;
+                }
+            }
+        }
+    }
+}
+
+/// m is assumed to be factorized
+template<class T,int s,int s2> void solve_using_lu_factorize( const Mat<T,Gen<s>,SparseLU> &mat, const Vec<T> &sol, Vec<T,s2> &res ) {
+    unsigned nb_lines = mat.nb_rows();
+    //
+    if ( res.size() <= nb_lines )
+        res.resize( nb_lines, T(0) );
+    //
+    for(unsigned line=0;line<nb_lines;++line) {
+        T v = sol[line];
+        for(unsigned i=0;i<mat.L[line].data.size();++i)
+            v -= mat.L[line].data[i] * res[ mat.L[line].indices[i] ];
+        res[line] = v;
+    }
+    //
+    Vec<T,s2> tmpvec = res;
+    while (nb_lines--) {
+        assert( mat.U[nb_lines].data.size() );
+        T tmp = tmpvec[nb_lines] / mat.U[nb_lines].data.back();
+        for(unsigned i=0;i<mat.U[nb_lines].data.size()-1;++i)
+            tmpvec[ mat.U[nb_lines].indices[i] ] -= mat.U[nb_lines].data[i] * tmp;
+        res[nb_lines] = tmp;
+    }
+}
+
+/// in place...
+template<class T> void incomplete_lu_factorize( Mat<T,Gen<>,SparseLU> &m ) {
+    unsigned n = m.nb_rows();
+    for(unsigned line=0;line<n;++line) {
+        // L
+        for(unsigned ind=0;ind<m.L[line].indices.size();++ind) {
+            // l_ij != 0
+            unsigned col = m.L[line].indices[ind];
+            m.L[line].data[ind] = ( m.L[line].data[ind] - dot_chol_factorize( m.U[col], m.L[line] ) ) / m.U[col].data.back();
+        }
+        // U
+        for(unsigned ind=0;ind<m.U[line].indices.size();++ind) {
+            // u_ij != 0
+            unsigned col = m.U[line].indices[ind];
+            m.U[line].data[ind] = m.U[line].data[ind] - dot_chol_factorize( m.U[line], m.L[col] );
+        }
+    }
+}
+
+template<class T,int s2> void solve_using_incomplete_lu_factorize( const Mat<T,Gen<>,SparseLU> &mp, const Mat<T,Gen<>,SparseLU> &A, const Vec<T> &b, Vec<T,s2> &x, T crit = 1e-4 ) {
+    assert(0); /// TODO
+//     Vec<T> r, d, q, s;
+//     
+//     r = b - A * x;
+//     for(unsigned i=0;;++i) { if ( i==r.size() ) return; if ( abs(r[i]) > crit ) break; }
+//     solve_using_lu_factorize( mp, r, d );
+//     
+//     T deltn = dot(r,d);
+//     unsigned cpt = 0;
+//     while ( true ) {
+//         T delto = deltn;
+//         
+//         q = A * d;
+//         T alpha = deltn / dot( d, q );
+//         x += alpha * d;
+//         r -= alpha * q; //r = b - A * x;
+//         for(unsigned i=0;;++i) { if ( i==r.size() ) return; if ( abs(r[i]) > crit ) break; }
+//         
+//         solve_using_lu_factorize( mp, r, s );
+//         deltn = dot( r, s );
+//         
+//         T beta = deltn / delto;
+//         d = s + beta * d;
+//         ++cpt;
+//         //std::cout << max(abs(r)) << std::endl;
+//     }
+}
+
+};
+
+#endif // LMT_matinvsparse_HEADER
+
