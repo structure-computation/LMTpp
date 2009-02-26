@@ -251,7 +251,7 @@ template<class T> bool lu_factorize( Mat<T,Gen<>,SparseLU> &m, Vec<int> &vector_
     int n = m.nb_rows();
     int jj,ii,i,ipivot,j2,ind,indc;
     int ideb, k;
-    typename TypePromote<T,AbsIndication>::T norme_maxi;
+    typename TypePromote<AbsIndication,T>::T norme_maxi;
     T big_in_abs;
     T tmp;
 

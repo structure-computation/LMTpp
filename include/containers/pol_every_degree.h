@@ -2,6 +2,7 @@
 #define pol_every_degree_HEADER
 
 #include "pol_dimension.h"
+#include "pol_tables.h"
 
 namespace LMT {
 
@@ -16,38 +17,7 @@ public:
 protected:
     Vec<T,dim> coefs;
 
-    template <int nx_> static Vec<unsigned,nx_> next_power(const Vec<unsigned,nx_> &v) {
-        Vec<unsigned,nx_> res=v;
-        unsigned tmp=res[0];
-        for (unsigned i=1;i<nx_;i++)
-            tmp+=res[i];
-        if (tmp<nd) {
-            res[0]++;
-        }
-        else {
-            Vec<unsigned,nx_-1> tmp=res[range(1,nx_)];
-            res[range(1,nx_)]=next_power(tmp);
-            res[0]=0;
-        }
-        return res;
-    }
-
-    static Vec<unsigned,1> next_power(const Vec<unsigned,1> &v) {
-        Vec<unsigned,1> res=v;
-        res[0]++;
-        return res;
-    }
-
 public:
-    static bool init_puissances;
-    static Vec<Vec<unsigned,nx>,PolEveryDegree<nd,nx,T>::dim> puissances;
-
-    static void initialize_puissances() {
-        init_puissances=0;
-        puissances[0].set(0);
-        for (int i=1;i<dim;i++)
-        puissances[i]=next_power(puissances[i-1]);
-    }
 
     PolEveryDegree () {}
 
@@ -67,13 +37,18 @@ public:
     PolEveryDegree(const T &a, const T &b, unsigned q) { ///Construit le polynome a + b*Xq;
         coefs.set(T(0));
         coefs[0]=a;
-        if (init_puissances)
-            initialize_puissances();
+        if (PolPowers<nd,nx>::init_puissances)
+            PolPowers<nd,nx>::initialize_puissances();
         for (int i=0;i<dim;i++)
-            if (puissances[i][q]==1) {
+            if (PolPowers<nd,nx>::puissances[i][q]==1) {
                 coefs[i]=b;
                 break;
             }
+    }
+
+    template <class T2>
+    PolEveryDegree(const PolEveryDegree<nd,nx,T2> &P) { ///Construit le polynome egal a P
+        coefs=P.coefficients();
     }
 
     template <class T2>
@@ -87,9 +62,9 @@ public:
     }
 
     const Vec<Vec<unsigned,nx>,dim> &powers() { ///Renvoie les puissances du polynome
-        if (init_puissances)
-            initialize_puissances();
-        return puissances;
+        if (PolPowers<nd,nx>::init_puissances)
+            PolPowers<nd,nx>::initialize_puissances();
+        return PolPowers<nd,nx>::puissances;
     }
 
     operator bool() const {return true;}
@@ -115,13 +90,6 @@ public:
     }
     
 };
-
-
-template <int nd, int nx, class T>
-bool PolEveryDegree<nd,nx,T>::init_puissances=1;
-
-template <int nd, int nx, class T>
-Vec<Vec<unsigned,nx>,PolEveryDegree<nd,nx,T>::dim> PolEveryDegree<nd,nx,T>::puissances;
 
 }
 

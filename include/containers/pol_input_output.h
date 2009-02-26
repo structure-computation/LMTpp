@@ -18,8 +18,8 @@ std::istream &line_input(std::istream &is, Pol<nd,nx,T> &P) { /// Definit un pol
 
 template <int nd, int nx, class T>
 std::ostream &operator<<(std::ostream &os, const Pol<nd,nx,T> &P) { /// Convertit un polynome multivariables non complexe en flux de sortie
-    if (Pol<nd,nx,T>::init_puissances)
-        Pol<nd,nx,T>::initialize_puissances();
+    if (PolPowers<nd,nx>::init_puissances)
+        PolPowers<nd,nx>::initialize_puissances();
     os << " " << P.coefficients()[0] << " ";
     for (unsigned i=1;i<Pol<nd,nx,T>::dim;i++) {
         if (P.coefficients()[i]>T(0))
@@ -28,8 +28,8 @@ std::ostream &operator<<(std::ostream &os, const Pol<nd,nx,T> &P) { /// Converti
             os << "-" << -P.coefficients()[i];
         if (P.coefficients()[i]!=T(0)) {
             for (int j=0;j<nx;j++)
-                if(Pol<nd,nx,T>::puissances[i][j]>0)
-                    os << "*X" << j << "^" << Pol<nd,nx,T>::puissances[i][j];
+                if(PolPowers<nd,nx>::puissances[i][j]>0)
+                    os << "*X" << j << "^" << PolPowers<nd,nx>::puissances[i][j];
             os << " ";
             }
     }
@@ -39,15 +39,15 @@ std::ostream &operator<<(std::ostream &os, const Pol<nd,nx,T> &P) { /// Converti
 
 template <int nd, int nx, class T>
 std::ostream &operator<<(std::ostream &os, const Pol<nd,nx,std::complex<T> > &P) { /// Convertit un polynome multivariables complexe en flux de sortie
-    if (Pol<nd,nx,T>::init_puissances)
-        Pol<nd,nx,T>::initialize_puissances();
+    if (PolPowers<nd,nx>::init_puissances)
+        PolPowers<nd,nx>::initialize_puissances();
     os << " " << P.coefficients()[0] << " ";
     for (unsigned i=1;i<Pol<nd,nx,T>::dim;i++) {
         if (P.coefficients()[i]!=std::complex<T>(0)) {
             os << "+" << P.coefficients()[i];
             for (int j=0;j<nx;j++)
-                if(Pol<nd,nx,T>::puissances[i][j]>0)
-                    os << "*X" << j << "^" << Pol<nd,nx,T>::puissances[i][j];
+                if(PolPowers<nd,nx>::puissances[i][j]>0)
+                    os << "*X" << j << "^" << PolPowers<nd,nx>::puissances[i][j];
             os << " ";
         }
     }
