@@ -252,7 +252,10 @@ struct DicCPU {
                 M.diag() += levenberg_marq; // * ( ni + ( ni == 0 ) );
             }
             C_M = M;
+            double t0 = time_of_day_in_sec();
             chol_factorize( C_M );
+            // incomplete_chol_factorize( C_M );
+            t1 += time_of_day_in_sec() - t0;
         }
     }
 
@@ -419,6 +422,7 @@ struct DicCPU {
     ///
     void solve_linear_system() {
         solve_using_chol_factorize( C_M, F, dU );
+        // solve_using_incomplete_chol_factorize( C_M, M, F, dU, 1e-2, true );
     }
     
     ///

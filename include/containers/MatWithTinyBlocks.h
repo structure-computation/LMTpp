@@ -1060,6 +1060,10 @@ std::ostream &operator<<( std::ostream &os, const MatWithTinyBlocks<T,TO> &m ) {
 
 /*
  mp -> precond
+ A -> original matrix
+ b -> sollicitation
+ x -> result
+ crit -> stop when norm_inf( delta x ) < crit
 */
 template<class TM,class TO,class TA,class T> void solve_using_incomplete_chol_factorize( const MatWithTinyBlocks<TM,TO> &mp, const TA &A, const Vec<T> &b, Vec<T> &x, T crit = 1e-4, bool disp_r = false ) {
     // bool disp_timing = true;
