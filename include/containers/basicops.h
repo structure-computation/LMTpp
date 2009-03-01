@@ -183,6 +183,12 @@ template<class T> bool heavyside(const T &val) { return (val>=0); }
     \keyword Mathématiques/Fonctions classiques
 */
 template<class T> bool heaviside(const T &val) { return (val>=0); }
+/*!
+     x if >= 0, or 0
+    \keyword Mathématiques/Fonctions classiques
+*/
+template<class T> T pos_part(const T &val) { return val * heaviside(val); }
+
 /*! 
     true if equal 0
     \keyword Mathématiques/Fonctions classiques
