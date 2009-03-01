@@ -23,9 +23,9 @@ public:
 
     template <class T2, int nd2>
     PolEveryDegree(const Vec<T2,nd2> &V) { ///Construit le polynome a partir de ses coefficients
-        for(unsigned i=0; i<min(V.size(),dim); ++i)
+        for(int i=0; i<min((int)V.size(),dim); ++i)
             coefs[i] = T(V[i]);
-        for(unsigned i=V.size(); i<dim; ++i)
+        for(int i=V.size(); i<dim; ++i)
             coefs[i] = T(0);
     }
 

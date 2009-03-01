@@ -5,10 +5,17 @@
 
 namespace LMT {
 
+template <int nx, class TT>
+struct ScalarTypeIfOne {typedef Vec<TT,nx> T;};
+template <class TT>
+struct ScalarTypeIfOne<1,TT> {typedef TT T;};
+
 //--------------Powers table for a polynomial of nd degree in nx variables -------------
 
 template <int nd, int nx>
 struct PolPowers {
+
+    typedef PolPowers<(nd>0?nd-1:nd),nx> Derivative;
 
     static bool init_puissances;
     static Vec<Vec<unsigned,nx>,DimPol<nd,nx>::valeur> puissances;
@@ -42,7 +49,16 @@ struct PolPowers {
         return res;
     }
 
-    typedef PolPowers<(nd>0?nd-1:nd),nx> Derivative;
+    template <class T, class T1, class T2> static void evaluates (T &res, const Vec<T1,DimPol<nd,nx>::valeur> &coefs, const Vec<T2,nx> &x){
+        res=coefs[0];
+        for (unsigned i=1;i<DimPol<nd,nx>::valeur;i++) {
+            T1 tmp=coefs[i];
+            for (int k=0;k<nx;k++)
+                tmp*=pow(x[k],int(puissances[i][k]));
+            res+=tmp;
+        }
+    }
+
 };
 
 template <int nd, int nx>
@@ -51,15 +67,39 @@ bool PolPowers<nd,nx>::init_puissances=1;
 template <int nd, int nx>
 Vec<Vec<unsigned,nx>,DimPol<nd,nx>::valeur> PolPowers<nd,nx>::puissances;
 
+template <int nd>
+struct PolPowers<nd,1> {
+
+    static bool init_puissances;
+    static Vec<Vec<unsigned,1>,DimPol<nd,1>::valeur> puissances;
+
+    static void initialize_puissances() {
+        for (int i=0;i<DimPol<nd,1>::valeur;i++)
+            puissances[i][0]=i;
+    }
+
+    template <class T, class T1, class T2> static void evaluates (T &res, const Vec<T1,DimPol<nd,1>::valeur> &coefs, const Vec<T2,1> &x){
+        res=coefs[0];
+        for (unsigned i=1;i<DimPol<nd,1>::valeur;i++)
+            res += coefs[i] * ::pow(x[0],i);
+    }
+
+    typedef PolPowers<(nd>0?nd-1:nd),1> Derivative;
+};
+
+template <int nd>
+bool PolPowers<nd,1>::init_puissances=0;
+
+template <int nd>
+Vec<Vec<unsigned,1>,DimPol<nd,1>::valeur> PolPowers<nd,1>::puissances;
+
 //--------------Derivative table for a polynomial of nd degree in nx variables-------------
 
 template <int nd, int nx>
 struct PolDerivative {
 
     static bool init_deriv;
-    static Vec<Vec<unsigned>,DimPol<nd,nx>::valeur> deriv_var;
-    static Vec<Vec<unsigned>,DimPol<nd,nx>::valeur> deriv_ind;
-    static Vec<Vec<unsigned>,DimPol<nd,nx>::valeur> deriv_coef;
+    static Vec<Vec<unsigned,DimPol<(nd>0?nd-1:nd),nx>::valeur>,nx> deriv;
 
     static void initialize_deriv() {
         if (PolPowers<nd,nx>::init_puissances)
@@ -67,34 +107,45 @@ struct PolDerivative {
         if (PolPowers<nd,nx>::Derivative::init_puissances)
             PolPowers<nd,nx>::Derivative::initialize_puissances();
         init_deriv=0;
-        for (unsigned i=1;i<DimPol<nd,nx>::valeur;i++)
-            for (int j=0;j<nx;j++)
-                if (PolPowers<nd,nx>::puissances[i][j]>0) {
-                    Vec<unsigned,nx> puissances_deriv_j=PolPowers<nd,nx>::puissances[i];
-                    puissances_deriv_j[j]--;
-                    for (unsigned alphas=0;alphas<PolPowers<nd,nx>::Derivative::puissances.size();alphas++)
-                        if (min(PolPowers<nd,nx>::Derivative::puissances[alphas]==puissances_deriv_j)) {
-                            deriv_var[i].push_back(j);
-                            deriv_ind[i].push_back(alphas);
-                            deriv_coef[i].push_back(PolPowers<nd,nx>::puissances[i][j]);
-                            break;
-                        }
+        for (unsigned i=0;i<nx;i++)
+            for (int j=0;j<DimPol<(nd>0?nd-1:nd),nx>::valeur;j++) {
+                Vec<unsigned,nx> puissance_input=PolPowers<(nd>0?nd-1:nd),nx>::puissances[j];
+                puissance_input[i]++;
+                for (int k=0;k<DimPol<nd,nx>::valeur;k++)
+                    if (puissance_input==PolPowers<nd,nx>::puissances[k]) {
+                        deriv[i][j]=k;
+                        break;
                 }
+            }
     }
 
+    template <class T>
+    static void derivates (Vec<Vec<T,DimPol<(nd>0?nd-1:nd),nx>::valeur>,nx> &derivee, const Vec<T,DimPol<nd,nx>::valeur> &coefs) {
+        for (int i=0;i<nx;i++)
+            for (int j=0;j<DimPol<(nd>0?nd-1:nd),nx>::valeur;j++)
+                derivee[i][j]=coefs[deriv[i][j]]*PolPowers<nd,nx>::puissances[deriv[i][j]][i];
+    }
 };
 
 template <int nd, int nx>
 bool PolDerivative<nd,nx>::init_deriv=1;
 
 template <int nd, int nx>
-Vec<Vec<unsigned>,DimPol<nd,nx>::valeur> PolDerivative<nd,nx>::deriv_var;
+Vec<Vec<unsigned,DimPol<(nd>0?nd-1:nd),nx>::valeur>,nx> PolDerivative<nd,nx>::deriv;
 
-template <int nd, int nx>
-Vec<Vec<unsigned>,DimPol<nd,nx>::valeur> PolDerivative<nd,nx>::deriv_ind;
+template <int nd>
+struct PolDerivative<nd,1> {
+    static bool init_deriv;
+    static void initialize_deriv() {}
+    template <class T>
+    static void derivates (Vec<T,DimPol<(nd>0?nd-1:nd),1>::valeur> &derivee, const Vec<T,DimPol<nd,1>::valeur> &coefs) {
+        for (unsigned j=0;j<DimPol<(nd>0?nd-1:nd),1>::valeur;j++)
+            derivee[j]=coefs[j+1]*(j+1);
+    }
+};
 
-template <int nd, int nx>
-Vec<Vec<unsigned>,DimPol<nd,nx>::valeur> PolDerivative<nd,nx>::deriv_coef;
+template <int nd>
+bool PolDerivative<nd,1>::init_deriv=0;
 
 //--------------Multiplication table for a two polynomials of nd degree in nx variables-------------
 
@@ -141,6 +192,11 @@ struct PolMultiplies {
                 }
     }
 
+    template <class T, class T1, class T2>
+    static void multiplies(Vec<T,DimPol<nd,nx>::valeur> &coef, unsigned i, const Vec<T1,DimPol<nd,nx>::valeur> &p, const Vec<T2,DimPol<nd,nx>::valeur> &q, int decalage = 0) {
+         for (int j=0;j<PolMultiplies<nd,nx>::mult[i].size()-decalage;j++)
+             coef[i]+=p[mult[i][j][0]]*q[mult[i][j][1]];
+    }
 };
 
 template <int nd, int nx>
@@ -148,6 +204,19 @@ bool PolMultiplies<nd,nx>::init_mult=1;
 
 template <int nd, int nx>
 Vec<Vec<Vec<unsigned,2> >,DimPol<nd,nx>::valeur> PolMultiplies<nd,nx>::mult;
+
+template <int nd>
+struct PolMultiplies<nd,1> {
+    static bool init_mult;
+    static void initialize_mult() {}
+    template <class T, class T1, class T2> static void multiplies(Vec<T,DimPol<nd,1>::valeur> &coef, unsigned i, const Vec<T1,DimPol<nd,1>::valeur> &p, const Vec<T2,DimPol<nd,1>::valeur> &q, int decalage = 0) {
+        for (int j=0;j<=i-decalage;j++)
+            coef[i]+=p[i-j]*q[j];
+    }
+};
+
+template <int nd>
+bool PolMultiplies<nd,1>::init_mult=0;
 
 //--------------Troncature table in order to make a polynomial of ne degree in nx variables---------------------
 //-------------------------------------------from a polynomial of nd degree in nx variables with (nd>ne)--------
@@ -172,6 +241,18 @@ struct PolTroncates {
                 }
     }
 
+    template <class T1, class T2>
+    static void troncates(Vec<T1,DimPol<nd,nx>::valeur> &coef, const Vec<T2,DimPol<ne,nx>::valeur> &p) {
+        coef.set(T1(0));
+        for (unsigned i=0;i<DimPol<ne,nx>::valeur;i++)
+            coef[troncature[i]] = p[i];
+    }
+
+    template <class T1, class T2>
+    static void troncates(Vec<T1,DimPol<ne,nx>::valeur> &coef, const Vec<T2,DimPol<nd,nx>::valeur> &p) {
+        for (unsigned i=0;i<DimPol<nd,nx>::valeur;i++)
+            coef[i] = p[troncature[i]];
+    }
 };
 
 template <int nd, int ne, int nx>
@@ -179,6 +260,30 @@ bool PolTroncates<nd,ne,nx>::init_troncates=1;
 
 template <int nd, int ne, int nx>
 Vec<unsigned,DimPol<ne,nx>::valeur> PolTroncates<nd,ne,nx>::troncature;
+
+template <int nd, int ne>
+struct PolTroncates<nd,ne,1> {
+
+    static bool init_troncates;
+    static void initialize_tronc () {}
+
+    template <class T1, class T2>
+    static void troncates(Vec<T1,DimPol<nd,1>::valeur> &coef, const Vec<T2,DimPol<ne,1>::valeur> &p) {
+        for(unsigned i=0;i<DimPol<ne,1>::valeur;++i)
+            coef[i] = p[i];
+        for(unsigned i=DimPol<ne,1>::valeur;i<DimPol<nd,1>::valeur;++i)
+            coef[i] = T1(0);
+    }
+
+    template <class T1, class T2>
+    static void troncates(Vec<T1,DimPol<ne,1>::valeur> &coef, const Vec<T2,DimPol<nd,1>::valeur> &p) {
+        for(unsigned i=0;i<DimPol<nd,1>::valeur;++i)
+            coef[i] = p[i];
+    }
+};
+
+template <int nd, int ne>
+bool PolTroncates<nd,ne,1>::init_troncates=0;
 
 //--------------Restriction tables in order to make a polynomial of nd degree in nx variables---------------------
 //---------------------------------------------from a polynomial of nd degree in ny variables with (nx>ny)--------

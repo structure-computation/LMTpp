@@ -52,8 +52,8 @@ void get_eig_sym( const TM &m, Vec<double> &eig_val, Mat<double> &eig_vec ) {
         throw "pb with eig with lapack";
     //
     eig_vec.resize( n, n );
-    for(unsigned i=0,c=0;i<n;++i)
-        for(unsigned j=0;j<n;++j,++c)
+    for(int i=0,c=0;i<n;++i)
+        for(int j=0;j<n;++j,++c)
             eig_vec( i, j ) = A[ c ];
 }
 
