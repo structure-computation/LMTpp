@@ -352,8 +352,8 @@ class LmtppFormulationAncestor
                                 const Number<symm> &matrix_is_sym,
                                 const Number<$assemble_mat> &assemble_mat,
                                 const Number<$assemble_vec> &assemble_vec,
-                                const Element<$(pe->name),DefaultBehavior,Node<3,T_pos,ND>,ED,nim> &elem,
-                                const Element<$(pc->name),DefaultBehavior,Node<3,T_pos,ND>,ED2,nim2> &skin_elem,
+                                const Element<$(pe->name),DefaultBehavior,Node<$nb_dim,T_pos,ND>,ED,nim> &elem,
+                                const Element<$(pc->name),DefaultBehavior,Node<$nb_dim,T_pos,ND>,ED2,nim2> &skin_elem,
                                 const Number<$num_pc> &num_child,
                                 const unsigned *indices,
                                 TMUT &mut ) {
@@ -367,8 +367,8 @@ class LmtppFormulationAncestor
                                 const Number<symm> &matrix_is_sym,
                                 const Number<$assemble_mat> &assemble_mat,
                                 const Number<$assemble_vec> &assemble_vec,
-                                const Element<$(pe->name),DefaultBehavior,Node<3,T_pos,ND>,ED,nim> &elem,
-                                const Element<$(pc->name),DefaultBehavior,Node<3,T_pos,ND>,ED2,nim2> &skin_elem,
+                                const Element<$(pe->name),DefaultBehavior,Node<$nb_dim,T_pos,ND>,ED,nim> &elem,
+                                const Element<$(pc->name),DefaultBehavior,Node<$nb_dim,T_pos,ND>,ED2,nim2> &skin_elem,
                                 const Number<$num_pc> &num_child,
                                 const unsigned *indices ) {
                             int fake_mut;
