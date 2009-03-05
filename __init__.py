@@ -37,7 +37,7 @@ def make_dep_py(env):
     for i in filter(lambda x:re_elem_py.match(x), all_py):
         corh = 'LMT/include/mesh' + i[ i.rfind('/') : -3 ] + '.h'
         ne = i[ i.rfind('/')+9 : -3 ]
-        env.Command( corh, [i,'LMT/make_elem.py'], 'export PYTHONPATH="..:$PYTHONPATH";python LMT/make_elem.py %s > %s'%(ne,corh) )
+        env.Command( corh, [i,'LMT/make_elem.py'], 'export PYTHONPATH="'+os.getcwd()+':$PYTHONPATH";python LMT/make_elem.py %s > %s'%(ne,corh) )
     # meshcarac
     for i in get_files(".", re.compile( '.*\.meshcarac.py$' ) ):
         corh = i[:-12] + "h"

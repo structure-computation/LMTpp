@@ -15,7 +15,7 @@ struct FormulationFit {
     }
     
     template<class TMAT>
-    void exec( const Vec<ScalarType> &exp_val, const TMAT &exp_mat, Vec<ScalarType> sens_val ) {
+    void exec( const Vec<ScalarType> &exp_val, const TMAT &exp_mat, Vec<ScalarType> sens_val = Vec<ScalarType>() ) {
         if ( sens_val.size() < exp_val.size() )
             sens_val.resize( exp_val.size(), 1.0 );
             

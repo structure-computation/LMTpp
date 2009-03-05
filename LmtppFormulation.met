@@ -95,6 +95,13 @@ class Variable[ nb_dim = [], sym = false ] inherits VariableAncestor
     expr          := TS()
     test          := TS()
         
+    relation      := TS()
+    has_relation  := false
+        
+    def reassign( value )
+        has_relation = false
+        relation = value
+        
     def update_computed_attributes( time, e, n )
         name = n
         if not tex_name.size
@@ -203,7 +210,12 @@ class LmtppFormulationAncestor
     
     #
     virtual def call_after_solve pertinence 0.5
-        return ""
+        cw := CodeWriter()
+        for name, var in AttributeExplorer( self )
+            if var.is_a_LmtppVariable and var.has_relation
+                info var.expr_symbols
+                # cw.add(  )
+        return cw.to_string()
 
     #
     def legacy_lmtpp_unk_management( t_unk, n_unk, sel )

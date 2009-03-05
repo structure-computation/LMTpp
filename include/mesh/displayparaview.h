@@ -37,7 +37,7 @@ public:
     ~DisplayParaview() {
     }
     
-    template<class TM> void add_mesh(const TM &m,const std::string &prefix="tmp/paraview",const Vec<std::string> &display_fields=Vec<std::string>("all"),double time_step=0) {
+    template<class TM> std::string add_mesh(const TM &m,const std::string &prefix="tmp/paraview",const Vec<std::string> &display_fields=Vec<std::string>("all"),double time_step=0) {
         std::string pvu_name = prefix;
         //if ( prefix.rfind(".vtu") != prefix.size() - 4 )
         pvu_name += "_" + to_string( time_step ) + "_" + to_string( pvu_files[time_step].size() ) + ".vtu";
@@ -52,6 +52,7 @@ public:
         get_min_max( m.node_list, ExtractDM<pos_DM>(), xmi, xma );
         if ( m.node_list.size() )
             app_xminmax(prefix,xmi,xma);
+        return pvu_name;
     }
     template<class TS> void add_shape(const Shape<2,TS> &shape,unsigned grid_size,const std::string &prefix="tmp/paraview") {
         typedef typename Shape<2,TS>::Pvec Pvec;
@@ -244,11 +245,15 @@ struct DpExec { void operator()(DisplayParaview &dp,unsigned i) const { dp.exec(
 /**
 */
 template<class Carac,unsigned nvi_to_subs,unsigned skin>
-int display( const MeshAncestor<Carac,nvi_to_subs,skin> &m, std::string pvsm_file ) {
+int display( const MeshAncestor<Carac,nvi_to_subs,skin> &m, std::string pvsm_file = "" ) {
     DisplayParaview dp;
-    dp.add_mesh( m );
+    std::string res = dp.add_mesh( m );
     
-    std::string t = "paraview --state=" + pvsm_file;
+    if ( pvsm_file.size() ) {
+        std::string t = "paraview --state=" + pvsm_file;
+        return system( t.c_str() );
+    }
+    std::string t = "paraview --data=" + res;
     return system( t.c_str() );
 }
 

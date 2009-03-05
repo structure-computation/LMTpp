@@ -16,7 +16,7 @@ for static_size in [1,0]:
         constructors  = '    Vec() {}\n'
         constructors += '    Vec(const TT &v) { for(unsigned i=0;i<(unsigned)static_size;val[i++]=v); } /// copy val in all elements of *this\n'
         constructors += '    void get_data_from_ptr(const TT *v) { for(unsigned i=0;i<(unsigned)static_size;++i) val[i]=v[i]; } /// copy val in all elements of *this\n'
-        for i in range(1,16):
+        for i in range(1,17):
             args = string.join( [ 'const TT &v%i'%k for k in range(i) ], ',')
             sets = string.join( [ 'val[%i]=v%i;'%(k,k) for k in range(i) ] , ' ')
             if i>1:
@@ -24,7 +24,7 @@ for static_size in [1,0]:
             constructors += '    void assign_and_complete_with_last('+args+') { '+sets+' for(unsigned i='+str(i)+';i<size();++i) val[i]=v'+str(i-1)+'; }\n'
     else:
         constructors = '    Vec() { init(); }\n'
-        for i in range(1,16):
+        for i in range(1,17):
             args = string.join( [ 'const TT &v%i'%k for k in range(i) ] ,',')
             sets = string.join( [ 'val[%i]=v%i;'%(k,k) for k in range(i) ] ,' ')
             constructors += '    explicit Vec('+args+') { init(); resize(%i); %s } /// declare a vector containing args\n' % (i,sets)
