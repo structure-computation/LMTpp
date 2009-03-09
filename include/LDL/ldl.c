@@ -581,4 +581,93 @@ int ldl_numeric_pg    /* returns n if successful, k if D (k,k) is zero */
     //free(kernod);
     return (n) ;    /* success, diagonal of D is all nonzero */
 }
+//
+int ldl_numeric_with_pivots_pg    /* returns n if successful, k if D (k,k) is zero */
+(
+    int n,      /* A and L are n-by-n, where n >= 0 */
+    int Ap [ ],     /* input of size n+1, not modified */
+    int Ai [ ],     /* input of size nz=Ap[n], not modified */
+    double Ax [ ],  /* input of size nz=Ap[n], modified */
+    int Lp [ ],     /* input of size n+1, not modified */
+    int Parent [ ], /* input of size n, not modified */
+    int Lnz [ ],    /* output of size n, not defn. on input */
+    int Li [ ],     /* output of size lnz=Lp[n], not defined on input */
+    double Lx [ ],  /* output of size lnz=Lp[n], not defined on input */
+    double D [ ],   /* output of size n, not defined on input */
+    double Y [ ],   /* workspace of size n, not defn. on input or output */
+    int Pattern [ ],    /* workspace of size n, not defn. on input or output */
+    int Flag [ ],   /* workspace of size n, not defn. on input or output */
+    int P [ ],      /* optional input of size n */
+    int Pinv [ ],    /* optional input of size n */    
+    int *ksiz,       /* input giving the number of null pivots */
+    int kernod [ ]   /* input list of null pivots  */
+) {
+    double yi, l_ki ;
+    int i, k, p, kk, p2, len, top, ker, pc, pp ;
+
+    for (ker=0; ker < *ksiz;++ker ){
+       for ( pc = 0 ; pc < n ; ++pc )
+          for ( pp = Ap[pc] ; pp < Ap[pc+1] ; ++pp)
+             if (Ai[pp]==kernod[ker]) {
+                Ax[ pp ]=0.;
+                break;
+             }
+       for ( pp = Ap[ kernod[ker] ] ; pp < Ap[kernod[ker]+1] ; ++pp ){
+        if(Ai[pp] ==kernod[ker] ){
+         Ax [ pp ] = 1.;
+        } else {
+         Ax [ pp ] = 0.;
+        }
+       }
+    }
+
+    for (k = 0 ; k < n ; k++) {
+        /* compute nonzero Pattern of kth row of L, in topological order */
+        Y [k] = 0.0 ;           /* Y(0:k) is now all zero */
+        top = n ;           /* stack for pattern is empty */
+        Flag [k] = k ;          /* mark node k as visited */
+        Lnz [k] = 0 ;           /* count of nonzeros in column k of L */
+        kk = (P) ? (P [k]) : (k) ;  /* kth original, or permuted, column */
+        p2 = Ap [kk+1] ;
+        for (p = Ap [kk] ; p < p2 ; p++) {
+            i = (Pinv) ? (Pinv [Ai [p]]) : (Ai [p]) ;   /* get A(i,k) */
+            if (i <= k) {
+                Y [i] += Ax [p] ;  /* scatter A(i,k) into Y (sum duplicates) */
+                /* follow path from i to root of etree, stop at flagged node */
+                for (len = 0 ; Flag [i] != k ; i = Parent [i]) {
+                    Pattern [len++] = i ;   /* L(k,i) is nonzero */
+                    Flag [i] = k ;      /* mark i as visited */
+                }
+                while (len > 0)         /* push path on top of stack */
+                {
+                    Pattern [--top] = Pattern [--len] ;
+                }
+            }
+        }
+        /* Pattern [top ... n-1] now contains nonzero pattern of L(:,k) */
+        /* compute numerical values kth row of L (a sparse triangular solve) */
+        D [k] = Y [k] ;         /* get D(k,k) and clear Y(k) */
+        Y [k] = 0.0 ;
+        for ( ; top < n ; top++) {
+            i = Pattern [top] ;
+            yi = Y [i] ;        /* get and clear Y(i) */
+            Y [i] = 0.0 ;
+            p2 = Lp [i] + Lnz [i] ;
+            for (p = Lp [i] ; p < p2 ; p++) {
+                Y [Li [p]] -= Lx [p] * yi ;
+            }
+            l_ki = yi * D [i] ;    /*pg D is inverse pivot i*/
+            D [k] -= l_ki * yi ;
+            Li [p] = k ;        /* store L(k,i) in column form of L */
+            Lx [p] = l_ki ;
+            Lnz [i]++ ;         /* increment count of nonzeros in col i */
+        }
+//printf("Pivot %d, %e, %e\n",kk,D[k],toupiti/D[0]);
+        yi =D [ k ];
+        for (ker=0;ker<*ksiz;++ker) if (kk == kernod[ker] ) { D[k]=0.;break;}
+        else { D [ k ] = 1 / yi;} /*pg useful to handle null pivots cleanly*/
+    }
+    return (n) ;    /* success, diagonal of D is all nonzero */
+}
+
 

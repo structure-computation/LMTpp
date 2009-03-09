@@ -11,7 +11,10 @@ class LDL_solver {
 public:
     typedef double T;
     
-    LDL_solver() {pseudo_inverse=false;}
+    LDL_solver() {
+        pseudo_inverse=false;
+        Pivots_To_block.resize(0);
+    }
     bool pseudo_inverse;
     
     /// after that, data in mat won't be used anymore.
@@ -25,6 +28,7 @@ public:
     template<class TM> void get_factorization( const TM &mat, bool want_free=true, bool want_semi_morse=false, bool want_amd_order=true ) { assert(0); /* TODO */ }
     /// ...
     void solve( LMT::Vec<double> &vec );
+    LMT::Vec<int> Pivots_To_block;
     
 private:
     ///
