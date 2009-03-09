@@ -136,7 +136,11 @@ struct DicCPU {
                         }
                         
                         // residual
-                        dic.sum_residual += abs( diff_fg );
+                        dic.sum_abs_diff_fg += abs( diff_fg );
+                        dic.sum_sq_diff_fg  += pow( diff_fg, 2 );
+                        dic.nb_covered_pixel++;
+                        dic.min_f = min( min_f, val_f );
+                        dic.max_f = max( min_f, val_f );
                     }
                 }
                 
@@ -220,7 +224,11 @@ struct DicCPU {
             F.set( 0.0 );
         }
         
-        sum_residual = 0;
+        sum_abs_diff_fg = 0;
+        sum_sq_diff_fg  = 0;
+        nb_covered_pixel = 0;
+        min_f = 0;
+        max_f = std::numeric_limits<T>::max();
         
         //         //
         //         Assemble<NAME_VAR_DEPL,NAME_VAR_GREY,true> ass_1;
@@ -257,6 +265,8 @@ struct DicCPU {
             // incomplete_chol_factorize( C_M );
             t1 += time_of_day_in_sec() - t0;
         }
+        
+        adimensioned_residual = sum_sq_diff_fg / nb_covered_pixel / ( max_f - min_f );
     }
 
     /// resol_level must be managed internally
@@ -544,11 +554,16 @@ struct DicCPU {
         return mean( dU );
     }
     
+    
     // output
     Mat<T,Sym<>,SparseLine<> > M, C_M;
     Vec<int> indice_noda;
     Vec<T> F, dU;
-    T sum_residual;
+    T sum_abs_diff_fg; // sum_{for each pixel i} | f( x_i + d_i ) - g( x_i ) |
+    T sum_sq_diff_fg ; // sum_{for each pixel i} ( f( x_i + d_i ) - g( x_i ) ) ^ 2
+    T adimensioned_residual; // sqrt( sum_{for each pixel i} ( f( x_i + d_i ) - a_i * g( x_i ) ) ^ 2 ) / ( max( f ) - min( f ) ) / nb_covered_pixels
+    int nb_covered_pixel;
+    T min_f, max_f;
     unsigned cpt_iter; // nombre d'itérations pour converger
     Vec<T> history_norm_inf_dU;
     Vec<T> history_norm_2_dU;
