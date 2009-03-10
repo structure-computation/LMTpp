@@ -87,7 +87,7 @@ namespace DM {
     template<> struct NbComponents<const char *> { static const unsigned n = 0; };
     template<class T,int dim> struct NbComponents<Vec<T,dim> > { static const unsigned n = int(NbComponents<T>::n*(MAX(dim,0))); };
     template<class T,int d1,int d2> struct NbComponents<Mat<T,Gen<d1,d2> > > { static const unsigned n = NbComponents<T>::n*MAX(d1,0)*MAX(d2,0); };
-    template<class T,int d> struct NbComponents<Mat<T,Sym<d> > > { static const unsigned n = NbComponents<T>::n*MAX(d,0)*MAX(d,0); };
+    template<class T,int d> struct NbComponents<Mat<T,Sym<d> > > { static const unsigned n = NbComponents<T>::n*MAX(d,0)*MAX(d+1,0)/2; };
     #ifndef WITHOUTCOMPLEX
         template<class T> struct NbComponents<std::complex<T> > { static const unsigned n = NbComponents<T>::n*2; };
     #endif

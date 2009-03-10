@@ -34,12 +34,12 @@ class VariableAncestor
     unit          := ""
     unknown       := false
     nb_der        := 0
-    tex_name      := ""
     
     # computed
     expr_symbols  := Vec[Symbol]()
     test_symbols  := Vec[Symbol]()
     name          := ""
+    tex_name      := ""
     
     virtual def make_expr_subs( from, to )
         abstract
@@ -72,6 +72,9 @@ class VariableAncestor
     virtual def get_nb_values
         abstract
 
+    virtual def get_expr_tensor_order
+        abstract
+
     def eq( v )
         if name == v.name
             assert( interpolation == v.interpolation, "variables with same names in different formulations but with different interpolations" )
@@ -89,23 +92,42 @@ class Variable[ nb_dim = [], sym = false ] inherits VariableAncestor
     static const TS := type_for_nb_dim_and_sym( nb_dim, sym )
     
     #parameters
-    default_value := TS()
+    default_value := TS( 0 )
     
     # computed
     expr          := TS()
     test          := TS()
         
-    relation      := TS()
     has_relation  := false
-        
+    
+    scalar_type   := "Tpos"
+    
     def reassign( value )
-        has_relation = false
-        relation = value
+        has_relation = true
+        expr         = value
         
+    def mesh_symbol( ind )
+        prefix := ""
+        if interpolation == "elementary"
+            prefix = "elem."
+        else
+            assert( 0, "interpolation=$interpolation not managed" )
+        #
+        if nb_dim.size == 0
+            return prefix + name
+        if nb_dim.size == 1
+            return prefix + name + "[$(ind[0])]"
+        if nb_dim.size == 2
+            return prefix + name + "($(ind[0]),$(ind[1]))"
+        assert( 0, "nb_dim=$nb_dim not managed" )
+    
     def update_computed_attributes( time, e, n )
         name = n
-        if not tex_name.size
+        # TeX stuff
+        if not tex_name
             tex_name = n
+            if tex_name in ["sigma","nu","alpha","beta","phi"]
+                tex_name = "\\" + n
         # for val, ind in values
         def index_access( ind )
             if ind.size
@@ -119,6 +141,11 @@ class Variable[ nb_dim = [], sym = false ] inherits VariableAncestor
             val = _get_scalar_var( time, e,           name + index_access( ind ), tex_name + intex_access( ind )           , expr_symbols, want_ders = not unknown )
         for ind, val in indices_and_values_of( test )
             val = _get_scalar_var( time, e, "test_" + name + index_access( ind ), tex_name + intex_access( ind ) + "{^*}{}", test_symbols, want_ders = false       )
+            
+            
+
+    virtual def get_expr_tensor_order
+        return expr.tensor_order
             
     virtual def make_expr_subs( from, to )
         expr = expr.subs( from, to )
@@ -141,8 +168,12 @@ class Variable[ nb_dim = [], sym = false ] inherits VariableAncestor
     
     virtual def default_value_str
         res := ""; cpt := 0
-        for ind, val in indices_and_values_of( default_value )
+        if default_value.tensor_order == 2
+            res += "$(default_value.nb_rows),$(default_value.nb_cols),Vec<$scalar_type>("
+        for ind, val in indices_and_values_of( default_value, compressed = true )
             res += "," * ( cpt++ != 0 ) + Float64( val ).to_string( 16 )
+        if default_value.tensor_order == 2
+            res += ")"
         return res
 
 #~
@@ -209,12 +240,18 @@ class LmtppFormulationAncestor
         return false
     
     #
-    virtual def call_after_solve pertinence 0.5
+    virtual def call_after_solve( e ) pertinence 0.5
         cw := CodeWriter()
         for name, var in AttributeExplorer( self )
             if var.is_a_LmtppVariable and var.has_relation
-                info var.expr_symbols
-                # cw.add(  )
+                for ind, value in indices_and_values_of( var.expr, compressed = true )
+                    val := value
+                    if var.interpolation in [ "elementary", "global" ]
+                        if value.depends_on( e.var_inter )
+                            stderr <<< "Attention : on peut pas coller un champ non constant sur un champ qui est supposé l'être. "
+                            stderr <<< "Vous pouvez faire e.mean(...) pour avoir la moyenne sur l'élément par exemple."
+                            val = e.mean( value )
+                    cw.add( var.mesh_symbol( ind ), val, reassign )
         return cw.to_string()
 
     #
@@ -582,6 +619,7 @@ class LmtppFormulation[ dim ] inherits LmtppFormulationAncestor
     def grad    ( expr )  return pe->grad    ( expr )
     def grad_sym( expr )  return pe->grad_sym( expr )
     def div     ( expr )  return pe->div     ( expr )
+    def mean    ( expr )  return pe->mean    ( expr )
     
 #
 def write_legacy_lmtpp_mesh_dm_data_set_field( res, bn, variable_list, sym_select, sp )
@@ -591,7 +629,8 @@ def write_legacy_lmtpp_mesh_dm_data_set_field( res, bn, variable_list, sym_selec
         res << sp <<< "    void dm_data_set_field( const std::string field_name, $TV value ) {"
         for v in variable_list
             if sym_select( v ) and v->nb_values == n
-                res << sp <<< "        if ( field_name == \"$( v->name )\" ) { $( v->name ) = value; return; }"
+                data_if_mat := ".data" * ( v->expr_tensor_order == 2 )
+                res << sp <<< "        if ( field_name == \"$( v->name )\" ) { $( v->name + data_if_mat ) = value; return; }"
         res << sp <<< "        std::cerr << \"There's no variable named \" << field_name << \" in data struct\" << std::endl;"
         res << sp <<< "    }"
         
@@ -599,7 +638,8 @@ def write_legacy_lmtpp_mesh_dm_data_set_field( res, bn, variable_list, sym_selec
         res << sp <<< "    $TV dm_data_get_field( const std::string field_name, StructForType<$TV > ) const {"
         for v in variable_list
             if sym_select( v ) and v->nb_values == n
-                res << sp <<< "        if ( field_name == \"$( v->name )\" ) { return $( v->name ); }"
+                data_if_mat := ".data" * ( v->expr_tensor_order == 2 )
+                res << sp <<< "        if ( field_name == \"$( v->name )\" ) { return $( v->name + data_if_mat ); }"
         res << sp <<< "        std::cerr << \"There's no variable named \" << field_name << \" in data struct\" << std::endl;"
         res << sp <<< "        return 0;"
         res << sp <<< "    }"
@@ -789,13 +829,13 @@ def write_legacy_lmtpp_carac_formulation_for_element( stream, name_form, fe, dim
     stream <<< "    };"
     stream <<< "    static const bool has_elementary_matrix = $( fe->non_null_system( fe->K_dV, fe->F_dV ) );"
     stream <<< "    static const bool has_skin_elementary_matrix = $( fe->need_skin_assembly );"
-    stream <<< "    template<class TE,class TF> static void after_solve(TE &elem,TF &f,const unsigned *indices) {"
+    stream <<< "    template<class TE,class TF,class TV> static void after_solve(TE &elem,TF &f,const unsigned *indices,TV &vectors) {"
     stream <<< "    #define PNODE(N) (*elem.node(N))"
-    stream <<< "    $( fe->call_after_solve() )"
+    stream <<< "    $( fe->call_after_solve( @child_cast( fe->pe ) ) )"
     stream <<< "    #undef PNODE"
     stream <<< "    }"
     for n in 2 .. 7
-        stream <<< "    template<class TE,class TF> static void after_solve_$n(TE &elem,TF &f,const unsigned *indices) {"
+        stream <<< "    template<class TE,class TF,class TV> static void after_solve_$n(TE &elem,TF &f,const unsigned *indices,TV &vectors) {"
         stream <<< "    }"
     stream <<< fe->legacy_lmtpp_unk_management( "elementary"     , "elem", x => x.elem==0 )
     stream <<< fe->legacy_lmtpp_unk_management( "skin_elementary", "elem", x => x.skin==0 )
