@@ -1,8 +1,8 @@
 /*!
 \example Exemple de formulation
 
-    L'objet de cet exemple est de montrer les codes sources d'un mini projet avec formulation d'un problème thermique. Vous trouverez dans le tutoriel \a "Comment résoudre un problème éléments finis de façon générale" toutes les explications nécessaires pour concevoir vos propres formulations.
-    Ici nous voulons résoudre un problème thermique dont la formulation est déjà écrite dans le fichier \a file:///home/pasquier/LMT/formulations/formulation_difftherm.py formulation_difftherm.py (à consulter). 
+    L'objet de cet exemple est de montrer les codes sources d'un mini-projet avec formulation d'un problème thermique. Vous trouverez dans le tutoriel [[Comment résoudre un problème éléments finis de façon générale]] toutes les explications nécessaires pour concevoir vos propres formulations.
+    Ici nous voulons résoudre un problème thermique dont la formulation est déjà écrite dans le fichier [[LMT/formulations/formulation_difftherm.py|formulation_difftherm.py]] formulation_difftherm.py (à consulter). 
 
     = Fichier Sconstruct
         \code
@@ -44,10 +44,9 @@
 
             env.Program( "main", ["main.cpp"] + pb_libs + libs, build_dir='build/LMT' )
 
-    La partie importante est l'appel de la fonction make_pb() avec comme paramètre le nom du problème, le nom de la formulation et le type d'éléments.
+    La partie importante est l'appel de la fonction make_pb(...) avec comme paramètre le nom du problème, le nom de la formulation et le type d'éléments.
     <strong> Imortant : </strong> n'oubliez pas d'ajouter pb_libs à votre liste de code source dans l'appel de la fonction env.Program().
 
-    
     = Fichier Makefile
         \code
             all: codegen
