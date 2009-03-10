@@ -16,6 +16,7 @@ def type_for_nb_dim_and_sym( nb_dim, sym ) when nb_dim.size == 2
 
 #~
 
+
 ~#
 class VariableAncestor
     #
