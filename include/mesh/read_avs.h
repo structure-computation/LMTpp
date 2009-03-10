@@ -52,6 +52,16 @@ struct Totito_ELEM {
         mesh = &mesh_;
     };
      
+    template<class T>
+    void operator()(unsigned num,const char *name,T &val) const {
+        for(unsigned i=0;i<fname.size();++i) {
+            if ( name == fname[i] ) {
+                std::cerr << "Pour l'instant pas codé lecteur de types autre que Tpos, Vec, Vec<Vec> dans read_avs."  << std::endl;
+                assert( 0 );
+            }
+        }
+    }
+
     template<class T,int s1, int s2>
     void operator()(unsigned num,const char *name,Vec<Vec<T,s2>,s1> &val) const {
         for(unsigned i=0;i<fname.size();++i)
@@ -74,8 +84,7 @@ struct Totito_ELEM {
             }
     }
     
-        template<class T>
-        void operator()(unsigned num,const char *name,T &val) const {
+        void operator()(unsigned num,const char *name,typename TM::Tpos &val) const {
             for(unsigned i=0;i<fname.size();++i)
                 if (name==fname[i]) {
                     val = T (data[number][i][0]);
