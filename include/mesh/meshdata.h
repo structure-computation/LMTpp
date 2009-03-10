@@ -151,12 +151,14 @@ namespace DM {
         }
         #ifndef DONT_WANT_XML
         template<class DMSet,unsigned total_number>
-        void get_data_from_xml(DMSet &dm_set,const XmlNode &xn,const Number<total_number> &n1,const Number<total_number> &nt) {}
+        void get_data_from_xml(DMSet &dm_set,const XmlNode &xn,const Number<total_number> &n1,const Number<total_number> &nt,bool want_warning_not_present_in_xml) {}
         template<class DMSet,unsigned number,unsigned total_number>
-        void get_data_from_xml(DMSet &dm_set,const XmlNode &xn,const Number<number> &n1,const Number<total_number> &nt) {
+        void get_data_from_xml(DMSet &dm_set,const XmlNode &xn,const Number<number> &n1,const Number<total_number> &nt,bool want_warning_not_present_in_xml) {
             if ( xn.has_attribute( DMSet::name_member_nb(n1) ) )
-                xn.get_attribute_with_unit( DMSet::name_member_nb(n1), DMSet::unit_member_nb(n1), dm_set.member_nb(n1) );
-            get_data_from_xml(dm_set,xn,Number<number+1>(),nt);
+                xn.get_attribute_with_unit( DMSet::name_member_nb(n1), DMSet::unit_member_nb(n1), dm_set.member_nb(n1), want_warning_not_present_in_xml );
+            else if ( want_warning_not_present_in_xml )
+                std::cerr << "Attribute " << DMSet::name_member_nb(n1) << " is not present in xml file -> Using value " << dm_set.member_nb(n1) << "." << std::endl;
+            get_data_from_xml(dm_set,xn,Number<number+1>(),nt,want_warning_not_present_in_xml);
         }
         template<class DMSet,unsigned total_number>
         void send_data_to_xml(const DMSet &dm_set,XmlNode &xn,const Number<total_number> &n1,const Number<total_number> &nt) {}
@@ -251,9 +253,9 @@ namespace DM {
     #ifndef DONT_WANT_XML
     ///
     template<class DMSet>
-    void get_data_from_xml(DMSet &dm_set,const XmlNode &xn) { DMPRIVATE::get_data_from_xml(dm_set,xn,Number<0>(),Number<NbFields<DMSet>::res>()); }
+    void get_data_from_xml(DMSet &dm_set,const XmlNode &xn,bool want_warning_not_present_in_xml=true) { DMPRIVATE::get_data_from_xml(dm_set,xn,Number<0>(),Number<NbFields<DMSet>::res>(),want_warning_not_present_in_xml); }
     template<class DMSet,unsigned n>
-    void get_data_from_xml_up_to(DMSet &dm_set,const XmlNode &xn,const Number<n> &nn) { DMPRIVATE::get_data_from_xml(dm_set,xn,Number<0>(),nn); }
+    void get_data_from_xml_up_to(DMSet &dm_set,const XmlNode &xn,const Number<n> &nn,bool want_warning_not_present_in_xml=true) { DMPRIVATE::get_data_from_xml(dm_set,xn,Number<0>(),nn,want_warning_not_present_in_xml); }
 
     ///
     template<class DMSet>

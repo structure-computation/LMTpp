@@ -92,7 +92,7 @@ class Variable[ nb_dim = [], sym = false ] inherits VariableAncestor
     static const TS := type_for_nb_dim_and_sym( nb_dim, sym )
     
     #parameters
-    default_value := TS( 0 )
+    default_value := TS()
     
     # computed
     expr          := TS()
