@@ -85,7 +85,7 @@ struct Totito_ELEM {
         void operator()(unsigned num,const char *name,typename TM::Tpos &val) const {
             for(unsigned i=0;i<fname.size();++i)
                 if (name==fname[i]) {
-                    val = T (data[number][i][0]);
+                    val = typename TM::Tpos (data[number][i][0]);
                     // cout << " changing info of node number " << number << " data "<< name << " value : " << val << endl ;
                 }
         }
