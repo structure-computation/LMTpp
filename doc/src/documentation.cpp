@@ -288,12 +288,7 @@ void Documentation::generate_webpage_list( vector<Target*>& v, const string& nam
     }
 
     pageWeb << "</p>" << std::endl ;
-    pageWeb << "<hr />" << std::endl ;
-    for(i=0;i<NB_FINAL_LINE;i++)
-        pageWeb << "<br>" << std::endl ;
-    pageWeb << "</body>" << std::endl ;
-    pageWeb << "</html>" << std::endl ;
-    pageWeb <<std::endl;
+    feetPage(pageWeb);
 }
 
 typedef map<string,Target*>::const_iterator const_iter ;
@@ -358,12 +353,7 @@ void Documentation::generate_webpage_multi_list( map<string,Target*>& ma, const 
     display_multi_list( ma,0,ma.begin(),ma.end(),pageWeb,pt) ;
 
     pageWeb << "</p>" << std::endl ;
-    pageWeb << "<hr />" << std::endl ;
-    for(i=0;i<NB_FINAL_LINE;i++)
-        pageWeb << "<br>" << std::endl ;
-    pageWeb << "</body>" << std::endl ;
-    pageWeb << "</html>" << std::endl ;
-    pageWeb <<std::endl;
+    feetPage(pageWeb);
 }
 
 Target* Documentation::generate_webpage_list_by_type( const ListTargetByType& li, const string& name_of_path, const string& suffix,const string& nom, bool incrementID) {
@@ -454,12 +444,7 @@ Target* Documentation::generate_webpage_list_by_type( const ListTargetByType& li
         pageWeb << "</ul>" << std::endl ;
     }
 
-    pageWeb << "<hr />" << std::endl ;
-    for(i=0;i<NB_FINAL_LINE;i++)
-        pageWeb << "<br>" << std::endl ;
-    pageWeb << "</body>" << std::endl ;
-    pageWeb << "</html>" << std::endl ;
-    pageWeb <<std::endl;
+    feetPage(pageWeb);
 
     return pt ;
 }
@@ -491,13 +476,7 @@ void Documentation::generate_webpage_vacuum( const string& name_of_path, const s
     pageWeb << "Compl&eacute;ter le fichier "<< nom << " dans le r&eacute;pertoire des sources du programme." << std::endl ;
     pageWeb << "</p>" << std::endl ;
 
-    pageWeb << "<hr />" << std::endl ;
-    for(i=0;i<NB_FINAL_LINE;i++)
-        pageWeb << "<br>" << std::endl ;
-    pageWeb << "</body>" << std::endl ;
-    pageWeb << "</html>" << std::endl ;
-    pageWeb <<std::endl;
-
+    feetPage(pageWeb);
 }
 
     /**
@@ -801,8 +780,7 @@ void Documentation::generate_index() {
     pageWeb<< "          </tr>" << std::endl;
     pageWeb<< "        </table>" << std::endl;
     pageWeb<< "      </form>" << std::endl;
-    pageWeb<< "</body>" << std::endl;
-    pageWeb<< "</html>" << std::endl;
+    feetPage(pageWeb,true);
 
     /*
          cet endroit, il faut parcourir le répertoire du programme pour trouver les fichiers txt correspondants aux pages web intro, installation, 

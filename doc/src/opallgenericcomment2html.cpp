@@ -117,13 +117,7 @@ void OpAllGenericComment2HTML :: generate_webPage_of_generic_object_without_gene
         pageWeb << "</ul>" << std::endl ;
     }
     pageWeb << "</div>" << std::endl ;
-
-    pageWeb << "<hr />" << std::endl ;
-    for(i=0;i<NB_FINAL_LINE;i++)
-        pageWeb << "<br>" << std::endl ;
-    pageWeb << "</body>" << std::endl ;
-    pageWeb << "</html>" << std::endl ;
-    pageWeb <<std::endl;
+    feetPage(pageWeb);
 }
 
 

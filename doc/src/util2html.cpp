@@ -1,4 +1,6 @@
 
+#include "time.h"
+
 #include "util2html.h"
 #include "token.h"
 #include "target.h"
@@ -295,7 +297,6 @@ string text2HTML(string& s,Target* ptr_parent, ListTarget* ptr_lt ) {
     char c;
     Target* ptr_t ;
 
-
 //     cerr << " ptr_parent = " << ptr_parent << endl ;
 //     cerr << " ptr_lt = " << ptr_lt << endl ;
 
@@ -334,8 +335,8 @@ string text2HTML(string& s,Target* ptr_parent, ListTarget* ptr_lt ) {
                 /// * \a Mesh
                 /// * \a [titre de la page]
                 /// * \a [url] Texte de la balise
-                /// * \a [href=url,type=val] Mesh
-                /// * \a [type=val,href=url] Mesh
+                /// * \a [href=url,type=val] Mesh  /// PAS FAIT
+                /// * \a [type=val,href=url] Mesh  /// PAS FAIT
                 stmp = s.substr(pos,suite-pos) ;
                 //cerr << "<<|" << stmp << "|" << endl ;
                 if (isURL(stmp2,s,suite,pos)) {
@@ -388,13 +389,13 @@ string text2HTML(string& s,Target* ptr_parent, ListTarget* ptr_lt ) {
         }
         if ( (pos2 = stmp.find("[[")) == 0) {
             /// syntaxe wiki possible :
-            /// * [[url]]
+            /// * [[url]]   où url est de la forme : chemin/cible  avec chemin relatif ou absolue
             /// * [[url|étiquette]]
             /// * [[Mesh]]
             if ((suite2 = s.find("]]",pos+2)) != string::npos) {
-                stmp = s.substr(pos+2,suite2-pos-2);
-                //cerr << "------ stmp = |" << stmp << "|  et pos2 = " << stmp.find('|') << endl;
-                start = pos+2;
+                //cerr << "------ stmp = |" << stmp << "|  et pos2 = " << stmp.find('|') << endl; /// problème avec find...
+                start = pos+2;// on se met juste après les [[
+                stmp = s.substr(start,suite2-start);
                 if ((pos2 = stmp.find('|')) == string::npos) {
                     if (isURL(stmp2,s,suite2,start)) {
                         html += linkHTML("",stmp2,stmp2) + " " ;
@@ -406,11 +407,15 @@ string text2HTML(string& s,Target* ptr_parent, ListTarget* ptr_lt ) {
                         ptr_t = ptr_lt->isName( stmp ) ;
                         if (ptr_t != NULL) {
                             html += linkHTML( ptr_parent->reference(), ptr_t->reference(), stmp ) + " ";
-                            start = suite2 + 2 ;
-                            continue;
+                        } else {
+                            /// on traite le cas d'un fichier
+                            html += linkHTML( ptr_parent->reference(), stmp, stmp ) + " ";
                         }
+                        start = suite2 + 2 ;
+                        continue;
                     }
                 } else {
+                    /// il y a un symbole |
                     stmp = s.substr(start+pos2+1,suite2-pos2-start-1);
                     if (isURL(stmp2,s,start+pos2,start)) {
                         html += linkHTML("",stmp2,stmp) + " ";
@@ -418,16 +423,22 @@ string text2HTML(string& s,Target* ptr_parent, ListTarget* ptr_lt ) {
                         continue;
                     } else {
                         /// c'est probablement un nom de fonction ou de classe.
-                        stmp2 = s.substr(start,pos2);
+                        stmp2 = s.substr(start,pos2); // stmp2 contient le A de [[A|B]]
                         ptr_t = ptr_lt->isName( stmp2 ) ;
                         if (ptr_t != NULL) {
                             if (stmp.size()==0)
                                 html += linkHTML( ptr_parent->reference(), ptr_t->reference(), stmp2 ) + " ";
                             else 
                                 html += linkHTML( ptr_parent->reference(), ptr_t->reference(), stmp ) + " ";
-                            start = suite2 + 2 ;
-                            continue;
+                        } else {
+                            /// on traite le cas d'un fichier
+                            if (stmp.size()==0)
+                                html += linkHTML( ptr_parent->reference(), stmp2, stmp2 ) + " ";
+                            else
+                                html += linkHTML( ptr_parent->reference(), stmp2, stmp ) + " ";
                         }
+                        start = suite2 + 2 ;
+                        continue;
                     }
                 }
             }
@@ -439,6 +450,25 @@ string text2HTML(string& s,Target* ptr_parent, ListTarget* ptr_lt ) {
         start = suite + 1 ;
     }
     return html ;
+}
+
+void feetPage(ofstream& pageWeb, bool withDate ) {
+
+    int NB_FINAL_LINE = 7,j;
+    time_t rawtime;
+    struct tm * timeinfo;
+
+    pageWeb << "<hr />" << std::endl ;
+    if (withDate) {
+        time( &rawtime );
+        timeinfo = localtime( &rawtime );
+        pageWeb << asctime (timeinfo);
+    }
+    for(j=0;j<NB_FINAL_LINE;j++)
+        pageWeb << "<br>" << std::endl ;
+    pageWeb << "</body>" << std::endl ;
+    pageWeb << "</html>" << std::endl ;
+    pageWeb << std::endl;
 }
 
 /*
