@@ -12,10 +12,6 @@ struct ListTarget ;
 
 using namespace std ;
 
-#define NB_FINAL_LINE 7 
-
-
-
 void generate_header( Target* src, string& path_root, ofstream& of,string& titre) ;
 
 // cette fonction convertit un nom en un identifiant web
@@ -39,6 +35,8 @@ bool isURL(string& res, string& s,int end,int start=0) ;
 
 // cette fonction convertit une chaine texte en un texte à la syntaxe HTML et avec la conversion de \a et \anchor en équivalent HTML
 string text2HTML(string& s, Target* ptr_parent, ListTarget* ptr_lt ) ;
+
+void feetPage(ofstream& pageWeb, bool withDate = true );
 
 //unsigned hash_p ( const string& s ) ;
 //unsigned hash_p ( const string& s,int end, int start ) ;

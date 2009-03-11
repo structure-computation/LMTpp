@@ -1,4 +1,6 @@
 
+#include "time.h"
+
 #include "util2html.h"
 #include "token.h"
 #include "target.h"
@@ -439,6 +441,25 @@ string text2HTML(string& s,Target* ptr_parent, ListTarget* ptr_lt ) {
         start = suite + 1 ;
     }
     return html ;
+}
+
+void feetPage(ofstream& pageWeb, bool withDate ) {
+
+    int NB_FINAL_LINE = 7,j;
+    time_t rawtime;
+    struct tm * timeinfo;
+
+    pageWeb << "<hr />" << std::endl ;
+    if (withDate) {
+        time( &rawtime );
+        timeinfo = localtime( &rawtime );
+        pageWeb << asctime (timeinfo);
+    }
+    for(j=0;j<NB_FINAL_LINE;j++)
+        pageWeb << "<br>" << std::endl ;
+    pageWeb << "</body>" << std::endl ;
+    pageWeb << "</html>" << std::endl ;
+    pageWeb << std::endl;
 }
 
 /*
