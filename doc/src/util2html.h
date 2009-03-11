@@ -33,7 +33,7 @@ string ancreHTML( const string& s,bool display = false ) ;
 // cette fonction renvoie vrai le texte compris entre start et end est un lien wb de la forme http.*, https.*, www.*, ftp.*. 
 bool isURL(string& res, string& s,int end,int start=0) ;
 
-// cette fonction convertit une chaine texte en un texte à la syntaxe HTML et avec la conversion de \a et \anchor en équivalent HTML
+// cette fonction convertit une chaine texte en un texte à la syntaxe HTML et avec la conversion de \a et \anchor en équivalent HTML et en faisant les liens HTML entre les noms répertoriés dans ptr_lt la page courante ptr_parent.
 string text2HTML(string& s, Target* ptr_parent, ListTarget* ptr_lt ) ;
 
 void feetPage(ofstream& pageWeb, bool withDate = true );
