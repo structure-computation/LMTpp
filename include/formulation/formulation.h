@@ -354,20 +354,19 @@ private:
                 assert( nb_global_unknowns==0 /*not yet implemented*/ );
                 if ( nb_nodal_unknowns ) {
                     unsigned ind[ 2 ] = { ((*indice_noda_)[f.m->node_list.number(n)]), f.indice_glob };
-                    add_nodal_matrix(f,  K , F, vectors, n, Number<MatCarac<0>::symm>(), Number<assemble_mat>(), Number<assemble_vec>(), ind, mutex );
+                    add_nodal_matrix(f,  K , F, vectors, n, Number<MatCarac<0>::symm>(), Number<assemble_mat>(), Number<assemble_vec>(), ind );
                 }
                 else
-                    add_nodal_matrix(f,  K , F , vectors, n, Number<MatCarac<0>::symm>(), Number<assemble_mat>(), Number<assemble_vec>(), &f.indice_glob, mutex );
+                    add_nodal_matrix(f,  K , F , vectors, n, Number<MatCarac<0>::symm>(), Number<assemble_mat>(), Number<assemble_vec>(), &f.indice_glob );
             }
             else {
                 unsigned ind[ 2 ] = { ((*indice_noda_)[f.m->node_list.number(n)]) };
                 //std::cerr << "plip plop ind[ 2 ] " << *ind << std::endl;
-                add_nodal_matrix( f, K , F, vectors, n, Number<MatCarac<0>::symm>(), Number<assemble_mat>(), Number<assemble_vec>(), ind, mutex );
+                add_nodal_matrix( f, K , F, vectors, n, Number<MatCarac<0>::symm>(), Number<assemble_mat>(), Number<assemble_vec>(), ind );
             }
         }
         const Vec<unsigned> *indice_noda_;
         Vec<Vec<ScalarType> > *vectors; 
-        pthread_mutex_t *mutex;
     };
     template<bool assemble_mat,bool assemble_vec>
     struct AssembleElem {
@@ -431,7 +430,7 @@ private:
             if ( nb_global_unknowns )
                 assert(0);
             
-            add_elem_matrix( f, K, F, *vectors, Number<MatCarac<0>::symm>(), Number<assemble_mat>(), Number<assemble_vec>(), e, in, mutex );
+            add_elem_matrix( f, K, F, *vectors, Number<MatCarac<0>::symm>(), Number<assemble_mat>(), Number<assemble_vec>(), e, in );
             
             // skin elements
 //             ass_skin_elem( e, in, f, K, F, *vectors, Number<0>() , Number<NbChildrenElement<typename TE::NE,1>::res>() );            
@@ -439,7 +438,6 @@ private:
         const Vec<unsigned> *indice_noda_;
         Vec<unsigned> *indice_elem_;
         Vec<Vec<ScalarType> > *vectors;
-        pthread_mutex_t* mutex;
     };
 public:
     Codegen::Ex::MapExNum val_sub_sym( const Codegen::Ex::SetEx &sub_symbols ) const {
@@ -607,33 +605,27 @@ public:
 //        std::cerr << "nb_processors : " << nb_processors << std::endl;
         //m->update_skin();
         assert(nb_global_unknowns==0 /* add_global_matrix not yet implemeted */);
-        pthread_mutex_t mutex;
-        pthread_mutex_init(&mutex,NULL);
         if ( assemble_mat ) {
             if ( assemble_vec ) {
                 AssembleNode<true,true > toto2;
                 toto2.indice_noda_ = &indice_noda_;
                 toto2.vectors = &vectors_;
-                toto2.mutex = &mutex;
                 apply( m->node_list, toto2, *this, K, F); // nodal
                 AssembleElem<true,true > toto;
                 toto.indice_noda_ = &indice_noda_;
                 toto.indice_elem_ = indice_elem;
                 toto.vectors = &vectors_;
-                toto.mutex = &mutex;
                 apply( m->elem_list, toto, *this , K, F); // element (and skin elements)
             }
             else{
                 AssembleNode<true,false > toto2;
                 toto2.indice_noda_ = &indice_noda_;
                 toto2.vectors = &vectors_;
-                toto2.mutex = &mutex;
                 apply( m->node_list, toto2, *this, K, F); // nodal
                 AssembleElem<true,false > toto;
                 toto.indice_noda_ = &indice_noda_;
                 toto.indice_elem_ = indice_elem;
                 toto.vectors = &vectors_;
-                toto.mutex = &mutex;
                 apply( m->elem_list, toto, *this , K, F); // element (and skin elements)                
             }
         }
@@ -641,15 +633,12 @@ public:
             AssembleNode<false,true > toto2;
             toto2.indice_noda_ = &indice_noda_;
             toto2.vectors = &vectors_;
-            toto2.mutex = &mutex;
             apply( m->node_list, toto2, *this, K, F); // nodal
             AssembleElem<false,true > toto;
             toto.indice_noda_ = &indice_noda_;
             toto.indice_elem_ = indice_elem;
-            toto.mutex = &mutex;
             apply( m->elem_list, toto, *this , K, F); // element (and skin elements)
         }
-        pthread_mutex_destroy(&mutex);
     }
     ///
     virtual void assemble_constraints(Mat<ScalarType,Sym<>,SparseLine<> > &K, Vec<ScalarType> &F, Vec<Vec<ScalarType> > &vectors_, const Vec<unsigned> &local_ddl_to_global_ones,const ScalarType &M, bool assemble_mat=true,bool assemble_vec=true) {
@@ -721,7 +710,6 @@ public:
         l.get_factorization(matrices(Number<0>()),false);
         l.solve( vectors[0] );
         #elif WITH_CHOLMOD
-        PRINT("yop");
       	if ( not matrices(Number<0>()).get_factorization() ) {
             std::cout << "Bing. Inversion error" << std::endl;
             return false;
@@ -1354,7 +1342,7 @@ void add_elem_matrix(
         
 }
 
-template<class TF,class TK,class TFE,class TVE,unsigned _ms,unsigned _am,unsigned _av,class TE,class Mutex>
+template<class TF,class TK,class TFE,class TVE,unsigned _ms,unsigned _am,unsigned _av,class TE>
 void add_elem_matrix(
         const TF &f,
         const TK &K,
@@ -1364,9 +1352,8 @@ void add_elem_matrix(
         const Number<_am> &assemble_mat,
         const Number<_av> &assemble_vec,
         const TE &elem,
-        const unsigned *indices,
-        Mutex mutex 
-//  f, K, F, *vectors, Number<MatCarac<0>::symm>(), Number<assemble_mat>(), Number<assemble_vec>(), e, in, mutex
+        const unsigned *indices
+//  f, K, F, *vectors, Number<MatCarac<0>::symm>(), Number<assemble_mat>(), Number<assemble_vec>(), e, in
 ) {}
 
 

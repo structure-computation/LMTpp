@@ -76,28 +76,6 @@ def write_matrix( f, M, V, symmetric, indices, offsets, assemble_mat, assemble_v
   else:
     f.write( cw.to_string() )
 
-def write_matrix_2( f, M, V, symmetric, indices, offsets, assemble_mat, assemble_vec ):
-  cw = Write_code('T')
-  for i in range(M.nb_rows()):
-    if assemble_mat:
-      for j in range(i*symmetric,M.nb_cols()):
-        if M[i,j]:
-          cw.add( M[i,j] , 'tmp_M_'+str(i)+'_'+str(j), Write_code.Declare)
-    if assemble_vec:
-      if V[i]:
-        cw.add( V[i] , 'tmp_V_'+str(i), Write_code.Declare)
-  f.write( cw.to_string() )
-  f.write('pthread_mutex_lock(mutex);\n')
-  for i in range(M.nb_rows()):
-    if assemble_mat:
-      for j in range(i*symmetric,M.nb_cols()):
-        if M[i,j]:
-          f.write( 'matrix(indices['+str(indices[i])+']+'+str(offsets[i])+',indices['+str(indices[j])+']+'+str(offsets[j])+')+=tmp_M_'+str(i)+'_'+str(j)+';\n')
-    if assemble_vec:
-      if V[i]:
-        f.write( 'sollicitation[indices['+str(indices[i])+']+'+str(offsets[i])+']+=tmp_V_'+str(i)+';\n' )
-  f.write('pthread_mutex_unlock(mutex);\n')
-
 def solve_iteration( residual, unknown_symbols, unknown_test_symbols, subs={}, allow_surtension_coefficient=False, assume_non_linear=False, dont_want_to_add_KUn=False, use_subs_instead_of_diff = False ):
     MV = calculate_matrix( residual, unknown_symbols, unknown_test_symbols, subs, allow_surtension_coefficient, assume_non_linear, dont_want_to_add_KUn, use_subs_instead_of_diff = self.use_subs_instead_of_diff )
     return MV['M'].inverse() * MV['V']
