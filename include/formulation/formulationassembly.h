@@ -17,6 +17,8 @@ namespace LMT {
             TM *m;
             Vec<unsigned> local_unknowns_to_global_ones;
             Vec<unsigned> indice_noda;
+            Vec<unsigned> indice_elem[ TM::TElemList::nb_sub_type ];
+            unsigned indice_glob;
             Vec<unsigned> local_ddl_to_global_ones;
             unsigned num_formulation;
         };
@@ -54,7 +56,9 @@ namespace LMT {
                     maf->num_formulation = i;
                     set_nb_vectors( max(nb_vectors, maf->pb->formulation_nb(i)->get_nb_vectors()));
                     formulation(formulations.size()-1)->set_vectors_assembly(vectors);
-                    formulation(formulations.size()-1)->set_indice_noda_assembly(maf->indice_noda);
+                    formulation(formulations.size()-1)->set_indice_noda(maf->indice_noda);
+                    formulation(formulations.size()-1)->set_indice_glob(maf->indice_glob);
+                    formulation(formulations.size()-1)->set_indice_elem(maf->indice_elem);
                     return true;
                 }
             }
@@ -143,7 +147,7 @@ namespace LMT {
             K.resize(vectors[0].size());
             F.set(T(0));
             for(unsigned i=0;i<formulations.size();++i) {
-                formulation(i)->assemble_clean_mat(K, F, vectors, formulations[i].indice_noda, assemble_mat, assemble_vec );
+                formulation(i)->assemble_clean_mat(K, F, vectors, assemble_mat, assemble_vec );
             }
             F_before_contraints  = F;
             K_before_constraints = K;
@@ -155,15 +159,25 @@ namespace LMT {
             assemble_sollicitations(K, F);
         }
         //
+        void assemble_u() { 
+            for(unsigned i=0;i<formulations.size();++i) {
+                Vec<FormulationAncestor<double>::LinearizedConstraint> data;
+                data = formulation(i)->get_linearized_constraints();
+                for(unsigned j=0;j<data.size();++j)
+                    if ( data[j].coeffs.size() == 1 )
+                        vectors[0][data[j].coeffs[0].num_in_vec] = data[j].val;
+            }
+        }
+        //
         void assemble_constraints( Mat<T,Sym<>,SparseLine<> > &K , Vec<T> &F,T M,  bool assemble_mat=true,bool assemble_vec=true) {
             for(unsigned i=0;i<formulations.size();++i) {
-                formulation(i)->assemble_constraints(K, F, vectors, formulations[i].local_ddl_to_global_ones, M, assemble_mat, assemble_vec );
+                formulation(i)->assemble_constraints(K, F, vectors, M, assemble_mat, assemble_vec );
             }
         }
         //
         void assemble_sollicitations( Mat<T,Sym<>,SparseLine<> > &K , Vec<T> &F, bool assemble_mat=true,bool assemble_vec=true) {
             for(unsigned i=0;i<formulations.size();++i) {
-                formulation(i)->assemble_sollicitations(K, F, vectors, formulations[i].local_ddl_to_global_ones, assemble_mat, assemble_vec );
+                formulation(i)->assemble_sollicitations(K, F, vectors, assemble_mat, assemble_vec );
             }
         }
         //
@@ -186,27 +200,42 @@ namespace LMT {
             return false;
         }
         //
-        void call_after_solve() {
-            for(unsigned i=0;i<formulations.size();++i)
-                formulation(i)->call_after_solve();
-        }
-        //
         void update_skin() {
             for(unsigned i=0;i<formulations.size();++i)
                 formulation(i)->update_skin();
         }
         //
+        void call_after_solve() {
+            for(unsigned i=0;i<formulations.size();++i)
+                formulation(i)->call_after_solve(vectors);
+        }
+        //
         void call_after_solve_2() {
             for(unsigned i=0;i<formulations.size();++i)
-                formulation(i)->call_after_solve_2();
+                formulation(i)->call_after_solve_2(vectors);
         }
         //
         void call_after_solve_3() {
             for(unsigned i=0;i<formulations.size();++i)
-                formulation(i)->call_after_solve_3();
+                formulation(i)->call_after_solve_3(vectors);
         }
         //
-        void call_after_solve(const Vec<void *> &elem_list) {
+        void call_after_solve_4() {
+            for(unsigned i=0;i<formulations.size();++i)
+                formulation(i)->call_after_solve_4(vectors);
+        }
+        //
+        void call_after_solve_5() {
+            for(unsigned i=0;i<formulations.size();++i)
+                formulation(i)->call_after_solve_5(vectors);
+        }
+        //
+        void call_after_solve_6() {
+            for(unsigned i=0;i<formulations.size();++i)
+                formulation(i)->call_after_solve_6(vectors);
+        }
+        //
+/*        void call_after_solve(const Vec<void *> &elem_list) {
             for(unsigned i=0;i<formulations.size();++i)
                 formulation(i)->call_after_solve(elem_list);
         }
@@ -219,11 +248,11 @@ namespace LMT {
         void call_after_solve_3(const Vec<void *> &elem_list) {
             for(unsigned i=0;i<formulations.size();++i)
                 formulation(i)->call_after_solve_3(elem_list);
-        }
+        }*/
         //
         void update_variables() {
             for(unsigned i=0;i<formulations.size();++i){
-                formulation(i)->update_variables(vectors, formulations[i].indice_noda);
+                formulation(i)->update_variables(vectors);
             }
         }
         //
@@ -249,17 +278,31 @@ namespace LMT {
             if ( connectivity_calculated )
                 return;
             connectivity_calculated = true;
-            unsigned nb_ddl_per_node = formulations[0].pb->formulation_nb(formulations[0].num_formulation)->get_nb_nodal_unknowns();
+            unsigned size = 0;
+            
+            MeshAndForm &maf = formulations[0];
+            unsigned nb_ddl_per_node = maf.pb->formulation_nb(maf.num_formulation)->get_nb_nodal_unknowns();
+        
+            // indice global unknowns
+            maf.indice_glob = 0;
+            unsigned ng = maf.pb->formulation_nb(maf.num_formulation)->get_nb_global_unknowns();
+            for(unsigned i=1;i<formulations.size();++i) {
+                //formulation(i)->update_connectivity();
+                MeshAndForm &maf = formulations[i];
+                maf.indice_glob = ng;
+                ng += maf.pb->formulation_nb(maf.num_formulation)->get_nb_global_unknowns();
+            }
+            size +=ng;
+            // nodal unknowns
             pos.resize( 0 );
-            pos.reserve( formulations[0].m->node_list.size());
+            pos.reserve( maf.m->node_list.size());
             Vec<Pvec> pos_skin;
             Vec<unsigned> j_skin;
             pos_skin.resize( 0 );
-            pos_skin.reserve( formulations[0].m->node_list.size());
+            pos_skin.reserve( maf.m->node_list.size());
             j_skin.resize( 0 );
-            j_skin.reserve( formulations[0].m->node_list.size());
-            formulation(0)->update_connectivity();
-            MeshAndForm &maf = formulations[0];
+            j_skin.reserve( maf.m->node_list.size());
+            //formulation(0)->update_connectivity();
             maf.local_unknowns_to_global_ones.resize(0);
             maf.local_unknowns_to_global_ones.resize( maf.m->node_list.size() );
             for(unsigned num_node=0;num_node < maf.m->node_list.size();++num_node) {
@@ -272,12 +315,14 @@ namespace LMT {
             }
             maf.local_ddl_to_global_ones.resize(0);
             maf.local_ddl_to_global_ones.reserve( maf.local_unknowns_to_global_ones.size() * nb_ddl_per_node );
-            maf.indice_noda = formulations[0].local_unknowns_to_global_ones * formulation(0)->get_nb_nodal_unknowns();
+            maf.indice_noda = maf.local_unknowns_to_global_ones * formulation(0)->get_nb_nodal_unknowns() + ng ;
+
             for(unsigned i=0;i<maf.local_unknowns_to_global_ones.size();++i)
                 for(unsigned d=0;d<nb_ddl_per_node;++d)
                     maf.local_ddl_to_global_ones.push_back( maf.local_unknowns_to_global_ones[i] * nb_ddl_per_node + d );
+                    
             for(unsigned i=1;i<formulations.size();++i) {
-                formulation(i)->update_connectivity();
+                //formulation(i)->update_connectivity();
                 MeshAndForm &maf = formulations[i];
                 maf.local_unknowns_to_global_ones.resize( maf.m->node_list.size() );
                 pos.reserve(pos.size() + maf.m->node_list.size() );
@@ -294,7 +339,7 @@ namespace LMT {
                                 pos.push_back( *node_pos );
                                 break;
                             }
-                            if ( abs_indication(norm_1(pos_skin[j] - *node_pos)) < abs_indication(tol) ) {
+                            if ( abs_indication(norm_2(pos_skin[j] - *node_pos))< abs_indication(tol) ) {
                                 maf.local_unknowns_to_global_ones[num_node] = j_skin[j];
                                 break;
                             }
@@ -309,8 +354,27 @@ namespace LMT {
                 maf.local_ddl_to_global_ones.resize(maf.local_unknowns_to_global_ones.size() * nb_ddl_per_node );
                 for(unsigned j=0;j<maf.local_unknowns_to_global_ones.size();++j)
                     for(unsigned d=0;d<nb_ddl_per_node;++d)
-                        maf.local_ddl_to_global_ones[j*nb_ddl_per_node+d] = maf.local_unknowns_to_global_ones[j] * nb_ddl_per_node + d ;
+                        maf.local_ddl_to_global_ones[j*nb_ddl_per_node+d] = maf.local_unknowns_to_global_ones[j] * nb_ddl_per_node + size ;
             }
+            size += pos.size() + nb_ddl_per_node;
+            // elem unknowns. nb_elem_of_type will = nb_unknowns
+            unsigned nb_elem_of_type[ TM::TElemList::nb_sub_type ];
+            unsigned nb_unknowns_for_type[ TM::TElemList::nb_sub_type ];
+            for(unsigned i=0;i<formulations.size();++i) {
+                MeshAndForm &maf = formulations[i];
+                maf.m->elem_list.get_sizes(nb_elem_of_type);
+                //TM::TElemList::apply_static_with_n( maf.pb->formulation_nb(maf.num_formulation)->GetNbUnknownByElement(), nb_elem_of_type, size, nb_unknowns_for_type );
+                maf.pb->formulation_nb(maf.num_formulation)->Get_Nb_UnknownByElement( nb_elem_of_type, size, nb_unknowns_for_type);
+
+                unsigned nb_unk_elem = 0;
+                for(unsigned i=0,ne=0;i<TM::TElemList::nb_sub_type;++i) {
+                    maf.indice_elem[i] = range( ne, ne + nb_elem_of_type[i] ) * nb_unknowns_for_type[i] + size;
+                    ne += nb_elem_of_type[i];
+                    size += nb_unknowns_for_type[i] * nb_elem_of_type[i];
+                    nb_unk_elem += nb_unknowns_for_type[i];
+                }
+            }
+
             pos.fit_memory();
             for(unsigned i=0;i<vectors.size();++i) {
                 vectors[i].resize( pos.size() * nb_ddl_per_node );

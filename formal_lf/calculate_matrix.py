@@ -63,10 +63,10 @@ def write_matrix( f, M, V, symmetric, indices, offsets, assemble_mat, assemble_v
     if assemble_mat:
       for j in range(i*symmetric,M.nb_cols()):
         if M[i,j]:
-          cw.add( M[i,j], 'f.matrices(Number<0>())(indices['+str(indices[i])+']+'+str(offsets[i])+',indices['+str(indices[j])+']+'+str(offsets[j])+')', Write_code.Add )
+          cw.add( M[i,j], 'matrix(indices['+str(indices[i])+']+'+str(offsets[i])+',indices['+str(indices[j])+']+'+str(offsets[j])+')', Write_code.Add )
     if assemble_vec:
       if V[i]:
-        cw.add( V[i], 'f.sollicitation[indices['+str(indices[i])+']+'+str(offsets[i])+']', Write_code.Add )
+        cw.add( V[i], 'sollicitation[indices['+str(indices[i])+']+'+str(offsets[i])+']', Write_code.Add )
   if use_asm:
     f.write( cw.asm_caller( asm_fname ) )
     #
