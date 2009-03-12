@@ -164,6 +164,7 @@ string french2HTML( const string& s) {
                         case -82 : t += "&icirc;" ; break ; // î
                         case -94 : t += "&acirc;" ; break ; // â
                         case -76 : t += "&ocirc;" ; break ; // ô
+                        case -69 : t += "&ucirc;" ; break ; // û
                         default: ;
                         }
                  i++ ; // pour sauter le deuxième octet
