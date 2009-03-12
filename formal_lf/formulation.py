@@ -818,7 +818,7 @@ class Formulation:
       f.write( '      const unsigned *indices){ \n' )
       f.write( '  #define PNODE(N) node\n' )
       
-    write_matrix_2( f, matrices[T]['M'], matrices[T]['V'], symmetric, matrices[T]['i'], matrices[T]['o'], assemble_mat, assemble_vec )  
+    write_matrix( f, matrices[T]['M'], matrices[T]['V'], symmetric, matrices[T]['i'], matrices[T]['o'], assemble_mat, assemble_vec, asmout = self.asmout, use_asm = self.use_asm, asm_fname = asm_fname )
     
     f.write( '  #undef PNODE\n' )
     f.write( '}\n' )
