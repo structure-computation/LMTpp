@@ -3,15 +3,18 @@
 
     L'objet de cet exemple est de montrer les codes sources d'un mini-projet avec formulation d'un problème thermique. Vous trouverez dans le tutoriel [[Comment résoudre un problème éléments finis de façon générale]] toutes les explications nécessaires pour concevoir vos propres formulations.
     Ici nous voulons résoudre un problème thermique dont la formulation est déjà écrite dans le fichier [[formulations/formulation_difftherm.py|formulation_difftherm.py]] (à consulter).
+    Les sources sont téléchargeables [[include/formulation/exemple_probleme_thermique.tar.gz|ici]] . 
+    <strong> Important : </strong > Pour tester le code, il faut créer un lien symbolique vers votre répertoire LMT (e.g. ln -s /home/voter_nom/LMT LMT) et un répertoire tmp pour l'affichage avec paraview.
 
     Pour un projet minimaliste utilisant une formulation, il faut au moins <strong> trois </strong> fichiers :
         * un <strong> SConstruct </strong>
         * un <strong> Makefile </strong>
         * un <strong> main.cpp </strong> ;-)
 
-    * un <strong> SConstruct </strong> sert à la fois à la compilation du projet et aussi à la génération du code C++ correspondant à la formulation. C'est le fichier d'entrée du programme scons.
-    * <strong> Makefile </strong> sert à lancer scons et éventuellement votre propre programme.
-    * <strong> main.cpp </strong> contient bien sûr les sources de votre programme.
+    Plus précisément :
+        * un <strong> SConstruct </strong> sert à la fois à la compilation du projet et aussi à la génération du code C++ correspondant à la formulation. C'est le fichier d'entrée du programme scons.
+        * <strong> Makefile </strong> sert à lancer scons et éventuellement votre propre programme.
+        * <strong> main.cpp </strong> contient bien sûr les sources de votre programme.
 
     = Fichier Sconstruct
         \code
