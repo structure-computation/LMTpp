@@ -9,8 +9,8 @@
 // Copyright: See COPYING file that comes with this distribution
 //
 //
-#ifndef LMTBAR3_H
-#define LMTBAR3_H
+#ifndef LMTBAR4_H
+#define LMTBAR4_H
 
 #include "containers/staticassert.h"
 #include "nodalelement.h"
