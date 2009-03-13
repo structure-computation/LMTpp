@@ -26,6 +26,6 @@
         Ensuite si vous avez besoin de la librairie cholamd, récupérer le répertoire MATH dans le dépot git :
         \code    
             git clone votre-nom@givry:/u/multi/MATH
-        puis copier ce répertoire dans le répoertoire /opt.
+        puis copier ce répertoire dans le répertoire /opt.
 
 */

@@ -829,13 +829,13 @@ def write_legacy_lmtpp_carac_formulation_for_element( stream, name_form, fe, dim
     stream <<< "    };"
     stream <<< "    static const bool has_elementary_matrix = $( fe->non_null_system( fe->K_dV, fe->F_dV ) );"
     stream <<< "    static const bool has_skin_elementary_matrix = $( fe->need_skin_assembly );"
-    stream <<< "    template<class TE,class TF,class TV> static void after_solve(TE &elem,TF &f,const unsigned *indices,TV &vectors) {"
+    stream <<< "    template<class TE,class TF> static void after_solve(TE &elem,TF &f,const unsigned *indices) {"
     stream <<< "    #define PNODE(N) (*elem.node(N))"
     stream <<< "    $( fe->call_after_solve( @child_cast( fe->pe ) ) )"
     stream <<< "    #undef PNODE"
     stream <<< "    }"
     for n in 2 .. 7
-        stream <<< "    template<class TE,class TF,class TV> static void after_solve_$n(TE &elem,TF &f,const unsigned *indices,TV &vectors) {"
+        stream <<< "    template<class TE,class TF> static void after_solve_$n(TE &elem,TF &f,const unsigned *indices) {"
         stream <<< "    }"
     stream <<< fe->legacy_lmtpp_unk_management( "elementary"     , "elem", x => x.elem==0 )
     stream <<< fe->legacy_lmtpp_unk_management( "skin_elementary", "elem", x => x.skin==0 )

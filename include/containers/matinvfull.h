@@ -69,128 +69,130 @@ template<class TT,int s,class Sto,class IO,class TF,class T3,int s3>
 // ------------------------------------------------------------------------------------------------------------------
 // symmetric
 // ------------------------------------------------------------------------------------------------------------------
+
 /** \relates Mat
 */
-// template<class T,int s,class TF,class IO>
-// bool get_factorization( const Mat<T,Sym<s,false>,Dense<Col>,IO> &m, TF &mat ) {
-//     const unsigned defpos = true;
-//     // m -> mat
-//     mat = m;
-//     //PRINTN(mat);
-//     //
-//     unsigned begin_col = 0;
-//     unsigned nb_T_used = 0;
-//     unsigned col;
-//     for(unsigned line=0;line<mat.nb_rows();++line) {
-//         // first step : factorization of a first triangle
-//         T *ptr = &mat(line,0).ptr();
-//         unsigned begin_col2 = begin_col;
-//         for(col=begin_col2;col<line;++col) {
-//             unsigned lb = begin_col2;
-//             T reg = ptr[col];
-//             reg -= dot_aligned_with_offset(&mat(col,0).ptr()+lb,ptr+lb,col-lb);
-//             reg /= (T)mat(col,col);
-//             ptr[col] = reg;
-//         }
-//         T reg = ptr[line] - norm_2_p2( ptr + begin_col2, line-begin_col2 );
-//         //PRINTN( norm_2_p2( ptr + begin_col2, line-begin_col2 ) );
-//         if (reg<=0.0) {
-//             //std::cout << line << " "  << begin_col2 << std::endl;
-//             std::cout << "bong" << std::endl;
-//             //PRINTN( norm_2_p2( ptr + begin_col2, line-begin_col2 ) );
-//             //for(unsigned i=0;i<line;++i) std::cout << ptr[i] << std::endl;
-//             return false;
-//         }
-//         ptr[line] = sqrt( reg );
-// 
-//         nb_T_used += line-begin_col2;
-// 
-//         // second step : factorization of the sub rectangular area using the triangle
-//         //  and partial factorization of the triangular areas on the right using the upper rectangular areas
-//         if ( nb_T_used > LMT_FACT_TRI*LMT_L1_CACHE_SIZE/sizeof(T) ) {
-//             ++line;
-//             unsigned end_col = line;
-// 
-//             // calculation of the sub rectangular area down to the triangle (to the bottom)
-//             for(;line<mat.nb_rows();++line) {
-//                 ptr = &mat(line,0).ptr();
-//                 begin_col2 = begin_col;
-//                 for(col=begin_col2;col<end_col;++col) {
-//                     unsigned lb = begin_col2;
-//                     ptr[col] = ( ptr[col] - dot_aligned_with_offset(mat.cum_index[col]+lb, ptr+lb, col-lb) ) / mat.cum_index[col][col];
-//                 }
-//             }
-// 
-//             // partial calculation of the triangular area on the right of the preceding rectangular area
-//             nb_T_used = 0;
-//             unsigned begin_block = end_col;
-//             for(line=end_col;line<mat.nb_rows();++line) {
-//                 begin_col2 = begin_col;
-//                 ptr = &mat(line,0).ptr();
-//                 for(col=begin_block;col<line;++col) {
-//                     unsigned lb = max( mat.lbounds[col], begin_col2 );
-//                     if (end_col>lb)
-//                         ptr[col] -= dot_aligned_with_offset(&mat(col,0).ptr()+lb, ptr+lb, end_col-lb);
-//                 }
-//                 ptr[line] -= norm_2_p2( ptr + begin_col2, end_col-begin_col2 );
-// 
-//                 nb_T_used += end_col-begin_col2;
-//                 // for the line2\in rest of the lines, sp( col\in [begin_block,line[, line2 )
-//                 if ( nb_T_used > LMT_FACT_RECT*LMT_L1_CACHE_SIZE/sizeof(T) ) {
-//                     for(unsigned line2=line+1;line2<mat.nb_rows();++line2) {
-//                         begin_col2 = begin_col;
-//                         ptr = &mat(line2,0).ptr();
-//                         for(col=begin_block;col<=line;++col) {
-//                             unsigned lb = max( &mat(col,0).ptr(), begin_col2 );
-//                             if (end_col>lb)
-//                                 ptr[col] -= dot_aligned_with_offset(&mat(col,0).ptr()+lb, ptr+lb, end_col-lb);
-//                         }
-//                     }
-//                     begin_block = line+1;
-//                     nb_T_used = 0;
-//                 }
-//             }
-// 
-//             line = end_col-1;
-//             begin_col = end_col;
-//             nb_T_used = 0;
-//         }
-// 
-// 
-//     }
-//     return true;
-// }
-// 
-// 
-// /** \relates Mat
-// */
-// template<class T,int s,class IO,class TF,class TV>
-// Vec< typename TypePromote< Multiplies, typename TF::T, typename TV::template SubType<0> ::T >::T ,s >
-// solve_using_factorization( const Mat<T,Sym<s,false>,Dense<Col>,IO> &m, const TF &mat, const TV &b ) {
-//     typedef typename TypePromote< Multiplies, typename TF::T, typename TV::template SubType<0> ::T >::T TR;
-//     unsigned nb_lines=mat.nb_rows();
-//     
-//     Vec<TR,s> vec;
-//     vec.resize( nb_lines );
-//     for(unsigned i=0;i<b.size();++i)
-//         vec[i] = b[i];
-//     //
-//     for(unsigned line=0;line<mat.nb_rows();++line)
-//         vec[line] = ( vec[line] - dot_aligned_with_offset(mat(line,range(line)),vec[range(line)]) ) / mat(line,line);
-// 
-//     //
-//     Vec<TR,s> tmpvec = vec;
-// 
-//     TR tmp;
-//     while (nb_lines--) {
-//         T *ptr = &mat(nb_lines,0);
-//         tmp = tmpvec[nb_lines] / ptr[nb_lines];
-//         for(unsigned lb=0;lb<nb_lines;++lb)
-//             tmpvec[lb] -= ptr[lb] * tmp;
-//         vec[nb_lines] = tmp;
-//     }
-//     return vec;
-// }
+template<class T,int s,class TF,class IO>
+bool get_factorization( const Mat<T,Sym<s,false>,Dense<Col>,IO> &m, TF &mat ) {
+    const unsigned defpos = true;
+    // m -> mat
+    mat = m;
+    //PRINTN(mat);
+    //
+    unsigned begin_col = 0;
+    unsigned nb_T_used = 0;
+    unsigned col;
+    for(unsigned line=0;line<mat.nb_rows();++line) {
+        // first step : factorization of a first triangle
+        T *ptr = &mat(line,0).ptr();
+        unsigned begin_col2 = begin_col;
+        for(col=begin_col2;col<line;++col) {
+            unsigned lb = begin_col2;
+            T reg = ptr[col];
+            reg -= dot_aligned_with_offset(&mat(col,0).ptr()+lb,ptr+lb,col-lb);
+            reg /= (T)mat(col,col);
+            ptr[col] = reg;
+        }
+        T reg = ptr[line] - norm_2_p2( ptr + begin_col2, line-begin_col2 );
+        //PRINTN( norm_2_p2( ptr + begin_col2, line-begin_col2 ) );
+        if (reg<=0.0) {
+            //std::cout << line << " "  << begin_col2 << std::endl;
+            std::cout << "bong" << std::endl;
+            //PRINTN( norm_2_p2( ptr + begin_col2, line-begin_col2 ) );
+            //for(unsigned i=0;i<line;++i) std::cout << ptr[i] << std::endl;
+            return false;
+        }
+        ptr[line] = sqrt( reg );
+
+        nb_T_used += line-begin_col2;
+
+        // second step : factorization of the sub rectangular area using the triangle
+        //  and partial factorization of the triangular areas on the right using the upper rectangular areas
+        if ( nb_T_used > LMT_FACT_TRI*LMT_L1_CACHE_SIZE/sizeof(T) ) {
+            ++line;
+            unsigned end_col = line;
+
+            // calculation of the sub rectangular area down to the triangle (to the bottom)
+            for(;line<mat.nb_rows();++line) {
+                ptr = &mat(line,0).ptr();
+                begin_col2 = begin_col;
+                for(col=begin_col2;col<end_col;++col) {
+                    unsigned lb = begin_col2;
+                    ptr[col] = ( ptr[col] - dot_aligned_with_offset(mat.cum_index[col]+lb, ptr+lb, col-lb) ) / mat.cum_index[col][col];
+                }
+            }
+
+            // partial calculation of the triangular area on the right of the preceding rectangular area
+            nb_T_used = 0;
+            unsigned begin_block = end_col;
+            for(line=end_col;line<mat.nb_rows();++line) {
+                begin_col2 = begin_col;
+                ptr = &mat(line,0).ptr();
+                for(col=begin_block;col<line;++col) {
+                    unsigned lb = max( mat.lbounds[col], begin_col2 );
+                    if (end_col>lb)
+                        ptr[col] -= dot_aligned_with_offset(&mat(col,0).ptr()+lb, ptr+lb, end_col-lb);
+                }
+                ptr[line] -= norm_2_p2( ptr + begin_col2, end_col-begin_col2 );
+
+                nb_T_used += end_col-begin_col2;
+                // for the line2\in rest of the lines, sp( col\in [begin_block,line[, line2 )
+                if ( nb_T_used > LMT_FACT_RECT*LMT_L1_CACHE_SIZE/sizeof(T) ) {
+                    for(unsigned line2=line+1;line2<mat.nb_rows();++line2) {
+                        begin_col2 = begin_col;
+                        ptr = &mat(line2,0).ptr();
+                        for(col=begin_block;col<=line;++col) {
+                            unsigned lb = max( &mat(col,0).ptr(), begin_col2 );
+                            if (end_col>lb)
+                                ptr[col] -= dot_aligned_with_offset(&mat(col,0).ptr()+lb, ptr+lb, end_col-lb);
+                        }
+                    }
+                    begin_block = line+1;
+                    nb_T_used = 0;
+                }
+            }
+
+            line = end_col-1;
+            begin_col = end_col;
+            nb_T_used = 0;
+        }
+
+
+    }
+    return true;
+}
+
+
+/** \relates Mat
+*/
+template<class T,int s,class IO,class TF,class TV>
+Vec< typename TypePromote< Multiplies, typename TF::T, typename TV::template SubType<0> ::T >::T ,s >
+solve_using_factorization( const Mat<T,Sym<s,false>,Dense<Col>,IO> &m, const TF &mat, const TV &b ) {
+    typedef typename TypePromote< Multiplies, typename TF::T, typename TV::template SubType<0> ::T >::T TR;
+    unsigned nb_lines=mat.nb_rows();
+    
+    Vec<TR,s> vec;
+    vec.resize( nb_lines );
+    for(unsigned i=0;i<b.size();++i)
+        vec[i] = b[i];
+    //
+    for(unsigned line=0;line<mat.nb_rows();++line)
+        vec[line] = ( vec[line] - dot_aligned_with_offset( mat.row(line), vec[range(line)] ) ) / mat(line,line);
+
+    //
+    Vec<TR,s> tmpvec = vec;
+
+    TR tmp;
+    while (nb_lines--) {
+        T *ptr = &mat(nb_lines,0);
+        tmp = tmpvec[nb_lines] / ptr[nb_lines];
+        for(unsigned lb=0;lb<nb_lines;++lb)
+            tmpvec[lb] -= ptr[lb] * tmp;
+        vec[nb_lines] = tmp;
+    }
+    return vec;
+}
+
 /// Cholesky
 template<class T,int s,class TF,class IO>
 bool get_factorization( const Mat<T,Herm<s,false>,Dense<Col>,IO> &m, TF &mat ) {

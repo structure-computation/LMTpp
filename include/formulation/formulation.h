@@ -623,9 +623,9 @@ public:
             precond();
     }
     ///
-    virtual void assemble_clean_mat(Mat<ScalarType,Sym<>,SparseLine<> > &K, Vec<ScalarType> &F, Vec<Vec<ScalarType> > &vectors_, const Vec<unsigned> &indice_noda_, bool assemble_mat=true,bool assemble_vec=true) {
+    virtual void assemble_clean_mat(Mat<ScalarType,Sym<>,SparseLine<> > &K, Vec<ScalarType> &F, Vec<Vec<ScalarType> > &vectors_, bool assemble_mat=true,bool assemble_vec=true) {
         if ( not initialized ) { // old_vectors
-            get_initial_conditions(vectors_, indice_noda_);
+            get_initial_conditions(vectors_);
         }
 //        std::cerr << "nb_processors : " << nb_processors << std::endl;
         //m->update_skin();

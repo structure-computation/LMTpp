@@ -8,7 +8,7 @@
 namespace LMT {
 /*!
 
-\verbatim
+    \verbatim
                     3------2
                     |      |
                     |      |
