@@ -927,24 +927,39 @@ public:
 private:
     template<unsigned num_der_var>
     struct AssembleNodeDerVar {
-        template<class TN> void operator()( const TN &n, const Vec<unsigned> &indice_noda, Formulation &f ) const {
+        template<class TN> void operator()( const TN &n, Formulation &f ) const {
             if ( nb_global_unknowns ) {
                 if ( nb_nodal_unknowns ) {
-                    unsigned ind[ 2 ] = { indice_noda[f.m->node_list.number(n)], f.indice_glob };
-                    add_nodal_vector_der_var( f, n, ind, Number<num_der_var>() );
+                    unsigned ind[ 2 ] = { (*f.indice_noda)[f.m->node_list.number(n)], *f.indice_glob };
+                    add_nodal_vector_der_var( 
+                        f,
+                        f.matrices(Number<0>()),
+                        f.sollicitation,
+                        f.vectors,
+                        n, ind, Number<num_der_var>() );
                 }
                 else
-                    add_nodal_vector_der_var( f, n, &f.indice_glob, Number<num_der_var>() );
+                    add_nodal_vector_der_var( 
+                        f, 
+                        f.matrices(Number<0>()),
+                        f.sollicitation,
+                        f.vectors,
+                        n, f.indice_glob, Number<num_der_var>() );
             }
             else
-                add_nodal_vector_der_var( f, n, &indice_noda[f.m->node_list.number(n)], Number<num_der_var>() );
+                add_nodal_vector_der_var(
+                    f, 
+                    f.matrices(Number<0>()),
+                    f.sollicitation,
+                    f.vectors,
+                    n, &(*f.indice_noda)[f.m->node_list.number(n)], Number<num_der_var>() );
         }
     };
     template<unsigned num_der_var>
     struct AssembleElemDerVar {
         template<class TE,class TCE,unsigned n> void adsem(Formulation &f,const Number<true> &n1,const Number<false> &n2,
                 const TE &e,const TCE *ce, const Number<n> &nn,unsigned *in) const {
-             add_skin_elem_vector_der_var( f, e, *ce, nn, in, Number<num_der_var>() );
+             add_skin_elem_vector_der_var( f, f.matrices(Number<0>()), f.sollicitation, f.vectors, e, *ce, nn, in, Number<num_der_var>() );
         }
         template<class TE,unsigned n,unsigned n2> void ass_skin_elem(const TE &e,unsigned *in,Formulation &f,
                     const Number<n> &nn,const Number<n2> &nn2) const { // sub_mesh(Number<1>()).
@@ -959,21 +974,26 @@ private:
             adsem( f, Number<true>(),Number<false>(), e, child_elem, nn, in );
         }
         template<class TE,unsigned n> void ass_skin_elem( const TE &e, unsigned *in, Formulation &f, const Number<n> &nn, const Number<n> &nn2 ) const {}
-        template<class TE> void operator()( const TE &e, const Vec<unsigned> &indice_noda, const Vec<unsigned> *indice_elem, Formulation &f ) const {
+        template<class TE> void operator()( const TE &e, const Vec<unsigned> *indice_elem, Formulation &f ) const {
             unsigned in[ TE::nb_nodes + 1 + nb_global_unknowns ];
             
             if ( nb_nodal_unknowns ) 
                 for(unsigned i=0;i<TE::nb_nodes;++i)
-                    in[i] = indice_noda[ f.m->node_list.number(*e.node(i)) ];
+                    in[i] = (*f.indice_noda)[ f.m->node_list.number(*e.node(i)) ];
             
             typedef CaracFormulationForElement<NameFormulation,TE,NameVariant,ScalarType> CFE;
             if ( CFE::nb_elementary_unknowns ) 
                 in[ TE::nb_nodes * (nb_nodal_unknowns!=0) ] = indice_elem[TE::num_in_elem_list][e.number];
             
             if ( nb_global_unknowns )
-                in[ TE::nb_nodes * (nb_nodal_unknowns!=0) + (CFE::nb_elementary_unknowns!=0) ] = f.indice_glob;
+                in[ TE::nb_nodes * (nb_nodal_unknowns!=0) + (CFE::nb_elementary_unknowns!=0) ] = *f.indice_glob;
 
-            add_elem_vector_der_var( f, e, in, Number<num_der_var>() );
+            add_elem_vector_der_var(
+                f,
+                f.matrices(Number<0>()),
+                f.sollicitation,
+                f.vectors,
+                e, in, Number<num_der_var>() );
             
             // skin elements
             if ( not f.assume_skin_not_needed )
@@ -987,9 +1007,9 @@ public:
         if ( num_der_var == n ) {
             sollicitation.set(ScalarType(0.0));
     
-            add_global_vector_der_var( *this, indice_glob, Number<num_der_var>() ); // global
-            apply( m->node_list, AssembleNodeDerVar<num_der_var>(), indice_noda, *this ); // nodal
-            apply( m->elem_list, AssembleElemDerVar<num_der_var>(), indice_noda, indice_elem, *this ); // element (and skin elements)
+            add_global_vector_der_var( *this, matrices(Number<0>()), sollicitation, vectors, Number<num_der_var>() ); // global
+            apply( m->node_list, AssembleNodeDerVar<num_der_var>(), *this ); // nodal
+            apply( m->elem_list, AssembleElemDerVar<num_der_var>(), indice_elem, *this ); // element (and skin elements)
         } else
             assemble_clean_vector_der_var( Number<num_der_var+1>(), n );
     }
@@ -1466,28 +1486,46 @@ void add_elem_matrix(
 
 /** To be redefined for each new formulations
 */
-template<class TM,class NameFormulation,class NameVariant,class T,bool wont_add_nz,class TN,unsigned num_der_var>
-void add_nodal_vector_der_var( Formulation<TM,NameFormulation,NameVariant,T,wont_add_nz> &f, const TN &node, const unsigned *indice, Number<num_der_var> ) {
+template<class TM,class NameFormulation,class NameVariant,class T,bool wont_add_nz,class TMA,class TVE,class TVEVE,class TN,unsigned num_der_var>
+void add_nodal_vector_der_var(
+    Formulation<TM,NameFormulation,NameVariant,T,wont_add_nz> &f, 
+    TMA   &matrix       ,
+    TVE   &sollicitation,
+    TVEVE &vectors      ,
+    const TN &node, const unsigned *indice, Number<num_der_var> ) {
 }
 
 /** To be redefined for each new formulations
 */
-template<class TM,class NameFormulation,class NameVariant,class T,bool wont_add_nz,unsigned num_der_var>
-void add_global_vector_der_var( Formulation<TM,NameFormulation,NameVariant,T,wont_add_nz> &f, unsigned indice, Number<num_der_var> ) {
+template<class TM,class NameFormulation,class NameVariant,class T,bool wont_add_nz,class TMA,class TVE,class TVEVE,unsigned num_der_var>
+void add_global_vector_der_var(
+    Formulation<TM,NameFormulation,NameVariant,T,wont_add_nz> &f, 
+    TMA   &matrix       ,
+    TVE   &sollicitation,
+    TVEVE &vectors      ,
+    Number<num_der_var> ) {
 }
 
 /** To be redefined for each new formulations
 */
-template<class TF,class TE,unsigned num_der_var>
+template<class TF,class TMA,class TVE,class TVEVE,class TE,unsigned num_der_var>
 void add_elem_vector_der_var(
         TF &f,
+        TMA   &matrix       ,
+        TVE   &sollicitation,
+        TVEVE &vectors      ,
         const TE &elem,
         const unsigned *indices,
         Number<num_der_var> ) {
     typedef typename TF::ScalarType T;
 
     for( const double *gp = gauss_point_for_order( f.order_integration_when_integration_totale, typename TE::NameElem() ); *gp!=0.0; gp += elem.nb_var_inter + 1 )
-        add_local_elem_vector_der_var( *gp, gp+1, f, elem, indices, Number<num_der_var>() );
+        add_local_elem_vector_der_var( 
+            *gp, gp+1, f , 
+            matrix       ,
+            sollicitation,
+            vectors      ,
+            elem, indices, Number<num_der_var>() );
         
 }
 

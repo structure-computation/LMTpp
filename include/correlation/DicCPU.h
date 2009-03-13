@@ -260,10 +260,10 @@ struct DicCPU {
                 M.diag() += levenberg_marq; // * ( ni + ( ni == 0 ) );
             }
             C_M = M;
-            double t0 = time_of_day_in_sec();
+            // double t0 = time_of_day_in_sec();
             chol_factorize( C_M );
             // incomplete_chol_factorize( C_M );
-            t1 += time_of_day_in_sec() - t0;
+            // t1 += time_of_day_in_sec() - t0;
         }
         
         adimensioned_residual = sum_sq_diff_fg / nb_covered_pixel / ( max_f - min_f );

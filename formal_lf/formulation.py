@@ -772,21 +772,27 @@ class Formulation:
     #
     f.write( '// \n' )
     if T=='V':
-      f.write( 'template<class TM,class T,bool wont_add_nz,class T_pos,class ND,class ED,unsigned nim>\n' )
+      f.write( 'template<class T,class TM,bool wont_add_nz,class TMA,class TVE,class TVEVE,class T_pos,class ND,class ED,unsigned nim>\n' )
       if self.integration_totale:
           f.write( 'void add_elem_vector_der_var(\n' )
       else:
           f.write( 'void add_local_elem_vector_der_var(T ponderation,const T *var_inter,\n' )
       f.write( '      Formulation<TM,%s,DefaultBehavior,T,wont_add_nz> &f,\n' % self.name )
+      f.write( '      TMA &matrix,\n')
+      f.write( '      TVE &sollicitation,\n' )
+      f.write( '      TVEVE &vectors,\n' )
       f.write( '      const Element<%s,DefaultBehavior,Node<%i,T_pos,ND>,ED,nim> &elem,\n'%(e.name,self.dim) )
       f.write( '      const unsigned *indices, Number<%i> num_der_var ) {\n' % num_der_var )
       f.write( '  #define PNODE(N) (*elem.node(N))\n' )
     
     elif T[0]=='S':
       num_child = string.atoi(T[1:])
-      f.write( 'template<class TM,class T,bool wont_add_nz,class T_pos,class ND,class ED,unsigned nim,class ED2,unsigned nim2>\n' )
+      f.write( 'template<class TM,class TMA,class TVE,class TVEVE,class T,bool wont_add_nz,class T_pos,class ND,class ED,unsigned nim,class ED2,unsigned nim2>\n' )
       f.write( 'void add_skin_elem_vector_der_var(\n' )
       f.write( '      Formulation<TM,%s,DefaultBehavior,T,wont_add_nz> &f,\n' % self.name )
+      f.write( '      TMA &matrix,\n')
+      f.write( '      TVE &sollicitation,\n' )
+      f.write( '      TVEVE &vectors,\n' )
       f.write( '      const Element<%s,DefaultBehavior,Node<%i,T_pos,ND>,ED,nim> &elem,\n' % (e.name,self.dim) )
       f.write( '      const Element<%s,DefaultBehavior,Node<%i,T_pos,ND>,ED2,nim2> &skin_elem,\n'%(e.children[num_child]['name'],self.dim) )
       f.write( '      const Number<%s> &num_child,\n' % num_child )
@@ -797,9 +803,12 @@ class Formulation:
       txt = 'ADD_NODAL_VEC_DER_VAR_%s_%i' % ( self.name, num_der_var )
       f.write( '#ifndef '+txt+'\n' )
       f.write( '#define '+txt+'\n' )
-      f.write( 'template<class TM,class T,bool wont_add_nz>\n' )
+      f.write( 'template<class TM,class TMA,class TVE,class TVEVE,class T,bool wont_add_nz>\n' )
       f.write( 'void add_nodal_vector_der_var(\n' )
       f.write( '      Formulation<TM,%s,DefaultBehavior,T,wont_add_nz> &f,\n' % self.name )
+      f.write( '      TMA &matrix,\n')
+      f.write( '      TVE &sollicitation,\n' )
+      f.write( '      TVEVE &vectors,\n' )
       f.write( '      const typename TM::TNode &node,\n' )
       f.write( '      const unsigned *indices, Number<%i> num_der_var ) {\n' % num_der_var )
       f.write( '  #define PNODE(N) node\n' )

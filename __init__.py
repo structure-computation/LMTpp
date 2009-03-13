@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import re,os,stat,string,time,sys
 # pouet
 def get_files(cd,r):
@@ -216,6 +218,10 @@ def make_pb( env,
              types = ['double'],
              dep_py = True,
              name_der_vars = [] ):
+   #
+   if len( formulations ) == 0:
+        print "Attention, tu demande de générer des fichiers de problème mais aucune formulation n'a été spécifiée. On peut utiliser d'autres fonctions pour faire des MeshCarac."
+   
    # find formulation and element files
    f_files, e_files = [], []
    for f in formulations:
