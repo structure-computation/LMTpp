@@ -28,9 +28,9 @@ SharedLibrary(
     'codegen',
     src + [ [ "codegen_wrap.cc", "codegen.i" ][found_swig==0] ],
     SWIGFLAGS = "-python -c++",
-    LIBPREFIX = "#_",
-    LIBSUFFIX = ".so",
-    LINKFLAGS = "-bundle -flat_namespace -undefined suppress" * mac,
+    SHLIBPREFIX = "#_",
+    SHLIBSUFFIX = ".so",
+    LINKFLAGS = "-flat_namespace -undefined suppress" * mac,
     CPPFLAGS = os.popen("python-config --includes","r").read().strip(),
     SHOBJSUFFIX = "_" + arch + ".o"
 )
