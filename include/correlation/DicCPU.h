@@ -139,8 +139,8 @@ struct DicCPU {
                         dic.sum_abs_diff_fg += abs( diff_fg );
                         dic.sum_sq_diff_fg  += pow( diff_fg, 2 );
                         dic.nb_covered_pixel++;
-                        dic.min_f = min( min_f, val_f );
-                        dic.max_f = max( min_f, val_f );
+                        dic.min_f = min( dic.min_f, val_f );
+                        dic.max_f = max( dic.min_f, val_f );
                     }
                 }
                 

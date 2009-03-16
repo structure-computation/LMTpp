@@ -1442,14 +1442,26 @@ private:
     unsigned indice_glob_internal;
     
 };
-/** To be redefined for each new formulations
-*/
+/** To be redefined for each new formulations */
 template<class TM,class NameFormulation,class NameVariant,unsigned assemble_mat,unsigned assemble_vec,class T,bool wont_add_nz>
 void add_global_matrix(Formulation<TM,NameFormulation,NameVariant,T,wont_add_nz> &f,const Number<assemble_mat> &nnm,const Number<assemble_vec> &nnv,unsigned indice) {
 }
 
-/** To be redefined for each new formulations
-*/
+/** To be redefined for each new formulations */
+template<class TF,unsigned _ms,unsigned _am,unsigned _av,class TE>
+void add_local_elem_matrix(
+    double pond, const double *var_inter, 
+    TF &f,
+    const Number<_ms> &matrix_is_sym,
+    const Number<_am> &assemble_mat,
+    const Number<_av> &assemble_vec,
+    const TE &elem,
+    const unsigned *indices ) {
+
+    assert( 0 );
+}
+
+/** To be redefined for each new formulations */
 template<class TF,unsigned _ms,unsigned _am,unsigned _av,class TE>
 void add_elem_matrix(
         TF &f,
@@ -1461,10 +1473,11 @@ void add_elem_matrix(
     typedef typename TF::ScalarType T;
 
     for( const double *gp = gauss_point_for_order( f.order_integration_when_integration_totale, typename TE::NameElem() ); *gp!=0.0; gp += elem.nb_var_inter + 1 )
-        add_local_elem_matrix( *gp, gp+1, f, f.matrices(Number<0>()), f.sollicitation, f.vectors,  matrix_is_sym, assemble_mat, assemble_vec, elem, indices );
+        add_local_elem_matrix( *gp, gp+1, f, matrix_is_sym, assemble_mat, assemble_vec, elem, indices );
         
 }
 
+/** To be redefined for each new formulations */
 template<class TF, class TMA, class TVE, class TVEVE, unsigned _ms,unsigned _am,unsigned _av,class TE>
 void add_elem_matrix(
         TF &f,
