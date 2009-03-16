@@ -17,7 +17,7 @@
 #include <assert.h>
 #include <stdlib.h>
 
-#ifdef __DARWIN__
+#ifdef __APPLE__
     #define WITHOUT_MALLOC
 #endif
 
