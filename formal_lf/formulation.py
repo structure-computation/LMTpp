@@ -659,7 +659,7 @@ class Formulation:
     f.write( '    static const bool has_elementary_matrix = %s;\n'%( ['true','false'][has_not_V_matrix] ) )
     f.write( '    static const bool has_skin_elementary_matrix = %s;\n'%( ['true','false'][has_not_S_matrix] ) )
 
-    f.write( '    template<class TE,class TF, class TVEVE> static void after_solve(TE &elem,TF &f,TVEVE &vectors, const unsigned *indices) {\n' )
+    f.write( '    template<class TE,class TF, class TVEVE> static void after_solve(TE &elem,TF &f,TVEVE &vectors,const unsigned *indices) {\n' )
     f.write( '      #define PNODE(N) (*elem.node(N))\n' )
     f.write( form_after_solve[0] + '\n' )
     f.write( '      #undef PNODE\n' )
@@ -705,7 +705,7 @@ class Formulation:
     f.write( '// \n' )
     BU = ',unsigned symmetric_version'*(assemble_mat==False)
     if T=='V':
-      f.write( 'template<class TM, class T,bool wont_add_nz,class TMA, class TVE, class TVEVE,class T_pos,class ND,class ED,unsigned nim'+BU+'>\n' )
+      f.write( 'template<class T,class TM,bool wont_add_nz,class TMA,class TVE,class TVEVE,class T_pos,class ND,class ED,unsigned nim'+BU+'>\n' )
       if self.integration_totale:
           f.write( 'void add_elem_matrix(\n' )
       else:
@@ -723,7 +723,7 @@ class Formulation:
     
     elif T[0]=='S':
       num_child = string.atoi(T[1:])
-      f.write( 'template<class TM, class T,bool wont_add_nz,class TMA, class TVE,class TVEVE, class T_pos, class ND,class ED, unsigned nim,class ED2,unsigned nim2'+BU+'>\n' )
+      f.write( 'template<class TM,class T,bool wont_add_nz,class TMA, class TVE,class TVEVE, class T_pos, class ND,class ED, unsigned nim,class ED2,unsigned nim2'+BU+'>\n' )
       f.write( 'void add_skin_elem_matrix(\n' )
       f.write( '      Formulation<TM,%s,DefaultBehavior,T,wont_add_nz> &f,\n' % self.name )
       f.write( '      TMA &matrix,\n')
@@ -743,16 +743,16 @@ class Formulation:
             ['false','true'][assemble_mat], ['false','true'][assemble_vec] )
       f.write( '#ifndef '+txt+'\n' )
       f.write( '#define '+txt+'\n' )
-      f.write( 'template<class TM,class T, class TMA, class TVE,class TVEVE, bool wont_add_nz '+BU+'>\n' )
+      f.write( 'template<class TM,class T,bool wont_add_nz,class TMA,class TVE,class TVEVE '+BU+'>\n' )
       f.write( 'void add_nodal_matrix(\n' )
       f.write( '      Formulation<TM,%s,DefaultBehavior,T,wont_add_nz> &f,\n' % self.name )
       f.write( '      TMA &matrix,\n' )
       f.write( '      TVE &sollicitation,\n' )
       f.write( '      TVEVE &vectors,\n' )
-      f.write( '      const typename TM::TNode &node,\n' )
       f.write( '      const Number<%s> &matrix_is_sym,\n'%( ['false','true','symmetric_version'][symmetric+(assemble_mat==False)] ) )
       f.write( '      const Number<%s> &assemble_mat,\n'%( ['false','true'][assemble_mat] ) )
       f.write( '      const Number<%s> &assemble_vec,\n'%( ['false','true'][assemble_vec] ) )
+      f.write( '      const typename TM::TNode &node,\n' )
       f.write( '      const unsigned *indices){ \n' )
       f.write( '  #define PNODE(N) node\n' )
       
