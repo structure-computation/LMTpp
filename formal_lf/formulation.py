@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from variable import *
 from interpolation import *
 from calculate_matrix import *
@@ -57,7 +58,7 @@ class Formulation:
       "auto_contact" : False,
       "matrix_will_be_definite_positive" : True,
       "Interpolations" : std_interpolations,
-      "order_integration" : 2,
+      "order_integration" : 2, # utilisé uniquement si integration_total = false
       "IS_contact_formulation" : IS_contact_formulation,
       "elem_contact_formulation" : elem_contact_formulation,
       'hooke_isotrope_th' : hooke_isotrope_th,
