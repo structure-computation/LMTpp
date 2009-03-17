@@ -71,6 +71,7 @@ class Formulation:
       'apply_on_elements_after_solve_6' : apply_on_elements_after_solve,
       'options' : options,
       'gauss_points' : [],
+      'user_headers' : [],
     }
     execfile( name_file, globals(), self.ind )
 
@@ -834,6 +835,8 @@ class Formulation:
     for i in range(len(ifndef)):
       if ifndef[i]=='/' or ifndef[i]==',' or ifndef[i]=='.': ifndef = ifndef[:i]+'_'+ifndef[i+1:]
     f.write( '\n' )
+    for include in self.user_headers:
+       f.write( '#include "'+ include +'" \n' )
     f.write( '#include "formulation/formulation.h"\n' )
     f.write( 'namespace LMT {\n' )
 
