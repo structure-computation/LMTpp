@@ -27,7 +27,7 @@ class Element:
         "children" : [],
         "var_inter" : [symbol('var_inter['+str(i)+']','\eta_{'+str(i)+'}') for i in range(5)],
         "val" : val,
-        "interpolation" : {'global':val[0],'gauss':val[0],'elementary':val[0],'skin_elementary':val[0],\
+        "interpolation" : {'global':val[0],'gauss':val[0],'Flat_Interpolation':val[0],'elementary':val[0],'skin_elementary':val[0],\
             'elementary_mul_nb_nodes':val[0],'elementary_mul_nb_nodes_of_each_children_elem':val[0]},
         "dim" : dim,
         "max_dim" : 3,
@@ -35,6 +35,7 @@ class Element:
         "has_extrapolation" : False,
         "authorized_permutations" : [],
         "can_directly_be_represented_by" : "",
+        "Flat_Interpolation_gauss_points" : {},
       }
       execfile( name_file, globals(), dict_e )
       
@@ -98,6 +99,19 @@ class Element:
       res = 0.0
       k = min( filter(lambda x:x>=order,self.gauss_points.keys()) )
       for w,p in self.gauss_points[k]:
+          mp = {}
+          for k,v in p.items():
+              if type(v) is float or type(v) is int: mp[k] = number(v)
+              else: mp[k] = v
+          res += w * expr.subs(EM(mp))
+      return res
+
+    def Flat_Interpolation_integration(self, expr, mul_by_jac = True ):
+      if type(expr) is float or type(expr) is int: expr = number(expr)
+      if mul_by_jac:
+        expr *= self.det_jacobian()
+      res = 0.0
+      for w,p in self.Flat_Interpolation_gauss_points:
           mp = {}
           for k,v in p.items():
               if type(v) is float or type(v) is int: mp[k] = number(v)

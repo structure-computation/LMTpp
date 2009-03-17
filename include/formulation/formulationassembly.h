@@ -258,6 +258,7 @@ namespace LMT {
         //
         void update_variables(T partial_ts) {
             for(unsigned i=0;i<formulations.size();++i){
+                assert(0);
                 formulation(i)->update_variables(partial_ts);
             }
         }
