@@ -355,7 +355,7 @@ namespace LMT {
                 maf.local_ddl_to_global_ones.resize(maf.local_unknowns_to_global_ones.size() * nb_ddl_per_node );
                 for(unsigned j=0;j<maf.local_unknowns_to_global_ones.size();++j)
                     for(unsigned d=0;d<nb_ddl_per_node;++d)
-                        maf.local_ddl_to_global_ones[j*nb_ddl_per_node+d] = maf.local_unknowns_to_global_ones[j] * nb_ddl_per_node + size ;
+                        maf.local_ddl_to_global_ones[j*nb_ddl_per_node+d] = maf.local_unknowns_to_global_ones[j] * nb_ddl_per_node + d ;
             }
             size += pos.size() + nb_ddl_per_node;
             // elem unknowns. nb_elem_of_type will = nb_unknowns
