@@ -121,10 +121,12 @@ public:
         f << "</VTKFile>" << std::endl;
    }
 
-    int exec( const std::string &filename = "paraview.pvd" ) {
+   int exec( const std::string &filename = "paraview.pvd" ) {
         make_pvd_file( filename );
 
         std::string t = "paraview --data=" + filename;
+        if ( pvsm_file.size() )
+            t += " --state=" + pvsm_file;
         return system( t.c_str() );
     
         /*
@@ -200,6 +202,8 @@ public:
         system( ("paraview --data="+tmp_file).c_str() );
         */
     }
+    
+    std::string pvsm_file;
 private:
     template<class PV> void app_xminmax(const std::string &prefix,const PV &xmi,const PV &xma) {
         if ( init_xminmax ) {

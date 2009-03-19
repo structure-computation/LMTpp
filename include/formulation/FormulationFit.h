@@ -60,7 +60,7 @@ struct FormulationFit {
             PRINT( dD );
             
             history.push_back( norm_inf( dD ) );
-            TF::Carac::add_to_der_vars( f, dD );
+            TF::Carac::add_to_der_vars( f, relaxation * dD );
             
             if ( all( abs( dD ) < conv ) or num_iter == 20 ) {
                 // sensitivity analysis

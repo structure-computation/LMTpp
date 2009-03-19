@@ -84,7 +84,7 @@ public:
         mat_def_pos_if_sym = Carac::matrix_will_be_definite_positive;
         time = AbsScalarType(0);
         time_steps = AbsScalarType(1e40);
-        initialized = false;
+        initial_condition_initialized = false;
         user_want_pierre_precond = true;
         this->order_integration_when_integration_totale = Carac::order_integration;
     
@@ -385,10 +385,13 @@ private:
             const Number<true> &n1,const Number<false> &n2,
             const TE &e,const TCE *ce, const Number<n> &nn,unsigned *in
         ) const {
-             add_skin_elem_matrix( 
+             add_skin_elem_matrix(
                 f, 
                 K, F, vectors,
-                Number<MatCarac<0>::symm>(), Number<assemble_mat>(), Number<assemble_vec>(), e, *ce, nn, in
+                Number<MatCarac<0>::symm>(), 
+                Number<assemble_mat>(), 
+                Number<assemble_vec>(), 
+                e, *ce, nn, in
             );
         }
         
@@ -470,7 +473,7 @@ public:
     }
     ///
     virtual void assemble_clean_mat(bool assemble_mat=true,bool assemble_vec=true) {
-        if ( not initialized ) { // old_vectors
+        if ( not initial_condition_initialized ) { // old_vectors
             get_initial_conditions();
             shift();
         }
@@ -611,7 +614,7 @@ public:
     }
     ///
     virtual void assemble_clean_mat(Mat<ScalarType,Sym<>,SparseLine<> > &K, Vec<ScalarType> &F, Vec<Vec<ScalarType> > &vectors_, bool assemble_mat=true,bool assemble_vec=true) {
-        if ( not initialized ) { // old_vectors
+        if ( not initial_condition_initialized ) { // old_vectors
             get_initial_conditions(vectors_);
         }
 //        std::cerr << "nb_processors : " << nb_processors << std::endl;
@@ -1324,7 +1327,7 @@ public:
             carac.get_nodal_initial_conditions(m->node_list[i],*this,vectors,(*indice_noda)[i]);
         apply( m->elem_list, GetInitialCond(), *this );
         carac.get_global_initial_conditions(m,*this,vectors,*indice_glob);
-        initialized = true;
+        initial_condition_initialized = true;
     }
     //
     virtual void get_initial_conditions(Vec<Vec<ScalarType> > &vectors_) {
@@ -1332,7 +1335,7 @@ public:
             carac.get_nodal_initial_conditions(m->node_list[i],*this,vectors_,(*indice_noda)[i]);
         apply( m->elem_list, GetInitialCond(), *this, vectors_);
         carac.get_global_initial_conditions(m,*this,vectors_,*indice_glob);
-        initialized = true;
+        initial_condition_initialized = true;
     }
     /**
      * add a constraint which will be added to system during assembly
@@ -1346,7 +1349,7 @@ public:
     virtual void add_sollicitation(int type_var,const std::string &val,unsigned nb_in_type,unsigned num_in_vec=0) {
         sollicitations.push_back( Sollicitation<Formulation>(type_var,val,nb_in_type,num_in_vec) );
     }
-    virtual void set_initial_time_step( AbsScalarType ts ) { time_steps = ts; }
+    virtual void set_initial_time_step( AbsScalarType ts ) { time_steps = ts; time = -2 * ts; }
     virtual ScalarType get_next_time_step() const { return time_steps[0]; }
     virtual ScalarType get_time() const { return time; }
     virtual void set_time( AbsScalarType ts ) { time = ts; } /// Attention, pilotage a faire soi-meme si utilisation de cette fonction....
@@ -1415,7 +1418,7 @@ public:
     Vec<Constraint<Formulation> > constraints;
     Vec<Sollicitation<Formulation> > sollicitations;
     
-    bool mat_def_pos_if_sym, initialized, user_want_pierre_precond, mat_has_been_allocated_with_symamd;
+    bool mat_def_pos_if_sym, initial_condition_initialized, user_want_pierre_precond, mat_has_been_allocated_with_symamd;
     bool allocated;
     Vec<unsigned>* indice_elem;
     Vec<unsigned>* indice_noda;
@@ -1464,13 +1467,15 @@ void add_local_elem_matrix(
     TF &f,
     TMA &matrix,
     TVE &sollicitation,
-    TVEVE &vectors,
+    const TVEVE &vectors,
     const Number<_ms> &matrix_is_sym,
     const Number<_am> &assemble_mat,
     const Number<_av> &assemble_vec,
     const TE &elem,
     const unsigned *indices ) {
 
+    std::cerr << "Attention : ni add_elem_matrix, ni add_local_elem_matrix n'ont été surdéfinis pour la formulation " << f.get_name() << " avec l'élément "
+              << elem.name << "." << std::endl;
     assert( 0 );
 }
 
@@ -1480,7 +1485,7 @@ void add_elem_matrix(
         TF &f,
         TMA &matrix,
         TVE &sollicitation,
-        TVEVE &vectors,
+        const TVEVE &vectors,
         const Number<_ms> &matrix_is_sym,
         const Number<_am> &assemble_mat,
         const Number<_av> &assemble_vec,

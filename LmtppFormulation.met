@@ -20,13 +20,14 @@ def type_for_nb_dim_and_sym( nb_dim, sym ) when nb_dim.size == 2
 class VariableAncestor
     #
     class Symbol
-        sym  := Op()
-        node := -1
-        elem := -1
-        skin := -1
-        glob := -1
-        name := ""
-        nder := 0
+        sym   := Op()
+        node  := -1
+        elem  := -1
+        skin  := -1
+        glob  := -1
+        name  := ""
+        ind_n := ""
+        nder  := 0
         off_ind := 0
         
     # parameters
@@ -44,28 +45,37 @@ class VariableAncestor
     virtual def make_expr_subs( from, to )
         abstract
 
-    def _get_scalar_var_wo_der( e, n, t, sym_lst = Vec[Symbol]() )
+    def _get_scalar_var_wo_der( e, n, ind_n, t, ind_t, sym_lst = Vec[Symbol]() )
         if interpolation == "nodal"
             for num_node in 0 .. e.nb_nodes
-                sym_lst.push_back( sym = symbol( "elem.node($num_node)->$n", "$(t)^{$num_node}" ), node = num_node, name = n, nder = nb_der )
+                sym_lst.push_back( sym = symbol( "elem.node($num_node)->$n$ind_n", "$(t)^{$num_node}$ind_t" ), node = num_node, name = n, ind_n = ind_n, nder = nb_der )
             return e.interpolation( sym_lst[ sym_lst.size - e.nb_nodes ... ].map( _0.sym ) )
         if interpolation == "elementary"
-            return sym_lst.push_back( sym = symbol( "elem.$n"     , "$t" ), elem = 0, name = n, nder = nb_der )->sym
+            return sym_lst.push_back( sym = symbol( "elem.$n$ind_n"     , "$t$ind_t" ), elem = 0, name = n, ind_n = ind_n, nder = nb_der )->sym
         if interpolation == "global"
-            return sym_lst.push_back( sym = symbol( "f.m->$n"     , "$t" ), glob = 0, name = n, nder = nb_der )->sym
+            return sym_lst.push_back( sym = symbol( "f.m->$n$ind_n"     , "$t$ind_t" ), glob = 0, name = n, ind_n = ind_n, nder = nb_der )->sym
         if interpolation == "skin_elementary"
-            return sym_lst.push_back( sym = symbol( "skin_elem.$n", "$t" ), skin = 0, name = n, nder = nb_der )->sym
+            return sym_lst.push_back( sym = symbol( "skin_elem.$n$ind_n", "$t$ind_t" ), skin = 0, name = n, ind_n = ind_n, nder = nb_der )->sym
         assert( 0, "unknown interpolation '$interpolation'" )
-        
-    def _get_scalar_var( time, e, n, t, sym_lst, want_ders )
-        r := _get_scalar_var_wo_der( e, n, t, sym_lst )
+    
+    def _get_scalar_var( time, e, n, t, ind, sym_lst, want_ders )
+        def index_access( ind )
+            if ind.size
+                return "[" + join( ind, "," ) + "]"
+            return ""
+        def intex_access( ind )
+            if ind.size
+                return "_{" + join( ind, "," ) + "}"
+            return ""
+        r := _get_scalar_var_wo_der( e, n, index_access( ind ), t, intex_access( ind ), sym_lst )
         for num_der in 1 .. ( nb_der + 1 ) * want_ders
-            r += _get_scalar_var_wo_der( e, n + "_der$num_der", t + "^{" + "'" * num_der + "}" ) * time ^ num_der / factorial( num_der )
+            r += _get_scalar_var_wo_der( e, n + "_der_$num_der", index_access( ind ), t + "^{" + "'" * num_der + "}", intex_access( ind ) )
+                    * time ^ num_der / factorial( num_der )
         return r
-        
+    
     virtual def get_cpp_type
         abstract
-        
+    
     virtual def default_value_str
         abstract
     
@@ -81,7 +91,7 @@ class VariableAncestor
             assert( true_type( self ) != true_type( v ), "variables with same names in different formulations but with different tensor sizes" )
             return true
         return false
-            
+    
 
 #~
 
@@ -128,19 +138,10 @@ class Variable[ nb_dim = [], sym = false ] inherits VariableAncestor
             tex_name = n
             if tex_name in ["sigma","nu","alpha","beta","phi"]
                 tex_name = "\\" + n
-        # for val, ind in values
-        def index_access( ind )
-            if ind.size
-                return "[" + join( ind, "," ) + "]"
-            return ""
-        def intex_access( ind )
-            if ind.size
-                return "[" + join( ind, "," ) + "]"
-            return ""
         for ind, val in indices_and_values_of( expr )
-            val = _get_scalar_var( time, e,           name + index_access( ind ), tex_name + intex_access( ind )           , expr_symbols, want_ders = not unknown )
+            val = _get_scalar_var( time, e,           name, tex_name           , ind, expr_symbols, want_ders = not unknown )
         for ind, val in indices_and_values_of( test )
-            val = _get_scalar_var( time, e, "test_" + name + index_access( ind ), tex_name + intex_access( ind ) + "{^*}{}", test_symbols, want_ders = false       )
+            val = _get_scalar_var( time, e, "test_" + name, tex_name + "{^*}{}", ind, test_symbols, want_ders = false       )
             
             
 
@@ -182,7 +183,9 @@ class Variable[ nb_dim = [], sym = false ] inherits VariableAncestor
 class LmtppFormulationAncestor
     # std variables
     time                     := symbol("time","t")
-    time_steps               := Vec[ Op ]( size = 32, function = x => symbol("time_steps[$x]","\\delta t_$x") )
+    time_beg_time_step       := symbol("f.time","ft")
+    abs_time                 := time_beg_time_step + time
+    time_steps               := Vec[ Op ]( size = 32, function = x => symbol("f.time_steps[$x]","\\delta t_$x") )
     dV                       := symbol("dV")
     dS                       := symbol("dS")
     dN                       := symbol("dN")
@@ -194,8 +197,9 @@ class LmtppFormulationAncestor
     left_time_integration    := 0
     right_time_integration   := 1
     
-    use_subs_instead_of_diff := true
-    assumed_symmetric_matrix := true
+    use_subs_instead_of_diff := 0
+    assumed_symmetric_matrix := 1
+    matrix_will_be_definite_positive := 0
     
     # computed
     unknown_variables := Vec[ Ptr[ VariableAncestor ] ]()
@@ -217,6 +221,9 @@ class LmtppFormulationAncestor
     
     name := ""
 
+    virtual def formulation_init pertinence 0
+        pass
+    
     virtual def get_nb_dim
         abstract
 
@@ -245,11 +252,10 @@ class LmtppFormulationAncestor
         for name, var in AttributeExplorer( self )
             if var.is_a_LmtppVariable and var.has_relation
                 for ind, value in indices_and_values_of( var.expr, compressed = true )
-                    val := value
+                    val := value.subs( time, time_steps[0] )
                     if var.interpolation in [ "elementary", "global" ]
                         if value.depends_on( e.var_inter )
-                            stderr <<< "Attention : on peut pas coller un champ non constant sur un champ qui est supposé l'être. "
-                            stderr <<< "Vous pouvez faire e.mean(...) pour avoir la moyenne sur l'élément par exemple."
+                            stderr <<< "Attention : on peut pas coller un champ non constant sur un champ qui est supposé l'être. Si par exemple vous souhaitez avoir la moyenne sur l'élément vous pouvez faire e.mean(...)."
                             val = e.mean( value )
                     cw.add( var.mesh_symbol( ind ), val, reassign )
         return cw.to_string()
@@ -268,14 +274,14 @@ class LmtppFormulationAncestor
                     interp_val := Vec[ Op ]( size = s.nder + 1, function = symbol( "vecs[$_0][indice+$num_ind]" ) )
                     interp_ste := Vec[ Op ]( size = s.nder + 1, function = time_steps[0] - sum( time_steps[ 0 .. _0 ] ) )
                     interp     := lagrange( interp_ste, interp_val, time )
-                    cw_set.add( "$n_unk.$(s.name)", interp.subs( time, time_steps[0] ), reassign )
-                    cw_sts.add( "$n_unk.$(s.name)", interp.subs( time, pts           ), reassign )
-                    expr := symbol( "$n_unk.$(s.name)" )
+                    cw_set.add( "$n_unk.$(s.name)$(s.ind_n)", interp.subs( time, time_steps[0] ), reassign )
+                    cw_sts.add( "$n_unk.$(s.name)$(s.ind_n)", interp.subs( time, pts           ), reassign )
+                    expr := symbol( "$n_unk.$(s.name)$(s.ind_n)" )
                     for nd in 1 .. s.nder + 1
                         interp = interp.diff( time )
-                        cw_set.add( "$n_unk.$(s.name)_der$nd", interp.subs( time, time_steps[0] ), reassign )
-                        cw_sts.add( "$n_unk.$(s.name)_der$nd", interp.subs( time, pts           ), reassign )
-                        expr += symbol( "$n_unk.$(s.name)_der$nd" ) * time / factorial( nd )
+                        cw_set.add( "$n_unk.$(s.name)_der_$nd$(s.ind_n)", interp.subs( time, time_steps[0] ), reassign )
+                        cw_sts.add( "$n_unk.$(s.name)_der_$nd$(s.ind_n)", interp.subs( time, pts           ), reassign )
+                        expr += symbol( "$n_unk.$(s.name)_der_$nd$(s.ind_n)" ) * time / factorial( nd )
                     #
                     for nd in 0 .. s.nder + 4
                         cw_get.add( "vecs[$nd][indice+$num_ind]", expr.subs( time, - sum( time_steps[ 0 .. nd ] ) ), reassign )
@@ -318,31 +324,37 @@ class LmtppFormulationAncestor
                     num_inds.push_back( s->node )
                     off_inds.push_back( s->off_ind )
             num_ind += pe->nb_nodes_
-            
+        
         if want_skin_elem
+            has_unknown_this_kind := false
             for s in unk_expr_syms
                 if s->skin >= 0
                     num_inds.push_back( num_ind )
                     off_inds.push_back( s->off_ind )
-            num_ind++
+                    has_unknown_this_kind = true
+            num_ind += has_unknown_this_kind
         
         if want_elem
+            has_unknown_this_kind := false
             for s in unk_expr_syms
                 if s->elem >= 0
                     num_inds.push_back( num_ind )
                     off_inds.push_back( s->off_ind )
-            num_ind++
+                    has_unknown_this_kind = true
+            num_ind += has_unknown_this_kind
                 
         if want_global
+            has_unknown_this_kind := false
             for s in unk_expr_syms
                 if s->glob >= 0
                     num_inds.push_back( num_ind )
                     off_inds.push_back( s->off_ind )
-            num_ind++
-                
+                    has_unknown_this_kind = true
+            num_ind += has_unknown_this_kind
+            
         #
         symm := symbol("symm")
-        cw := CodeWriter("T") # Alt
+        cw := CodeWriterAlt("T") # 
         # t0 := time_of_day_in_sec()
         for r in 0 .. F.size
             if assemble_vec and not assumed( F[r] == 0 )
@@ -361,7 +373,7 @@ class LmtppFormulationAncestor
             for assemble_vec in 0 .. 2
                 stream <<<<
                     // 
-                    template<class TM,class TK,class TF,class TV,class T,bool wont_add_nz,unsigned symm,class T_pos,class ND,class ED,unsigned nim,class TMUT>
+                    template<class TM,class T,bool wont_add_nz,class TK,class TF,class TV,unsigned symm,class T_pos,class ND,class ED,unsigned nim>
                     void add_elem_matrix(
                         Formulation<TM,$name,DefaultBehavior,T,wont_add_nz> &f,
                         TK &K,
@@ -371,8 +383,7 @@ class LmtppFormulationAncestor
                         const Number<$assemble_mat> &assemble_mat,
                         const Number<$assemble_vec> &assemble_vec,
                         const Element<$(pe->name),DefaultBehavior,Node<$nb_dim,T_pos,ND>,ED,nim> &elem,
-                        const unsigned *indices,
-                        TMUT &mut ) {
+                        const unsigned *indices ) {
                     $( write_mat( K_dV, F_dV, assemble_mat, assemble_vec, want_nodal=true, want_skin_elem=true, want_elem=true, want_global=true ) )
                     }
                     //
@@ -384,15 +395,14 @@ class LmtppFormulationAncestor
                         const Number<$assemble_vec> &assemble_vec,
                         const Element<$(pe->name),DefaultBehavior,Node<$nb_dim,T_pos,ND>,ED,nim> &elem,
                         const unsigned *indices ) {
-                        int fake_mut;
-                        add_elem_matrix( f, f.matrices(Number<0>()), f.sollicitation, f.vectors, matrix_is_sym, assemble_mat, assemble_vec, elem, indices, fake_mut );
+                        add_elem_matrix( f, f.matrices(Number<0>()), f.sollicitation, f.vectors, matrix_is_sym, assemble_mat, assemble_vec, elem, indices );
                     }
                 
         #
                 for pc, num_pc in pe_children, 0...
                     stream <<<<
                         // 
-                        template<class TM,class TK,class TF,class TV,class T,bool wont_add_nz,unsigned symm,class T_pos,class ND,class ED,unsigned nim,class ED2,unsigned nim2,class TMUT>
+                        template<class TM,class T,bool wont_add_nz,class TK,class TF,class TV,unsigned symm,class T_pos,class ND,class ED,unsigned nim,class ED2,unsigned nim2>
                         void add_skin_elem_matrix(
                                 Formulation<TM,$name,DefaultBehavior,T,wont_add_nz> &f,
                                 TK &K,
@@ -404,8 +414,7 @@ class LmtppFormulationAncestor
                                 const Element<$(pe->name),DefaultBehavior,Node<$nb_dim,T_pos,ND>,ED,nim> &elem,
                                 const Element<$(pc->name),DefaultBehavior,Node<$nb_dim,T_pos,ND>,ED2,nim2> &skin_elem,
                                 const Number<$num_pc> &num_child,
-                                const unsigned *indices,
-                                TMUT &mut ) {
+                                const unsigned *indices ) {
                         $( write_mat( K_dS[num_pc], F_dS[num_pc], assemble_mat, assemble_vec, want_nodal=true, want_skin_elem=true, want_elem=true, want_global=true ) )
                         }
                     stream <<<<
@@ -420,8 +429,7 @@ class LmtppFormulationAncestor
                                 const Element<$(pc->name),DefaultBehavior,Node<$nb_dim,T_pos,ND>,ED2,nim2> &skin_elem,
                                 const Number<$num_pc> &num_child,
                                 const unsigned *indices ) {
-                            int fake_mut;
-                            add_skin_elem_matrix( f, f.matrices(Number<0>()), f.sollicitation, f.vectors, matrix_is_sym, assemble_mat, assemble_vec, elem, skin_elem, num_child, indices, fake_mut);
+                            add_skin_elem_matrix( f, f.matrices(Number<0>()), f.sollicitation, f.vectors, matrix_is_sym, assemble_mat, assemble_vec, elem, skin_elem, num_child, indices );
                         }
         stream <<< "} // namespace LMT"
         
@@ -431,7 +439,7 @@ class LmtppFormulationAncestor
         for assemble_mat in 0 .. 2
             for assemble_vec in 0 .. 2
                 stream <<<<
-                    template<class TM,class TK,class TF,class TV,class T,bool wont_add_nz,unsigned symm,class TMUT>
+                    template<class TM,class TK,class TF,class TV,class T,bool wont_add_nz,unsigned symm>
                     void add_nodal_matrix(
                             Formulation<TM,$name,DefaultBehavior,T,wont_add_nz> &f,
                             TK &K,
@@ -441,8 +449,7 @@ class LmtppFormulationAncestor
                             const Number<symm> &matrix_is_sym,
                             const Number<$assemble_mat> &assemble_mat,
                             const Number<$assemble_vec> &assemble_vec,
-                            const unsigned *indices,
-                            TMUT &mut ) {
+                            const unsigned *indices ) {
                         #define PNODE(N) node
                     $( write_mat( K_dN, F_dN, assemble_mat, assemble_vec, want_nodal=true, want_skin_elem=false, want_elem=false, want_global=true ) )
                         #undef PNODE
@@ -455,8 +462,7 @@ class LmtppFormulationAncestor
                             const Number<$assemble_mat> &assemble_mat,
                             const Number<$assemble_vec> &assemble_vec,
                             const unsigned *indices ) {
-                        int fake_mut;
-                        add_nodal_matrix( f, f.matrices(Number<0>()), f.sollicitation, f.vectors, node, matrix_is_sym, assemble_mat, assemble_vec, indices, fake_mut );
+                        add_nodal_matrix( f, f.matrices(Number<0>()), f.sollicitation, f.vectors, node, matrix_is_sym, assemble_mat, assemble_vec, indices );
                     }
         stream <<< "} // namespace LMT"
     
@@ -471,7 +477,13 @@ class LmtppFormulation[ dim ] inherits LmtppFormulationAncestor
     def init( e )
         init_using_default_values( self )
         update_variable_expr_and_test( e )
-
+        formulation_init()
+        
+    #
+    def init
+        init_using_default_values( self )
+        formulation_init()
+        
     #
     virtual def get_nb_dim
         return dim
@@ -572,6 +584,8 @@ class LmtppFormulation[ dim ] inherits LmtppFormulationAncestor
                 unk_expr_syms.map( _0->sym ), 
                 unk_test_syms.map( _0->sym )
             )
+            # F_dS[ num_child ].display_tex()
+        
         
     #
     def _volumic_vars( var_to_sym_lst_function )
@@ -644,6 +658,7 @@ def write_legacy_lmtpp_mesh_dm_data_set_field( res, bn, variable_list, sym_selec
         res << sp <<< "        return 0;"
         res << sp <<< "    }"
 
+
 #
 def write_legacy_lmtpp_mesh_StaticData( bn, variable_list, sym_select, sp = "    " )
     type_variable_list := Map[String,String]()
@@ -658,9 +673,11 @@ def write_legacy_lmtpp_mesh_StaticData( bn, variable_list, sym_select, sp = "   
     init_const := ""
     for v in variable_list
         if sym_select( v )
-            res <<< sp + "    CARACDMEXTNAME( $cpt, $( type_variable_list[ v->cpp_type ] ), $( v->name ), \"$( v->unit )\" );"
-            init_const << (":,"[cpt!=0]) << " $( v->name )( $( v->default_value_str() ) )"
-            cpt++
+            for num_der in 0 .. v->nb_der + 1
+                name := v->name + "_der_$num_der" * ( num_der != 0 )
+                res <<< sp + "    CARACDMEXTNAME( $cpt, $( type_variable_list[ v->cpp_type ] ), $name, \"$( v->unit )\" );"
+                init_const << (":,"[cpt!=0]) << " $name( $( v->default_value_str() ) )"
+                cpt++
     if cpt
         res <<< sp + "    static const unsigned nb_params = $cpt;"
         res <<< sp + "    $bn() $init_const {}"
@@ -694,11 +711,13 @@ def write_legacy_lmtpp_mesh_carac( stream, pb_name, fe_set_by_dim, dim )
     
     # mesh data structs
     for v in variable_list
-        stream <<<<
-            #ifndef IFNDEF_$(v->name)_DM
-            #define IFNDEF_$(v->name)_DM
-                struct $(v->name)_DM {};
-            #endif // IFNDEF_$(v->name)_DM
+        for num_der in 0 .. v->nb_der + 1
+            name := v->name + "_der_$num_der" * ( num_der != 0 )
+            stream <<<<
+                #ifndef IFNDEF_$(name)_DM
+                #define IFNDEF_$(name)_DM
+                    struct $(name)_DM {};
+                #endif // IFNDEF_$(name)_DM
         
     # CARACDMEXTNAMES
     CARACDM_NodalStaticData    := write_legacy_lmtpp_mesh_StaticData( "NodalStaticData"  , variable_list, x => ( x->interpolation in [ "nodal"     , "bubble" ] ) )
@@ -748,6 +767,10 @@ def write_legacy_lmtpp_carac_formulation( stream, name_form, fe_set_by_dim_and_n
         is_unknown << [""," or "][cpt_unknown!=0] << "s == \"$(v->name)\""
         num_in_vec_unknown << "if ( s == \"$(v->name)\" ) return $cpt_unknown;"
         cpt_unknown += v->nb_values
+    
+    f := fe_set_by_dim_and_name[0]
+    matrix_will_be_definite_positive := f->matrix_will_be_definite_positive
+    
     #
     stream <<<<
         // generated file. Do not modify
@@ -768,7 +791,7 @@ def write_legacy_lmtpp_carac_formulation( stream, name_form, fe_set_by_dim_and_n
         public:
             typedef P_T T;
             static const char *name() { return "$(name_form)"; }
-            static const bool matrix_will_be_definite_positive = true;
+            static const bool matrix_will_be_definite_positive = $matrix_will_be_definite_positive;
             static const bool has_nodal_matrix = true;
             static const bool has_IS_contact_matrix = false;
             static const bool need_skin_assembly = $( any( fe_set_by_dim_and_name.map( x => x->need_skin_assembly ) ) );
@@ -803,6 +826,7 @@ def write_legacy_lmtpp_carac_formulation( stream, name_form, fe_set_by_dim_and_n
         #endif // CARAC_FORMULATION_$(dim)_$(name_form)_H
 
 #
+#
 def write_legacy_lmtpp_carac_formulation_for_element( stream, name_form, fe, dim )
     # symm := fe->K_dV.get_is_sym_rt()
     symm := fe->assumed_symmetric_matrix
@@ -829,13 +853,16 @@ def write_legacy_lmtpp_carac_formulation_for_element( stream, name_form, fe, dim
     stream <<< "    };"
     stream <<< "    static const bool has_elementary_matrix = $( fe->non_null_system( fe->K_dV, fe->F_dV ) );"
     stream <<< "    static const bool has_skin_elementary_matrix = $( fe->need_skin_assembly );"
-    stream <<< "    template<class TE,class TF> static void after_solve(TE &elem,TF &f,const unsigned *indices) {"
+    stream <<< "    template<class TE,class TF,class TVEVE> static void after_solve(TE &elem,TF &f,TVEVE &vectors,const unsigned *indices) {"
     stream <<< "    #define PNODE(N) (*elem.node(N))"
     stream <<< "    $( fe->call_after_solve( @child_cast( fe->pe ) ) )"
     stream <<< "    #undef PNODE"
     stream <<< "    }"
+    stream <<< "    template<class TE,class TF> static void after_solve(TE &elem,TF &f,const unsigned *indices) {"
+    stream <<< "        after_solve(elem,f,f.vectors,indices);"
+    stream <<< "    }"
     for n in 2 .. 7
-        stream <<< "    template<class TE,class TF> static void after_solve_$n(TE &elem,TF &f,const unsigned *indices) {"
+        stream <<< "    template<class TE,class TF,class TVEVE> static void after_solve_$n(TE &elem,TF &f,TVEVE &vectors,const unsigned *indices) {"
         stream <<< "    }"
     stream <<< fe->legacy_lmtpp_unk_management( "elementary"     , "elem", x => x.elem==0 )
     stream <<< fe->legacy_lmtpp_unk_management( "skin_elementary", "elem", x => x.skin==0 )
@@ -958,14 +985,6 @@ def write_legacy_lmtpp_code( pb_name, TfList, TeList, dim_function = x => x::nvi
     for dim, fe_set_by_dim in fe_set
         write_legacy_lmtpp_mesh_carac( mesh_carac_file, pb_name, fe_set_by_dim, dim )
     
-    # nodal, elementary and global matrices
-    for dim, fe_set_by_dim in fe_set
-        for name_form, fe_set_by_dim_and_name in fe_set_by_dim
-            for fe, cpt_elem in fe_set_by_dim_and_name, 0...
-                if not cpt_elem
-                    fe->write_add_nodal_matrices( File( rep + "/add_nodal_matrices_$name_form.$dim.h", "w" ) )
-                fe->write_add_elem_matrices( File( rep + "/add_matrices_$name_form.$dim.$(fe->pe->name).h", "w" ) )
-    
     # carac_formulation
     for dim, fe_set_by_dim in fe_set
         for name_form, fe_set_by_dim_and_name in fe_set_by_dim
@@ -973,4 +992,12 @@ def write_legacy_lmtpp_code( pb_name, TfList, TeList, dim_function = x => x::nvi
             for fe in fe_set_by_dim_and_name
                 # info rep + "/form_carac_$name_form.$dim.$(fe->pe->name).h"
                 write_legacy_lmtpp_carac_formulation_for_element( File( rep + "/form_carac_$name_form.$dim.$(fe->pe->name).h", "w" ), name_form, fe, dim )
+    
+    # nodal, elementary and global matrices
+    for dim, fe_set_by_dim in fe_set
+        for name_form, fe_set_by_dim_and_name in fe_set_by_dim
+            for fe, cpt_elem in fe_set_by_dim_and_name, 0...
+                if not cpt_elem
+                    fe->write_add_nodal_matrices( File( rep + "/add_nodal_matrices_$name_form.$dim.h", "w" ) )
+                fe->write_add_elem_matrices( File( rep + "/add_matrices_$name_form.$dim.$(fe->pe->name).h", "w" ) )
     
