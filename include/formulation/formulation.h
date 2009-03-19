@@ -24,6 +24,13 @@
 #include "containers/matumfpack.h"
 
 namespace LMT {
+template<class NameFormulation, int dim, class ScalarType_>
+struct LocalOperator{
+    template< class TM, class TF>
+    void local_update(TM *m ,TF *f){  };
+    template<class TM>
+    void update_variables(TM *m){ };
+    };
 /** To be redefined for each new for,ulations */
 template<class TF>
     void read_material_to_mesh(const XmlNode &n, TF &f);
@@ -83,6 +90,7 @@ public:
     
     Formulation(TM &mm) {
         m = &mm;
+        localOP = new LocalOperator<NameFormulation, TM::dim, ScalarType>;
         mat_def_pos_if_sym = Carac::matrix_will_be_definite_positive;
         time = AbsScalarType(0);
         time_steps = AbsScalarType(1e40);
@@ -652,6 +660,15 @@ public:
         read_material_to_mesh_(n, *this);
     }
     //
+    virtual unsigned localOP_local_update(){
+        unsigned olda = 0;
+        localOP->local_update(m , this);                         ///< Local loop 
+        return olda;
+    };
+    //
+    virtual void localOP_update_variables(){
+       localOP->update_variables(m);
+    };
     ///
     virtual void assemble_constraints(Mat<ScalarType,Sym<>,SparseLine<> > &K, Vec<ScalarType> &F, Vec<Vec<ScalarType> > &vectors_, const ScalarType &M, bool assemble_mat=true,bool assemble_vec=true) {
         // constraints
@@ -1420,6 +1437,8 @@ public:
     Vec<AbsScalarType,nb_vectors> time_steps;
     AbsScalarType time; /// at end of current step
     Vec<ScalarType> old_vec;
+   
+    LocalOperator<NameFormulation, TM::dim, ScalarType>* localOP;
 
     Vec<Constraint<Formulation> > constraints;
     Vec<Sollicitation<Formulation> > sollicitations;

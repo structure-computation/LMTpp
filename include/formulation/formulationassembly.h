@@ -205,6 +205,13 @@ namespace LMT {
                 formulation(i)->update_skin();
         }
         //
+        void local_update(Vec<unsigned> &TODO) {
+            for(unsigned i=0;i<formulations.size();++i)
+                if(TODO[i] == 1){
+                    TODO[i] = formulation(i)->localOP_local_update();
+                    }
+        }
+        //
         void call_after_solve() {
             for(unsigned i=0;i<formulations.size();++i)
                 formulation(i)->call_after_solve(vectors);
