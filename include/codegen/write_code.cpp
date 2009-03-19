@@ -120,8 +120,6 @@ std::string Write_code::to_string() {
         }
     }
     
-    std::cout << "pouet!!!!!!!!" << std::endl;
-    
     // do not depend on language (only on processor).
     set_node_order();
 
