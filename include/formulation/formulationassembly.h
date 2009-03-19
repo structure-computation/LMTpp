@@ -257,6 +257,12 @@ namespace LMT {
                 formulation(i)->call_after_solve_3(elem_list);
         }*/
         //
+        void localOP_update_variables() {
+            for(unsigned i=0;i<formulations.size();++i){
+                formulation(i)->localOP_update_variables();
+            }
+        }
+        //
         void update_variables() {
             for(unsigned i=0;i<formulations.size();++i){
                 formulation(i)->update_variables(vectors);
