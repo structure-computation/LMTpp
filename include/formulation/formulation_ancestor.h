@@ -2,6 +2,7 @@
 #define FORMULATION_ANCESTOR_H
 
 // #include "containers/mat.h"
+#include "io/xmlnode.h"
 namespace LMT {
 struct SparseUMFPACK;
 struct SparseCholMod;
@@ -58,6 +59,8 @@ public:
     virtual void assemble_constraints   (Mat<ScalarType,Sym<>,SparseLine<> > &K, Vec<ScalarType> &F, Vec<Vec<ScalarType> > &vectors_, const double &M, bool assemble_mat=true,bool assemble_vec=true) = 0;
     virtual void assemble_sollicitations(Mat<ScalarType,Sym<>,SparseLine<> > &K, Vec<ScalarType> &F, Vec<Vec<ScalarType> > &vectors_, bool assemble_mat=true,bool assemble_vec=true) = 0 ;    
     virtual void assemble(Mat<ScalarType,Sym<>,SparseLine<> > &K, Vec<ScalarType> &F, Vec<Vec<ScalarType> > &vectors_, bool assemble_mat=true, bool assemble_vec=true)=0;
+    
+    virtual void read_material_to_mesh(const XmlNode &) = 0;
     
     virtual void get_precond() = 0;
     virtual void solve_system_using_precond(AbsScalarType iterative_criterium) = 0;

@@ -24,7 +24,9 @@
 #include "containers/matumfpack.h"
 
 namespace LMT {
-
+/** To be redefined for each new for,ulations */
+template<class TF>
+    void read_material_to_mesh(const XmlNode &n, TF &f);
 /**
 */
 template<class NameFormulation,unsigned dim,class T,class NameVariant=DefaultBehavior>
@@ -646,6 +648,10 @@ public:
             apply( m->elem_list, toto, *this , K, F ); // element (and skin elements)
         }
     }
+    virtual void read_material_to_mesh(const XmlNode &n){
+        read_material_to_mesh_(n, *this);
+    }
+    //
     ///
     virtual void assemble_constraints(Mat<ScalarType,Sym<>,SparseLine<> > &K, Vec<ScalarType> &F, Vec<Vec<ScalarType> > &vectors_, const ScalarType &M, bool assemble_mat=true,bool assemble_vec=true) {
         // constraints
