@@ -12,25 +12,39 @@
 #ifndef LMTMESHCARACSTD_H
 #define LMTMESHCARACSTD_H
 
+#include "mesh/mesh.h"
 #include "element.h"
 #include "tetra.h"
 #include "hexa.h"
+#include "tetra_10.h"
+#include "hexa_20.h"
 
 namespace LMT {
 
-template<int nb_var_inter,bool want_cubic=false> struct ElementChoiceMeshCaracStd { typedef void NE; };
-template<> struct ElementChoiceMeshCaracStd<3,false> { typedef Tetra NE; };
-template<> struct ElementChoiceMeshCaracStd<2,false> { typedef Triangle NE; };
-template<> struct ElementChoiceMeshCaracStd<1,false> { typedef Bar NE; };
-template<> struct ElementChoiceMeshCaracStd<0,false> { typedef NodalElement NE; };
+template<int nb_var_inter,bool want_cubic=false,unsigned degree=1> struct ElementChoiceMeshCaracStd { typedef void NE; };
+template<> struct ElementChoiceMeshCaracStd<3,false,1> { typedef Tetra NE; };
+template<> struct ElementChoiceMeshCaracStd<2,false,1> { typedef Triangle NE; };
+template<> struct ElementChoiceMeshCaracStd<1,false,1> { typedef Bar NE; };
+template<> struct ElementChoiceMeshCaracStd<0,false,1> { typedef NodalElement NE; };
 
-template<> struct ElementChoiceMeshCaracStd<3,true> { typedef Hexa NE; };
-template<> struct ElementChoiceMeshCaracStd<2,true> { typedef Quad NE; };
-template<> struct ElementChoiceMeshCaracStd<1,true> { typedef Bar NE; };
-template<> struct ElementChoiceMeshCaracStd<0,true> { typedef NodalElement NE; };
+template<> struct ElementChoiceMeshCaracStd<3,false,2> { typedef Tetra_10 NE; };
+template<> struct ElementChoiceMeshCaracStd<2,false,2> { typedef Triangle_6 NE; };
+template<> struct ElementChoiceMeshCaracStd<1,false,2> { typedef Bar_3 NE; };
+template<> struct ElementChoiceMeshCaracStd<0,false,2> { typedef NodalElement NE; };
+
+template<> struct ElementChoiceMeshCaracStd<3,true,1> { typedef Hexa NE; };
+template<> struct ElementChoiceMeshCaracStd<2,true,1> { typedef Quad NE; };
+template<> struct ElementChoiceMeshCaracStd<1,true,1> { typedef Bar NE; };
+template<> struct ElementChoiceMeshCaracStd<0,true,1> { typedef NodalElement NE; };
+
+template<> struct ElementChoiceMeshCaracStd<3,true,2> { typedef Hexa_20 NE; };
+template<> struct ElementChoiceMeshCaracStd<2,true,2> { typedef Quad_8 NE; };
+template<> struct ElementChoiceMeshCaracStd<1,true,2> { typedef Bar_3 NE; };
+template<> struct ElementChoiceMeshCaracStd<0,true,2> { typedef NodalElement NE; };
+
 /*!
 
-Cette classe peut servir de paramètre à une classe Mesh pour définir un maillage sans champs. On ne mémorise que la position des noeuds. On trouve d'autres exemples pour des formualtions dans le dossier formulation (n'hésitez pas à faire du copier/coller). Pour générer un MeshCarac personnel, on peut utiliser la fonction make_pb() dans le fichier Sconstruct (voir le tutorial \a [Comment résoudre un problème éléments finis de façon générale] ).
+Cette classe peut servir de paramètre à une classe Mesh pour définir un maillage sans champs (autre que pos, la position dans l'espace). On ne mémorise que la position des noeuds. On trouve d'autres exemples pour des formulations dans le dossier formulation (n'hésitez pas à faire du copier/coller). Pour générer un MeshCarac personnel, on peut utiliser la fonction make_pb() dans le fichier Sconstruct (voir le tutorial \a [Comment résoudre un problème éléments finis de façon générale] ).
 
 MeshCarac class (usable as Mesh<MeshCaracStd<...> > to instantiate a mesh) with
 Tetras if nb_var_inter==3
@@ -39,13 +53,29 @@ Bars if nb_var_inter==1
 NodalElements if nb_var_inter==0
 
 */
-template<unsigned dim,unsigned nb_var_inter,bool want_cubic=false,class T=double>
-struct MeshCaracStd : public MeshCarac<dim,T> {
-    typedef MeshCarac<dim,T> MA;
-    MESHCARACINHERITSFROM(MA);
+template<unsigned d,unsigned nb_var_inter,bool want_cubic=false,class T=double,unsigned degree=1,class NodalData=NodalStaticDataStd<T,d>,class GlobalData=VoidDMSet>
+struct MeshCaracStd {
+    ///
+    typedef T Tpos;
+    ///
+    static const unsigned dim = d;
+    ///
+    typedef Vec<T,d> Pvec;
+    ///
+    typedef NodalData NodalStaticData;
+    ///
+    typedef GlobalData GlobalStaticData;
+    /// inner is a workaround. NE can be Triangle, Tetra, ... end of elements<nvi_to_subs,skin> is marked by NE=void
+    template<unsigned nvi_to_subs,unsigned skin,unsigned num_sub_element,unsigned inner=0>
+    struct ElementChoice {
+        typedef void NE;
+        typedef DefaultBehavior BE;
+        typedef VoidDMSet TData;
+    };
+    ///
     template<unsigned nvi_to_subs,unsigned skin,unsigned inner>
     struct ElementChoice<nvi_to_subs,skin,0,inner> {
-        typedef typename ElementChoiceMeshCaracStd<nb_var_inter-(int)nvi_to_subs,want_cubic>::NE NE;
+        typedef typename ElementChoiceMeshCaracStd<nb_var_inter-(int)nvi_to_subs,want_cubic,degree>::NE NE;
         typedef DefaultBehavior BE;
         typedef VoidDMSet TData;
     };

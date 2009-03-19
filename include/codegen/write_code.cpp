@@ -78,47 +78,49 @@ void Write_code::set_node_order() {
 
 std::string Write_code::to_string() {
 //     std::cerr << "to_string" << std::endl;
-//     for(unsigned i=0;i<lst_var.size();++i) {
-//         const Op *h = set_depth_rec(lst_var[i].ex,0);
-//         // if found an heavyside
-//         if ( h ) {
-//             std::string res;
-//             //
-//             for(unsigned i=0;i<lst_var.size();++i)
-//                 if ( lst_var[i].method == Declare )
-//                     res += std::string( wcl->nb_spaces, ' ' ) + wcl->write_declaration( lst_var[i].name ) + "\n";
-//             //
-//             std::ostringstream name_h;
-//             name_h << "val_heaviside_if_" << h->data.children[0];
-//             //
-//             {
-//                 Write_code wc_cond;
-//                 wc_cond.wcl = wcl->copy( 0, wc_cond );
-//                 wc_cond.add( h->data.children[0], name_h.str(), Declare );
-//                 res += wc_cond.to_string();
-//             }
-//             // h = 1
-//             res += std::string( wcl->nb_spaces, ' ' ) + "if ( " + name_h.str() + " >= 0 ) {\n";
-//             {
-//                 Write_code wc_1;
-//                 wc_1.wcl = wcl->copy( 4, wc_1 );
-//                 for(unsigned j=0;j<lst_var.size();++j)
-//                     wc_1.add( lst_var[j].ex.subs( h, number(1.0) ), lst_var[j].name, lst_var[j].method == Declare ? Set : lst_var[j].method );
-//                 res += wc_1.to_string();
-//             }
-//             // h = 0
-//             res += std::string( wcl->nb_spaces, ' ' ) + "} else {\n";
-//             {
-//                 Write_code wc_0;
-//                 wc_0.wcl = wcl->copy( 4, wc_0 );
-//                 for(unsigned j=0;j<lst_var.size();++j)
-//                     wc_0.add( lst_var[j].ex.subs( h, number(0.0) ), lst_var[j].name, lst_var[j].method == Declare ? Set : lst_var[j].method );
-//                 res += wc_0.to_string();
-//             }
-//             res += std::string( wcl->nb_spaces, ' ' ) + "}\n";
-//             return res;
-//         }
-//     }
+    for(unsigned i=0;i<lst_var.size();++i) {
+        const Op *h = set_depth_rec(lst_var[i].ex,0);
+        // if found an heavyside
+        if ( h ) {
+            std::string res;
+            //
+            for(unsigned i=0;i<lst_var.size();++i)
+                if ( lst_var[i].method == Declare )
+                    res += std::string( wcl->nb_spaces, ' ' ) + wcl->write_declaration( lst_var[i].name ) + "\n";
+            //
+            std::ostringstream name_h;
+            name_h << "val_heaviside_if_" << h->data.children[0];
+            //
+            {
+                Write_code wc_cond;
+                wc_cond.wcl = wcl->copy( 0, wc_cond );
+                wc_cond.add( h->data.children[0], name_h.str(), Declare );
+                res += wc_cond.to_string();
+            }
+            // h = 1
+            res += std::string( wcl->nb_spaces, ' ' ) + "if ( " + name_h.str() + " >= 0 ) {\n";
+            {
+                Write_code wc_1;
+                wc_1.wcl = wcl->copy( 4, wc_1 );
+                for(unsigned j=0;j<lst_var.size();++j)
+                    wc_1.add( lst_var[j].ex.subs( h, number(1.0) ), lst_var[j].name, lst_var[j].method == Declare ? Set : lst_var[j].method );
+                res += wc_1.to_string();
+            }
+            // h = 0
+            res += std::string( wcl->nb_spaces, ' ' ) + "} else {\n";
+            {
+                Write_code wc_0;
+                wc_0.wcl = wcl->copy( 4, wc_0 );
+                for(unsigned j=0;j<lst_var.size();++j)
+                    wc_0.add( lst_var[j].ex.subs( h, number(0.0) ), lst_var[j].name, lst_var[j].method == Declare ? Set : lst_var[j].method );
+                res += wc_0.to_string();
+            }
+            res += std::string( wcl->nb_spaces, ' ' ) + "}\n";
+            return res;
+        }
+    }
+    
+    std::cout << "pouet!!!!!!!!" << std::endl;
     
     // do not depend on language (only on processor).
     set_node_order();
@@ -168,6 +170,7 @@ Write_code::Tleaves::iterator Write_code::get_next_node() {
     return leaves.begin();
 }
 
+/// return Non NULL value if contains an Heaviside_if
 const Op *Write_code::set_depth_rec(const Ex &ex,unsigned depth) {
     if ( ex.op->type == Op::Heavyside_if )
         return ex.op;

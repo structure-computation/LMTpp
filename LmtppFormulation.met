@@ -552,7 +552,7 @@ class LmtppFormulation[ dim ] inherits LmtppFormulationAncestor
 
     #
     def make_matrices( e )
-        residual := formulation( e )
+        residual := Op( formulation( e ) )
         
         # time integration
         if max_nb_der
