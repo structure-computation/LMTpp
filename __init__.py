@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import re,os,stat,string,time,sys
 # pouet
 def get_files(cd,r):
@@ -49,11 +50,11 @@ def make_dep_py(env):
     
 def linkflags(libs):
     """ find flags for libraries which has exetutables that return them... """
-    return string.join([ string.rstrip(os.popen(lib+' --libs').readline()) for lib in libs ])
+    return ' ' + string.join([ string.rstrip(os.popen(lib+' --libs').readline()) for lib in libs ]) + ' '
     
 def cppflags(libs):
     """ find flags for libraries which has exetutables that return them... """
-    return string.join([ string.rstrip(os.popen(lib+' --cflags').readline()) for lib in libs ])
+    return ' ' + string.join([ string.rstrip(os.popen(lib+' --cflags').readline()) for lib in libs ]) + ' '
     
 def makedist(target,source,env):
     """ dist """

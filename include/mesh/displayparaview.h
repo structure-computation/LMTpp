@@ -205,7 +205,7 @@ public:
     
     Vec<std::string> get_all_pvu_files() const {
         Vec<std::string> res;
-        for( std::map<double,Vec<std::string> >::const_iterator iter = pvu_files.begin(); iter != pvu_files.end(); ++iter, ++cpt )
+        for( std::map<double,Vec<std::string> >::const_iterator iter = pvu_files.begin(); iter != pvu_files.end(); ++iter )
             for(unsigned i=0;i<iter->second.size();++i)
                 res.push_back( iter->second[i] );
         return res;

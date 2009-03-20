@@ -1,6 +1,7 @@
 import os
-if 'arch' in ARGUMENTS: arch = ARGUMENTS['arch']
-else: arch = os.uname()[4]
+#arch = ARGUMENTS['arch'] or os.uname()[4]
+#arch = os.uname()[4]
+arch = ( 'arch' in ARGUMENTS and ARGUMENTS['arch'] ) or os.uname()[4]
 mac = 'mac' in ARGUMENTS and ARGUMENTS['mac']
 
 src = [
