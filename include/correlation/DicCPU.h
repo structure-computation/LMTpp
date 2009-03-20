@@ -24,7 +24,9 @@ void dic_elem_matrix_( const TE &elem, const TIMG_f &f, const TIMG_g &g, TDIC &d
 }
 
 /**
-
+    Corrélation sur CPU
+    
+    Il faut spécifier un critère d'arrêt avant exec ou exec_rigid_body (min_norm_inf_dU ou min_norm_2_dU par exemple).
 */
 template<class T,unsigned dim>
 struct DicCPU {
@@ -134,7 +136,11 @@ struct DicCPU {
                         }
                         
                         // residual
-                        dic.sum_residual += abs( diff_fg );
+                        dic.sum_abs_diff_fg += abs( diff_fg );
+                        dic.sum_sq_diff_fg  += pow( diff_fg, 2 );
+                        dic.nb_covered_pixel++;
+                        dic.min_f = min( dic.min_f, val_f );
+                        dic.max_f = max( dic.min_f, val_f );
                     }
                 }
                 
@@ -218,7 +224,11 @@ struct DicCPU {
             F.set( 0.0 );
         }
         
-        sum_residual = 0;
+        sum_abs_diff_fg = 0;
+        sum_sq_diff_fg  = 0;
+        nb_covered_pixel = 0;
+        min_f = 0;
+        max_f = std::numeric_limits<T>::max();
         
         //         //
         //         Assemble<NAME_VAR_DEPL,NAME_VAR_GREY,true> ass_1;
@@ -250,13 +260,21 @@ struct DicCPU {
                 M.diag() += levenberg_marq; // * ( ni + ( ni == 0 ) );
             }
             C_M = M;
+            // double t0 = time_of_day_in_sec();
             chol_factorize( C_M );
+            // incomplete_chol_factorize( C_M );
+            // t1 += time_of_day_in_sec() - t0;
         }
+        
+        adimensioned_residual = sum_sq_diff_fg / nb_covered_pixel / ( max_f - min_f );
     }
 
     /// resol_level must be managed internally
     template<class TIMGf,class TIMGg,class TM,class NAME_VAR_DEPL,class NAME_VAR_GREY> 
     void exec( const TIMGf &f, const TIMGg &g, TM &m, const NAME_VAR_DEPL &name_var_depl, const NAME_VAR_GREY &name_var_grey, bool want_mat = true, bool want_vec = true, int resol_level = 0 ) {
+        if ( min_norm_inf_dU == 0 and min_norm_2_dU == 0 )
+            std::cerr << "Il faut préciser au moins un critère d'arrêt (ex : min_norm_inf_dU ou min_norm_2_dU)." << std::endl;
+    
         if ( resol_level < multi_resolution ) {
             ExtractDM<NAME_VAR_DEPL> pd;
             for(unsigned i=0;i<m.node_list.size();++i) {
@@ -414,6 +432,7 @@ struct DicCPU {
     ///
     void solve_linear_system() {
         solve_using_chol_factorize( C_M, F, dU );
+        // solve_using_incomplete_chol_factorize( C_M, M, F, dU, 1e-2, true );
     }
     
     ///
@@ -535,11 +554,16 @@ struct DicCPU {
         return mean( dU );
     }
     
+    
     // output
     Mat<T,Sym<>,SparseLine<> > M, C_M;
     Vec<int> indice_noda;
     Vec<T> F, dU;
-    T sum_residual;
+    T sum_abs_diff_fg; // sum_{for each pixel i} | f( x_i + d_i ) - g( x_i ) |
+    T sum_sq_diff_fg ; // sum_{for each pixel i} ( f( x_i + d_i ) - g( x_i ) ) ^ 2
+    T adimensioned_residual; // sqrt( sum_{for each pixel i} ( f( x_i + d_i ) - a_i * g( x_i ) ) ^ 2 ) / ( max( f ) - min( f ) ) / nb_covered_pixels
+    int nb_covered_pixel;
+    T min_f, max_f;
     unsigned cpt_iter; // nombre d'itérations pour converger
     Vec<T> history_norm_inf_dU;
     Vec<T> history_norm_2_dU;
@@ -553,8 +577,8 @@ struct DicCPU {
     unsigned max_cpt_iter; /// à moins que nb_iter >= max_cpt_iter
     unsigned nb_threads_for_assembly;
     int div_pixel; /// for "correct" integration. 0 means analytical integration
-    bool display_norm_inf_dU; /// display norm_inf( dU ) au cours des itérations, vrai par défaut
-    bool display_norm_2_dU; /// display norm_2( dU ) au cours des itérations, faux par défaut
+    bool display_norm_inf_dU; /// affiche norm_inf( dU ) au cours des itérations, vrai par défaut
+    bool display_norm_2_dU; /// affiche norm_2( dU ) au cours des itérations, faux par défaut
     bool display_iteration_time; ///
     int multi_resolution; /// div = 2^multi_resolution meaning that 0 = no multi res.
     std::string name_tmp_paraview_file; /// base name to save intermediate results during iterations

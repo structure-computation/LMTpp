@@ -23,12 +23,72 @@ namespace LMT {
 \\generic_comment Rat 
     \\brief fonctions rationnelles à plusieurs indéterminées et de degré quelconque bornés
 
-    Rat est une classe qui représente les fonctions rationnelles à plusieurs indéterminés et de degré quelconque mais on fixe à la compilation le nombre d'indéterminés (paramètre template nx) ainsi que le même degré partiel maximum de chaque indéterminé (paramètre template nd) du numérateur et dénominateur. 
-    Attention : Le stockage est de type dense ; cad on stocke la valeur de tous les monômes donc la taille augmente très vite avec le nombre d'indéterminées...
+    = Remarque générale
 
-    \\relates PolApprox
-    \\relates RatApprox
-    \\relates Pol
+        Rat est une classe qui représente les fonctions rationnelles à plusieurs indéterminés et de degré quelconque mais on fixe à la compilation le nombre d'indéterminés (paramètre template nx) ainsi que le même degré partiel maximum de chaque indéterminé (paramètre template nd) du numérateur et dénominateur. 
+        Pour pouvoir manipuler des fonctions rationnelles (monovariables seulement), il faut utiliser le fichier rational_functions.h 
+        Attention : Le stockage est de type dense ; cad on stocke la valeur de tous les monômes donc la taille augmente très vite avec le nombre d'indéterminées...
+
+            \\relates PolApprox
+            \\relates RatApprox
+            \\relates Pol
+
+    =  Parametres templates pour les fonctions rationnelles
+
+        Il y a trois parametres templates pour définir une fonction rationnelle : Rat<nd,nx,T>
+        
+            * nd est le degré maximal du numérateur et du dénominateur de la fonction rationnelle (valeur par défaut : 4)
+            * nx est le nombre de variables de la fonction rationnelle (valeur par défaut : 1)
+            * T est le type des coefficients de la fonction rationnelle (valeur par défaut : double)
+        
+        Il n'y a pas encore de spécialisation de la classe Rat pour les fonctions rationnelles monovariables (nx=1). Si vos calculs sont trop lents pour des fonctions rationnelles monovariables, demandez (gentiment) à Camille Gouttebroze de faire une spécialisation. 
+
+    = Foire aux questions pour les fonctions rationnelles
+
+        [[#1| Comment créer une fonction rationnelle constante ?]]
+        [[#2| Comment afficher une fonction rationnelle ?]]
+        [[#3| Comment récupérer les coefficients du numérateur d'une fonction rationnelle ?]]
+        [[#4| Comment récupérer les puissances du dénominateur d'une fonction rationnelle ?]]
+        [[#5| Comment évaluer une fonction rationnelle en un point ?]]
+        [[#6| Comment dériver une fonction rationnelle ?]]
+        [[#7| Comment effectuer des opérations algébriques sur des fonctions rationnelles ?]] 
+
+    = Réponses :
+
+        * \\anchor 1 Pour afficher la fonction rationnelle F :
+            \\code C/C++
+                cout << F << endl;
+                OU
+                PRINT(F);
+        
+        * \\anchor 2 Pour récupérer les du numérateur de la fonction rationnelle F:
+            \\code C/C++
+                Vec<T> V=P.numerator();
+        * \\anchor 3 Pour récupérer les du dénominateur de la fonction rationnelle F:
+            \\code C/C++
+                Vec<T> V=P.denominator();
+        * \\anchor 4 Pour évaluer la fonction rationnelle de 3 variables F au point (4,-2,1) :
+            \\code C/C++
+                Rat<nd,3,T> F = ... blabla ...
+                Vec<T,3> V(4,-2,1);
+                Vec<T> W=F(V);
+        * \\anchor 5 Pour obtenir les dérivées de la fonction rationnelle F :
+            \\code C/C++
+                Vec<Rat<2*nd,nx,T>,nx> V=F.derivative();
+        * \\anchor 6 Pour obtenir la dérivée du polynome monovariable P :
+            \\code C/C++
+                Pol<nd-1,nx,T> Q=P.derivative();
+        * \\anchor 7 Pour obtenir la primitive du polynome monovariable P qui s'annule en a:
+            \\code C/C++
+                T a; 
+                Pol<nd-1,nx,T> Q=P.integral(a);
+        * \\anchor 8 Pour effectuer des opérations algébriques sur des fonctions rationnelles P et Q :
+            \\code C/C++
+                Rat<nd,nx,T> R=P+Q;
+                Rat<nd,nx,T> R=P-Q;
+                Rat<nd,nx,T> R=P*Q;
+                Rat<nd,nx,T> R=P/Q; 
+
     \\friend camille.gouttebroze@lmt.ens-cachan.fr
     \\friend raphael.pasquier@lmt.ens-cachan.fr
     \\friend hugo.leclerc@lmt.ens-cachan.fr

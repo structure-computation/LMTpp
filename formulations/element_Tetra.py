@@ -36,6 +36,13 @@ interpolation["bubble"] = (1-var_inter[0]-var_inter[1]-var_inter[2]) * (1-ni) * 
 
 interpolation["der_nodal"] = val[0]
 
+# ---------------------------------------------------------------------------------
+a,b,c = 1.0/4.0, 1.0/6.0, 1.0/2.0;
+interpolation["gauss"] = (var_inter[0]-b)*(var_inter[0]-c)/((a-b)*(a-c)) *  (var_inter[1]-b)*(var_inter[1]-c)/((a-b)*(a-c)) * (var_inter[2]-b)*(var_inter[2]-c)/((a-b)*(a-c)) * val[0] + \
+                         (var_inter[0]-a)*(var_inter[0]-c)/((b-a)*(b-c)) *  (var_inter[1]-a)*(var_inter[1]-c)/((b-a)*(b-c)) * (var_inter[2]-a)*(var_inter[2]-c)/((b-a)*(b-c)) * val[1] + \
+                         (var_inter[0]-a)*(var_inter[0]-b)/((c-a)*(c-b)) *  (var_inter[1]-a)*(var_inter[1]-c)/((b-a)*(b-c)) * (var_inter[2]-a)*(var_inter[2]-c)/((b-a)*(b-c)) * val[2] + \
+                         (var_inter[0]-a)*(var_inter[0]-c)/((b-a)*(b-c)) *  (var_inter[1]-a)*(var_inter[1]-b)/((c-a)*(c-b)) * (var_inter[2]-a)*(var_inter[2]-c)/((b-a)*(b-c)) * val[3] + \
+                         (var_inter[0]-a)*(var_inter[0]-c)/((b-a)*(b-c)) *  (var_inter[1]-a)*(var_inter[1]-c)/((b-a)*(b-c)) * (var_inter[2]-a)*(var_inter[2]-b)/((c-a)*(c-b)) * val[4]
 
 
 quality = 1

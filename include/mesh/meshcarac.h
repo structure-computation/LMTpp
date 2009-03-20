@@ -24,6 +24,12 @@ struct DefaultBehavior {};
     struct pos_DM {};
 #endif // IFNDEF_pos_DM
 
+template<class T,unsigned dim>
+struct NodalStaticDataStd {
+    typedef Vec<T,dim> Pvec;
+    CARACDMEXTNAME(0,Pvec,pos,"mm");
+};
+
 /*! 
 
     Modèle de classe qui sert de paramètre à la classe \a Mesh . On peut aussi consulter  \a MeshCaracStd pour un exemple exploitable de ce modèle et aussi tous les exemples dans le dossier formulation. 
@@ -57,14 +63,7 @@ struct MeshCarac {
         typedef VoidDMSet TData;
     };
     ///
-    //template<class NE,class BE,unsigned nvi_to_subs,unsigned skin,unsigned inner=0>
-    //struct ElementaryStaticData {
-    //    VOIDDMSET;
-    //};
-    ///
-    struct NodalStaticData {
-        CARACDMEXTNAME(0,Pvec,pos,"mm");
-    };
+    typedef NodalStaticDataStd<T,dim> NodalStaticData;
     ///
     typedef VoidDMSet GlobalStaticData;
 };

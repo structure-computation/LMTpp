@@ -7,28 +7,49 @@ interval_var_inter = [
 ]
 
 #    7 ---14----6
-#   /|         /|
-# 15 |       13 |
+#   /.         /|
+# 15 .       13 |
 # /  19      /  18
-#4---|-12---5   |
-#|   |      |   |
-#|   3---10-|-- 2
-#16 /      17  /
+#4-----12---5   |
+#|   .      |   |
+#|   3...10.|.. 2
+#16 .      17  /
 #|11        | 9
-#|/         |/
+#|.         |/
 #0-----8----1
 
 children = [
-  {'name':"Quad_8", 'nodes':[0,1,2,3,8,9,10,11], 'var':[var_inter[0],var_inter[1],number(0)]},
+  {'name':"Quad_8", 'nodes':[0,3,2,1,11,10,9,8], 'var':[var_inter[1],var_inter[0],number(0)]},
   {'name':"Quad_8", 'nodes':[4,5,6,7,12,13,14,15], 'var':[var_inter[0],var_inter[1],number(1)]},
   {'name':"Quad_8", 'nodes':[0,1,5,4,8,17,12,16], 'var':[var_inter[0],number(0),var_inter[1]]},
   {'name':"Quad_8", 'nodes':[1,2,6,5,9,18,13,17], 'var':[number(1),var_inter[0],var_inter[1]]},
-  {'name':"Quad_8", 'nodes':[3,2,6,7,10,18,14,19], 'var':[var_inter[0],number(1),var_inter[1]]},
-  {'name':"Quad_8", 'nodes':[0,3,7,4,11,19,15,16], 'var':[number(0),var_inter[0],var_inter[1]]},
-]              
+  {'name':"Quad_8", 'nodes':[3,7,6,2,19,14,18,10], 'var':[var_inter[1],number(1),var_inter[0]]},
+  {'name':"Quad_8", 'nodes':[0,4,7,3,16,15,19,11], 'var':[number(0),var_inter[1],var_inter[0]]},
+]
 
 # permutation = [ 19,18,17,16,15,14,13,12,11,10,9,8,7, 6, 5, 4, 3, 2, 1, 0 ]
 permutation = [ 0,3,2,1,4,7,6,5,11,10,9,8,15,14,13,12,16,19,18,17]
+
+tmp_authorized_permutations = [
+    [0,1,2,3, 4,5,6,7, 8,9,10,11,   12,13,14,15, 16,17,18,19],
+    [4,7,6,5, 0,3,2,1, 15,14,13,12, 11,10,9,8,   16,19,18,17],
+    [3,2,6,7, 0,1,5,4, 10,18,14,19, 8,17,12,16,  11,9,13,15],
+    [0,4,5,1, 3,7,6,2, 16,12,17,8,  19,14,18,10, 11,15,13,9],
+    [1,5,6,2, 0,4,7,3, 17,13,18,9,  16,15,19,11, 8,12,14,10],
+    [0,3,7,4, 1,2,6,5, 11,19,15,16, 9,18,13,17,  8,10,14,12],
+]
+
+for i in range(4):
+    authorized_permutations += tmp_authorized_permutations
+    for c in range( len(tmp_authorized_permutations) ):
+        tmp_authorized_permutations[c] = tmp_authorized_permutations[c][1:4] + [ tmp_authorized_permutations[c][0] ] + \
+                                         tmp_authorized_permutations[c][5:8] + [ tmp_authorized_permutations[c][4] ] + \
+                                         tmp_authorized_permutations[c][9:12] + [ tmp_authorized_permutations[c][8] ]+ \
+                                         tmp_authorized_permutations[c][13:16] + [ tmp_authorized_permutations[c][12] ] + \
+                                         tmp_authorized_permutations[c][17:20] + [ tmp_authorized_permutations[c][16] ]
+
+authorized_permutations = authorized_permutations[1:]
+
 
 X = 2*var_inter[0]-1
 Y = 2*var_inter[1]-1
@@ -69,6 +90,31 @@ interpolation["nodal"] =  ( 1./8. *  (1-X) * (1-Y) * (1-Z) * (-X -Y -Z - 2) ) * 
                                                     
 quality = 1
 interpolation["der_nodal"] = val[0]
+
+z1=(1+(1.0/sqrt(3.0)))/2;
+z2=(1-(1.0/sqrt(3.0)))/2; 
+interpolation["gauss"] = (1-(var_inter[0]-z2)/(z1-z2))     * (1-(var_inter[1]-z2)/(z1-z2))     * (1-(var_inter[2]-z2)/(z1-z2))    * val[0]  + \
+                         (1-((1-var_inter[0])-z2)/(z1-z2)) * (1-(var_inter[1]-z2)/(z1-z2))     * (1-(var_inter[2]-z2)/(z1-z2))    * val[1]  + \
+                         (1-((1-var_inter[0])-z2)/(z1-z2)) * (1-((1-var_inter[1])-z2)/(z1-z2)) * (1-(var_inter[2]-z2)/(z1-z2))    * val[2]  + \
+                         (1-(var_inter[0]-z2)/(z1-z2))     * (1-((1-var_inter[1])-z2)/(z1-z2)) * (1-(var_inter[2]-z2)/(z1-z2))    * val[3]  + \
+                         (1-(var_inter[0]-z2)/(z1-z2))     * (1-(var_inter[1]-z2)/(z1-z2))     * (1-((1-var_inter[2])-z2)/(z1-z2))* val[4]  + \
+                         (1-((1-var_inter[0])-z2)/(z1-z2)) * (1-(var_inter[1]-z2)/(z1-z2))     * (1-((1-var_inter[2])-z2)/(z1-z2))* val[5]  + \
+                         (1-((1-var_inter[0])-z2)/(z1-z2)) * (1-((1-var_inter[1])-z2)/(z1-z2)) * (1-((1-var_inter[2])-z2)/(z1-z2))* val[6]  + \
+                         (1-(var_inter[0]-z2)/(z1-z2))     * (1-((1-var_inter[1])-z2)/(z1-z2)) * (1-((1-var_inter[2])-z2)/(z1-z2))* val[7]
+
+a = 1.0/sqrt(3.0)
+Flat_Interpolation_gauss_points = [
+  ( 1.0/4.0, { var_inter[0] : (1-a)/2.0, var_inter[1] : (1-a)/2.0,   var_inter[2] : 1.0/2.0 } ),
+  ( 1.0/4.0, { var_inter[0] : (1+a)/2.0, var_inter[1] : (1-a)/2.0,   var_inter[2] : 1.0/2.0 } ),
+  ( 1.0/4.0, { var_inter[0] : (1+a)/2.0, var_inter[1] : (1+a)/2.0,   var_inter[2] : 1.0/2.0 } ),
+  ( 1.0/4.0, { var_inter[0] : (1-a)/2.0, var_inter[1] : (1+a)/2.0,   var_inter[2] : 1.0/2.0 } ),
+]
+z1=(1+(1.0/sqrt(3.0)))/2;
+z2=(1-(1.0/sqrt(3.0)))/2;
+interpolation["Flat_Interpolation"] = (1-(var_inter[0]-z2)/(z1-z2))     * (1-(var_inter[1]-z2)/(z1-z2))      * val[0]  + \
+                         (1-((1-var_inter[0])-z2)/(z1-z2)) * (1-(var_inter[1]-z2)/(z1-z2))       * val[1]  + \
+                         (1-((1-var_inter[0])-z2)/(z1-z2)) * (1-((1-var_inter[1])-z2)/(z1-z2))   * val[2]  + \
+                         (1-(var_inter[0]-z2)/(z1-z2))     * (1-((1-var_inter[1])-z2)/(z1-z2))   * val[3]  \
 
 # ---------------------------------------------------------------------------------
 def local_coordinates(point):

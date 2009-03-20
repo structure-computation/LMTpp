@@ -58,6 +58,7 @@ typename TNG::Pvec sample_normal(const Element<Bar_3,TN,TNG,TD,NET> &e) {
 }
 
 
+/* TODO : exact computation */
 template<class TN,class TNG,class TD,unsigned NET>
 typename TNG::T measure( const Element<Bar_3,TN,TNG,TD,NET> &e ) {
     return length( e.node(1)->pos - e.node(0)->pos );

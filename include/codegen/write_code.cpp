@@ -168,6 +168,7 @@ Write_code::Tleaves::iterator Write_code::get_next_node() {
     return leaves.begin();
 }
 
+/// return Non NULL value if contains an Heaviside_if
 const Op *Write_code::set_depth_rec(const Ex &ex,unsigned depth) {
     if ( ex.op->type == Op::Heavyside_if )
         return ex.op;

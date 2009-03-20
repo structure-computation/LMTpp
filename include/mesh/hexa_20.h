@@ -59,12 +59,12 @@ template<unsigned n> struct TypeChildrenElement<Hexa_20,3,n> { typedef NodalElem
 
 template<class TN,class TNG,class TD,unsigned NET,class TC,class HET>
 void append_skin_elements(Element<Hexa_20,TN,TNG,TD,NET> &e,TC &ch,HET &het,Number<1> nvi_to_subs) {
-    het.add_element(e,ch,Quad_8(),e.node(0),e.node(1),e.node(2),e.node(3),e.node(8),e.node(9),e.node(10),e.node(11));
+    het.add_element(e,ch,Quad_8(),e.node(0),e.node(3),e.node(2),e.node(1),e.node(11),e.node(10),e.node(9),e.node(8));
     het.add_element(e,ch,Quad_8(),e.node(4),e.node(5),e.node(6),e.node(7),e.node(12),e.node(13),e.node(14),e.node(15));
     het.add_element(e,ch,Quad_8(),e.node(0),e.node(1),e.node(5),e.node(4),e.node(8),e.node(17),e.node(12),e.node(16));
     het.add_element(e,ch,Quad_8(),e.node(1),e.node(2),e.node(6),e.node(5),e.node(9),e.node(18),e.node(13),e.node(17));
-    het.add_element(e,ch,Quad_8(),e.node(3),e.node(2),e.node(6),e.node(7),e.node(10),e.node(18),e.node(14),e.node(19));
-    het.add_element(e,ch,Quad_8(),e.node(0),e.node(3),e.node(7),e.node(4),e.node(11),e.node(19),e.node(15),e.node(16));
+    het.add_element(e,ch,Quad_8(),e.node(3),e.node(7),e.node(6),e.node(2),e.node(19),e.node(14),e.node(18),e.node(10));
+    het.add_element(e,ch,Quad_8(),e.node(0),e.node(4),e.node(7),e.node(3),e.node(16),e.node(15),e.node(19),e.node(11));
 }
 
 template<class TN,class TNG,class TD,unsigned NET,class TC,class HET>

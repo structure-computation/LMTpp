@@ -20,6 +20,7 @@ struct DefaultBehavior;
 struct Wedge;
 struct Hexa_20;
 struct Tetra_10;
+struct Wedge_15;
 
 /**
  * Bar
@@ -54,9 +55,11 @@ struct Tetra_10;
 */
 
 template<class TM>
-void make_rect(TM &m,const Bar &t,typename TM::Pvec X0,typename TM::Pvec X1,typename TM::Pvec nb_points_) {
+void make_rect(TM &m,const Bar &t,typename TM::Pvec X0_,typename TM::Pvec X1_,typename TM::Pvec nb_points_) {
     typedef typename TM::Pvec Pvec;
     typedef typename TM::Tpos Tpos;
+    Pvec X0 = min(X0_,X1_);
+    Pvec X1 = max(X0_,X1_);
     Vec<unsigned,TM::dim> nb_points(nb_points_); 
 
     unsigned nb_x = (unsigned)nb_points[0], beg = m.node_list.size();
@@ -91,9 +94,12 @@ void make_rect(TM &m,const Bar_3 &t,typename TM::Pvec X0,typename TM::Pvec X1,ty
  * @param nb_y 
  */
 template<class TM>
-void make_rect(TM &m,const Triangle &t,typename TM::Pvec X0,typename TM::Pvec X1,Vec<unsigned,2> nb_points_) {
+void make_rect(TM &m,const Triangle &t,typename TM::Pvec X0_,typename TM::Pvec X1_,Vec<unsigned,2> nb_points_) {
     typedef typename TM::Pvec Pvec;
     typedef typename TM::Tpos Tpos;
+    
+    Pvec X0 = min(X0_,X1_);
+    Pvec X1 = max(X0_,X1_);
     Vec<unsigned,TM::dim> nb_points(nb_points_); 
 
     unsigned nb_x = (unsigned)nb_points[0], nb_y = (unsigned)nb_points[1], beg = m.node_list.size();
@@ -123,9 +129,11 @@ void make_rect(TM &m,const Triangle &t,typename TM::Pvec X0,typename TM::Pvec X1
  * @param nb_y 
  */
 template<class TM>
-void make_rect(TM &m,const Quad &t,typename TM::Pvec X0,typename TM::Pvec X1,typename TM::Pvec nb_points_) {
+void make_rect(TM &m,const Quad &t,typename TM::Pvec X0_,typename TM::Pvec X1_,typename TM::Pvec nb_points_) {
     typedef typename TM::Pvec Pvec;
     typedef typename TM::Tpos Tpos;
+    Pvec X0 = min(X0_,X1_);
+    Pvec X1 = max(X0_,X1_);
     Vec<unsigned,TM::dim> nb_points(nb_points_); 
 
     unsigned nb_x = (unsigned)nb_points[0], nb_y = (unsigned)nb_points[1], beg = m.node_list.size();
@@ -154,9 +162,11 @@ void make_rect(TM &m,const Quad &t,typename TM::Pvec X0,typename TM::Pvec X1,typ
  * @param nb_y 
  */
 template<class TM>
-void make_rect(TM &m,const Triangle_6 &t,typename TM::Pvec X0,typename TM::Pvec X1,typename TM::Pvec nb_points_) {
+void make_rect(TM &m,const Triangle_6 &t,typename TM::Pvec X0_,typename TM::Pvec X1_,typename TM::Pvec nb_points_) {
     typedef typename TM::Pvec Pvec;
     typedef typename TM::Tpos Tpos;
+    Pvec X0 = min(X0_,X1_);
+    Pvec X1 = max(X0_,X1_);
     Vec<unsigned,TM::dim> nb_points(nb_points_); 
 
     unsigned nb_x = (unsigned)nb_points[0], nb_y = (unsigned)nb_points[1], beg = m.node_list.size();
@@ -191,11 +201,14 @@ void make_rect(TM &m,const Triangle_6 &t,typename TM::Pvec X0,typename TM::Pvec 
  * @param nb_y 
  */
 template<class TM>
-void make_rect(TM &m,const Hexa &t,typename TM::Pvec X0,typename TM::Pvec X1,typename TM::Pvec nb_points_) {
+void make_rect(TM &m,const Hexa &t,typename TM::Pvec X0_,typename TM::Pvec X1_,typename TM::Pvec nb_points_) {
     typedef typename TM::Pvec Pvec;
     typedef typename TM::Tpos Tpos;
     Vec<unsigned,TM::dim> nb_points(nb_points_); 
 
+    Pvec X0 = min(X0_,X1_);
+    Pvec X1 = max(X0_,X1_);
+    
     unsigned nb_x = (unsigned)nb_points[0], nb_y = (unsigned)nb_points[1], nb_z = (unsigned)nb_points[2], beg = m.node_list.size();
     Pvec incr = (X1-X0)/(nb_points-1);
     for(Rectilinear_iterator<Tpos,3> iter(X0,X1+(incr+(incr==0))*0.5,incr+(incr==0));iter;++iter)
@@ -224,9 +237,11 @@ void make_rect(TM &m,const Hexa &t,typename TM::Pvec X0,typename TM::Pvec X1,typ
  * @param nb_y 
  */
 template<class TM>
-void make_rect(TM &m,const Tetra &t,typename TM::Pvec X0,typename TM::Pvec X1,typename TM::Pvec nb_points_) {
+void make_rect(TM &m,const Tetra &t,typename TM::Pvec X0_,typename TM::Pvec X1_,typename TM::Pvec nb_points_) {
     typedef typename TM::Pvec Pvec;
     typedef typename TM::Tpos Tpos;
+    Pvec X0 = min(X0_,X1_);
+    Pvec X1 = max(X0_,X1_);
     Vec<unsigned,TM::dim> nb_points(nb_points_); 
 
     Pvec incr = (X1-X0)/(nb_points-1);
@@ -268,10 +283,12 @@ void make_rect(TM &m,const Tetra &t,typename TM::Pvec X0,typename TM::Pvec X1,ty
  * Quad_8
  */
 template<class TM>
-void make_rect(TM &m,const Quad_8 &t,typename TM::Pvec X0,typename TM::Pvec X1,typename TM::Pvec nb_points_) {
+void make_rect(TM &m,const Quad_8 &t,typename TM::Pvec X0_,typename TM::Pvec X1_,typename TM::Pvec nb_points_) {
     typedef typename TM::Pvec Pvec;
     typedef typename TM::Tpos Tpos;
     Vec<unsigned,TM::dim> nb_points(nb_points_); 
+    Pvec X0 = min(X0_,X1_);
+    Pvec X1 = max(X0_,X1_);
 
     // nodes
     unsigned nb_x = (unsigned)nb_points[0], nb_y = (unsigned)nb_points[1];
@@ -307,11 +324,13 @@ void make_rect(TM &m,const Quad_8 &t,typename TM::Pvec X0,typename TM::Pvec X1,t
  * Quad_9
  */
 template<class TM>
-void make_rect(TM &m,const Quad_9 &t,typename TM::Pvec X0,typename TM::Pvec X1,typename TM::Pvec nb_points_) {
+void make_rect(TM &m,const Quad_9 &t,typename TM::Pvec X0_,typename TM::Pvec X1_,typename TM::Pvec nb_points_) {
     typedef typename TM::Pvec Pvec;
     typedef typename TM::Tpos Tpos;
     Vec<unsigned,TM::dim> nb_points(nb_points_); 
 
+    Pvec X0 = min(X0_,X1_);
+    Pvec X1 = max(X0_,X1_);
     // nodes
     unsigned nb_x = (unsigned)nb_points[0] * 2 - 1, nb_y = (unsigned)nb_points[1] * 2 - 1;
     for(unsigned j=0;j<nb_y;++j)
@@ -346,10 +365,13 @@ void make_rect(TM &m,const Quad_9 &t,typename TM::Pvec X0,typename TM::Pvec X1,t
 /**
  * Quad_6
  */
-template<class TM> void make_rect(TM &m,const Quad_6 &t,typename TM::Pvec X0,typename TM::Pvec X1,typename TM::Pvec nb_points_) {
+template<class TM> void make_rect(TM &m,const Quad_6 &t,typename TM::Pvec X0_,typename TM::Pvec X1_,typename TM::Pvec nb_points_) {
     typedef typename TM::Pvec Pvec;
     typedef typename TM::Tpos Tpos;
     Vec<unsigned,TM::dim> nb_points(nb_points_); 
+    
+    Pvec X0 = min(X0_,X1_);
+    Pvec X1 = max(X0_,X1_);
 
     unsigned nb_x = (unsigned)nb_points[0], nb_y = (unsigned)nb_points[1];
     unsigned inc_x = 2*nb_x - 1, beg = m.node_list.size();
@@ -389,10 +411,12 @@ template<class TM> void make_rect(TM &m,const Quad_6 &t,typename TM::Pvec X0,typ
 /**
  * Quad_42
  */
-template<class TM> void make_rect(TM &m,const Quad_42 &t,typename TM::Pvec X0,typename TM::Pvec X1,typename TM::Pvec nb_points_) {
+template<class TM> void make_rect(TM &m,const Quad_42 &t,typename TM::Pvec X0_,typename TM::Pvec X1_,typename TM::Pvec nb_points_) {
     typedef typename TM::Pvec Pvec;
     typedef typename TM::Tpos Tpos;
     Vec<unsigned,TM::dim> nb_points(nb_points_); 
+    Pvec X0 = min(X0_,X1_);
+    Pvec X1 = max(X0_,X1_);
 
     unsigned nb_x = (unsigned)nb_points[0], nb_y = (unsigned)nb_points[1];
     unsigned inc_x = 3*nb_x - 2, beg = m.node_list.size();
@@ -443,10 +467,13 @@ template<class TM> void make_rect(TM &m,const Quad_42 &t,typename TM::Pvec X0,ty
  * @param nb_x
  * @param nb_y
  */
-template<class TM> void make_rect(TM &m,const Wedge &t,typename TM::Pvec X0,typename TM::Pvec X1,typename TM::Pvec nb_points_) {
+template<class TM> void make_rect(TM &m,const Wedge &t,typename TM::Pvec X0_,typename TM::Pvec X1_,typename TM::Pvec nb_points_) {
     typedef typename TM::Pvec Pvec;
     typedef typename TM::Tpos Tpos;
     Vec<unsigned,TM::dim> nb_points(nb_points_); 
+    
+    Pvec X0 = min(X0_,X1_);
+    Pvec X1 = max(X0_,X1_);
 
     unsigned nb_x = (unsigned)nb_points[0], nb_y = (unsigned)nb_points[1], nb_z = (unsigned)nb_points[2], beg = m.node_list.size();
     Pvec incr = (X1-X0)/(nb_points-1);
@@ -502,11 +529,14 @@ struct BestialNodeAdder {
         .                    0-----8----1
  */
 template<class TM>
-void make_rect(TM &m,const Hexa_20 &t,typename TM::Pvec X0,typename TM::Pvec X1,typename TM::Pvec nb_elements) {
+void make_rect(TM &m,const Hexa_20 &t,typename TM::Pvec X0_,typename TM::Pvec X1_,typename TM::Pvec nb_elements) {
     typedef typename TM::Pvec Pvec;
     typedef typename TM::Tpos Tpos;
     //     Vec<unsigned,TM::dim> nb_points(nb_points_); 
-
+    
+    Pvec X0 = min(X0_,X1_);
+    Pvec X1 = max(X0_,X1_);
+    
     BestialNodeAdder<TM> ban; ban.m = &m; ban.prec = min( (X1-X0)/nb_elements ) * 1e-6;
     
     Pvec step = (X1-X0) / nb_elements;
@@ -551,9 +581,11 @@ void make_rect(TM &m,const Hexa_20 &t,typename TM::Pvec X0,typename TM::Pvec X1,
         .                     0/--- 4------\1
  */
 template<class TM>
-void make_rect(TM &m,const Tetra_10 &t,typename TM::Pvec X0,typename TM::Pvec X1,typename TM::Pvec nb_elements) {
+void make_rect(TM &m,const Tetra_10 &t,typename TM::Pvec X0_,typename TM::Pvec X1_,typename TM::Pvec nb_elements) {
     typedef typename TM::Pvec Pvec;
     typedef typename TM::Tpos Tpos;
+    Pvec X0 = min(X0_,X1_);
+    Pvec X1 = max(X0_,X1_);
 
     BestialNodeAdder<TM> ban; ban.m = &m; ban.prec = min( (X1-X0)/nb_elements ) * 1e-6;
     
@@ -576,6 +608,71 @@ void make_rect(TM &m,const Tetra_10 &t,typename TM::Pvec X0,typename TM::Pvec X1
     }
 }
 
+
+//
+//     5
+//    /|\
+//  11 | 10
+//  /  14  \
+// 3___9___4
+// |   |   |
+// |   2   |
+//12  / \  13
+// | 8   7 |
+// |/     \|
+// 0___6__ 1
+template<class TM>
+void make_rect(TM &m,const Wedge_15 &t,typename TM::Pvec X0_,typename TM::Pvec X1_,typename TM::Pvec nb_elements) {
+    typedef typename TM::Pvec Pvec;
+    typedef typename TM::Tpos Tpos;
+    
+    Pvec X0 = min(X0_,X1_);
+    Pvec X1 = max(X0_,X1_);
+    
+    BestialNodeAdder<TM> ban; ban.m = &m; ban.prec = min( (X1-X0)/nb_elements ) * 1e-6;
+    
+    Pvec step = (X1-X0) / nb_elements;
+    for(Rectilinear_iterator<Tpos,TM::dim> iter( X0, X1 - 0.1 * step, step ); iter; ++iter ) {
+        typename TM::TNode *n[] = {
+            ban.get_node( iter.pos + step * Pvec(0.0,0.0,0.0) ),
+            ban.get_node( iter.pos + step * Pvec(1.0,0.0,0.0) ),
+            ban.get_node( iter.pos + step * Pvec(1.0,1.0,0.0) ),
+            ban.get_node( iter.pos + step * Pvec(0.0,1.0,0.0) ),
+            ban.get_node( iter.pos + step * Pvec(0.0,0.0,1.0) ),
+            ban.get_node( iter.pos + step * Pvec(1.0,0.0,1.0) ),
+            ban.get_node( iter.pos + step * Pvec(1.0,1.0,1.0) ),
+            ban.get_node( iter.pos + step * Pvec(0.0,1.0,1.0) ),
+                       
+            ban.get_node( iter.pos + step * Pvec(0.5,0.0,0.0) ),
+            ban.get_node( iter.pos + step * Pvec(1.0,0.5,0.0) ),
+            ban.get_node( iter.pos + step * Pvec(0.5,1.0,0.0) ),
+            ban.get_node( iter.pos + step * Pvec(0.0,0.5,0.0) ),
+            ban.get_node( iter.pos + step * Pvec(0.5,0.0,1.0) ),
+            ban.get_node( iter.pos + step * Pvec(1.0,0.5,1.0) ),
+            ban.get_node( iter.pos + step * Pvec(0.5,1.0,1.0) ),
+            ban.get_node( iter.pos + step * Pvec(0.0,0.5,1.0) ),
+            
+            ban.get_node( iter.pos + step * Pvec(0.0,0.0,0.5) ),
+            ban.get_node( iter.pos + step * Pvec(1.0,0.0,0.5) ),
+            ban.get_node( iter.pos + step * Pvec(1.0,1.0,0.5) ),
+            ban.get_node( iter.pos + step * Pvec(0.0,1.0,0.5) ),
+            
+            ban.get_node( iter.pos + step * Pvec(0.5,0.5,0.0) ),
+            ban.get_node( iter.pos + step * Pvec(0.5,0.5,1.0) ),
+        };
+        typename TM::TNode *n1[15] = { n[0],n[2],n[3],n[4],n[6],n[7],
+                                         n[20],n[10],n[11],n[21],n[14],n[15],
+                                         n[16],n[18],n[19] };
+        m.add_element( Wedge_15(), DefaultBehavior(), n1 );
+        
+        typename TM::TNode *n2[15] = { n[0],n[1],n[2],n[4],n[5],n[6],
+                                         n[8],n[9],n[20],n[12],n[13],n[21],
+                                         n[16],n[17],n[18] };
+        m.add_element( Wedge_15(), DefaultBehavior(), n2 );
+        
+        
+    }
+}
 
 }
 

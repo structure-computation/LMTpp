@@ -1,8 +1,9 @@
 import os
-#arch = ARGUMENTS['arch'] or os.uname()[4]
-#arch = os.uname()[4]
-arch = ( 'arch' in ARGUMENTS and ARGUMENTS['arch'] ) or os.uname()[4]
-mac = 'mac' in ARGUMENTS and ARGUMENTS['mac']
+if 'arch' in ARGUMENTS:
+    arch = ARGUMENTS['arch']
+else:
+    arch = os.uname()[4]
+mac = ( os.uname()[0] == 'Darwin' )
 
 src = [
     "ex.cpp",
@@ -13,11 +14,9 @@ src = [
     "write_code_language_cpp.cpp",
     "exmatrix.cpp",
     "exvector.cpp",
-    # "exsolver.cpp",
 ]
+
 found_swig = os.system('which swig')
-if arch=='ia64':
-    found_swig = 1
 
 #print "sed 's/module codegen/module codegen_"+arch+"/' < codegen.i > codegen_"+arch+".i"
 #os.system( "sed 's/module codegen/module codegen_"+arch+"/' < codegen.i > codegen_"+arch+".i" )
@@ -27,9 +26,9 @@ SharedLibrary(
     'codegen',
     src + [ [ "codegen_wrap.cc", "codegen.i" ][found_swig==0] ],
     SWIGFLAGS = "-python -c++",
-    LIBPREFIX = "#_",
-    CPPFLAGS = ' -O3 ',
-    CPPPATH = ['/usr/include/python2.5','/usr/include/python2.4','/usr/include/python2.3'],
-    LIBS = ['python'] * int(mac),
+    SHLIBPREFIX = "#_",
+    SHLIBSUFFIX = ".so",
+    LINKFLAGS = "-flat_namespace -undefined suppress" * mac,
+    CPPFLAGS = os.popen("python-config --includes","r").read().strip(),
     SHOBJSUFFIX = "_" + arch + ".o"
 )

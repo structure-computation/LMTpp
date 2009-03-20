@@ -34,10 +34,10 @@ public:
         Codegen::Ex val; /// coeff
         unsigned num_in_fmat(const TF &f) const {
             if ( type_var==-2 ) {
-                return f.indice_glob + num_in_vec;
+                return (*f.indice_glob) + num_in_vec;
             }
             else if ( type_var==-1 ) {
-                return f.indice_noda[ num ] + num_in_vec;
+                return (*f.indice_noda)[ num ] + num_in_vec;
             }
             else {
                 return f.indice_elem[ type_var ][ num ] + num_in_vec;

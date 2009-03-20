@@ -496,12 +496,7 @@ void VisitorBloc_AllClass_toHTML :: generate_page_HTML_for_class_or_struct( cons
     ///pageWeb << linkHTML( b->reference(),stmp,stmp ) << std::endl ;
     pageWeb << "</p>" << std::endl ;
 
-    pageWeb << "<hr />" << std::endl ;
-    for(i=0;i<NB_FINAL_LINE;i++)
-        pageWeb << "<br>" << std::endl ;
-    pageWeb << "</body>" << std::endl ;
-    pageWeb << "</html>" << std::endl ;
-    pageWeb <<std::endl;
+    feetPage(pageWeb);
 }
 
 void VisitorBloc_AllClass_toHTML :: function_at_Classe( Classe* c ) {
@@ -595,13 +590,7 @@ void VisitorBloc_AllClass_toHTML :: function_at_Function( Function* f ) {
     ///stmp = enleve_suffix( f->source_file ) + f->suffix_source ;       /// <--------------------- problème éventuel si c'est un code C    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     ///pageWeb << linkHTML( f->reference(),stmp,stmp ) << std::endl ;
     pageWeb << "</p>" << std::endl ;
-
-    pageWeb << "<hr />" << std::endl ;
-    for(j=0;j<NB_FINAL_LINE;j++)
-        pageWeb << "<br>" << std::endl ;
-    pageWeb << "</body>" << std::endl ;
-    pageWeb << "</html>" << std::endl ;
-    pageWeb <<std::endl;
+    feetPage(pageWeb);
 }
 
 

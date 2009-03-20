@@ -52,7 +52,6 @@ public:
         get_min_max( m.node_list, ExtractDM<pos_DM>(), xmi, xma );
         if ( m.node_list.size() )
             app_xminmax(prefix,xmi,xma);
-            
         return pvu_name;
     }
     template<class TS> std::string add_shape(const Shape<2,TS> &shape,unsigned grid_size,const std::string &prefix="tmp/paraview") {
@@ -123,10 +122,12 @@ public:
         f << "</VTKFile>" << std::endl;
    }
 
-    int exec( const std::string &filename = "paraview.pvd" ) {
+   int exec( const std::string &filename = "paraview.pvd" ) {
         make_pvd_file( filename );
 
         std::string t = "paraview --data=" + filename;
+        if ( pvsm_file.size() )
+            t += " --state=" + pvsm_file;
         return system( t.c_str() );
     
         /*
@@ -202,7 +203,7 @@ public:
         system( ("paraview --data="+tmp_file).c_str() );
         */
     }
-    
+
     Vec<std::string> get_all_pvu_files() const {
         Vec<std::string> res;
         for( std::map<double,Vec<std::string> >::const_iterator iter = pvu_files.begin(); iter != pvu_files.end(); ++iter )
@@ -210,7 +211,9 @@ public:
                 res.push_back( iter->second[i] );
         return res;
     }
-    
+
+    std::string pvsm_file;
+
 private:
     template<class PV> void app_xminmax(const std::string &prefix,const PV &xmi,const PV &xma) {
         if ( init_xminmax ) {
@@ -256,11 +259,15 @@ struct DpExec { void operator()(DisplayParaview &dp,unsigned i) const { dp.exec(
 /**
 */
 template<class Carac,unsigned nvi_to_subs,unsigned skin>
-int display( const MeshAncestor<Carac,nvi_to_subs,skin> &m, std::string pvsm_file ) {
+int display( const MeshAncestor<Carac,nvi_to_subs,skin> &m, std::string pvsm_file = "" ) {
     DisplayParaview dp;
-    dp.add_mesh( m );
+    std::string res = dp.add_mesh( m );
     
-    std::string t = "paraview --state=" + pvsm_file;
+    if ( pvsm_file.size() ) {
+        std::string t = "paraview --state=" + pvsm_file;
+        return system( t.c_str() );
+    }
+    std::string t = "paraview --data=" + res;
     return system( t.c_str() );
 }
 

@@ -381,7 +381,7 @@ namespace LMT {
             apply( vecteur1, vecteur2, opérateur, les paramètres (facultatifs) de l'opérateur)
 
 
-        Ainsi si vous souhaitez faire un calcul sur les éléments d'un vecteur, vous créerai un opérateur correspondant à l'algorithme avec éventuellement des parmètres si l'algorithme a des varaiantes. Cela fonctionne suivant le même principe que les filtres sur une image et comme les filtres, on peut aussi enchaîner simplement les traitements ; cad par exemple  si vous avez défini des opérateurs op1, op2, ... on peut créer un autre opérateur op utilisant les op1, op2 et l'appliquer sur un vecteur via apply.
+        Ainsi si vous souhaitez faire un calcul sur les éléments d'un vecteur, vous créerez un opérateur correspondant à l'algorithme avec éventuellement des paramètres si l'algorithme a des variantes. Cela fonctionne suivant le même principe que les filtres sur une image et comme les filtres, on peut aussi enchaîner simplement les traitements ; cad par exemple  si vous avez défini des opérateurs op1, op2, ... on peut créer un autre opérateur op utilisant les op1, op2 et l'appliquer sur un vecteur via apply.
 
         Suivant le même principe de fonctionnement on pourra aussi consulter la documentation des fonctions :
             * \a find

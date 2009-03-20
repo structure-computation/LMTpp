@@ -135,7 +135,7 @@ void read_vtk(TM &mesh, std::istream &is) throw(std::runtime_error) {
     }
 }
 
-/// put avs mesh castem in m
+/// put vtk mesh castem in m
 template<class TM>
 void read_vtk(TM &m,const std::string &fic_name) throw(std::runtime_error) {
     // ouverture du fichier

@@ -340,7 +340,7 @@ template<class TT> struct TypePromoteAbsIndicationWithIsScalarBool<true,TT> {
 };
 
 template<class TT>
-struct TypePromote<TT,AbsIndication> {
+struct TypePromote<AbsIndication,TT> {
     static const bool is_scalar = TypeInformation<TT>::is_scalar;
     typedef typename TypePromoteAbsIndicationWithIsScalarBool<is_scalar,TT>::T T;
 };

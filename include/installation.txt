@@ -17,15 +17,20 @@
             * readline (commande : sudo apt-get install libreadline5-dev ).
             * en-têtes python (commande : sudo apt-get install python-dev ).
             * libg2c0 (commande : sudo apt-get install libg2c0 ).
-            * lapack (commande : sudo apt-get install liblapack-dev ). 
+            * lapack (commande : sudo apt-get install liblapack-dev ).
+            * la librairie goto blas (http://staff.psc.edu/oneal/charts/es45/LIBGOTO/)
             
-        cela devrait suffire!
+        cela devrait suffire.
 
     = Dépendances
 
-        Ensuite si vous avez besoin de la librairie cholamd, récupérer le répertoire MATH dans le dépot git :
+        Ensuite si vous avez besoin de la librairie cholamd, et que vous êtes sur votre propre machine, récupérer le répertoire MATH dans le dépot git :
         \code    
-            git clone votre-nom@givry:/u/multi/MATH
-        puis copier ce répertoire dans le répoertoire /opt.
+            cp -r /u/multi/MATH_linux_32 /opt/MATH
+            ou
+            cp -r /u/multi/MATH_linux_64 /opt/MATH
+            ou
+            cp -r /u/multi/MATH_mac_32 /opt/MATH
+        puis copier ce répertoire dans le répertoire /opt.
 
 */

@@ -23,20 +23,18 @@ struct Totito {
         for(unsigned i=0;i<fname.size();++i)
             if ( name == fname[i] ) {
                 val = data[number][i];
-//                 debug << " cambiando info de los nodos numero " << number << " dato "<< name << " valor : " << val << endl ;
             }
     }
     template<class T>
     void operator()(unsigned num,const char *name,T &val) const {
         for(unsigned i=0;i<fname.size();++i)
             if (name==fname[i]) {
-                val = data[number][i][0];
-//                 debug << " cambiando info de los nodos numero " << number << " dato "<< name << " valor : " << val << endl ;
+                val = T (data[number][i][0]);
             }
     }
 
-    template<class TE>
-    void operator()(TE &e) {
+    template<class TE, class DD>
+    void operator()(TE &e, DD & dd) {
         number = e.number;
         DM::apply_with_names( e, *this );
     }
@@ -47,8 +45,62 @@ struct Totito {
     Vec<Vec<Vec<double> > > data;
 
 };
+template <class dinamiquedata, class TM >
+struct Totito_ELEM {
+    Totito_ELEM(dinamiquedata &dd_, TM &mesh_){
+        dd = &dd_;
+        mesh = &mesh_;
+    };
+    template<class T>
+    void operator()(unsigned num,const char *name,T &val) const {
+        for(unsigned i=0;i<fname.size();++i) {
+            if ( name == fname[i] ) {
+                std::cerr << "Pour l'instant pas codé lecteur de types autre que Tpos, Vec, Vec<Vec> dans read_avs."  << std::endl;
+                assert( 0 );
+            }
+        }
+    }
+    template<class T,int s1, int s2>
+    void operator()(unsigned num,const char *name,Vec<Vec<T,s2>,s1> &val) const {
+        for(unsigned i=0;i<fname.size();++i)
+            if ( name == fname[i] ) {
+                unsigned cpt =0;
+                for(unsigned j=0;j<val.size();j++)
+                    for(unsigned k=0;k<val[j].size();k++){
+                        val[j][k] = data[number][i][cpt];
+                        cpt++;
+                    }
+            }
+    }
 
-
+    template<class T,int s>
+    void operator()(unsigned num,const char *name,Vec<T,s> &val) const {
+        for(unsigned i=0;i<fname.size();++i)
+            if ( name == fname[i] ) {
+                val = data[number][i];
+                //cout << " changing information of node number " << number << " data "<< name << " value : " << val << endl ;
+            }
+    }
+    
+        void operator()(unsigned num,const char *name,typename TM::Tpos &val) const {
+            for(unsigned i=0;i<fname.size();++i)
+                if (name==fname[i]) {
+                    val = typename TM::Tpos (data[number][i][0]);
+                    // cout << " changing info of node number " << number << " data "<< name << " value : " << val << endl ;
+                }
+        }
+            template<class TE>
+            void operator()(TE &e) {
+                number = mesh->elem_list.get_data(*dd, e);
+                DM::apply_with_names( e, *this);
+            }
+            dinamiquedata *dd;
+            TM *mesh;
+            int number;
+            Vec<string> fname;
+            Vec<int> fsize;
+            Vec<Vec<Vec<double> > > data;
+};
 
 template<class TM>
 void read_avs(TM &mesh, std::istream &is) throw(std::runtime_error) {
@@ -57,6 +109,8 @@ void read_avs(TM &mesh, std::istream &is) throw(std::runtime_error) {
     typedef typename TM::Tpos T;
     typedef typename TM::Pvec Pvec;
     typedef typename TM::TNode TNode;
+    typedef typename TM::EA EA;
+    typedef DynamicData<int,TM::TElemList::nb_elem_type> CDC;
     static const int dim = TM::dim;
     map<int,TNode *> map_num_node;
 
@@ -104,6 +158,7 @@ void read_avs(TM &mesh, std::istream &is) throw(std::runtime_error) {
     //int nbnodeelem;
     int nnode_elem;
     string type_elem;
+    CDC dd("global_number");
     while(nb<nbelem) {
         string str;
         getline(is,str);
@@ -123,7 +178,9 @@ void read_avs(TM &mesh, std::istream &is) throw(std::runtime_error) {
                 s >> number;
                 vn[i] = map_num_node[number];
             }
-            mesh.add_element(Bar(),DefaultBehavior(),&vn[0]);
+            typename TM::EA *ne = reinterpret_cast<typename TM::EA *>(mesh.add_element(Bar(),DefaultBehavior(),&vn[0]));
+            if(nbelem_data) mesh.elem_list.synchronize_dyn(&dd);
+            if(nbelem_data) mesh.elem_list.get_data(dd, *ne) = nb;
         } else if (type_elem=="tri") {
             Vec<TNode *> vn;
             while ( true ) {
@@ -140,10 +197,14 @@ void read_avs(TM &mesh, std::istream &is) throw(std::runtime_error) {
                         swap( vn[0], vn[1] );
                 }
                 permutation_if_jac_neg(Triangle(),vn.ptr());
-                mesh.add_element(Triangle(),DefaultBehavior(),&vn[0]);
+                typename TM::EA *ne = reinterpret_cast<typename TM::EA *>(mesh.add_element(Triangle(),DefaultBehavior(),&vn[0]));
+                if(nbelem_data) mesh.elem_list.synchronize_dyn(&dd);
+                if(nbelem_data) mesh.elem_list.get_data(dd, *ne) = nb;
             } else if ( vn.size()==6 ) {
                 permutation_if_jac_neg(Triangle_6(),vn.ptr());
-                mesh.add_element(Triangle_6(),DefaultBehavior(),&vn[0]);
+                typename TM::EA *ne = reinterpret_cast<typename TM::EA *>(mesh.add_element(Triangle_6(),DefaultBehavior(),&vn[0]));
+                if(nbelem_data) mesh.elem_list.synchronize_dyn(&dd);
+                if(nbelem_data) mesh.elem_list.get_data(dd, *ne) = nb;
             } else
                 throw std::runtime_error("Unknown element...");
 
@@ -156,7 +217,9 @@ void read_avs(TM &mesh, std::istream &is) throw(std::runtime_error) {
                 vn[i] = map_num_node[number];
             }
             permutation_if_jac_neg(Quad(),vn.ptr());
-            mesh.add_element(Quad(),DefaultBehavior(),&vn[0]);
+            typename TM::EA *ne = reinterpret_cast<typename TM::EA *>(mesh.add_element(Quad(),DefaultBehavior(),&vn[0]));
+            if(nbelem_data) mesh.elem_list.synchronize_dyn(&dd);
+            if(nbelem_data) mesh.elem_list.get_data(dd, *ne) = nb;
         } else if (type_elem=="tet") {
             nnode_elem=4;
             Vec<TNode *> vn;
@@ -166,7 +229,10 @@ void read_avs(TM &mesh, std::istream &is) throw(std::runtime_error) {
                 vn[i] = map_num_node[number];
             }
             permutation_if_jac_neg(Tetra(),vn.ptr());
-            mesh.add_element(Tetra(),DefaultBehavior(),&vn[0]);
+            //typename TM::template TElem<Tetra,DefaultBehavior>::TE *ne = mesh.add_element(Tetra(),DefaultBehavior(),&vn[0]);
+            typename TM::EA *ne = reinterpret_cast<typename TM::EA *>(mesh.add_element(Tetra(),DefaultBehavior(),&vn[0]));
+            if(nbelem_data) mesh.elem_list.synchronize_dyn(&dd);
+            if(nbelem_data) mesh.elem_list.get_data(dd, *ne) = nb;
         } else if (type_elem=="cub8" or type_elem=="hex") {
             nnode_elem=8;
             Vec<TNode *> vn;
@@ -176,7 +242,10 @@ void read_avs(TM &mesh, std::istream &is) throw(std::runtime_error) {
                 vn[i] = map_num_node[number];
             }
             permutation_if_jac_neg(Hexa(),vn.ptr());
-            mesh.add_element(Hexa(),DefaultBehavior(),&vn[0]);
+            //typename TM::template TElem<Hexa,DefaultBehavior>::TE *ne = mesh.add_element(Hexa(),DefaultBehavior(),&vn[0]);
+            typename TM::EA *ne = reinterpret_cast<typename TM::EA *>(mesh.add_element(Hexa(),DefaultBehavior(),&vn[0]));
+            if(nbelem_data) mesh.elem_list.synchronize_dyn(&dd);
+            if(nbelem_data) mesh.elem_list.get_data(dd, *ne) = nb;
         } else if (type_elem=="prism") {
             nnode_elem=6;
             Vec<TNode *> vn;
@@ -186,7 +255,10 @@ void read_avs(TM &mesh, std::istream &is) throw(std::runtime_error) {
                 vn[i] = map_num_node[number];
             }
             permutation_if_jac_neg(Wedge(),vn.ptr());
-            mesh.add_element(Wedge(),DefaultBehavior(),&vn[0]);
+            //typename TM::template TElem<Wedge,DefaultBehavior>::TE *ne = mesh.add_element(Wedge(),DefaultBehavior(),&vn[0]);
+            typename TM::EA *ne = reinterpret_cast<typename TM::EA *>(mesh.add_element(Wedge(),DefaultBehavior(),&vn[0]));
+            if(nbelem_data) mesh.elem_list.synchronize_dyn(&dd);
+            if(nbelem_data) mesh.elem_list.get_data(dd, *ne) = nb;
         } else {
             cout << "Erreur - type d'element non lu" <<endl;
             assert(0);
@@ -196,10 +268,9 @@ void read_avs(TM &mesh, std::istream &is) throw(std::runtime_error) {
     mesh.sub_mesh(Number<1>()).elem_list.change_hash_size( mesh, mesh.elem_list.size() / 2 + 1 );
     //mesh.sub_mesh(Number<2>()).elem_list.change_hash_size( mesh, mesh.elem_list.size() /2 +1);
 
-/*
 
 
-    {    //reading node fields
+    if(nbnode_data){    //reading node fields
         string str;
         getline(is,str);
         istringstream s(str);
@@ -207,14 +278,14 @@ void read_avs(TM &mesh, std::istream &is) throw(std::runtime_error) {
         nb=0;
         int nb_of_node_fields;
         s >> nb_of_node_fields;
-//         debug << "nb_of_node_fields " << nb_of_node_fields << endl;
+//         cout << "nb_of_node_fields " << nb_of_node_fields << endl;
         Vec<int> nb_of_comp;
         nb_of_comp.resize(nb_of_node_fields);
         while(nb<nb_of_node_fields) {
             s >> nb_of_comp[nb];
             ++nb;
         }
-//         debug << "nb of comp " << nb_of_comp << endl;
+//         cout << "nb of comp " << nb_of_comp << endl;
         nb=0;
         Vec<string> node_fields_names;
         Vec<string> node_fields_units;
@@ -232,7 +303,7 @@ void read_avs(TM &mesh, std::istream &is) throw(std::runtime_error) {
             node_fields_units[nb] = split[1];
             ++nb;
         }
-//         debug << "names " << node_fields_names << " " <<  node_fields_units << endl;
+//         cout << "names " << node_fields_names << " " <<  node_fields_units << endl;
 
         nb=0;
         int number;
@@ -269,9 +340,9 @@ void read_avs(TM &mesh, std::istream &is) throw(std::runtime_error) {
             DM::apply_with_names( mesh.node_list[i], mmmm);
         }
     }
+    
 
-
-    {//reading elem fields
+    if(nbelem_data){//reading elem fields
         string str;
         getline(is,str);
         istringstream s(str);
@@ -279,7 +350,7 @@ void read_avs(TM &mesh, std::istream &is) throw(std::runtime_error) {
         nb=0;
         int nb_of_elem_fields;
         s >> nb_of_elem_fields;
-//         debug << "nb_of_elem_fields " << nb_of_elem_fields << endl;
+//         cout << "nb_of_elem_fields " << nb_of_elem_fields << endl;
         Vec<int> nb_of_comp;
         nb_of_comp.resize(nb_of_elem_fields);
         while(nb<nb_of_elem_fields) {
@@ -304,12 +375,11 @@ void read_avs(TM &mesh, std::istream &is) throw(std::runtime_error) {
             elem_fields_units[nb] = split[1];
             ++nb;
         }
-//         debug << "names " << elem_fields_names << " " <<  elem_fields_units << endl;
+//         cout << "names " << elem_fields_names << " " <<  elem_fields_units << endl;
 
         nb=0;
         int number;
-
-        Totito mmmm;
+        Totito_ELEM<CDC,TM> mmmm(dd,mesh);
         mmmm.fname = elem_fields_names;
         mmmm.data.resize(nbelem);
         for(unsigned i=0;i<nbelem;++i)
@@ -339,7 +409,7 @@ void read_avs(TM &mesh, std::istream &is) throw(std::runtime_error) {
         apply( mesh.elem_list, mmmm);
     }
 
-    {//reading globals fields
+    if(nbglobal_data){//reading globals fields
         ///nbglobal_data
         string str;
         getline(is,str);
@@ -348,14 +418,14 @@ void read_avs(TM &mesh, std::istream &is) throw(std::runtime_error) {
         nb=0;
         int nb_of_global_fields;
         s >> nb_of_global_fields;
-//         debug << "nb_of_global_fields " << nb_of_global_fields << endl;
+//         cout << "nb_of_global_fields " << nb_of_global_fields << endl;
         Vec<int> nb_of_comp;
         nb_of_comp.resize(nb_of_global_fields);
         while(nb<nb_of_global_fields) {
             s >> nb_of_comp[nb];
             ++nb;
         }
-//         debug << "nb of comp " << nb_of_comp << endl;
+//         cout << "nb of comp " << nb_of_comp << endl;
         nb=0;
         Vec<string> global_fields_names;
         Vec<string> global_fields_units;
@@ -401,7 +471,6 @@ void read_avs(TM &mesh, std::istream &is) throw(std::runtime_error) {
         mmmm.number=0;
         DM::apply_with_names(mesh, mmmm);
     }
-*/
 }
 
 /// put avs mesh castem in m

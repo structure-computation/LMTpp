@@ -60,13 +60,7 @@ void VisitorCommentItem_tutorial_toHTML :: function_at_CommentItemTutorial( Comm
     pageWeb << "<p class=\"reference_fichier_source\">" << std::endl ;
     pageWeb << linkHTML( c->reference(),c->source_file,c->source_file ) ;
     pageWeb << "</p>" << std::endl ;
-
-    pageWeb << "<hr />" << std::endl ;
-    for(i=0;i<NB_FINAL_LINE;i++)
-        pageWeb << "<br>" << std::endl ;
-    pageWeb << "</body>" << std::endl ;
-    pageWeb << "</html>" << std::endl ;
-    pageWeb <<std::endl;
+    feetPage(pageWeb);
 }
 
 

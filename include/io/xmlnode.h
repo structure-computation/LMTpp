@@ -65,7 +65,7 @@ public:
         std::string att( get_attribute(name) );
         std::istringstream is( att );
         line_input(is, res);
-        //if ( !is ) throw IoException( i18n("Attribute named %0 equal to %1 is of wrong type").arg(name).arg(att) );
+        if ( !is ) { throw IoException( "Error while reading attribute " + std::string( name ) + " value=" + att ); }
         return *this;
     }
     /// 
@@ -75,7 +75,7 @@ public:
             std::string att( get_attribute(name) );
             std::istringstream is( att );
             line_input(is, res);
-            //if ( !is ) throw IoException( i18n("Attribute named %0 equal to %1 is of wrong type").arg(name).arg(att) );
+            if ( !is ) { throw IoException( "Error while reading attribute " + std::string( name ) + " value=" + att ); }
         }
         else
             res = default_value;
@@ -87,10 +87,12 @@ public:
         std::string att( get_attribute(name) ), unit;
         std::istringstream is( att );
         line_input(is, res);
-        //if ( !is ) throw IoException( std::string("Attribute named %0 equal to %1 is of wrong type").arg(name).arg(att) );
+        if ( !is ) { throw IoException( "Error while reading attribute " + std::string( name ) + " value=" + att ); }
         is >> unit;
         if ( is )
             res *= getUnitCoeff(unit.c_str()) / getUnitCoeff(final_unit);
+        else
+            is.clear();
         return *this;
     }
     /// with unit
@@ -100,10 +102,12 @@ public:
             std::string att( get_attribute(name) ), unit;
             std::istringstream is( att );
             line_input(is, res);
-            //if ( !is ) throw IoException( std::string("Attribute named %0 equal to %1 is of wrong type").arg(name).arg(att) );
+            if ( !is ) { throw IoException( "Error while reading attribute " + std::string( name ) + " value=" + att ); }
             is >> unit;
             if ( is )
                 res *= getUnitCoeff(unit.c_str()) / getUnitCoeff(final_unit);
+            else
+                is.clear();
         }
         else
             res = default_value;

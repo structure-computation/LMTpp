@@ -7,26 +7,37 @@ interval_var_inter = [
 ]
 
 #     5
-#    /|\
-#   / | \
-#  /  |  \
-# 3___|___4
-# |   |   |
+#    /.\
+#   / . \
+#  /  .  \
+# 3_______4
+# |   .   |
 # |   2   |
-# |  / \  |
-# | /   \ |
-# |/     \|
+# |  . .  |
+# | .   . |
+# |.     .|
 # 0______ 1
 
 children = [
   {'name':'Quad', 'nodes':[0, 1, 4, 3], 'var':[var_inter[0],number(0),var_inter[1]]},
-  {'name':'Quad', 'nodes':[0, 2, 5, 3], 'var':[number(0),var_inter[0],var_inter[1]]},
+  {'name':'Quad', 'nodes':[0, 3, 5, 2], 'var':[number(0),var_inter[0],var_inter[1]]},
   {'name':'Quad', 'nodes':[1, 2, 5 ,4], 'var':[1-var_inter[0],var_inter[0],var_inter[1]]},
-  {'name':'Triangle', 'nodes':[0, 1, 2], 'var':[var_inter[0],var_inter[1],number(0)]},
+  {'name':'Triangle', 'nodes':[0, 2, 1], 'var':[var_inter[0],var_inter[1],number(0)]},
   {'name':'Triangle', 'nodes':[3, 4, 5], 'var':[var_inter[0],var_inter[1],number(1)]},
 ]
 
 permutation = [ 0, 2, 1, 3, 5, 4 ]
+tmp_authorized_permutations = [
+    [0,1,2,3,4,5],
+    [3,5,4,0,2,1],
+]
+for i in range(3):
+    authorized_permutations += tmp_authorized_permutations
+    for c in range( len(tmp_authorized_permutations) ):
+        tmp_authorized_permutations[c] = tmp_authorized_permutations[c][1:3] + [ tmp_authorized_permutations[c][0] ] + \
+                                         tmp_authorized_permutations[c][4:6] + [ tmp_authorized_permutations[c][3] ]
+authorized_permutations = authorized_permutations[1:]
+
 
 interpolation["nodal"] = (1-var_inter[0]-var_inter[1]) * (1-var_inter[2])   * val[0] + \
                                    var_inter[0] * (1-var_inter[2])          * val[1] + \
@@ -37,6 +48,24 @@ interpolation["nodal"] = (1-var_inter[0]-var_inter[1]) * (1-var_inter[2])   * va
 
 interpolation["der_nodal"] = val[0]
 
+z1=(1+(1.0/sqrt(2.0)))/2;
+z2=(1-(1.0/sqrt(2.0)))/2;
+interpolation["gauss"] =  ( 2*var_inter[0] + 2*var_inter[1] - 1)   * (1-(var_inter[2]-z2)/(z1-z2))     * val[0]  + \
+                          (-2*var_inter[0]                  + 1)   * (1-(var_inter[2]-z2)/(z1-z2))     * val[1]  + \
+                          (-2*var_inter[1]                  + 1)   * (1-(var_inter[2]-z2)/(z1-z2))     * val[2]  + \
+                          ( 2*var_inter[0] + 2*var_inter[1] - 1)   * (1-((1-var_inter[2])-z2)/(z1-z2)) * val[3]  + \
+                          (-2*var_inter[0]                  + 1)   * (1-((1-var_inter[2])-z2)/(z1-z2)) * val[4]  + \
+                          (-2*var_inter[1]                  + 1)   * (1-((1-var_inter[2])-z2)/(z1-z2)) * val[5]
+
+a = 1.0/6.0
+Flat_Interpolation_gauss_points = [
+  ( a, { var_inter[0] : 1.0/2.0, var_inter[1] : 1.0/2.0 , var_inter[2] : 1.0/2.0 } ),
+  ( a, { var_inter[0] : 0.0,     var_inter[1] : 1.0/2.0 , var_inter[2] : 1.0/2.0 } ),
+  ( a, { var_inter[0] : 1.0/2.0, var_inter[1] : 0.0     , var_inter[2] : 1.0/2.0 } ),
+]
+interpolation["Flat_Interpolation"] = ( 2*var_inter[0] + 2*var_inter[1] - 1)   * val[0]  + \
+                          (-2*var_inter[0]                  + 1)   * val[1]  + \
+                          (-2*var_inter[1]                  + 1)   * val[2]
 quality = 1
                                
 def local_coordinates(point):
@@ -52,16 +81,17 @@ def pos_using_local_coordinates(coords):
 #   ( 1.0/2.0, { var_inter[0] : 1.0/3.0, var_inter[1] : 1.0/3.0 , var_inter[2] : 1.0/2.0  } ),
 # ]
 
-a = 1.0/6.0 * 1.0/2.0 
-gauss_points[2] = [
-  ( a, { var_inter[0] : 1.0/2.0, var_inter[1] : 0.0     , var_inter[2] : (1.0-sqrt(1.0/3.0))/2.0 } ),
-  ( a, { var_inter[0] : 1.0/2.0, var_inter[1] : 1.0/2.0 , var_inter[2] : (1.0-sqrt(1.0/3.0))/2.0 } ),
-  ( a, { var_inter[0] : 0.0,     var_inter[1] : 1.0/2.0 , var_inter[2] : (1.0-sqrt(1.0/3.0))/2.0 } ),
-  ( a, { var_inter[0] : 1.0/2.0, var_inter[1] : 0.0     , var_inter[2] : (1.0+sqrt(1.0/3.0))/2.0 } ),
-  ( a, { var_inter[0] : 1.0/2.0, var_inter[1] : 1.0/2.0 , var_inter[2] : (1.0+sqrt(1.0/3.0))/2.0 } ),
-  ( a, { var_inter[0] : 0.0,     var_inter[1] : 1.0/2.0 , var_inter[2] : (1.0+sqrt(1.0/3.0))/2.0 } ),
-]
 
+a = 1.0/6.0
+b = 1.0/sqrt(2.0)
+gauss_points[2] = [
+  ( a, { var_inter[0] : 1.0/2.0, var_inter[1] : 1.0/2.0 , var_inter[2] : (1-a)/2.0 } ),
+  ( a, { var_inter[0] : 0.0,     var_inter[1] : 1.0/2.0 , var_inter[2] : (1-a)/2.0 } ),
+  ( a, { var_inter[0] : 1.0/2.0, var_inter[1] : 0.0 ,     var_inter[2] : (1-a)/2.0 } ),
+  ( a, { var_inter[0] : 1.0/2.0, var_inter[1] : 1.0/2.0 , var_inter[2] : (1+a)/2.0 } ),
+  ( a, { var_inter[0] : 0.0,     var_inter[1] : 1.0/2.0 , var_inter[2] : (1+a)/2.0 } ),
+  ( a, { var_inter[0] : 1.0/2.0, var_inter[1] : 0.0 ,     var_inter[2] : (1+a)/2.0 } ),
+]
 a = -27.0/96.0 * 1.0/2.0
 b = 25.0/96.0 * 1.0/2.0
 gauss_points[3] = [

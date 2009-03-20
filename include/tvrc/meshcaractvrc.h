@@ -133,7 +133,7 @@ public:
         void dm_data_set_field( const std::string field_name, const Vec<Tpos,4> &value ) { assert(0); /*TODO*/ }
         void dm_data_set_field( const std::string field_name, const Vec<Tpos,5> &value ) { assert(0); /*TODO*/ }
         void dm_data_set_field( const std::string field_name, const Vec<Tpos,6> &value ) { assert(0); /*TODO*/ }
-        template<class G> G dm_data_get_field( const std::string field_name, StructForType<G> ) const { assert( 0 /*TODO*/ ); return G( 0.0 );  }
+        template<class __G__> __G__ dm_data_get_field( const std::string field_name, StructForType<__G__> ) const { assert( 0 /*TODO*/ ); return __G__( 0.0 );  }
     };
     struct GlobalStaticData {
         VOIDDMSET;
@@ -144,7 +144,7 @@ public:
         void dm_data_set_field( const std::string field_name, const Vec<Tpos,4> &value ) { assert(0); /*TODO*/ }
         void dm_data_set_field( const std::string field_name, const Vec<Tpos,5> &value ) { assert(0); /*TODO*/ }
         void dm_data_set_field( const std::string field_name, const Vec<Tpos,6> &value ) { assert(0); /*TODO*/ }
-        template<class G> G dm_data_get_field( const std::string field_name, StructForType<G> ) const { assert( 0 /*TODO*/ ); return G( 0.0 );  }
+        template<class __G__> __G__ dm_data_get_field( const std::string field_name, StructForType<__G__> ) const { assert( 0 /*TODO*/ ); return __G__( 0.0 );  }
     };
     template<unsigned nvi_to_subs,unsigned skin,unsigned num_sub_element,unsigned inner=0>
     struct ElementChoice {
@@ -163,7 +163,7 @@ public:
         void dm_data_set_field( const std::string field_name, const Vec<Tpos,4> &value ) { assert(0); /*TODO*/ }
         void dm_data_set_field( const std::string field_name, const Vec<Tpos,5> &value ) { assert(0); /*TODO*/ }
         void dm_data_set_field( const std::string field_name, const Vec<Tpos,6> &value ) { assert(0); /*TODO*/ }
-        template<class G> G dm_data_get_field( const std::string field_name, StructForType<G> ) const { assert( 0 /*TODO*/ ); return G( 0.0 );  }
+        template<class __G__> __G__ dm_data_get_field( const std::string field_name, StructForType<__G__> ) const { assert( 0 /*TODO*/ ); return __G__( 0.0 );  }
     };
     template<unsigned inner> struct ElementChoice<0,0,0,inner> {
         typedef NodalElement NE;
@@ -246,7 +246,7 @@ public:
         void dm_data_set_field( const std::string field_name, const Vec<Tpos,4> &value ) { assert(0); /*TODO*/ }
         void dm_data_set_field( const std::string field_name, const Vec<Tpos,5> &value ) { assert(0); /*TODO*/ }
         void dm_data_set_field( const std::string field_name, const Vec<Tpos,6> &value ) { assert(0); /*TODO*/ }
-        template<class G> G dm_data_get_field( const std::string field_name, StructForType<G> ) const { assert( 0 /*TODO*/ ); return G( 0.0 );  }
+        template<class __G__> __G__ dm_data_get_field( const std::string field_name, StructForType<__G__> ) const { assert( 0 /*TODO*/ ); return __G__( 0.0 );  }
     };
     struct GlobalStaticData {
         VOIDDMSET;
@@ -257,7 +257,7 @@ public:
         void dm_data_set_field( const std::string field_name, const Vec<Tpos,4> &value ) { assert(0); /*TODO*/ }
         void dm_data_set_field( const std::string field_name, const Vec<Tpos,5> &value ) { assert(0); /*TODO*/ }
         void dm_data_set_field( const std::string field_name, const Vec<Tpos,6> &value ) { assert(0); /*TODO*/ }
-        template<class G> G dm_data_get_field( const std::string field_name, StructForType<G> ) const { assert( 0 /*TODO*/ ); return G( 0.0 );  }
+        template<class __G__> __G__ dm_data_get_field( const std::string field_name, StructForType<__G__> ) const { assert( 0 /*TODO*/ ); return __G__( 0.0 );  }
     };
     template<unsigned nvi_to_subs,unsigned skin,unsigned num_sub_element,unsigned inner=0>
     struct ElementChoice {
@@ -276,7 +276,7 @@ public:
         void dm_data_set_field( const std::string field_name, const Vec<Tpos,4> &value ) { assert(0); /*TODO*/ }
         void dm_data_set_field( const std::string field_name, const Vec<Tpos,5> &value ) { assert(0); /*TODO*/ }
         void dm_data_set_field( const std::string field_name, const Vec<Tpos,6> &value ) { assert(0); /*TODO*/ }
-        template<class G> G dm_data_get_field( const std::string field_name, StructForType<G> ) const { assert( 0 /*TODO*/ ); return G( 0.0 );  }
+        template<class __G__> __G__ dm_data_get_field( const std::string field_name, StructForType<__G__> ) const { assert( 0 /*TODO*/ ); return __G__( 0.0 );  }
     };
     template<unsigned inner> struct ElementChoice<0,0,0,inner> {
         typedef NodalElement NE;
@@ -404,7 +404,7 @@ public:
         void dm_data_set_field( const std::string field_name, const Vec<Tpos,4> &value ) { assert(0); /*TODO*/ }
         void dm_data_set_field( const std::string field_name, const Vec<Tpos,5> &value ) { assert(0); /*TODO*/ }
         void dm_data_set_field( const std::string field_name, const Vec<Tpos,6> &value ) { assert(0); /*TODO*/ }
-        template<class G> G dm_data_get_field( const std::string field_name, StructForType<G> ) const { assert( 0 /*TODO*/ ); return G( 0.0 );  }
+        template<class __G__> __G__ dm_data_get_field( const std::string field_name, StructForType<__G__> ) const { assert( 0 /*TODO*/ ); return __G__( 0.0 );  }
     };
     struct GlobalStaticData {
         VOIDDMSET;
@@ -415,7 +415,7 @@ public:
         void dm_data_set_field( const std::string field_name, const Vec<Tpos,4> &value ) { assert(0); /*TODO*/ }
         void dm_data_set_field( const std::string field_name, const Vec<Tpos,5> &value ) { assert(0); /*TODO*/ }
         void dm_data_set_field( const std::string field_name, const Vec<Tpos,6> &value ) { assert(0); /*TODO*/ }
-        template<class G> G dm_data_get_field( const std::string field_name, StructForType<G> ) const { assert( 0 /*TODO*/ ); return G( 0.0 );  }
+        template<class __G__> __G__ dm_data_get_field( const std::string field_name, StructForType<__G__> ) const { assert( 0 /*TODO*/ ); return __G__( 0.0 );  }
     };
     template<unsigned nvi_to_subs,unsigned skin,unsigned num_sub_element,unsigned inner=0>
     struct ElementChoice {
@@ -434,7 +434,7 @@ public:
         void dm_data_set_field( const std::string field_name, const Vec<Tpos,4> &value ) { assert(0); /*TODO*/ }
         void dm_data_set_field( const std::string field_name, const Vec<Tpos,5> &value ) { assert(0); /*TODO*/ }
         void dm_data_set_field( const std::string field_name, const Vec<Tpos,6> &value ) { assert(0); /*TODO*/ }
-        template<class G> G dm_data_get_field( const std::string field_name, StructForType<G> ) const { assert( 0 /*TODO*/ ); return G( 0.0 );  }
+        template<class __G__> __G__ dm_data_get_field( const std::string field_name, StructForType<__G__> ) const { assert( 0 /*TODO*/ ); return __G__( 0.0 );  }
     };
     template<unsigned inner> struct ElementChoice<0,0,0,inner> {
         typedef NodalElement NE;

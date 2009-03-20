@@ -84,7 +84,7 @@ public:
         mat_def_pos_if_sym = Carac::matrix_will_be_definite_positive;
         time = AbsScalarType(0);
         time_steps = AbsScalarType(1e40);
-        initialized = false;
+        initial_condition_initialized = false;
         user_want_pierre_precond = true;
         this->order_integration_when_integration_totale = Carac::order_integration;
     
@@ -92,9 +92,16 @@ public:
         symbols.push_back( time_symbol );
         
         allocated = false;
+        vectors_assembly = NULL;
+        indice_elem = indice_elem_internal;
+        indice_noda = &indice_noda_internal;
+        indice_glob = &indice_glob_internal;
+        
     }
     virtual std::string get_name() const { return Carac::name(); }
     virtual void set_mesh( void *m_ ) { m = reinterpret_cast<TM *>( m_ ); }
+    virtual unsigned get_nb_nodal_unknowns() {return nb_nodal_unknowns ;};
+    virtual unsigned get_nb_global_unknowns(){return nb_global_unknowns ;};
     virtual unsigned get_nb_vectors(){ return nb_vectors; }
 
 private:
@@ -125,6 +132,9 @@ public:
             (nb_global_unknowns==0 || Carac::template GlobalMatricesCarac<num_mat>::diag) &&
             MatCaracElem<num_mat,0,TM::TElemList::nb_sub_type>::diag;
     };
+    void Get_Nb_UnknownByElement( unsigned* nb_elem_of_type, unsigned &size, unsigned* nb_unknowns_for_type){
+        TM::TElemList::apply_static_with_n( GetNbUnknownByElement(), nb_elem_of_type, size, nb_unknowns_for_type );
+    }
 private:
     struct GetNbUnknownByElement {
         template<class TE,unsigned nt> void operator()(const StructForType<TE> &se,const Number<nt> &nv,unsigned *nb_elem_of_type,
@@ -139,9 +149,9 @@ private:
 //                 assert( (CaracFormulationForElement<NameFormulation,TE,NameVariant,ScalarType>::nb_elementary_unknowns) == 0 );
                 if ( nb_nodal_unknowns ) {
                     for(unsigned i=0;i<TE::nb_nodes;++i) {
-                        unsigned a = f.indice_noda[ f.m->node_list.number(*e.node(i)) ];
+                        unsigned a = (*f.indice_noda)[ f.m->node_list.number(*e.node(i)) ];
                         for(unsigned j=0;j<TE::nb_nodes;++j) {
-                            unsigned b = f.indice_noda[ f.m->node_list.number(*e.node(j)) ];
+                            unsigned b = (*f.indice_noda)[ f.m->node_list.number(*e.node(j)) ];
                             if ( std::find(v[a].begin(),v[a].end(),b)==v[a].end() ) {
                                 for(unsigned k=0;k<nb_nodal_unknowns;++k)
                                     for(unsigned l=0;l<nb_nodal_unknowns;++l)
@@ -216,8 +226,8 @@ public:
      * Set matrix and vector sizes...
      * if amd, use a permutation able to minimize fill-in sparse mat... in this case, use chol_factorize and solve_using_chol_factorize
      */
-    virtual unsigned update_connectivity(bool amd=false) {
-        mat_has_been_allocated_with_symamd = amd;
+    virtual unsigned update_connectivity() {
+        mat_has_been_allocated_with_symamd = this->want_amd;
         
         unsigned size = 0;
         // global unknowns
@@ -235,7 +245,7 @@ public:
         indice_glob = 0;
         unsigned nnu = nb_nodal_unknowns;
         unsigned ngu = nb_global_unknowns;
-        indice_noda = range( m->node_list.size() ) * nnu + ngu;
+        *indice_noda = range( m->node_list.size() ) * nnu + ngu;
         //std::cout << "indice_noda " << indice_noda << std::endl;
         unsigned ind = m->node_list.size() * nnu + ngu;
         unsigned nb_unk_elem = 0;
@@ -246,10 +256,10 @@ public:
             ind += nb_unknowns_for_type[i] * nb_elem_of_type[i];
             nb_unk_elem += nb_unknowns_for_type[i];
         }
-        if ( amd ) {
+        if ( this->want_amd ) {
             assert( indice_glob==0 ); // not managed
             assert( nb_unk_elem==0 ); // not managed
-            indice_noda = symamd( *m ) * nnu;
+            *indice_noda = symamd( *m ) * nnu;
         }
         return size;
     }
@@ -279,7 +289,7 @@ public:
         indice_glob = 0;
         unsigned nnu = nb_nodal_unknowns;
         unsigned ngu = nb_global_unknowns;
-        indice_noda = range( m->node_list.size() ) * nnu + ngu;
+        *indice_noda = range( m->node_list.size() ) * nnu + ngu;
         unsigned ind = m->node_list.size() * nnu + ngu;
         unsigned nb_unk_elem = 0;
         
@@ -293,7 +303,7 @@ public:
         if ( this->want_amd ) {
             assert( indice_glob==0 ); // not managed
             assert( nb_unk_elem==0 ); // not managed
-            indice_noda = symamd( *m ) * nnu;
+            *indice_noda = symamd( *m ) * nnu;
         }
 
         // matrice allocation
@@ -339,63 +349,67 @@ private:
         template<class TN> void operator()(const TN &n,const Vec<unsigned> &indice_noda,Formulation &f) const {
             if ( nb_global_unknowns ) {
                 if ( nb_nodal_unknowns ) {
-                    unsigned ind[ 2 ] = { indice_noda[f.m->node_list.number(n)], f.indice_glob };
-                    add_nodal_matrix( f, n, Number<MatCarac<0>::symm>(), Number<assemble_mat>(), Number<assemble_vec>(), ind );
+                    unsigned ind[ 2 ] = { indice_noda[f.m->node_list.number(n)], *f.indice_glob };
+                    add_nodal_matrix( f, f.matrices(Number<0>()), f.sollicitation, f.vectors, Number<MatCarac<0>::symm>(), Number<assemble_mat>(), Number<assemble_vec>(), n, ind );
                 }
                 else
-                    add_nodal_matrix( f, n, Number<MatCarac<0>::symm>(), Number<assemble_mat>(), Number<assemble_vec>(), &f.indice_glob );
+                    add_nodal_matrix( f, f.matrices(Number<0>()), f.sollicitation, f.vectors, Number<MatCarac<0>::symm>(), Number<assemble_mat>(), Number<assemble_vec>(), n, f.indice_glob );
             }
             else
-                add_nodal_matrix( f, n, Number<MatCarac<0>::symm>(), Number<assemble_mat>(), Number<assemble_vec>(), &indice_noda[f.m->node_list.number(n)] );
+                add_nodal_matrix( f, f.matrices(Number<0>()), f.sollicitation, f.vectors, Number<MatCarac<0>::symm>(), Number<assemble_mat>(), Number<assemble_vec>(), n, &indice_noda[f.m->node_list.number(n)]);
         }
         //
-        template<class TN, class TMA, class TVE> void operator()(const TN &n, Formulation &f, TMA &K, TVE &F) const {
+        template<class TN,class TMA,class TVE> void operator()(const TN &n, Formulation &f, TMA &K, TVE &F) const {
             if ( nb_global_unknowns ) {
                 assert( nb_global_unknowns==0 /*not yet implemented*/ );
                 if ( nb_nodal_unknowns ) {
-                    unsigned ind[ 2 ] = { ((*indice_noda_)[f.m->node_list.number(n)]), f.indice_glob };
-                    add_nodal_matrix(f,  K , F, vectors, n, Number<MatCarac<0>::symm>(), Number<assemble_mat>(), Number<assemble_vec>(), ind, mutex );
+                    unsigned ind[ 2 ] = { ((*f.indice_noda)[f.m->node_list.number(n)]), *f.indice_glob };
+                    add_nodal_matrix( f, K, F, vectors, Number<MatCarac<0>::symm>(), Number<assemble_mat>(), Number<assemble_vec>(), n, ind );
                 }
                 else
-                    add_nodal_matrix(f,  K , F , vectors, n, Number<MatCarac<0>::symm>(), Number<assemble_mat>(), Number<assemble_vec>(), &f.indice_glob, mutex );
+                    add_nodal_matrix( f, K, F, vectors, Number<MatCarac<0>::symm>(), Number<assemble_mat>(), Number<assemble_vec>(), n, f.indice_glob );
             }
             else {
-                unsigned ind[ 2 ] = { ((*indice_noda_)[f.m->node_list.number(n)]) };
+                unsigned ind[ 2 ] = { ((*f.indice_noda)[f.m->node_list.number(n)]) };
                 //std::cerr << "plip plop ind[ 2 ] " << *ind << std::endl;
-                add_nodal_matrix( f, K , F, vectors, n, Number<MatCarac<0>::symm>(), Number<assemble_mat>(), Number<assemble_vec>(), ind, mutex );
+                add_nodal_matrix( f, K, F, vectors, Number<MatCarac<0>::symm>(), Number<assemble_mat>(), Number<assemble_vec>(), n, ind );
             }
         }
-        const Vec<unsigned> *indice_noda_;
         Vec<Vec<ScalarType> > *vectors; 
-        pthread_mutex_t *mutex;
     };
     template<bool assemble_mat,bool assemble_vec>
     struct AssembleElem {
-        //         template<class TE,unsigned n> void adsem(Formulation &f,const Number<true> &n1,const Number<false> &n2,
-        //                 const TE &e,void *, const Number<n> &nn,unsigned *in) const {
-        //                     std::cout << n << std::endl;
-        //         }
-        template<class TE,class TCE,unsigned n> void adsem(Formulation &f,const Number<true> &n1,const Number<false> &n2,
-                const TE &e,const TCE *ce, const Number<n> &nn,unsigned *in) const {
-            //               #warning
-             add_skin_elem_matrix( f, Number<MatCarac<0>::symm>(), Number<assemble_mat>(), Number<assemble_vec>(), e, *ce, nn, in );
+    
+        template<class TMA,class TVE,class TVEVE,class TE,class TCE,unsigned n> void adsem(
+            Formulation &f,TMA &K,TVE &F,TVEVE &vectors,
+            const Number<true> &n1,const Number<false> &n2,
+            const TE &e,const TCE *ce, const Number<n> &nn,unsigned *in
+        ) const {
+             add_skin_elem_matrix(
+                f, 
+                K, F, vectors,
+                Number<MatCarac<0>::symm>(), 
+                Number<assemble_mat>(), 
+                Number<assemble_vec>(), 
+                e, *ce, nn, in
+            );
         }
-        template<class TE,unsigned n,unsigned n2> void ass_skin_elem(const TE &e,unsigned *in,Formulation &f,
-                    const Number<n> &nn,const Number<n2> &nn2) const { // sub_mesh(Number<1>()).
-            ass_skin_elem( e, in, f, Number<n+1>(), nn2 );
+        
+        template<class TE,class TMA, class TVE,class TVEVE, unsigned n>
+        void ass_skin_elem(const TE &e,unsigned *in,Formulation &f, TMA &K, TVE &F, TVEVE &vectors, const Number<n> &nn,const Number<n> &nn2) const {}
+        
+        template<class TE,class TMA, class TVE,class TVEVE, unsigned n,unsigned n2>
+        void ass_skin_elem(const TE &e,unsigned *in,Formulation &f, TMA &K, TVE &F, TVEVE &vectors, const Number<n> &nn,const Number<n2> &nn2) const {
+            ass_skin_elem( e, in, f, K, F, vectors, Number<n+1>(), nn2 );
             if ( f.m->sub_mesh(Number<1>()).get_parents_of( *f.m->get_children_of(e,Number<1>())[n] ).size()!=1 )
                 return;
-            //PRINTTYPE( typeid( typename TypeChildrenElement<typename TE::NE,1,n>::T ) );
-            //typedef typename TM::TSkin::template TElem<typename TypeChildrenElement<typename TE::NE,1,n>::T>::TE TCH;
-            //PRINT( n );
-            //PRINTTYPE( typeid( typename TE::NE ) );
             
             typedef typename TM::template SubMesh<1>::T TSubMesh;
             typedef typename TSubMesh::template TElem<typename TypeChildrenElement<typename TE::NE,1,n>::T>::TE TCH;
             TCH *child_elem = static_cast<TCH *>( f.m->get_children_of(e,Number<1>())[n] );
-            adsem( f, Number<true>(),Number<false>(), e, child_elem, nn, in );
+            adsem( f, K, F, vectors, Number<true>(), Number<false>(), e, child_elem, nn, in );
         }
-        template<class TE,unsigned n> void ass_skin_elem(const TE &e,unsigned *in,Formulation &f,const Number<n> &nn,const Number<n> &nn2) const {}
+        
         template<class TE> void operator()(const TE &e,const Vec<unsigned> &indice_noda,const Vec<unsigned> *indice_elem,Formulation &f ) const {
             unsigned in[ TE::nb_nodes + 1 + nb_global_unknowns ];
             
@@ -408,21 +422,22 @@ private:
                 in[ TE::nb_nodes * (nb_nodal_unknowns!=0) ] = indice_elem[TE::num_in_elem_list][e.number];
             
             if ( nb_global_unknowns )
-                in[ TE::nb_nodes * (nb_nodal_unknowns!=0) + (CFE::nb_elementary_unknowns!=0) ] = f.indice_glob;
+                in[ TE::nb_nodes * (nb_nodal_unknowns!=0) + (CFE::nb_elementary_unknowns!=0) ] = *f.indice_glob;
 
-            add_elem_matrix( f, Number<MatCarac<0>::symm>(), Number<assemble_mat>(), Number<assemble_vec>(), e, in );
+            add_elem_matrix( f, f.matrices(Number<0>()), f.sollicitation, f.vectors, Number<MatCarac<0>::symm>(), Number<assemble_mat>(), Number<assemble_vec>(), e, in );
             
             // skin elements
             if ( not f.assume_skin_not_needed )
-                ass_skin_elem( e, in, f, Number<0>() , Number<NbChildrenElement<typename TE::NE,1>::res>() );
+                ass_skin_elem( e, in, f, f.matrices(Number<0>()), f.sollicitation, f.vectors, Number<0>(), Number<NbChildrenElement<typename TE::NE,1>::res>() );
         }
+
         //
-        template<class TE, class TMA, class TVE> void operator()(const TE &e, Formulation &f, TMA &K, TVE &F) const {
+        template<class TE, class TMA, class TVE> void operator()( const TE &e, Formulation &f, TMA &K, TVE &F ) const {
             unsigned in[ TE::nb_nodes + 1 + nb_global_unknowns ];
             
             if ( nb_nodal_unknowns )
                 for(unsigned i=0;i<TE::nb_nodes;++i)
-                    in[i] = (*indice_noda_)[ f.m->node_list.number(*e.node(i)) ];
+                    in[i] = (*f.indice_noda)[ f.m->node_list.number(*e.node(i)) ];
             
             typedef CaracFormulationForElement<NameFormulation,TE,NameVariant,ScalarType> CFE;
             if ( CFE::nb_elementary_unknowns ) 
@@ -431,15 +446,13 @@ private:
             if ( nb_global_unknowns )
                 assert(0);
             
-            add_elem_matrix( f, K, F, *vectors, Number<MatCarac<0>::symm>(), Number<assemble_mat>(), Number<assemble_vec>(), e, in, mutex );
+            add_elem_matrix( f, K, F, *vectors, Number<MatCarac<0>::symm>(), Number<assemble_mat>(), Number<assemble_vec>(), e, in );
             
             // skin elements
-//             ass_skin_elem( e, in, f, K, F, *vectors, Number<0>() , Number<NbChildrenElement<typename TE::NE,1>::res>() );            
+            if ( not f.assume_skin_not_needed )
+                ass_skin_elem( e, in, f, K, F, *vectors, Number<0>(), Number<NbChildrenElement<typename TE::NE,1>::res>() );
         }
-        const Vec<unsigned> *indice_noda_;
-        Vec<unsigned> *indice_elem_;
         Vec<Vec<ScalarType> > *vectors;
-        pthread_mutex_t* mutex;
     };
 public:
     Codegen::Ex::MapExNum val_sub_sym( const Codegen::Ex::SetEx &sub_symbols ) const {
@@ -460,7 +473,7 @@ public:
     }
     ///
     virtual void assemble_clean_mat(bool assemble_mat=true,bool assemble_vec=true) {
-        if ( not initialized ) { // old_vectors
+        if ( not initial_condition_initialized ) { // old_vectors
             get_initial_conditions();
             shift();
         }
@@ -473,26 +486,26 @@ public:
         if ( assemble_mat ) {
             clean_mats();
             if ( assemble_vec ) {
-                add_global_matrix( *this, Number<true>(), Number<true>(), indice_glob ); // global
-                apply( m->node_list, AssembleNode<true,true >(), indice_noda, *this ); // nodal
-                apply( m->elem_list, AssembleElem<true,true >(), indice_noda, indice_elem, *this ); // element (and skin elements)
+                add_global_matrix( *this, matrices(Number<0>()), sollicitation, vectors, Number<MatCarac<0>::symm>(), Number<true>(), Number<true>(), *indice_glob ); // global
+                apply( m->node_list, AssembleNode<true,true >(), *indice_noda, *this ); // nodal
+                apply( m->elem_list, AssembleElem<true,true >(), *indice_noda, indice_elem, *this ); // element (and skin elements)
             }
             else {
-                add_global_matrix( *this, Number<true>(), Number<false>(), indice_glob ); // global
-                apply( m->node_list, AssembleNode<true,false>(), indice_noda, *this ); // nodal
-                apply( m->elem_list, AssembleElem<true,false>(), indice_noda, indice_elem, *this); // element (and skin elements)
+                add_global_matrix( *this, matrices(Number<0>()), sollicitation, vectors, Number<MatCarac<0>::symm>(), Number<true>(), Number<false>(), *indice_glob ); // global
+                apply( m->node_list, AssembleNode<true,false>(), *indice_noda, *this ); // nodal
+                apply( m->elem_list, AssembleElem<true,false>(), *indice_noda, indice_elem, *this); // element (and skin elements)
             }
         }
         else {
             if ( assemble_vec ) {
-                add_global_matrix( *this, Number<false>(), Number<true>(), indice_glob ); // global
-                apply( m->node_list, AssembleNode<false,true >(), indice_noda, *this ); // nodal
-                apply( m->elem_list, AssembleElem<false,true >(), indice_noda, indice_elem, *this ); // element (and skin elements)
+                add_global_matrix( *this, matrices(Number<0>()), sollicitation, vectors, Number<MatCarac<0>::symm>(), Number<false>(), Number<true>(), *indice_glob ); // global
+                apply( m->node_list, AssembleNode<false,true >(), *indice_noda, *this ); // nodal
+                apply( m->elem_list, AssembleElem<false,true >(), *indice_noda, indice_elem, *this ); // element (and skin elements)
             }
             else {
-                add_global_matrix( *this, Number<false>(), Number<false>(), indice_glob ); // global
-                apply( m->node_list, AssembleNode<false,false>(), indice_noda, *this ); // nodal
-                apply( m->elem_list, AssembleElem<false,false>(), indice_noda, indice_elem, *this ); // element (and skin elements)
+                add_global_matrix( *this, matrices(Number<0>()), sollicitation, vectors, Number<MatCarac<0>::symm>(), Number<false>(), Number<false>(), *indice_glob ); // global
+                apply( m->node_list, AssembleNode<false,false>(), *indice_noda, *this ); // nodal
+                apply( m->elem_list, AssembleElem<false,false>(), *indice_noda, indice_elem, *this ); // element (and skin elements)
             }
         }
     }
@@ -600,59 +613,41 @@ public:
             precond();
     }
     ///
-    virtual void assemble_clean_mat(Mat<ScalarType,Sym<>,SparseLine<> > &K, Vec<ScalarType> &F, Vec<Vec<ScalarType> > &vectors_, const Vec<unsigned> &indice_noda_, bool assemble_mat=true,bool assemble_vec=true) {
-        if ( not initialized ) { // old_vectors
-            get_initial_conditions(vectors_, indice_noda_);
+    virtual void assemble_clean_mat(Mat<ScalarType,Sym<>,SparseLine<> > &K, Vec<ScalarType> &F, Vec<Vec<ScalarType> > &vectors_, bool assemble_mat=true,bool assemble_vec=true) {
+        if ( not initial_condition_initialized ) { // old_vectors
+            get_initial_conditions(vectors_);
         }
 //        std::cerr << "nb_processors : " << nb_processors << std::endl;
         //m->update_skin();
         assert(nb_global_unknowns==0 /* add_global_matrix not yet implemeted */);
-        pthread_mutex_t mutex;
-        pthread_mutex_init(&mutex,NULL);
         if ( assemble_mat ) {
             if ( assemble_vec ) {
                 AssembleNode<true,true > toto2;
-                toto2.indice_noda_ = &indice_noda_;
                 toto2.vectors = &vectors_;
-                toto2.mutex = &mutex;
-                apply( m->node_list, toto2, *this, K, F); // nodal
+                apply( m->node_list, toto2, *this, K, F ); // nodal
                 AssembleElem<true,true > toto;
-                toto.indice_noda_ = &indice_noda_;
-                toto.indice_elem_ = indice_elem;
                 toto.vectors = &vectors_;
-                toto.mutex = &mutex;
-                apply( m->elem_list, toto, *this , K, F); // element (and skin elements)
+                apply( m->elem_list, toto, *this, K, F ); // element (and skin elements)
             }
             else{
                 AssembleNode<true,false > toto2;
-                toto2.indice_noda_ = &indice_noda_;
                 toto2.vectors = &vectors_;
-                toto2.mutex = &mutex;
-                apply( m->node_list, toto2, *this, K, F); // nodal
+                apply( m->node_list, toto2, *this, K, F ); // nodal
                 AssembleElem<true,false > toto;
-                toto.indice_noda_ = &indice_noda_;
-                toto.indice_elem_ = indice_elem;
                 toto.vectors = &vectors_;
-                toto.mutex = &mutex;
-                apply( m->elem_list, toto, *this , K, F); // element (and skin elements)                
+                apply( m->elem_list, toto, *this, K, F ); // element (and skin elements)                
             }
         }
         else {
             AssembleNode<false,true > toto2;
-            toto2.indice_noda_ = &indice_noda_;
             toto2.vectors = &vectors_;
-            toto2.mutex = &mutex;
-            apply( m->node_list, toto2, *this, K, F); // nodal
+            apply( m->node_list, toto2, *this, K, F ); // nodal
             AssembleElem<false,true > toto;
-            toto.indice_noda_ = &indice_noda_;
-            toto.indice_elem_ = indice_elem;
-            toto.mutex = &mutex;
-            apply( m->elem_list, toto, *this , K, F); // element (and skin elements)
+            apply( m->elem_list, toto, *this , K, F ); // element (and skin elements)
         }
-        pthread_mutex_destroy(&mutex);
     }
     ///
-    virtual void assemble_constraints(Mat<ScalarType,Sym<>,SparseLine<> > &K, Vec<ScalarType> &F, Vec<Vec<ScalarType> > &vectors_, const Vec<unsigned> &local_ddl_to_global_ones,const ScalarType &M, bool assemble_mat=true,bool assemble_vec=true) {
+    virtual void assemble_constraints(Mat<ScalarType,Sym<>,SparseLine<> > &K, Vec<ScalarType> &F, Vec<Vec<ScalarType> > &vectors_, const ScalarType &M, bool assemble_mat=true,bool assemble_vec=true) {
         // constraints
         if ( constraints.size() ) {
             for(unsigned i=0;i<constraints.size();++i) {
@@ -667,7 +662,7 @@ public:
                 Vec<ScalarType> coeffs; coeffs.resize( constraints[i].coeffs.size() );
                 Vec<unsigned> num_in_fmat; num_in_fmat.resize( constraints[i].coeffs.size() );
                 for(unsigned j=0;j<constraints[i].coeffs.size();++j) {
-                    num_in_fmat[j] = local_ddl_to_global_ones[constraints[i].coeffs[j].num_in_fmat(*this)];
+                    num_in_fmat[j] = constraints[i].coeffs[j].num_in_fmat(*this);
                     Ex coeff = constraints[i].coeffs[j].val;
                     Ex::SetEx sub_symbols;
                     res.get_sub_symbols(sub_symbols);
@@ -692,7 +687,7 @@ public:
         }
     }
     ///
-    virtual void assemble_sollicitations(Mat<ScalarType,Sym<>,SparseLine<> > &K, Vec<ScalarType> &F,Vec<Vec<ScalarType> > &vectors_, const Vec<unsigned> &local_ddl_to_global_ones, bool assemble_mat=true,bool assemble_vec=true) {
+    virtual void assemble_sollicitations(Mat<ScalarType,Sym<>,SparseLine<> > &K, Vec<ScalarType> &F,Vec<Vec<ScalarType> > &vectors_, bool assemble_mat=true,bool assemble_vec=true) {
         // sollicitations
         if ( sollicitations.size() ) {
             for(unsigned i=0;i<sollicitations.size();++i) {
@@ -704,13 +699,23 @@ public:
                 Codegen::Ex::MapExNum vss = val_sub_sym(sub_symbols);
                 ScalarType ress = (ScalarType)res.subs_numerical( vss );
                 // add to vec and mat
-                unsigned num_in_fmat = local_ddl_to_global_ones[sollicitations[i].num_in_fmat(*this)];
+                unsigned num_in_fmat = sollicitations[i].num_in_fmat(*this);
                 std::cerr << "num_in_fmat " << num_in_fmat<< std::endl;
                 if ( assemble_vec )
                     sollicitation[num_in_fmat] += ress;
             }
         }
     }
+    ///
+    virtual void assemble(Mat<ScalarType,Sym<>,SparseLine<> > &K, Vec<ScalarType> &F,Vec<Vec<ScalarType> > &vectors_, bool assemble_mat=true, bool assemble_vec=true) {
+        // assemble_mat
+        assemble_clean_mat(K, F, vectors_, assemble_mat, assemble_vec);
+        // constraints
+        double M = max(abs(K.diag()));
+        assemble_constraints(K, F, vectors_,  M, assemble_mat, assemble_vec);
+        // sollicitations
+        assemble_sollicitations(K, F, vectors_,  assemble_mat, assemble_vec);
+    };
     ///
     bool solve_system_(AbsScalarType iterative_criterium, const Number<1> &n_wont_add_nz, const Number<0> &sym) {
         //matrices(Number<0>()).get_factorization();
@@ -721,7 +726,6 @@ public:
         l.get_factorization(matrices(Number<0>()),false);
         l.solve( vectors[0] );
         #elif WITH_CHOLMOD
-        PRINT("yop");
       	if ( not matrices(Number<0>()).get_factorization() ) {
             std::cout << "Bing. Inversion error" << std::endl;
             return false;
@@ -854,13 +858,13 @@ public:
                 unsigned num_unk = 0;
                 for(unsigned n=0;n<nb_nodal_unknowns;++n,++num_unk) {
                     for(unsigned i=0;i<m->node_list.size() and converged;++i) {
-                        unsigned ind = indice_noda[i] + n;
+                        unsigned ind = (*indice_noda)[i] + n;
                         converged &= abs( old_vec[ind] - vectors[0][ind] ) <= this->non_linear_iterative_criterium_vec[ num_unk ];
                     }
                 }
                 converged &= not find( m->elem_list, ChecKNLConv(), this );
                 for(unsigned n=0;n<nb_global_unknowns;++n,++num_unk) {
-                    unsigned ind = indice_glob + n;
+                    unsigned ind = *indice_glob + n;
                     converged &= abs( old_vec[ind] - vectors[0][ind] ) <= this->non_linear_iterative_criterium_vec[ num_unk ];
                 }
                 if ( converged )
@@ -906,30 +910,46 @@ public:
     virtual void solve_system_using_factorization_matrix() { solve_system_using_factorization_matrix( Number<MatCarac<0>::symm>() ); }
     
     virtual unsigned get_nb_nodal_unknowns() const { return nb_nodal_unknowns; }
-    
+    virtual unsigned get_nb_global_unknowns() const { return nb_global_unknowns; }
+    virtual unsigned get_nb_elem_unknowns() const { return nb_nodal_unknowns; }
     
     
 private:
     template<unsigned num_der_var>
     struct AssembleNodeDerVar {
-        template<class TN> void operator()( const TN &n, const Vec<unsigned> &indice_noda, Formulation &f ) const {
+        template<class TN> void operator()( const TN &n, Formulation &f ) const {
             if ( nb_global_unknowns ) {
                 if ( nb_nodal_unknowns ) {
-                    unsigned ind[ 2 ] = { indice_noda[f.m->node_list.number(n)], f.indice_glob };
-                    add_nodal_vector_der_var( f, n, ind, Number<num_der_var>() );
+                    unsigned ind[ 2 ] = { (*f.indice_noda)[f.m->node_list.number(n)], *f.indice_glob };
+                    add_nodal_vector_der_var( 
+                        f,
+                        f.matrices(Number<0>()),
+                        f.sollicitation,
+                        f.vectors,
+                        n, ind, Number<num_der_var>() );
                 }
                 else
-                    add_nodal_vector_der_var( f, n, &f.indice_glob, Number<num_der_var>() );
+                    add_nodal_vector_der_var( 
+                        f, 
+                        f.matrices(Number<0>()),
+                        f.sollicitation,
+                        f.vectors,
+                        n, f.indice_glob, Number<num_der_var>() );
             }
             else
-                add_nodal_vector_der_var( f, n, &indice_noda[f.m->node_list.number(n)], Number<num_der_var>() );
+                add_nodal_vector_der_var(
+                    f, 
+                    f.matrices(Number<0>()),
+                    f.sollicitation,
+                    f.vectors,
+                    n, &(*f.indice_noda)[f.m->node_list.number(n)], Number<num_der_var>() );
         }
     };
     template<unsigned num_der_var>
     struct AssembleElemDerVar {
         template<class TE,class TCE,unsigned n> void adsem(Formulation &f,const Number<true> &n1,const Number<false> &n2,
                 const TE &e,const TCE *ce, const Number<n> &nn,unsigned *in) const {
-             add_skin_elem_vector_der_var( f, e, *ce, nn, in, Number<num_der_var>() );
+             add_skin_elem_vector_der_var( f, f.matrices(Number<0>()), f.sollicitation, f.vectors, e, *ce, nn, in, Number<num_der_var>() );
         }
         template<class TE,unsigned n,unsigned n2> void ass_skin_elem(const TE &e,unsigned *in,Formulation &f,
                     const Number<n> &nn,const Number<n2> &nn2) const { // sub_mesh(Number<1>()).
@@ -944,21 +964,26 @@ private:
             adsem( f, Number<true>(),Number<false>(), e, child_elem, nn, in );
         }
         template<class TE,unsigned n> void ass_skin_elem( const TE &e, unsigned *in, Formulation &f, const Number<n> &nn, const Number<n> &nn2 ) const {}
-        template<class TE> void operator()( const TE &e, const Vec<unsigned> &indice_noda, const Vec<unsigned> *indice_elem, Formulation &f ) const {
+        template<class TE> void operator()( const TE &e, const Vec<unsigned> *indice_elem, Formulation &f ) const {
             unsigned in[ TE::nb_nodes + 1 + nb_global_unknowns ];
             
             if ( nb_nodal_unknowns ) 
                 for(unsigned i=0;i<TE::nb_nodes;++i)
-                    in[i] = indice_noda[ f.m->node_list.number(*e.node(i)) ];
+                    in[i] = (*f.indice_noda)[ f.m->node_list.number(*e.node(i)) ];
             
             typedef CaracFormulationForElement<NameFormulation,TE,NameVariant,ScalarType> CFE;
             if ( CFE::nb_elementary_unknowns ) 
                 in[ TE::nb_nodes * (nb_nodal_unknowns!=0) ] = indice_elem[TE::num_in_elem_list][e.number];
             
             if ( nb_global_unknowns )
-                in[ TE::nb_nodes * (nb_nodal_unknowns!=0) + (CFE::nb_elementary_unknowns!=0) ] = f.indice_glob;
+                in[ TE::nb_nodes * (nb_nodal_unknowns!=0) + (CFE::nb_elementary_unknowns!=0) ] = *f.indice_glob;
 
-            add_elem_vector_der_var( f, e, in, Number<num_der_var>() );
+            add_elem_vector_der_var(
+                f,
+                f.matrices(Number<0>()),
+                f.sollicitation,
+                f.vectors,
+                e, in, Number<num_der_var>() );
             
             // skin elements
             if ( not f.assume_skin_not_needed )
@@ -972,9 +997,9 @@ public:
         if ( num_der_var == n ) {
             sollicitation.set(ScalarType(0.0));
     
-            add_global_vector_der_var( *this, indice_glob, Number<num_der_var>() ); // global
-            apply( m->node_list, AssembleNodeDerVar<num_der_var>(), indice_noda, *this ); // nodal
-            apply( m->elem_list, AssembleElemDerVar<num_der_var>(), indice_noda, indice_elem, *this ); // element (and skin elements)
+            add_global_vector_der_var( *this, matrices(Number<0>()), sollicitation, vectors, Number<num_der_var>() ); // global
+            apply( m->node_list, AssembleNodeDerVar<num_der_var>(), *this ); // nodal
+            apply( m->elem_list, AssembleElemDerVar<num_der_var>(), indice_elem, *this ); // element (and skin elements)
         } else
             assemble_clean_vector_der_var( Number<num_der_var+1>(), n );
     }
@@ -1057,6 +1082,9 @@ private:
         template<class TE> void operator()(TE &e,Formulation &f) const {
             CaracFormulationForElement<NameFormulation,TE,NameVariant,ScalarType>::set_elementary_unknowns(e,f,f.vectors,f.indice_elem[TE::num_in_elem_list][e.number]);
         }
+        template<class TE> void operator()(TE &e,Formulation &f,Vec<Vec<ScalarType> > &vectors_) const {
+            CaracFormulationForElement<NameFormulation,TE,NameVariant,ScalarType>::set_elementary_unknowns(e,f,vectors_,f.indice_elem[TE::num_in_elem_list][e.number]);
+        }
         template<class TE> void operator()(TE &e,Formulation &f,const ScalarType &partial_ts) const {
             CaracFormulationForElement<NameFormulation,TE,NameVariant,ScalarType>::set_elementary_unknowns(e,f,f.vectors,f.indice_elem[TE::num_in_elem_list][e.number],partial_ts);
         }
@@ -1065,65 +1093,69 @@ private:
         template<class TE> void operator()(const TE &e,Formulation &f) const {
             CaracFormulationForElement<NameFormulation,TE,NameVariant,ScalarType>::get_elementary_initial_conditions(e,f,f.vectors,f.indice_elem[TE::num_in_elem_list][e.number]);
         }
-        template<class TE,class TV> void operator()(const TE &e,Formulation &f,Vec<Vec<ScalarType> > &vectors_,TV  &indice_elem_) const {
-            CaracFormulationForElement<NameFormulation,TE,NameVariant,ScalarType>::get_elementary_initial_conditions(e,f,vectors_,indice_elem_[TE::num_in_elem_list][e.number]);
+        template<class TE> void operator()(const TE &e,Formulation &f,Vec<Vec<ScalarType> > &vectors_) const {
+            CaracFormulationForElement<NameFormulation,TE,NameVariant,ScalarType>::get_elementary_initial_conditions(e,f,vectors_,f.indice_elem[TE::num_in_elem_list][e.number]);
         }
     };
     struct CallAfterSolve {
-        template<class TE> void operator()(TE &e,Formulation &f) const {
+        template<class TE,class TV> void operator()(TE &e,Formulation &f,TV &vectors_) const {
             unsigned in[ TE::nb_nodes+1 ];
-            for(unsigned i=0;i<TE::nb_nodes;++i)
-                in[i] = f.indice_noda[ f.m->node_list.number(*e.node(i)) ];
-            in[ TE::nb_nodes ] = f.indice_elem[TE::num_in_elem_list][e.number];
-            CaracFormulationForElement<NameFormulation,TE,NameVariant,ScalarType>::after_solve(e,f,in);
+                for(unsigned i=0;i<TE::nb_nodes;++i)
+                    in[i] = (*f.indice_noda)[ f.m->node_list.number(*e.node(i)) ];
+                in[ TE::nb_nodes ] = f.indice_elem[TE::num_in_elem_list][e.number];
+            CaracFormulationForElement<NameFormulation,TE,NameVariant,ScalarType>::after_solve(e,f,vectors_,in);
         }
     };
+    //
     struct CallAfterSolve_2 {
-        template<class TE> void operator()(TE &e,Formulation &f) const {
+        template<class TE,class TV> void operator()(TE &e,Formulation &f,TV &vectors_) const {
             unsigned in[ TE::nb_nodes+1 ];
             for(unsigned i=0;i<TE::nb_nodes;++i)
-                in[i] = f.indice_noda[ f.m->node_list.number(*e.node(i)) ];
+                in[i] = (*f.indice_noda)[ f.m->node_list.number(*e.node(i)) ];
             in[ TE::nb_nodes ] = f.indice_elem[TE::num_in_elem_list][e.number];
-            CaracFormulationForElement<NameFormulation,TE,NameVariant,ScalarType>::after_solve_2(e,f,in);
+            CaracFormulationForElement<NameFormulation,TE,NameVariant,ScalarType>::after_solve_2(e,f,vectors_,in);
         }
     };
+    //
     struct CallAfterSolve_3 {
-        template<class TE> void operator()(TE &e,Formulation &f) const {
+        template<class TE,class TV> void operator()(TE &e,Formulation &f,TV &vectors_) const {
             unsigned in[ TE::nb_nodes+1 ];
             for(unsigned i=0;i<TE::nb_nodes;++i)
-                in[i] = f.indice_noda[ f.m->node_list.number(*e.node(i)) ];
+                in[i] = (*f.indice_noda)[ f.m->node_list.number(*e.node(i)) ];
             in[ TE::nb_nodes ] = f.indice_elem[TE::num_in_elem_list][e.number];
-            CaracFormulationForElement<NameFormulation,TE,NameVariant,ScalarType>::after_solve_3(e,f,in);
+            CaracFormulationForElement<NameFormulation,TE,NameVariant,ScalarType>::after_solve_3(e,f,vectors_,in);
         }
     };
+    //
     struct CallAfterSolve_4 {
-        template<class TE> void operator()(TE &e,Formulation &f) const {
+        template<class TE,class TV> void operator()(TE &e,Formulation &f,TV &vectors_) const {
             unsigned in[ TE::nb_nodes+1 ];
             for(unsigned i=0;i<TE::nb_nodes;++i)
-                in[i] = f.indice_noda[ f.m->node_list.number(*e.node(i)) ];
+                in[i] = (*f.indice_noda)[ f.m->node_list.number(*e.node(i)) ];
             in[ TE::nb_nodes ] = f.indice_elem[TE::num_in_elem_list][e.number];
-            CaracFormulationForElement<NameFormulation,TE,NameVariant,ScalarType>::after_solve_4(e,f,in);
+            CaracFormulationForElement<NameFormulation,TE,NameVariant,ScalarType>::after_solve_4(e,f,vectors_,in);
         }
     };
+    //
     struct CallAfterSolve_5 {
-        template<class TE> void operator()(TE &e,Formulation &f) const {
+        template<class TE,class TV> void operator()(TE &e,Formulation &f,TV &vectors_) const {
             unsigned in[ TE::nb_nodes+1 ];
             for(unsigned i=0;i<TE::nb_nodes;++i)
-                in[i] = f.indice_noda[ f.m->node_list.number(*e.node(i)) ];
+                in[i] = (*f.indice_noda)[ f.m->node_list.number(*e.node(i)) ];
             in[ TE::nb_nodes ] = f.indice_elem[TE::num_in_elem_list][e.number];
-            CaracFormulationForElement<NameFormulation,TE,NameVariant,ScalarType>::after_solve_5(e,f,in);
+            CaracFormulationForElement<NameFormulation,TE,NameVariant,ScalarType>::after_solve_5(e,f,vectors_,in);
         }
     };
+    //
     struct CallAfterSolve_6 {
-        template<class TE> void operator()(TE &e,Formulation &f) const {
+        template<class TE,class TV> void operator()(TE &e,Formulation &f,TV &vectors_) const {
             unsigned in[ TE::nb_nodes+1 ];
             for(unsigned i=0;i<TE::nb_nodes;++i)
-                in[i] = f.indice_noda[ f.m->node_list.number(*e.node(i)) ];
+                in[i] = (*f.indice_noda)[ f.m->node_list.number(*e.node(i)) ];
             in[ TE::nb_nodes ] = f.indice_elem[TE::num_in_elem_list][e.number];
-            CaracFormulationForElement<NameFormulation,TE,NameVariant,ScalarType>::after_solve_6(e,f,in);
+            CaracFormulationForElement<NameFormulation,TE,NameVariant,ScalarType>::after_solve_6(e,f,vectors_,in);
         }
     };
-
 public:
     /**
      * call all after_solve in carac elem ( generated by apply_on_elements_after_solve() in formulation_...py )
@@ -1131,113 +1163,179 @@ public:
     virtual void set_vectors_assembly(Vec<Vec<ScalarType> > &vec){
         vectors_assembly = &vec;
     };
-    virtual void set_indice_noda_assembly(Vec<unsigned> &vec){
-        indice_noda_assembly = &vec;
+    //
+    virtual void set_indice_noda(Vec<unsigned> &vec){
+        indice_noda = &vec;
+    };
+    //
+    virtual void set_indice_elem(Vec<unsigned>* vec){
+        indice_elem = vec;
+    };
+    //
+    virtual void set_indice_glob(unsigned &val){
+        indice_glob = &val;
     };
     virtual void call_after_solve() {
         if ( not allocated )
             allocate_matrices();
-        apply( m->elem_list, CallAfterSolve(), *this );
+        apply( m->elem_list, CallAfterSolve(), *this, vectors );
+    }
+    //
+    virtual void call_after_solve(Vec<Vec<ScalarType> > &vectors_) {
+        apply( m->elem_list, CallAfterSolve(), *this, vectors_);
     }
     virtual void call_after_solve_2() {
         if ( not allocated )
             allocate_matrices();
-        apply( m->elem_list, CallAfterSolve_2(), *this );
+        apply( m->elem_list, CallAfterSolve_2(), *this, vectors );
     }
+    virtual void call_after_solve_2(Vec<Vec<ScalarType> > &vectors_)  {
+        apply( m->elem_list, CallAfterSolve_2(), *this, vectors_ );
+    }
+
     virtual void call_after_solve_3() {
         if ( not allocated )
             allocate_matrices();
-        apply( m->elem_list, CallAfterSolve_3(), *this );
+        apply( m->elem_list, CallAfterSolve_3(), *this, vectors );
     }
+    virtual void call_after_solve_3(Vec<Vec<ScalarType> > &vectors_)  {
+        apply( m->elem_list, CallAfterSolve_3(), *this, vectors_ );
+    }
+
     virtual void call_after_solve_4() {
         if ( not allocated )
             allocate_matrices();
-        apply( m->elem_list, CallAfterSolve_4(), *this );
+        apply( m->elem_list, CallAfterSolve_4(), *this, vectors );
     }
+
+    virtual void call_after_solve_4(Vec<Vec<ScalarType> > &vectors_)  {
+        apply( m->elem_list, CallAfterSolve_4(), *this, vectors_ );
+    }
+    
     virtual void call_after_solve_5() {
         if ( not allocated )
             allocate_matrices();
-        apply( m->elem_list, CallAfterSolve_5(), *this );
+        apply( m->elem_list, CallAfterSolve_5(), *this, vectors );
+    }
+    virtual void call_after_solve_5(Vec<Vec<ScalarType> > &vectors_)  {
+        apply( m->elem_list, CallAfterSolve_5(), *this, vectors_ );
     }
     virtual void call_after_solve_6() {
         if ( not allocated )
             allocate_matrices();
-        apply( m->elem_list, CallAfterSolve_6(), *this );
+        apply( m->elem_list, CallAfterSolve_6(), *this, vectors );
     }
-
-
+    virtual void call_after_solve_6(Vec<Vec<ScalarType> > &vectors_)  {
+        apply( m->elem_list, CallAfterSolve_6(), *this, vectors_ );
+    }
     virtual void call_after_solve(const Vec<void *> &elem_list) {
-        if ( not allocated )
-            allocate_matrices();
-        for(unsigned i=0;i<elem_list.size();++i)
-            TM::TElemList::apply_on_down_cast( reinterpret_cast<typename TM::EA *>(elem_list[i]), CallAfterSolve(), *this );
+        if (vectors_assembly == NULL){
+            if ( not allocated )
+                 allocate_matrices();
+            for(unsigned i=0;i<elem_list.size();++i)
+                TM::TElemList::apply_on_down_cast( reinterpret_cast<typename TM::EA *>(elem_list[i]), CallAfterSolve(), *this, vectors );
+        } else {
+            for(unsigned i=0;i<elem_list.size();++i)
+            TM::TElemList::apply_on_down_cast( reinterpret_cast<typename TM::EA *>(elem_list[i]), CallAfterSolve(), *this, *vectors_assembly); 
+        }
     }
     virtual void call_after_solve_2(const Vec<void *> &elem_list) {
-        if ( not allocated )
-            allocate_matrices();
-        for(unsigned i=0;i<elem_list.size();++i)
-            TM::TElemList::apply_on_down_cast( reinterpret_cast<typename TM::EA *>(elem_list[i]), CallAfterSolve_2(), *this );
+        if (vectors_assembly== NULL){
+            if ( not allocated )
+                 allocate_matrices();
+            for(unsigned i=0;i<elem_list.size();++i)
+                TM::TElemList::apply_on_down_cast( reinterpret_cast<typename TM::EA *>(elem_list[i]), CallAfterSolve_2(), *this, vectors );
+        } else {
+            for(unsigned i=0;i<elem_list.size();++i)
+                TM::TElemList::apply_on_down_cast( reinterpret_cast<typename TM::EA *>(elem_list[i]), CallAfterSolve_2(), *this, *vectors_assembly); 
+        }
     }
     virtual void call_after_solve_3(const Vec<void *> &elem_list) {
-        if ( not allocated )
-            allocate_matrices();
-        for(unsigned i=0;i<elem_list.size();++i)
-            TM::TElemList::apply_on_down_cast( reinterpret_cast<typename TM::EA *>(elem_list[i]), CallAfterSolve_3(), *this );
+        if (vectors_assembly== NULL){
+            if ( not allocated )
+                allocate_matrices();
+            for(unsigned i=0;i<elem_list.size();++i)
+                TM::TElemList::apply_on_down_cast( reinterpret_cast<typename TM::EA *>(elem_list[i]), CallAfterSolve_3(), *this, vectors );
+        } else {
+            for(unsigned i=0;i<elem_list.size();++i)
+                TM::TElemList::apply_on_down_cast( reinterpret_cast<typename TM::EA *>(elem_list[i]), CallAfterSolve_3(), *this, *vectors_assembly); 
+        }
     }
     virtual void call_after_solve_4(const Vec<void *> &elem_list) {
-        if ( not allocated )
-            allocate_matrices();
-        for(unsigned i=0;i<elem_list.size();++i)
-            TM::TElemList::apply_on_down_cast( reinterpret_cast<typename TM::EA *>(elem_list[i]), CallAfterSolve_4(), *this );
+        if (vectors_assembly== NULL){
+            if ( not allocated )
+                allocate_matrices();
+            for(unsigned i=0;i<elem_list.size();++i)
+                TM::TElemList::apply_on_down_cast( reinterpret_cast<typename TM::EA *>(elem_list[i]), CallAfterSolve_4(), *this, vectors );
+        } else {
+            for(unsigned i=0;i<elem_list.size();++i)
+                TM::TElemList::apply_on_down_cast( reinterpret_cast<typename TM::EA *>(elem_list[i]), CallAfterSolve_4(), *this, *vectors_assembly); 
+        }
     }
     virtual void call_after_solve_5(const Vec<void *> &elem_list) {
-        if ( not allocated )
-            allocate_matrices();
-        for(unsigned i=0;i<elem_list.size();++i)
-            TM::TElemList::apply_on_down_cast( reinterpret_cast<typename TM::EA *>(elem_list[i]), CallAfterSolve_5(), *this );
+        if (vectors_assembly== NULL){
+            if ( not allocated )
+                allocate_matrices();
+            for(unsigned i=0;i<elem_list.size();++i)
+                TM::TElemList::apply_on_down_cast( reinterpret_cast<typename TM::EA *>(elem_list[i]), CallAfterSolve_5(), *this, vectors );
+        } else {
+            for(unsigned i=0;i<elem_list.size();++i)
+                TM::TElemList::apply_on_down_cast( reinterpret_cast<typename TM::EA *>(elem_list[i]), CallAfterSolve_5(), *this, *vectors_assembly); 
+        }
     }
     virtual void call_after_solve_6(const Vec<void *> &elem_list) {
-        if ( not allocated )
-            allocate_matrices();
-        for(unsigned i=0;i<elem_list.size();++i)
-            TM::TElemList::apply_on_down_cast( reinterpret_cast<typename TM::EA *>(elem_list[i]), CallAfterSolve_6(), *this );
+        if (vectors_assembly== NULL){
+            if ( not allocated )
+                allocate_matrices();
+            for(unsigned i=0;i<elem_list.size();++i)
+                TM::TElemList::apply_on_down_cast( reinterpret_cast<typename TM::EA *>(elem_list[i]), CallAfterSolve_6(), *this, vectors );
+        } else {
+            for(unsigned i=0;i<elem_list.size();++i)
+                TM::TElemList::apply_on_down_cast( reinterpret_cast<typename TM::EA *>(elem_list[i]), CallAfterSolve_6(), *this, *vectors_assembly); 
+        }
     }
-
     /**
      * update variable at end of the time step
      */
     virtual void update_variables() {
         for(unsigned i=0;i<m->node_list.size();++i)
-            carac.set_nodal_unknowns(m->node_list[i],*this,vectors,indice_noda[i]);
+            carac.set_nodal_unknowns(m->node_list[i],*this,vectors,(*indice_noda)[i]);
         apply( m->elem_list, UpdateVarElem(), *this );
-        carac.set_global_unknowns(m,*this,vectors,indice_glob);
+        carac.set_global_unknowns(m,*this,vectors,*indice_glob);
+    };
+    //
+    virtual void update_variables(Vec<Vec<ScalarType> > &vectors_) {
+        for(unsigned i=0;i<m->node_list.size();++i)
+            carac.set_nodal_unknowns(m->node_list[i],*this,vectors_,(*indice_noda)[i]);
+        apply( m->elem_list, UpdateVarElem(), *this, vectors_);
+        carac.set_global_unknowns(m,*this,vectors_,*indice_glob);
     }
     /**
      * update variable at time t_n + partial_ts
      */
     virtual void update_variables(ScalarType partial_ts) {
         for(unsigned i=0;i<m->node_list.size();++i)
-            carac.set_nodal_unknowns(m->node_list[i],*this,vectors,indice_noda[i],partial_ts);
+            carac.set_nodal_unknowns(m->node_list[i],*this,vectors,(*indice_noda)[i],partial_ts);
         apply( m->elem_list, UpdateVarElem(), *this, partial_ts );
-        carac.set_global_unknowns(m,*this,vectors,indice_glob,partial_ts);
+        carac.set_global_unknowns(m,*this,vectors,*indice_glob,partial_ts);
     }
     /**
      * fill vectors[x] using dern_unknown
      */
     virtual void get_initial_conditions() {
         for(unsigned i=0;i<m->node_list.size();++i)
-            carac.get_nodal_initial_conditions(m->node_list[i],*this,vectors,indice_noda[i]);
+            carac.get_nodal_initial_conditions(m->node_list[i],*this,vectors,(*indice_noda)[i]);
         apply( m->elem_list, GetInitialCond(), *this );
-        carac.get_global_initial_conditions(m,*this,vectors,indice_glob);
-        initialized = true;
+        carac.get_global_initial_conditions(m,*this,vectors,*indice_glob);
+        initial_condition_initialized = true;
     }
     //
-    virtual void get_initial_conditions(Vec<Vec<ScalarType> > &vectors_,const Vec<unsigned> &indice_noda_) {
+    virtual void get_initial_conditions(Vec<Vec<ScalarType> > &vectors_) {
         for(unsigned i=0;i<m->node_list.size();++i)
-            carac.get_nodal_initial_conditions(m->node_list[i],*this,vectors_,indice_noda_[i]);
-        apply( m->elem_list, GetInitialCond(), *this, vectors_, indice_elem );
-        carac.get_global_initial_conditions(m,*this,vectors_,indice_glob);
-        initialized = true;
+            carac.get_nodal_initial_conditions(m->node_list[i],*this,vectors_,(*indice_noda)[i]);
+        apply( m->elem_list, GetInitialCond(), *this, vectors_);
+        carac.get_global_initial_conditions(m,*this,vectors_,*indice_glob);
+        initial_condition_initialized = true;
     }
     /**
      * add a constraint which will be added to system during assembly
@@ -1251,7 +1349,7 @@ public:
     virtual void add_sollicitation(int type_var,const std::string &val,unsigned nb_in_type,unsigned num_in_vec=0) {
         sollicitations.push_back( Sollicitation<Formulation>(type_var,val,nb_in_type,num_in_vec) );
     }
-    virtual void set_initial_time_step( AbsScalarType ts ) { time_steps = ts; }
+    virtual void set_initial_time_step( AbsScalarType ts ) { time_steps = ts; time = -2 * ts; }
     virtual ScalarType get_next_time_step() const { return time_steps[0]; }
     virtual ScalarType get_time() const { return time; }
     virtual void set_time( AbsScalarType ts ) { time = ts; } /// Attention, pilotage a faire soi-meme si utilisation de cette fonction....
@@ -1280,7 +1378,7 @@ public:
     virtual unsigned nb_constraints() const { return constraints.size(); }
     virtual void erase_constraints_from(unsigned number) { constraints.resize(number); }
     
-    virtual unsigned get_indice_noda(unsigned num_node) const { return indice_noda[num_node]; }
+    virtual unsigned get_indice_noda(unsigned num_node) const { return (*indice_noda)[num_node]; }
     virtual unsigned num_in_vec_unknown(const std::string &name) const { return carac.num_in_vec_unknown( name ); }
     
     virtual void display_mat( std::ostream &os ) const {
@@ -1312,7 +1410,6 @@ public:
     TMAT0 precond_matrix; /// in case user has called get_precond()
     Vec<Vec<ScalarType>,nb_vectors> vectors;
     Vec<Vec<ScalarType> >* vectors_assembly;      ///< vectors from formulationassembly;
-    Vec<unsigned>* indice_noda_assembly;                    ///< indice_noda from formulationassembly;
     Vec<ScalarType> sollicitation;
     Vec<AbsScalarType,nb_vectors> time_steps;
     AbsScalarType time; /// at end of current step
@@ -1321,27 +1418,74 @@ public:
     Vec<Constraint<Formulation> > constraints;
     Vec<Sollicitation<Formulation> > sollicitations;
     
-    Vec<unsigned> indice_elem[ TM::TElemList::nb_sub_type ];
-    Vec<unsigned> indice_noda;
-    unsigned indice_glob;
-    bool mat_def_pos_if_sym, initialized, user_want_pierre_precond, mat_has_been_allocated_with_symamd;
+    bool mat_def_pos_if_sym, initial_condition_initialized, user_want_pierre_precond, mat_has_been_allocated_with_symamd;
     bool allocated;
-    
+    Vec<unsigned>* indice_elem;
+    Vec<unsigned>* indice_noda;
+    unsigned* indice_glob;
+
     std::vector<Codegen::Ex> symbols;
     Codegen::Ex time_symbol;
+private:
+    Vec<unsigned> indice_elem_internal[ TM::TElemList::nb_sub_type ];
+    Vec<unsigned> indice_noda_internal;
+    unsigned indice_glob_internal;
+    
 };
 
-/** To be redefined for each new formulations
-*/
-template<class TM,class NameFormulation,class NameVariant,unsigned assemble_mat,unsigned assemble_vec,class T,bool wont_add_nz>
-void add_global_matrix(Formulation<TM,NameFormulation,NameVariant,T,wont_add_nz> &f,const Number<assemble_mat> &nnm,const Number<assemble_vec> &nnv,unsigned indice) {
+/** To be redefined for each new formulations */
+template<class TF,class TMA,class TVE,class TVEVE,unsigned _ms,unsigned _am,unsigned _av,class TN>
+void add_nodal_matrix(
+    TF &f,
+    TMA &matrix,
+    TVE &sollicitation,
+    TVEVE &vectors,
+    const Number<_ms> &matrix_is_sym,
+    const Number<_am> &assemble_mat,
+    const Number<_av> &assemble_vec,
+    const TN &node,
+    const unsigned *indices ) {
 }
 
-/** To be redefined for each new formulations
-*/
-template<class TF,unsigned _ms,unsigned _am,unsigned _av,class TE>
+/** To be redefined for each new formulations */
+template<class TF,class TMA,class TVE,class TVEVE,unsigned _ms,unsigned _am,unsigned _av>
+void add_global_matrix(
+    TF &f,
+    TMA &matrix,
+    TVE &sollicitation,
+    TVEVE &vectors,
+    const Number<_ms> &matrix_is_sym,
+    const Number<_am> &assemble_mat,
+    const Number<_av> &assemble_vec,
+    unsigned indice ) {
+}
+
+/** To be redefined for each new formulations */
+template<class T,class TF,class TMA,class TVE,class TVEVE,unsigned _ms,unsigned _am,unsigned _av,class TE>
+void add_local_elem_matrix(
+    T pond, const T *var_inter, 
+    TF &f,
+    TMA &matrix,
+    TVE &sollicitation,
+    const TVEVE &vectors,
+    const Number<_ms> &matrix_is_sym,
+    const Number<_am> &assemble_mat,
+    const Number<_av> &assemble_vec,
+    const TE &elem,
+    const unsigned *indices ) {
+
+    std::cerr << "Attention : ni add_elem_matrix, ni add_local_elem_matrix n'ont été surdéfinis pour la formulation " << f.get_name() << " avec l'élément "
+              << elem.name << "." << std::endl;
+    assert( 0 );
+}
+
+/** To be redefined for each new formulations */
+template<class TF, class TMA, class TVE, class TVEVE, unsigned _ms,unsigned _am,unsigned _av,class TE>
 void add_elem_matrix(
         TF &f,
+        TMA &matrix,
+        TVE &sollicitation,
+        const TVEVE &vectors,
         const Number<_ms> &matrix_is_sym,
         const Number<_am> &assemble_mat,
         const Number<_av> &assemble_vec,
@@ -1350,51 +1494,71 @@ void add_elem_matrix(
     typedef typename TF::ScalarType T;
 
     for( const double *gp = gauss_point_for_order( f.order_integration_when_integration_totale, typename TE::NameElem() ); *gp!=0.0; gp += elem.nb_var_inter + 1 )
-        add_local_elem_matrix( *gp, gp+1, f, matrix_is_sym, assemble_mat, assemble_vec, elem, indices );
-        
+        add_local_elem_matrix( *gp, gp+1, f, matrix, sollicitation , vectors, matrix_is_sym, assemble_mat, assemble_vec, elem, indices );
 }
 
-template<class TF,class TK,class TFE,class TVE,unsigned _ms,unsigned _am,unsigned _av,class TE,class Mutex>
-void add_elem_matrix(
-        const TF &f,
-        const TK &K,
-        const TFE &F,
-        const TVE &vectors,
-        const Number<_ms> &matrix_is_sym,
-        const Number<_am> &assemble_mat,
-        const Number<_av> &assemble_vec,
-        const TE &elem,
-        const unsigned *indices,
-        Mutex mutex 
-//  f, K, F, *vectors, Number<MatCarac<0>::symm>(), Number<assemble_mat>(), Number<assemble_vec>(), e, in, mutex
-) {}
 
 
-/** To be redefined for each new formulations
-*/
-template<class TM,class NameFormulation,class NameVariant,class T,bool wont_add_nz,class TN,unsigned num_der_var>
-void add_nodal_vector_der_var( Formulation<TM,NameFormulation,NameVariant,T,wont_add_nz> &f, const TN &node, const unsigned *indice, Number<num_der_var> ) {
+/** To be redefined for each new formulations */
+template<class TF,class TMA,class TVE,class TVEVE,unsigned _ms,unsigned _am,unsigned _av,class TN,unsigned num_der_var>
+void add_nodal_vector_der_var(
+    TF    &f, 
+    TMA   &matrix,
+    TVE   &sollicitation,
+    TVEVE &vectors,
+    const TN &node,
+    const unsigned *indices,
+    Number<num_der_var> ) {
 }
 
-/** To be redefined for each new formulations
-*/
-template<class TM,class NameFormulation,class NameVariant,class T,bool wont_add_nz,unsigned num_der_var>
-void add_global_vector_der_var( Formulation<TM,NameFormulation,NameVariant,T,wont_add_nz> &f, unsigned indice, Number<num_der_var> ) {
+/** To be redefined for each new formulations */
+template<class TF,class TMA,class TVE,class TVEVE,unsigned num_der_var>
+void add_global_vector_der_var(
+    TF    &f, 
+    TMA   &matrix,
+    TVE   &sollicitation,
+    TVEVE &vectors,
+    Number<num_der_var> ) {
 }
 
-/** To be redefined for each new formulations
-*/
-template<class TF,class TE,unsigned num_der_var>
+/** To be redefined for each new formulations */
+template<class T,class TF,class TMA,class TVE,class TVEVE,class TE,unsigned num_der_var>
+void add_local_elem_vector_der_var(
+    T pond, const T *var_inter, 
+    TF &f,
+    TMA &matrix,
+    TVE &sollicitation,
+    TVEVE &vectors,
+    const TE &elem,
+    const unsigned *indices,
+    Number<num_der_var> ) {
+
+    assert( 0 );
+}
+
+/** To be redefined for each new formulations */
+template<class TF,class TMA,class TVE,class TVEVE,class TE,unsigned num_der_var>
 void add_elem_vector_der_var(
         TF &f,
+        TMA   &matrix,
+        TVE   &sollicitation,
+        TVEVE &vectors,
         const TE &elem,
         const unsigned *indices,
         Number<num_der_var> ) {
     typedef typename TF::ScalarType T;
 
     for( const double *gp = gauss_point_for_order( f.order_integration_when_integration_totale, typename TE::NameElem() ); *gp!=0.0; gp += elem.nb_var_inter + 1 )
-        add_local_elem_vector_der_var( *gp, gp+1, f, elem, indices, Number<num_der_var>() );
-        
+        add_local_elem_vector_der_var( 
+            *gp, gp+1, 
+            f,
+            matrix,
+            sollicitation,
+            vectors,
+            elem,
+            indices,
+            Number<num_der_var>()
+        );
 }
 
 };

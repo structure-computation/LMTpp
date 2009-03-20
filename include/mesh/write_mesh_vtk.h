@@ -185,6 +185,7 @@ struct GetVtkTypes {
     template<unsigned n,class T,int s,int s2,int s3> void operator()( const Number<n> &nn, const StructForType<Vec<Vec<Vec<T,s>,s2>,s3> > &st ) { res.push_back( GetVtkType<T>::res() ); }
     template<unsigned n,class T,int s,int s2> void operator()( const Number<n> &nn, const StructForType<Vec<Vec<T,s>,s2 > > &st ) { res.push_back( GetVtkType<T>::res() ); }
     template<unsigned n,class T,int s,int s2> void operator()( const Number<n> &nn, const StructForType<Mat<T,Gen<s,s2> > > &st ) { res.push_back( GetVtkType<T>::res() ); }
+    template<unsigned n,class T,int s> void operator()( const Number<n> &nn, const StructForType<Mat<T,Sym<s> > > &st ) { res.push_back( GetVtkType<T>::res() ); }
     Vec<const char *> res;
 };
 
@@ -256,6 +257,10 @@ struct Data_vtk_extract_elem {
 
             }
         }
+    }
+    template<class T,class ST,class OT>
+    void operator()( unsigned i, const char *name, const Mat<T,ST,OT> &data) {
+        operator()( i, name, data.data );
     }
     template<class T>
     void operator()(unsigned i,const char *name,T data) {

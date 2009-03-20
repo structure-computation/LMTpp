@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+<<<<<<< HEAD:__init__.py
+=======
+
+>>>>>>> 713e22e284f1397c81d82c09be6de2a4d3ef2a7d:__init__.py
 import re,os,stat,string,time,sys
 # pouet
 def get_files(cd,r):
@@ -38,7 +42,7 @@ def make_dep_py(env):
     for i in filter(lambda x:re_elem_py.match(x), all_py):
         corh = 'LMT/include/mesh' + i[ i.rfind('/') : -3 ] + '.h'
         ne = i[ i.rfind('/')+9 : -3 ]
-        env.Command( corh, [i,'LMT/make_elem.py'], 'export PYTHONPATH="..:$PYTHONPATH";python LMT/make_elem.py %s > %s'%(ne,corh) )
+        env.Command( corh, [i,'LMT/make_elem.py'], 'export PYTHONPATH="'+os.getcwd()+':$PYTHONPATH";python LMT/make_elem.py %s > %s'%(ne,corh) )
     # meshcarac
     for i in get_files(".", re.compile( '.*\.meshcarac.py$' ) ):
         corh = i[:-12] + "h"
@@ -217,6 +221,10 @@ def make_pb( env,
              types = ['double'],
              dep_py = True,
              name_der_vars = [] ):
+   #
+   if len( formulations ) == 0:
+        print "Attention, tu demande de générer des fichiers de problème mais aucune formulation n'a été spécifiée. On peut utiliser d'autres fonctions pour faire des MeshCarac."
+   
    # find formulation and element files
    f_files, e_files = [], []
    for f in formulations:
