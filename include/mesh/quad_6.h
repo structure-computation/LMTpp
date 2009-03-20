@@ -60,6 +60,13 @@ void append_skin_elements(Element<Quad_6,TN,TNG,TD,NET> &e,TC &ch,HET &het,Numbe
     het.add_element(e,ch,NodalElement(),e.node(5));
 }
 
+template<class TN,class TNG,class TD,unsigned NET>
+typename TNG::T measure( const Element<Quad_6,TN,TNG,TD,NET> &e ) {
+    std::cerr << "measure pour Quad_6 n'est pas implémentée" << std::endl;
+    assert(0);
+    return (typename TNG::T) -1;
+}
+
 };
 
 #include "element_Quad_6.h"
