@@ -1,5 +1,3 @@
-// file generated from polynomials.h.py. Do not modify
-
 #ifndef POLYNOMIALS_H
 #define POLYNOMIALS_H
 
@@ -34,7 +32,7 @@ namespace LMT {
         * nx est le nombre de variables du polynome (valeur par défaut : 1)
         * T est le type des coefficients du polynomes (valeur par défaut : double)
     
-        Pour diminuer les temps de calcus, il y a une spécialisation de la classe Pol pour les polynomes monovariables (nx=1). Ils s'utilisent donc légèrement différement que les polynomes multivariables. 
+        Pour diminuer les temps de calculs, il y a une spécialisation de la classe Pol pour les polynomes monovariables (nx=1). Ils s'utilisent donc légèrement différement que les polynomes multivariables. 
 
     = Foire aux questions pour les polynômes :
     
@@ -90,7 +88,7 @@ namespace LMT {
                 Pol<nd,nx,T> R=P+Q;
                 Pol<nd,nx,T> R=P-Q;
                 Pol<nd,nx,T> R=P*Q;
-                Pol<nd,nx,T> R=P/Q; (pour la division, un développement de Taylor est effectué autour de 0)
+                Pol<nd,nx,T> R=P/Q;
         * \\anchor 11 Pour obtenir les racines du polynome monovariable P :
             \\code C/C++
                 Vec<T> V=P.roots(); 
@@ -123,10 +121,11 @@ public:
     Pol(const T &a, const T &b, unsigned q) {
         coefs.set(T(0));
         coefs[0]=a;
-        if (PolPowers<nd,nx>::init_puissances)
-            PolPowers<nd,nx>::initialize_puissances();
-        for (int i=0;i<dim;i++)
-            if (PolPowers<nd,nx>::puissances[i][q]==1) {
+        if (PolPowers<nd,nx>::needs_initialization)
+            PolPowers<nd,nx>::initialize();
+        PolPowers<nd,nx> op;
+        for (unsigned i=0;i<dim;i++)
+           if (op(i,q)) {
                 coefs[i]=b;
                 break;
             }
@@ -140,47 +139,37 @@ public:
             coefs[i] = T(0);
     }
 
-    template <class T2>
-    Pol (const Pol<nd,nx,T2> &P) {
-        coefs=P.coefficients();
-    }
-
     template <int nd2, class T2>
     Pol (const Pol<nd2,nx,T2> &P) {
-        if (PolTroncates<(nd<nd2?nd2:nd),(nd>nd2?nd2:nd),nx>::init_troncates)
-            PolTroncates<(nd<nd2?nd2:nd),(nd>nd2?nd2:nd),nx>::initialize_tronc();
-        PolTroncates<(nd<nd2?nd2:nd),(nd>nd2?nd2:nd),nx>::troncates(coefs,P.coefficients());
+        PolTroncates<MAX(nd,nd2),MIN(nd,nd2),nx> op;
+        coefs = op(P.coefficients());
     }
 
     template <int nx2, class T2>
     Pol (const Pol<nd,nx2,T2> &P, const Vec<unsigned,nx2> &v_ind) {
-        int rest=0;
-        for (int i=0;i<nx2;i++) {
-            int tmp=1;
-            for (int j=0;j<v_ind[i];j++)
-                tmp*=2;
-            rest+=tmp;
-        }
-        if (PolRestriction<nd,nx,nx2>::init_restriction[rest])
-            PolRestriction<nd,nx,nx2>::initialize_restriction(v_ind);
-        coefs.set(T(0));
-        for (int i=0;i<DimPol<nd,nx2>::valeur;i++)
-            coefs[PolRestriction<nd,nx,nx2>::restriction[rest][i]]=P.coefficients()[i];
+        unsigned rest = PolRestriction<nd,nx,nx2>::get_index(v_ind);
+        if (PolRestriction<nd,nx,nx2>::needs_initialization[rest])
+            PolRestriction<nd,nx,nx2>::initialize(v_ind,rest);
+        PolRestriction<nd,nx,nx2> op;
+        coefs = op(P.coefficients(),rest);
     }
 
     template <int nx2, class T2>
     Pol (const Pol<nd,nx2,T2> &P, const Vec<unsigned,nx> &v_ind) {
-        int rest=0;
-        for (int i=0;i<nx;i++) {
-            int tmp=1;
-            for (int j=0;j<v_ind[i];j++)
-                tmp*=2;
-            rest+=tmp;
-        }
-        if (PolRestriction<nd,nx2,nx>::init_restriction[rest])
-            PolRestriction<nd,nx2,nx>::initialize_restriction(v_ind);
-        for (int i=0;i<dim;i++)
-            coefs[i]=P.coefficients()[PolRestriction<nd,nx2,nx>::restriction[rest][i]];
+        unsigned rest = PolRestriction<nd,nx2,nx>::get_index(v_ind);
+        if (PolRestriction<nd,nx2,nx>::needs_initialization[rest])
+            PolRestriction<nd,nx2,nx>::initialize(v_ind,rest);
+        PolRestriction<nd,nx2,nx> op;
+        coefs = op(P.coefficients(),rest);
+    }
+
+    template <int nx2, class T2, class T3>
+    Pol (const Pol<nd,nx2,T2> &P, const Vec<unsigned,nx> &v_ind, const Vec<T3,nx2-nx> &x) {
+        unsigned rest = PolRestriction<nd,nx2,nx>::get_index(v_ind);
+        if (PolPartialEvaluates<nd,nx2,nx>::needs_initialization[rest])
+            PolPartialEvaluates<nd,nx2,nx>::initialize(v_ind,rest);
+        PolPartialEvaluates<nd,nx2,nx> op;
+        coefs = op(P.coefficients(),x,v_ind,rest);
     }
 
     template <class T2>
@@ -197,7 +186,6 @@ public:
     template <class T2>
     bool operator!= (const Pol<nd,nx,T2> &P) const { return !(coefs==P.coefficients()); }
 
-
     Pol<nd,nx,T> operator-() const { return Pol<nd,nx,T>(-coefs); }
 
     template <class T2>
@@ -208,64 +196,49 @@ public:
 
     template <class T2>
     void operator*= (const Pol<nd,nx,T2> &P) {
-        Vec<T,dim> old_coefs=coefs;
-        coefs.set(T(0));
-        if (PolMultiplies<nd,nx>::init_mult)
-            PolMultiplies<nd,nx>::initialize_mult();
-        for (int i=0;i<dim;i++)
-            PolMultiplies<nd,nx>::multiplies(coefs,i,old_coefs,P.coefficients());
-    }    
+        if (PolMultiplies<nd,nd,nx>::needs_initialization)
+            PolMultiplies<nd,nd,nx>::initialize();
+        PolMultiplies<nd,nd,nx> op;
+        coefs = op(coefs,P.coefficients());
+    }
 
     template <class T2>
     void operator/= (const Pol<nd,nx,T2> &P) {
-        Vec<T,dim> a,old_coefs;
-        old_coefs=coefs;
-        a.set(T(0));
-        a[0]=T2(1)/P.coefficients()[0];
-        coefs.set(T(0));
-        coefs[0]=old_coefs[0]/P.coefficients()[0];
-        if (PolMultiplies<nd,nx>::init_mult)
-            PolMultiplies<nd,nx>::initialize_mult();
-        for (int i=1;i<dim;i++) {
-            PolMultiplies<nd,nx>::multiplies(a,i,-P.coefficients(),a,1);
-            a[i]/=P.coefficients()[0];
-            PolMultiplies<nd,nx>::multiplies(coefs,i,old_coefs,a);
-        }
+        if (PolMultiplies<nd,nd,nx>::needs_initialization)
+            PolMultiplies<nd,nd,nx>::initialize();
+        PolDivides<nd,nd,nx> op;
+        coefs = op(coefs,P.coefficients());
     }
 
     template <class T2>
     typename TypePromote<Multiplies,T,T2>::T operator() (const Vec<T2,nx> &x) const {
-        if (PolPowers<nd,nx>::init_puissances)
-            PolPowers<nd,nx>::initialize_puissances();
-        typename TypePromote<Multiplies,T,T2>::T res;
-        PolPowers<nd,nx>::evaluates(res,coefs,x);
-        return res;
+        if (PolPowers<nd,nx>::needs_initialization)
+            PolPowers<nd,nx>::initialize();
+        PolPowers<nd,nx> op;
+        return op(coefs,x);
     }
 
     typedef Pol<(nd>0?nd-1:nd),nx,T> Derivative;
 
-    typename VecIfStaticSizeIsOneAndScalarIfNot<Derivative,nx>::T   derivative() const {
-        if (PolDerivative<nd,nx>::init_deriv)
-            PolDerivative<nd,nx>::initialize_deriv();
-        typename VecIfStaticSizeIsOneAndScalarIfNot<Vec<T,DimPol<(nd>0?nd-1:nd),nx>::valeur>,nx>::T derivee;
-        PolDerivative<nd,nx>::derivates(derivee,coefs);
-        return typename VecIfStaticSizeIsOneAndScalarIfNot<Derivative,nx>::T(derivee);
+    typename VecIfStaticSizeIsOneAndScalarIfNot<Derivative,nx>::T derivative() const {
+        if (PolDerivative<nd,nx>::needs_initialization)
+            PolDerivative<nd,nx>::initialize();
+        PolDerivative<nd,nx> op;
+        return typename VecIfStaticSizeIsOneAndScalarIfNot<Derivative,nx>::T(op(coefs));
     }
 
     const Vec<T,DimPol<nd,nx>::valeur> &coefficients() const { return coefs; };
 
-    const Vec<Vec<unsigned,nx>,dim> &powers() {
-        if (PolPowers<nd,nx>::init_puissances)
-            PolPowers<nd,nx>::initialize_puissances();
-        return PolPowers<nd,nx>::puissances;
+    Vec<typename VecIfStaticSizeIsOneAndScalarIfNot<unsigned,nx>::T,dim> powers() {
+        if (PolPowers<nd,nx>::needs_initialization)
+            PolPowers<nd,nx>::initialize();
+        PolPowers<nd,nx> op;
+        return op();
     }
 
     template <class T2> typename TypePromote<Multiplies,T,T2>::T operator() (const T2 &x) const {
-        assert(nx==1);
-        typename TypePromote<Multiplies,T,T2>::T res = coefs[0];
-        for (unsigned i=1;i<dim;i++)
-            res += coefs[i] * ::pow(x,i);
-        return res;
+        PolPowers<nd,nx> op;
+        return op(coefs,x);
     }
 
     Pol<nd+1,nx,T> integral (const T &a) const {
@@ -534,9 +507,7 @@ template<int m, int n,class TT> struct SubComplex<Pol<m,n,TT> > {
 }
 
 #include "pol_unary.h"
-#include "pol_binary_with_scalar.h"
-#include "pol_binary_same_degree.h"
-#include "pol_binary_different_degree.h"
+#include "pol_binary.h"
 #include "pol_input_output.h"
 
 #endif // POLYNOMIALS_H
