@@ -1,7 +1,7 @@
 #ifndef FORMULATION_ANCESTOR_H
 #define FORMULATION_ANCESTOR_H
 
-// #include "containers/mat.h"
+#include "containers/mat.h"
 #include "io/xmlnode.h"
 namespace LMT {
 struct SparseUMFPACK;
