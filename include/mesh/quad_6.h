@@ -60,6 +60,18 @@ void append_skin_elements(Element<Quad_6,TN,TNG,TD,NET> &e,TC &ch,HET &het,Numbe
     het.add_element(e,ch,NodalElement(),e.node(5));
 }
 
+template<class TN,class TNG,class TD,unsigned NET>
+typename TNG::T measure( const Element<Quad_6,TN,TNG,TD,NET> &e ) {
+    std::cerr << "measure pour Quad_6 n'est pas implémentée" << std::endl;
+    assert(0);
+    return (typename TNG::T) -1;
+}
+
+template<class TV,class T>
+bool var_inter_is_inside( const Quad_6 &, const TV &var_inter, T tol = 0 ) {
+    return heaviside( var_inter[0] + tol ) * heaviside( var_inter[1] + tol ) * heaviside( 1 - var_inter[0] + tol ) * heaviside( 1 - var_inter[1] + tol );
+}
+
 };
 
 #include "element_Quad_6.h"

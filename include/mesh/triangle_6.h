@@ -103,6 +103,11 @@ typename TNG::Pvec center(const Element<Triangle_6,TN,TNG,TD,NET> &e) {
     return res / 3;
 }
 
+template<class TV,class T>
+bool var_inter_is_inside( const Triangle_6 &e, const TV &var_inter, T tol = 0 ) {
+    return heaviside( var_inter[0] + tol ) * heaviside( var_inter[1] + tol ) * heaviside( 1 - var_inter[0] - var_inter[1] + tol );
+}
+
 };
 #include "element_Triangle_6.h"
 

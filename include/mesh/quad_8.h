@@ -23,7 +23,7 @@ namespace LMT {
         .                        3    6    2
         .                        x----x----x
         .                        |         |
-        .                       7|         x5
+        .                        x7         x5
         .                        |         |
         .                        x----x----x
         .                        0    4    1
@@ -136,6 +136,10 @@ bool divide_element_using_elem_children(Element<Quad_8,TN,TNG,TD,NET> &e,TM &m,T
     return divide_element(e,m,nnodes);
 }
 
+template<class TV,class T>
+bool var_inter_is_inside( const Quad_8 &, const TV &var_inter, T tol = 0 ) {
+    return heaviside( var_inter[0] + tol ) * heaviside( var_inter[1] + tol ) * heaviside( 1 - var_inter[0] + tol ) * heaviside( 1 - var_inter[1] + tol );
+}
 
 };
 

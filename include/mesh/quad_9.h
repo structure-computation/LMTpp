@@ -127,4 +127,4 @@ bool var_inter_is_inside( const Quad_9 &, const TV &var_inter, T tol = 0 ) {
 
 #include "element_Quad_9.h"
 
-#endif // LMTQUAD_8_H
+#endif // LMTQUAD_9_H

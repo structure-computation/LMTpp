@@ -93,6 +93,15 @@ void append_skin_elements(Element<Pyramid,TN,TNG,TD,NET> &e,TC &ch,HET &het,Numb
 //     return *( div_pyramid_face_center + index * 32 ) >= 0;
 // }
 
+template<class TV,class T>
+bool var_inter_is_inside( const Pyramid &, const TV &var_inter, T tol = 0 ) {
+    return heaviside( var_inter[0] + tol ) *  
+           heaviside( var_inter[1] + tol ) * 
+           heaviside( var_inter[2] + tol ) * 
+           heaviside( 1 - var_inter[2] - var_inter[0] + tol ) *
+           heaviside( 1 - var_inter[2] - var_inter[1] + tol ) ;
+}
+
 };
 
-#endif // LMT_wedge_HEADER
+#endif // LMT_pyramid_HEADER
