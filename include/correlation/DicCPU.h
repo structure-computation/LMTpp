@@ -27,6 +27,8 @@ void dic_elem_matrix_( const TE &elem, const TIMG_f &f, const TIMG_g &g, TDIC &d
     Corrélation sur CPU
     
     Il faut spécifier un critère d'arrêt avant exec ou exec_rigid_body (min_norm_inf_dU ou min_norm_2_dU par exemple).
+    
+    On a besoin de QtGui et de QtCore dans les librairies.
 */
 template<class T,unsigned dim>
 struct DicCPU {

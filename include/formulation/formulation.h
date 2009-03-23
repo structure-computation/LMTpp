@@ -734,7 +734,7 @@ public:
         // assemble_mat
         assemble_clean_mat(K, F, vectors_, assemble_mat, assemble_vec);
         // constraints
-        double M = max(abs(K.diag()));
+        ScalarType M = max(abs(K.diag()));
         assemble_constraints(K, F, vectors_,  M, assemble_mat, assemble_vec);
         // sollicitations
         assemble_sollicitations(K, F, vectors_,  assemble_mat, assemble_vec);
