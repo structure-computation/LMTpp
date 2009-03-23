@@ -30,6 +30,43 @@ struct NodalStaticDataStd {
     CARACDMEXTNAME(0,Pvec,pos,"mm");
 };
 
+namespace LMT_DOCUMENTATION {
+
+/*!
+    Ce type qui est défini dans un type \a MeshCarac précise les éléments possibles du maillage ainsi que ses sous-mailllage et maillage peau.
+    Le premier argument <strong> nvi_to_subs </strong> est la valeur qu'on doit retrancher à la dimension du maillage pour tomber sur la dimension de l'élément ElementChoice::NE (NE signifie Nom Element, i.e. Quad, Bar,...). Par exemple, si le maillage est un maillage de l'espace et si ElementChoice::NE est de type \a Triangle_6 alors nvi_to_subs vaudra 1.
+    Le second argument <strong> skin </strong> précise si l'élément est un élément de peau (skin=1) ou non (skin=0).
+    Le troisième argument <strong> num_sub_element </strong> est le numéro de l'élément par les éléments de même dimension. Par exemple si on a deux éléments possibles pour un maillage 2D, \a Quad et \a Quad_9 , on aura :
+    \code 
+        ...
+        ...
+        template<unsigned skin,unsigned inner> struct ElementChoice<0,skin,0,inner> {
+            typedef Quad NE;
+            typedef DefaultBehavior BE;
+            typedef TCDM0 TData;
+        };
+        template<unsigned skin,unsigned inner> struct ElementChoice<0,skin,1,inner> {
+            typedef Triangle NE;
+            typedef DefaultBehavior BE;
+            typedef TCDM0 TData;
+        };
+        ...
+        ...
+    Le dernier argument sert d'identifiant pour les différents sous-maillages.
+
+    Pour exemple, on peut consulter [[include/mesh/exemple_meshcarac.tar.gz|cet exemple]] , ou  voir le code de \a MeshCaracStd , \a MeshCarac .
+
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+*/
+template<unsigned nvi_to_subs,unsigned skin,unsigned num_sub_element,unsigned inner=0>
+struct ElementChoice {
+    typedef void NE;
+    typedef DefaultBehavior BE;
+    typedef VoidDMSet TData;
+};
+};
+
 /*! 
 
     Modèle de classe qui sert de paramètre à la classe \a Mesh . On peut aussi consulter  \a MeshCaracStd pour un exemple exploitable de ce modèle et aussi tous les exemples dans le dossier formulation. 
@@ -43,6 +80,8 @@ struct NodalStaticDataStd {
             typedef DefaultBehavior BE;
         };
         ...
+
+    Il y a aussi un autre exemple de MeshCarac dans [[include/mesh/exemple_meshcarac.tar.gz|cet exemple]] .
 
     \relates Mesh
     \relates MeshCaracStd

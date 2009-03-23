@@ -120,6 +120,13 @@ return V;
 //     R = length( e.node(0)->pos - C );
 // }
 
+template<class TV,class T>
+bool var_inter_is_inside( const Hexa_20 &, const TV &var_inter, T tol = 0 ) {
+    return heaviside( var_inter[0] + tol ) * heaviside( 1 - var_inter[0] + tol ) * 
+           heaviside( var_inter[1] + tol ) * heaviside( 1 - var_inter[1] + tol ) *
+           heaviside( var_inter[2] + tol ) * heaviside( 1 - var_inter[2] + tol );
+}
+
 template<class TN,class TNG,class TD,unsigned NET,class TM>
 bool divide_element_using_elem_children(Element<Hexa_20,TN,TNG,TD,NET> &e,TM &m,TNG **nnodes) {
 std::cout << "Surdiscretisation non implementee pour les Hexa_20" << std::endl;
@@ -249,9 +256,9 @@ return false;
 //   
 //}
 //
-/** new_nodes are independant nodes created to make a fine grid for integration. Used in TvrcFormulation
-//    \relates Hexa_20
-//    \todo actually, we divide element n times, with n = max(edge length) / max_dist. For flat elements, it's far from optimallity
+/*! new_nodes are independant nodes created to make a fine grid for integration. Used in TvrcFormulation
+     \relates Hexa_20
+    \todo actually, we divide element n times, with n = max(edge length) / max_dist. For flat elements, it's far from optimallity
 //*/
 //template<class TN,class TNG,class TD,unsigned NET,class T>
 //bool subdivision_element(const Element<Tetra,TN,TNG,TD,NET> &e,Vec<TNG> &new_nodes,T max_dist) {

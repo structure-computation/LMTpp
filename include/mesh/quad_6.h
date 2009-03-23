@@ -67,6 +67,11 @@ typename TNG::T measure( const Element<Quad_6,TN,TNG,TD,NET> &e ) {
     return (typename TNG::T) -1;
 }
 
+template<class TV,class T>
+bool var_inter_is_inside( const Quad_6 &, const TV &var_inter, T tol = 0 ) {
+    return heaviside( var_inter[0] + tol ) * heaviside( var_inter[1] + tol ) * heaviside( 1 - var_inter[0] + tol ) * heaviside( 1 - var_inter[1] + tol );
+}
+
 };
 
 #include "element_Quad_6.h"
