@@ -27,6 +27,7 @@
     * \a #16 Pour afficher la forme des elements d'une matrice M sparse ou skyline  
     * \a #17 Pour faire une factorisation de cholesky d'une matrice M et la stocker dans une nouvelle matrice I (M doit etre du type : Mat<type, Sym<>, stockage >) 
     * \a #18 Pour résoudre un problème directement sans factoriser préalablement ni inverser de matrice
+    * \a #23 La routine de la librairie Lapack plante mon programme à l'exécution ?
 
     = Réponses :
 
@@ -187,5 +188,6 @@
         \code C/C++
             mean(M);variance(M);min(M);max(M);
 
+    \anchor 23 dans le fichier /opt/MATH/timdavis/ldflags , modifie g2c par gfortran
 
 */
