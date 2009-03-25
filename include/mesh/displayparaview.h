@@ -37,7 +37,7 @@ public:
     ~DisplayParaview() {
     }
     
-    template<class TM> std::string add_mesh(const TM &m,const std::string &prefix="tmp/paraview",const Vec<std::string> &display_fields=Vec<std::string>("all"),double time_step=0) {
+    template<class TM> std::string add_mesh(const TM &m,const std::string &prefix="paraview",const Vec<std::string> &display_fields=Vec<std::string>("all"),double time_step=0) {
         std::string pvu_name = prefix;
         //if ( prefix.rfind(".vtu") != prefix.size() - 4 )
         pvu_name += "_" + to_string( time_step ) + "_" + to_string( pvu_files[time_step].size() ) + ".vtu";
@@ -54,7 +54,7 @@ public:
             app_xminmax(prefix,xmi,xma);
         return pvu_name;
     }
-    template<class TS> void add_shape(const Shape<2,TS> &shape,unsigned grid_size,const std::string &prefix="tmp/paraview") {
+    template<class TS> void add_shape(const Shape<2,TS> &shape,unsigned grid_size,const std::string &prefix="paraview") {
         typedef typename Shape<2,TS>::Pvec Pvec;
         typedef typename Shape<2,TS>::TPen TPen;
         Pvec tdim_min,tdim_max;
@@ -123,10 +123,13 @@ public:
 
    int exec( const std::string &filename = "paraview.pvd" ) {
         make_pvd_file( filename );
-
+        
+        if ( pvsm_file.size() ) {
+            std::string t = "paraview --state=" + pvsm_file;
+            return system( t.c_str() );
+        }
+        
         std::string t = "paraview --data=" + filename;
-        if ( pvsm_file.size() )
-            t += " --state=" + pvsm_file;
         return system( t.c_str() );
     
         /*
@@ -244,7 +247,7 @@ template<class TM> void display_mesh(const TM &m,const char *nodal_field_to_disp
 /*!
  * usefull to get several Windows (using apply_mt)
  */
-struct DpExec { void operator()(DisplayParaview &dp,unsigned i) const { dp.exec( "tmp/conf"+to_string(i)+".pvs"); } };
+struct DpExec { void operator()(DisplayParaview &dp,unsigned i) const { dp.exec( "conf"+to_string(i)+".pvs"); } };
 
 /**
 */
