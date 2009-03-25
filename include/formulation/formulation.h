@@ -242,7 +242,7 @@ public:
         m->elem_list.get_sizes(nb_elem_of_type);
         TM::TElemList::apply_static_with_n( GetNbUnknownByElement(), nb_elem_of_type, size, nb_unknowns_for_type );
         // indices
-        indice_glob = 0;
+        *indice_glob = 0;
         unsigned nnu = nb_nodal_unknowns;
         unsigned ngu = nb_global_unknowns;
         *indice_noda = range( m->node_list.size() ) * nnu + ngu;
@@ -257,7 +257,7 @@ public:
             nb_unk_elem += nb_unknowns_for_type[i];
         }
         if ( this->want_amd ) {
-            assert( indice_glob==0 ); // not managed
+            assert( (*indice_glob)==0 ); // not managed
             assert( nb_unk_elem==0 ); // not managed
             *indice_noda = symamd( *m ) * nnu;
         }
@@ -286,7 +286,7 @@ public:
 
         
         // indices
-        indice_glob = 0;
+        *indice_glob = 0;
         unsigned nnu = nb_nodal_unknowns;
         unsigned ngu = nb_global_unknowns;
         *indice_noda = range( m->node_list.size() ) * nnu + ngu;
@@ -301,7 +301,7 @@ public:
         }
         
         if ( this->want_amd ) {
-            assert( indice_glob==0 ); // not managed
+            assert( *(indice_glob)==0 ); // not managed
             assert( nb_unk_elem==0 ); // not managed
             *indice_noda = symamd( *m ) * nnu;
         }

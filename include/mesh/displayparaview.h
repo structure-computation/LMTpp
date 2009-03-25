@@ -54,7 +54,7 @@ public:
             app_xminmax(prefix,xmi,xma);
         return pvu_name;
     }
-    template<class TS> void add_shape(const Shape<2,TS> &shape,unsigned grid_size,const std::string &prefix="paraview") {
+    template<class TS> std::string add_shape(const Shape<2,TS> &shape,unsigned grid_size,const std::string &prefix="paraview") {
         typedef typename Shape<2,TS>::Pvec Pvec;
         typedef typename Shape<2,TS>::TPen TPen;
         Pvec tdim_min,tdim_max;
@@ -101,13 +101,14 @@ public:
         f << "    </Piece>" << std::endl;
         f << "  </ImageData>" << std::endl;
         f << "</VTKFile>" << std::endl;
+        return vti_name;
     }
     void set_field_to_display(const std::string &name,TypeField type) {
         field_to_display = name;
         type_field_to_display = type;
     }
 
-   void make_pvd_file( const std::string &filename = "paraview.pvd" ) const {
+    void make_pvd_file( const std::string &filename = "paraview.pvd" ) const {
         std::ofstream f( filename.c_str() );
         //
         f << "<?xml version='1.0'?>" << std::endl;
@@ -205,8 +206,17 @@ public:
         system( ("paraview --data="+tmp_file).c_str() );
         */
     }
-    
+
+    Vec<std::string> get_all_pvu_files() const {
+        Vec<std::string> res;
+        for( std::map<double,Vec<std::string> >::const_iterator iter = pvu_files.begin(); iter != pvu_files.end(); ++iter )
+            for(unsigned i=0;i<iter->second.size();++i)
+                res.push_back( iter->second[i] );
+        return res;
+    }
+
     std::string pvsm_file;
+
 private:
     template<class PV> void app_xminmax(const std::string &prefix,const PV &xmi,const PV &xma) {
         if ( init_xminmax ) {

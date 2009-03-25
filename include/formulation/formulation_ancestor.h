@@ -30,7 +30,7 @@ public:
         assume_skin_not_needed = false;
         max_non_linear_iteration = 50;
         premul_KUn_in_sollicitation = ScalarType(1);
-        want_amd = true;
+        want_amd = false ;
         levenberg_marquadt = AbsScalarType(0);
         max_diag = ScalarType(0);
     }
