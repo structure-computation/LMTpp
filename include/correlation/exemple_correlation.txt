@@ -29,6 +29,9 @@
                 f.data[ i ] += 10.0 * rand() / double( RAND_MAX );
             
             dic.exec( f, g, m, dep_DM(), lum_DM() );
+
+            Vec<Pvec> gege = generate( m.node_list, ExtractDM<dep_DM>() );
+            PRINT(gege);
         
         //     std::ofstream out_file( "mon_resultat.m" );
         //     out_file << "dep_0=[" << generate( m.node_list, ExtractDM<dep_0_DM>() ) << "];" << std::endl;
@@ -51,7 +54,7 @@
     <strong> ImgInterp<double,2> f( "Croix/plateblanche001_0078.png" ); </strong>  charge l'image Croix/plateblanche001_0078.png ainsi nommée dans l'objet f.
     Même remarque pour la ligne suivante.
     <strong> TM m; </strong> : on crée un objet de type TM, nommé m. C'est pour l'instant un maillage sans noeud, ni élément.
-    <strong> make_rect( m, Quad(), Pvec(100,10), Pvec(1190,990), 20 ); <strong> crée un maillage carré de \a Quad () du point (100,10) au point (1190,90) avec 20 par lignes et autant par colonne. Remarque : Le dernier argument est normalement de type Pvec(nb_x,nb_y) où nb_x (resp. nb_y) est le nombre de noeuds suivant x (resp. y). Dans cet exemple 20 est converti en Pvec(20,20) (mécanisme de conversion du C++). 
+    <strong> make_rect( m, Quad(), Pvec(100,10), Pvec(1190,990), 20 ); </strong> crée un maillage carré de \a Quad () du point (100,10) au point (1190,90) avec 20 par lignes et autant par colonne. Remarque : Le dernier argument est normalement de type Pvec(nb_x,nb_y) où nb_x (resp. nb_y) est le nombre de noeuds suivant x (resp. y). Dans cet exemple 20 est converti en Pvec(20,20) (mécanisme de conversion du C++). 
     <strong> DicCPU<double,2> dic; </strong> crée un objet dic.
     <strong> dic.min_norm_inf_dU = 1e-4; </strong> est un critère d'arrêt basé sur la norme infini.
     <strong> dic.display_norm_inf_dU = true; </strong> permet l'affichage de la norme au cours des itérations.
