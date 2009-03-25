@@ -54,7 +54,7 @@ namespace LMT_DOCUMENTATION {
         ...
     Le dernier argument sert d'identifiant pour les différents sous-maillages.
 
-    Pour exemple, on peut consulter [[include/mesh/exemple_meshcarac.tar.gz|cet exemple]] , ou  voir le code de \a MeshCaracStd , \a MeshCarac .
+    Pour exemple, on peut consulter [[Exemple de MeshCarac|cet exemple]] , ou  voir le code de \a MeshCaracStd , \a MeshCarac .
 
     \friend raphael.pasquier@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr

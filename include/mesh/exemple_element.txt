@@ -1,5 +1,5 @@
 /*!
-\example Exemple de spécialisation du type \a Element
+\example Exemple de spécialisation du type Element
 
     Voici le code le plus simple possible pour créer sa propre spécialisation du type \a Element :
     \code C/C++
@@ -16,14 +16,14 @@
         
         template <class Tpos_> struct MyTData {
             typedef Tpos_ Tpos;
-            void dm_data_set_field( const std::string field_name, Tpos value ) { assert(0); /*TODO*/ }
-            void dm_data_set_field( const std::string field_name, const Vec<Tpos,1> &value ) { assert(0); /*TODO*/ }
-            void dm_data_set_field( const std::string field_name, const Vec<Tpos,2> &value ) { assert(0); /*TODO*/ }
-            void dm_data_set_field( const std::string field_name, const Vec<Tpos,3> &value ) { assert(0); /*TODO*/ }
-            void dm_data_set_field( const std::string field_name, const Vec<Tpos,4> &value ) { assert(0); /*TODO*/ }
-            void dm_data_set_field( const std::string field_name, const Vec<Tpos,5> &value ) { assert(0); /*TODO*/ }
-            void dm_data_set_field( const std::string field_name, const Vec<Tpos,6> &value ) { assert(0); /*TODO*/ }
-            template<class __G__> __G__ dm_data_get_field( const std::string field_name, StructForType<__G__> ) const { assert( 0 /*TODO*/ ); return __G__( 0.0 );  }
+            void dm_data_set_field( const std::string field_name, Tpos value ) { assert(0);   }
+            void dm_data_set_field( const std::string field_name, const Vec<Tpos,1> &value ) { assert(0);   }
+            void dm_data_set_field( const std::string field_name, const Vec<Tpos,2> &value ) { assert(0);   }
+            void dm_data_set_field( const std::string field_name, const Vec<Tpos,3> &value ) { assert(0);   }
+            void dm_data_set_field( const std::string field_name, const Vec<Tpos,4> &value ) { assert(0);   }
+            void dm_data_set_field( const std::string field_name, const Vec<Tpos,5> &value ) { assert(0);   }
+            void dm_data_set_field( const std::string field_name, const Vec<Tpos,6> &value ) { assert(0);   }
+            template<class __G__> __G__ dm_data_get_field( const std::string field_name, StructForType<__G__> ) const { assert( 0   ); return __G__( 0.0 );  }
         };
         
         template <class T_,int dim_> struct MyTNode {
@@ -40,9 +40,9 @@
             typedef TE::Pvec Pvec;
             typedef TE::T T;
         
-            /**
-            Je définis un tableau de 4 MyTNode puis j'initialise leur position. Ces quatre noeuds seront les noeuds de mon élément e.
-            */
+            
+            /// Je définis un tableau de 4 MyTNode puis j'initialise leur position. Ces quatre noeuds seront les noeuds de mon élément e.
+            
             MyTNode_2 list_MyTNode_2[TE::nb_nodes]; /// 4 noeuds suffisent pour un Quad.
         //     list_MyTNode_2[0].pos = Pvec(2,2);
         //     list_MyTNode_2[1].pos = Pvec(5,2);

@@ -50,17 +50,28 @@
     Quelques Explications.
 
     <strong> typedef DicCPU<double,2>::TM_exemple TM; </strong> : le type <strong> DicCPU<double,2> </strong> contient (en autre) le type du maillage qui convient pour la corrélation, nommé <strong> TM_exemple </strong> . <strong> typedef </strong> définit un synonime car écrire TM est plus simple que DicCPU<...>::TM_exmple. Il est notoirement connu que les programmeurs sont parresseux ;-)
+
     <strong> typedef TM::Pvec Pvec; </strong> : le type TM contient à son tour le type du vecteur position (  TM::Pvec == Vec<double,2> pour la corrélation ).
+
     <strong> ImgInterp<double,2> f( "Croix/plateblanche001_0078.png" ); </strong>  charge l'image Croix/plateblanche001_0078.png ainsi nommée dans l'objet f.
     Même remarque pour la ligne suivante.
+
     <strong> TM m; </strong> : on crée un objet de type TM, nommé m. C'est pour l'instant un maillage sans noeud, ni élément.
+
     <strong> make_rect( m, Quad(), Pvec(100,10), Pvec(1190,990), 20 ); </strong> crée un maillage carré de \a Quad () du point (100,10) au point (1190,90) avec 20 par lignes et autant par colonne. Remarque : Le dernier argument est normalement de type Pvec(nb_x,nb_y) où nb_x (resp. nb_y) est le nombre de noeuds suivant x (resp. y). Dans cet exemple 20 est converti en Pvec(20,20) (mécanisme de conversion du C++). 
+
     <strong> DicCPU<double,2> dic; </strong> crée un objet dic.
+
     <strong> dic.min_norm_inf_dU = 1e-4; </strong> est un critère d'arrêt basé sur la norme infini.
+
     <strong> dic.display_norm_inf_dU = true; </strong> permet l'affichage de la norme au cours des itérations.
+
     <strong> dic.exec( f, g, m, dep_DM(), lum_DM() ); </strong> réalise la corrélation suivant la luminance. 
+
     <strong> f.data[ i ] += 10.0 * rand() / double( RAND_MAX ); </strong> ajoute un bruit "uniforme" sur les données de l'image.
+
     <strong> display_mesh( m ); </strong> lance paraview sur m.
+
     <strong> Vec<Pvec> gege = generate( m.node_list, ExtractDM<dep_DM>() ); </strong> renvoie dans le vecteur gege, tous les déplacements des noeuds (voir \a generate ()). 
 
     \friend raphael.pasquier@lmt.ens-cachan.fr
