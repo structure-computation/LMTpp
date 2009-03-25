@@ -401,8 +401,6 @@ class Formulation:
 
         # subs children_is_on_skin
         subs_cs = {}
-        print len( e.children_is_on_skin )
-        print e.name
         for i in range(len( e.children )):
             subs_cs[ e.children_is_on_skin[ i ] ] = number( cpt_child == i )
         local_ds = local_ds.subs(EM( subs_cs ))

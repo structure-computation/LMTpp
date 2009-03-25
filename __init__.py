@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
-<<<<<<< HEAD:__init__.py
-=======
 
->>>>>>> 713e22e284f1397c81d82c09be6de2a4d3ef2a7d:__init__.py
 import re,os,stat,string,time,sys
 # pouet
 def get_files(cd,r):

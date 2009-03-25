@@ -1,8 +1,10 @@
 import os
+
 if 'arch' in ARGUMENTS:
     arch = ARGUMENTS['arch']
 else:
     arch = os.uname()[4]
+
 mac = ( os.uname()[0] == 'Darwin' )
 
 src = [
