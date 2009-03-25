@@ -1,0 +1,96 @@
+/*!
+\example Exemple de spécialisation du type Element
+
+    Voici le code le plus simple possible pour créer sa propre spécialisation du type \a Element :
+    \code C/C++
+        #include "mesh/quad.h"
+        #include "mesh/quad_8.h"
+        #include "mesh/triangle.h"
+        #include "mesh/triangle_6.h"
+        #include "mesh/element_Bar_3.h"
+        #include "mesh/hexa.h"
+        #include "mesh/element_Bar_3.h"
+        
+        using namespace LMT;
+        using namespace std;
+        
+        template <class Tpos_> struct MyTData {
+            typedef Tpos_ Tpos;
+            void dm_data_set_field( const std::string field_name, Tpos value ) { assert(0);   }
+            void dm_data_set_field( const std::string field_name, const Vec<Tpos,1> &value ) { assert(0);   }
+            void dm_data_set_field( const std::string field_name, const Vec<Tpos,2> &value ) { assert(0);   }
+            void dm_data_set_field( const std::string field_name, const Vec<Tpos,3> &value ) { assert(0);   }
+            void dm_data_set_field( const std::string field_name, const Vec<Tpos,4> &value ) { assert(0);   }
+            void dm_data_set_field( const std::string field_name, const Vec<Tpos,5> &value ) { assert(0);   }
+            void dm_data_set_field( const std::string field_name, const Vec<Tpos,6> &value ) { assert(0);   }
+            template<class __G__> __G__ dm_data_get_field( const std::string field_name, StructForType<__G__> ) const { assert( 0   ); return __G__( 0.0 );  }
+        };
+        
+        template <class T_,int dim_> struct MyTNode {
+            static const int dim = dim_;
+            typedef T_ T;
+            typedef Vec<T,dim> Pvec;
+            Pvec pos;
+        };
+        
+        int main(int argc,char* argv[]) {
+            typedef Quad NameElement;
+            typedef MyTNode<double,NameElement::nb_var_inter> MyTNode_2;
+            typedef Element<NameElement,DefaultBehavior,MyTNode_2,MyTData<double>,0> TE;
+            typedef TE::Pvec Pvec;
+            typedef TE::T T;
+        
+            
+            /// Je définis un tableau de 4 MyTNode puis j'initialise leur position. Ces quatre noeuds seront les noeuds de mon élément e.
+            
+            MyTNode_2 list_MyTNode_2[TE::nb_nodes]; /// 4 noeuds suffisent pour un Quad.
+        //     list_MyTNode_2[0].pos = Pvec(2,2);
+        //     list_MyTNode_2[1].pos = Pvec(5,2);
+        //     list_MyTNode_2[2].pos = Pvec(6,5);
+        //     list_MyTNode_2[3].pos = Pvec(3,7);
+            list_MyTNode_2[0].pos = Pvec(2,2);
+            list_MyTNode_2[1].pos = Pvec(5,2);
+            list_MyTNode_2[2].pos = Pvec(6,7);
+            list_MyTNode_2[3].pos = Pvec(3,7);
+            TE e;
+            for(unsigned i=0;i<TE::nb_nodes;++i)
+                e.nodes[i] = &list_MyTNode_2[i];
+        
+            Pvec pos(4.0,4.49);
+            Pvec var_inter;
+        
+            Vec<Pvec,TE::nb_nodes> pos_nodes;
+            for(unsigned i=0;i<TE::nb_nodes;++i) {
+                pos_nodes[i] = e.node( i )->pos;
+                PRINT( e.node( i )->pos );
+            }
+            PRINT(center(e));
+        
+            ///get_var_inter_linear( TE::NE(), pos_nodes, pos, var_inter ); // cette fonction retourne dans var_inter les coordonnées de pos dans le repère de référence de l'élément.
+            /// ATTENTION get_var_inter_linear ne marche pas pour Quad.
+            get_var_inter( TE::NE(), pos_nodes, pos, var_inter );
+        
+        
+            PRINT(var_inter);
+            if ( var_inter_is_inside( TE::NE(), var_inter, std::numeric_limits<T>::epsilon() * 10 ) ) {
+                T res;
+                get_interp( TE::NE(), Nodal(), var_inter,static_dirac_vec<TE::NE::nb_nodes>( 1.0, 0 ), res );
+                PRINT(res);
+            } else {
+                cout << " tu es à l'extérieur de l'élément." << endl;
+            }
+        
+            return 0;
+        }
+
+    Le plus délicat est la définition de ses propres types TData et TNode.
+
+    \relates get_shape_functions
+    \relates get_var_inter_linear
+    \relates get_var_inter
+    \relates var_inter_is_inside
+    \relates Vec
+    \keyword Maillage/Elément
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+*/

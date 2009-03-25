@@ -112,6 +112,9 @@ public:
     Vec(std::istream &is) { init(); is >> *this; } /// get data from stream
     // Vec(const std::string &s) { init(); std::istringstream is(s); is >> *this; } /// get data from string
     
+    template<class T2>
+    void set( const T2 &v ) { for(unsigned i=0;i<size();++i) operator[]( i ) = v; }
+            
     #ifdef MATLAB_MEX_FILE
         explicit Vec(const mxArray *variable) throw(std::runtime_error) {
             if ( mxIsEmpty(variable) ) {
