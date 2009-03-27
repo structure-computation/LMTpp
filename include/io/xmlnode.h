@@ -80,6 +80,16 @@ public:
         else
             res = default_value;
         return *this;
+    }    /// 
+    std::string get_content() const throw (IoException);
+    /// 
+    template<class T>
+    const XmlNode &get_content(T &res) const throw (IoException) {
+        std::string att( get_content() );
+        std::istringstream is( att );
+        line_input(is, res);
+        if ( !is ) { throw IoException( "Error while reading content : " + att ); }
+        return *this;
     }
     /// with unit
     template<class T>

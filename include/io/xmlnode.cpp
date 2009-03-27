@@ -168,6 +168,16 @@ std::string XmlNode::get_attribute(const char *name_attr) const throw (IoExcepti
 }
 
 /// name of pointed element
+std::string XmlNode::get_content() const throw (IoException) {
+    xmlChar *uri = xmlNodeGetContent(node);
+    if ( uri == (xmlChar *)NULL )
+        throw IoException( std::string("Element has no content") );
+    std::string res( (const char *)uri );
+    xmlFree( uri );
+    return res;
+}
+
+/// name of pointed element
 const char *XmlNode::get_name() const {
     return (const char *)node->name;
 }
