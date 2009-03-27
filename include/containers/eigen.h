@@ -9,7 +9,10 @@ namespace LMT {
    compute eigen values and vectors.
    input : vec in vector form
    output : eigenvalues, eigenvectors
-    \keyword Mathématiques/Algèbre linéaire/vecteurs et valeurs propres
+    \keyword Mathématiques/Algèbre linéaire/Vecteurs et valeurs propres
+
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
  */
 template<class T>
 void get_eigen_values_and_vectors( const Vec<T,3> &vec, Vec<T,2> &eigenvalues, Vec<Vec<T,2>,2> &eigenvectors ) {
