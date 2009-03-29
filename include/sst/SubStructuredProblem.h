@@ -9,7 +9,7 @@ struct SubStructureAncestor {
 struct InterfaceAncestor {
 };
 
-/**
+/*!
 
 */
 template<class TData>
@@ -17,7 +17,7 @@ struct SubStructure : TData, SubStructureAncestor {
     Vec<InterfaceAncestor *> interfaces;
 };
 
-/**
+/*!
 
 */
 template<class SstData0,class SstData1,class TData>
@@ -29,7 +29,7 @@ struct Interface : TData, InterfaceAncestor {
     TSubStructure1 *sub_structure1;
 };
 
-/**
+/*!
 
 */
 template<class SubStructuresData,class InternalInterfacesData,class ExternalInterfacesData>

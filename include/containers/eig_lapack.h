@@ -10,7 +10,7 @@ extern "C" int dsyev_(
     
 namespace LMT {
 
-/**
+/*!
     Get eigen values and vector of a symetric matrix using lapack.
     m will be converted to a dense matrix (compatible with lapack).
     you will need to add gfortran and lapack in libraries.
@@ -33,6 +33,12 @@ namespace LMT {
         m.diag() = eig_val;
         PRINTN( trans( eig_vec ) * m * eig_vec );
 
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+
+    \keyword Mathématiques/Algèbre linéaire/Vecteurs et valeurs propres
+
+    \author Hugo Leclerc
 */
 template<class TM>
 void get_eig_sym( const TM &m, Vec<double> &eig_val, Mat<double> &eig_vec ) {

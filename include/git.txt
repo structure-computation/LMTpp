@@ -3,6 +3,8 @@
 
     git est un programme de gestion des fichiers sources et la documentation de la librairie LMT++. Pour la culture, git fut créé par Linus Torwarld, l'initiateur du système d'exploitation Linux et il sert à la gestion de son système.
     git vous servira pour installer la LMT++, pour faire une mise à jour ou une soumission de modification de code ou de commentaire.
+
+    Cette page contient "l'essentiel" pour vos besoins mais si vous souhaitez en savoir davantage voici une [[http://alexgirard.com/git-book/|référence]] en français (merci à Camille Gouttebroze).
  
     <strong> REMARQUE IMPORTANTE </strong> : Avant d'utiliser git, il faut se connecter sur la machine ssh (id madiran), sur laquelle tous les logiciels sont installés. 
 
