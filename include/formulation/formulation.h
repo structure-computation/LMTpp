@@ -265,6 +265,8 @@ public:
     }
     //
     virtual void allocate_matrices() {
+        if ( allocated )
+            return;
         allocated = true;
         mat_has_been_allocated_with_symamd = this->want_amd;
         
@@ -1323,6 +1325,7 @@ public:
      * fill vectors[x] using dern_unknown
      */
     virtual void get_initial_conditions() {
+        allocate_matrices();
         for(unsigned i=0;i<m->node_list.size();++i)
             carac.get_nodal_initial_conditions(m->node_list[i],*this,vectors,(*indice_noda)[i]);
         apply( m->elem_list, GetInitialCond(), *this );
