@@ -259,18 +259,29 @@ template<class TM,bool const_tm,class TV1,class TV2=void> struct SubMat;
     \author Hugo Leclerc
 */
 template<class T,class Structure,class Storage,class OP>
-std::ostream &operator<<(std::ostream &os,const Mat<T,Structure,Storage,OP> &m) {
+void display( std::ostream &os, const Mat<T,Structure,Storage,OP> &m, int precision = 16 ) {
     int max_size = 0;
     for(unsigned i=0;i<m.nb_rows();++i)
         for(unsigned j=0;j<m.nb_cols();++j)
-            max_size = max( max_size, (int)to_string( m( i, j ) ).size() );
+            max_size = max( max_size, (int)to_string( m( i, j ), precision ).size() );
     for(unsigned i=0;i<m.nb_rows();++i) {
         for(unsigned j=0;j<m.nb_cols();++j) {
-            std::string s = to_string( m( i, j ) );
+            std::string s = to_string( m( i, j ), precision );
             os << s << std::string( max_size + 1 - s.size(), ' ' );
         }
         os << "\n";
     }
+}
+
+/*!
+    \relates Mat
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \keyword Mathématiques/Algèbre linéaire
+    \author Hugo Leclerc
+*/
+template<class T,class Structure,class Storage,class OP>
+std::ostream &operator<<( std::ostream &os, const Mat<T,Structure,Storage,OP> &m ) {
+    display( os, m, 16 );
     return os;
 }
 /*!
