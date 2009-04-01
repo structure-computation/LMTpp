@@ -76,7 +76,7 @@ struct VoidDMSet {
     }
     template<class TT> TT dm_data_get_field( const std::string field_name, StructForType<TT> ) const {
         std::cerr << "There is no variable named " << field_name << " in data struct" << std::endl;
-        return TT(typename TypeInformation<TT>::SubType(0));
+        return TT();
     }
 };
 
