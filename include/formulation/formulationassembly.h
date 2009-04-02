@@ -184,8 +184,18 @@ namespace LMT {
         void dispatch_results(bool want_f_reaction = true) { ///push result in each f.result
             for(unsigned i=0;i<formulations.size();++i)
                 formulation(i)->get_result() = vectors[0][ formulations[i].local_ddl_to_global_ones ];
-            if (want_f_reaction)
+            if (want_f_reaction){
                 f_reaction = K_before_constraints * vectors[0] - F_before_contraints;
+
+                #ifdef IFNDEF_f_nodal_2_DM
+                for(unsigned i=0;i<formulations.size();++i){
+                MeshAndForm &maf = formulations[i];
+                for(unsigned j=0;j<maf.m->node_list.size();++j)
+                    for(unsigned k=0;k<3;++k)
+                        maf.m->node_list[j].f_nodal_2[k] = f_reaction[maf.local_ddl_to_global_ones][j*3+k];
+                }
+                #endif // IFNDEF_dI_DM
+            }
         }
         //
         bool solve_system(T iterative_criterium=T(0), bool want_f_reaction = true) {
