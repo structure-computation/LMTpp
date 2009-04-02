@@ -54,6 +54,10 @@ public:
     virtual Vec<T,5> get_field( const std::string field_name, StructForType<Vec<T,5> > ) const = 0;
     virtual Vec<T,6> get_field( const std::string field_name, StructForType<Vec<T,6> > ) const = 0;
     
+    virtual Mat<T,Sym<1> > get_field( const std::string field_name, StructForType<Mat<T,Sym<1> > > ) const = 0;
+    virtual Mat<T,Sym<2> > get_field( const std::string field_name, StructForType<Mat<T,Sym<2> > > ) const = 0;
+    virtual Mat<T,Sym<3> > get_field( const std::string field_name, StructForType<Mat<T,Sym<3> > > ) const = 0;
+    
     unsigned number;
     unsigned absolute_number;
     
@@ -168,6 +172,10 @@ public:
     virtual Vec<T,4> get_field( const std::string field_name, StructForType<Vec<T,4> > e ) const { return TData::dm_data_get_field( field_name, e ); }
     virtual Vec<T,5> get_field( const std::string field_name, StructForType<Vec<T,5> > e ) const { return TData::dm_data_get_field( field_name, e ); }
     virtual Vec<T,6> get_field( const std::string field_name, StructForType<Vec<T,6> > e ) const { return TData::dm_data_get_field( field_name, e ); }
+    
+    virtual Mat<T,Sym<1> > get_field( const std::string field_name, StructForType<Mat<T,Sym<1> > > e ) const { return TData::dm_data_get_field( field_name, e ); }
+    virtual Mat<T,Sym<2> > get_field( const std::string field_name, StructForType<Mat<T,Sym<2> > > e ) const { return TData::dm_data_get_field( field_name, e ); }
+    virtual Mat<T,Sym<3> > get_field( const std::string field_name, StructForType<Mat<T,Sym<3> > > e ) const { return TData::dm_data_get_field( field_name, e ); }
     
     ///
     TNode *nodes[nb_nodes];

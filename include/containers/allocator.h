@@ -60,7 +60,7 @@ inline void disp_alloc(const char *prefix="") {
     for(std::map<std::string,long long>::const_iterator iter=total_allocated.begin();iter!=total_allocated.end();++iter) {
         if ( iter->second ) {
             std::cout << prefix << iter->second << " " << std::flush;
-            system( ( "c++filt -t " + iter->first ).c_str() );
+            system( ( "c++filt " + iter->first ).c_str() );
             s += iter->second;
         }
     }

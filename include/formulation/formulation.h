@@ -252,7 +252,11 @@ public:
         m->elem_list.get_sizes(nb_elem_of_type);
         TM::TElemList::apply_static_with_n( GetNbUnknownByElement(), nb_elem_of_type, size, nb_unknowns_for_type );
         // indices
+<<<<<<< HEAD:include/formulation/formulation.h
         *(indice_glob) = 0;
+=======
+        *indice_glob = 0;
+>>>>>>> e7a74bbe45736c6081d75fd5c438cd9216aa7694:include/formulation/formulation.h
         unsigned nnu = nb_nodal_unknowns;
         unsigned ngu = nb_global_unknowns;
         *indice_noda = range( m->node_list.size() ) * nnu + ngu;
@@ -267,7 +271,11 @@ public:
             nb_unk_elem += nb_unknowns_for_type[i];
         }
         if ( this->want_amd ) {
+<<<<<<< HEAD:include/formulation/formulation.h
             assert( *(indice_glob)==0 ); // not managed
+=======
+            assert( (*indice_glob)==0 ); // not managed
+>>>>>>> e7a74bbe45736c6081d75fd5c438cd9216aa7694:include/formulation/formulation.h
             assert( nb_unk_elem==0 ); // not managed
             *indice_noda = symamd( *m ) * nnu;
         }
@@ -275,6 +283,8 @@ public:
     }
     //
     virtual void allocate_matrices() {
+        if ( allocated )
+            return;
         allocated = true;
         mat_has_been_allocated_with_symamd = this->want_amd;
         
@@ -296,7 +306,11 @@ public:
 
         
         // indices
+<<<<<<< HEAD:include/formulation/formulation.h
         *(indice_glob) = 0;
+=======
+        *indice_glob = 0;
+>>>>>>> e7a74bbe45736c6081d75fd5c438cd9216aa7694:include/formulation/formulation.h
         unsigned nnu = nb_nodal_unknowns;
         unsigned ngu = nb_global_unknowns;
         *indice_noda = range( m->node_list.size() ) * nnu + ngu;
@@ -311,7 +325,11 @@ public:
         }
         
         if ( this->want_amd ) {
+<<<<<<< HEAD:include/formulation/formulation.h
             assert( (*indice_glob)==0 ); // not managed
+=======
+            assert( *(indice_glob)==0 ); // not managed
+>>>>>>> e7a74bbe45736c6081d75fd5c438cd9216aa7694:include/formulation/formulation.h
             assert( nb_unk_elem==0 ); // not managed
             *indice_noda = symamd( *m ) * nnu;
         }
@@ -1372,6 +1390,7 @@ public:
      * fill vectors[x] using dern_unknown
      */
     virtual void get_initial_conditions() {
+        allocate_matrices();
         for(unsigned i=0;i<m->node_list.size();++i)
             carac.get_nodal_initial_conditions(m->node_list[i],*this,vectors,(*indice_noda)[i]);
         apply( m->elem_list, GetInitialCond(), *this );

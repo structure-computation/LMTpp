@@ -3,7 +3,7 @@
 #include "containers/mat.h"
 
 namespace LMT {
-    
+
     template<class PB>
     struct FormulationAssembly {
         typedef typename PB::TM TM;
@@ -68,10 +68,10 @@ namespace LMT {
             return formulations[i].pb->formulation_nb( formulations[i].num_formulation );
         }
         //
-        bool solve(T iterative_criterium=T(0)) {
+        bool solve(T iterative_criterium=T(0), bool want_f_reaction = true) {
             allocate_matrices();
             assemble();
-            solve_system();
+            solve_system(want_f_reaction);
             call_after_solve();
             update_variables();
             return true;
@@ -124,7 +124,7 @@ namespace LMT {
             mat_already_allocated = true;
             //
             update_connectivity();
-            
+
             unsigned nb_ddl_per_node = formulations[0].pb->formulation_nb(formulations[0].num_formulation)->get_nb_nodal_unknowns();
             for(unsigned i=0;i<vectors.size();++i)
                 vectors[i].resize( pos.size() * nb_ddl_per_node );
@@ -181,22 +181,16 @@ namespace LMT {
             }
         }
         //
-        void dispatch_results() { ///push result in each f.result
+        void dispatch_results(bool want_f_reaction = true) { ///push result in each f.result
             for(unsigned i=0;i<formulations.size();++i)
                 formulation(i)->get_result() = vectors[0][ formulations[i].local_ddl_to_global_ones ];
-            f_reaction = K_before_constraints * vectors[0] - F_before_contraints;
-
-            for(unsigned i=0;i<formulations.size();++i){
-                MeshAndForm &maf = formulations[i];
-                for(unsigned j=0;j<maf.m->node_list.size();++j)
-                    for(unsigned k=0;k<3;++k)
-                        maf.m->node_list[j].f_nodal_2[k] = f_reaction[maf.local_ddl_to_global_ones][j*3+k];
-                }
+            if (want_f_reaction)
+                f_reaction = K_before_constraints * vectors[0] - F_before_contraints;
         }
         //
-        bool solve_system(T iterative_criterium=0.0) {
+        bool solve_system(T iterative_criterium=T(0), bool want_f_reaction = true) {
             vectors[0] = inv(K) * F;
-            dispatch_results();
+            dispatch_results(want_f_reaction);
             return false;
         }
         //
@@ -293,10 +287,10 @@ namespace LMT {
                 return;
             connectivity_calculated = true;
             unsigned size = 0;
-            
+
             MeshAndForm &maf = formulations[0];
             unsigned nb_ddl_per_node = maf.pb->formulation_nb(maf.num_formulation)->get_nb_nodal_unknowns();
-        
+
             // indice global unknowns
             maf.indice_glob = 0;
             unsigned ng = maf.pb->formulation_nb(maf.num_formulation)->get_nb_global_unknowns();
@@ -334,7 +328,7 @@ namespace LMT {
             for(unsigned i=0;i<maf.local_unknowns_to_global_ones.size();++i)
                 for(unsigned d=0;d<nb_ddl_per_node;++d)
                     maf.local_ddl_to_global_ones.push_back( maf.local_unknowns_to_global_ones[i] * nb_ddl_per_node + d );
-                    
+
             for(unsigned i=1;i<formulations.size();++i) {
                 //formulation(i)->update_connectivity();
                 MeshAndForm &maf = formulations[i];
@@ -409,7 +403,7 @@ namespace LMT {
         Vec<Pvec > pos;
         AbsT tol;
     };
-    
+
 }
 
 #endif // FORMULATION_ASSEMBLY_H

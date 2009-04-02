@@ -31,7 +31,7 @@ public:
         assume_skin_not_needed = false;
         max_non_linear_iteration = 50;
         premul_KUn_in_sollicitation = ScalarType(1);
-        want_amd = true;
+        want_amd = false ;
         levenberg_marquadt = AbsScalarType(0);
         max_diag = ScalarType(0);
     }
@@ -99,6 +99,7 @@ public:
     virtual void localOP_update_variables() = 0;    /// update variable at end of the time step from the c++ code.
     virtual void update_variables(Vec<Vec<ScalarType> > &vectors_) = 0;
     virtual void update_variables() = 0; /// update variable at end of the time step
+    virtual void update_variables(Vec<Vec<ScalarType> > &vectors_) = 0; /// update variable at end of the time step
     virtual void update_variables(ScalarType partial_ts) = 0; ///  update variable at time t_n + partial_ts
     virtual void get_initial_conditions() = 0; /// fill vectors[x] using dern_unknown
     virtual void get_initial_conditions(Vec<Vec<ScalarType> > &vectors_) = 0; /// fill vectors[x] using dern_unknown

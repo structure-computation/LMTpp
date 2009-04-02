@@ -89,6 +89,9 @@ class VariableAncestor
     virtual def get_expr_tensor_order
         abstract
 
+    virtual def get_sym_property
+        abstract
+
     def eq( v )
         if name == v.name
             assert( interpolation == v.interpolation, "variables with same name ($name) in different formulations but with different interpolations" )
@@ -156,6 +159,9 @@ class Variable[ nb_dim = [], sym = false ] inherits VariableAncestor
 
     virtual def get_expr_tensor_order
         return expr.tensor_order
+
+    virtual def get_sym_property
+        return sym
             
     virtual def make_expr_subs( from, to )
         expr = expr.subs( from, to )
@@ -673,7 +679,7 @@ def write_legacy_lmtpp_mesh_dm_data_set_field( res, bn, variable_list, sym_selec
             if sym_select( v ) and v->nb_values == n
                 data_if_mat := ".data" * ( v->expr_tensor_order == 2 )
                 res << sp <<< "        if ( field_name == \"$( v->name )\" ) { $( v->name + data_if_mat ) = value; return; }"
-        res << sp <<< "        std::cerr << \"There's no variable named \" << field_name << \" in data struct\" << std::endl;"
+        res << sp <<< "        std::cerr << \"There's no variable named \" << field_name << \" of type $TV in data struct\" << std::endl;"
         res << sp <<< "    }"
         
         # dm_data_get_field
@@ -682,10 +688,20 @@ def write_legacy_lmtpp_mesh_dm_data_set_field( res, bn, variable_list, sym_selec
             if sym_select( v ) and v->nb_values == n
                 data_if_mat := ".data" * ( v->expr_tensor_order == 2 )
                 res << sp <<< "        if ( field_name == \"$( v->name )\" ) { return $( v->name + data_if_mat ); }"
-        res << sp <<< "        std::cerr << \"There's no variable named \" << field_name << \" in data struct\" << std::endl;"
+        res << sp <<< "        std::cerr << \"There's no variable named \" << field_name << \" of type $TV in data struct\" << std::endl;"
         res << sp <<< "        return 0;"
         res << sp <<< "    }"
 
+    # Mat<...,Sym<> >
+    for n in 1 .. 4
+        TV := "Mat<Tpos,Sym<$n> >"
+        res << sp <<< "    $TV dm_data_get_field( const std::string field_name, StructForType<$TV > ) const {"
+        for v in variable_list
+            if sym_select( v ) and v->expr_tensor_order == 2 and v->nb_values == n * ( n + 1 ) / 2 and v->sym_property
+                res << sp <<< "        if ( field_name == \"$( v->name )\" ) { return $(v->name); }"
+        res << sp <<< "        std::cerr << \"There's no variable named \" << field_name << \" of type $TV in data struct\" << std::endl;"
+        res << sp <<< "        return $TV();"
+        res << sp <<< "    }"
 
 #
 def write_legacy_lmtpp_mesh_StaticData( bn, variable_list, sym_select, sp = "    " )

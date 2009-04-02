@@ -156,6 +156,11 @@ class Problem:
                 output.write( ' '*nb_sp+'        std::cerr << "There is no variable named " << field_name << " in data struct" << std::endl;\n' )
                 output.write( ' '*nb_sp+"        return Vec<Tpos,"+str(d)+">(Tpos(0));\n" )
                 output.write( ' '*nb_sp+"    }\n" )
+            for d in range( 1, 4 ):
+                output.write( ' '*nb_sp+"    Mat<Tpos,Sym<"+str(d)+"> > dm_data_get_field( const std::string field_name, StructForType<Mat<Tpos,Sym<"+str(d)+"> > > ) const {\n" )
+                output.write( ' '*nb_sp+"        assert( 0 /*TODO*/ );\n" )
+                output.write( ' '*nb_sp+"        return Mat<Tpos,Sym<"+str(d)+"> >();\n" )
+                output.write( ' '*nb_sp+"    }\n" )
             
             output.write( ' '*nb_sp+"};\n" )
         

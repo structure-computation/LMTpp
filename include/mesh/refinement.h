@@ -101,14 +101,6 @@ namespace LMTPRIVATE {
     };
 };
 
-// struct DispNumber {
-//     template<class TE> void operator()(const TE &e) const {
-//         for(unsigned i=0;i<TE::nb_nodes;++i)
-//             std::cout << e.node(i)->number_in_original_mesh() << " ";
-//         std::cout << std::endl;
-//     }
-// };
-
 /*!
     Cette fonction divise les barres (segments) du maillage suivant l'opérateur op.
     L'opérateur op peut soit renvoyer  un booléen soit un double. Il prend aussi forcément un élément barre en paramètre.
@@ -117,8 +109,6 @@ namespace LMTPRIVATE {
     Enfin refinement() renvoie vrai si elle divise au moins une barre et faux sinon.
 
     \keyword Maillage/Elément/Opération
-    \friend raphael.pasquier@lmt.ens-cachan.fr
-    \friend hugo.leclerc@lmt.ens-cachan.fr
 
     subdivide each element bar e contained in mesh or sub_meshes such as op(e)==true (true means subdivision). Subdivide parents
 */
@@ -137,10 +127,23 @@ bool refinement(TM &m,Op &op) {
     return res;
 }
 
+/**
+    Peut être utilisé pour couper un maillage avec un level-set
+*/
+template<class PhiDM>
+struct LevelSetRefinement {
+    template<class TE> typename TE::T operator()( const TE &e ) const {
+        typename TE::T d0 = ed( *e.node(0) );
+        typename TE::T d1 = ed( *e.node(1) );
+        if ( d0 * d1 >= 0 )
+            return 0;
+        return d0 / ( d0 - d1 ) * 0.999999;
+    }  
+    ExtractDM<PhiDM> ed;
+};
+
 /*!
     opérateur créé pour la fonction \a refinement_if_length_sup .
-    \friend raphael.pasquier@lmt.ens-cachan.fr
-    \friend hugo.leclerc@lmt.ens-cachan.fr
 */
 template<class T>
 struct RafinementOpBasedOnLength {
@@ -154,8 +157,6 @@ struct RafinementOpBasedOnLength {
     Elle renvoie vrai si elle divise au moins une barre et faux sinon. Ainsi si on souhaite que toutes les barres soient inférieures à max_length, on relancera la fonction autant de fois que nécessaire. 
 
     \keyword Maillage/Elément/Opération
-    \friend raphael.pasquier@lmt.ens-cachan.fr
-    \friend hugo.leclerc@lmt.ens-cachan.fr
     subdivide each element bar e such as length(e)>max_length (true means subdivision).
 */
 template<class TM,class T>

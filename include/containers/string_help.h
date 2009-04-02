@@ -15,7 +15,15 @@
 namespace LMT {
 
 template<class T>
-std::string to_string(const T &val) {
+std::string to_string( const T &val, int precision ) {
+    std::ostringstream os;
+    os.precision( precision );
+    os << val;
+    return os.str();
+}
+
+template<class T>
+std::string to_string( const T &val ) {
     std::ostringstream os;
     os << val;
     return os.str();

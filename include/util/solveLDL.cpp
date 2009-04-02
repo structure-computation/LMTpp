@@ -104,6 +104,7 @@ void LDL_solver::get_factorization( LMT::Mat<double,LMT::Gen<>,LMT::SparseLine<>
     // numeric factorization to get Li, Lx, and D */
     int d = ldl_numeric (n, Ap.ptr(), Ai.ptr(), Ax.ptr(), Lp.ptr(), Parent.ptr(), Lnz.ptr(), Li.ptr(),
                          Lx.ptr(), D.ptr(), Y.ptr(), Flag.ptr(), Pattern.ptr(), P.ptr(), Pinv.ptr());
+
     if (d != n) {
         std::cerr << "Ax=b not solved." << std::endl;
         assert(0);
@@ -116,6 +117,119 @@ void LDL_solver::get_factorization( LMT::Mat<double,LMT::Gen<>,LMT::SparseLine<>
     else
         want_semi_morse_ = false;
 }
+
+// pseudo-inverse
+// void LDL_solver::get_factorization( LMT::Mat<double,LMT::Gen<>,LMT::SparseLine<> > &mat, LMT::Vec<LMT::Vec<double> > &Kernel, bool want_free, bool want_semi_morse, bool want_amd_order ) {
+//     n = mat.nb_rows();
+// 
+//     Flag.resize( n );
+//     
+//     Ap.resize( n+1 );
+//     unsigned cpt = 0;
+//     for(int i=0;i<n;++i) {
+//         Ap[i] = cpt;
+//         cpt += mat.data[i].indices.size();
+//     }
+//     Ap[ n ] = cpt;
+// 
+//     unsigned nz = 0;
+//     for(int i=0;i<n;++i)
+//         nz += mat.data[i].indices.size();
+//     Ai.resize( nz );
+//     Ax.resize( nz );
+//     for(int i=0,cpt=0;i<n;++i) {
+//         for(unsigned j=0;j<mat.data[i].indices.size();++j,++cpt) {
+//             Ai[cpt] = mat.data[i].indices[j];
+//             Ax[cpt] = mat.data[i].data[j];
+//         }
+//     }
+//     
+//     if ( want_free )
+//         mat.free();
+//     
+//     // permutation
+//     P = LMT::range(n);
+//     if ( want_amd_order and amd_order( n, Ap.ptr(), Ai.ptr(), P.ptr(), (double *) NULL, Info) != AMD_OK ) {
+//         std::cerr << "call to AMD failed" << std::endl;
+//         assert(0);
+//     }
+//     
+//     //amd_control((double *) NULL); // amd_info(Info);
+//     //amd_info (Info) ;
+//     
+//     if ( !ldl_valid_matrix (n, Ap.ptr(), Ai.ptr()) or not ldl_valid_perm (n, P.ptr(), Flag.ptr()) ) {
+//         std::cerr << "mauvaise matrice - solveLDL.cpp" << std::endl;
+//         return;
+//     }
+//     
+//     // memory allocation
+//     Pinv.resize(n);
+//     Y.resize(n);
+//     Pattern.resize(n);
+//     Lnz.resize(n);
+//     Lp.resize(n+1);
+//     Parent.resize(n);
+//     D.resize(n);
+//     B.resize(n);
+//     X.resize(n);
+//     
+//     //
+//     ldl_symbolic(n, Ap.ptr(), Ai.ptr(), Lp.ptr(), Parent.ptr(), Lnz.ptr(), Flag.ptr(), P.ptr(), Pinv.ptr());
+//     lnz = Lp[n];
+//     
+//     // allocate remainder of L, of size lnz */
+//     Li.resize( lnz );
+//     Lx.resize( lnz );
+//     
+//     // numeric factorization to get Li, Lx, and D */
+// 
+//     // debut PK et PG
+//     pseudo_inverse=true;
+//     int Ksiz=0;
+// //    int maxkersiz=6; 
+// //    LMT::Vec<int> Knod; 
+// //    Knod.resize(maxkersiz);Knod.set(0);
+//     //Ker.resize(maxkersiz*n);Ker.set(0.);
+//     double *Ker_ptr = NULL;
+//     
+// //    int d = ldl_numeric (n, Ap.ptr(), Ai.ptr(), Ax.ptr(), Lp.ptr(), Parent.ptr(), Lnz.ptr(), Li.ptr(),
+// //                         Lx.ptr(), D.ptr(), Y.ptr(), Flag.ptr(), Pattern.ptr(), P.ptr(), Pinv.ptr());
+//     int d = ldl_numeric_pg (n, Ap.ptr(), Ai.ptr(), Ax.ptr(), Lp.ptr(), Parent.ptr(), Lnz.ptr(), Li.ptr(),
+//                          Lx.ptr(), D.ptr(), Y.ptr(), Flag.ptr(), Pattern.ptr(), P.ptr(), Pinv.ptr(),
+//                          &Ksiz, &Ker_ptr );
+//     LMT::Vec<double> Ker; Ker.resize( n * Ksiz );
+//     for(int i=0;i<n * Ksiz;++i)
+//         Ker[i] = Ker_ptr[i];
+//     if ( Ker_ptr )
+//         free( Ker_ptr );
+// 	
+// 	//std::cout << "\t\t\t\ttaille du noyau : " << Ksiz << std::endl ;
+//    
+//   
+//     Kernel.resize(Ksiz) ;
+//     for (unsigned i=0;i<(unsigned)Ksiz;i++){
+//       Kernel[i].resize(n) ;
+//       Vec<unsigned> rep = range(i*n,(i+1)*n) ;
+//       Kernel[i] = Ker[rep] ;
+//     }
+// 
+//     //std::cout << " Ker : "<< Ker << std::endl ;
+// 
+// //    std::cout << " Kernel dimension :  " << Ksiz << " / null pivots : "<< Knod <<" / Kernel basis : "<< Kernel << std::endl ;
+//     // fin PK et PG
+// 
+//     if (d != n) {
+//         std::cerr << "Ax=b not solved." << std::endl;
+//         assert(0);
+//     }
+// 
+//     if ( want_semi_morse ) {
+//         want_semi_morse_ = true;
+//         update_block_set_from_factorization();
+//     }
+//     else
+//         want_semi_morse_ = false;
+// }
 
 void LDL_solver::get_factorization( LMT::Mat<double,LMT::Sym<>,LMT::SparseLine<> > &m, LMT::Vec<LMT::Vec<double> > &Kernel, bool want_free, bool want_semi_morse, bool want_amd_order ) {
     //     TicToc tt; tt.start();
