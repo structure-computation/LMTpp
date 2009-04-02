@@ -37,12 +37,12 @@ const char* PageComment::prefixTag[SIZE_TABLE_PREFIX_TAG] = {
 
 
 
-PageComment :: PageComment( const char* file) {
+PageComment::PageComment( const char* file) {
  nameFile = file ;
  nameWithoutSuffix = enleve_suffix( nameFile ) ; 
 }
 
-PageComment :: ~PageComment( ) {
+PageComment::~PageComment( ) {
 
     int i ;
 
@@ -50,17 +50,17 @@ PageComment :: ~PageComment( ) {
         delete listComment[i] ;
 }
 
-string PageComment :: getName()
+string PageComment::getName()
 {
  return nameWithoutSuffix ;
 }
 
-string PageComment :: getNameFile()
+string PageComment::getNameFile()
 {
  return nameFile ;
 }
 
-int PageComment :: state( string& t,int end, int start ) {
+int PageComment::state( string& t,int end, int start ) {
 
     int pos,i ;
     bool tag ;
@@ -84,7 +84,7 @@ int PageComment :: state( string& t,int end, int start ) {
     return OPEN_STATE_ID ; 
 }
 
-string PageComment :: state_namespace( int* suivant, string& t ,int end, int start ) {
+string PageComment::state_namespace( int* suivant, string& t ,int end, int start ) {
 
     string retour ;
     int position[2] ;
@@ -122,7 +122,7 @@ string PageComment :: state_namespace( int* suivant, string& t ,int end, int sta
 }
 
 // renvoie vrai si c'est un extern "C"
-bool PageComment :: state_extern( int* suivant, string& t ,int end, int start ) {
+bool PageComment::state_extern( int* suivant, string& t ,int end, int start ) {
 
     int pos,next ;
     char delim ;
@@ -130,9 +130,14 @@ bool PageComment :: state_extern( int* suivant, string& t ,int end, int start ) 
     if ((pos = extraire_token(&next,&delim,"[]{}<>&*/:;()=\n \t",t,end,start )) >= 0 ) {
         if (t.substr(pos,next-pos) == "\"C\"") {
             // on parse le bloc extern
-            if (chercher_delimitateur(t,"{",&pos,end,next)) {
-                get_block(suivant,"{}",t,end,pos+1) ;
-                return true ;
+            if (chercher_delimitateur(t,"{;",&pos,end,next)) {
+                if (t[pos] == ';') {
+                    *suivant = pos+1;
+                    return true;
+                } else {
+                    get_block(suivant,"{}",t,end,pos+1) ;
+                    return true ;
+                }
             }
         } else {
             *suivant = next ;
@@ -147,7 +152,7 @@ bool PageComment :: state_extern( int* suivant, string& t ,int end, int start ) 
 }
 
 // Important : on suppose que start est l'indice du #
-void PageComment :: state_preprocessor( int* suivant, string& t ,int end, int start ) {
+void PageComment::state_preprocessor( int* suivant, string& t ,int end, int start ) {
 
     int pos ;
 
@@ -167,7 +172,7 @@ void PageComment :: state_preprocessor( int* suivant, string& t ,int end, int st
 
 /*
 // tableau à 2k valeurs 2j est l'index de début du lexem j et 2j+1 l'index du caractère qui le suit 
-void PageComment :: extract_list_lexem( int* suivant, deque<int>& listeIndex,char* delim,const char* ldelim, string& t ,int end, int start ) {
+void PageComment::extract_list_lexem( int* suivant, deque<int>& listeIndex,char* delim,const char* ldelim, string& t ,int end, int start ) {
 
     int pos,next,i,j,n ;
     char local_delim ;
@@ -193,7 +198,7 @@ void PageComment :: extract_list_lexem( int* suivant, deque<int>& listeIndex,cha
     *suivant = next ;
 }*/
 
-void PageComment :: state_typedef( int* suivant, Names& type, string& synonyme, string& t ,int end, int start ) {
+void PageComment::state_typedef( int* suivant, Names& type, string& synonyme, string& t ,int end, int start ) {
 
     deque<int> localListIndex ;
     string localtype ;
@@ -222,7 +227,7 @@ void PageComment :: state_typedef( int* suivant, Names& type, string& synonyme, 
     *suivant = next ;
 }
 
-void PageComment :: extract_ported( int* suivant, string& name, string& t ,int end, int start ) {
+void PageComment::extract_ported( int* suivant, string& name, string& t ,int end, int start ) {
 
     string locals ;
     int pos,next ;
@@ -235,7 +240,7 @@ void PageComment :: extract_ported( int* suivant, string& name, string& t ,int e
 
 }
 
-int PageComment :: index_begin_signature( string& t ,int end, int start ) {
+int PageComment::index_begin_signature( string& t ,int end, int start ) {
 
     int c_parenthese_fermante,i,pos ;
 
@@ -255,7 +260,7 @@ int PageComment :: index_begin_signature( string& t ,int end, int start ) {
     return end;
 }
 
-void PageComment :: extract_returnType_name( int* suivant ,const string& name_structure, Names& returnType, Names& name, string& t ,int end, int start ) {
+void PageComment::extract_returnType_name( int* suivant ,const string& name_structure, Names& returnType, Names& name, string& t ,int end, int start ) {
 
     deque<int> localListIndex ;
     string stmp ;
@@ -356,7 +361,7 @@ void PageComment :: extract_returnType_name( int* suivant ,const string& name_st
 }
 
 // on suppose que le ( des paramètres a été passé
-void PageComment :: extract_parametersFunction( int* suivant, ListParameter& listeParam, string& t ,int end, int start ) {
+void PageComment::extract_parametersFunction( int* suivant, ListParameter& listeParam, string& t ,int end, int start ) {
 
     deque<int> localListIndex ;
     string localtype ;
@@ -443,7 +448,7 @@ void PageComment :: extract_parametersFunction( int* suivant, ListParameter& lis
 
 
 // on supposera que le ) est passé
-void PageComment :: extract_FinalAttributFunction( int* suivant, string& attrib, char* delimitateur, string& t ,int end, int start ) {
+void PageComment::extract_FinalAttributFunction( int* suivant, string& attrib, char* delimitateur, string& t ,int end, int start ) {
 
     deque<int> localListIndex ;
     string localattr ;
@@ -469,7 +474,7 @@ void PageComment :: extract_FinalAttributFunction( int* suivant, string& attrib,
     *suivant = next ;
 }
 
-void PageComment :: extract_name_heritedClass( int* suivant, Names& name, ListParameter& lp , char* delimitateur, string& t ,int end, int start ) {
+void PageComment::extract_name_heritedClass( int* suivant, Names& name, ListParameter& lp , char* delimitateur, string& t ,int end, int start ) {
 
     deque<int> localListIndex ;
     string localattr ;
@@ -571,7 +576,7 @@ void PageComment :: extract_name_heritedClass( int* suivant, Names& name, ListPa
 }
 
 
-void PageComment :: get_declaration( Parameter& p,string& t,int end, int start ) {
+void PageComment::get_declaration( Parameter& p,string& t,int end, int start ) {
 
     deque<int> li ;
     string localtype ;
@@ -692,11 +697,11 @@ void PageComment :: get_declaration( Parameter& p,string& t,int end, int start )
 }
 
 /*
-void PageComment :: state_function( int* suivant, Function* f, string& t ,int end, int start ) {
+void PageComment::state_function( int* suivant, Function* f, string& t ,int end, int start ) {
 
 }*/
 
-void PageComment :: state_template( int* suivant, ListTemplateParameter& listeParam, string& t ,int end, int start ) {
+void PageComment::state_template( int* suivant, ListTemplateParameter& listeParam, string& t ,int end, int start ) {
 
     vector<string> listeLexems ;
     string locals ;
@@ -765,7 +770,7 @@ void PageComment :: state_template( int* suivant, ListTemplateParameter& listePa
 }
 
 // à améliorer
-void PageComment :: copy_listTemplateParameter( ListTemplateParameter& res, ListTemplateParameter& src ) {
+void PageComment::copy_listTemplateParameter( ListTemplateParameter& res, ListTemplateParameter& src ) {
 
     int i ;
     TemplateParameter* ptr_tp ;
@@ -779,7 +784,7 @@ void PageComment :: copy_listTemplateParameter( ListTemplateParameter& res, List
 }
 
 // cette fonction recherche s'il y a des mots écrits au début de la ligne à aprtir de la position start
-bool PageComment :: code_before_comment(string& t ,int start ) {
+bool PageComment::code_before_comment(string& t ,int start ) {
 
     bool reponse ;
     char c ;
@@ -798,12 +803,12 @@ bool PageComment :: code_before_comment(string& t ,int start ) {
     return false ;
 }
 
-void PageComment :: addComment( Comment* c )
+void PageComment::addComment( Comment* c )
 {
  listComment.push_back( c ) ;
 }
 
-bool PageComment :: comment_of_code( string& s) {
+bool PageComment::comment_of_code( string& s) {
 
     string stmp ;
     char lexem_example[16] ;
@@ -832,7 +837,7 @@ bool PageComment :: comment_of_code( string& s) {
     return true ;
 }
 
-string PageComment :: principal_type_of( string& na) {
+string PageComment::principal_type_of( string& na) {
 
     deque<int> localListIndex ;
     string stmp ;
@@ -867,7 +872,7 @@ string PageComment :: principal_type_of( string& na) {
 
 }
 
-void PageComment :: parse()
+void PageComment::parse()
 {
     char str[LENGTH_STRING] ;
     char number[10] ;
@@ -885,7 +890,7 @@ void PageComment :: parse()
     ifstream entree( file , ios::in ) ;
 
     if (! entree) {
-        cerr << " impossible d' ouvrir le fichier "  << file << " pour PageComment :: parse() " << endl ;
+        cerr << " impossible d' ouvrir le fichier "  << file << " pour PageComment::parse() " << endl ;
         return ;
     }
 
@@ -1041,7 +1046,7 @@ void PageComment :: parse()
     parse_language_cpp( &code,texte,texte.size(),0) ;
 }
 
-void PageComment :: parse_language_cpp( Bloc* code, string& textOfCode, int end, int start ) {
+void PageComment::parse_language_cpp( Bloc* code, string& textOfCode, int end, int start ) {
 
     ListTemplateParameter listeTemplateParameter ;
     ListParameter listeParameter ;
@@ -1375,7 +1380,7 @@ std::ostream &operator<<( std::ostream &os, PageComment &c ) {
 }
 
 /*
-void PageComment :: generateHTML() {
+void PageComment::generateHTML() {
 
  for(int i=0;i<listComment.size();++i)  listComment[i]->generateHTML( name ) ;
 }
