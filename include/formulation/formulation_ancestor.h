@@ -97,7 +97,6 @@ public:
 
     virtual unsigned localOP_local_update()= 0;
     virtual void localOP_update_variables() = 0;    /// update variable at end of the time step from the c++ code.
-    virtual void update_variables(Vec<Vec<ScalarType> > &vectors_) = 0;
     virtual void update_variables() = 0; /// update variable at end of the time step
     virtual void update_variables(Vec<Vec<ScalarType> > &vectors_) = 0; /// update variable at end of the time step
     virtual void update_variables(ScalarType partial_ts) = 0; ///  update variable at time t_n + partial_ts
