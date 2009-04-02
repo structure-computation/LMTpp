@@ -294,7 +294,7 @@ std::string Write_code::to_asm( std::string function_name ) {
     
     
     //
-    MakeAsm ma;
+    MakeAsm ma( /*x86_64*/sizeof(void *) == 8 );
     ++Ex::current_id;
     for(unsigned i=0;i<lst_var.size();++i)
         ma.add_op_to_write( lst_var[i].ex.op );

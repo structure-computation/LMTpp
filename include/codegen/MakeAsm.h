@@ -79,8 +79,10 @@ struct MakeAsm {
         // stack management
         std::ostringstream res;
         if ( not x86_64 ) {
-            res << "%define rax eax\n";
+            res << "%define mon_rax eax\n";
             res << "%define rsp esp\n";
+        } else {
+            res << "%define mon_rax rdi\n";
         }
         res << "    sub  rsp, " << base_type_size << '*' << stack.size() << "\n";
         for(unsigned i=0;i<registers.size();++i)
@@ -265,7 +267,7 @@ private:
         //
         if ( wop->to_write >= 0 ) {
             wop->pos_in_lst_var = wop->to_write;
-            os << "    movsd [ rax + " << base_type_size << '*' << wop->to_write << " ], xmm" << wop->reg << "\n";
+            os << "    movsd [ mon_rax + " << base_type_size << '*' << wop->to_write << " ], xmm" << wop->reg << "\n";
             if ( wop->parents.size() == 0 )
                 registers[ wop->reg ] = NULL;
         }
@@ -458,7 +460,7 @@ private:
         if ( wop->reg >= 0 )
             os << "xmm" << wop->reg;
         else if ( wop->pos_in_lst_var >= 0 )
-            os << "[ rax + " << base_type_size << '*' << wop->pos_in_lst_var << " ]";
+            os << "[ mon_rax + " << base_type_size << '*' << wop->pos_in_lst_var << " ]";
         else if ( wop->pos_in_stack >= 0 )
             os << "[ rsp + " << base_type_size << '*' << wop->pos_in_stack   << " ]";
         else

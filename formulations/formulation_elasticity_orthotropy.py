@@ -27,6 +27,7 @@ sigma = Variable( interpolation='der_nodal', default_value='0', nb_dim=[dim*(dim
 epsilon = Variable( interpolation='der_nodal', default_value='0', nb_dim=[dim*(dim+1)/2], unit='' )
 ener = Variable( interpolation='elementary', default_value='0', unit='N*mm' )
 
+use_asm = True
 
 def formulation():
     epsilon = grad_sym_col(dep.expr)
