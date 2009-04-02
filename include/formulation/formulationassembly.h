@@ -184,8 +184,18 @@ namespace LMT {
         void dispatch_results(bool want_f_reaction = true) { ///push result in each f.result
             for(unsigned i=0;i<formulations.size();++i)
                 formulation(i)->get_result() = vectors[0][ formulations[i].local_ddl_to_global_ones ];
-            if (want_f_reaction)
+            if (want_f_reaction){
                 f_reaction = K_before_constraints * vectors[0] - F_before_contraints;
+
+                #ifdef IFNDEF_f_nodal_2_DM
+                for(unsigned i=0;i<formulations.size();++i){
+                MeshAndForm &maf = formulations[i];
+                for(unsigned j=0;j<maf.m->node_list.size();++j)
+                    for(unsigned k=0;k<3;++k)
+                        maf.m->node_list[j].f_nodal_2[k] = f_reaction[maf.local_ddl_to_global_ones][j*3+k];
+                }
+                #endif // IFNDEF_dI_DM
+            }
         }
         //
         bool solve_system(T iterative_criterium=T(0), bool want_f_reaction = true) {
@@ -197,6 +207,13 @@ namespace LMT {
         void update_skin() {
             for(unsigned i=0;i<formulations.size();++i)
                 formulation(i)->update_skin();
+        }
+        //
+        void local_update(Vec<unsigned> &TODO) {
+            for(unsigned i=0;i<formulations.size();++i)
+                if(TODO[i] == 1){
+                    TODO[i] = formulation(i)->localOP_local_update();
+                    }
         }
         //
         void call_after_solve() {
@@ -243,6 +260,12 @@ namespace LMT {
             for(unsigned i=0;i<formulations.size();++i)
                 formulation(i)->call_after_solve_3(elem_list);
         }*/
+        //
+        void localOP_update_variables() {
+            for(unsigned i=0;i<formulations.size();++i){
+                formulation(i)->localOP_update_variables();
+            }
+        }
         //
         void update_variables() {
             for(unsigned i=0;i<formulations.size();++i){
@@ -349,7 +372,7 @@ namespace LMT {
                 maf.local_ddl_to_global_ones.resize(maf.local_unknowns_to_global_ones.size() * nb_ddl_per_node );
                 for(unsigned j=0;j<maf.local_unknowns_to_global_ones.size();++j)
                     for(unsigned d=0;d<nb_ddl_per_node;++d)
-                        maf.local_ddl_to_global_ones[j*nb_ddl_per_node+d] = maf.local_unknowns_to_global_ones[j] * nb_ddl_per_node + size ;
+                        maf.local_ddl_to_global_ones[j*nb_ddl_per_node+d] = maf.local_unknowns_to_global_ones[j] * nb_ddl_per_node + d ;
             }
             size += pos.size() + nb_ddl_per_node;
             // elem unknowns. nb_elem_of_type will = nb_unknowns

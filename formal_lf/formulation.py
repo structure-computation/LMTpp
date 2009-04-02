@@ -884,6 +884,7 @@ class Formulation:
     #       for symmetric in [False,True][update_only_vec:]:
     #         self.write_contact_matrix(f,'N',update_only_vec,symmetric,contact_matrices,'')
 
+    self.write_xml_mat_to_mesh(f)
     f.write( '} // namespace LMT\n' )
     f.write( '\n' )
     
@@ -932,3 +933,21 @@ class Formulation:
     #     f.write( '  #undef PNODE\n' )
     #     f.write( '}\n' )
     #     f.write( '#endif\n' )
+      
+  def write_xml_mat_to_mesh(self, f=sys.stdout):
+    f.write( '\n' )
+    f.write( '#ifndef '+ self.name +'_read_material_to_mesh\n' )
+    f.write( '#define '+ self.name +'_read_material_to_mesh\n' )
+    new_var = self.get_variables().items()
+    f.write( 'template<class TM, class T, bool wont_add_nz>\n')
+    f.write( 'void read_material_to_mesh_(const XmlNode &n, Formulation<TM,%s,DefaultBehavior,T,wont_add_nz> &f){ \n' % (self.name) )
+    for name_var,var in new_var:
+      if var.interpolation=='global':
+         f.write( '    if(n.has_attribute("'+name_var+'"))  \n')
+         f.write( '        n.get_attribute("'+name_var+'", f.m->' +name_var+ ' ); \n')
+         f.write( '    else  \n')
+         f.write( '        std::cerr << "Warning using default value of ' +name_var+ ' : " << f.m->'+name_var+' << std::endl; \n\n')
+    f.write( '  };\n' )
+    f.write( '#endif // '+ self.name +'_read_material_to_mesh\n' )
+
+

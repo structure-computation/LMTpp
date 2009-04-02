@@ -24,7 +24,16 @@
 #include "containers/matumfpack.h"
 
 namespace LMT {
-
+template<class NameFormulation, int dim, class ScalarType_>
+struct LocalOperator{
+    template< class TM, class TF>
+    void local_update(TM *m ,TF *f){  };
+    template<class TM>
+    void update_variables(TM *m){ };
+    };
+/** To be redefined for each new for,ulations */
+template<class TF>
+    void read_material_to_mesh(const XmlNode &n, TF &f);
 /**
 */
 template<class NameFormulation,unsigned dim,class T,class NameVariant=DefaultBehavior>
@@ -81,6 +90,7 @@ public:
     
     Formulation(TM &mm) {
         m = &mm;
+        localOP = new LocalOperator<NameFormulation, TM::dim, ScalarType>;
         mat_def_pos_if_sym = Carac::matrix_will_be_definite_positive;
         time = AbsScalarType(0);
         time_steps = AbsScalarType(1e40);
@@ -303,7 +313,7 @@ public:
         }
         
         if ( this->want_amd ) {
-            assert( *(indice_glob)==0 ); // not managed
+            assert( (*indice_glob)==0 ); // not managed
             assert( nb_unk_elem==0 ); // not managed
             *indice_noda = symamd( *m ) * nnu;
         }
@@ -648,6 +658,19 @@ public:
             apply( m->elem_list, toto, *this , K, F ); // element (and skin elements)
         }
     }
+    virtual void read_material_to_mesh(const XmlNode &n){
+        read_material_to_mesh_(n, *this);
+    }
+    //
+    virtual unsigned localOP_local_update(){
+        unsigned olda = 0;
+        localOP->local_update(m , this);                         ///< Local loop 
+        return olda;
+    };
+    //
+    virtual void localOP_update_variables(){
+       localOP->update_variables(m);
+    };
     ///
     virtual void assemble_constraints(Mat<ScalarType,Sym<>,SparseLine<> > &K, Vec<ScalarType> &F, Vec<Vec<ScalarType> > &vectors_, const ScalarType &M, bool assemble_mat=true,bool assemble_vec=true) {
         // constraints
@@ -1178,36 +1201,54 @@ public:
         indice_glob = &val;
     };
     virtual void call_after_solve() {
-        if ( not allocated )
-            allocate_matrices();
-        apply( m->elem_list, CallAfterSolve(), *this, vectors );
+        if (vectors_assembly== NULL){
+            if ( not allocated )
+                allocate_matrices();
+            apply( m->elem_list, CallAfterSolve(), *this, vectors );
+        } else {
+            apply( m->elem_list, CallAfterSolve(), *this, *vectors_assembly );
+        }
+
     }
     //
     virtual void call_after_solve(Vec<Vec<ScalarType> > &vectors_) {
         apply( m->elem_list, CallAfterSolve(), *this, vectors_);
     }
     virtual void call_after_solve_2() {
-        if ( not allocated )
-            allocate_matrices();
-        apply( m->elem_list, CallAfterSolve_2(), *this, vectors );
+        if (vectors_assembly== NULL){
+            if ( not allocated )
+                allocate_matrices();
+            apply( m->elem_list, CallAfterSolve_2(), *this, vectors );
+        } else {
+            apply( m->elem_list, CallAfterSolve_2(), *this, *vectors_assembly );
+        }
     }
     virtual void call_after_solve_2(Vec<Vec<ScalarType> > &vectors_)  {
         apply( m->elem_list, CallAfterSolve_2(), *this, vectors_ );
     }
 
     virtual void call_after_solve_3() {
-        if ( not allocated )
-            allocate_matrices();
-        apply( m->elem_list, CallAfterSolve_3(), *this, vectors );
+        if (vectors_assembly== NULL){
+            if ( not allocated )
+                allocate_matrices();
+            apply( m->elem_list, CallAfterSolve_3(), *this, vectors );
+        } else {
+            apply( m->elem_list, CallAfterSolve_3(), *this, *vectors_assembly );
+        }
+
     }
     virtual void call_after_solve_3(Vec<Vec<ScalarType> > &vectors_)  {
         apply( m->elem_list, CallAfterSolve_3(), *this, vectors_ );
     }
 
     virtual void call_after_solve_4() {
-        if ( not allocated )
-            allocate_matrices();
-        apply( m->elem_list, CallAfterSolve_4(), *this, vectors );
+        if (vectors_assembly== NULL){
+            if ( not allocated )
+                allocate_matrices();
+            apply( m->elem_list, CallAfterSolve_4(), *this, vectors );
+        } else {
+            apply( m->elem_list, CallAfterSolve_4(), *this, *vectors_assembly );
+        }
     }
 
     virtual void call_after_solve_4(Vec<Vec<ScalarType> > &vectors_)  {
@@ -1215,17 +1256,25 @@ public:
     }
     
     virtual void call_after_solve_5() {
-        if ( not allocated )
-            allocate_matrices();
-        apply( m->elem_list, CallAfterSolve_5(), *this, vectors );
+        if (vectors_assembly== NULL){
+            if ( not allocated )
+                allocate_matrices();
+            apply( m->elem_list, CallAfterSolve_5(), *this, vectors );
+        } else {
+            apply( m->elem_list, CallAfterSolve_5(), *this, *vectors_assembly );
+        }
     }
     virtual void call_after_solve_5(Vec<Vec<ScalarType> > &vectors_)  {
         apply( m->elem_list, CallAfterSolve_5(), *this, vectors_ );
     }
     virtual void call_after_solve_6() {
-        if ( not allocated )
-            allocate_matrices();
-        apply( m->elem_list, CallAfterSolve_6(), *this, vectors );
+        if (vectors_assembly== NULL){
+            if ( not allocated )
+                allocate_matrices();
+            apply( m->elem_list, CallAfterSolve_6(), *this, vectors );
+        } else {
+            apply( m->elem_list, CallAfterSolve_6(), *this, *vectors_assembly );
+        }
     }
     virtual void call_after_solve_6(Vec<Vec<ScalarType> > &vectors_)  {
         apply( m->elem_list, CallAfterSolve_6(), *this, vectors_ );
@@ -1417,6 +1466,8 @@ public:
     Vec<AbsScalarType,nb_vectors> time_steps;
     AbsScalarType time; /// at end of current step
     Vec<ScalarType> old_vec;
+   
+    LocalOperator<NameFormulation, TM::dim, ScalarType>* localOP;
 
     Vec<Constraint<Formulation> > constraints;
     Vec<Sollicitation<Formulation> > sollicitations;

@@ -23,7 +23,7 @@ void dic_elem_matrix_( const TE &elem, const TIMG_f &f, const TIMG_g &g, TDIC &d
     assert( 0 );
 }
 
-/**
+/*!
     Corrélation sur CPU
     
     Il faut spécifier un critère d'arrêt avant exec ou exec_rigid_body (min_norm_inf_dU ou min_norm_2_dU par exemple).
