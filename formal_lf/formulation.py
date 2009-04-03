@@ -707,11 +707,12 @@ class Formulation:
     f.write( '// \n' )
     BU = ',unsigned symmetric_version'*(assemble_mat==False)
     if T=='V':
-      f.write( 'template<class T,class TM,bool wont_add_nz,class TMA,class TVE,class TVEVE,class T_pos,class ND,class ED,unsigned nim'+BU+'>\n' )
       if self.integration_totale:
+          f.write( 'template<class T,class TM,bool wont_add_nz,class TMA,class TVE,class TVEVE,class T_pos,class ND,class ED,unsigned nim'+BU+'>\n' )
           f.write( 'void add_elem_matrix(\n' )
       else:
-          f.write( 'void add_local_elem_matrix(T ponderation,const T *var_inter,\n' )
+          f.write( 'template<class TD,class T,class TM,bool wont_add_nz,class TMA,class TVE,class TVEVE,class T_pos,class ND,class ED,unsigned nim'+BU+'>\n' )
+          f.write( 'void add_local_elem_matrix(TD ponderation,const TD *var_inter,\n' )
       f.write( '      Formulation<TM,%s,DefaultBehavior,T,wont_add_nz> &f,\n' % self.name )
       f.write( '      TMA &matrix,\n' )
       f.write( '      TVE &sollicitation,\n' )
@@ -774,11 +775,12 @@ class Formulation:
     #
     f.write( '// \n' )
     if T=='V':
-      f.write( 'template<class T,class TM,bool wont_add_nz,class TMA,class TVE,class TVEVE,class T_pos,class ND,class ED,unsigned nim>\n' )
       if self.integration_totale:
+          f.write( 'template<class T,class TM,bool wont_add_nz,class TMA,class TVE,class TVEVE,class T_pos,class ND,class ED,unsigned nim>\n' )
           f.write( 'void add_elem_vector_der_var(\n' )
       else:
-          f.write( 'void add_local_elem_vector_der_var(T ponderation,const T *var_inter,\n' )
+          f.write( 'template<class TD,class T,class TM,bool wont_add_nz,class TMA,class TVE,class TVEVE,class T_pos,class ND,class ED,unsigned nim>\n' )
+          f.write( 'void add_local_elem_vector_der_var(TD ponderation,const TD *var_inter,\n' )
       f.write( '      Formulation<TM,%s,DefaultBehavior,T,wont_add_nz> &f,\n' % self.name )
       f.write( '      TMA &matrix,\n')
       f.write( '      TVE &sollicitation,\n' )

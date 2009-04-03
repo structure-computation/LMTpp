@@ -291,7 +291,6 @@ struct DicCPU {
                 pd( m.node_list[i] ) *= 2;
             }
         }
-        PRINT( resol_level );
         //
         for(cpt_iter=0;cpt_iter<max_cpt_iter;++cpt_iter) {
             double time_old = time_of_day_in_sec();
@@ -358,7 +357,6 @@ struct DicCPU {
                 pd( m.node_list[i] ) *= 2;
             }
         }
-        PRINT( resol_level );
         //
         typedef typename TM::Pvec Pvec;
         double time_old = time_of_day_in_sec();
