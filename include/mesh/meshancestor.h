@@ -52,9 +52,10 @@
 namespace LMT {
 
 
-template<class Carac,unsigned nvi_to_subs,unsigned skin>
-class MeshAncestor : public Carac::GlobalStaticData {
+template<class Carac_,unsigned nvi_to_subs,unsigned skin>
+class MeshAncestor : public Carac_::GlobalStaticData {
 public:
+    typedef Carac_ Carac;
     static const unsigned dim = Carac::dim;
     typedef typename Carac::Tpos Tpos;
     typedef Vec<Tpos,dim> Pvec;
