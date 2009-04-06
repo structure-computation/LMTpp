@@ -59,7 +59,7 @@ struct ImgInterpOrder3_Kernel {
     static std::string name() { return "ImgInterpOrder3_Kernel"; }
     
     template<class T>
-    T interp( T vm, T v0, T v1, T v2, T xf ) {
+    T interp( T vm, T v0, T v1, T v2, T xf ) const {
         return 
             vm * ( 0 - xf ) * ( 1 - xf ) * ( 2 - xf ) / 6 + 
             v0 * ( 1 + xf ) * ( 1 - xf ) * ( 2 - xf ) / 2 + 
@@ -68,7 +68,7 @@ struct ImgInterpOrder3_Kernel {
     }
     
     template<class T>
-    T grad( T vm, T v0, T v1, T v2, T xf ) {
+    T grad( T vm, T v0, T v1, T v2, T xf ) const {
         return 
             vm * ( xf * ( 1 - xf ) - ( 2 - xf ) * ( 1 - 2 * xf ) ) / 6 + 
             v0 * ( - ( 1 - xf ) * ( 1 + xf ) - 2 * xf * ( 2 - xf ) ) / 2 + 
@@ -418,7 +418,7 @@ struct ImgInterp {
     Vec<T> data;
     Vec<int,dim> sizes;
     Kernel kernel;
-    mutable ImgInterp<T,dim> *div_2;
+    mutable ImgInterp<T,dim,Kernel> *div_2;
 };
 
 

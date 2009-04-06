@@ -24,16 +24,19 @@
 #include "containers/matumfpack.h"
 
 namespace LMT {
+
 template<class NameFormulation, int dim, class ScalarType_>
 struct LocalOperator{
     template< class TM, class TF>
     void local_update(TM *m ,TF *f){  };
     template<class TM>
     void update_variables(TM *m){ };
-    };
+};
+
 /** To be redefined for each new for,ulations */
 template<class TF>
-    void read_material_to_mesh(const XmlNode &n, TF &f);
+void read_material_to_mesh_( const XmlNode &n, TF &f );
+
 /**
 */
 template<class NameFormulation,unsigned dim,class T,class NameVariant=DefaultBehavior>
@@ -658,13 +661,13 @@ public:
             apply( m->elem_list, toto, *this , K, F ); // element (and skin elements)
         }
     }
-    virtual void read_material_to_mesh(const XmlNode &n){
-        read_material_to_mesh_(n, *this);
+    virtual void read_material_to_mesh( const XmlNode &n ){
+        read_material_to_mesh_( n, *this );
     }
     //
     virtual unsigned localOP_local_update(){
         unsigned olda = 0;
-        localOP->local_update(m , this);                         ///< Local loop 
+        localOP->local_update( m, this );                         ///< Local loop 
         return olda;
     };
     //
