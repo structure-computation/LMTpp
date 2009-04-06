@@ -35,7 +35,7 @@ struct LocalOperator{
 
 /** To be redefined for each new for,ulations */
 template<class TF>
-void read_material_to_mesh_( const XmlNode &n, TF &f );
+void read_material_to_mesh_( const XmlNode &n, TF &f ) {}
 
 /**
 */
