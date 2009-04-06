@@ -12,6 +12,8 @@ namespace LMT {
 
 /** kernel exemple for ImgInterp */
 struct ImgInterpBilinearKernel {
+    static std::string name() { return "ImgInterpBilinearKernel"; }
+    
     // 2D
     template<class T,class Img,class PT>
     T operator()( StructForType<T>, const Img &f, PT x, PT y ) const {
@@ -41,6 +43,82 @@ struct ImgInterpBilinearKernel {
                f.tex_int( xi + 1, yi + 0, zi + 1 ) * ( 0 + xf ) * ( 1 - yf ) * ( 0 + zf ) + 
                f.tex_int( xi + 0, yi + 1, zi + 1 ) * ( 1 - xf ) * ( 0 + yf ) * ( 0 + zf ) + 
                f.tex_int( xi + 1, yi + 1, zi + 1 ) * ( 0 + xf ) * ( 0 + yf ) * ( 0 + zf );
+    }
+
+    template<class T,class Img,class PT,int dim>
+    Vec<T,dim> grad( StructForType<T>, const Img &f, Vec<PT,dim> p ) const {
+        Vec<T,dim> res;
+        for(int i=0;i<dim;++i)
+            res[ i ] = f( Vec<PT,dim>( p + static_dirac_vec<dim>( 0.5, i ) ) ) - f( p - static_dirac_vec<dim>( 0.5, i ) );
+        return res;
+    }
+};
+
+/** kernel exemple for ImgInterp */
+struct ImgInterpOrder3_Kernel {
+    static std::string name() { return "ImgInterpOrder3_Kernel"; }
+    
+    template<class T>
+    T interp( T vm, T v0, T v1, T v2, T xf ) {
+        return 
+            vm * ( 0 - xf ) * ( 1 - xf ) * ( 2 - xf ) / 6 + 
+            v0 * ( 1 + xf ) * ( 1 - xf ) * ( 2 - xf ) / 2 + 
+            v1 * ( 1 + xf ) * ( 0 + xf ) * ( 2 - xf ) / 2 + 
+            v2 * ( 1 + xf ) * ( 0 + xf ) * ( xf - 1 ) / 6;
+    }
+    
+    template<class T>
+    T grad( T vm, T v0, T v1, T v2, T xf ) {
+        return 
+            vm * ( xf * ( 1 - xf ) - ( 2 - xf ) * ( 1 - 2 * xf ) ) / 6 + 
+            v0 * ( - ( 1 - xf ) * ( 1 + xf ) - 2 * xf * ( 2 - xf ) ) / 2 + 
+            v1 * ( ( 2 - xf ) * ( 1 + 2 * xf ) - xf * ( 1 + xf ) ) / 2 + 
+            v2 * ( xf * ( 1 + xf ) + ( xf - 1 ) * ( 1 + 2 * xf ) ) / 6;
+    }
+    
+    // 2D
+    template<class T,class Img,class PT>
+    T operator()( StructForType<T>, const Img &f, PT x, PT y ) const {
+        int xi = int( x );
+        int yi = int( y );
+        PT xf = x - xi;
+        PT yf = y - yi;
+        return interp( 
+            interp( f.tex_int( xi - 1, yi - 1 ), f.tex_int( xi + 0, yi - 1 ), f.tex_int( xi + 1, yi - 1 ), f.tex_int( xi + 2, yi - 1 ), xf ),
+            interp( f.tex_int( xi - 1, yi + 0 ), f.tex_int( xi + 0, yi + 0 ), f.tex_int( xi + 1, yi + 0 ), f.tex_int( xi + 2, yi + 0 ), xf ),
+            interp( f.tex_int( xi - 1, yi + 1 ), f.tex_int( xi + 0, yi + 1 ), f.tex_int( xi + 1, yi + 1 ), f.tex_int( xi + 2, yi + 1 ), xf ),
+            interp( f.tex_int( xi - 1, yi + 2 ), f.tex_int( xi + 0, yi + 2 ), f.tex_int( xi + 1, yi + 2 ), f.tex_int( xi + 2, yi + 2 ), xf ),
+            yf 
+        );
+    }
+    // 3D
+    template<class T,class Img,class PT>
+    T operator()( StructForType<T>, const Img &f, PT x, PT y, PT z ) const {
+        assert( 0 /*TODO*/ );
+    }
+
+    template<class T,class Img,class PT,int dim>
+    Vec<T,dim> grad( StructForType<T>, const Img &f, Vec<PT,dim> p ) const {
+        int xi = int( p[0] );
+        int yi = int( p[1] );
+        PT xf = p[0] - xi;
+        PT yf = p[1] - yi;
+        return Vec<T,dim>( 
+            grad(
+                interp( f.tex_int( xi - 1, yi - 1 ), f.tex_int( xi - 1, yi + 0 ), f.tex_int( xi - 1, yi + 1 ), f.tex_int( xi - 1, yi + 2 ), yf ),
+                interp( f.tex_int( xi + 0, yi - 1 ), f.tex_int( xi + 0, yi + 0 ), f.tex_int( xi + 0, yi + 1 ), f.tex_int( xi + 0, yi + 2 ), yf ),
+                interp( f.tex_int( xi + 1, yi - 1 ), f.tex_int( xi + 1, yi + 0 ), f.tex_int( xi + 1, yi + 1 ), f.tex_int( xi + 1, yi + 2 ), yf ),
+                interp( f.tex_int( xi + 2, yi - 1 ), f.tex_int( xi + 2, yi + 0 ), f.tex_int( xi + 2, yi + 1 ), f.tex_int( xi + 2, yi + 2 ), yf ),
+                xf 
+            ),
+            grad(
+                interp( f.tex_int( xi - 1, yi - 1 ), f.tex_int( xi + 0, yi - 1 ), f.tex_int( xi + 1, yi - 1 ), f.tex_int( xi + 2, yi - 1 ), xf ),
+                interp( f.tex_int( xi - 1, yi + 0 ), f.tex_int( xi + 0, yi + 0 ), f.tex_int( xi + 1, yi + 0 ), f.tex_int( xi + 2, yi + 0 ), xf ),
+                interp( f.tex_int( xi - 1, yi + 1 ), f.tex_int( xi + 0, yi + 1 ), f.tex_int( xi + 1, yi + 1 ), f.tex_int( xi + 2, yi + 1 ), xf ),
+                interp( f.tex_int( xi - 1, yi + 2 ), f.tex_int( xi + 0, yi + 2 ), f.tex_int( xi + 1, yi + 2 ), f.tex_int( xi + 2, yi + 2 ), xf ),
+                yf 
+            )
+        );
     }
 };
 
@@ -322,19 +400,16 @@ struct ImgInterp {
     
     ///
     inline Vec<T,dim> grad( Vec<PT,dim> p ) const {
-        Vec<T,dim> res;
-        for(int i=0;i<dim;++i)
-            res[ i ] = operator()( Vec<PT,dim>( p + 0.5 * static_dirac_vec<dim>( 1, i ) ) ) - operator()( p - 0.5 * static_dirac_vec<dim>( 1, i ) );
-        return res;
+        return kernel.grad( StructForType<T>(), *this, p );
     }
     
     ///
-    inline Vec<T,dim> grad( Vec<PT,dim> p, PT dec ) const {
-        Vec<T,dim> res;
-        for(int i=0;i<dim;++i)
-            res[ i ] = ( operator()( Vec<PT,dim>( p + static_dirac_vec<dim>( dec / 2, i ) ) ) - operator()( p - static_dirac_vec<dim>( dec / 2, i ) ) ) / dec;
-        return res;
-    }
+    //     inline Vec<T,dim> grad( Vec<PT,dim> p, PT dec ) const {
+    //         Vec<T,dim> res;
+    //         for(int i=0;i<dim;++i)
+    //             res[ i ] = ( operator()( Vec<PT,dim>( p + static_dirac_vec<dim>( dec / 2, i ) ) ) - operator()( p - static_dirac_vec<dim>( dec / 2, i ) ) ) / dec;
+    //         return res;
+    //     }
     
     ///
     void load_if_necessary( Vec<int,dim> MI, Vec<int,dim> MA, bool may_be_modified = false ) const {}

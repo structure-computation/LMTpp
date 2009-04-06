@@ -94,10 +94,13 @@ class Problem:
             cpt = 0
             for namevar,var in all_vars.items():
                 if cond(var):
-                    for i in range(0,var.nb_der+1):
-                        der_str = ("der"+str(i)+"_")*(i!=0)
-                        output.write( ' '*nb_sp+'    CARACDMEXTNAME( '+str(cpt)+', '+type_vars[var.type_to_str(in_vec(var),cond(var))]+', '+der_str+namevar+', "'+var.unit+'" );\n')
-                        cpt += 1
+                    if var.dont_use_caracdm:
+                        output.write( ' '*nb_sp+'    '+type_vars[var.type_to_str(in_vec(var),cond(var))]+' '+namevar+';\n')
+                    else:
+                        for i in range(0,var.nb_der+1):
+                            der_str = ("der"+str(i)+"_")*(i!=0)
+                            output.write( ' '*nb_sp+'    CARACDMEXTNAME( '+str(cpt)+', '+type_vars[var.type_to_str(in_vec(var),cond(var))]+', '+der_str+namevar+', "'+var.unit+'" );\n')
+                            cpt += 1
             if cpt==0: output.write( ' '*nb_sp+"    VOIDDMSET;\n" )
             else: output.write( ' '*nb_sp+"    static const unsigned nb_params = "+str(cpt)+";\n" )
             
@@ -170,6 +173,9 @@ class Problem:
             nb_nodes = 0
         write_static_data( 'NodalStaticData',  lambda var:std_interpolations[var.interpolation](Toto()).nb_nodal,  lambda var:std_interpolations[var.interpolation](Toto()).in_vec )
         write_static_data( 'GlobalStaticData', lambda var:std_interpolations[var.interpolation](Toto()).nb_global, lambda var:std_interpolations[var.interpolation](Toto()).in_vec )
+
+        output.write( "    typedef Node<dim,Tpos,NodalStaticData> TNode;\n" )
+        output.write( "    typedef ElementAncestor<TNode> EA;\n" )
 
         # elements
         output.write( "    template<unsigned nvi_to_subs,unsigned skin,unsigned num_sub_element,unsigned inner=0> struct ElementChoice { typedef void NE; typedef DefaultBehavior BE; typedef VoidDMSet TData; };\n" )

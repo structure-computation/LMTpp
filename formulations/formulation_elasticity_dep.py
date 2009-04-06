@@ -28,6 +28,8 @@ dep_imp_val_0_1 = Variable( nb_dim=[dim], default_value='0', unit='1' )
 
 dep_imp_coef_0 = Variable( default_value='0', unit='1' )
 
+neig_pointer = Variable( interpolation='elementary', T='Vec<EA *,2>', default_value='',  unit='', dont_use_caracdm = True )
+
 #pouet = Variable( interpolation='elementary', default_value='0', unit='1' )
 #assume_symmetric_matrix = False
 #integration_totale = False

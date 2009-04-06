@@ -3,7 +3,7 @@ from LMT.include.codegen import *
 
 class Variable:
   """ Class to manage Variables (unknowns or not, nodal, elementary or global) """
-  def __init__(self,unit,interpolation="nodal",unknown=False,nb_dim=[],nb_der=0,skin_var=False,default_value="",extr=extrapolation.Pol_extr,sup_nb_der=0,T=""):
+  def __init__(self,unit,interpolation="nodal",unknown=False,nb_dim=[],nb_der=0,skin_var=False,default_value="",extr=extrapolation.Pol_extr,sup_nb_der=0,T="",dont_use_caracdm = False):
     self.interpolation = interpolation
     self.nb_dim = nb_dim
     self.nb_der = nb_der
@@ -14,6 +14,7 @@ class Variable:
     self.extrapolation = extr
     self.T = T
     self.unit = unit
+    self.dont_use_caracdm = dont_use_caracdm
 
   def extr(self,test_expr=False): return self.extrapolation( (self.nb_der+self.sup_nb_der)*(not test_expr) )
     
