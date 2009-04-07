@@ -75,17 +75,17 @@ public:
     
     /// TE must be an element of this
     template<class TE> SimpleConstIterator<const EA *> get_parents_of(const TE &e) const {
-         return elem_parents[e.num_in_elem_list_virtual()][e.number]; 
+         return elem_parents[e.num_in_elem_list][e.number]; 
     }
     /// TE must be an element of this !
     template<class TE> SimpleConstIterator<EA *> get_parents_of(const TE &e) {
-         return elem_parents[e.num_in_elem_list_virtual()][e.number]; 
+         return elem_parents[e.num_in_elem_list][e.number]; 
     }
     
     /// TE must be an element of this
-    SimpleConstIterator<const EA *> get_parents_of(const EA *e) const {return elem_parents[e->num_in_elem_list_virtual()][e.number];}
+    SimpleConstIterator<const EA *> get_parents_of_EA(const EA *e) const {return elem_parents[e->num_in_elem_list_virtual()][e->number];}
     /// TE must be an element of this !
-    SimpleConstIterator<EA *> get_parents_of(const EA *e) { return elem_parents[e->num_in_elem_list_virtual()][e.number]; }
+    SimpleConstIterator<EA *> get_parents_of_EA(const EA *e) { return elem_parents[e->num_in_elem_list_virtual()][e->number]; }
     
     ///
     void free() {

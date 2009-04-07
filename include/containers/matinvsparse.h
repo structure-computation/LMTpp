@@ -210,7 +210,7 @@ template<class T,int s2> int solve_using_incomplete_chol_factorize( const Mat<T,
         PRINT( alpha );
         PRINT( x );
         PRINT( max(abs(r)) );
-        //r -= alpha * q;
+        // r -= alpha * q;
         r = b - A * x;
         for(unsigned i=0;;++i) { if ( i==r.size() ) return cpt; if ( LMT::abs(r[i]) > crit ) break; }
         

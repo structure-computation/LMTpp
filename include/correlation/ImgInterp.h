@@ -67,6 +67,18 @@ struct ImgInterpOrder3_Kernel {
             v2 * ( 1 + xf ) * ( 0 + xf ) * ( xf - 1 ) / 6;
     }
     
+    /*
+        vm := symbol("vm")
+        v0 := symbol("v0")
+        v1 := symbol("v1")
+        v2 := symbol("v2")
+        xf := symbol("xf")
+        
+        d := vm * ( xf * ( 1 - xf ) - ( 2 - xf ) * ( 1 - 2 * xf ) ) / 6 + 
+                    v0 * ( - ( 1 - xf ) * ( 1 + xf ) - 2 * xf * ( 2 - xf ) ) / 2 + 
+                    v1 * ( ( 2 - xf ) * ( 1 + 2 * xf ) - xf * ( 1 + xf ) ) / 2 + 
+                    v2 * ( xf * ( 1 + xf ) + ( xf - 1 ) * ( 1 + 2 * xf ) ) / 6
+    */
     template<class T>
     T grad( T vm, T v0, T v1, T v2, T xf ) const {
         return 
@@ -88,7 +100,7 @@ struct ImgInterpOrder3_Kernel {
             interp( f.tex_int( xi - 1, yi + 0 ), f.tex_int( xi + 0, yi + 0 ), f.tex_int( xi + 1, yi + 0 ), f.tex_int( xi + 2, yi + 0 ), xf ),
             interp( f.tex_int( xi - 1, yi + 1 ), f.tex_int( xi + 0, yi + 1 ), f.tex_int( xi + 1, yi + 1 ), f.tex_int( xi + 2, yi + 1 ), xf ),
             interp( f.tex_int( xi - 1, yi + 2 ), f.tex_int( xi + 0, yi + 2 ), f.tex_int( xi + 1, yi + 2 ), f.tex_int( xi + 2, yi + 2 ), xf ),
-            yf 
+            yf
         );
     }
     // 3D
@@ -338,16 +350,19 @@ struct ImgInterp {
     
     ///
     inline T &tex_int( int x, int y ) {
-        return data[ sizes[0] * y + x ];
+        return data[ sizes[0] * max( 0, min( sizes[1]-1, y ) ) + max( 0, min( sizes[0]-1, x ) ) ];
     }
     
     ///
     inline T tex_int( int x, int y ) const {
-        return data[ sizes[0] * y + x ];
+        return data[ sizes[0] * max( 0, min( sizes[1]-1, y ) ) + max( 0, min( sizes[0]-1, x ) ) ];
     }
     
     ///
     inline T &tex_int( int x, int y, int z ) {
+        x = max( 0, min( x, sizes[0]-1 ) );
+        y = max( 0, min( y, sizes[1]-1 ) );
+        z = max( 0, min( z, sizes[2]-1 ) );
         return data[ sizes[1] * sizes[0] * z + sizes[0] * y + x ];
     }
     

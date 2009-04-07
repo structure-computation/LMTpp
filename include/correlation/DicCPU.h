@@ -292,7 +292,11 @@ struct DicCPU {
             }
         }
         //
-        for(cpt_iter=0;cpt_iter<max_cpt_iter;++cpt_iter) {
+        for(cpt_iter=0;;++cpt_iter) {
+            if ( cpt_iter == max_cpt_iter ) {
+                std::cerr << "Convergence pb." << std::endl;
+                break;
+            }
             double time_old = time_of_day_in_sec();
             
             assemble( f, g, m, name_var_depl, name_var_grey, want_mat, want_vec, resol_level );
@@ -316,9 +320,9 @@ struct DicCPU {
             history_norm_inf_dU.push_back( norm_inf( dU ) );
             history_norm_2_dU  .push_back( norm_2  ( dU ) );
             if ( display_norm_inf_dU )
-                PRINT( norm_inf( dU ) );
+                std::cout << "iter=" << cpt_iter << " norm_inf(dU)=" << norm_inf( dU ) << std::endl;
             if ( display_norm_2_dU )
-                PRINT( norm_2( dU ) );
+                std::cout << "iter=" << cpt_iter << " norm_2(dU)=" << norm_2( dU ) << std::endl;
             
             // convergence
             if ( norm_inf( dU ) <= min_norm_inf_dU or norm_2( dU ) <= min_norm_2_dU )
@@ -360,7 +364,11 @@ struct DicCPU {
         //
         typedef typename TM::Pvec Pvec;
         double time_old = time_of_day_in_sec();
-        for(cpt_iter=0;cpt_iter<max_cpt_iter;++cpt_iter) {
+        for(cpt_iter=0;;++cpt_iter) {
+            if ( cpt_iter == max_cpt_iter ) {
+                std::cerr << "Convergence pb." << std::endl;
+                break;
+            }
             assemble( f, g, m, name_var_depl, name_var_grey, want_mat, want_vec, resol_level );
             // simple break conditions
             if ( want_vec == false or ( min_norm_inf_dU == 0 and min_norm_2_dU == 0 ) )
@@ -415,7 +423,7 @@ struct DicCPU {
             history_norm_inf_dU.push_back( norm_inf( dU_red ) );
             history_norm_2_dU  .push_back( norm_2  ( dU_red ) );
             if ( display_norm_inf_dU or display_norm_2_dU )
-                PRINT( dU_red );
+                std::cout << "iter=" << cpt_iter << " dU_red=" << dU_red << std::endl;
             
             if ( display_iteration_time ) {
                 double time_cur = time_of_day_in_sec();
@@ -564,7 +572,7 @@ struct DicCPU {
     T adimensioned_residual; // sqrt( sum_{for each pixel i} ( f( x_i + d_i ) - a_i * g( x_i ) ) ^ 2 ) / ( max( f ) - min( f ) ) / nb_covered_pixels
     int nb_covered_pixel;
     T min_f, max_f;
-    unsigned cpt_iter; // nombre d'itérations pour converger
+    unsigned cpt_iter; // nombre d'itérations pour converger lors du précédent exec (valable aussi pour exec_rigid_body)
     Vec<T> history_norm_inf_dU;
     Vec<T> history_norm_2_dU;
     

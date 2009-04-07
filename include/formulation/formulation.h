@@ -26,8 +26,8 @@
 namespace LMT {
 
 template<class NameFormulation, int dim, class ScalarType_>
-struct LocalOperator{
-    template< class TM, class TF>
+struct LocalOperator {
+    template<class TM,class TF>
     void local_update(TM *m ,TF *f){  };
     template<class TM>
     void update_variables(TM *m){ };
@@ -416,7 +416,7 @@ private:
         template<class TE,class TMA, class TVE,class TVEVE, unsigned n,unsigned n2>
         void ass_skin_elem(const TE &e,unsigned *in,Formulation &f, TMA &K, TVE &F, TVEVE &vectors, const Number<n> &nn,const Number<n2> &nn2) const {
             ass_skin_elem( e, in, f, K, F, vectors, Number<n+1>(), nn2 );
-            if ( f.m->sub_mesh(Number<1>()).get_parents_of( *f.m->get_children_of(e,Number<1>())[n] ).size()!=1 )
+            if ( f.m->sub_mesh(Number<1>()).get_parents_of_EA( f.m->get_children_of(e,Number<1>())[n] ).size()!=1 )
                 return;
             
             typedef typename TM::template SubMesh<1>::T TSubMesh;
@@ -982,7 +982,7 @@ private:
         template<class TE,unsigned n,unsigned n2> void ass_skin_elem(const TE &e,unsigned *in,Formulation &f,
                     const Number<n> &nn,const Number<n2> &nn2) const { // sub_mesh(Number<1>()).
             ass_skin_elem( e, in, f, Number<n+1>(), nn2 );
-            if ( f.m->sub_mesh(Number<1>()).get_parents_of( *f.m->get_children_of(e,Number<1>())[n] ).size()!=1 )
+            if ( f.m->sub_mesh(Number<1>()).get_parents_of_EA( f.m->get_children_of(e,Number<1>())[n] ).size()!=1 )
                 return;
             //PRINTTYPE( typeid( typename TypeChildrenElement<typename TE::NE,1,n>::T ) );
             
