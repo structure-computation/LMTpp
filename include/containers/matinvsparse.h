@@ -63,7 +63,7 @@ template<class T,class TS> void chol_factorize( Mat<T,TS,SparseLine<> > &m ) {
             unsigned col = m.data[line].indices[ind];
             if ( m.data[col].data.size() == 0 )
                 continue;
-            m.data[line].data[ind] = ( m.data[line].data[ind] - dot_chol_factorize( m.data[col], m.data[line] ) ) / m.data[col].data.back();
+            m.data[line].data[ind] = ( m.data[line].data[ind] - dot_chol_factorize( m.data[col], m.data[line] ) ) * m.data[col].data.back();
             hash[ line ].add( col );
             // m_ij == 0
             unsigned ie = m.data[line].indices[ind+1];
@@ -80,7 +80,7 @@ template<class T,class TS> void chol_factorize( Mat<T,TS,SparseLine<> > &m ) {
                         m.data[line].indices[k] = m.data[line].indices[k-1];
                         m.data[line].data[k] = m.data[line].data[k-1];
                     }
-                    m.data[line].data[ind] = -v / m.data[col].data.back();
+                    m.data[line].data[ind] = -v * m.data[col].data.back();
                     m.data[line].indices[ind] = col;
                     hash[ line ].add( col );
                 }
@@ -88,7 +88,7 @@ template<class T,class TS> void chol_factorize( Mat<T,TS,SparseLine<> > &m ) {
         }
         // on diag
         if ( m.data[line].data.size() )
-            m.data[line].data.back() = sqrt( m.data[line].data.back() - norm_2_p2( m.data[line].data.begin(), m.data[line].data.size()-1 ) );
+            m.data[line].data.back() = 1.0 / sqrt( m.data[line].data.back() - norm_2_p2( m.data[line].data.begin(), m.data[line].data.size()-1 ) );
     }
     //PRINT( hash );
 }
@@ -120,11 +120,11 @@ template<class T> void incomplete_chol_factorize( Mat<T,Sym<>,SparseLine<> > &m 
         
         }
         // on diag
-        #ifdef DO_NOT_SQRT_DIAG_CHOL
-            m.data[line].data.back() = m.data[line].data.back() - norm_2_p2( m.data[line].data.begin(), m.data[line].data.size()-1 );
-        #else
-            m.data[line].data.back() = 1.0 / sqrt( m.data[line].data.back() - norm_2_p2( m.data[line].data.begin(), m.data[line].data.size()-1 ) );
-        #endif
+        //#ifdef DO_NOT_SQRT_DIAG_CHOL
+        //    m.data[line].data.back() = m.data[line].data.back() - norm_2_p2( m.data[line].data.begin(), m.data[line].data.size()-1 );
+        //#else
+        m.data[line].data.back() = 1.0 / sqrt( m.data[line].data.back() - norm_2_p2( m.data[line].data.begin(), m.data[line].data.size()-1 ) );
+        //#endif
     }
 }
 
@@ -145,13 +145,13 @@ template<class T,int s,int s2> void solve_using_chol_factorize( const Mat<T,Sym<
         T v = sol[line];
         for(int i=0;i<(int)mat.data[line].data.size()-1;++i)
             v -= mat.data[line].data[i] * res[ mat.data[line].indices[i] ];
-        res[line] = v / mat.data[line].data.back();
+        res[line] = v * mat.data[line].data.back();
     }
 
     //
     Vec<T,s2> tmpvec = res;
     while (nb_lines--) {
-        T tmp = tmpvec[nb_lines] / mat.data[nb_lines].data.back();
+        T tmp = tmpvec[nb_lines] * mat.data[nb_lines].data.back();
         for(int i=0;i<(int)mat.data[nb_lines].data.size()-1;++i)
             tmpvec[ mat.data[nb_lines].indices[i] ] -= mat.data[nb_lines].data[i] * tmp;
         res[nb_lines] = tmp;
@@ -199,7 +199,7 @@ template<class T,int s2> int solve_using_incomplete_chol_factorize( const Mat<T,
     solve_using_chol_factorize( mp, r, d );
     
     
-    T deltn = dot(r,d);
+    T deltn = dot( r, d );
     unsigned cpt = 1;
     while ( cpt < 200 ) {
         T delto = deltn;
