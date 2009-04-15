@@ -29,7 +29,6 @@ typename TM::T _cond( const TM &m, TV &vp, T crit, T offset ) {
 */
 template<class TM>
 typename TM::T cond( const TM &m, typename TM::T prec = 1e-6 ) {
-    assert( m.nb_rows() == m.nb_cols() );
     typedef typename TM::T T;
     
     unsigned s = m.nb_rows();

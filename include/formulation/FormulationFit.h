@@ -47,6 +47,7 @@ struct FormulationFit {
                 for(unsigned j=0;j<TF::nb_der_var;++j)
                     M( i, j ) = dot( dUi, der_U[j] );
             }
+            residual_history.push_back( dot( exp_mat * ( exp_val - f.vectors[0] ), exp_val - f.vectors[0] ) );
             
             if ( norm_inf( M.diag() ) == 0 )
                 M.diag() = 1.0;
@@ -90,6 +91,7 @@ struct FormulationFit {
     Vec<ScalarType,TF::nb_der_var> conv; // norm_inf( dParams ) < conv => convergence
     
     // outputs
+    Vec<ScalarType> residual_history;
     Vec<ScalarType> history;
     Vec<ScalarType> sensitivity_after_fit;
 };

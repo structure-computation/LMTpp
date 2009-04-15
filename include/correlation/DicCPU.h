@@ -51,6 +51,8 @@ struct DicCPU {
         multi_resolution = 0;
         remove_eig_val_if_lower_than = 0;
         want_epsilon = true;
+        importance_pixelotomy = 0;
+        importance_pixelotomy[0] = 1;
     }
 
     ///
@@ -108,19 +110,26 @@ struct DicCPU {
                         
                         T diff_fg = val_f - val_g;
                         
+                        
+                        //
+                        unsigned sum_non_integer = 0;
+                        for(unsigned i=0;i<p.pos.size();++i)
+                            sum_non_integer += ( abs( round( p.pos[i] ) - p.pos[i] ) > 0.1 );
+                        T imp = dic.importance_pixelotomy[ sum_non_integer ];
+                        
                         // dU part
                         Vec<T,dim*TE::nb_nodes> sham_grad;
                         for(int i=0,n=0;i<TE::nb_nodes;++i)
                             for(int d=0;d<dim;++d,++n)
                                 sham_grad[ n ] = shape_functions[ i ] * grad[ d ];
-                                
+                        
                         //
                         for(int i=0;i<TE::nb_nodes;++i) {
                             for(int d=0;d<dim;++d) {
-                                F[ i * ( dim + 1 ) + d ] += sham_grad[ i * dim + d ] * diff_fg;
+                                F[ i * ( dim + 1 ) + d ] += imp * sham_grad[ i * dim + d ] * diff_fg;
                                 for(int j=0;j<TE::nb_nodes;++j)
                                     for(int c=0;c<dim;++c)
-                                        M( i * ( dim + 1 ) + d, j * ( dim + 1 ) + c ) += sham_grad[ i * dim + d ] * sham_grad[ j * dim + c ];
+                                        M( i * ( dim + 1 ) + d, j * ( dim + 1 ) + c ) += imp * sham_grad[ i * dim + d ] * sham_grad[ j * dim + c ];
                             }
                         }
                         
@@ -129,12 +138,11 @@ struct DicCPU {
                         Vec<T,TE::nb_nodes> sham_grey;
                         for(int i=0;i<TE::nb_nodes;++i)
                             sham_grey[ i ] = shape_functions[ i ] * val_g;
-                            
-                        //
+                        
                         for(int i=0;i<TE::nb_nodes;++i) {
                             for(int j=0;j<TE::nb_nodes;++j)
-                                M( i * ( dim + 1 ) + dim, j * ( dim + 1 ) + dim ) += sham_grey[ i ] * sham_grey[ j ];
-                            F[ i * ( dim + 1 ) + dim ] += sham_grey[ i ] * diff_fg;
+                                M( i * ( dim + 1 ) + dim, j * ( dim + 1 ) + dim ) += imp * sham_grey[ i ] * sham_grey[ j ];
+                            F[ i * ( dim + 1 ) + dim ] += imp * sham_grey[ i ] * diff_fg;
                         }
                         
                         // residual
@@ -579,6 +587,7 @@ struct DicCPU {
     // input
     T levenberg_marq;
     T relaxation;
+    Vec<T,3> importance_pixelotomy;
     T delta_gray; /// erreur capteur
     T min_norm_inf_dU; /// norm_inf( dU ) < min_norm_inf_dU pour que ça s'arrête
     T min_norm_2_dU; /// à moins que norm_2( dU ) < min_norm_2_dU
