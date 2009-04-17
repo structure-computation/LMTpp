@@ -191,6 +191,15 @@ void plot(const Vec<T,s,O> &vec,const char *params="") {
     gp.wait();
 }
 
+/*! plot avec Gnuplot et attend
+*/
+template<class T,int s,class O>
+void plot(const Vec<T,s,O> &x,const Vec<T,s,O> &y,const char *params="") {
+    GnuPlot gp;
+    gp.plot(x,y,params);
+    gp.wait();
+}
+
 /*! plot and wait
 */
 template<class T,class STR,class STO>
