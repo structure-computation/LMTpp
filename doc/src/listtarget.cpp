@@ -11,7 +11,7 @@ using namespace std ;
 #include "listtarget.h"
 #include "target_type_without_genericcomment.h"
 
-ListTarget :: ~ListTarget() {
+ListTarget::~ListTarget() {
 
     int i,n ;
 
@@ -42,7 +42,7 @@ void ListTarget::update_property_of_generic_comment() {
         }
 }
 
-void ListTarget :: init_property() {
+void ListTarget::init_property() {
 
     int i,n ;
 
@@ -54,7 +54,7 @@ void ListTarget :: init_property() {
 /*
  indice contient l'indice du premier target possédant le nom principal name ou bien l'indice du generic_comment de nom principal name ou encore -1 s'il la fonction n'a rien trouvé.
 */
-int ListTarget :: nb_principalName(int* indice, string& name) {
+int ListTarget::nb_principalName(int* indice, string& name) {
     int i,n,c,in ;
 
     c = 0 ;
@@ -74,7 +74,7 @@ int ListTarget :: nb_principalName(int* indice, string& name) {
 /*
 Cette fonction ajoute un target dans la liste des targets.
 */
-void ListTarget :: push_back( Target* pt, bool incrementID ) {
+void ListTarget::push_back( Target* pt, bool incrementID ) {
 
     TargetIntel targetintel ;
 
@@ -91,7 +91,7 @@ void ListTarget :: push_back( Target* pt, bool incrementID ) {
     // sinon c'est -1 par défaut
 }
 
-void ListTarget :: push_back_RealTarget( Target* pt, bool incrementID ) {
+void ListTarget::push_back_RealTarget( Target* pt, bool incrementID ) {
 
     TargetIntel targetintel ;
 
@@ -107,7 +107,7 @@ void ListTarget :: push_back_RealTarget( Target* pt, bool incrementID ) {
         pt->id = list.size()-1 ; // sinon c'est -1 par défaut
 }
 
-void ListTarget :: clear() {
+void ListTarget::clear() {
 
     int i,n ;
 
@@ -134,7 +134,7 @@ void ListTarget :: clear() {
     return os ;
 } ;
 
-int ListTarget :: isPrincipalName0( string& nom ) {
+int ListTarget::isPrincipalName0( string& nom ) {
 
     int i,n ;
 
@@ -146,7 +146,7 @@ int ListTarget :: isPrincipalName0( string& nom ) {
     return -1 ;
 }
 
-void ListTarget :: generate_listPrincipalName( string& path_generic_comment ) {
+void ListTarget::generate_listPrincipalName( string& path_generic_comment ) {
 
     vector<string> list_string_principalName;
     string stmp,tmp_type;
@@ -202,7 +202,7 @@ void ListTarget :: generate_listPrincipalName( string& path_generic_comment ) {
     }
 }
 
-void ListTarget :: set_type_of_listPrincipalName() {
+void ListTarget::set_type_of_listPrincipalName() {
 
     string stmp;
     int i,j,m,n;
@@ -226,7 +226,7 @@ void ListTarget :: set_type_of_listPrincipalName() {
     }
 }
 
-Target* ListTarget :: isName( string& nom ) {
+Target* ListTarget::isName( string& nom ) {
 
     int i,n,indice ;
     Target* ptr_t ;
@@ -241,7 +241,21 @@ Target* ListTarget :: isName( string& nom ) {
     return NULL ;
 }
 
-// void ListTarget :: setID() {
+void ListTarget::write_listPrincipalName(const char* filename) {
+    
+    ofstream f(filename);
+    if (not(f.is_open())) {
+        cerr << " Error to open " << filename << endl;
+        return;
+    }
+    
+    for(int i=0;i<listPrincipalName.size();++i) {
+        f << list[listPrincipalName[i]].pt->name.principalName << endl;
+    }
+    f.close();
+}
+
+// void ListTarget::setID() {
 // 
 //     int i,n,c ;
 // 

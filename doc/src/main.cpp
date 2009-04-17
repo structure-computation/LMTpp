@@ -79,7 +79,8 @@ int main(int argc, char* argv[]) {
     docProject.generate_file_css() ; /// génère le fichier css du site.
     docProject.generate_file_for_search_engine(); /// génère le fichier search.idx
 
-
+    //docProject.listTarget.write_listPrincipalName("list_nom_generique.txt");
+    
     return 0 ;
 }
 

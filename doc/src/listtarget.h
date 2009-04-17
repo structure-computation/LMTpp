@@ -59,7 +59,8 @@ struct ListTarget {
     void init_property();
     void update_property_of_generic_comment(); // cette fonction s'assure que si un target a une certaine propriété alors son éventuel target du type "generic comment" aura aussi la même propriété 
     friend std::ostream &operator<<( std::ostream &os, ListTarget& t ) ;
-
+    void write_listPrincipalName(const char* filename);
+    
     //private:
     vector<TargetIntel> list ;
     //vector<bool> realTarget; // correspond à la liste list. Si list[i].pt est instancié alors realTarget[i] est vrai, et faux sinon
