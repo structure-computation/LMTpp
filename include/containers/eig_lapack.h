@@ -33,6 +33,8 @@ namespace LMT {
         m.diag() = eig_val;
         PRINTN( trans( eig_vec ) * m * eig_vec );
 
+    eig_vec.row( i ) to get the i-th eigen vector
+
     \friend raphael.pasquier@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
 
