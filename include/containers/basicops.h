@@ -371,7 +371,7 @@ template<class T> inline typename FloatType<T>::T cosh(const T &val) { return st
     C'est la fonction de la librairie standard du C.
     \keyword Mathématiques/Fonctions classiques 
 */
-template<class T> inline typename FloatType<T>::T exp(const T &val) { return std::exp(val); }
+template<class T> inline typename FloatType<T>::T exp(const T &val) { return std::exp( typename FloatType<T>::T( val ) ); }
 /*!
 \generic_comment log
     Fonction logarithme népérien
