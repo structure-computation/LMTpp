@@ -4,6 +4,8 @@ bloc.cpp
 bloc.h
 classe.cpp
 classe.h
+classemetil.cpp
+classemetil.h
 comment.cpp
 comment.h
 commentitem.cpp

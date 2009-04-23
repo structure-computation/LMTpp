@@ -12,9 +12,9 @@ typedef struct {
     string nomHtml ;
 } referenceWeb ;
 
-string enleve_suffix(string& s) ;
-string suffix(string& s) ;
-string directory(string& s) ;
+string enleve_suffix(const string& s) ;
+string suffix(const string& s) ;
+string directory(const string& s) ;
 
 void tolower(string& s);
 

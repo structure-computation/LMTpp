@@ -13,13 +13,13 @@ using namespace std ;
 // la définition de LINE_VACUUM est en fait dans le fichier token.h alors attention si on change la valeur 
 #define LINE_VACUUM -1
 
-string enleve_suffix(string& s) {
+string enleve_suffix(const string& s) {
     string::size_type i = s.rfind('.') ;
 
     if (i == string::npos ) return s ; else return s.substr(0,i) ;
 }
 
-string suffix(string& s) {
+string suffix(const string& s) {
 
     string::size_type i = s.rfind('.') ;
 
@@ -29,7 +29,7 @@ string suffix(string& s) {
         return "" ;
 }
 
-string directory(string& s) {
+string directory(const string& s) {
 
     string::size_type i = s.rfind('/') ;
 

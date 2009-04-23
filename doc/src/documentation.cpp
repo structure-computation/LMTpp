@@ -1,18 +1,23 @@
-#include <iostream>
-#include <string>
-#include <vector>
-//#include <stdio>
-#include <map>
-using namespace std ;
-// pour parcourir, manipuler les fichier sur linux
-#include <unistd.h>
-#include <dirent.h>
-#include <sys/types.h>
-#include <sys/stat.h>   // pour avoir des infos sur les fichiers : par exemple le type
-#include <stdio.h>
-#include <cerrno>
+#include<iostream>
+#include<cstdlib>
+#include<fstream>
+#include<iomanip>
+#include<cmath>
+#include<string>
+#include<vector>
+#include<map>
+#include<sstream>
+#include <stdexcept>
+using namespace std;
+/// pour parcourir, manipuler les fichiers sur linux
+//#include <unistd.h>
+//#include <dirent.h>
+//#include <sys/types.h>
+//#include <sys/stat.h>   // pour avoir des infos sur les fichiers : par exemple le type
+//#include <stdio.h>
+//#include <cerrno>
 #include <algorithm>
-#include <string.h>
+//#include <string.h>
 
 #include "token.h"
 #include "op.h"
@@ -27,10 +32,10 @@ using namespace std ;
 #include "opwebpage_exists.h"
 #include "opget_listkeyword.h"
 #include "opinternal.h"
-//#include "opgettype_for_principalname.h"
-//#include "arbre.h"
-//#include "noeud.h"
-//#include "visitorbloc_namebaseclass.h"
+
+/// pour parcourir, manipuler les fichiers avec Boost
+#include "boost/filesystem.hpp"    // includes all needed Boost.Filesystem declarations
+using namespace boost::filesystem; //  a namespace alias is preferred practice in real code
 
 Documentation::~Documentation() {
 
@@ -47,8 +52,6 @@ void Documentation::add_source( const char* name_dir, vector<const char*>& list_
     addDirSource( name_dir,list_source,&list_excluded_directories ) ;
     n = list_source.size() ;
     m = listPageComment.size() ;
-
-//     for(i=0;i<n;i++)
 //         cerr << " lll <<<<<< " << list_source[i] << endl ;
 
     for(i=0;i<n;i++) {
@@ -76,94 +79,143 @@ void Documentation::addFileSource( const char* file ) {
 }
 
 void Documentation::addDirSource( const char* name_dir,vector<string>& listsource, vector<const char*>* ptr_list_excluded_directories ) {
-
+    
     string stmp ;
-    string path ;
+    //string path ;
     string stmp2 ;
-    int err ;
-    DIR* dir;
-    struct dirent* dp;
-    struct stat st ;
+    bool on_le_parse;
 
-    //cout << "------------- départ ----------------" << name_dir << endl ;
-    dir = opendir(name_dir) ;
-    if (dir==NULL)
-        return ;
-    //cout << "++++++++++++++++++++++++++++++++++++++ je parcours " << name_dir << endl ;
-    path = name_dir  ;
-    path += "/" ;
-    dp = readdir(dir) ;
-    while(dp != NULL) {
-        //cout << dp->d_name << endl ; //<< " : " << dp->d_reclen << endl ;
-        stmp = path + dp->d_name ;
-        //cout << " new dp->d_name = " << stmp << endl ; 
-        if ( (err = lstat(stmp.c_str(),&st)) != -1) {
-            if ((S_ISDIR(st.st_mode)) && (dp->d_name[0] != '.')) { 
-                /// dp->d_name est le nom d'un répertoire qui ne commence pas un point
-                //cout << " fichier = |" << dp->d_name << "| est un répertoire" << endl ;
-                /// on teste si ce répertoire n'est pas un répertoire à exclure.
-                if (ptr_list_excluded_directories != NULL) {
-                    bool on_le_parse = true;
-                    for(int i=0;i<(*ptr_list_excluded_directories).size();i++) {
-                        //cout << " (*ptr_list_excluded_directories)[i] = |" << (*ptr_list_excluded_directories)[i] << "|" << endl ;
-                        if (strcmp(dp->d_name,(*ptr_list_excluded_directories)[i]) == 0) {
-                            on_le_parse = false;
-                            break;
-                        }
-                    }
-                    if (on_le_parse)
-                        addDirSource( stmp.c_str(),listsource ) ;      // addDirSource(dp->d_name) ;
-                }else
-                    addDirSource( stmp.c_str(),listsource ) ;      // addDirSource(dp->d_name) ;
-            } else
-            if (S_ISREG(st.st_mode)) {
-                // c'est un fichier
-                //stmp = dp->d_name ;
-                //cout << " fichier = |" << dp->d_name << "|" ;
-                stmp2 = suffix( stmp ) ;
-                //cout << " suffix = |" << stmp2 << "|" << endl ;
-                if ((stmp2=="h") || (stmp2=="txt")) {
-                    addFileSource(stmp.c_str()) ; 
-                //cout << "[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[ ajoutons " << stmp  << endl ;//addFileSource(stmp.c_str()) ;
-                }
-                if ((stmp2=="c") || (stmp2=="cpp") || (stmp2=="cc"))
-                    listsource.push_back( stmp ) ;
-            } else
-            if (S_ISLNK(st.st_mode)) {
-                //cout << " fichier = |" << stmp << "| est un lien" << endl ;
-            } else
-            if (S_ISCHR(st.st_mode)) {
-                //cout << " fichier = |" << stmp << "| est un fichier spécial caractère" << endl ;
-            } else
-            if (S_ISBLK(st.st_mode)) {
-                //cout << " fichier = |" << stmp << "| est un fichier spécial bloc" << endl ;
-            } else
-            if (S_ISFIFO(st.st_mode)) {
-                //cout << " fichier = |" << stmp << "| est un tube nommé" << endl ;
-            } else
-            if (S_ISSOCK(st.st_mode)) {
-                //cout << " fichier = |" << stmp << "| est un socket" << endl ;
-            } else
-                ;//cout << " fichier = |" << stmp << "| est d'un format inconnu..." << endl ;
-
-        }
-        else {
-            cerr << "lstat échoue avec la réponse = " << err << "   errno = " ;
-            switch(errno) {
-                case EBADF : cout << "EBADF" << endl ; break ;
-                case EFAULT : cout << "EFAULT" << endl ; break ;
-                case ENAMETOOLONG : cout << "ENAMETOOLONG" << endl ; break ;
-                case ENOENT : cout << "ENOENT" << endl ; break ;
-                case ENOMEM : cout << "ENOMEM" << endl ; break ;
-                case ENOTDIR : cout << "ENOTDIR" << endl ; break ;
-                default : cout << "ERREUR INCONNUE" << endl ; break ;
-            }
-        }
-        dp = readdir(dir) ;
+    stmp = name_dir;
+    path dir_path(stmp);
+    if (not(exists( dir_path ))) {
+        cerr << " Le répertoire n'existe pas." << endl;
+        return;
     }
-    //cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++"  << endl ;
-    closedir(dir) ;
+    directory_iterator end_itr; /// default construction yields past-the-end
+    for ( directory_iterator itr( dir_path ); itr != end_itr; ++itr ) {
+        if ( is_directory(itr->status()) ) {
+            //cout << " itr->path().string().c_str() = |" << itr->path().string().c_str() << "|" << endl ;
+            /// on vérifie que le répertoire ne fait pas parti des répertoires exclus.
+            if (ptr_list_excluded_directories != NULL) {
+                on_le_parse = true;
+                for(int i=0;i<(*ptr_list_excluded_directories).size();i++) {
+                    //cout << " (*ptr_list_excluded_directories)[i] = |" << (*ptr_list_excluded_directories)[i] << "|" << endl ;
+                    if (strcmp(itr->path().string().c_str()+2,(*ptr_list_excluded_directories)[i]) == 0) { /// +2 pour sauter le ./
+                        on_le_parse = false;
+                        break;
+                    }
+                }
+                if (on_le_parse)
+                    addDirSource( itr->path().string().c_str(),listsource ) ;      // addDirSource(dp->d_name) ;
+            } else
+                addDirSource( itr->path().string().c_str(),listsource ) ;  
+        } else {
+            if (is_regular(itr->status())) {
+                /// on vérifie que le fichier a le bon suffix
+                stmp = suffix( itr->leaf() );
+                vector<string>::iterator it;
+                if ((it = find(listHeaderSuffix.begin(),listHeaderSuffix.end(),stmp)) != listHeaderSuffix.end())
+                    addFileSource(itr->path().string().c_str()) ;
+                if ((it = find(listBodySuffix.begin(),listBodySuffix.end(),stmp)) != listBodySuffix.end())
+                    listsource.push_back( stmp );
+                //op.analyse(itr->path().string());
+            } else
+                cerr << " le fichier " << itr->leaf() << " n'est pas régulier " << endl;
+
+        }
+    }
+
 }
+
+// void Documentation::addDirSource( const char* name_dir,vector<string>& listsource, vector<const char*>* ptr_list_excluded_directories ) {
+// 
+//     string stmp ;
+//     string path ;
+//     string stmp2 ;
+//     int err ;
+//     DIR* dir;
+//     struct dirent* dp;
+//     struct stat st ;
+// 
+//     //cout << "------------- départ ----------------" << name_dir << endl ;
+//     dir = opendir(name_dir) ;
+//     if (dir==NULL)
+//         return ;
+//     //cout << "++++++++++++++++++++++++++++++++++++++ je parcours " << name_dir << endl ;
+//     path = name_dir  ;
+//     path += "/" ;
+//     dp = readdir(dir) ;
+//     while(dp != NULL) {
+//         //cout << dp->d_name << endl ; //<< " : " << dp->d_reclen << endl ;
+//         stmp = path + dp->d_name ;
+//         //cout << " new dp->d_name = " << stmp << endl ; 
+//         if ( (err = lstat(stmp.c_str(),&st)) != -1) {
+//             if ((S_ISDIR(st.st_mode)) && (dp->d_name[0] != '.')) { 
+//                 /// dp->d_name est le nom d'un répertoire qui ne commence pas un point
+//                 //cout << " fichier = |" << dp->d_name << "| est un répertoire" << endl ;
+//                 /// on teste si ce répertoire n'est pas un répertoire à exclure.
+//                 if (ptr_list_excluded_directories != NULL) {
+//                     bool on_le_parse = true;
+//                     for(int i=0;i<(*ptr_list_excluded_directories).size();i++) {
+//                         //cout << " (*ptr_list_excluded_directories)[i] = |" << (*ptr_list_excluded_directories)[i] << "|" << endl ;
+//                         if (strcmp(dp->d_name,(*ptr_list_excluded_directories)[i]) == 0) {
+//                             on_le_parse = false;
+//                             break;
+//                         }
+//                     }
+//                     if (on_le_parse)
+//                         addDirSource( stmp.c_str(),listsource ) ;      // addDirSource(dp->d_name) ;
+//                 }else
+//                     addDirSource( stmp.c_str(),listsource ) ;      // addDirSource(dp->d_name) ;
+//             } else
+//             if (S_ISREG(st.st_mode)) {
+//                 // c'est un fichier
+//                 //stmp = dp->d_name ;
+//                 //cout << " fichier = |" << dp->d_name << "|" ;
+//                 stmp2 = suffix( stmp ) ;
+//                 //cout << " suffix = |" << stmp2 << "|" << endl ;
+//                 if ((stmp2=="h") || (stmp2=="txt")) {
+//                     addFileSource(stmp.c_str()) ; 
+//                 //cout << "[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[ ajoutons " << stmp  << endl ;//addFileSource(stmp.c_str()) ;
+//                 }
+//                 if ((stmp2=="c") || (stmp2=="cpp") || (stmp2=="cc"))
+//                     listsource.push_back( stmp ) ;
+//             } else
+//             if (S_ISLNK(st.st_mode)) {
+//                 //cout << " fichier = |" << stmp << "| est un lien" << endl ;
+//             } else
+//             if (S_ISCHR(st.st_mode)) {
+//                 //cout << " fichier = |" << stmp << "| est un fichier spécial caractère" << endl ;
+//             } else
+//             if (S_ISBLK(st.st_mode)) {
+//                 //cout << " fichier = |" << stmp << "| est un fichier spécial bloc" << endl ;
+//             } else
+//             if (S_ISFIFO(st.st_mode)) {
+//                 //cout << " fichier = |" << stmp << "| est un tube nommé" << endl ;
+//             } else
+//             if (S_ISSOCK(st.st_mode)) {
+//                 //cout << " fichier = |" << stmp << "| est un socket" << endl ;
+//             } else
+//                 ;//cout << " fichier = |" << stmp << "| est d'un format inconnu..." << endl ;
+// 
+//         }
+//         else {
+//             cerr << "lstat échoue avec la réponse = " << err << "   errno = " ;
+//             switch(errno) {
+//                 case EBADF : cout << "EBADF" << endl ; break ;
+//                 case EFAULT : cout << "EFAULT" << endl ; break ;
+//                 case ENAMETOOLONG : cout << "ENAMETOOLONG" << endl ; break ;
+//                 case ENOENT : cout << "ENOENT" << endl ; break ;
+//                 case ENOMEM : cout << "ENOMEM" << endl ; break ;
+//                 case ENOTDIR : cout << "ENOTDIR" << endl ; break ;
+//                 default : cout << "ERREUR INCONNUE" << endl ; break ;
+//             }
+//         }
+//         dp = readdir(dir) ;
+//     }
+//     //cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++"  << endl ;
+//     closedir(dir) ;
+// }
 
 void Documentation::generate_ListTarget() {
 
@@ -794,6 +846,16 @@ void Documentation::generate_index() {
             generate_file_for_webpage( list_webpage[i],list_titre_of_webpage[i]) ;
         }
     }
+}
+
+void Documentation::setHeaderSuffix(vector<const char*> l){
+    for(int i=0;i<l.size();i++)
+        listHeaderSuffix.push_back(l[i]);
+}
+
+void Documentation::setBodySuffix(vector<const char*> l){
+    for(int i=0;i<l.size();i++)
+        listBodySuffix.push_back(l[i]);
 }
 
 void Documentation::generate_file_for_search_engine() { 

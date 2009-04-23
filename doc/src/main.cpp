@@ -43,7 +43,19 @@ int main(int argc, char* argv[]) {
         list_excluded_directories.push_back(argv[i]);
         cerr << " exclu = " << argv[i] << endl;
     }
-
+    
+    /// on indique les fichiers que l'on veut analyser :
+    const char* temp_header[3] = {"txt","h","hpp"};
+    const char* temp_body[2] = {"cc","cpp"};
+    vector<const char*> list_header_suffix;
+    vector<const char*> list_body_suffix;
+    for(int i =0;i<3;++i)
+        list_header_suffix.push_back(temp_header[i]);
+    for(int i =0;i<2;++i)
+        list_body_suffix.push_back(temp_body[i]);
+    docProject.setHeaderSuffix(list_header_suffix);
+    docProject.setBodySuffix(list_body_suffix);
+    
     /// on lit tous les fichiers du dossier du projet. argv[1] doit contenir le nom du dossier
     docProject.add_source( argv[1],list_excluded_directories ) ;
     // Ensuite on les "parse".

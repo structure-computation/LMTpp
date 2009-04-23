@@ -22,7 +22,7 @@ typedef std::vector<TemplateParameter*> ListTemplateParameter ;
 //typedef std::vector<Parameter*> ListParameter ;
 
 struct Bloc : public TagComment, public Target  {
-    Bloc( ) { }
+    Bloc() { }
     virtual ~Bloc() ;
     virtual void display( std::ostream &os ) ;
     friend std::ostream &operator<<( std::ostream &os, Bloc &b ) ;
@@ -31,7 +31,7 @@ struct Bloc : public TagComment, public Target  {
     string _namespace ;
     string portee ;
     ListTemplateParameter listTemplateParameter ;
-    std::vector<Bloc*> list_subType_function ;
+    vector<Bloc*> list_subType_function ;
     ListParameter listTypedef ; // avec dans l'ordre le nom du type puis le synonyme
     ListParameter listMember ;
 } ;
