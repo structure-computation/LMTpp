@@ -91,9 +91,10 @@ struct Data_vtk_extract {
             os[i].write( (char *)&data, sizeof(T) );
             //os[i].write( " ", sizeof(char) );
         } else {
-            os[i] << data << " ";
+            os[i] << data;
             if ( nb_comp[i]==2 )
-                os[i] << "0 ";
+                os[i] << " 0";
+            os[i] << " ";
         }
     }
     template<class T,int s>
@@ -105,9 +106,10 @@ struct Data_vtk_extract {
                 os[i].write( (char *)&v,  sizeof(T) );
             }
         } else {
-            os[i] << data << " ";
+            os[i] << data;
             if ( data.size()==2 )
-                os[i] << "0 ";
+                os[i] << " 0";
+            os[i] << " ";
         }
     }
     template<class T>
@@ -267,7 +269,7 @@ struct Data_vtk_extract_elem {
         if ( binary )
             mapd[ name ].os += std::string( (char *)&data, (char *)&data + sizeof(T) );
         else
-            mapd[ name ].os += to_string( data );
+            mapd[ name ].os += to_string( data ) + " ";
             
         // nb_comp complement
         const unsigned real_nb_comp = DM::NbComponents<T>::n;
@@ -278,7 +280,7 @@ struct Data_vtk_extract_elem {
                 mapd[ name ].os += std::string( (char *)&tmp, (char *)&tmp + GetVtkTypeSize<T>::n );
         else
             for(unsigned i=real_nb_comp;i<want_nb_comp;++i)
-                mapd[ name ].os += "0";
+                mapd[ name ].os += "0 ";
                 
         //
         mapd[ name ].appended = true;
@@ -393,7 +395,10 @@ void write_mesh_vtk(std::ostream &os,const TM &m,const Vec<std::string> &display
             if ( std::find(display_fields.begin(),display_fields.end(),std::string(names[i]))!=display_fields.end() or (display_fields.size()>=1 and display_fields[0]=="all") ) {    //continue;
                 if ( names[i]!=const_cast<char *>("pos") and nb_comp[i] ) {
                     os << "                <DataArray Name='" << names[i]
-                            << "' NumberOfComponents='" << nb_comp[i] << "' type='" << get_vtk_types.res[i] << "' format='" << (binary ? "appended" : "ascii" ) << "' offset='" << appended.size() << "'>";
+                            << "' NumberOfComponents='" << nb_comp[i] << "' type='" << get_vtk_types.res[i] << "' format='" << ( binary ? "appended" : "ascii" );
+                    if ( binary )
+                        os << "' offset='" << appended.size();
+                    os << "'>";
                     if ( binary )
                         add_encoded( dve.os[i].str(), appended );
                     else

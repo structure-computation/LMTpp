@@ -277,6 +277,14 @@ public:
         return size;
     }
     //
+    void free_matrices() {
+        allocated = false;
+        matrices( Number<0>() ).free();
+        sollicitation.free();
+        for(unsigned i=0;i<vectors.size();++i)
+            vectors[i].free();
+    }
+    //
     virtual void allocate_matrices() {
         if ( allocated )
             return;
