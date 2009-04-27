@@ -1,0 +1,67 @@
+/*!
+\tutorial Mon premier programme
+
+    L'objet de cette page est d'écrire un petit programme sur les matrices. La librairie LMT++ permettent de créer facilement du code C++/Python pour résoudre des problèmes utilisant les éléments finis mais ici on se contentera de créer une matrice ( type \a Mat ) et de faire quelques manipulations.
+
+    La librairie LMT s'appuie sur les logiciels scons et make pour gérer la compilation d'un projet : il faut donc créer au moins quatre fichiers :
+        * un fichier <strong> SConstruct </strong> pour scons,
+        * un fichier <strong> Makefile </strong> pour make,
+        * un lien symbolique vers votre répertoire LMT,
+        * le code source <strong> main.cpp </strong> .
+
+
+    Voici les trois premiers :
+        * <strong> SConstruct </strong> 
+            qui contiendra :
+            \code
+                from LMT import *
+                env = Environment(
+                CPPPATH = [ '#LMT/include' ]
+                )
+
+                make_dep_py(env)
+                env.Program( "test", ["main.cpp"] )
+
+        * <strong> Makefile </strong> 
+            qui contiendra
+            \code
+                all: codegen
+                    scons
+                codegen:
+                    cd LMT/include/codegen; scons
+            Attention: dans Makefile, les tabulations doivent être de vraies tabulations et non une séquance d'espaces!
+        * un lien sur la librairie LMT++ (taper ln -s ~/LMT LMT si vous avez mis le répertoire LMT dans votre home ou sinon /chemin/LMT).
+
+    Ensuite créer le fichier source, <strong> main.cpp </strong> , avec le contenu :
+        \code
+            include <containers/mat.h>
+            using namespace LMT;
+            int main(  ) {
+                Mat<double> m(10,10);
+                for(unsigned i=0;i<m.nb_rows();++i)
+                    for(unsigned j=0;j<m.nb_cols();++j)
+                        m(i,j) = i + j;
+                PRINTN( m + 10 );
+                std::cout << dot( m.diag(), range(m.nb_rows()) ) << std::endl;
+            }
+
+        Remarque : Si vous choisissez un autre nom de fichier, n'oubliez pas de changer le fichier SConstruct en conséquence.
+    
+    Maintenant il faut compiler le code pour générer un fichier exécutable. Il existe deux méthodes au centre de calcul :
+        * en ligne de commande,
+        * avec l'interface graphique de kdevelop , un logiciel de développement (IDE en anglais).
+
+    En ligne de commande, on tape simplement la commande make.
+    Avec interface graphique, 
+        * on lance kdevelop (taper kdevelop&). Remarque : il se peut qu'un projet se lance automatiquement. Dans ce cas on le ferme avec cette option du menu "Project".
+        * on crée un projet à partir de fichiers sources existants en faisant menu Project->Import existing project... et validez autant de fois que nécessaire sans faire de changement.
+        * on tape F8
+
+    Dans les deux cas, cela devrait compiler !
+
+
+    Remarque : la méthode IDE est certes plus compliqué mais lorsque le projet grossit et que le nombre de fichiers sources est conséquent, un IDE devient très utile ( voire indispensable) pour se retrouver dans les lignes de code...
+
+    \friend rapahel.pasquier@lmt.ens-cachan.fr
+
+*/ 

@@ -227,7 +227,7 @@
 
     = Projet Kdevelop
 
-        Si vous avez oubliez comment on procède pour créer un projet kdevelop, consultez le tutoriel \a "Mon premier programme" .
+        Si vous avez oubliez comment on procède pour créer un projet kdevelop, consultez le tutoriel [[Mon premier programme]] .
    
         = Utilisation en C++ des maillages et formulations
 
