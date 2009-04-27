@@ -6,9 +6,9 @@ interval_var_inter = [
 ]
 
 children = [
-  {'name':'Bar_3', 'nodes':[0, 3, 1], 'var':[var_inter[0],number(0)]},
-  {'name':'Bar_3', 'nodes':[1, 4, 2], 'var':[1-var_inter[0],var_inter[0]]},
-  {'name':'Bar_3', 'nodes':[2, 5, 0], 'var':[number(0),1-var_inter[0]]},
+  {'name':'Bar_3', 'nodes':[0, 1, 3], 'var':[var_inter[0],number(0)]},
+  {'name':'Bar_3', 'nodes':[1, 2, 4], 'var':[1-var_inter[0],var_inter[0]]},
+  {'name':'Bar_3', 'nodes':[2, 0, 5], 'var':[number(0),1-var_inter[0]]},
 ]
 
 permutation = [ 5,4,3,2,1,0 ]
