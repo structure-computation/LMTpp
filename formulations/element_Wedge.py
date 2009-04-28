@@ -82,16 +82,25 @@ def pos_using_local_coordinates(coords):
 # ]
 
 
-a = 1.0/6.0
-b = 1.0/sqrt(2.0)
+a = 1.0/6.0 * 1.0/2.0 
 gauss_points[2] = [
-  ( a, { var_inter[0] : 1.0/2.0, var_inter[1] : 1.0/2.0 , var_inter[2] : (1-a)/2.0 } ),
-  ( a, { var_inter[0] : 0.0,     var_inter[1] : 1.0/2.0 , var_inter[2] : (1-a)/2.0 } ),
-  ( a, { var_inter[0] : 1.0/2.0, var_inter[1] : 0.0 ,     var_inter[2] : (1-a)/2.0 } ),
-  ( a, { var_inter[0] : 1.0/2.0, var_inter[1] : 1.0/2.0 , var_inter[2] : (1+a)/2.0 } ),
-  ( a, { var_inter[0] : 0.0,     var_inter[1] : 1.0/2.0 , var_inter[2] : (1+a)/2.0 } ),
-  ( a, { var_inter[0] : 1.0/2.0, var_inter[1] : 0.0 ,     var_inter[2] : (1+a)/2.0 } ),
+  ( a, { var_inter[0] : 1.0/2.0, var_inter[1] : 0.0     , var_inter[2] : (1.0-sqrt(1.0/3.0))/2.0 } ),
+  ( a, { var_inter[0] : 1.0/2.0, var_inter[1] : 1.0/2.0 , var_inter[2] : (1.0-sqrt(1.0/3.0))/2.0 } ),
+  ( a, { var_inter[0] : 0.0,     var_inter[1] : 1.0/2.0 , var_inter[2] : (1.0-sqrt(1.0/3.0))/2.0 } ),
+  ( a, { var_inter[0] : 1.0/2.0, var_inter[1] : 0.0     , var_inter[2] : (1.0+sqrt(1.0/3.0))/2.0 } ),
+  ( a, { var_inter[0] : 1.0/2.0, var_inter[1] : 1.0/2.0 , var_inter[2] : (1.0+sqrt(1.0/3.0))/2.0 } ),
+  ( a, { var_inter[0] : 0.0,     var_inter[1] : 1.0/2.0 , var_inter[2] : (1.0+sqrt(1.0/3.0))/2.0 } ),
 ]
+#a = 1.0/6.0
+#b = 1.0/sqrt(2.0)
+#gauss_points[2] = [
+  #( a, { var_inter[0] : 1.0/2.0, var_inter[1] : 1.0/2.0 , var_inter[2] : (1-a)/2.0 } ),
+  #( a, { var_inter[0] : 0.0,     var_inter[1] : 1.0/2.0 , var_inter[2] : (1-a)/2.0 } ),
+  #( a, { var_inter[0] : 1.0/2.0, var_inter[1] : 0.0 ,     var_inter[2] : (1-a)/2.0 } ),
+  #( a, { var_inter[0] : 1.0/2.0, var_inter[1] : 1.0/2.0 , var_inter[2] : (1+a)/2.0 } ),
+  #( a, { var_inter[0] : 0.0,     var_inter[1] : 1.0/2.0 , var_inter[2] : (1+a)/2.0 } ),
+  #( a, { var_inter[0] : 1.0/2.0, var_inter[1] : 0.0 ,     var_inter[2] : (1+a)/2.0 } ),
+#]
 a = -27.0/96.0 * 1.0/2.0
 b = 25.0/96.0 * 1.0/2.0
 gauss_points[3] = [

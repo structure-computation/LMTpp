@@ -77,8 +77,9 @@ struct TicToc {
     TicToc(){}
     void start() { gettimeofday( &start1,&toto); }
     void stop() {
-         gettimeofday( &stop1,&toto);
-         res = ((double)stop1.tv_sec-(double)start1.tv_sec)+((double)stop1.tv_usec-(double)start1.tv_usec) / 1e6;
+        gettimeofday( &stop1,&toto);
+        res = ((double)stop1.tv_sec-(double)start1.tv_sec)+((double)stop1.tv_usec-(double)start1.tv_usec) / 1e6;
+        printf("%f\n",res);
     }
     struct timeval start1, stop1;
     struct timezone toto;
