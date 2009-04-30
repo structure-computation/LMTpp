@@ -48,8 +48,8 @@ interpolation["nodal"] = (1-var_inter[0]-var_inter[1]) * (1-var_inter[2])   * va
 
 interpolation["der_nodal"] = val[0]
 
-z1=(1+(1.0/sqrt(2.0)))/2;
-z2=(1-(1.0/sqrt(2.0)))/2;
+z1=(1+(1.0/sqrt(3.0)))/2;
+z2=(1-(1.0/sqrt(3.0)))/2;
 interpolation["gauss"] =  ( 2*var_inter[0] + 2*var_inter[1] - 1)   * (1-(var_inter[2]-z2)/(z1-z2))     * val[0]  + \
                           (-2*var_inter[0]                  + 1)   * (1-(var_inter[2]-z2)/(z1-z2))     * val[1]  + \
                           (-2*var_inter[1]                  + 1)   * (1-(var_inter[2]-z2)/(z1-z2))     * val[2]  + \

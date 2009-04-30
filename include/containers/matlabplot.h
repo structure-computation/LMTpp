@@ -20,7 +20,7 @@ namespace LMT {
 class MatlabPlot {
 public:
     MatlabPlot() {
-        if ((tube=popen("matlab -nojvm","w"))==NULL) {
+        if ((tube=popen("matlab -nodesktop","w"))==NULL) {
             std::cerr << "matlab impossible à ouvrir" << std::endl;
             exit(1);
         }
