@@ -972,7 +972,7 @@ def write_legacy_lmtpp_problem_h_file( stream, pb_name, fe_set, type_list )
     stream <<< "#endif // PROBLEM_$(pb_name)_H"
         
 #~ ~#
-def write_legacy_lmtpp_all_in_one_file( stream, pb_name, fe_set, type_list )
+def write_legacy_lmtpp_all_in_one_file( stream, pb_name, fe_set, type_list, list_sup_all_in_one )
     stream <<<< 
         #include <formulation/formulation.h>
         #include "mesh_carac.h"
@@ -985,6 +985,9 @@ def write_legacy_lmtpp_all_in_one_file( stream, pb_name, fe_set, type_list )
                 stream <<<< 
                     #include "form_carac_$name_form.$dim.$(fe->pe->name).h"
                     #include "add_matrices_$name_form.$dim.$(fe->pe->name).h"
+    for file_name in list_sup_all_in_one
+        stream <<<< 
+            #include "$file_name"
     #
 
 #~ ~#
@@ -1001,10 +1004,18 @@ def write_legacy_lmtpp_problem_cpp_file( stream, pb_name, fe_set, type_list )
 
 #~
     TfList -> [ FormulationType1, FormulationType2, ... ] ex : FormulationElasticity
-    TEList -> [ ElementType1, Quad, ... ] ex : Triangle, Quad, ...
+    TeList -> [ ElementType1, ElementType2, ... ] ex : Triangle, Quad, ...
+    funcList -> [ Function1, Function2, ... ]
 ~#
-def write_legacy_lmtpp_code( pb_name, TfList, TeList, dim_function = x => x::nvi, base_rep = "build", type_list = ["double"], assume_const_jac_in_elems = true )
+def write_legacy_lmtpp_code( pb_name, TfList, TeList, dim_function = x => x::nvi, base_rep = "build", type_list = ["double"], assume_const_jac_in_elems = true, funcList = [] )
     fe_set := Map[ Int32 #~dim~#, Map[ String #~Formulation~#, Vec[ Ptr[ LmtppFormulationAncestor ] ] ] ]()
+    list_sup_all_in_one := Vec[ String ]()
+    list_f := Vec[ Ptr[ LmtppFormulationAncestor ] ]()
+    
+    # files
+    rep := base_rep + "/" * Bool( base_rep.size ) + "problem_" + pb_name
+    mkdir( rep )
+    
     for Tf in TfList
         for Te in TeList
             e := new SymbolicElement[ Te, dim_function( Te ) ]
@@ -1014,13 +1025,13 @@ def write_legacy_lmtpp_code( pb_name, TfList, TeList, dim_function = x => x::nvi
             f->name = Tf
             #
             f->make_matrices( @e )
-        
-    # files
-    rep := base_rep + "/" * Bool( base_rep.size ) + "problem_" + pb_name
-    mkdir( rep )
+            list_f.push_back( f )
+
+    for func in funcList
+        list_sup_all_in_one.append( func( list_f, rep ) )
     
     # all_in_one
-    write_legacy_lmtpp_all_in_one_file( File( rep + "/all_in_one.h", "w" ), pb_name, fe_set, type_list )
+    write_legacy_lmtpp_all_in_one_file( File( rep + "/all_in_one.h", "w" ), pb_name, fe_set, type_list, list_sup_all_in_one )
     
     # problem
     write_legacy_lmtpp_problem_h_file( File( rep + "/problem.h", "w" ), pb_name, fe_set, type_list )
