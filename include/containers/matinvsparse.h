@@ -93,14 +93,71 @@ template<class T,class TS> void chol_factorize( Mat<T,TS,SparseLine<> > &m ) {
     //PRINT( hash );
 }
 
-template<class T> void incomplete_chol_factorize( Mat<T,Sym<>,SparseLine<> > &m, int level = 2  ) {
+// template<class T> void incomplete_chol_factorize( Mat<T,Sym<>,SparseLine<> > &m, int level = 1  ) {
+//     static const unsigned NN = 16; /// ajouté par Raphaël
+//     Vec<HashCH<NN> > hash; hash.resize( m.nb_rows() ); /// ajouté par Raphaël
+//     for(unsigned line=0;line<m.nb_rows();++line) {
+//         for(unsigned ind=0;ind<m.data[line].indices.size()-1;++ind) {
+//             // m_ij != 0
+//             unsigned col = m.data[line].indices[ind];
+//             if ( m.data[col].data.size() == 0 ) continue; /// ajouté par Raphaël
+//             m.data[line].data[ind] = ( m.data[line].data[ind] - dot_chol_factorize( m.data[col], m.data[line] ) ) * m.data[col].data.back();
+//             hash[ line ].add( col ); /// ajouté par Raphaël
+//             // m_ij == 0
+//             unsigned ie = min( m.data[line].indices[ind+1], col+level );
+//             while ( ++col < ie ) {
+//                 if ( not HashCH<NN>::cor( hash[col], hash[ line ] ) ) continue;
+// 
+//                 T v = dot_chol_factorize( m.data[col], m.data[line] );
+//                 if ( LMT::abs( v ) ) {
+//                     unsigned os = m.data[line].indices.size();
+//                     m.data[line].indices.resize( os+1 );
+//                     m.data[line].data.resize( os+1 );
+//                     ++ind;
+//                     for(unsigned k=os;k>ind;--k) {
+//                         m.data[line].indices[k] = m.data[line].indices[k-1];
+//                         m.data[line].data[k] = m.data[line].data[k-1];
+//                     }
+//                     m.data[line].data[ind] = -v * m.data[col].data.back(); /// dans la version commentée suivante c'est une /
+//                     m.data[line].indices[ind] = col;
+//                     hash[ line ].add( col );
+//                 }
+//             }
+// //             while ( ++col < ie ) {
+// //                 T v = dot_chol_factorize( m.data[col], m.data[line] );
+// //                 if ( v ) {
+// //                     unsigned os = m.data[line].indices.size();
+// //                     m.data[line].indices.resize( os+1 );
+// //                     m.data[line].data.resize( os+1 );
+// //                     ++ind;
+// //                     for(unsigned k=os;k>ind;--k) {
+// //                         m.data[line].indices[k] = m.data[line].indices[k-1];
+// //                         m.data[line].data[k] = m.data[line].data[k-1];
+// //                     }
+// //                     m.data[line].data[ind] = -v / m.data[col].data.back();
+// //                     m.data[line].indices[ind] = col;
+// //                 }
+// //             }
+//        }
+//         // on diag
+//         //#ifdef DO_NOT_SQRT_DIAG_CHOL
+//         //    m.data[line].data.back() = m.data[line].data.back() - norm_2_p2( m.data[line].data.begin(), m.data[line].data.size()-1 );
+//         //#else
+//         if ( m.data[line].data.size() )
+//             m.data[line].data.back() = 1.0 / sqrt( m.data[line].data.back() - norm_2_p2( m.data[line].data.begin(), m.data[line].data.size()-1 ) );
+//         //#endif
+//     }
+// }
+
+/// ancienne version de incomplete_chol_factorize
+template<class T> void incomplete_chol_factorize( Mat<T,Sym<>,SparseLine<> > &m ) {
     for(unsigned line=0;line<m.nb_rows();++line) {
         for(unsigned ind=0;ind<m.data[line].indices.size()-1;++ind) {
-            // m_ij != 0
+            m_ij != 0
             unsigned col = m.data[line].indices[ind];
             m.data[line].data[ind] = ( m.data[line].data[ind] - dot_chol_factorize( m.data[col], m.data[line] ) ) * m.data[col].data.back();
-            // m_ij == 0
-            unsigned ie = min( m.data[line].indices[ind+1], col+level );
+            m_ij == 0
+            unsigned ie = min( m.data[line].indices[ind+1], col+2 );
             while ( ++col < ie ) {
                 T v = dot_chol_factorize( m.data[col], m.data[line] );
                 if ( v ) {
@@ -119,12 +176,11 @@ template<class T> void incomplete_chol_factorize( Mat<T,Sym<>,SparseLine<> > &m,
         
         
         }
-        // on diag
+        //on diag
         //#ifdef DO_NOT_SQRT_DIAG_CHOL
-        //    m.data[line].data.back() = m.data[line].data.back() - norm_2_p2( m.data[line].data.begin(), m.data[line].data.size()-1 );
+        //   m.data[line].data.back() = m.data[line].data.back() - norm_2_p2( m.data[line].data.begin(), m.data[line].data.size()-1 );
         //#else
-        if ( m.data[line].data.size() )
-            m.data[line].data.back() = 1.0 / sqrt( m.data[line].data.back() - norm_2_p2( m.data[line].data.begin(), m.data[line].data.size()-1 ) );
+        m.data[line].data.back() = 1.0 / sqrt( m.data[line].data.back() - norm_2_p2( m.data[line].data.begin(), m.data[line].data.size()-1 ) );
         //#endif
     }
 }
