@@ -985,9 +985,12 @@ def write_legacy_lmtpp_all_in_one_file( stream, pb_name, fe_set, type_list, list
                 stream <<<< 
                     #include "form_carac_$name_form.$dim.$(fe->pe->name).h"
                     #include "add_matrices_$name_form.$dim.$(fe->pe->name).h"
+    file_name_done := Set[String]()
     for file_name in list_sup_all_in_one
-        stream <<<< 
-            #include "$file_name"
+        if not ( file_name in file_name_done )
+            file_name_done.insert( file_name )
+            stream <<<<
+                #include "$file_name"
     #
 
 #~ ~#
@@ -1011,7 +1014,7 @@ def write_legacy_lmtpp_code( pb_name, TfList, TeList, dim_function = x => x::nvi
     fe_set := Map[ Int32 #~dim~#, Map[ String #~Formulation~#, Vec[ Ptr[ LmtppFormulationAncestor ] ] ] ]()
     list_sup_all_in_one := Vec[ String ]()
     list_f := Vec[ Ptr[ LmtppFormulationAncestor ] ]()
-    
+
     # files
     rep := base_rep + "/" * Bool( base_rep.size ) + "problem_" + pb_name
     mkdir( rep )
@@ -1029,7 +1032,7 @@ def write_legacy_lmtpp_code( pb_name, TfList, TeList, dim_function = x => x::nvi
 
     for func in funcList
         list_sup_all_in_one.append( func( list_f, rep ) )
-    
+
     # all_in_one
     write_legacy_lmtpp_all_in_one_file( File( rep + "/all_in_one.h", "w" ), pb_name, fe_set, type_list, list_sup_all_in_one )
     

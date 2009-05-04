@@ -401,23 +401,6 @@ private:
         Vec<Vec<ScalarType> > *vectors; 
     };
     
-    template<class TE>
-    Vec<unsigned,TE::nb_nodes+1+nb_global_unknowns> indices_for_element( const TE &e ) const {
-        Vec<unsigned,TE::nb_nodes+1+nb_global_unknowns> in[ TE::nb_nodes + 1 + nb_global_unknowns ];
-        
-        if ( nb_nodal_unknowns ) 
-            for(unsigned i=0;i<TE::nb_nodes;++i)
-                in[i] = indice_noda[ m->node_list.number(*e.node(i)) ];
-        
-        typedef CaracFormulationForElement<NameFormulation,TE,NameVariant,ScalarType> CFE;
-        if ( CFE::nb_elementary_unknowns ) 
-            in[ TE::nb_nodes * (nb_nodal_unknowns!=0) ] = indice_elem[TE::num_in_elem_list][e.number];
-        
-        if ( nb_global_unknowns )
-            in[ TE::nb_nodes * (nb_nodal_unknowns!=0) + (CFE::nb_elementary_unknowns!=0) ] = *indice_glob;
-            
-        return in;
-    }
     
     template<bool assemble_mat,bool assemble_vec>
     struct AssembleElem {
@@ -497,6 +480,24 @@ private:
         Vec<Vec<ScalarType> > *vectors;
     };
 public:
+    template<class TE>
+    Vec<unsigned,TE::nb_nodes+1+nb_global_unknowns> indices_for_element( const TE &e ) const {
+        Vec<unsigned,TE::nb_nodes+1+nb_global_unknowns> in[ TE::nb_nodes + 1 + nb_global_unknowns ];
+        
+        if ( nb_nodal_unknowns ) 
+            for(unsigned i=0;i<TE::nb_nodes;++i)
+                in[i] = indice_noda[ m->node_list.number(*e.node(i)) ];
+        
+        typedef CaracFormulationForElement<NameFormulation,TE,NameVariant,ScalarType> CFE;
+        if ( CFE::nb_elementary_unknowns ) 
+            in[ TE::nb_nodes * (nb_nodal_unknowns!=0) ] = indice_elem[TE::num_in_elem_list][e.number];
+        
+        if ( nb_global_unknowns )
+            in[ TE::nb_nodes * (nb_nodal_unknowns!=0) + (CFE::nb_elementary_unknowns!=0) ] = *indice_glob;
+            
+        return in;
+    }
+    ///
     Codegen::Ex::MapExNum val_sub_sym( const Codegen::Ex::SetEx &sub_symbols ) const {
         using namespace Codegen;
         Ex::MapExNum res;
