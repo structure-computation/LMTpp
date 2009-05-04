@@ -153,10 +153,10 @@ template<class T,class TS> void chol_factorize( Mat<T,TS,SparseLine<> > &m ) {
 template<class T> void incomplete_chol_factorize( Mat<T,Sym<>,SparseLine<> > &m ) {
     for(unsigned line=0;line<m.nb_rows();++line) {
         for(unsigned ind=0;ind<m.data[line].indices.size()-1;++ind) {
-            m_ij != 0
+            // m_ij != 0
             unsigned col = m.data[line].indices[ind];
             m.data[line].data[ind] = ( m.data[line].data[ind] - dot_chol_factorize( m.data[col], m.data[line] ) ) * m.data[col].data.back();
-            m_ij == 0
+            // m_ij == 0
             unsigned ie = min( m.data[line].indices[ind+1], col+2 );
             while ( ++col < ie ) {
                 T v = dot_chol_factorize( m.data[col], m.data[line] );
