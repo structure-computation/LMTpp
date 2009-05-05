@@ -51,7 +51,7 @@ void OpGetBrief_for_principalName :: operator()( PageComment* page ) {
     for(i=0;i<n;i++) {
         if (page->code.list_subType_function[i]->name.principalName == principal_name ) {
             gs.ptr_listParameter = NULL;
-            page->code.list_subType_function[i]->execute_function( &gs ) ;
+            page->code.list_subType_function[i]->exec( &gs ) ;
             m = page->code.list_subType_function[i]->listTag.size() ;
             getbrief.clear() ;
             for(j=0;j<m;j++) {

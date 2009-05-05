@@ -1,22 +1,49 @@
 <?xml version = '1.0' encoding = 'UTF-8'?>
 <!DOCTYPE KDevPrjSession>
 <KDevPrjSession>
- <DocsAndViews NumberOfDocuments="5" >
-  <Doc0 NumberOfViews="1" URL="file:///home/pasquier/projet_comment_of_LMT/documentation.cpp" >
-   <View0 Encoding="" Type="Source" />
+ <DocsAndViews NumberOfDocuments="14" >
+  <Doc0 NumberOfViews="1" URL="file:///home/pasquier/projet_comment_of_LMT/pagecomment.h" >
+   <View0 Encoding="" line="72" Type="Source" />
   </Doc0>
-  <Doc1 NumberOfViews="1" URL="file:///home/pasquier/projet_comment_of_LMT/util2html.cpp" >
-   <View0 Encoding="" Type="Source" />
+  <Doc1 NumberOfViews="1" URL="file:///home/pasquier/projet_comment_of_LMT/pagecomment.cpp" >
+   <View0 Encoding="" line="1217" Type="Source" />
   </Doc1>
-  <Doc2 NumberOfViews="1" URL="file:///home/pasquier/projet_comment_of_LMT/util2html.h" >
-   <View0 Encoding="" Type="Source" />
+  <Doc2 NumberOfViews="1" URL="file:///home/pasquier/projet_comment_of_LMT/lexem.h" >
+   <View0 Encoding="" line="81" Type="Source" />
   </Doc2>
-  <Doc3 NumberOfViews="1" URL="file:///home/pasquier/projet_comment_of_LMT/token.h" >
-   <View0 Encoding="" Type="Source" />
+  <Doc3 NumberOfViews="1" URL="file:///home/pasquier/projet_comment_of_LMT/lexemdefinition.h" >
+   <View0 Encoding="" line="32" Type="Source" />
   </Doc3>
-  <Doc4 NumberOfViews="1" URL="file:///home/pasquier/projet_comment_of_LMT/token.cpp" >
-   <View0 Encoding="" line="528" Type="Source" />
+  <Doc4 NumberOfViews="1" URL="file:///home/pasquier/projet_comment_of_LMT/lexem.cpp" >
+   <View0 Encoding="" line="73" Type="Source" />
   </Doc4>
+  <Doc5 NumberOfViews="1" URL="file:///home/pasquier/projet_comment_of_LMT/function.h" >
+   <View0 Encoding="" line="31" Type="Source" />
+  </Doc5>
+  <Doc6 NumberOfViews="1" URL="file:///home/pasquier/projet_comment_of_LMT/bloc.h" >
+   <View0 Encoding="" line="0" Type="Source" />
+  </Doc6>
+  <Doc7 NumberOfViews="1" URL="file:///home/pasquier/projet_comment_of_LMT/parameter.h" >
+   <View0 Encoding="" line="20" Type="Source" />
+  </Doc7>
+  <Doc8 NumberOfViews="1" URL="file:///home/pasquier/projet_comment_of_LMT/names.h" >
+   <View0 Encoding="" line="14" Type="Source" />
+  </Doc8>
+  <Doc9 NumberOfViews="1" URL="file:///home/pasquier/projet_comment_of_LMT/usual_strings.h" >
+   <View0 Encoding="" line="48" Type="Source" />
+  </Doc9>
+  <Doc10 NumberOfViews="1" URL="file:///home/pasquier/projet_comment_of_LMT/main.cpp" >
+   <View0 Encoding="" line="89" Type="Source" />
+  </Doc10>
+  <Doc11 NumberOfViews="1" URL="file:///home/pasquier/projet_comment_of_LMT/listparameter.h" >
+   <View0 Encoding="" line="24" Type="Source" />
+  </Doc11>
+  <Doc12 NumberOfViews="1" URL="file:///home/pasquier/projet_comment_of_LMT/listparameter.cpp" >
+   <View0 Encoding="" line="71" Type="Source" />
+  </Doc12>
+  <Doc13 NumberOfViews="1" URL="file:///home/pasquier/projet_comment_of_LMT/parameter.cpp" >
+   <View0 Encoding="" line="15" Type="Source" />
+  </Doc13>
  </DocsAndViews>
  <pluginList>
   <kdevdebugger>

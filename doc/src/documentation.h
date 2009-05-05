@@ -17,10 +17,10 @@ using namespace std;
 #include "visitorbloc.h"
 #include "listtarget.h"
 #include "searchindex.h"
+#include "language_id.h"
 
 struct PageComment;
 struct ListTargetByType;
-
 struct Parameter;
 
 /*
@@ -30,7 +30,7 @@ struct Parameter;
 
 */
 struct Documentation {
-    Documentation( ) { name_software = "LMT++";}
+    Documentation() { name_software = "LMT++";}
     ~Documentation();
     void add_source( const char* name_dir, vector<const char*>& list_excluded_directories );
     void addDirSource( const char* name_dir,vector<string>& listsource, vector<const char*>* ptr_list_excluded_directories=NULL );
@@ -39,8 +39,11 @@ struct Documentation {
     void display_ListTarget();
     void generate_ListPrincipalName();
     void display_ListPrincipalName();
-    void setHeaderSuffix(vector<const char*> l);
-    void setBodySuffix(vector<const char*> l);
+    void setHeaderSuffix(const char* l[], int s);
+    void setBodySuffix(const char* l[], int s);
+    void setLanguage(Language_id id) { language_id = id; }
+    void setLanguage_Cpp() { language_id = C_Cpp_language; }
+    void setLanguage_Metil() { language_id = Metil_language; }
     /*
     Cette methode génère les pages web de description des objets génériqes puis le résumé par ordre alphabétique des fonctions, puis des structures, des exemples et tutoriaux.
     IMPORTANT : On suppose que les méthodes generate_ListTarget() et generate_ListPrincipalName() furent déjà appelés pour générer la liste des pages web potentielles et la
@@ -58,7 +61,7 @@ struct Documentation {
     void generate_index();
     void generate_file_css();
     void generate_file_for_search_engine();
-    void parse(); // cette fonction parse le code c++ de tout le projet ainsi que tous les commentaires.
+    void parse(); // cette fonction parse le code c++ ou métil de tout le projet ainsi que tous les commentaires.
     void scan( Op& op ); // cette fonction permet d'appliquer un opérateur/fonction op sur tous les objets PageComment du projet.
 
     vector<PageComment*> listPageComment;
@@ -67,6 +70,7 @@ struct Documentation {
     map<string,string> tree;
     vector<string> listHeaderSuffix;
     vector<string> listBodySuffix;
+    Language_id language_id;
     /**
         temporaire : c'est un objet qui génère le fichier search.idx contenant la table de correspondance servant à la recherche par mot clés.
         Cette classe fur récupérée et adaptée du programme doxygen.

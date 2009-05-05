@@ -9,6 +9,7 @@
 #include<sstream>
 #include <stdexcept>
 using namespace std;
+#include <string.h> /// pour strcmp
 /// pour parcourir, manipuler les fichiers sur linux
 //#include <unistd.h>
 //#include <dirent.h>
@@ -280,7 +281,7 @@ void Documentation::parse() {
 
     m = listPageComment.size() ;
     for(i=0;i<m;i++) {
-        listPageComment[i]->parse();
+        listPageComment[i]->parse(language_id);
         cout << listPageComment[i]->nameFile <<" is parsing" << endl ;
     }
 }
@@ -848,13 +849,13 @@ void Documentation::generate_index() {
     }
 }
 
-void Documentation::setHeaderSuffix(vector<const char*> l){
-    for(int i=0;i<l.size();i++)
+void Documentation::setHeaderSuffix(const char* l[], int s){
+    for(int i=0;i<s;i++)
         listHeaderSuffix.push_back(l[i]);
 }
 
-void Documentation::setBodySuffix(vector<const char*> l){
-    for(int i=0;i<l.size();i++)
+void Documentation::setBodySuffix(const char* l[], int s){
+    for(int i=0;i<s;i++)
         listBodySuffix.push_back(l[i]);
 }
 

@@ -26,10 +26,10 @@ struct Function : public Bloc {
     Function( ) { }
     ~Function() ;
     virtual void display( std::ostream &os ) ;
-    virtual void execute_function( VisitorBloc *v ) { v->function_at_Function( this ) ;  }
+    virtual void exec( VisitorBloc *v ) { v->exec( this ) ;  }
     //void apply_on_related_to( const std::string &s, Op *op ) ;
     //friend std::ostream &operator<<( std::ostream &os, const Comment &c ) ;
-    // méthode virtuelle de target
+    /// méthode virtuelle de target
     virtual bool of_function() { return true; }
     //int type ;
     string listAttribut ; // static, const, ...

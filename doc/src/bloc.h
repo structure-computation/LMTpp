@@ -26,7 +26,7 @@ struct Bloc : public TagComment, public Target  {
     virtual ~Bloc() ;
     virtual void display( std::ostream &os ) ;
     friend std::ostream &operator<<( std::ostream &os, Bloc &b ) ;
-    virtual void execute_function( VisitorBloc *v ) { v->function_at_Bloc( this ) ;  }
+    virtual void exec( VisitorBloc *v ) { v->exec( this ) ;  }
 
     string _namespace ;
     string portee ;

@@ -7,31 +7,33 @@
 #include<vector>
 #include<string>
 
-using namespace std ;
+using namespace std;
 
-//struct CommentItem ;
-//struct LangRef ;
+//struct CommentItem;
+//struct LangRef;
 
-struct Bloc ;
-struct Classe ;
-struct Function ;
-struct Struct ;
-struct VisitorBloc ;
-struct ListLink ;
+struct Bloc;
+struct Classe;
+struct ClasseMetil;
+struct Function;
+struct Struct;
+struct VisitorBloc;
+struct ListLink;
 
 
 struct VisitorBloc_NameBaseClass : public VisitorBloc {
-    VisitorBloc_NameBaseClass( ListLink* plink ) { ptr_listLink = plink ; }
-    virtual ~VisitorBloc_NameBaseClass() ;
-    virtual void function_at_Bloc( Bloc* b ) ;
-    virtual void function_at_Classe( Classe* c ) ;
-    virtual void function_at_Struct( Struct* s ) ;
-    virtual void function_at_Function( Function* f ) ;
-    //bool isNameBaseClass( string& n ) ;
-    //bool isPrincipalNameBaseClass( string& n ) ;
+    VisitorBloc_NameBaseClass( ListLink* plink ) { ptr_listLink = plink; }
+    virtual ~VisitorBloc_NameBaseClass();
+    virtual void exec( Bloc* b );
+    virtual void exec( Classe* c );
+    virtual void exec( ClasseMetil* c );
+    virtual void exec( Struct* s );
+    virtual void exec( Function* f );
+    //bool isNameBaseClass( string& n );
+    //bool isPrincipalNameBaseClass( string& n );
 
-    ListLink* ptr_listLink ;
-} ;
+    ListLink* ptr_listLink;
+};
 
 
 #endif
