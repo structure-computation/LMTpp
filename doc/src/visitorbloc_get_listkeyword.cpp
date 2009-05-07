@@ -8,11 +8,12 @@
 #include<cmath>
 #include"time.h"
 
-using namespace std ;
+using namespace std;
 
 #include "op.h"
 #include "parameter.h"
 #include "classe.h"
+#include "classemetil.h"
 #include "struct.h"
 #include "bloc.h"
 #include "visitorbloc.h"
@@ -23,56 +24,73 @@ using namespace std ;
 #include "templateparameter.h"
 #include "visitorcommentitem_getkeyword_of_extuge.h"
 
-void VisitorBloc_getListKeyword :: function_at_Classe( Classe* c ) {
+void VisitorBloc_getListKeyword::exec( Classe* c ) {
 
-    int i,n,j,m ;
+    int i,n,j,m;
 
     /// on veut récupérer tous les keyword de tous les commentaires associés à cette classe.
-    VisitorCommentItem_getKeyword_of_ExTuGe visi ;
-    n = c->listTag.size() ;
+    VisitorCommentItem_getKeyword_of_ExTuGe visi;
+    n = c->listTag.size();
     for(i=0;i<n;i++) {
-        m = c->listTag[i]->items.size() ;
+        m = c->listTag[i]->items.size();
         for(j=0;j<m;j++) {
-            c->listTag[i]->items[j]->execute_function( &visi ) ;
+            c->listTag[i]->items[j]->execute_function( &visi );
         }
     }
     if (visi.isExtuge==0)
-        listkeyword_of_class_struct = visi.listNameKeyword ;
+        listkeyword_of_class_struct = visi.listNameKeyword;
 }
 
-void VisitorBloc_getListKeyword :: function_at_Struct( Struct* s ) { 
+void VisitorBloc_getListKeyword::exec( ClasseMetil* c ) {
 
-    int i,n,j,m ;
+    int i,n,j,m;
 
-    // on veut récupérer tous les keyword de tous les commentaires associés à cette classe.
-    VisitorCommentItem_getKeyword_of_ExTuGe visi ;
-    n = s->listTag.size() ;
+    /// on veut récupérer tous les keyword de tous les commentaires associés à cette classe.
+    VisitorCommentItem_getKeyword_of_ExTuGe visi;
+    n = c->listTag.size();
     for(i=0;i<n;i++) {
-        m = s->listTag[i]->items.size() ;
+        m = c->listTag[i]->items.size();
         for(j=0;j<m;j++) {
-            s->listTag[i]->items[j]->execute_function( &visi ) ;
-            //s->listTag[i]->items[j]->display( cerr ) ;
+            c->listTag[i]->items[j]->execute_function( &visi );
         }
     }
     if (visi.isExtuge==0)
-        listkeyword_of_class_struct = visi.listNameKeyword ;
+        listkeyword_of_class_struct = visi.listNameKeyword;
 }
 
-void VisitorBloc_getListKeyword :: function_at_Function( Function* f ) {
+void VisitorBloc_getListKeyword::exec( Struct* s ) { 
 
-    int i,n,j,m ;
+    int i,n,j,m;
 
     // on veut récupérer tous les keyword de tous les commentaires associés à cette classe.
-    VisitorCommentItem_getKeyword_of_ExTuGe visi ;
-    n = f->listTag.size() ;
+    VisitorCommentItem_getKeyword_of_ExTuGe visi;
+    n = s->listTag.size();
     for(i=0;i<n;i++) {
-        m = f->listTag[i]->items.size() ;
+        m = s->listTag[i]->items.size();
         for(j=0;j<m;j++) {
-            f->listTag[i]->items[j]->execute_function( &visi ) ;
+            s->listTag[i]->items[j]->execute_function( &visi );
+            //s->listTag[i]->items[j]->display( cerr );
         }
     }
     if (visi.isExtuge==0)
-        listkeyword_of_function = visi.listNameKeyword ;
+        listkeyword_of_class_struct = visi.listNameKeyword;
+}
+
+void VisitorBloc_getListKeyword::exec( Function* f ) {
+
+    int i,n,j,m;
+
+    // on veut récupérer tous les keyword de tous les commentaires associés à cette classe.
+    VisitorCommentItem_getKeyword_of_ExTuGe visi;
+    n = f->listTag.size();
+    for(i=0;i<n;i++) {
+        m = f->listTag[i]->items.size();
+        for(j=0;j<m;j++) {
+            f->listTag[i]->items[j]->execute_function( &visi );
+        }
+    }
+    if (visi.isExtuge==0)
+        listkeyword_of_function = visi.listNameKeyword;
 }
 
 

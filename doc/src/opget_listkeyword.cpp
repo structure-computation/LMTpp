@@ -87,7 +87,7 @@ void OpGet_listKeyword :: operator()( PageComment* page ) {
     n = page->code.list_subType_function.size() ;
     for(i=0;i<n;i++) {
         viso.init() ;
-        page->code.list_subType_function[i]->execute_function( &viso ) ;
+        page->code.list_subType_function[i]->exec( &viso ) ;
         
         m = viso.listkeyword_of_class_struct.size() ;
         for(j=0;j<m;j++) {

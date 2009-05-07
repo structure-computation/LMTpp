@@ -23,26 +23,26 @@ using namespace std ;
 #include "templateparameter.h"
 
 
-VisitorBloc_GetCaracteristicFunction :: ~VisitorBloc_GetCaracteristicFunction() {
+VisitorBloc_GetCaracteristicFunction::~VisitorBloc_GetCaracteristicFunction() {
 
 }
 
-void VisitorBloc_GetCaracteristicFunction :: function_at_Bloc( Bloc* b ) {
+void VisitorBloc_GetCaracteristicFunction::exec( Bloc* b ) {
 
     enphase = false ;
 }
 
-void VisitorBloc_GetCaracteristicFunction :: function_at_Classe( Classe* c ) {
+void VisitorBloc_GetCaracteristicFunction::exec( Classe* c ) {
 
     enphase = false ;
 }
 
-void VisitorBloc_GetCaracteristicFunction :: function_at_Struct( Struct* s ) { 
+void VisitorBloc_GetCaracteristicFunction::exec( Struct* s ) { 
 
     enphase = false ;
 }
 
-void VisitorBloc_GetCaracteristicFunction :: function_at_Function( Function* f ) {
+void VisitorBloc_GetCaracteristicFunction::exec( Function* f ) {
 
     enphase = true ;
     ptr_listAttribut = &f->listAttribut ;
@@ -50,6 +50,10 @@ void VisitorBloc_GetCaracteristicFunction :: function_at_Function( Function* f )
     ptr_returnType = &f->returnType ;
 }
 
+void VisitorBloc_GetCaracteristicFunction::exec( ClasseMetil* c ) {
+    
+    enphase = false ;
+}
 
 
 

@@ -12,8 +12,10 @@ using namespace std ;
 
 
 struct Names {
+    //Names( const Names& n) { name = n.name; principalName = n.principalName; }
     Names( ) { }
     ~Names() {} 
+    void clear() { name.clear();principalName.clear(); }
     //void apply_on_related_to( const std::string &s, Op *op ) ;
     //friend std::ostream &operator<<( std::ostream &os, const Comment &c ) ;
 

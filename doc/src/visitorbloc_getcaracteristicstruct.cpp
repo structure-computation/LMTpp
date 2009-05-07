@@ -13,6 +13,7 @@ using namespace std ;
 #include "op.h"
 #include "parameter.h"
 #include "classe.h"
+#include "classemetil.h"
 #include "struct.h"
 #include "bloc.h"
 #include "visitorbloc.h"
@@ -23,30 +24,35 @@ using namespace std ;
 #include "templateparameter.h"
 
 
-VisitorBloc_GetCaracteristicStruct :: ~VisitorBloc_GetCaracteristicStruct() {
+VisitorBloc_GetCaracteristicStruct::~VisitorBloc_GetCaracteristicStruct() {
 
 }
 
-void VisitorBloc_GetCaracteristicStruct :: function_at_Bloc( Bloc* b ) {
+void VisitorBloc_GetCaracteristicStruct::exec( Bloc* b ) {
 
-    enphase = false ;
+    ptr_listHerited = NULL;
 }
 
-void VisitorBloc_GetCaracteristicStruct :: function_at_Classe( Classe* c ) {
+void VisitorBloc_GetCaracteristicStruct::exec( Classe* c ) {
 
-    enphase = false ;
+    ptr_listHerited = NULL;
 }
 
-void VisitorBloc_GetCaracteristicStruct :: function_at_Struct( Struct* s ) { 
+void VisitorBloc_GetCaracteristicStruct::exec( ClasseMetil* c ) {
 
-    enphase = true ;
+    ptr_listHerited = NULL;
+}
+
+void VisitorBloc_GetCaracteristicStruct::exec( Struct* s ) { 
+
     ptr_listHerited = &s->listHerited ;
 }
 
-void VisitorBloc_GetCaracteristicStruct :: function_at_Function( Function* f ) {
+void VisitorBloc_GetCaracteristicStruct::exec( Function* f ) {
 
-    enphase = false ;
+    ptr_listHerited = NULL;
 }
+
 
 
 

@@ -22,7 +22,7 @@ void OpAllClass :: operator()( PageComment* page ) {
     n = page->code.list_subType_function.size() ;
     for(i=0;i<n;i++) {
         v_all_class.setParent( page->code.list_subType_function[i] ) ;
-        page->code.list_subType_function[i]->execute_function( &v_all_class ) ;
+        page->code.list_subType_function[i]->exec( &v_all_class ) ;
     }
 
 }

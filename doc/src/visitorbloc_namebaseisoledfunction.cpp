@@ -3,7 +3,7 @@
 #include <vector>
 
 
-using namespace std ;
+using namespace std;
 #include "op.h"
 #include "classe.h"
 #include "struct.h"
@@ -32,20 +32,20 @@ void VisitorBloc_NameBaseIsoledFunction :: function_at_Struct( Struct* s ) {
 
 void VisitorBloc_NameBaseIsoledFunction :: function_at_Function( Function* f ) {
 
-    //string h ;
-    Link* ptr_link ;
+    //string h;
+    Link* ptr_link;
 
-    ptr_link = new Link() ;
-    ptr_link->name = f->name ;
-    ptr_link->path = "function/" ;
+    ptr_link = new Link();
+    ptr_link->name = f->name;
+    ptr_link->path = "function/";
     //if ( f->name.hash != 0)
-    //    h = hash2string( f->name.hash ) ;
+    //    h = hash2string( f->name.hash );
     //else
-    //    h = "" ;
-    ptr_link->name_file = french2webID( f->name.name ) + '_' + hash2string( f->name.hash ) + ".html" ;
-    ptr_listLink->list.push_back( ptr_link ) ;
+    //    h = "";
+    ptr_link->name_file = french2webID( f->name.name ) + '_' + hash2string( f->name.hash ) + ".html";
+    ptr_listLink->list.push_back( ptr_link );
 
-    //list_NameBaseIsoledFunction.push_back( f->name ) ;
+    //list_NameBaseIsoledFunction.push_back( f->name );
 }
 
 

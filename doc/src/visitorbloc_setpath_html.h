@@ -7,16 +7,17 @@
 #include<vector>
 #include<string>
 
-using namespace std ;
+using namespace std;
 
-//struct CommentItem ;
-//struct LangRef ;
+//struct CommentItem;
+//struct LangRef;
 
-struct Bloc ;
-struct Classe ;
-struct Function ;
-struct Struct ;
-struct VisitorBloc ;
+struct Bloc;
+struct Classe;
+struct ClasseMetil;
+struct Function;
+struct Struct;
+struct VisitorBloc;
 
 
 // l'objectif de cette structure est de définir les les chemins des pages web de chaque bloc dans pour pouvoir constuire les liens HTML.
@@ -24,18 +25,19 @@ struct VisitorBloc ;
 struct VisitorBloc_SetPath_HTML : public VisitorBloc {
     VisitorBloc_SetPath_HTML( ) { }
     virtual ~VisitorBloc_SetPath_HTML() {}
-    virtual void function_at_Bloc( Bloc* b ) ;
-    virtual void function_at_Classe( Classe* c ) ;
-    virtual void function_at_Struct( Struct* s ) ;
-    virtual void function_at_Function( Function* f ) ;
-    void setRepertory_function( const string& s ) ;
-    void setRepertory_struct( const string& s ) ;
-    void setRepertory_class( const string& s ) ;
+    virtual void exec( Bloc* b );
+    virtual void exec( ClasseMetil* c );
+    virtual void exec( Classe* c );
+    virtual void exec( Struct* s );
+    virtual void exec( Function* f );
+    void setRepertory_function( const string& s );
+    void setRepertory_struct( const string& s );
+    void setRepertory_class( const string& s );
 
-    string repertory_function ;
-    string repertory_struct ;
-    string repertory_class ;
-} ;
+    string repertory_function;
+    string repertory_struct;
+    string repertory_class;
+};
 
 
 #endif

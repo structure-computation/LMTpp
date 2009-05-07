@@ -13,6 +13,7 @@ using namespace std ;
 #include "op.h"
 #include "parameter.h"
 #include "classe.h"
+#include "classemetil.h"
 #include "struct.h"
 #include "bloc.h"
 #include "visitorbloc.h"
@@ -23,30 +24,36 @@ using namespace std ;
 #include "templateparameter.h"
 
 
-VisitorBloc_GetCaracteristicClass :: ~VisitorBloc_GetCaracteristicClass() {
+VisitorBloc_GetCaracteristicClass::~VisitorBloc_GetCaracteristicClass() {
 
 }
 
-void VisitorBloc_GetCaracteristicClass :: function_at_Bloc( Bloc* b ) {
+void VisitorBloc_GetCaracteristicClass::exec( Bloc* b ) {
 
-    enphase = false ;
+    ptr_listHerited = NULL;
 }
 
-void VisitorBloc_GetCaracteristicClass :: function_at_Classe( Classe* c ) {
+void VisitorBloc_GetCaracteristicClass::exec( Classe* c ) {
 
-    enphase = true ;
     ptr_listHerited = &c->listHerited ;
 }
 
-void VisitorBloc_GetCaracteristicClass :: function_at_Struct( Struct* s ) { 
+void VisitorBloc_GetCaracteristicClass::exec( Struct* s ) { 
 
-    enphase = false ;
+    ptr_listHerited = NULL;
 }
 
-void VisitorBloc_GetCaracteristicClass :: function_at_Function( Function* f ) {
+void VisitorBloc_GetCaracteristicClass::exec( Function* f ) {
 
-    enphase = false ;
+    ptr_listHerited = NULL;
 }
+
+void VisitorBloc_GetCaracteristicClass::exec( ClasseMetil* c ) {
+    
+    ptr_listHerited = &c->listHerited ;
+}
+
+
 
 
 

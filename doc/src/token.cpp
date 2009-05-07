@@ -101,20 +101,20 @@ bool chercher_motif( const string& s, const char* motif, int* pos, int end, int 
 
     for(i=start;i<end;i++) {
         if (motif[0] == s[i]) {
-                p = i ;
-                j = 1 ;
-                while (motif[j] != '\0') {
-                        if ((p+j == end) || (motif[j] != s[p+j])) break ;
-                        j++ ;
-                        }
-                if (motif[j] == '\0') { *pos = p ; return true ; }
-                }
+            p = i ;
+            j = 1 ;
+            while (motif[j] != '\0') {
+                if ((p+j == end) || (motif[j] != s[p+j])) break ;
+                j++ ;
+            }
+            if (motif[j] == '\0') { *pos = p ; return true ; }
+        }
     }
 
  //cout << " (interne) p = " << p << endl ;
  //cout << " (interne) i = " << i << endl ;
- *pos = -1 ;
- return false ;
+    *pos = -1 ;
+    return false ;
 /*
  int i ;
  i = s.find( motif,start ) ;
