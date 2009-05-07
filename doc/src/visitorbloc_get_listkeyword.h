@@ -7,30 +7,32 @@
 #include<vector>
 #include<string>
 
-using namespace std ;
+using namespace std;
 
-//struct CommentItem ;
-//struct LangRef ;
+//struct CommentItem;
+//struct LangRef;
 
-struct Bloc ;
-struct Classe ;
-struct Function ;
-struct Struct ;
-struct VisitorBloc ;
+struct Bloc;
+struct Classe;
+struct ClasseMetil;
+struct Function;
+struct Struct;
+struct VisitorBloc;
 
 
     struct VisitorBloc_getListKeyword : public VisitorBloc {
     VisitorBloc_getListKeyword( ) { }
     virtual ~VisitorBloc_getListKeyword() {}
-    virtual void function_at_Bloc( Bloc* b ) {}
-    virtual void function_at_Classe( Classe* c ) ;
-    virtual void function_at_Struct( Struct* s ) ;
-    virtual void function_at_Function( Function* f ) ;
-    void init() { listkeyword_of_class_struct.clear() ; listkeyword_of_function.clear() ; }
+    virtual void exec( Bloc* b ) {}
+    virtual void exec( Classe* c );
+    virtual void exec( ClasseMetil* c );
+    virtual void exec( Struct* s );
+    virtual void exec( Function* f );
+    void init() { listkeyword_of_class_struct.clear(); listkeyword_of_function.clear(); }
 
-    vector<string> listkeyword_of_class_struct ;
-    vector<string> listkeyword_of_function ;
-} ;
+    vector<string> listkeyword_of_class_struct;
+    vector<string> listkeyword_of_function;
+};
 
 
 #endif

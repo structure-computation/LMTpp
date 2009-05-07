@@ -24,7 +24,7 @@ struct Classe : public Bloc {
     Classe( ) { }
     virtual ~Classe() ;
     virtual void display( std::ostream &os ) ;
-    virtual void execute_function( VisitorBloc *v ) { v->function_at_Classe( this ) ;  }
+    virtual void exec( VisitorBloc *v ) { v->exec( this ) ;  }
     //void apply_on_related_to( const std::string &s, Op *op ) ;
 
     /// méthode virtuelle de target

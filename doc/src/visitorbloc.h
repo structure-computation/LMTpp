@@ -6,26 +6,28 @@
 #include<fstream>
 #include<vector>
 
-using namespace std ;
+using namespace std;
 
-//struct CommentItem ;
-//struct LangRef ;
+//struct CommentItem;
+//struct LangRef;
 
-struct Bloc ;
-struct Classe ;
-struct Function ;
-struct Struct ;
+struct Bloc;
+struct Classe;
+struct ClasseMetil;
+struct Function;
+struct Struct;
 
 struct VisitorBloc {
     VisitorBloc( ) { }
-    virtual ~VisitorBloc() ;
-    virtual void function_at_Bloc( Bloc* b ) ;
-    virtual void function_at_Classe( Classe* c ) ;
-    virtual void function_at_Struct( Struct* s ) ;
-    virtual void function_at_Function( Function* f ) ;
-    //void apply_on_related_to( const std::string &s, Op *op ) ;
-    //friend std::ostream &operator<<( std::ostream &os, const Comment &c ) ;
-} ;
+    virtual ~VisitorBloc();
+    virtual void exec( Bloc* b );
+    virtual void exec( Classe* c );
+    virtual void exec( ClasseMetil* c );
+    virtual void exec( Struct* s );
+    virtual void exec( Function* f );
+    //void apply_on_related_to( const std::string &s, Op *op );
+    //friend std::ostream &operator<<( std::ostream &os, const Comment &c );
+};
 
 
 #endif

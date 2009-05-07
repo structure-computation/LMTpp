@@ -22,7 +22,7 @@ struct Struct : public Bloc {
     Struct( ) { }
     virtual ~Struct() ;
     virtual void display( std::ostream &os ) ;
-    virtual void execute_function( VisitorBloc *v ) { v->function_at_Struct( this ) ;  }
+    virtual void exec( VisitorBloc *v ) { v->exec( this ) ;  }
     //void apply_on_related_to( const std::string &s, Op *op ) ;
     //friend std::ostream &operator<<( std::ostream &os, const Comment &c ) ;
 

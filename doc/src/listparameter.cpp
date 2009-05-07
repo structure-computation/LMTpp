@@ -69,9 +69,7 @@ void ListParameter :: display_parameter_to_HTML(ofstream* f, ListTarget* ptr_lis
     n = t.list.size() ;
     for(i=0;i<n;i++) {
         os << "vvvvvvvvvvvvvvvvvv PARAMETRE vvvvvvvvvvvvvvvvvv" << endl ;
-        os << " type name = |" << t.list[i].type.name << "|" << std::endl ;
-        os << " type name principal = |" << t.list[i].type.principalName << "|" << std::endl ;
-        os << " name of variable = |" << t.list[i].nameVariable << "|" << std::endl ;
+        os << t.list[i];
     }
     return os ;
 } ;

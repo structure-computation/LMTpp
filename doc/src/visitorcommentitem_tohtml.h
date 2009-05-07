@@ -31,7 +31,7 @@ struct CommentItemVerbatim ;
 struct ListTarget ;
 struct Target ;
 
-/*
+/*!
 cette classe va générer un flux au format HTML des items **sauf** :
     * les pages webs définis dans les sources du projet
     * les items example

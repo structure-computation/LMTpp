@@ -8,10 +8,11 @@
 #include<cmath>
 #include"time.h"
 
-using namespace std ;
+using namespace std;
 
 #include "op.h"
 #include "parameter.h"
+#include "classemetil.h"
 #include "classe.h"
 #include "struct.h"
 #include "bloc.h"
@@ -22,24 +23,29 @@ using namespace std ;
 #include "token.h"
 #include "templateparameter.h"
 
-void VisitorBloc_what_type :: function_at_Struct( Struct* s ) {
+void VisitorBloc_what_type::exec( Struct* s ) {
 
-    type = "struct" ;
+    type = "struct";
 }
 
-void VisitorBloc_what_type :: function_at_Function( Function* f ) {
+void VisitorBloc_what_type::exec( Function* f ) {
 
-    type = "function" ;
+    type = "function";
 }
 
-void VisitorBloc_what_type :: function_at_Classe( Classe* c ) {
+void VisitorBloc_what_type::exec( Classe* c ) {
 
-    type = "class" ;
+    type = "class";
 }
 
-void VisitorBloc_what_type :: function_at_Bloc( Bloc* b ) {
+void VisitorBloc_what_type::exec( ClasseMetil* c ) {
 
-    type = "bloc" ; // ne devrait jamais être utilisée.
+    type = "class";
+}
+
+void VisitorBloc_what_type::exec( Bloc* b ) {
+
+    type = "bloc"; // ne devrait jamais être utilisée.
 }
 
 

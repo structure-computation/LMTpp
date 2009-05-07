@@ -6,26 +6,25 @@
 using namespace std ;
 #include "op.h"
 #include "classe.h"
+#include "classemetil.h"
 #include "struct.h"
 #include "bloc.h"
 #include "visitorbloc.h"
 
 
-VisitorBloc :: ~VisitorBloc() {
+VisitorBloc::~VisitorBloc() {
 
 }
 
-void VisitorBloc :: function_at_Bloc( Bloc* b ) {
-}
+void VisitorBloc::exec( Bloc* b ) { }
 
-void VisitorBloc :: function_at_Classe( Classe* c ) {
-}
+void VisitorBloc::exec( Classe* c ) { }
 
-void VisitorBloc :: function_at_Struct( Struct* s ) { 
-}
+void VisitorBloc::exec( ClasseMetil* c ) { } 
 
-void VisitorBloc :: function_at_Function( Function* f ) {
-}
+void VisitorBloc::exec( Struct* s ) { }
+
+void VisitorBloc::exec( Function* f ) { }
 
 
 

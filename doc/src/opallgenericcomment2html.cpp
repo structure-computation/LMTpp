@@ -25,7 +25,7 @@ using namespace std ;
 #include "pagecomment.h"
 
 // cette fonction génère toutes les pages web d'un objet/fonction générique ou hérité qui n'ont pas d'item generic_comment
-void OpAllGenericComment2HTML :: generate_webPage_of_generic_object_without_generic_comment() {
+void OpAllGenericComment2HTML::generate_webPage_of_generic_object_without_generic_comment() {
 
     int i,n ;
     Target* pt;
@@ -43,7 +43,7 @@ void OpAllGenericComment2HTML :: generate_webPage_of_generic_object_without_gene
 
 
 // cette fonction génère la page web d'un objet/fonction générique ou hérité qui n'a pas d'item generic_comment et dont le nom générique est principal_name
-void OpAllGenericComment2HTML :: generate_webPage_of_generic_object_without_generic_comment( Target* pt) {
+void OpAllGenericComment2HTML::generate_webPage_of_generic_object_without_generic_comment( Target* pt) {
 
     string stmp ;
     string stmp2 ;
@@ -128,7 +128,7 @@ void OpAllGenericComment2HTML :: generate_webPage_of_generic_object_without_gene
  générique ou dérivée... ouf! pas simple à expliquer.
 
 */
-void OpAllGenericComment2HTML :: operator()( PageComment* page ) {
+void OpAllGenericComment2HTML::operator()( PageComment* page ) {
 
     // on génère les pages web des commentaitres generaux generic comment de ce PageComment.
 

@@ -64,7 +64,7 @@ void OpStructure_site :: operator()( PageComment* page ) {
     // on détermine le chemin des différents bloc|target sachant qu'un bloc est en fait soit une classe, soit une struc soit une fonction.
     n = page->code.list_subType_function.size() ;
     for(i=0;i<n;i++)
-        page->code.list_subType_function[i]->execute_function( &visi ) ;
+        page->code.list_subType_function[i]->exec( &visi ) ;
 
     // ... puis des exemples, tutorials et "commentaires génériques"
     visor.setRepertory_example( (*ptr_tree)["example"] ) ;

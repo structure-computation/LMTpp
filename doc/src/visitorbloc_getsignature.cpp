@@ -14,6 +14,7 @@ using namespace std ;
 #include "parameter.h"
 #include "listparameter.h"
 #include "classe.h"
+#include "classemetil.h"
 #include "struct.h"
 #include "bloc.h"
 #include "visitorbloc.h"
@@ -23,26 +24,31 @@ using namespace std ;
 
 
 
-VisitorBloc_getSignature :: ~VisitorBloc_getSignature() {
+VisitorBloc_getSignature::~VisitorBloc_getSignature() {
 
 }
 
-void VisitorBloc_getSignature :: function_at_Bloc( Bloc* b ) {
+void VisitorBloc_getSignature::exec( Bloc* b ) {
 
     ptr_listParameter = NULL ;
 }
 
-void VisitorBloc_getSignature :: function_at_Classe( Classe* c ) {
+void VisitorBloc_getSignature::exec( Classe* c ) {
 
     ptr_listParameter = NULL ;
 }
 
-void VisitorBloc_getSignature :: function_at_Struct( Struct* s ) { 
+void VisitorBloc_getSignature::exec( ClasseMetil* c ) {
 
     ptr_listParameter = NULL ;
 }
 
-void VisitorBloc_getSignature :: function_at_Function( Function* f ) {
+void VisitorBloc_getSignature::exec( Struct* s ) { 
+
+    ptr_listParameter = NULL ;
+}
+
+void VisitorBloc_getSignature::exec( Function* f ) {
 
     ptr_listParameter = &f->listParameter ;
 }
