@@ -143,6 +143,8 @@ public:
     
     virtual Vec<ScalarType> &get_sollicitation() = 0; ///
     virtual Vec<ScalarType> &get_result(unsigned num=0) = 0; ///
+    
+    virtual Vec<bool> constrained_nodes() const = 0; /// renvoie un vecteur de la taille égal au nombre de noeud et qui vaut vrai si le noeud est contraint.
 
     bool assume_constant_matrix; ///
     ScalarType default_iterative_criterium; /// iterative_criterium for conjugate gradient, GMRES, ... based on norm_inf( delta solution )

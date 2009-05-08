@@ -1485,6 +1485,16 @@ public:
         update_variables();
     }
     
+    virtual Vec<bool> constrained_nodes() const {
+        Vec<bool> res;
+        res.resize( m->node_list.size(), false );
+        for(unsigned i=0;i<constraints.size();++i)
+            for(unsigned j=0;j<constraints[i].coeffs.size();++j)
+                if ( constraints[i].coeffs[j].type_var == -1 )
+                    res[ constraints[i].coeffs[j].num ] = true;
+        return res;
+    }
+    
     
     TM *m;
     Carac carac;
