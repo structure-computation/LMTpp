@@ -54,7 +54,7 @@ class Problem:
                 output.write( "    struct %s_DM { static std::string name() { return \"%s\"; } };\n" % ( nn, nn ) )
                 output.write( "#endif // IFNDEF_%s_DM\n" % nn )
                 output.write( "\n" )
-        
+
         output.write( "template<class TP>\n" )
         output.write( "struct Mesh_carac_%s<TP,%i> {\n" % (self.name,dim) )
         output.write( "    typedef TP Tpos;\n" )
@@ -75,7 +75,7 @@ class Problem:
             for Ti,To in type_vars.items():
                 output.write( ' '*nb_sp+'    typedef '+Ti+' '+To+';\n' )
 
-            #            
+            #
             output.write( ' '*nb_sp+"    %s()"%nf )
             cpt = 0
             for namevar,var in all_vars.items():
@@ -103,7 +103,7 @@ class Problem:
                             cpt += 1
             if cpt==0: output.write( ' '*nb_sp+"    VOIDDMSET;\n" )
             else: output.write( ' '*nb_sp+"    static const unsigned nb_params = "+str(cpt)+";\n" )
-            
+
             # dm_data_set_field
             output.write( ' '*nb_sp+"    void dm_data_set_field( const std::string field_name, Tpos value ) {\n" )
             for namevar, var in all_vars.items():
@@ -130,7 +130,20 @@ class Problem:
                                 output.write( ' '*nb_sp+'        if ( field_name == "'+namevar+'" ) { '+namevar+' = value; return; }\n' )
                 output.write( ' '*nb_sp+'        std::cerr << "There is no variable named " << field_name << " in data struct" << std::endl;\n' )
                 output.write( ' '*nb_sp+"    }\n" )
-            
+            for d in range( 1, 7 ):
+                output.write( ' '*nb_sp+"    void dm_data_set_field( const std::string field_name, const Mat<Tpos,Gen<"+str(d)+","+str(d)+"> > &value ) {\n" )
+                for namevar, var in all_vars.items():
+                    if cond( var ) and var.nb_dim == [d, d]:
+                        if in_vec( var ):
+                            for i in range( cond(var) ):
+                                if len( var.T ) == 0:
+                                    output.write( ' '*nb_sp+'        if ( field_name == "'+namevar+'" ) { '+namevar+'['+str(i)+'] = value; return; } // hum\n' )
+                        else:
+                            if len( var.T ) == 0:
+                                output.write( ' '*nb_sp+'        if ( field_name == "'+namevar+'" ) { '+namevar+' = value; return; }\n' )
+                output.write( ' '*nb_sp+'        std::cerr << "There is no variable named " << field_name << " in data struct" << std::endl;\n' )
+                output.write( ' '*nb_sp+"    }\n" )
+
             # dm_data_get_field
             output.write( ' '*nb_sp+"    Tpos dm_data_get_field( const std::string field_name, StructForType<Tpos> ) const {\n" )
             for namevar, var in all_vars.items():
@@ -159,14 +172,28 @@ class Problem:
                 output.write( ' '*nb_sp+'        std::cerr << "There is no variable named " << field_name << " in data struct" << std::endl;\n' )
                 output.write( ' '*nb_sp+"        return Vec<Tpos,"+str(d)+">(Tpos(0));\n" )
                 output.write( ' '*nb_sp+"    }\n" )
+            for d in range( 1, 7 ):
+                output.write( ' '*nb_sp+"    Mat<Tpos,Gen<"+str(d)+"> > dm_data_get_field( const std::string field_name, StructForType<Mat<Tpos,Gen<"+str(d)+","+str(d)+"> > > ) const {\n" )
+                for namevar, var in all_vars.items():
+                    if cond( var ) and var.nb_dim == [d, d]:
+                        if in_vec( var ):
+                            for i in range( cond(var) ):
+                                if len( var.T ) == 0:
+                                    output.write( ' '*nb_sp+'        if ( field_name == "'+namevar+'" ) { return '+namevar+'['+str(i)+']; } // hum\n' )
+                        else:
+                            if len( var.T ) == 0:
+                                output.write( ' '*nb_sp+'        if ( field_name == "'+namevar+'" ) { return '+namevar+'; }\n' )
+                output.write( ' '*nb_sp+'        std::cerr << "There is no variable named " << field_name << " in data struct" << std::endl;\n' )
+                output.write( ' '*nb_sp+"        return Mat<Tpos,Gen<"+str(d)+","+str(d)+"> >(Tpos(0));\n" )
+                output.write( ' '*nb_sp+"    }\n" )
             for d in range( 1, 4 ):
                 output.write( ' '*nb_sp+"    Mat<Tpos,Sym<"+str(d)+"> > dm_data_get_field( const std::string field_name, StructForType<Mat<Tpos,Sym<"+str(d)+"> > > ) const {\n" )
                 output.write( ' '*nb_sp+"        assert( 0 /*TODO*/ );\n" )
                 output.write( ' '*nb_sp+"        return Mat<Tpos,Sym<"+str(d)+"> >();\n" )
                 output.write( ' '*nb_sp+"    }\n" )
-            
+
             output.write( ' '*nb_sp+"};\n" )
-        
+
         class Toto:
             def get_nb_var(self,name): return 0
             def sum_nb_nodes_of_each_children(self): return 0
@@ -231,7 +258,7 @@ class Problem:
                 f = Formulation(nf,dim,0,self.incpaths,options=self.options)
                 fe_sets.append( (f, e) )
         return fe_sets, all_dims
-            
+
     #
     def write_all_mesh_carac(self, output, fe_sets, all_dims ):
         ifndef = 'Mesh_carac_%s_HEADER' % self.name
@@ -245,39 +272,39 @@ class Problem:
         output.write( "template<class TP,unsigned dim> struct Mesh_carac_%s {};\n"%self.name )
         for dim in all_dims.keys():
             self.dim = dim
-            
+
             cp = copy.deepcopy( self.additional_fields )
-                
+
             for n,v in self.additional_fields.items():
                 v.T = string.replace( v.T, 'dim', str(dim) )
                 v.T = string.replace( v.T, 'DIM', str(dim) )
                 v.nb_dim = replace_dim( v.nb_dim, dim )
-                
+
             self.write_mesh_carac( dim, fe_sets, output )
-            
+
             self.additional_fields = cp
-                        
+
         output.write( '} // namespace LMT\n' )
         output.write( '#endif // %s\n' % ifndef )
 
     # write all in a single file
     def write( self, output = sys.stdout, name_der_vars = [] ):
         fe_sets, all_dims = self.get_fe_sets_and_dims()
-        
+
         ifndef = self.name
         output.write( '#ifndef PROBLEM_' + ifndef + '\n' )
         output.write( '#define PROBLEM_' + ifndef + '\n' )
         output.write( '\n' )
         output.write( '#include "formulation/formulation.h"\n' )
         output.write( '\n' )
-        
+
         self.write_all_mesh_carac( output, fe_sets, all_dims )
         output.write( '\n' )
-        
+
         # formulations
         for f,e in fe_sets:
             f.write( e, output, name_der_vars = name_der_vars )
-        
+
         output.write( '\n' )
         output.write( '#endif // PROBLEM_' + ifndef + '\n' )
 
@@ -287,7 +314,7 @@ def write_pb(name,formulations,elements,dim='nvi',output=sys.stdout,incpaths=['.
         Ex : write_pb('toto',[...],['Triangle','Tetra'],'nvi') -> 2 meshes will be created. One in 2D with triangles and one in 3D with tetras
         Ex : write_pb('toto',[...],['Triangle','Quad','Tetra'],'nvi') -> 2 meshes will be created. One in 2D with [triangles,quad] and one in 3D with tetras
         Ex : write_pb('toto',[...],['Triangle','Bar'],'nvi+1') -> 2 meshes will be created. One in 2D with bars and one in 3D with Triangles
-        
+
         options will be passed as local scope to def formulation() and apply_on_elements_after_solve...(...)
         Ex : options = {
             'behavior_simplification' : 'plane stress',
@@ -296,4 +323,3 @@ def write_pb(name,formulations,elements,dim='nvi',output=sys.stdout,incpaths=['.
     pb = Problem(name,formulations,elements,dim,incpaths,options,additional_fields)
     pb.write( output, name_der_vars )
 
-    

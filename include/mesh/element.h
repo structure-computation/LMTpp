@@ -24,7 +24,7 @@ public:
     typedef TNode_ TNode;
     typedef typename TNode_::T T;
     static const unsigned dim = TNode::dim;
-    
+
     virtual unsigned nb_nodes_virtual() const = 0;
     virtual unsigned nb_var_inter_virtual() const = 0;
     virtual TNode *node_virtual(unsigned i) = 0;
@@ -37,7 +37,7 @@ public:
 
     virtual typename TNode::Pvec sample_normal_virtual() const = 0;
     virtual typename TNode::Pvec sample_tangent_virtual() const = 0;
-    
+
     virtual void set_field( const std::string field_name, T value ) = 0;
     virtual void set_field( const std::string field_name, Vec<T,1> value ) = 0;
     virtual void set_field( const std::string field_name, Vec<T,2> value ) = 0;
@@ -45,6 +45,12 @@ public:
     virtual void set_field( const std::string field_name, Vec<T,4> value ) = 0;
     virtual void set_field( const std::string field_name, Vec<T,5> value ) = 0;
     virtual void set_field( const std::string field_name, Vec<T,6> value ) = 0;
+    virtual void set_field( const std::string field_name, Mat<T,Gen<1, 1> > value ) = 0;
+    virtual void set_field( const std::string field_name, Mat<T,Gen<2, 2> > value ) = 0;
+    virtual void set_field( const std::string field_name, Mat<T,Gen<3, 3> > value ) = 0;
+    virtual void set_field( const std::string field_name, Mat<T,Gen<4, 4> > value ) = 0;
+    virtual void set_field( const std::string field_name, Mat<T,Gen<5, 5> > value ) = 0;
+    virtual void set_field( const std::string field_name, Mat<T,Gen<6, 6> > value ) = 0;
 
     virtual T        get_field( const std::string field_name, StructForType<T        > ) const = 0;
     virtual Vec<T,1> get_field( const std::string field_name, StructForType<Vec<T,1> > ) const = 0;
@@ -53,14 +59,19 @@ public:
     virtual Vec<T,4> get_field( const std::string field_name, StructForType<Vec<T,4> > ) const = 0;
     virtual Vec<T,5> get_field( const std::string field_name, StructForType<Vec<T,5> > ) const = 0;
     virtual Vec<T,6> get_field( const std::string field_name, StructForType<Vec<T,6> > ) const = 0;
-    
+    virtual Mat<T,Gen<1, 1> > get_field( const std::string field_name, StructForType<Mat<T,Gen<1, 1> > > ) const = 0;
+    virtual Mat<T,Gen<2, 2> > get_field( const std::string field_name, StructForType<Mat<T,Gen<2, 2> > > ) const = 0;
+    virtual Mat<T,Gen<3, 3> > get_field( const std::string field_name, StructForType<Mat<T,Gen<3, 3> > > ) const = 0;
+    virtual Mat<T,Gen<4, 4> > get_field( const std::string field_name, StructForType<Mat<T,Gen<4, 4> > > ) const = 0;
+    virtual Mat<T,Gen<5, 5> > get_field( const std::string field_name, StructForType<Mat<T,Gen<5, 5> > > ) const = 0;
+    virtual Mat<T,Gen<6, 6> > get_field( const std::string field_name, StructForType<Mat<T,Gen<6, 6> > > ) const = 0;
     virtual Mat<T,Sym<1> > get_field( const std::string field_name, StructForType<Mat<T,Sym<1> > > ) const = 0;
     virtual Mat<T,Sym<2> > get_field( const std::string field_name, StructForType<Mat<T,Sym<2> > > ) const = 0;
     virtual Mat<T,Sym<3> > get_field( const std::string field_name, StructForType<Mat<T,Sym<3> > > ) const = 0;
-    
+
     unsigned number;
     unsigned absolute_number;
-    
+
     virtual ~ElementAncestor() {}
 };
 
@@ -121,7 +132,7 @@ public:
     virtual void set_node_virtual(unsigned i,TNode *n) {
         nodes[i] = n;
     }
-    
+
     Pvec pos(unsigned i) const { return nodes[i]->pos; }
 
     // virtual
@@ -154,9 +165,9 @@ public:
         return sample_tangent(*this);
     }
     virtual T measure_virtual() const { return measure( *this ); }
-    
+
     virtual ~Element() {}
-    
+
     virtual void set_field( const std::string field_name, T value ) { TData::dm_data_set_field( field_name, value ); }
     virtual void set_field( const std::string field_name, Vec<T,1> value ) { TData::dm_data_set_field( field_name, value ); }
     virtual void set_field( const std::string field_name, Vec<T,2> value ) { TData::dm_data_set_field( field_name, value ); }
@@ -164,6 +175,12 @@ public:
     virtual void set_field( const std::string field_name, Vec<T,4> value ) { TData::dm_data_set_field( field_name, value ); }
     virtual void set_field( const std::string field_name, Vec<T,5> value ) { TData::dm_data_set_field( field_name, value ); }
     virtual void set_field( const std::string field_name, Vec<T,6> value ) { TData::dm_data_set_field( field_name, value ); }
+    virtual void set_field( const std::string field_name, Mat<T,Gen<1, 1> > value ) { TData::dm_data_set_field( field_name, value ); }
+    virtual void set_field( const std::string field_name, Mat<T,Gen<2, 2> > value ) { TData::dm_data_set_field( field_name, value ); }
+    virtual void set_field( const std::string field_name, Mat<T,Gen<3, 3> > value ) { TData::dm_data_set_field( field_name, value ); }
+    virtual void set_field( const std::string field_name, Mat<T,Gen<4, 4> > value ) { TData::dm_data_set_field( field_name, value ); }
+    virtual void set_field( const std::string field_name, Mat<T,Gen<5, 5> > value ) { TData::dm_data_set_field( field_name, value ); }
+    virtual void set_field( const std::string field_name, Mat<T,Gen<6, 6> > value ) { TData::dm_data_set_field( field_name, value ); }
 
     virtual T        get_field( const std::string field_name, StructForType<T        > e ) const { return TData::dm_data_get_field( field_name, e ); }
     virtual Vec<T,1> get_field( const std::string field_name, StructForType<Vec<T,1> > e ) const { return TData::dm_data_get_field( field_name, e ); }
@@ -172,11 +189,16 @@ public:
     virtual Vec<T,4> get_field( const std::string field_name, StructForType<Vec<T,4> > e ) const { return TData::dm_data_get_field( field_name, e ); }
     virtual Vec<T,5> get_field( const std::string field_name, StructForType<Vec<T,5> > e ) const { return TData::dm_data_get_field( field_name, e ); }
     virtual Vec<T,6> get_field( const std::string field_name, StructForType<Vec<T,6> > e ) const { return TData::dm_data_get_field( field_name, e ); }
-    
+    virtual Mat<T,Gen<1, 1> > get_field( const std::string field_name, StructForType<Mat<T,Gen<1, 1> > > e ) const { return TData::dm_data_get_field( field_name, e ); }
+    virtual Mat<T,Gen<2, 2> > get_field( const std::string field_name, StructForType<Mat<T,Gen<2, 2> > > e ) const { return TData::dm_data_get_field( field_name, e ); }
+    virtual Mat<T,Gen<3, 3> > get_field( const std::string field_name, StructForType<Mat<T,Gen<3, 3> > > e ) const { return TData::dm_data_get_field( field_name, e ); }
+    virtual Mat<T,Gen<4, 4> > get_field( const std::string field_name, StructForType<Mat<T,Gen<4, 4> > > e ) const { return TData::dm_data_get_field( field_name, e ); }
+    virtual Mat<T,Gen<5, 5> > get_field( const std::string field_name, StructForType<Mat<T,Gen<5, 5> > > e ) const { return TData::dm_data_get_field( field_name, e ); }
+    virtual Mat<T,Gen<6, 6> > get_field( const std::string field_name, StructForType<Mat<T,Gen<6, 6> > > e ) const { return TData::dm_data_get_field( field_name, e ); }
     virtual Mat<T,Sym<1> > get_field( const std::string field_name, StructForType<Mat<T,Sym<1> > > e ) const { return TData::dm_data_get_field( field_name, e ); }
     virtual Mat<T,Sym<2> > get_field( const std::string field_name, StructForType<Mat<T,Sym<2> > > e ) const { return TData::dm_data_get_field( field_name, e ); }
     virtual Mat<T,Sym<3> > get_field( const std::string field_name, StructForType<Mat<T,Sym<3> > > e ) const { return TData::dm_data_get_field( field_name, e ); }
-    
+
     ///
     TNode *nodes[nb_nodes];
     /// nb fields
@@ -196,7 +218,7 @@ public:
 template<class T1,class T2,class T3,unsigned nvi_to_subs>
 void append_skin_elements(const T1 &,const T2 &,const T3 &,const Number<nvi_to_subs> &n) {}
 
-/*! 
+/*!
     Cette fonction retourne l'isobarycentre des noeuds de l'élément.
 
     \friend raphael.pasquier@lmt.ens-cachan.fr
@@ -210,7 +232,7 @@ typename TNode::Pvec center(const Element<NameElem,NameBehavior,TNode,TData,num_
     return res / NameElem::nb_nodes;
 }
 
-/*! 
+/*!
 \generic_comment center
     Cette fonction retourne l'isobarycentre des noeuds de l'élément.
 
@@ -219,12 +241,12 @@ typename TNode::Pvec center(const Element<NameElem,NameBehavior,TNode,TData,num_
     \friend hugo.leclerc@lmt.ens-cachan.fr
 */
 
-/*! 
+/*!
     Cette fonction retourne l'isobarycentre des noeuds de l'élément.
 
     \friend raphael.pasquier@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
-*/  
+*/
 template<class TNode>
 typename TNode::Pvec center(const ElementAncestor<TNode> &e) {
     typename TNode::Pvec res = 0.0;
@@ -290,7 +312,7 @@ template<class TE,class Pvec,class TVI> void get_var_inter(const TE &elem,const 
     Vec<Vec<typename TE::T,TE::dim>,TE::nb_nodes> pos_nodes;
     for(unsigned i=0;i<TE::nb_nodes;++i)
         pos_nodes[i] = elem.pos(i);
-    
+
     get_var_inter_linear( typename TE::NE(), pos_nodes, pos, var_inter );
     Vec<typename TE::T,TE::nb_var_inter> old_var_inter = var_inter;
     while ( true ) {
@@ -304,7 +326,7 @@ template<class TE,class Pvec,class TVI> void get_var_inter(const TE &elem,const 
 /** contains res -> true if eq to find var!inter from pos is non linear (recquires iterations) */
 template<class NE> struct ElemVarInterFromPosNonLinear { };
 
-/*! 
+/*!
     La fonction renvoie vrai si pos est à l'intérieur de l'élément avec une tolérance tol.
 
 
