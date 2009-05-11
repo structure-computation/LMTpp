@@ -131,9 +131,9 @@ class Problem:
                 output.write( ' '*nb_sp+'        std::cerr << "There is no variable named " << field_name << " in data struct" << std::endl;\n' )
                 output.write( ' '*nb_sp+"    }\n" )
             for d in range( 1, 7 ):
-                output.write( ' '*nb_sp+"    void dm_data_set_field( const std::string field_name, const Mat<Tpos,Gen<"+str(d)+","+str(d)+"> > &value ) {\n" )
+                output.write( ' '*nb_sp+"    void dm_data_set_field( const std::string field_name, const Mat<Tpos,Gen<"+str(d)+"> > &value ) {\n" )
                 for namevar, var in all_vars.items():
-                    if cond( var ) and var.nb_dim == [d, d]:
+                    if cond( var ) and var.nb_dim == [d,d]:
                         if in_vec( var ):
                             for i in range( cond(var) ):
                                 if len( var.T ) == 0:

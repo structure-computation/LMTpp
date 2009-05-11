@@ -30,7 +30,7 @@ dep_imp_val_0_1 = Variable( nb_dim=[dim], default_value='0', unit='1' )
 
 dep_imp_coef_0 = Variable( default_value='0', unit='1' )
 
-neig_pointer = Variable( interpolation='elementary', T='Vec<EA *,2>', default_value='',  unit='', dont_use_caracdm = True )
+#neig_pointer = Variable( interpolation='elementary', T='Vec<EA *,2>', default_value='',  unit='', dont_use_caracdm = True )
 
 #pouet = Variable( interpolation='elementary', default_value='0', unit='1' )
 #assume_symmetric_matrix = False
@@ -53,7 +53,7 @@ def formulation():
         - lim_cond_1 * dep_imp_val_0_1.expr
         , dep.test )
     
-    return res * dV + dot( f_nodal.expr, dep.test ) * dN - dot( f_surf.expr, dep.test ) * dS - dot( p.expr * dS_normal, dep.test ) * dS + dmp * dN
+    return res * dV - dot( f_nodal.expr, dep.test ) * dN - dot( f_surf.expr, dep.test ) * dS - dot( p.expr * dS_normal, dep.test ) * dS + dmp * dN
 
 
 # --------------------------------------------------------------------------------------------------------------------------------

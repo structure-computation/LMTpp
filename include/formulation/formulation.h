@@ -12,9 +12,10 @@
 #ifndef LMT_formulation_HEADER
 #define LMT_formulation_HEADER
 
+#include "mesh/mesh.h"
+
 extern LMT::Vec<double>* F_POINTER;
 
-#include "mesh/mesh.h"
 #include "containers/heterogeneouspack.h"
 #include "convergence_criteria.h"
 #include "constraint.h"

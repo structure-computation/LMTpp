@@ -265,7 +265,6 @@ template<class T,int s2> int solve_using_incomplete_chol_factorize( const Mat<T,
         T alpha = deltn / dot( d, q );
         x += alpha * d;
         PRINT( alpha );
-        PRINT( x );
         PRINT( max(abs(r)) );
         // r -= alpha * q;
         r = b - A * x;

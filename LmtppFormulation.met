@@ -30,6 +30,22 @@ class VariableAncestor
         nder  := 0
         off_ind := 0
         
+    # list de fonctions d'enrichissement
+    class EnrichList
+        v := VarArgs()
+        
+        def init( lst ) when lst.tensor_order == 1
+            v.init()
+            for i in lst
+                v.push_unnamed( i )
+        
+        def get_size
+            return v.get_size()
+            
+        def __for__( block )
+            for i in v
+                block( i )
+        
     # parameters
     interpolation := "nodal"
     unit          := ""
@@ -42,6 +58,8 @@ class VariableAncestor
     name          := ""
     tex_name      := ""
     
+    enrich        := EnrichList()
+    
     virtual def make_expr_subs( from, to )
         abstract
 
@@ -52,7 +70,8 @@ class VariableAncestor
                    _get_scalar_var_wo_der( e, n, ind_n, t, ind_t, sym_lst, "nodal" ) * b
         if interpolation_ == "nodal"
             for num_node in 0 .. e.nb_nodes
-                sym_lst.push_back( sym = symbol( "elem.node($num_node)->$n$ind_n", "$(t)^{$num_node}$ind_t" ), node = num_node, name = n, ind_n = ind_n, nder = nb_der )
+                sym_lst.push_back( sym = symbol( "elem.node($num_node)->$n$ind_n", "$(t)^{$num_node}$ind_t" ),
+                    node = num_node, name = n, ind_n = ind_n, nder = nb_der )
             return e.interpolation( sym_lst[ sym_lst.size - e.nb_nodes ... ].map( _0.sym ) )
         if interpolation_ == "elementary"
             return sym_lst.push_back( sym = symbol( "elem.$n$ind_n"     , "$t$ind_t" ), elem = 0, name = n, ind_n = ind_n, nder = nb_der )->sym
@@ -62,7 +81,7 @@ class VariableAncestor
             return sym_lst.push_back( sym = symbol( "skin_elem.$n$ind_n", "$t$ind_t" ), skin = 0, name = n, ind_n = ind_n, nder = nb_der )->sym
         assert( 0, "unknown interpolation_ '$interpolation_'" )
     
-    def _get_scalar_var( time, e, n, t, ind, sym_lst, want_ders )
+    def _get_scalar_var_wo_enr( time, e, n, t, ind, sym_lst, want_ders )
         def index_access( ind )
             if ind.size
                 return "[" + join( ind, "," ) + "]"
@@ -73,9 +92,19 @@ class VariableAncestor
             return ""
         r := _get_scalar_var_wo_der( e, n, index_access( ind ), t, intex_access( ind ), sym_lst )
         for num_der in 1 .. ( nb_der + 1 ) * want_ders
-            r += _get_scalar_var_wo_der( e, n + "_der_$num_der", index_access( ind ), t + "^{" + "'" * num_der + "}", intex_access( ind ) )
-                    * time ^ num_der / factorial( num_der )
+            r += _get_scalar_var_wo_der( e, n + "_der_$num_der", index_access( ind ), 
+                    t + "^{" + "'" * num_der + "}", intex_access( ind ) ) * time ^ num_der / factorial( num_der )
         return r
+        
+    def _get_scalar_var( time, e, n, t, ind, sym_lst, want_ders )
+        return _get_scalar_var_wo_enr( time, e, n, t, ind, sym_lst, want_ders )
+        
+    def _add_scalar_var_enr( val, time, e, n, t, ind, sym_lst, want_ders, f )
+        cpt_enr := 0
+        for fe in enrich
+            val += fe( f ) * _get_scalar_var_wo_enr( time, e, n + "_ENR_$cpt_enr", t + "^{E_{$cpt_enr}}", ind, sym_lst, want_ders )
+            cpt_enr++
+        
     
     virtual def get_cpp_type
         abstract
@@ -143,7 +172,7 @@ class Variable[ nb_dim = [], sym = false ] inherits VariableAncestor
             return prefix + name + "($(ind[0]),$(ind[1]))"
         assert( 0, "nb_dim=$nb_dim not managed" )
     
-    def update_computed_attributes( time, e, n )
+    def update_computed_attributes_pass_0( time, e, n, f )
         name = n
         # TeX stuff
         if not tex_name
@@ -154,7 +183,13 @@ class Variable[ nb_dim = [], sym = false ] inherits VariableAncestor
             val = _get_scalar_var( time, e,           name, tex_name           , ind, expr_symbols, want_ders = not unknown )
         for ind, val in indices_and_values_of( test )
             val = _get_scalar_var( time, e, "test_" + name, tex_name + "{^*}{}", ind, test_symbols, want_ders = false       )
-            
+        
+    #
+    def update_computed_attributes_pass_1( time, e, n, f )
+        for ind, val in indices_and_values_of( expr )
+            _add_scalar_var_enr( val, time, e,           name, tex_name           , ind, expr_symbols, want_ders = not unknown, f = f )
+        for ind, val in indices_and_values_of( test )
+            _add_scalar_var_enr( val, time, e, "test_" + name, tex_name + "{^*}{}", ind, test_symbols, want_ders = false      , f = f )
             
 
     virtual def get_expr_tensor_order
@@ -533,10 +568,14 @@ class LmtppFormulation[ dim ] inherits LmtppFormulationAncestor
             if var.is_a_LmtppVariable
                 var.from_formulation = this
                 variables.push_back( &var )
-                var.update_computed_attributes( time, e, name )
+                var.update_computed_attributes_pass_0( time, e, name, self )
                 max_nb_der = max( max_nb_der, var.nb_der )
                 if var.unknown
                     unknown_variables.push_back( &var )
+        
+        for name, var in AttributeExplorer( self )
+            if var.is_a_LmtppVariable
+                var.update_computed_attributes_pass_1( time, e, name, self )
                     
         # subs list to have unknown_variables in vectors[0]
         mesh_subs      := Vec[Op]()
@@ -722,6 +761,14 @@ def write_legacy_lmtpp_mesh_StaticData( bn, variable_list, sym_select, sp = "   
                 res <<< sp + "    CARACDMEXTNAME( $cpt, $( type_variable_list[ v->cpp_type ] ), $name, \"$( v->unit )\" );"
                 init_const << (":,"[cpt!=0]) << " $name( $( v->default_value_str() ) )"
                 cpt++
+            cpt_enr := 0
+            for enr in v->enrich
+                for num_der in 0 .. v->nb_der + 1
+                    name := v->name + "_ENR_$cpt_enr" + "_der_$num_der" * ( num_der != 0 )
+                    res <<< sp + "    CARACDMEXTNAME( $cpt, $( type_variable_list[ v->cpp_type ] ), $name, \"$( v->unit )\" );"
+                    init_const << (":,"[cpt!=0]) << " $name( $( v->default_value_str() ) )"
+                    cpt++
+                cpt_enr++
     if cpt
         res <<< sp + "    static const unsigned nb_params = $cpt;"
         res <<< sp + "    $bn() $init_const {}"
@@ -755,13 +802,14 @@ def write_legacy_lmtpp_mesh_carac( stream, pb_name, fe_set_by_dim, dim )
     
     # mesh data structs
     for v in variable_list
-        for num_der in 0 .. v->nb_der + 1
-            name := v->name + "_der_$num_der" * ( num_der != 0 )
-            stream <<<<
-                #ifndef IFNDEF_$(name)_DM
-                #define IFNDEF_$(name)_DM
-                    struct $(name)_DM {};
-                #endif // IFNDEF_$(name)_DM
+        for cpt_enr in -1 .. v->enrich.size
+            for num_der in 0 .. v->nb_der + 1
+                name := v->name + "_ENR_$cpt_enr" * ( cpt_enr >= 0 ) + "_der_$num_der" * ( num_der != 0 )
+                stream <<<<
+                    #ifndef IFNDEF_$(name)_DM
+                    #define IFNDEF_$(name)_DM
+                        struct $(name)_DM {};
+                    #endif // IFNDEF_$(name)_DM
         
     # CARACDMEXTNAMES
     CARACDM_NodalStaticData    := write_legacy_lmtpp_mesh_StaticData( "NodalStaticData"  , variable_list, x => ( x->interpolation in [ "nodal"     , "bubble" ] ) )
@@ -808,9 +856,13 @@ def write_legacy_lmtpp_carac_formulation( stream, name_form, fe_set_by_dim_and_n
     num_in_vec_unknown := ""
     cpt_unknown        := 0
     for v in fe_set_by_dim_and_name[0]->unknown_variables
-        is_unknown << [""," or "][cpt_unknown!=0] << "s == \"$(v->name)\""
-        num_in_vec_unknown << "if ( s == \"$(v->name)\" ) return $cpt_unknown;"
-        cpt_unknown += v->nb_values
+        for cpt_enr in -1 .. v->enrich.size
+            is_unknown << [""," or "][cpt_unknown!=0] << "s == \"$( v->name + "_ENR_$cpt_enr" * ( cpt_enr >= 0 ) )\""
+            num_in_vec_unknown << "if ( s == \"$( v->name + "_ENR_$cpt_enr" * ( cpt_enr >= 0 ) )\" ) return $cpt_unknown;"
+            cpt_unknown += v->nb_values
+    
+    if not is_unknown
+        is_unknown = "false"
     
     f := fe_set_by_dim_and_name[0]
     matrix_will_be_definite_positive := f->matrix_will_be_definite_positive
