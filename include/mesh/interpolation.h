@@ -55,6 +55,39 @@ typename TypeOfVariableInterpolationInMesh<MeshAncestor<Carac,nvi_to_subs,skin>,
     return tof.res;
 }
 
+struct MatrixSimpleInterpolation {
+    template<class TE,class Pvec,class V>
+    bool operator()( const TE &elem, const Pvec &pos, V &row ) {
+        Vec<typename TE::T,TE::nb_var_inter> var_inter;
+        get_var_inter( elem, pos, var_inter, 1e-4 );
+        if ( var_inter_is_inside( typename TE::NE(), var_inter, 1e-6 ) ) {
+            Vec<typename TE::T,TE::nb_nodes> shape_functions;
+            get_shape_functions( typename TE::NE(), var_inter, shape_functions );
+            for(unsigned i=0;i<TE::nb_nodes;++i)
+                row[ elem.node( i )->number ] = shape_functions[ i ];
+            return true;
+        }
+        return false;
+    }
+};
+
+/*
+    find a such as m_left = A * m_right (simple collocation)
+*/
+template<class TM1,class TM2,class Mat>
+void simple_interpolation_matrix( const TM1 &m_left, const TM2 &m_right, Mat &A ) {
+    //     typedef typename TM1::TNode::template SubTypeByName0<NameDM>::TT TypeIfNodal1;
+    //     typedef typename TM2::TNode::template SubTypeByName0<NameDM>::TT TypeIfNodal2;
+    //     assert( not AreSameType<TypeIfNodal1,void>::res );
+    //     assert( not AreSameType<TypeIfNodal2,void>::res );
+    A.resize( m_left.node_list.size(), m_right.node_list.size() );
+    MatrixSimpleInterpolation msi;
+    for(unsigned i=0;i<m_left.node_list.size();++i) {
+        if ( not find( m_right.elem_list, msi, m_left.node_list[i].pos, A.row( i ) ) )
+            throw FindEnglobingElementAndReturnInterpolationException();
+    }
+}
+
 
 } // namespace LMT
 
