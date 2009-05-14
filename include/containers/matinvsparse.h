@@ -169,7 +169,7 @@ template<class T> void incomplete_chol_factorize( Mat<T,Sym<>,SparseLine<> > &m 
                         m.data[line].indices[k] = m.data[line].indices[k-1];
                         m.data[line].data[k] = m.data[line].data[k-1];
                     }
-                    m.data[line].data[ind] = -v / m.data[col].data.back();
+                    m.data[line].data[ind] = - v * m.data[col].data.back();
                     m.data[line].indices[ind] = col;
                 }
             }
@@ -180,7 +180,9 @@ template<class T> void incomplete_chol_factorize( Mat<T,Sym<>,SparseLine<> > &m 
         //#ifdef DO_NOT_SQRT_DIAG_CHOL
         //   m.data[line].data.back() = m.data[line].data.back() - norm_2_p2( m.data[line].data.begin(), m.data[line].data.size()-1 );
         //#else
-        m.data[line].data.back() = 1.0 / sqrt( m.data[line].data.back() - norm_2_p2( m.data[line].data.begin(), m.data[line].data.size()-1 ) );
+        T d = m.data[line].data.back() - norm_2_p2( m.data[line].data.begin(), m.data[line].data.size()-1 );
+        assert( d > 0 );
+        m.data[line].data.back() = 1.0 / sqrt( abs( d ) + ( d == 0 ) );
         //#endif
     }
 }

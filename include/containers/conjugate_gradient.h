@@ -38,7 +38,7 @@ unsigned conjugate_gradient( const Precond &precond, const Matrix &matrix, const
         solution += alpha * d;
         r -= alpha * q; // r = b - A * x;
         
-        PRINT( alpha );
+        // PRINT( alpha );
         
         if ( crit_op( alpha * d, r ) )
             return cpt;
