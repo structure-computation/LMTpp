@@ -255,12 +255,12 @@ public:
 
     /// registering a DynamicData field can be pertinent when functions like mesh.filter_element(...) are used :
     ///  data in dda will automatically be re-ordered.
-    template<class T> void reg_dyn(DynamicData<T,nb_elem_type> *dda) {
+    template<class T> void reg_dyn(DynamicData<T,nb_elem_type> *dda) const {
         dyn_data.push_back(dda);
         synchronize_dyn(dda);
     }
     /// 
-    template<class T> void unreg_dyn(DynamicData<T,nb_elem_type> *dda) { dyn_data.erase_first(dda); }
+    template<class T> void unreg_dyn(DynamicData<T,nb_elem_type> *dda) const { dyn_data.erase_first(dda); }
     ///
     void synchronize_dyn(DynamicDataAncestor *dda) const {
         unsigned ss[nb_elem_type+(nb_elem_type==0)]; hp.get_sizes(ss);
@@ -378,7 +378,7 @@ protected:
     ///
     Vec<TListPtr> has_elements_with_hash_val;
     ///
-    Vec<DynamicDataAncestor *> dyn_data;
+    mutable Vec<DynamicDataAncestor *> dyn_data;
 
     template<class Carac_,unsigned max_sub_meshes> friend class Mesh;
     template<class Carac_,unsigned nvi_to_subs_,unsigned skin_> friend class MeshAncestor;

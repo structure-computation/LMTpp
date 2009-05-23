@@ -99,8 +99,8 @@ public:
     /// get elements connected (directly) to element
     template<class TE> SimpleConstIterator<EA *> get_elem_neighbours(const TE &e) { return elem_neighbours[TE::num_in_elem_list][e.number]; }
     template<class TE> SimpleConstIterator<const EA *> get_elem_neighbours(const TE &e) const { return elem_neighbours[TE::num_in_elem_list][e.number]; }
-    SimpleConstIterator<EA *> get_elem_neighbours(const EA *e) { return elem_neighbours[e->num_in_elem_list_virtual()][e->number]; }
-    SimpleConstIterator<const EA *> get_elem_neighbours(const EA *e) const { return elem_neighbours[e->num_in_elem_list_virtual()][e->number]; }
+    SimpleConstIterator<EA *> get_elem_neighbours_EA(const EA *e) { return elem_neighbours[e->num_in_elem_list_virtual()][e->number]; }
+    SimpleConstIterator<const EA *> get_elem_neighbours_EA(const EA *e) const { return elem_neighbours[e->num_in_elem_list_virtual()][e->number]; }
     
     struct GetNodeAdresses { template<class N> void operator()(N &n,TNode** &res) const { *(res++) = &n; } };
     void get_nodes_adresses(TNode **res) { apply( this->node_list, GetNodeAdresses(), res ); } /// fill vec with adresses of nodes
@@ -377,6 +377,13 @@ void MeshAncestor<Carac,nvi_to_subs,skin>::update_elem_neighbours() {
 //     apply( m.sub_mesh(Number<1>()), ads, m );
 // }
 
+template<class Carac,unsigned nvi_to_subs,unsigned skin>
+typename MeshAncestor<Carac,nvi_to_subs,skin>::Pvec center( const MeshAncestor<Carac,nvi_to_subs,skin> &m ) {
+    typename MeshAncestor<Carac,nvi_to_subs,skin>::Pvec res( 0 );
+    for(unsigned i=0;i<m.node_list.size();++i)
+        res += m.node_list[i].pos;
+    return res / m.node_list.size();
+}
 
 };
 

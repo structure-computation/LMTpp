@@ -22,6 +22,9 @@
 
 namespace LMT {
 
+template<class SubStructuresData,class InternalInterfacesData,class ExternalInterfacesData>
+struct SubStructuredProblem;
+
 /*!
     open paraview and send data
 
@@ -215,8 +218,24 @@ public:
         return res;
     }
 
+    /// need s.number and s.mesh
+    struct AddSstMesh {
+        template<class TS> void operator()(const TS &s,DisplayParaview &dp) const {
+            disp( s, dp, Number<TS::has_mesh>() );
+        }
+        template<class TS> void disp(const TS &s,DisplayParaview &dp,Number<0>) const {
+        }
+        template<class TS> void disp(const TS &s,DisplayParaview &dp,Number<1>) const {
+            DynamicData<double,TS::TM::TElemList::nb_elem_type> number("number");
+            s.mesh.elem_list.reg_dyn( &number );
+            number.set_values( s.number );
+            dp.add_mesh( s.mesh );
+            s.mesh.elem_list.unreg_dyn( &number );
+        }
+    };
+    
     std::string pvsm_file;
-
+    
 private:
     template<class PV> void app_xminmax(const std::string &prefix,const PV &xmi,const PV &xma) {
         if ( init_xminmax ) {
@@ -274,6 +293,27 @@ int display( const MeshAncestor<Carac,nvi_to_subs,skin> &m, std::string pvsm_fil
     return system( t.c_str() );
 }
 
+
+
+/**
+*/
+template<class SubStructuresData,class InternalInterfacesData,class ExternalInterfacesData>
+int display( const SubStructuredProblem<SubStructuresData,InternalInterfacesData,ExternalInterfacesData> &sst_pb, const std::string pvsm_file = "" ) {
+    DisplayParaview dp;
+    apply( sst_pb.sub_structures, DisplayParaview::AddSstMesh(), dp );
+    apply( sst_pb.interfaces    , DisplayParaview::AddSstMesh(), dp );
+    dp.make_pvd_file( "paraview.pvd" );
+    
+    if ( pvsm_file.size() ) {
+        std::string t = "paraview --state=" + pvsm_file;
+        return system( t.c_str() );
+    }
+    std::string t = "paraview --data=paraview.pvd";
+    return system( t.c_str() );
+}
+
 };
+
+
 
 #endif

@@ -314,7 +314,8 @@ class LmtppFormulationAncestor
                     if var.interpolation in [ "elementary", "global" ]
                         if val.depends_on( e.var_inter )
                             stderr <<< "Attention : on peut pas coller un champ non constant sur un champ qui est supposé l'être. Si par exemple vous souhaitez avoir la moyenne sur l'élément vous pouvez faire e.mean(...)."
-                            val = e.mean( val )
+                            # val = e.mean( val )
+                            val = val.subs( e.var_inter, e.get_center_of_var_inter() )
                     cw.add( var.mesh_symbol( ind ), val, reassign )
         return cw.to_string()
     
@@ -742,6 +743,23 @@ def write_legacy_lmtpp_mesh_dm_data_set_field( res, bn, variable_list, sym_selec
         res << sp <<< "        return $TV();"
         res << sp <<< "    }"
 
+    # Mat<...,Gen<> >
+    for n in 1 .. 7
+        TV := "Mat<Tpos,Gen<$n> >"
+        res << sp <<< "    $TV dm_data_get_field( const std::string field_name, StructForType<$TV > ) const {"
+        for v in variable_list
+            if sym_select( v ) and v->expr_tensor_order == 2 and v->nb_values == n * n
+                res << sp <<< "        if ( field_name == \"$( v->name )\" ) { return $(v->name); }"
+        res << sp <<< "        std::cerr << \"There's no variable named \" << field_name << \" of type $TV in data struct\" << std::endl;"
+        res << sp <<< "        return $TV();"
+        res << sp <<< "    }"
+        res << sp <<< "    void dm_data_set_field( const std::string field_name, const $TV &value ) {"
+        for v in variable_list
+            if sym_select( v ) and v->expr_tensor_order == 2 and v->nb_values == n * n
+                res << sp <<< "        if ( field_name == \"$( v->name )\" ) { $(v->name) = value; }"
+        res << sp <<< "        std::cerr << \"There's no variable named \" << field_name << \" of type $TV in data struct\" << std::endl;"
+        res << sp <<< "    }"
+
 #
 def write_legacy_lmtpp_mesh_StaticData( bn, variable_list, sym_select, sp = "    " )
     type_variable_list := Map[String,String]()
@@ -1024,7 +1042,7 @@ def write_legacy_lmtpp_problem_h_file( stream, pb_name, fe_set, type_list )
     stream <<< "#endif // PROBLEM_$(pb_name)_H"
         
 #~ ~#
-def write_legacy_lmtpp_all_in_one_file( stream, pb_name, fe_set, type_list, list_sup_all_in_one )
+def write_legacy_lmtpp_all_in_one_file( stream, pb_name, fe_set, type_list, list_sup_all_in_one, make_latin_funcs )
     stream <<<< 
         #include <formulation/formulation.h>
         #include "mesh_carac.h"
@@ -1043,6 +1061,10 @@ def write_legacy_lmtpp_all_in_one_file( stream, pb_name, fe_set, type_list, list
             file_name_done.insert( file_name )
             stream <<<<
                 #include "$file_name"
+    if make_latin_funcs
+        stream <<<<
+            #include "latin_funcs.h"
+        
     #
 
 #~ ~#
@@ -1057,12 +1079,60 @@ def write_legacy_lmtpp_problem_cpp_file( stream, pb_name, fe_set, type_list )
                     #include "add_matrices_$name_form.$dim.$(fe->pe->name).h"
     #
 
+def write_add_W_chap_F_chap( stream, e_sst, e_int )
+    nb_dim := e_sst.dim
+    #
+    dep_syms := Vec[Op]()
+    det_syms := Vec[Op]()
+    dep    := e_sst.new_variable( "dep", nb_dim = [ nb_dim ], sym = dep_syms )
+    det    := e_sst.new_variable( "det", nb_dim = [ nb_dim ], sym = det_syms )
+    W_chap := Vec[Op,nb_dim]( x => symbol("elem_int.W_chap[$x]") )
+    F_chap := Vec[Op,nb_dim]( x => symbol("elem_int.F_chap[$x]") )
+    k_chap := Vec[Op,nb_dim]( x => symbol("elem_int.k_chap[$x]") )
+    expr   := dot( dep - W_chap, k_chap * det ) + dot( F_chap, det )
+    expr    = e_sst.integration( expr * e_int.point_is_inside( e_sst.pos ) )
+    dexp   := expr.diff( det_syms )
+    ddex   := dexp.diff( dep_syms )
+    cw := CodeWriterAlt("T_pos_0")
+    for i in 0 .. det_syms.size
+        cw.add( "vec[ ind[ elem_sst.node( $( i // nb_dim ) )->number ] + $( i % nb_dim ) ]", - dexp[i].subs( det_syms, det_syms * 0 ), add )
+        for j in 0 .. i + 1
+            cw.add( "mat( ind[ elem_sst.node( $( i // nb_dim ) )->number ] + $( i % nb_dim ), ind[ elem_sst.node( $( j // nb_dim ) )->number ] + $( j % nb_dim ) )", ddex[i,j], add )
+    #
+    cwa := CodeWriterAlt("T_pos_0")
+    cwa.add( "res", e_sst.integration( e_int.point_is_inside( e_sst.pos ), false ), reassign )
+    #
+    stream <<<<
+        namespace LMT {
+        template<class T_pos_0,class ND_0,class ED_0,unsigned nim_0,class T_pos_1,class ND_1,class ED_1,unsigned nim_1,class Mat,class Vec,class Tin>
+        void add_W_chap_F_chap(
+            const Element<$(e_sst.name),DefaultBehavior,Node<$nb_dim,T_pos_0,ND_0>,ED_0,nim_0> &elem_sst,
+            const Element<$(e_int.name),DefaultBehavior,Node<$nb_dim,T_pos_1,ND_1>,ED_1,nim_1> &elem_int,
+            Mat &mat,
+            Vec &vec,
+            Tin &ind
+        ) {
+        $(cw.to_string())
+        }
+        //
+        template<class T_pos_0,class ND_0,class ED_0,unsigned nim_0,class T_pos_1,class ND_1,class ED_1,unsigned nim_1>
+        T_pos_0 add_W_chap_F_chap(
+            const Element<$(e_sst.name),DefaultBehavior,Node<$nb_dim,T_pos_0,ND_0>,ED_0,nim_0> &elem_sst,
+            const Element<$(e_int.name),DefaultBehavior,Node<$nb_dim,T_pos_1,ND_1>,ED_1,nim_1> &elem_int
+        ) {
+            T_pos_0 res;
+        $(cwa.to_string())
+            return res;
+        }
+        }
+    
 #~
     TfList -> [ FormulationType1, FormulationType2, ... ] ex : FormulationElasticity
     TeList -> [ ElementType1, ElementType2, ... ] ex : Triangle, Quad, ...
     funcList -> [ Function1, Function2, ... ]
 ~#
-def write_legacy_lmtpp_code( pb_name, TfList, TeList, dim_function = x => x::nvi, base_rep = "build", type_list = ["double"], assume_const_jac_in_elems = true, funcList = [] )
+def write_legacy_lmtpp_code( pb_name, TfList, TeList, dim_function = x => x::nvi, base_rep = "build", type_list = ["double"], 
+        assume_const_jac_in_elems = true, funcList = [], h_file = "", make_latin_funcs = false )
     fe_set := Map[ Int32 #~dim~#, Map[ String #~Formulation~#, Vec[ Ptr[ LmtppFormulationAncestor ] ] ] ]()
     list_sup_all_in_one := Vec[ String ]()
     list_f := Vec[ Ptr[ LmtppFormulationAncestor ] ]()
@@ -1086,7 +1156,12 @@ def write_legacy_lmtpp_code( pb_name, TfList, TeList, dim_function = x => x::nvi
         list_sup_all_in_one.append( func( list_f, rep ) )
 
     # all_in_one
-    write_legacy_lmtpp_all_in_one_file( File( rep + "/all_in_one.h", "w" ), pb_name, fe_set, type_list, list_sup_all_in_one )
+    write_legacy_lmtpp_all_in_one_file( File( rep + "/all_in_one.h", "w" ), pb_name, fe_set, type_list, list_sup_all_in_one, make_latin_funcs )
+    
+    # h_file
+    if h_file
+        File( h_file, "w" ) <<<< 
+            #include "$rep/all_in_one.h"
     
     # problem
     write_legacy_lmtpp_problem_h_file( File( rep + "/problem.h", "w" ), pb_name, fe_set, type_list )
@@ -1111,4 +1186,28 @@ def write_legacy_lmtpp_code( pb_name, TfList, TeList, dim_function = x => x::nvi
                 if not cpt_elem
                     fe->write_add_nodal_matrices( File( rep + "/add_nodal_matrices_$name_form.$dim.h", "w" ) )
                 fe->write_add_elem_matrices( File( rep + "/add_matrices_$name_form.$dim.$(fe->pe->name).h", "w" ) )
+    
+    # latrin -> W_chap and F_chap from interfaces
+    if make_latin_funcs
+        sst_elements := SplittedVec[AutoPtr[SymbolicElementAncestor],8]()
+        int_elements := SplittedVec[AutoPtr[SymbolicElementAncestor],8]()
+        for TE in TeList
+            dim := dim_function( TE )
+            e := SymbolicElement[ TE, dim ]()
+            for c_ in e.children( 1 )
+                c := child_cast( c_ )
+                if not ( c->name in sst_elements.map( _0->name ) )
+                    sst_elements.push_back( new SymbolicElement[c->TE,dim]("elem_sst") )
+                    int_elements.push_back( new SymbolicElement[c->TE,dim]("elem_int") )
+                    info c->TE
+        #
+        f := File( rep + "/latin_funcs.h", "w" )
+        for c0 in sst_elements
+            for c1 in int_elements
+                write_add_W_chap_F_chap( f, @child_cast( c0 ), @child_cast( c1 ) )
+                
+    
+    
+    
+    
     

@@ -357,6 +357,10 @@ struct DicCPU {
     
     template<class TIMGf,class TIMGg,class TM,class NAME_VAR_DEPL,class NAME_VAR_GREY>
     void exec_rigid_body( const TIMGf &f, const TIMGg &g, TM &m, const NAME_VAR_DEPL &name_var_depl, const NAME_VAR_GREY &name_var_grey, bool want_mat = true, bool want_vec = true, int resol_level = 0 ) {
+        const unsigned nb_search_dir = 3 + 3 * ( dim == 3 );
+        U_red.resize( nb_search_dir );
+        U_red.set( 0.0 );
+        //
         if ( resol_level < multi_resolution ) {
             ExtractDM<NAME_VAR_DEPL> pd;
             for(unsigned i=0;i<m.node_list.size();++i) {
@@ -383,7 +387,6 @@ struct DicCPU {
                 break;
             
             // search_dir
-            const unsigned nb_search_dir = 3 + 3 * ( dim == 3 );
             Pvec C = center( m );
             Vec<Vec<T>,nb_search_dir> search_dir;
             for(unsigned i=0;i<nb_search_dir;++i)
@@ -416,6 +419,7 @@ struct DicCPU {
                     M_red( i, j ) = dot( M * search_dir[ i ], search_dir[ j ] );
             }
             Vec<T> dU_red = inv( M_red ) * F_red;
+            U_red += dU_red;
             
             // update_mesh ( translation + "true" rotation )
             ExtractDM<NAME_VAR_DEPL> ed;
@@ -601,6 +605,7 @@ struct DicCPU {
     std::string name_tmp_paraview_file; /// base name to save intermediate results during iterations
     T remove_eig_val_if_lower_than;
     bool want_epsilon; /// true by default
+    Vec<T> U_red; /// vector result of exec_rigid_body
 };
 
 }

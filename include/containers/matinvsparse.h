@@ -181,7 +181,7 @@ template<class T> void incomplete_chol_factorize( Mat<T,Sym<>,SparseLine<> > &m 
         //   m.data[line].data.back() = m.data[line].data.back() - norm_2_p2( m.data[line].data.begin(), m.data[line].data.size()-1 );
         //#else
         T d = m.data[line].data.back() - norm_2_p2( m.data[line].data.begin(), m.data[line].data.size()-1 );
-        assert( d > 0 );
+        // assert( d > 0 );
         m.data[line].data.back() = 1.0 / sqrt( abs( d ) + ( d == 0 ) );
         //#endif
     }

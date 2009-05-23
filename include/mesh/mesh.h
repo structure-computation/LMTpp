@@ -312,13 +312,6 @@ namespace LMTPRIVATE {
 //     apply( m.skin.elem_list, Copy_data_from_sub_mesh_to_skin(), m );
 // }
 
-template<class TCM,unsigned max_sub_meshes>
-typename Mesh<TCM,max_sub_meshes>::Pvec center( const Mesh<TCM,max_sub_meshes> &m ) {
-    typename Mesh<TCM,max_sub_meshes>::Pvec res( 0 );
-    for(unsigned i=0;i<m.node_list.size();++i)
-        res += m.node_list[i].pos;
-    return res / m.node_list.size();
-}
 
 };
 

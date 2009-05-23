@@ -21,7 +21,16 @@ def make_dep_py(env):
     nfd = re.compile( r'"([^"]*)"' )
     nfs = re.compile( r"'([^']*)'" )
     all_py = get_files(".", re.compile( '.*\.py$' ) )
+    all_met = get_files(".", re.compile( '.*\.met$' ) )
     re_elem_py = re.compile( '.*element_.*\.py$' )
+    # .h.met
+    for i in filter( lambda x:'.h.met' in x, all_met ):
+        corh = i[:-4]
+        METILPATH = ""
+        if env.has_key('METILPATH'): adl = env['METILPATH']
+        METILEXEC = "metil"
+        if env.has_key('METILEXEC'): adl = env['METILEXEC']
+        env.Command(corh,i,'export METILPATH="'+METILPATH+':$METILPATH";'+METILEXEC+' %s %s'%(i,corh))
     # .h.py
     for i in filter(lambda x:'.h.py' in x or '.cpp.py' in x, all_py):
         corh = i[:-3]

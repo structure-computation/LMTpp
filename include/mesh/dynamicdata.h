@@ -54,6 +54,11 @@ public:
     //template<class NE,class NB,class TN,class TD,unsigned nel> T &get_data(const Element<NE,NB,TN,TD,nel> &e) { return vec[nel][e.number]; };
     //template<class NE,class NB,class TN,class TD,unsigned nel> const T &get_data(const Element<NE,NB,TN,TD,nel> &e) const { return vec[nel][e.number]; };
     
+    void set_values( const T &v ) {
+        for(unsigned i=0;i<nb_elem_type;++i)
+            vec[i].set( v );
+    }
+    
     unsigned size(unsigned num_type) const { return vec[num_type].size(); }
     virtual unsigned nb_comp() const { return DM::NbComponents<T>::n; }
     virtual void write_data(std::ostream &os) const {

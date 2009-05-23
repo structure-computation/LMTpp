@@ -12,6 +12,7 @@ struct FormulationFit {
         levenberg_marq = 0;
         relaxation = 1;
         conv = 1e-4;
+        display_dD = true;
     }
     
     template<class TMAT>
@@ -39,8 +40,7 @@ struct FormulationFit {
                 der_U[ i ] = I * f.sollicitation;
             }
             //
-            Mat<ScalarType> M( TF::nb_der_var );
-            Vec<ScalarType,TF::nb_der_var> V;
+            M.resize( TF::nb_der_var );
             for(unsigned i=0;i<TF::nb_der_var;++i) {
                 Vec<ScalarType> dUi = exp_mat * der_U[i];
                 V[ i ] = dot( dUi, exp_val - f.vectors[0] );
@@ -58,7 +58,8 @@ struct FormulationFit {
             //
             Inv<ScalarType> IM( M );
             Vec<ScalarType> dD = IM * V;
-            PRINT( dD );
+            if ( display_dD )
+                PRINT( dD );
             
             history.push_back( norm_inf( dD ) );
             TF::Carac::add_to_der_vars( f, relaxation * dD );
@@ -85,6 +86,9 @@ struct FormulationFit {
     
     TF &f;
     
+    Mat<ScalarType> M;
+    Vec<ScalarType,TF::nb_der_var> V;
+
     // inputs
     ScalarType levenberg_marq;
     Vec<ScalarType,TF::nb_der_var> relaxation; // U += relaxation * dU;
@@ -94,6 +98,8 @@ struct FormulationFit {
     Vec<ScalarType> residual_history;
     Vec<ScalarType> history;
     Vec<ScalarType> sensitivity_after_fit;
+    
+    bool display_dD;
 };
 
 }
