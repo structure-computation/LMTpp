@@ -16,6 +16,7 @@ struct Bloc ;
 struct Classe ;
 struct ClasseMetil ;
 struct Function ;
+struct FunctionMetil ;
 struct Struct ;
 struct VisitorBloc ;
 
@@ -28,7 +29,8 @@ struct VisitorBloc ;
     virtual void exec( ClasseMetil* c ) ;
     virtual void exec( Struct* s ) ;
     virtual void exec( Function* f ) ;
-
+    virtual void exec( FunctionMetil* f ) ;
+    
     ListParameter* ptr_listHerited ;
 } ;
 

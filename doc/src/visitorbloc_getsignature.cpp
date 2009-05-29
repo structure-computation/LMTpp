@@ -17,6 +17,8 @@ using namespace std ;
 #include "classemetil.h"
 #include "struct.h"
 #include "bloc.h"
+#include "function.h"
+#include "functionmetil.h"
 #include "visitorbloc.h"
 #include "visitorbloc_getsignature.h"
 #include "visitorbloc_namebaseclass.h"
@@ -53,7 +55,10 @@ void VisitorBloc_getSignature::exec( Function* f ) {
     ptr_listParameter = &f->listParameter ;
 }
 
+void VisitorBloc_getSignature::exec( FunctionMetil* f ) {
 
+    ptr_listParameter = &f->listParameter ;
+}
 
 
 

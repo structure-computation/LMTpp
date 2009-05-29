@@ -27,7 +27,7 @@ struct Parameter : public TagComment {
     string listAttribut ;
     Names type ;
     string nameVariable ;
-    string op; /// op vaut soit rien soit = soit := soit ...
+    string op; /// op peut valoir soit rien soit = soit := soit ...
     string defaultType ;
 } ;
 

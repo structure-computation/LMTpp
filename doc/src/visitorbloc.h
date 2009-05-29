@@ -15,6 +15,7 @@ struct Bloc;
 struct Classe;
 struct ClasseMetil;
 struct Function;
+struct FunctionMetil;
 struct Struct;
 
 struct VisitorBloc {
@@ -25,6 +26,7 @@ struct VisitorBloc {
     virtual void exec( ClasseMetil* c );
     virtual void exec( Struct* s );
     virtual void exec( Function* f );
+    virtual void exec( FunctionMetil* f );
     //void apply_on_related_to( const std::string &s, Op *op );
     //friend std::ostream &operator<<( std::ostream &os, const Comment &c );
 };

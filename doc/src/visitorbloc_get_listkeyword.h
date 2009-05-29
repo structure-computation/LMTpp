@@ -16,6 +16,7 @@ struct Bloc;
 struct Classe;
 struct ClasseMetil;
 struct Function;
+struct FunctionMetil;
 struct Struct;
 struct VisitorBloc;
 
@@ -28,6 +29,7 @@ struct VisitorBloc;
     virtual void exec( ClasseMetil* c );
     virtual void exec( Struct* s );
     virtual void exec( Function* f );
+    virtual void exec( FunctionMetil* f );
     void init() { listkeyword_of_class_struct.clear(); listkeyword_of_function.clear(); }
 
     vector<string> listkeyword_of_class_struct;

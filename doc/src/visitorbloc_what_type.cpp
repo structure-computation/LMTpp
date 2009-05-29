@@ -15,6 +15,8 @@ using namespace std;
 #include "classemetil.h"
 #include "classe.h"
 #include "struct.h"
+#include "function.h"
+#include "functionmetil.h"
 #include "bloc.h"
 #include "visitorbloc.h"
 #include "visitorbloc_what_type.h"
@@ -29,6 +31,11 @@ void VisitorBloc_what_type::exec( Struct* s ) {
 }
 
 void VisitorBloc_what_type::exec( Function* f ) {
+
+    type = "function";
+}
+
+void VisitorBloc_what_type::exec( FunctionMetil* f ) {
 
     type = "function";
 }

@@ -54,11 +54,12 @@ struct PageComment {
 
     /// juste pour l'analyse de Metil
     //Lexem* research_containerType(Lexem* _le);
-    Lexem* research_if_assign_reassign(Lexem* _le);
-    void parse_language_Metil_rec( Bloc* code, Lexem* le);
-    void append_function( Bloc* code, const Lexem* le);
-    void append_class( Bloc* code, const Lexem* le);
-    void append_member( Bloc* code, Lexem* start, Lexem* le);
+    Lexem* research_if_assign_reassign_def_class(Lexem* _le);
+    string getAttribut( Lexem* start, Lexem* end);
+    void parse_language_Metil_rec( Bloc* code, Lexem* le, const string& attr="");
+    void append_function( Bloc* code, Lexem* le, const string& attr="");
+    void append_class( Bloc* code, Lexem* le);
+    void append_member( Bloc* code, Lexem* le, const string& attr);
     void append_property( Bloc* code, const Lexem* le);
     /// juste pour l'analyse de C++
     void parse_language_Cpp_rec( Bloc* code, string& textOfCode, int end, int start );
@@ -87,7 +88,7 @@ struct PageComment {
     string nameWithoutSuffix;
     string nameFile;
     string suffix_source;
-    std::vector<Comment*> listComment; /// liste des commentaires de la page
+    std::vector<Comment*> listComment; /// liste des commentaires de la page dans le cas d'un code C++ : c'est provisoire
     Bloc code;  /// bloc contenant tout le code de la page
     
     static const char* prefixTag[]; 
