@@ -1189,7 +1189,7 @@ void PageComment::parse_language_Metil(string& textOfCode) {
     ErrorList error_list;
 
     Lexer lexer(textOfCode.c_str(),provenance,&error_list);
-    display_graph(lexer.root());
+    //display_graph(lexer.root());
     parse_language_Metil_rec( &code,(Lexem*) lexer.root());
 //     parse_language_Metil_rec(code,Lexer(textOfCode.c_str(),provenance,&error_list).root());
 }

@@ -996,7 +996,7 @@ void VisitorBloc_AllClass_toHTML::generate_stream_HTML_for_functionMetil( ofstre
     *o << " ) " << std::endl;
     if (f->condition.size())
         *o << " <strong> when </strong> " << f->condition << std::endl;
-    if (f->default_pertinence > 0)
+    if (f->default_pertinence > 1e-5)
         *o << " <strong> pertinence </strong> " << f->default_pertinence << std::endl;
 
     if ((t == Normal) or (t == Anchor)) {
