@@ -15,6 +15,8 @@ using namespace std;
 #include "classe.h"
 #include "classemetil.h"
 #include "struct.h"
+#include "function.h"
+#include "functionmetil.h"
 #include "bloc.h"
 #include "visitorbloc.h"
 #include "visitorbloc_get_listkeyword.h"
@@ -93,7 +95,22 @@ void VisitorBloc_getListKeyword::exec( Function* f ) {
         listkeyword_of_function = visi.listNameKeyword;
 }
 
+void VisitorBloc_getListKeyword::exec( FunctionMetil* f ) {
 
+    int i,n,j,m;
+
+    // on veut récupérer tous les keyword de tous les commentaires associés à cette classe.
+    VisitorCommentItem_getKeyword_of_ExTuGe visi;
+    n = f->listTag.size();
+    for(i=0;i<n;i++) {
+        m = f->listTag[i]->items.size();
+        for(j=0;j<m;j++) {
+            f->listTag[i]->items[j]->execute_function( &visi );
+        }
+    }
+    if (visi.isExtuge==0)
+        listkeyword_of_function = visi.listNameKeyword;
+}
 
 
 

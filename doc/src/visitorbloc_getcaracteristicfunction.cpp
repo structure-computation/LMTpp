@@ -15,6 +15,8 @@ using namespace std ;
 #include "classe.h"
 #include "struct.h"
 #include "bloc.h"
+#include "function.h"
+#include "functionmetil.h"
 #include "visitorbloc.h"
 #include "visitorbloc_getcaracteristicfunction.h"
 #include "visitorbloc_namebaseclass.h"
@@ -48,6 +50,16 @@ void VisitorBloc_GetCaracteristicFunction::exec( Function* f ) {
     ptr_listAttribut = &f->listAttribut ;
     ptr_listParameter = &f->listParameter ;
     ptr_returnType = &f->returnType ;
+}
+
+void VisitorBloc_GetCaracteristicFunction::exec( FunctionMetil* f ) {
+
+    enphase = true ;
+    ptr_listAttribut = &f->listAttribut ;
+    ptr_listParameter = &f->listParameter ;
+    ptr_returnType = &f->returnType ;
+    ptr_condition = &f->condition;
+    default_pertinence = f->default_pertinence;
 }
 
 void VisitorBloc_GetCaracteristicFunction::exec( ClasseMetil* c ) {

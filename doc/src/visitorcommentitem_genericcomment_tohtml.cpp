@@ -73,7 +73,7 @@ void VisitorCommentItem_GenericComment_toHTML::function_at_CommentItemGenericCom
         pageWeb << "<ul>" << std::endl;
         for(i=0;i<n;i++) {
             stmp = op_get_brief_for_principalName.list[i]->pt->name.name;
-            cerr << " stmp == |" << stmp << "|" << endl;
+            //cerr << " stmp == |" << stmp << "|" << endl;
             if (!chercher_motif( stmp,"generic_comment_",&pos,stmp.size(),0)) {
                 stmp2 = linkHTML( c->reference(), op_get_brief_for_principalName.list[i]->pt->reference(),stmp );
                 if (op_get_brief_for_principalName.list[i]->ptr_info == NULL)

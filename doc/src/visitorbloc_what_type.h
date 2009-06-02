@@ -16,6 +16,7 @@ struct Bloc;
 struct Classe;
 struct ClasseMetil;
 struct Function;
+struct FunctionMetil;
 struct Struct;
 struct VisitorBloc;
 struct VisitorBloc_NameBaseClass;
@@ -34,7 +35,8 @@ struct VisitorBloc_what_type : public VisitorBloc {
     virtual void exec( Classe* c );
     virtual void exec( Struct* s );
     virtual void exec( Function* f );
-
+    virtual void exec( FunctionMetil* f );
+    
     /*!
     type peut prendre comme valeur :
         * bloc

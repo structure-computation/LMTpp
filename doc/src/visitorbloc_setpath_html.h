@@ -16,6 +16,7 @@ struct Bloc;
 struct Classe;
 struct ClasseMetil;
 struct Function;
+struct FunctionMetil;
 struct Struct;
 struct VisitorBloc;
 
@@ -30,6 +31,7 @@ struct VisitorBloc_SetPath_HTML : public VisitorBloc {
     virtual void exec( Classe* c );
     virtual void exec( Struct* s );
     virtual void exec( Function* f );
+    virtual void exec( FunctionMetil* f );
     void setRepertory_function( const string& s );
     void setRepertory_struct( const string& s );
     void setRepertory_class( const string& s );

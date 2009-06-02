@@ -7,6 +7,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <deque>
 #include <map>
 #include <string.h>
 
@@ -20,6 +21,7 @@ using namespace std;
 #include "typedef.h"
 #include "classe.h"
 #include "classemetil.h"
+#include "functionmetil.h"
 #include "struct.h"
 #include "util2html.h"
 #include "visitorbloc_getproperty.h"
@@ -908,72 +910,154 @@ string PageComment::principal_type_of( string& na) {
 /*!
     Cette fonction renvoie l'adresse d'un asssign ou reassign dans le cas où _le a un enfant assign ou reassign sinon elle renvoie NULL
 */
-Lexem* PageComment::research_if_assign_reassign(Lexem* _le) {
+Lexem* PageComment::research_if_assign_reassign_def_class(Lexem* _le) {
     
 /*    if (_le)
         cerr << " parcours de "; _le->display_just_name_and_type(cerr);*/
     while(_le) {
         //cerr << " a pour enfant gauche "; _le->display_just_name_and_type(cerr);
-        if ((_le->type == STRING_reassign_NUM) or (_le->type == STRING_assign_NUM))
+        if ((_le->type == STRING_reassign_NUM) or (_le->type == STRING_assign_NUM)  or (_le->type == STRING___def___NUM)  or (_le->type == STRING___class___NUM))
             return _le;
         _le = _le->children[0];
     }
     return NULL;
 }
 
-/// ajoute la fonction pointée par le à code
-void PageComment::append_function( Bloc* code, const Lexem* _le) {
-//     Parameter p;
-    Function* fonction;
+/// ajoute la fonction pointée par _le à code
+void PageComment::append_function( Bloc* code, Lexem* _le, const string& attr) {
+    string stmp;
+    FunctionMetil* fonction;
+    LexemDefinition *def;
     const Lexem* le;
+    const Lexem* le2;
+    const Lexem* le3;
+    deque<Comment_zone> list_comment;
+    Comment* ptr_comment;
     
-    fonction = new Function();
+    fonction = new FunctionMetil();
     fonction->source_file = nameFile;
-    if (_le->def) {
+    fonction->listAttribut = attr;
+    def = _le->def;
+    if (def) {
         //cerr << " la fonction a un def" << endl;
-        if (_le->def->tname) {
-            le = _le->def->tname;
+        if (def->tname) {
+            le = def->tname;
             fonction->name.name.append(le->s,le->si);
             fonction->name.principalName.append(le->s,le->si);
+        }
+        /// pertinence
+        if (def->pertinence) {
+            le = def->pertinence;
+            //cerr << "IIIIIIIIIIIII pertinence = "; cerr.write(le->s,le->si); cerr << endl;
+        }
+        //cerr << "IIIIIIIIIIIII pertinence par défaut = " << def->default_pertinence << endl;
+        /// condition
+        if (def->condition) {
+            le = def->condition;
+            if (le->children[0]) {
+                le2 = leftmost_child(le->children[0]);
+                le3 = rightmost_child(le->children[0]);
+                stmp.append(le2->s,le3->s-le2->s+le3->si);
+            }
+            /// récupération de l'expression à droite
+            if (le->children[1]) {
+                switch(le->type) {
+                    case STRING_or_boolean_NUM : stmp.append(" or "); break;
+                    case STRING_and_boolean_NUM : stmp.append(" and "); break;
+                    case STRING_xor_boolean_NUM : stmp.append(" xor "); break;
+                    //case STRING_not_boolean_NUM : stmp.append(" not "); break;
+                    case STRING_not_equal_NUM : stmp.append(" != "); break;
+                    case STRING_equal_NUM : stmp.append(" == "); break;
+                    case STRING_superior_equal_NUM : stmp.append(" >= "); break;
+                    case STRING_inferior_equal_NUM : stmp.append(" <= "); break;
+                    case STRING_superior_NUM : stmp.append(" > "); break;
+                    case STRING_inferior_NUM : stmp.append(" < "); break;
+                    case STRING___is_a___NUM : stmp.append(" is a "); break;
+                    case STRING_concatenate_NUM : stmp.append(" + "); break;
+                    //case STRING_range_NUM : stmp.append(" range "); break;
+                    case STRING_triple_dots_NUM : stmp.append(" ... "); break;
+                    case STRING_add_NUM : stmp.append(" + "); break;
+                    case STRING_sub_NUM : stmp.append(" - "); break;
+                    case STRING_mod_NUM : stmp.append(" mod "); break;
+                    case STRING_mul_NUM : stmp.append(" x "); break;
+                    case STRING_div_NUM : stmp.append(" / "); break;
+                    case STRING_div_int_NUM : stmp.append(" // "); break;
+                    case STRING_ml_div_NUM : stmp.append(" x/ "); break;
+                    case STRING_pow_NUM : stmp.append(" ^ "); break;
+                    case STRING___pow___NUM : stmp.append(" ^ "); break;
+                    case STRING_not_bitwise_NUM : stmp.append(" not bitwise "); break;
+                    case STRING_trans_NUM : stmp.append(" trans "); break;
+                    case STRING_tensorial_product_NUM : stmp.append(" tx "); break;
+                    case STRING_get_attr_ptr_NUM : stmp.append("->"); break;
+                    case STRING_get_attr_NUM : stmp.push_back('.'); break;
+                    default:
+                        stmp.append(" unknow "); /// provisoire
+                }
+                le2 = leftmost_child(le->children[1]);
+                le3 = rightmost_child(le->children[1]);
+                stmp.append(le2->s,le3->s-le2->s+le3->si);
+            }
+            //cerr << "IIIIIIIIIIIII condition = " << stmp << endl;
+            fonction->condition = stmp;
         }
         /// arguments
         for(int i=0;i<_le->def->arguments.size();++i) {
             Parameter p;//p.clear();
-            if (_le->def->arguments[i].tname) 
-                p.nameVariable.append(_le->def->arguments[i].tname->s,_le->def->arguments[i].tname->si);
-            if (_le->def->arguments[i].type_constraint) {
-                le = _le->def->arguments[i].type_constraint;
+            if (def->arguments[i].tname) 
+                p.nameVariable.append(def->arguments[i].tname->s,def->arguments[i].tname->si);
+            if (def->arguments[i].type_constraint) {
+                le = def->arguments[i].type_constraint;
                 p.type.name.append(le->s,le->si);
                 p.type.principalName.append(le->s,le->si);
             }
-            if (_le->def->arguments[i].default_value) {
-                le = _le->def->arguments[i].default_value;
+            if (def->arguments[i].default_value) {
+                le = def->arguments[i].default_value;
                 p.defaultType.append(le->s,le->si);
             }
             fonction->listParameter.push_back(p);
         }
         //cerr << " liste des paramètres de la fonction : ";
         //cerr << fonction->listParameter.size() << endl;
-        if (_le->def->return_type) {
+        if (def->return_type) {
             le = _le->def->return_type;
             fonction->returnType.name.append(le->s,le->si);
         }
     } //else
         //cerr << " la fonction " << fonction->name.name << " n' a pas de def" << endl;
     code->list_subType_function.push_back( fonction );
+
+    /** récupération des commentaires  **/
+    doc_of(_le,list_comment);
+    //cout << "== commentaires de " << fonction->name.name << endl;
+    for(int i=0;i<list_comment.size();++i) {
+        //cout << list_comment[i] << endl;
+        ptr_comment = new Comment( nameFile );
+        ptr_comment->parse( ptr_comment->items, list_comment[i].start, list_comment[i].size);
+        fonction->listTag.push_back(ptr_comment);
+        //listComment.push_back( ptr_comment );
+    }
+    //cout << "== FIN des commentaires de " << fonction->name.name << endl;
 }
 
-void PageComment::append_member( Bloc* code, Lexem* start, Lexem* le) {
+string PageComment::getAttribut( Lexem* start, Lexem* end) {
+
+    string stmp;
+
+    /// récuparation des attributs
+    while (start != end) {
+        stmp.append(start->s,start->si);
+        stmp.push_back(' ');
+        start = start->children[0];
+    }
+    return stmp;
+}
+
+void PageComment::append_member( Bloc* code, Lexem* le, const string& attr) {
     Parameter p;
     const Lexem* le2;
     const Lexem* le3;
     
-    /// récuparation des attributs
-    while (start != le) {
-        p.listAttribut.append(start->s,start->si);
-        p.listAttribut.push_back(' ');
-        start = start->children[0];
-    }
+    p.listAttribut = attr;
     /// récuparation du nom
     if (le->children[0]) {
         le2 = leftmost_child(le->children[0]);
@@ -1008,26 +1092,36 @@ void PageComment::append_property( Bloc* code, const Lexem* le) {
     
 }
 
-void PageComment::append_class( Bloc* code, const Lexem* _le) {
+void PageComment::append_class( Bloc* code, Lexem* _le) {
     ClasseMetil* classe;
     TemplateParameter* ptr_tp;
+    Parameter p;
     const Lexem* le;
 
     classe = new ClasseMetil();
     classe->source_file = nameFile;
-    le = _le->def->tname;
-    classe->name.name.append(le->s,le->si);
-    classe->name.principalName.append(le->s,le->si);
-    /// arguments template
-    for(int i=0;i<_le->def->arguments.size();++i) {
-        ptr_tp = new TemplateParameter();
-        if (_le->def->arguments[i].tname) 
-            ptr_tp->name.append(_le->def->arguments[i].tname->s,_le->def->arguments[i].tname->si);
-        if (_le->def->arguments[i].default_value) {
-            le = _le->def->arguments[i].default_value;
-            ptr_tp->defaultType.append(le->s,le->si);
+    if (_le->def) {
+        le = _le->def->tname;
+        classe->name.name.append(le->s,le->si);
+        classe->name.principalName.append(le->s,le->si);
+        /// héritage
+        for(int i=0;i<_le->def->inheritance.size();++i) {
+            p.clear();
+            le = _le->def->inheritance[i];
+            p.type.name.append(le->s,le->si);
+            classe->listHerited.push_back(p);
         }
-        classe->listTemplateParameter.push_back(ptr_tp);
+        /// arguments template
+        for(int i=0;i<_le->def->arguments.size();++i) {
+            ptr_tp = new TemplateParameter();
+            if (_le->def->arguments[i].tname) 
+                ptr_tp->name.append(_le->def->arguments[i].tname->s,_le->def->arguments[i].tname->si);
+            if (_le->def->arguments[i].default_value) {
+                le = _le->def->arguments[i].default_value;
+                ptr_tp->defaultType.append(le->s,le->si);
+            }
+            classe->listTemplateParameter.push_back(ptr_tp);
+        }
     }
     /// ensuite on parcourt via next toutes les "instructions"
     /// on commence par sauter le (-9)
@@ -1044,10 +1138,10 @@ string explore_s(const char* s, int avant, int apres) {
     return stmp;
 }
 
-void PageComment::parse_language_Metil_rec( Bloc* code, Lexem* le) {
+void PageComment::parse_language_Metil_rec( Bloc* code, Lexem* le, const string& attr) {
 
     Lexem* ret;
-    int indice,indice2;
+    int indice;
     string stmp;
     
     while(le) {
@@ -1060,17 +1154,18 @@ void PageComment::parse_language_Metil_rec( Bloc* code, Lexem* le) {
                 break;
             case STRING___def___NUM :
                 cerr << "{" << code->name.name << "} DEF " ;le->display_just_name_and_type(cerr);
-                append_function(code,le);
+                append_function(code,le,attr);
                 break;
             case STRING_assign_NUM : case STRING_reassign_NUM :
                 cerr << "{" << code->name.name << "} (RE)ASSIGN " ;le->display_just_name_and_type(cerr);
-                append_member(code,le,le);
+                append_member(code,le,attr);
                 cerr << explore_s(le->s,-10,10) << endl;
                 break;
             case STRING___static___NUM : case STRING___const___NUM :
-                ret = research_if_assign_reassign(le);
-                if (ret)
-                    append_member(code,le,ret);
+                ret = research_if_assign_reassign_def_class(le);
+                if (ret) {
+                    parse_language_Metil_rec(code,ret,getAttribut(le,ret));
+                }
                 break;
             case STRING___property___NUM :
                 cerr << "{" << code->name.name << "} PROPERTY " ;le->display_just_name_and_type(cerr);
@@ -1094,7 +1189,7 @@ void PageComment::parse_language_Metil(string& textOfCode) {
     ErrorList error_list;
 
     Lexer lexer(textOfCode.c_str(),provenance,&error_list);
-    display_graph(lexer.root());
+    //display_graph(lexer.root());
     parse_language_Metil_rec( &code,(Lexem*) lexer.root());
 //     parse_language_Metil_rec(code,Lexer(textOfCode.c_str(),provenance,&error_list).root());
 }

@@ -3,6 +3,51 @@
 
     Cette fonction retourne suivant l'ordre et l'élément passé en paramètre un pointeur constant sur un tableau de double (type const double*) contenant à la suite le poids puis les coordonnées des points de Gauss ( p,u,v,p,u,v,...).
 
+    Exemple d'utilisation :
+    Supposons que nous voulions travailler avec les points de Gauss d'un Hexa à l'ordre 2. On ferait :
+    \code C/C++
+        #include <mesh/mesh.h>
+        #include <mesh/hexa.h>
+
+        #include <cmath>
+        #include <cstdlib>
+
+        using namespace LMT;
+        using namespace std ;
+
+
+        int main(int argc, char* argv[] ) {
+
+            const double* pg = gauss_point_for_order(2,Hexa());
+            static const int dim  = Hexa::nb_var_inter;
+            static const int step = 1 + dim;
+
+            /// Affichage des valeurs des fonctions de forme phi_i pour les noeuds de Gauss
+            for(int i=0;i<Hexa::nb_nodes;i++) {
+                Vec<double,dim> p(pg[step*i+1],pg[step*i+2],pg[step*i+3]);
+                //PRINT(p);
+                Vec<double,Hexa::nb_nodes> res;
+                get_shape_functions(Hexa(),p,res);
+                PRINT(res);
+            }
+
+            /// calcul de la somme sum_i(poids_i * phi_i(x)) pour un x quelconque dans l'espace de référence
+
+            Vec<double,dim> p(1,0,0);
+                //PRINT(p);
+            Vec<double,Hexa::nb_nodes> res;
+            Vec<double,Hexa::nb_nodes> poids;
+            for(int i=0;i<Hexa::nb_nodes;i++)
+                poids[i] = pg[step*i];
+            get_shape_functions(Hexa(),p,res);
+            PRINT(res);
+            PRINT(poids);
+            PRINT(dot(poids,res));
+
+            return 0 ;
+        }
+
+
     \keyword Maillage/Elément/Opération
     \friend raphael.pasquier@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr

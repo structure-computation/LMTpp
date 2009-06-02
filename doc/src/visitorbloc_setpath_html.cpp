@@ -15,6 +15,8 @@ using namespace std;
 #include "classemetil.h"
 #include "struct.h"
 #include "bloc.h"
+#include "function.h"
+#include "functionmetil.h"
 #include "visitorbloc.h"
 #include "visitorbloc_setpath_html.h"
 #include "util2html.h"
@@ -62,7 +64,10 @@ void VisitorBloc_SetPath_HTML::exec( Function* f ) {
     f->path = repertory_function;
 }
 
+void VisitorBloc_SetPath_HTML::exec( FunctionMetil* f ) {
 
+    f->path = repertory_function;
+}
 
 
 

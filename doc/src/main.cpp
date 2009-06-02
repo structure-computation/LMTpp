@@ -83,11 +83,11 @@ int main(int argc, char* argv[]) {
     docProject.generate_webpage_of_summary() ;/// génère les pages web contenant respetivement tous les liens vers les classes, les fonctions, les exemples, les tutoriels, et les mot-clés.
     docProject.generate_webpage_of_main_object() ;/// génère les pages web contenant respetivement tous les liens vers les classes principales, les fonctions principales.
 
-    //docProject.scan( opdebug ) ;/// log de "debbugage"
-    //cout << "-------------------  liste des targets  -------------------------------- " << endl ;
-    //docProject.display_ListTarget() ;/// "debugage"
-    //cout << "-------------------  liste des targets principaux -------------------------------- " << endl ;
-    //docProject.display_ListPrincipalName() ;/// "debugage"
+//     docProject.scan( opdebug ) ;/// log de "debbugage"
+//     cout << "-------------------  liste des targets  -------------------------------- " << endl ;
+//     docProject.display_ListTarget() ;/// "debugage"
+//     cout << "-------------------  liste des targets principaux -------------------------------- " << endl ;
+//     docProject.display_ListPrincipalName() ;/// "debugage"
 
     docProject.scan( opallclass ) ; /// génère les pages web des classes, structures, fonctions
     docProject.scan( opallexample ) ; /// génère les pages web des exemples

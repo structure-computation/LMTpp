@@ -44,7 +44,7 @@
     = CLONAGE 
         Pour obtenir une version actuelle complète: 
         \verbatim
-            git clone /ul/multi/LMT/ 
+            git clone givry:/ul/multi/LMT/ 
     
     
     
