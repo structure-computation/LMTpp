@@ -1199,7 +1199,6 @@ def write_legacy_lmtpp_code( pb_name, TfList, TeList, dim_function = x => x::nvi
                 if not ( c->name in sst_elements.map( _0->name ) )
                     sst_elements.push_back( new SymbolicElement[c->TE,dim]("elem_sst") )
                     int_elements.push_back( new SymbolicElement[c->TE,dim]("elem_int") )
-                    info c->TE
         #
         f := File( rep + "/latin_funcs.h", "w" )
         for c0 in sst_elements

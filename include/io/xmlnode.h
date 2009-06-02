@@ -34,9 +34,16 @@ helper class to extract data from a dom node
 */
 class XmlNode {
 public:
+    struct ParseText { };
+    struct Parsefile { };
+    ///
     XmlNode();
     ///
     XmlNode(const char *file) { parse_file(file); }
+    ///
+    XmlNode(const char *file,ParseFile) { parse_file(file); }
+    ///
+    XmlNode(const char *text,ParseText) { parse_text(text); }
     ///
     XmlNode(const XmlNode &XmlNode);
     ///
