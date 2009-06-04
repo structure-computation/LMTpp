@@ -70,7 +70,8 @@ class VariableAncestor
                    _get_scalar_var_wo_der( e, n, ind_n, t, ind_t, sym_lst, "nodal" ) * b
         if interpolation_ == "nodal"
             for num_node in 0 .. e.nb_nodes
-                sym_lst.push_back( sym = symbol( "elem.node($num_node)->$n$ind_n", "$(t)^{$num_node}$ind_t" ),
+                num_node_cpp := e.corr_cpp( num_node )
+                sym_lst.push_back( sym = symbol( "elem.node($num_node_cpp)->$n$ind_n", "$(t)^{$num_node}$ind_t" ),
                     node = num_node, name = n, ind_n = ind_n, nder = nb_der )
             return e.interpolation( sym_lst[ sym_lst.size - e.nb_nodes ... ].map( _0.sym ) )
         if interpolation_ == "elementary"
@@ -588,10 +589,10 @@ class LmtppFormulation[ dim ] inherits LmtppFormulationAncestor
         has_skin_unknowns := false; nb_skin_unk := 0
         for num_node in 0 .. e.nb_nodes
             nb_node_unk = 0
-            _update_unk( unknown_variables, mesh_subs, vect_subs, num_in_indices, has_node_unknowns, nb_node_unk, _0.node == num_node )
-        _update_unk( unknown_variables, mesh_subs, vect_subs, num_in_indices, has_elem_unknowns, nb_elem_unk, _0.elem == 0 )
-        _update_unk( unknown_variables, mesh_subs, vect_subs, num_in_indices, has_glob_unknowns, nb_glob_unk, _0.glob == 0 )
-        _update_unk( unknown_variables, mesh_subs, vect_subs, num_in_indices, has_skin_unknowns, nb_skin_unk, _0.skin == 0 )
+            _update_unk( unknown_variables, mesh_subs, vect_subs, num_in_indices, has_node_unknowns, nb_node_unk, _0.node == num_node, e.corr_cpp( num_in_indices ) )
+        _update_unk( unknown_variables, mesh_subs, vect_subs, num_in_indices, has_elem_unknowns, nb_elem_unk, _0.elem == 0, num_in_indices )
+        _update_unk( unknown_variables, mesh_subs, vect_subs, num_in_indices, has_glob_unknowns, nb_glob_unk, _0.glob == 0, num_in_indices )
+        _update_unk( unknown_variables, mesh_subs, vect_subs, num_in_indices, has_skin_unknowns, nb_skin_unk, _0.skin == 0, num_in_indices )
         
         # apply subs list
         for v in unknown_variables
@@ -599,13 +600,13 @@ class LmtppFormulation[ dim ] inherits LmtppFormulationAncestor
                 
                 
     # @see update_variable_expr_and_test
-    def _update_unk( unknown_variables, mesh_subs, vect_subs, num_in_indices, has__unknowns, nb__unk, function_crit )
+    def _update_unk( unknown_variables, mesh_subs, vect_subs, num_in_indices, has__unknowns, nb__unk, function_crit, num_in_cpp )
         for v in unknown_variables
             for s in v->expr_symbols
                 if function_crit( s )
                     s.off_ind = nb__unk
                     mesh_subs.push_back( s.sym )
-                    syms := Vec[ Op ]( size = v->nb_der + 1, function = symbol("vectors[$_0][indices[$num_in_indices]+$nb__unk]","V_{$_0,$num_in_indices,$nb__unk}") )
+                    syms := Vec[ Op ]( size = v->nb_der + 1, function = symbol("vectors[$_0][indices[$num_in_cpp]+$nb__unk]","V_{$_0,$num_in_indices,$nb__unk}") )
                     tims := Vec[ Op ]( size = v->nb_der + 1, function = time_steps[0] - sum( time_steps[ 0 .. _0 ] ) )
                     vect_subs.push_back( lagrange( tims, syms, time ) )
                     s.sym = syms[ 0 ]
