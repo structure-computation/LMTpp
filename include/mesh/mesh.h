@@ -58,7 +58,8 @@ public:
     ///
     Mesh() {
         //PRINT( nb_sub_meshes );
-        cpt_nodes=0;
+        cpt_nodes = 0;
+        date_last_skin_update = 0;
     }
     /// add a node using default constructor
     TNode *add_node() { TNode *res = this->node_list.hp.new_elem(); res->number = cpt_nodes++; return res; }
@@ -109,6 +110,11 @@ public:
     /// A faire
     template<unsigned inner>
     void update_skin_( bool rm_intermediate_data, Number<inner> ) {
+        if ( date_last_skin_update == this->date_last_connectivity_change )
+            return;
+        date_last_skin_update = this->date_last_connectivity_change;
+        //
+        
         this->update_elem_parents(Number<1>());
         LMTPRIVATE::AddElemWith1Parent<Mesh> ae;
         ae.m = this;
@@ -283,6 +289,7 @@ public:
     TSkin skin;
 private:
     unsigned cpt_nodes;
+    unsigned date_last_skin_update;
 };
 
 namespace LMTPRIVATE {

@@ -525,6 +525,7 @@ public:
 
         if ( assemble_vec ) // preinitialisation
             sollicitation.set(ScalarType(0));
+            
         if ( not this->assume_skin_not_needed )
             m->update_skin();
 
@@ -656,11 +657,6 @@ public:
 
         if ( user_want_pierre_precond )
             precond();
-    }
-    
-    ///
-    virtual void assemble_latin_bc() {
-        
     }
     
     ///

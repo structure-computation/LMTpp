@@ -1090,18 +1090,23 @@ def write_add_W_chap_F_chap( stream, e_sst, e_int )
     W_chap := Vec[Op,nb_dim]( x => symbol("elem_int.W_chap[$x]") )
     F_chap := Vec[Op,nb_dim]( x => symbol("elem_int.F_chap[$x]") )
     k_chap := Vec[Op,nb_dim]( x => symbol("elem_int.k_chap[$x]") )
-    expr   := dot( dep - W_chap, k_chap * det ) + dot( F_chap, det )
-    expr    = e_sst.integration( expr * e_int.point_is_inside( e_sst.pos ) )
+    my_sgn := symbol("my_sgn")
+    expr   := dot( dep - W_chap, k_chap * det ) - dot( F_chap, det ) * my_sgn
+    expr    = e_sst.integration( expr #~* e_int.point_is_inside( e_sst.pos )~# )
     dexp   := expr.diff( det_syms )
     ddex   := dexp.diff( dep_syms )
-    cw := CodeWriterAlt("T_pos_0")
+    cwm := CodeWriterAlt("T_pos_0")
+    cwv := CodeWriterAlt("T_pos_0")
     for i in 0 .. det_syms.size
-        cw.add( "vec[ ind[ elem_sst.node( $( i // nb_dim ) )->number ] + $( i % nb_dim ) ]", - dexp[i].subs( det_syms, det_syms * 0 ), add )
+        v := - dexp[i].subs( det_syms, det_syms * 0 ).subs( dep_syms, dep_syms * 0 )
+        cwm.add( "vec[ ind[ elem_sst.node( $( i // nb_dim ) )->number ] + $( i % nb_dim ) ]", v, add )
+        cwv.add( "vec[ ind[ elem_sst.node( $( i // nb_dim ) )->number ] + $( i % nb_dim ) ]", v, add )
         for j in 0 .. i + 1
-            cw.add( "mat( ind[ elem_sst.node( $( i // nb_dim ) )->number ] + $( i % nb_dim ), ind[ elem_sst.node( $( j // nb_dim ) )->number ] + $( j % nb_dim ) )", ddex[i,j], add )
+            cwm.add( "mat( ind[ elem_sst.node( $( i // nb_dim ) )->number ] + $( i % nb_dim ), ind[ elem_sst.node( $( j // nb_dim ) )->number ] + $( j % nb_dim ) )", ddex[i,j], add )
     #
     cwa := CodeWriterAlt("T_pos_0")
-    cwa.add( "res", e_sst.integration( e_int.point_is_inside( e_sst.pos ), false ), reassign )
+    cwa.add( "res", e_sst.mean( e_sst.pos ) == e_int.mean( e_int.pos ), reassign )
+    # cwa.add( "res", e_sst.integration( e_int.point_is_inside( e_sst.pos ), false ), reassign )
     #
     stream <<<<
         namespace LMT {
@@ -1111,9 +1116,20 @@ def write_add_W_chap_F_chap( stream, e_sst, e_int )
             const Element<$(e_int.name),DefaultBehavior,Node<$nb_dim,T_pos_1,ND_1>,ED_1,nim_1> &elem_int,
             Mat &mat,
             Vec &vec,
-            Tin &ind
+            Tin &ind,
+            int my_sgn
         ) {
-        $(cw.to_string())
+        $(cwm.to_string())
+        }
+        template<class T_pos_0,class ND_0,class ED_0,unsigned nim_0,class T_pos_1,class ND_1,class ED_1,unsigned nim_1,class Vec,class Tin>
+        void add_W_chap_F_chap(
+            const Element<$(e_sst.name),DefaultBehavior,Node<$nb_dim,T_pos_0,ND_0>,ED_0,nim_0> &elem_sst,
+            const Element<$(e_int.name),DefaultBehavior,Node<$nb_dim,T_pos_1,ND_1>,ED_1,nim_1> &elem_int,
+            Vec &vec,
+            Tin &ind,
+            int my_sgn
+        ) {
+        $(cwv.to_string())
         }
         //
         template<class T_pos_0,class ND_0,class ED_0,unsigned nim_0,class T_pos_1,class ND_1,class ED_1,unsigned nim_1>

@@ -220,16 +220,16 @@ public:
 
     /// need s.number and s.mesh
     struct AddSstMesh {
-        template<class TS> void operator()(const TS &s,DisplayParaview &dp) const {
-            disp( s, dp, Number<TS::has_mesh>() );
+        template<class TS> void operator()(const TS &s,DisplayParaview &dp,double time_step) const {
+            disp( s, dp, Number<TS::has_mesh>(), time_step );
         }
-        template<class TS> void disp(const TS &s,DisplayParaview &dp,Number<0>) const {
+        template<class TS> void disp(const TS &s,DisplayParaview &dp,Number<0>,double time_step) const {
         }
-        template<class TS> void disp(const TS &s,DisplayParaview &dp,Number<1>) const {
+        template<class TS> void disp(const TS &s,DisplayParaview &dp,Number<1>,double time_step) const {
             DynamicData<double,TS::TM::TElemList::nb_elem_type> number("number");
             s.mesh.elem_list.reg_dyn( &number );
             number.set_values( s.number );
-            dp.add_mesh( s.mesh );
+            dp.add_mesh( s.mesh, "paraview", Vec<std::string>("all"), time_step );
             s.mesh.elem_list.unreg_dyn( &number );
         }
     };

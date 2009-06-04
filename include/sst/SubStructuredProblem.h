@@ -61,6 +61,7 @@ struct Interface : TData_, InterfaceAncestorWoWOMesh<typename TData_::TM> {
     typedef SubStructure<SstData1> TSubStructure1;
     typedef TData_ TData;
     typedef typename TData_::TM TM;
+    static const bool internal_interface = true;
     
     TSubStructure0 *sub_structure0;
     TSubStructure1 *sub_structure1;
@@ -76,6 +77,7 @@ struct Interface<TData_,SstData> : TData_, InterfaceAncestorWoWOMesh<typename TD
     typedef SubStructure<SstData> TSubStructure;
     typedef TData_ TData;
     typedef typename TData_::TM TM;
+    static const bool internal_interface = false;
     
     TSubStructure *sub_structure;
     typename IntersectionCarac<typename TSubStructure::TM::TSkin::TElemList,typename TM::TElemList>::T sst_and_interf_element_pairs;
@@ -218,15 +220,6 @@ struct SubStructuredProblem {
         void operator()( TE &elem, Interf *interface, Number<1> ) {
             interface->sst_and_interf_element_pairs.push_back( std::make_pair( &elem, add( elem, interface ) ) );
         }
-        /*
-main_latin.cpp:88: instantiated from here
-/usr/include/c++/4.3/bits/stl_pair.h:106: error: invalid conversion from '
-LMT::Element<LMT::Triangle, LMT::DefaultBehavior, LMT::Node<3u, double, LMT::Mesh_carac_mon_probleme<double, 3u>::NodalStaticData>, LMT::Mesh_carac_mon_probleme<double, 3u>::ElementChoice<1u, 1u, 0u, 0u>::TData, 0u>*
-LMT::Element<LMT::Triangle, LMT::DefaultBehavior, LMT::Node<3u, double, LMT::Mesh_carac_mon_probleme<double, 3u>::NodalStaticData>, LMT::Mesh_carac_mon_probleme<double, 3u>::ElementChoice<1u, 1u, 0u, 0u>::TData, 0u>*
-scons: *** [main_latin.o] Error 1
-scons: building terminated because of errors.
-        
-        */
         //
         template<class TE0,class TE1,class Interf> void operator()( const TE0 &elem_0, const TE1 &elem_1, Interf *interface, Number<0> ) {}
         //
