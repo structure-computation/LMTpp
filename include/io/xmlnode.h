@@ -35,7 +35,7 @@ helper class to extract data from a dom node
 class XmlNode {
 public:
     struct ParseText { };
-    struct Parsefile { };
+    struct ParseFile { };
     ///
     XmlNode();
     ///
