@@ -16,6 +16,7 @@
 #include "basicops.h"
 #include <assert.h>
 #include <stdlib.h>
+#include <typeinfo>
 
 #ifdef __APPLE__
     #define WITHOUT_MALLOC

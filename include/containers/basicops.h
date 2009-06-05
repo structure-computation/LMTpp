@@ -292,6 +292,9 @@ struct Abs;
 */
 template<class T> inline typename TypePromote<Abs,T>::T abs(const T &val) { return typename TypePromote<Abs,T>::T(std::abs(val)); }
 template<class T> inline typename TypePromote<Abs,T>::T abs_indication(const T &val) { return LMT::abs(val); } // if val is a function, return abs( something_close_to_mean(val) )
+
+inline int abs(const int &val) { return ( val >= 0 ? val : -val ); }
+
 /*!
 \generic_comment acos
     fonction réciproque de la la fonction cosinus

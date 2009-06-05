@@ -71,8 +71,8 @@ class VariableAncestor
         if interpolation_ == "nodal"
             for num_node in 0 .. e.nb_nodes
                 num_node_cpp := e.corr_cpp( num_node )
-                sym_lst.push_back( sym = symbol( "elem.node($num_node_cpp)->$n$ind_n", "$(t)^{$num_node}$ind_t" ),
-                    node = num_node, name = n, ind_n = ind_n, nder = nb_der )
+                sym_lst.push_back( sym = symbol( "elem.node($num_node_cpp)->$n$ind_n", "$(t)^{$num_node_cpp}$ind_t" ),
+                    node = num_node_cpp, name = n, ind_n = ind_n, nder = nb_der )
             return e.interpolation( sym_lst[ sym_lst.size - e.nb_nodes ... ].map( _0.sym ) )
         if interpolation_ == "elementary"
             return sym_lst.push_back( sym = symbol( "elem.$n$ind_n"     , "$t$ind_t" ), elem = 0, name = n, ind_n = ind_n, nder = nb_der )->sym
@@ -198,10 +198,10 @@ class Variable[ nb_dim = [], sym = false ] inherits VariableAncestor
 
     virtual def get_sym_property
         return sym
-            
+    
     virtual def make_expr_subs( from, to )
         expr = expr.subs( from, to )
-        
+    
     virtual def get_cpp_type
         if nb_dim.size == 0  return "Tpos"
         if nb_dim.size == 1  return "Vec<Tpos,$(nb_dim[0])>"
@@ -282,17 +282,17 @@ class LmtppFormulationAncestor
         for var in unknown_variables
             for es, ts in var->expr_symbols, var->test_symbols
                 test = test.subs( es.sym, ts.sym )
-        
+    
     virtual def get_nb_dim
         abstract
-
+    
     def nb_unknowns_of_type( sel )
         res := 0
         for v in unknown_variables
             for s in v->expr_symbols
                 res += sel( s )
         return res
-
+    
     static def non_null_system( K, F )
         for v in K.values +++ F
             if not assumed( v == 0 )
@@ -589,10 +589,10 @@ class LmtppFormulation[ dim ] inherits LmtppFormulationAncestor
         has_skin_unknowns := false; nb_skin_unk := 0
         for num_node in 0 .. e.nb_nodes
             nb_node_unk = 0
-            _update_unk( unknown_variables, mesh_subs, vect_subs, num_in_indices, has_node_unknowns, nb_node_unk, _0.node == num_node, e.corr_cpp( num_in_indices ) )
-        _update_unk( unknown_variables, mesh_subs, vect_subs, num_in_indices, has_elem_unknowns, nb_elem_unk, _0.elem == 0, num_in_indices )
-        _update_unk( unknown_variables, mesh_subs, vect_subs, num_in_indices, has_glob_unknowns, nb_glob_unk, _0.glob == 0, num_in_indices )
-        _update_unk( unknown_variables, mesh_subs, vect_subs, num_in_indices, has_skin_unknowns, nb_skin_unk, _0.skin == 0, num_in_indices )
+            _update_unk( unknown_variables, mesh_subs, vect_subs, num_in_indices, has_node_unknowns, nb_node_unk, _0.node == num_node )
+        _update_unk( unknown_variables, mesh_subs, vect_subs, num_in_indices, has_elem_unknowns, nb_elem_unk, _0.elem == 0 )
+        _update_unk( unknown_variables, mesh_subs, vect_subs, num_in_indices, has_glob_unknowns, nb_glob_unk, _0.glob == 0 )
+        _update_unk( unknown_variables, mesh_subs, vect_subs, num_in_indices, has_skin_unknowns, nb_skin_unk, _0.skin == 0 )
         
         # apply subs list
         for v in unknown_variables
@@ -600,13 +600,13 @@ class LmtppFormulation[ dim ] inherits LmtppFormulationAncestor
                 
                 
     # @see update_variable_expr_and_test
-    def _update_unk( unknown_variables, mesh_subs, vect_subs, num_in_indices, has__unknowns, nb__unk, function_crit, num_in_cpp )
+    def _update_unk( unknown_variables, mesh_subs, vect_subs, num_in_indices, has__unknowns, nb__unk, function_crit )
         for v in unknown_variables
             for s in v->expr_symbols
                 if function_crit( s )
                     s.off_ind = nb__unk
                     mesh_subs.push_back( s.sym )
-                    syms := Vec[ Op ]( size = v->nb_der + 1, function = symbol("vectors[$_0][indices[$num_in_cpp]+$nb__unk]","V_{$_0,$num_in_indices,$nb__unk}") )
+                    syms := Vec[ Op ]( size = v->nb_der + 1, function = symbol("vectors[$_0][indices[$num_in_indices]+$nb__unk]","V_{$_0,$num_in_indices,$nb__unk}") )
                     tims := Vec[ Op ]( size = v->nb_der + 1, function = time_steps[0] - sum( time_steps[ 0 .. _0 ] ) )
                     vect_subs.push_back( lagrange( tims, syms, time ) )
                     s.sym = syms[ 0 ]
