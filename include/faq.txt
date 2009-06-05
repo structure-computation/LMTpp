@@ -29,6 +29,7 @@
     * \a #18 Pour résoudre un problème directement sans factoriser préalablement ni inverser de matrice
     * \a #23 La routine de la librairie Lapack plante mon programme à l'exécution ?
     * \a #24 A la compilation, j' ai le sympathique message "with behavior cannot be included in elem_list"!
+    * \a #25 Que signifient les paramètres remplate Pvec, T, TE, TM, PB, etc... ?
 
     = Réponses :
 
@@ -191,4 +192,19 @@
 
     \anchor 23 dans le fichier /opt/MATH/timdavis/ldflags , modifie <strong> g2c </strong> par <strong> gfortran </strong> .
     \anchor 24 Car votre type particulier de \a MeshCarac qui caractérise votre maillage ne connaît le type d'élément que vous souhaitez utiliser avec votre mailleur. Allez donc voir votre formulation définie par la fonction <strong> make_pb() </strong> dans le fichier SConstruct en général, et ajouter les éléments qui vous manque dans le paramètre <strong> elements          = ['Triangle','Tetra'], </strong> .  
+
+    \anchor 25 
+        * Pvec est le type pour la position d'un point dans l'espace (e.g. Vec<double,3> pour un point de l'espace).
+        * T est le type flottant (e.g. double ou float).
+        * TE celui d'un élément (e.g. [[Triangle]] , [[Hexa]] ).
+        * TM est le type d'un maillage.
+        * PB celui d'un problème
+
+
+
+
+
+
 */
+
+

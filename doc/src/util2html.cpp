@@ -53,7 +53,7 @@ void generate_header( Target* src, string& path_root, ofstream& of,string &titre
     of<<"<link href=\"" << stmp << "\" rel=\"stylesheet\" type=\"text/css\" />"<<std::endl;
     of<<"<title> Documentation (Officielle) de la librairie LMT++ </title>"<<std::endl;
     of<<"</head>"<<std::endl;
-    of<<"<body text=\"#000000\" bgcolor=\"#fcfcdf\" link=\"#0000cc\" vlink=\"#551a8b\" >"<<std::endl;
+    of<<"<body text=\"#000000\" bgcolor=\"#ffffff\" link=\"#0000cc\" vlink=\"#551a8b\" >"<<std::endl;
 
     /*
     REMARQUE : je ne parcours pas la liste des pages web pour générer cet en-tête.
@@ -188,6 +188,9 @@ string linkHTML( const string& href_src,const string& href_target , const string
         end = href_src.size() ;
     start = 0 ;
 
+    //cerr << "DEBUG href_src    |" << href_src << "|" << endl;
+    //cerr << "DEBUG href_target |" << href_target << "|" << endl;
+    
     while (start<end) {
         if (chercher_motif( href_src,"/",&pos,end,start ) && chercher_motif( href_target,"/",&pos2,end,start )) {
             if ((start == pos) || (start == pos2)) {
@@ -200,8 +203,9 @@ string linkHTML( const string& href_src,const string& href_target , const string
         } else
             break ;
     }
-    // start pointe sur le premier caractère du premier répertoire différent.
+    /// start pointe sur le premier caractère du premier répertoire différent.
     nb = compter_caractere( href_src,'/',start ) ;
+    //cerr << " nb = " << nb << endl;
     for(i=0;i<nb;i++)
         stmp += "../" ;
     stmp += href_target.substr(start, href_target.size()-start) ;

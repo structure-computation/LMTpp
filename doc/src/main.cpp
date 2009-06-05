@@ -67,7 +67,7 @@ int main(int argc, char* argv[]) {
 
     /// on lit tous les fichiers du dossier du projet. argv[1] doit contenir le nom du dossier
     docProject.add_source( argv[1],list_excluded_directories ) ;
-    // Ensuite on les "parse".
+    /// Ensuite on les "parse".
     docProject.parse() ;
 
     /// puis on définit la structure du site web.

@@ -712,7 +712,7 @@ void Documentation::generate_index() {
     pageWeb<<"<title> Documentation de " << name_software <<  " </title>"<<std::endl;
     pageWeb<<"<link href=\"classic.css\" rel=\"stylesheet\" type=\"text/css\" />"<<std::endl;
     pageWeb<<"</head>"<<std::endl;
-    pageWeb<<"<body text=\"#000000\" bgcolor=\"#fcfcdf\" link=\"#0000cc\" vlink=\"#551a8b\"  >"<<std::endl;
+    pageWeb<<"<body text=\"#000000\" bgcolor=\"#ffffff\" link=\"#0000cc\" vlink=\"#551a8b\"  >"<<std::endl;
     
 
     pageWeb<< "<h1 align=\"center\"> Documentation de " << name_software << "<br/><small></small></h1>" << std::endl;
@@ -940,7 +940,7 @@ void Documentation::generate_file_css() {
     pageWeb <<  "\tpadding: 5px 20px;" << std::endl;
     pageWeb << "\tmargin: 0px 2px;" << std::endl;
     pageWeb << "\tborder: 1px solid #666;" << std::endl;
-    pageWeb << "\tbackground-color: #f4d9ab;" << std::endl;
+    pageWeb << "\tbackground-color: #9DC5D4;" << std::endl;
     pageWeb << "\ttext-decoration: none;" << std::endl;
     pageWeb << "\ttext-align: center;" << std::endl;
     pageWeb << "}" << std::endl;
@@ -974,7 +974,7 @@ void Documentation::generate_file_css() {
     pageWeb << std::endl;
     pageWeb << "div.verbatim {\n	background-color: #c7dad7;\n	padding: 0px 85px;\n	width: 83%;\n}\n" << std::endl;
     pageWeb << std::endl;
-    pageWeb << "td.pair {\n    background-color: #eaeacf;#cbcbb4;\n}\n" << std::endl;
+    pageWeb << "td.pair {\n    background-color: #eaeacf;#9ACBD4;\n}\n" << std::endl;
     pageWeb << std::endl;
     pageWeb << "a:link {\n    text-decoration: none;\n}\n" << std::endl;
     pageWeb << "a:visited {\n    text-decoration: none;\n}\n" << std::endl;

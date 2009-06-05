@@ -47,16 +47,22 @@ void VisitorBloc_SetPath_HTML::exec( Bloc* b ) {
 void VisitorBloc_SetPath_HTML::exec( Classe* c ) {
 
     c->path = repertory_class;
+    for(int i=0;i<c->list_subType_function.size();++i)
+        c->list_subType_function[i]->path = repertory_class;
 }
 
 void VisitorBloc_SetPath_HTML::exec( ClasseMetil* c ) {
     
     c->path = repertory_class;
+    for(int i=0;i<c->list_subType_function.size();++i)
+        c->list_subType_function[i]->path = repertory_class;
 }
 
 void VisitorBloc_SetPath_HTML::exec( Struct* s ) { 
 
     s->path = repertory_struct;
+    for(int i=0;i<s->list_subType_function.size();++i)
+        s->list_subType_function[i]->path = repertory_struct;
 }
 
 void VisitorBloc_SetPath_HTML::exec( Function* f ) {

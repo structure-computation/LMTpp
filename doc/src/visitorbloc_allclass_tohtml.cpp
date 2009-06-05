@@ -927,13 +927,17 @@ void VisitorBloc_AllClass_toHTML::generate_stream_HTML_for_function( ofstream* o
                 *o << stmp2 << " &gt; ";
         }
     }
-    *o << " <strong> " << f->listAttribut << " </strong> " << std::endl;
+    //*o << " <strong> " << f->listAttribut << " </strong> " << std::endl;
     stmp = f->returnType.name;
     if ((ptr_t = ptr_list_target->isName( stmp )) != 0 ) {
         stmp2 = linkHTML( f->reference(), ptr_t->reference(), stmp );
-    } else
+        //cerr << " f->returnType = " << stmp << " de la fonction " << f->name.name << endl;
+    } else {
+        //cerr << " f->returnType ooouiiiiiiiiiiiiiiiii= " << stmp << " de la fonction " << f->name.name << endl;
         stmp2 = french2HTML( stmp );
-    *o << stmp2 << "   ";
+    }
+    *o << stmp2 ;
+    //cerr << " f->reference() = " << f->reference() << endl;
     switch(t) {
         case Normal : *o << french2HTML( f->name.name ); break;
         case Link   : *o << link_fragmentHTML( f->name.name ); break;
@@ -996,14 +1000,18 @@ void VisitorBloc_AllClass_toHTML::generate_stream_HTML_for_functionMetil( ofstre
     *o << " ) " << std::endl;
     if (f->condition.size())
         *o << " <strong> when </strong> " << f->condition << std::endl;
-    if (f->default_pertinence > 1e-5)
+    if ((f->default_pertinence > 1e-5) or ((f->default_pertinence < -1e-5)))
         *o << " <strong> pertinence </strong> " << f->default_pertinence << std::endl;
 
     if ((t == Normal) or (t == Anchor)) {
         m = f->listTag.size();
+        if (t == Anchor)
+            *o << " </strong> ";
         for(j=0;j<m;j++) {
             f->listTag[j]->generate_pageHTML(o,ptr_list_target,ptr_parent );
         }
+        if (t == Anchor)
+            *o << " <strong> ";
     }
     *o << "</div>" << std::endl;
 }

@@ -16,6 +16,29 @@ using namespace std;
 struct ListTarget;
 struct Target;
 
+#define COMMENT__RELATES 0 
+#define COMMENT__FRIEND 1
+#define COMMENT__STRUCT 2
+#define COMMENT__LATEX 3
+#define COMMENT__GENERIC_COMMENT 4
+#define COMMENT__AUTHOR 5
+#define COMMENT__EXAMPLE 6
+#define COMMENT__TUTORIAL 7
+#define COMMENT__BRIEF 8
+#define COMMENT__PROPERTY 9
+#define COMMENT__MAINCLASS 10
+#define COMMENT__KEYWORD 11
+#define COMMENT__PARAM 12
+#define COMMENT__RETURN 13
+#define COMMENT__INTERNAL 14
+#define COMMENT__CODE 15
+#define COMMENT__TABLE 16
+#define COMMENT__WEBPAGE 17
+#define COMMENT__MAIN 18
+#define COMMENT__VERBATIM 19
+#define COMMENT__A 20
+#define COMMENT__ANCHOR 21
+#define COMMENT__UNDEFINED 22
 
 struct Comment {
     Comment( string& namefile ) { source_file = namefile; }
@@ -34,11 +57,16 @@ struct Comment {
     //LangRef *lang_ref;
 
     // private
-    int findKeyword( int* posistion,int* positionAfter, string& s,int end,int start=0);
+    int findKeyword( int* position,int* positionAfter, string& s,int end,int start=0);
     bool chercher_section( int* nb, string& s, int end,int start );
     bool chercher_liste( int* nb, char* type, string& s, int end,int start );
+
     static const char* keyword[22];
 };
+
+int findKeyword_( int* position,int* positionAfter, const char* s, int end, int start=0);
+bool chercher_section_( int* nb, const char* s, int end, int start );
+bool chercher_liste_( int* nb, char* type, const char* s, int end, int start );
 
 #endif
 

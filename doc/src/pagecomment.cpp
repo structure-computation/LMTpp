@@ -933,7 +933,8 @@ void PageComment::append_function( Bloc* code, Lexem* _le, const string& attr) {
     const Lexem* le3;
     deque<Comment_zone> list_comment;
     Comment* ptr_comment;
-    
+    int typeComment,pos,pos2;
+
     fonction = new FunctionMetil();
     fonction->source_file = nameFile;
     fonction->listAttribut = attr;
@@ -1024,19 +1025,20 @@ void PageComment::append_function( Bloc* code, Lexem* _le, const string& attr) {
         }
     } //else
         //cerr << " la fonction " << fonction->name.name << " n' a pas de def" << endl;
-    code->list_subType_function.push_back( fonction );
 
     /** récupération des commentaires  **/
     doc_of(_le,list_comment);
-    //cout << "== commentaires de " << fonction->name.name << endl;
     for(int i=0;i<list_comment.size();++i) {
-        //cout << list_comment[i] << endl;
-        ptr_comment = new Comment( nameFile );
-        ptr_comment->parse( ptr_comment->items, list_comment[i].start, list_comment[i].size);
-        fonction->listTag.push_back(ptr_comment);
-        //listComment.push_back( ptr_comment );
+        //cout << "comment function  " << list_comment[i] << endl;
+        typeComment = findKeyword_(&pos,&pos2,list_comment[i].start,list_comment[i].size,0);
+        if ((typeComment != COMMENT__EXAMPLE) and (typeComment != COMMENT__TUTORIAL) and (typeComment != COMMENT__GENERIC_COMMENT)) {
+            ptr_comment = new Comment( nameFile );
+            ptr_comment->parse( ptr_comment->items, list_comment[i].start, list_comment[i].size);
+            fonction->listTag.push_back(ptr_comment);
+        }
     }
-    //cout << "== FIN des commentaires de " << fonction->name.name << endl;
+
+    code->list_subType_function.push_back( fonction );
 }
 
 string PageComment::getAttribut( Lexem* start, Lexem* end) {
@@ -1056,7 +1058,10 @@ void PageComment::append_member( Bloc* code, Lexem* le, const string& attr) {
     Parameter p;
     const Lexem* le2;
     const Lexem* le3;
-    
+    deque<Comment_zone> list_comment;
+    Comment* ptr_comment;
+    int typeComment,pos,pos2;
+
     p.listAttribut = attr;
     /// récuparation du nom
     if (le->children[0]) {
@@ -1064,7 +1069,7 @@ void PageComment::append_member( Bloc* code, Lexem* le, const string& attr) {
         le3 = rightmost_child(le->children[0]);
         p.nameVariable.append(le2->s,le3->s-le2->s+le3->si);
     }
-    p.op.append(le->s,le->si);/// devrait être soit = soit :=
+    p.op.append(le->s,le->si);/// devrait être soit = soit := soit ~=
     /// récupération de l'expression à droite
     if (le->children[1]) {
         le2 = leftmost_child(le->children[1]);
@@ -1076,17 +1081,42 @@ void PageComment::append_member( Bloc* code, Lexem* le, const string& attr) {
             p.defaultType = "\"\""; /// A REVOIR...
         }
     }
+    /** récupération des commentaires  **/
+    doc_of(le,list_comment);
+    for(int i=0;i<list_comment.size();++i) {
+        //cout << "comment member " << list_comment[i] << endl;
+        typeComment = findKeyword_(&pos,&pos2,list_comment[i].start,list_comment[i].size,0);
+        if ((typeComment != COMMENT__EXAMPLE) and (typeComment != COMMENT__TUTORIAL) and (typeComment != COMMENT__GENERIC_COMMENT)) {
+            ptr_comment = new Comment( nameFile );
+            ptr_comment->parse( ptr_comment->items, list_comment[i].start, list_comment[i].size);
+            p.listTag.push_back(ptr_comment);
+        }
+    }
     code->listMember.push_back(p);
 }
 
 void PageComment::append_property( Bloc* code, const Lexem* le) {
     Parameter p;
     VisitorBloc_getProperty visi;
-    
+    deque<Comment_zone> list_comment;
+    Comment* ptr_comment;
+    int typeComment,pos,pos2;
+
     code->exec( &visi);
     if ((visi.ptr_listProperty ) and (le->children[0])) {
         p.type.name.append(le->children[0]->s,le->children[0]->si);
         p.type.principalName.append(le->children[0]->s,le->children[0]->si);
+        /** récupération des commentaires  **/
+        doc_of(le,list_comment);
+        for(int i=0;i<list_comment.size();++i) {
+            //cout << list_comment[i] << endl;
+            typeComment = findKeyword_(&pos,&pos2,list_comment[i].start,list_comment[i].size,0);
+            if ((typeComment != COMMENT__EXAMPLE) and (typeComment != COMMENT__TUTORIAL) and (typeComment != COMMENT__GENERIC_COMMENT)) {
+                ptr_comment = new Comment( nameFile );
+                ptr_comment->parse( ptr_comment->items, list_comment[i].start, list_comment[i].size);
+                p.listTag.push_back(ptr_comment);
+            }
+        }
         visi.ptr_listProperty->push_back(p);
     }
     
@@ -1097,6 +1127,9 @@ void PageComment::append_class( Bloc* code, Lexem* _le) {
     TemplateParameter* ptr_tp;
     Parameter p;
     const Lexem* le;
+    deque<Comment_zone> list_comment;
+    Comment* ptr_comment;
+    int typeComment,pos,pos2;
 
     classe = new ClasseMetil();
     classe->source_file = nameFile;
@@ -1123,19 +1156,22 @@ void PageComment::append_class( Bloc* code, Lexem* _le) {
             classe->listTemplateParameter.push_back(ptr_tp);
         }
     }
+    /** récupération des commentaires  **/
+    doc_of(_le,list_comment);
+    //cout << "== commentaires de " << fonction->name.name << endl;
+    for(int i=0;i<list_comment.size();++i) {
+        //cout << list_comment[i] << endl;
+        typeComment = findKeyword_(&pos,&pos2,list_comment[i].start,list_comment[i].size,0);
+        if ((typeComment != COMMENT__EXAMPLE) and (typeComment != COMMENT__TUTORIAL) and (typeComment != COMMENT__GENERIC_COMMENT)) {
+            ptr_comment = new Comment( nameFile );
+            ptr_comment->parse( ptr_comment->items, list_comment[i].start, list_comment[i].size);
+            classe->listTag.push_back(ptr_comment);
+        }
+    }
     /// ensuite on parcourt via next toutes les "instructions"
     /// on commence par sauter le (-9)
     parse_language_Metil_rec(classe,_le->children[1]->children[0]);
     code->list_subType_function.push_back( classe );
-}
-
-string explore_s(const char* s, int avant, int apres) {
-    string stmp;
-    
-    stmp.append("<<|");
-    stmp.append(s+avant,apres-avant+1);
-    stmp.append("|>>");
-    return stmp;
 }
 
 void PageComment::parse_language_Metil_rec( Bloc* code, Lexem* le, const string& attr) {
@@ -1147,39 +1183,105 @@ void PageComment::parse_language_Metil_rec( Bloc* code, Lexem* le, const string&
     while(le) {
         switch(le->type) {
             case STRING___class___NUM :
-                cerr << "{" << code->name.name << "} CLASS " ;le->display_just_name_and_type(cerr);
+                //cerr << "{" << code->name.name << "} CLASS " ;le->display_just_name_and_type(cerr);
                 append_class(code,le);
-                indice = offset_to_doc_of(le,le->s);
-                cerr << explore_s(le->s,-15,15) << endl;
                 break;
             case STRING___def___NUM :
-                cerr << "{" << code->name.name << "} DEF " ;le->display_just_name_and_type(cerr);
+                //cerr << "{" << code->name.name << "} DEF " ;le->display_just_name_and_type(cerr);
                 append_function(code,le,attr);
                 break;
-            case STRING_assign_NUM : case STRING_reassign_NUM :
-                cerr << "{" << code->name.name << "} (RE)ASSIGN " ;le->display_just_name_and_type(cerr);
+            case STRING_assign_NUM : case STRING_reassign_NUM : case STRING_assign_type_NUM :
+                //cerr << "{" << code->name.name << "} (RE)ASSIGN " ;le->display_just_name_and_type(cerr);
                 append_member(code,le,attr);
-                cerr << explore_s(le->s,-10,10) << endl;
                 break;
-            case STRING___static___NUM : case STRING___const___NUM :
+            case STRING___static___NUM : case STRING___const___NUM : case STRING___virtual___NUM :
                 ret = research_if_assign_reassign_def_class(le);
                 if (ret) {
                     parse_language_Metil_rec(code,ret,getAttribut(le,ret));
                 }
                 break;
             case STRING___property___NUM :
-                cerr << "{" << code->name.name << "} PROPERTY " ;le->display_just_name_and_type(cerr);
+                //cerr << "{" << code->name.name << "} PROPERTY " ;le->display_just_name_and_type(cerr);
                 append_property(code,le);
+                break;
+            case STRING___import___NUM : case STRING___for___NUM : case STRING___if___NUM :
+                /// mot-clés ignorés
                 break;
             default :
                 /// on ne sait pas trop ce que c'est. L'idée est de remonter les parents jusqu'à trouver un def, class ou (re)assign si c'est possible
-                cerr << "{" << code->name.name << "} TRAITEMENT PAR DEFAUT DU " ;le->display_just_name_and_type(cerr);
+                cerr << "{" << code->name.name << "} TRAITEMENT PAR DEFAUT DU " ;le->display_just_name_and_type(cerr); cerr << " du fichier " << nameFile << endl;
                 //append_member(code,le);
                 break;
         }
         //cerr << " ---> " << endl;
 //         le->display_just_name_and_type(cerr);
         le = le->next;
+    }
+}
+
+/// recherche le début et la fin d'un commentaire sur plusieurs lignes
+Comment_zone PageComment::getComment_multiLine( char* s) {
+    Comment_zone comment_zone;
+    char *b;
+    char* c;
+
+    if (not(*s) or (*s == '#') or (*s == '~')) /// problème
+        return comment_zone;
+    /// reherche du début
+    b = s-1;
+    while(*b) {
+        for( ; *b ; --b )
+            if ((*b == '~') or (*b == '#'))
+                break;
+        if (not(*b))
+            return comment_zone; /// problème
+        b--;
+        if (*b == '#') {
+            comment_zone.start = b+2;
+            break;
+        } else
+            continue;
+    }
+    /// recherche de la fin
+    b = s+1;
+    while(*b) {
+        for( ; *b ; ++b )
+            if ((*b == '~') or (*b == '#'))
+                break;
+        if (not(*b))
+            return comment_zone; /// problème remarque : size == 0
+        b++;
+        if (*b == '#') {
+            comment_zone.size = b-2-comment_zone.start;
+            return comment_zone;
+        } else
+            continue;
+    }
+}
+
+/// on cherche et analyse  les commentaires du type |tutorial, \example, \webpage et eventuellemnt \generic_comment
+void PageComment::search_parse_special_comment(const char* s, int end) {
+    Comment_zone comment_zone;
+    int typeComment,pos,pos2,start,jump;
+    Comment* ptr_comment;
+
+    start = 0;
+    while((typeComment = findKeyword_(&pos,&pos2,s,end,start)) >= 0) {
+        switch(typeComment) {
+            case COMMENT__EXAMPLE : case COMMENT__TUTORIAL : case COMMENT__WEBPAGE : case COMMENT__GENERIC_COMMENT :
+                comment_zone = getComment_multiLine((char*)s+pos);
+                if (comment_zone.size > 0) {
+                    //cout << "~~~|" << comment_zone << "|~~~" << endl;
+                    ptr_comment = new Comment( nameFile );
+                    ptr_comment->parse( ptr_comment->items, comment_zone.start, comment_zone.size);
+                    listComment.push_back(ptr_comment);
+                    start = comment_zone.start - s + comment_zone.size + 2;
+                } else
+                    start = pos2;
+                break;
+            default:
+                start = pos2;
+        }
     }
 }
 
@@ -1192,6 +1294,8 @@ void PageComment::parse_language_Metil(string& textOfCode) {
     //display_graph(lexer.root());
     parse_language_Metil_rec( &code,(Lexem*) lexer.root());
 //     parse_language_Metil_rec(code,Lexer(textOfCode.c_str(),provenance,&error_list).root());
+    /// on analyse ensuite les commentaires du type |tutorial, \example, \webpage et eventuellemnt \generic_comment
+    search_parse_special_comment(textOfCode.c_str()+1,textOfCode.size()-1); /// +1 pour passer le \0 du début
 }
 
 void PageComment::parse_language_Cpp( string& textOfCode) {
@@ -1453,10 +1557,10 @@ void PageComment::parse_language_Cpp_rec( Bloc* code, string& textOfCode, int en
                                                     start = suivant;
                                                 }
                                             } else {
-                                                // ça doit être une fonction
+                                                /// ça doit être une fonction
                                                 if (chercher_delimitateur( textOfCode,"{;",&pos,end,start )) {
                                                     fonctionCourante = new Function();
-                                                    ///fonctionCourante->suffix_source = suffix_source;index_begin_signature
+                                                    ///fonctionCourante->ancestor = code;
                                                     fonctionCourante->source_file = nameFile;
                                                     tag = fonctionCourante;
                                                     fonctionCourante->listTag = listTagLocal;
@@ -1549,7 +1653,7 @@ void PageComment::parse_language_Cpp_rec( Bloc* code, string& textOfCode, int en
                                                 switch( delim ) {
                                                     case '{' : // c'est une fonction probablemisDeclarationent (i.e. on supposera que ce n'est pas une déclaration de tableau).
                                                             fonctionCourante = new Function();
-                                                            ///fonctionCourante->suffix_source = suffix_source;
+                                                            ///fonctionCourante->ancestor = code;
                                                             fonctionCourante->source_file = nameFile;
                                                             tag = fonctionCourante;
                                                             fonctionCourante->listTag = listTagLocal;
@@ -1601,7 +1705,7 @@ void PageComment::parse_language_Cpp_rec( Bloc* code, string& textOfCode, int en
                                                                 start = pos + 1; // +1 pour sauter le;
                                                             } else {
                                                                 fonctionCourante = new Function();
-                                                                ///fonctionCourante->suffix_source = suffix_source;
+                                                                ///fonctionCourante->ancestor = code;
                                                                 fonctionCourante->source_file = nameFile;
                                                                 tag = fonctionCourante;
                                                                 fonctionCourante->listTag = listTagLocal;

@@ -12,9 +12,10 @@
 #include "struct.h"
 #include "function.h"
 #include "language_id.h"
+#include "lexem.h"
 
-class LexemDefinition;
-class Lexem;
+//class LexemDefinition;
+//class Lexem;
 
 //struct ListTemplateParameter;
 
@@ -61,6 +62,8 @@ struct PageComment {
     void append_class( Bloc* code, Lexem* le);
     void append_member( Bloc* code, Lexem* le, const string& attr);
     void append_property( Bloc* code, const Lexem* le);
+    Comment_zone getComment_multiLine( char* s);/// recherche le début et la fin d'un commentaire
+    void search_parse_special_comment(const char* s, int size);
     /// juste pour l'analyse de C++
     void parse_language_Cpp_rec( Bloc* code, string& textOfCode, int end, int start );
     int state( string& t ,int end, int start );
