@@ -12,6 +12,8 @@
 #ifndef LMT_matinvsparse_HEADER
 #define LMT_matinvsparse_HEADER
 
+#include "boolean.h"
+
 namespace LMT {
 
 template<class T,int s> inline T dot_chol_factorize( const Vec<Sparse<T>,s> &v1, const Vec<Sparse<T>,s> &v2 ) {
@@ -71,7 +73,7 @@ template<class T,class TS> void chol_factorize( Mat<T,TS,SparseLine<> > &m ) {
                 if ( not HashCH<NN>::cor( hash[col], hash[ line ] ) ) continue;
 
                 T v = dot_chol_factorize( m.data[col], m.data[line] );
-                if ( LMT::abs( v ) ) {
+                if ( boolean( v ) ) {
                     unsigned os = m.data[line].indices.size();
                     m.data[line].indices.resize( os+1 );
                     m.data[line].data.resize( os+1 );
@@ -109,7 +111,7 @@ template<class T,class TS> void chol_factorize( Mat<T,TS,SparseLine<> > &m ) {
 //                 if ( not HashCH<NN>::cor( hash[col], hash[ line ] ) ) continue;
 // 
 //                 T v = dot_chol_factorize( m.data[col], m.data[line] );
-//                 if ( LMT::abs( v ) ) {
+//                 if ( boolean( v ) ) {
 //                     unsigned os = m.data[line].indices.size();
 //                     m.data[line].indices.resize( os+1 );
 //                     m.data[line].data.resize( os+1 );
@@ -160,7 +162,7 @@ template<class T> void incomplete_chol_factorize( Mat<T,Sym<>,SparseLine<> > &m 
             unsigned ie = min( m.data[line].indices[ind+1], col+2 );
             while ( ++col < ie ) {
                 T v = dot_chol_factorize( m.data[col], m.data[line] );
-                if ( v ) {
+                if ( boolean( v ) ) {
                     unsigned os = m.data[line].indices.size();
                     m.data[line].indices.resize( os+1 );
                     m.data[line].data.resize( os+1 );
@@ -182,7 +184,7 @@ template<class T> void incomplete_chol_factorize( Mat<T,Sym<>,SparseLine<> > &m 
         //#else
         T d = m.data[line].data.back() - norm_2_p2( m.data[line].data.begin(), m.data[line].data.size()-1 );
         // assert( d > 0 );
-        m.data[line].data.back() = 1.0 / sqrt( abs( d ) + ( d == 0 ) );
+        m.data[line].data.back() = T(1) / sqrt( abs( d ) + ( d == T(0) ) );
         //#endif
     }
 }
