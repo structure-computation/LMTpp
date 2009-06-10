@@ -14,8 +14,6 @@
 
 #include "mesh/mesh.h"
 
-extern LMT::Vec<double>* F_POINTER;
-
 #include "containers/heterogeneouspack.h"
 #include "convergence_criteria.h"
 #include "constraint.h"

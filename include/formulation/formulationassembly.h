@@ -142,8 +142,7 @@ namespace LMT {
             F_CL.resize( pos.size() * nb_ddl_per_node, T(0) );
             f_reaction.resize( pos.size() * nb_ddl_per_node, T(0) );
             f_reaction.set(T(0));
-            f_nodal.resize( pos.size() * nb_ddl_per_node, T(0) );
-            f_nodal.set(T(0));
+            f_nodal.resize( pos.size() * nb_ddl_per_node, 0.0 );
             X_before_contraints.resize( pos.size() * nb_ddl_per_node, T(0) );
             diag_before_contraints.resize( pos.size() * nb_ddl_per_node, T(0) );
         }
@@ -434,7 +433,8 @@ namespace LMT {
         //
         Vec<Splitted<MeshAndForm,2> > formulations;
         Mat<T,Sym<>,SparseLine<> > K, K_before_constraints, K_CL;
-        Vec<T> F, F_before_contraints, F_CL, diag_before_contraints, X_before_contraints, f_reaction, f_nodal;
+        Vec<T> F, F_before_contraints, F_CL, diag_before_contraints, X_before_contraints, f_reaction;
+        Vec<double> f_nodal;
         unsigned nb_vectors;
         Vec<Vec<T> > vectors;
         Vec<AbsT> time_steps;
