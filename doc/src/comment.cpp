@@ -1,7 +1,9 @@
 #include <iostream>
 #include <string>
 #include <vector>
-
+#include <cstdio>
+#include <cstdlib>
+#include <string.h> /// pour strcmp
 
 using namespace std;
 #include "token.h"
@@ -55,37 +57,6 @@ const char* Comment::keyword[SIZE_TABLE_KEYWORD] = {
                                          "a", // 20
                                          "anchor" // 21
                                      };
-
-/*
-enum typeCommentID
-{
-//-------- types
- UNKNOWN_ID = 0 ,
- CLASS_ID = 1 ,
- STRUCT_ID = 2 ,
- FUNCTION_ID = 3 ,
- GENERIC_COMMENT_ID = 4 ,
- METHOD_ID = 5 ,
- EXAMPLE_ID = 6 ,
- TUTORIAL_ID = 7,
-//-------- caratéristiques
- BRIEF_ID = 32,
- PROPERTY_ID = 33,
- MAINCLASS_ID = 34,
- RELATEDTO_ID = 35,
- INCATEGORY_ID = 36,
- PARAM_ID = 37,
- RETURN_ID = 38,
- MEMBER_ID = 39,
-//-------- caratéristiques spécifiques au commentaires "texte"
- CODE_ID = 64 ,
- ENDCODE_ID = 65,
- TABLE_ID = 66,
- HEADER_ID = 67,
- ENDTALBE_ID = 68
- };
-*/
-
 // ----------------------------------------------------
 struct LangRef {
     virtual void print( std::ostream &os ) const = 0;
@@ -139,7 +110,7 @@ int Comment::findKeyword( int* position,int* positionAfter, string& s,int end,in
     //cout << "line = {" << s.substr(start,end-start) << "}" << endl;
     
     if (chercher_motif( s,"\\",&pos,end,start )) {
-        pos = extraire_token( &pos2,&delim,"[]{}<>&*/:;()=\n \t",s,end,pos+1 );// après l'appel pos2 pointe sur le caractère qui suit le token
+        pos = extraire_token( &pos2,&delim,"[]{}<>&*/:;()=\n \t",s,end,pos+1 );/// après l'appel pos2 pointe sur le caractère qui suit le token
         token = s.substr(pos,pos2-pos);
         //cout << " token = ||" << token << "||" << endl;
         for(j=0;j<SIZE_TABLE_KEYWORD;j++) 
@@ -150,8 +121,31 @@ int Comment::findKeyword( int* position,int* positionAfter, string& s,int end,in
     return j;
 }
 
-bool Comment::chercher_section( int* nb, string& s, int end,int start  )
-{
+int findKeyword_( int* position,int* positionAfter, const char* s,int end,int start) {
+    int pos,pos2,j;
+    char delim;
+
+    j = -1;
+    pos = -1;
+    pos2 = -1;
+    //cout << " vrai début |" << s[start] << "| = " << (int) s[start] << " start= " << start << endl;
+    if (chercher_motif( s,"\\",&pos,end,start )) {
+        //cout << " début |" << s[pos] << "| = " << (int) s[pos] << " pos = " << pos << endl;
+        pos = extraire_token( &pos2,&delim,"[]{}<>&*/:;()=\n \t",s,end,pos+1 );/// après l'appel pos2 pointe sur le caractère qui suit le token
+        //cout << " ooooooooooooooooooooo |"; cout.write(s+pos,pos2-pos); cout << "|" <<endl;
+        for(j=0;j<SIZE_TABLE_KEYWORD;j++) 
+            if (not(strncmp(s+pos,Comment::keyword[j],strlen(Comment::keyword[j]))))
+                break;
+    } //else
+        //cout << " pppppppppppppppppppppppppppppppppppppppppppp "<< endl;
+    *position = pos;
+    *positionAfter = pos2;
+    if (j == SIZE_TABLE_KEYWORD)
+        j = -1;
+    return j;
+}
+
+bool Comment::chercher_section( int* nb, string& s, int end,int start  ) {
     int p;
  
     *nb = -1;
@@ -164,8 +158,20 @@ bool Comment::chercher_section( int* nb, string& s, int end,int start  )
         return false;
 }
 
-bool Comment::chercher_liste( int* nb, char* type, string& s,int end,int start )
-{
+bool chercher_section_( int* nb, const char* s, int end, int start  ) {
+    int p;
+ 
+    *nb = -1;
+    for(p=start;p<end;p++) if (s[p] != ' ') break;
+    if (p == end) return false;
+    if (s[p] == '=') {
+        *nb = p;
+        return true;
+    } else 
+        return false;
+}
+
+bool Comment::chercher_liste( int* nb, char* type, string& s,int end,int start ) {
     int p;
     char c;
  
@@ -181,15 +187,31 @@ bool Comment::chercher_liste( int* nb, char* type, string& s,int end,int start )
     return false;
 }
 
-void Comment::parse( vector<CommentItem*>& listItems, const char* s, int size ) {
-
-    string cmal;
-    
-    cmal.append(s,size);
-    parse(listItems,cmal,cmal.size(),0);
+bool chercher_liste_( int* nb, char* type, const char* s, int end, int start ) {
+    int p;
+    char c;
+ 
+    *nb = -1;
+    for(p=start;p<end;p++) if (s[p] != ' ') break;
+    if (p == end) return false;
+    c = s[p];
+    if ((s[p] == '*') || (s[p] == '#') || (s[p] == '-')) {
+        *nb = p;
+        *type = c;
+        return true;
+    }
+    return false;
 }
 
-/*
+// void Comment::parse( vector<CommentItem*>& listItems, const char* s, int size ) {
+// 
+//     string cmal;
+// 
+//     cmal.append(s,size);
+//     parse(listItems,cmal,cmal.size(),0);
+// }
+
+
 void Comment::parse( vector<CommentItem*>& listItems, const char* s, int size ) {
 
     int n,i,pos,j,c,nb_espaces_reference,pos2,nb,next,decalage_ref,start_tuto_example, start;
@@ -213,258 +235,248 @@ void Comment::parse( vector<CommentItem*>& listItems, const char* s, int size ) 
     start = 0;
     while(start<size) {
         //cout << " ::::::::::::::: BOUCLE ::::::::::::::::::::::::::::::::" << endl;
-        if (!chercher_motif( file,"\n",&next,end,start )) next = end;
-        j = findKeyword(&pos,&pos2,file,next,start ); //après l'appel pos contient l'indice du premier caractère du mot clé et pos2 celui du premier caractère après le token
+        if (!chercher_motif( s,"\n",&next,size,start )) next = size;
+        j = findKeyword_(&pos,&pos2,s,next,start ); ///après l'appel pos contient l'indice du premier caractère du mot clé et pos2 celui du premier caractère après le token
         //cout << "--j = " << j << endl;
+        //cout << " chaine |"; cout.write(s+start,next-start);cout << "| fin de chaine"<< endl;
         //cout << " start = " << start << "   ,   next = " <<  next << endl;
 
         switch(j) {
             case 0 : case 1 : case 2 : case 5 : case 8 : case 9 : case 10 : case 11 : case 12 : case 13 : case 14 : case 18 :
                 ptr_CommentItemKeyword = new CommentItemKeyword( keyword[j] );
                 listItems.push_back( ptr_CommentItemKeyword );   //addCommentItem( ptr_CommentItemKeyword );
-                token = file.substr(pos2,next-pos2 );
+                token.assign(s+pos2,next-pos2);//token = file.substr(pos2,next-pos2 );
                 cut_space( token );
                 ptr_CommentItemKeyword->addParameter( token );
                 //cout << " plout " << endl;
-                start = next + 1; // + 1 pour sauter le \n
+                start = next + 1; /// + 1 pour sauter le \n
+                break;
+            case 3 :    /// pour un commentaire au format LaTex
+                ptr_CommentItemLaTex = new CommentItemLaTex();
+                ptr_CommentItemLaTex->source_file = source_file;
+                listItems.push_back( ptr_CommentItemLaTex );  //addCommentItem( ptr_CommentItemCode );
+                decalage_ref = pos - start - 1;// pos contient la position de \latex, start celle du début de ligne
+                start = next + 1; // on passe à la ligne suivante 
+                start_tuto_example = start;
+                while (start<size)  {
+                    if (!chercher_motif( s,"\n",&next,size,start )) next = size;
+                    c = indentation( &pos2,s,start ); 
+                    if ((c != LINE_VACUUM) && (c <= decalage_ref)) break; // problème potentiel --- pour distinguer la fin d'un code
+                //ptr_CommentItemLaTex->addTxt( file,next,pos2);
+                    start = next + 1; // + 1 pour sauter le \n
+                }
+                ptr_CommentItemLaTex->addTxt( s+start_tuto_example,start-start_tuto_example);
                 break;
 
-                case 3 :    // pour un commentaire au format LaTex
-                //token = file.substr(pos2,next-pos2 ); // récupération du langage
-                //cut_space( token );
-                    ptr_CommentItemLaTex = new CommentItemLaTex();
-                    ptr_CommentItemLaTex->source_file = source_file;
-                    listItems.push_back( ptr_CommentItemLaTex );  //addCommentItem( ptr_CommentItemCode );
-                    decalage_ref = pos - start - 1;// pos contient la position de \latex, start celle du début de ligne
-                    start = next + 1; // on passe à la ligne suivante 
-                    start_tuto_example = start;
-                    while (start<end)  {
-                        if (!chercher_motif( file,"\n",&next,end,start )) next = end;
-                        c = indentation( &pos2,file,start ); 
-                        if ((c != LINE_VACUUM) && (c <= decalage_ref)) break; // problème potentiel --- pour distinguer la fin d'un code
-                    //ptr_CommentItemLaTex->addTxt( file,next,pos2);
-                        start = next + 1; // + 1 pour sauter le \n
-                    }
-                    ptr_CommentItemLaTex->addTxt( file,start,start_tuto_example);
-                    break;
+            case 4 : /// pour un commentaire du type generic_comment
+                token.assign(s+pos2,next-pos2);//token = file.substr(pos2,next-pos2 ); // récupération de l'éventuelle référence
+                cut_space( token );
+                ptr_CommentItemGenericComment = new CommentItemGenericComment( token );
+                ptr_CommentItemGenericComment->source_file = source_file;
+                listItems.push_back( ptr_CommentItemGenericComment ); //addCommentItem( ptr_CommentItemGenericComment );
+                decalage_ref = pos - start - 1;
+                start = next + 1; // on passe à la ligne suivante 
+                start_tuto_example = start;
+                while (start<size)  {
+                    if (!chercher_motif( s,"\n",&next,size,start )) next = size;
+                    c = indentation( &pos2,s,start ); // pos contient la position de \code, start celle du début de ligne
+                    if ((c != LINE_VACUUM) && (c <= decalage_ref)) break; // problème potentiel --- pour distinguer la fin d'un exemple ou d'un tutoriel
+                    start = next + 1; // + 1 pour sauter le \n
+            //cout << " ~~~~~~~~~~~~" << endl;
+                }
+                parse( ptr_CommentItemGenericComment->items,s+start_tuto_example,start-start_tuto_example );
+                break;
 
-                    case 4 : // pour un commentaire du type generic_comment
-                        token = file.substr(pos2,next-pos2 ); // récupération de l'éventuelle référence
-                        cut_space( token );
-                        ptr_CommentItemGenericComment = new CommentItemGenericComment( token );
-                        ptr_CommentItemGenericComment->source_file = source_file;
-                        listItems.push_back( ptr_CommentItemGenericComment ); //addCommentItem( ptr_CommentItemGenericComment );
-                        decalage_ref = pos - start - 1;
-                        start = next + 1; // on passe à la ligne suivante 
-                        start_tuto_example = start;
-                        while (start<end)  {
-                            if (!chercher_motif( file,"\n",&next,end,start )) next = end;
-                            c = indentation( &pos2,file,start ); // pos contient la position de \code, start celle du début de ligne
-                            if ((c != LINE_VACUUM) && (c <= decalage_ref)) break; // problème potentiel --- pour distinguer la fin d'un exemple ou d'un tutoriel
-                            start = next + 1; // + 1 pour sauter le \n
+            case 6 : case 7 : /// on a le début d'un exemple ou d'un tutoriel
+                /// on détermine les lignes qui correspondent à l'exemple via l'indentation
+                decalage_ref = pos - start - 1;// pos contient la position de \example, start celle du début de ligne
+                token.assign(s+pos2,next-pos2 ); // on enregistre la référence ou le titre de l'exemple ou du tutoriel
+                cut_space( token );
+                start = next + 1; // on passe à la ligne suivante 
+                start_tuto_example = start;
+                while (start<size)  {
+                    if (!chercher_motif( s,"\n",&next,size,start )) next = size;
+                    c = indentation( &pos2,s,start ); // pos contient la position de \code, start celle du début de ligne
+                    if ((c != LINE_VACUUM) && (c <= decalage_ref)) break; // problème potentiel --- pour distinguer la fin d'un exemple ou d'un tutoriel
+                    start = next + 1; // + 1 pour sauter le \n
                     //cout << " ~~~~~~~~~~~~" << endl;
-                        }
-                        parse( ptr_CommentItemGenericComment->items,file,start,start_tuto_example );
-                        break;
-
-                        case 6 : case 7 : // on a le début d'un exemple ou d'un tutoriel
-                // on détermine les lignes qui correspondent à l'exemple via l'indentation
-                            decalage_ref = pos - start - 1;// pos contient la position de \example, start celle du début de ligne
-                            token = file.substr(pos2,next-pos2 ); // on enregistre la référence ou le titre de l'exemple ou du tutoriel
-                            cut_space( token );
-                            start = next + 1; // on passe à la ligne suivante 
-                            start_tuto_example = start;
-                            while (start<end)  {
-                                if (!chercher_motif( file,"\n",&next,end,start )) next = end;
-                                c = indentation( &pos2,file,start ); // pos contient la position de \code, start celle du début de ligne
-                                if ((c != LINE_VACUUM) && (c <= decalage_ref)) break; // problème potentiel --- pour distinguer la fin d'un exemple ou d'un tutoriel
-                                start = next + 1; // + 1 pour sauter le \n
-                    //cout << " ~~~~~~~~~~~~" << endl;
-                            }
+                }
                 //cout << " start = " << start << endl;
                 //cout << " start_tuto_example = " << start_tuto_example << endl;
-                            if (j==6) {
-                    // c'est un exemple
-                                ptr_CommentItemExample = new CommentItemExample( token );
-                                ptr_CommentItemExample->source_file = source_file;
-                                listItems.push_back( ptr_CommentItemExample ); //addCommentItem( ptr_CommentItemExample );
+                if (j==6) {
+                    /// c'est un exemple
+                    ptr_CommentItemExample = new CommentItemExample( token );
+                    ptr_CommentItemExample->source_file = source_file;
+                    listItems.push_back( ptr_CommentItemExample ); //addCommentItem( ptr_CommentItemExample );
                     //cout << " ~~~~~~~~~~~~  AVANT LE PARSING RECURSIF  ~~~~~~~~~~~~~~~~~~~~~" << endl;
-                                parse( ptr_CommentItemExample->items,file,start,start_tuto_example );
+                    parse( ptr_CommentItemExample->items,s+start_tuto_example,start-start_tuto_example );
                     //cout << " ~~~~~~~~~~~~  JE PASSE LE PARSING RECURSIF  ~~~~~~~~~~~~~~~~~~~~~" << endl;
-                            } else {
-                    // c'est un tutoriel
-                                ptr_CommentItemTutorial = new CommentItemTutorial( token );
-                                ptr_CommentItemTutorial->source_file = source_file;
-                                listItems.push_back( ptr_CommentItemTutorial ); //addCommentItem( ptr_CommentItemTutorial );
-                                parse( ptr_CommentItemTutorial->items,file,start,start_tuto_example );
-                            }
-                            break;
-
-                            case 15 : // pour un code
-                                token = file.substr(pos2,next-pos2 ); // récupération du langage
-                                cut_space( token );
-                                ptr_CommentItemCode = new CommentItemCode( token );
-                                listItems.push_back( ptr_CommentItemCode );  //addCommentItem( ptr_CommentItemCode );
-                                decalage_ref = pos - start - 1;// pos contient la position de \code, start celle du début de ligne de \code
-                                start = next + 1; // on passe à la ligne suivante 
-                                nb_espaces_reference = 0;
-                                while (start<end)  {
-                                    if (!chercher_motif( file,"\n",&next,end,start )) next = end;
-                                    c = indentation( &pos2,file,start ); 
-                                    if ((c != LINE_VACUUM) && (c <= decalage_ref)) break; // problème potentiel --- pour distinguer la fin d'un code
-                                    if ((nb_espaces_reference == 0) && (c != LINE_VACUUM)) nb_espaces_reference = c - decalage_ref; 
-                                    token = file.substr(pos2,next-pos2 );
-                                    if (c != LINE_VACUUM)
-                                        c = (c-decalage_ref)/nb_espaces_reference - 1;
-                                    else
-                                        c = 0;
-                                    ptr_CommentItemCode->addTabulation_String( c, token);
-                                    start = next + 1; // + 1 pour sauter le \n
-                                }
-                                break;
-
-                                case 19 : // pour un mode verbatim
-                                    ptr_CommentItemVerbatim = new CommentItemVerbatim();
-                                    listItems.push_back( ptr_CommentItemVerbatim );  //addCommentItem( ptr_CommentItemCode );
-                                    decalage_ref = pos - start - 1;// pos contient la position de \code, start celle du début de ligne
-                                    start = next + 1; // on passe à la ligne suivante 
-                                    nb_espaces_reference = 0;
-                                    while (start<end)  {
-                                        if (!chercher_motif( file,"\n",&next,end,start )) next = end;
-                                        c = indentation( &pos2,file,start ); 
-                                        if ((c != LINE_VACUUM) && (c <= decalage_ref)) break; // problème potentiel --- pour distinguer la fin d'un code
-                                        if ((nb_espaces_reference == 0) && (c != LINE_VACUUM)) nb_espaces_reference = c - decalage_ref;
-                                        token = file.substr(pos2,next-pos2 );
-                                        if (c != LINE_VACUUM)
-                                            c = (c-decalage_ref)/nb_espaces_reference - 1;
-                                        else
-                                            c = 0;
-                                        ptr_CommentItemVerbatim->addTabulation_String( c, token);
-                                        start = next + 1; // + 1 pour sauter le \n
-                                    }
-                                    break;
-
-                                    case 16 : // pour un tableau
-                                        token = file.substr(pos2,next-pos2 ); // récupération du header
-                                        cut_space( token );
-                                        ptr_CommentItemTable = new CommentItemTable( token );
-                                        listItems.push_back( ptr_CommentItemTable ); // addCommentItem( ptr_CommentItemTable );
-                                        decalage_ref = pos - start - 1;// pos contient la position de \code, start celle du début de ligne
-                                        start = next + 1; // on passe à la ligne suivante 
-                                        nb_espaces_reference = 0;
-                                        while (start<end)  {
-                                            if (!chercher_motif( file,"\n",&next,end,start )) next = end;
-                                            c = indentation( &pos2,file,start ); // pos contient la position de \table
-                                            if (nb_espaces_reference == 0) nb_espaces_reference = c; 
-                                            if (c <= decalage_ref) 
-                                                break;// problème potentiel pour distinguer la fin d'un tableau
-                                            token = file.substr(pos2,next-pos2 );
-                                            ptr_CommentItemTable->addLine( token );
-                                            start = next + 1;
-                                        }
-                                        break;
-
-                                        case 17 : // pour une page web
-                                            decalage_ref = pos - start - 1;// pos contient la position de \webpage, start celle du début de ligne
-                                            token = file.substr(pos2,next-pos2 ); // récupération des paramètres
-                                            cut_space( token );
-                                            start = next + 1; // on passe à la ligne suivante 
-                                            start_tuto_example = start;
-                                            while (start<end)  {
-                                                if (!chercher_motif( file,"\n",&next,end,start )) next = end;
-                                                c = indentation( &pos2,file,start ); // pos contient la position de \code, start celle du début de ligne
-                                                if ((c != LINE_VACUUM) && (c <= decalage_ref)) break; // problème potentiel --- pour distinguer la fin d'un exemple ou d'un tutoriel
-                                                start = next + 1; // + 1 pour sauter le \n
-                    //cout << " ~~~~~~~~~~~~" << endl;
-                                            }
+                } else {
+                    /// c'est un tutoriel
+                    ptr_CommentItemTutorial = new CommentItemTutorial( token );
+                    ptr_CommentItemTutorial->source_file = source_file;
+                    listItems.push_back( ptr_CommentItemTutorial ); //addCommentItem( ptr_CommentItemTutorial );
+                    parse( ptr_CommentItemTutorial->items,s+start_tuto_example,start-start_tuto_example );
+                }
+                break;
+            case 15 : /// pour un code
+                token.assign(s+pos2,next-pos2 ); // récupération du langage
+                cut_space( token );
+                ptr_CommentItemCode = new CommentItemCode( token );
+                listItems.push_back( ptr_CommentItemCode );  //addCommentItem( ptr_CommentItemCode );
+                decalage_ref = pos - start - 1;// pos contient la position de \code, start celle du début de ligne de \code
+                start = next + 1; // on passe à la ligne suivante 
+                nb_espaces_reference = 0;
+                while (start<size)  {
+                    if (!chercher_motif( s,"\n",&next,size,start )) next = size;
+                    c = indentation( &pos2,s,start ); 
+                    if ((c != LINE_VACUUM) && (c <= decalage_ref)) break; // problème potentiel --- pour distinguer la fin d'un code
+                    if ((nb_espaces_reference == 0) && (c != LINE_VACUUM)) nb_espaces_reference = c - decalage_ref; 
+                    token.assign(s+pos2,next-pos2 );
+                    if (c != LINE_VACUUM)
+                        c = (c-decalage_ref)/nb_espaces_reference - 1;
+                    else
+                        c = 0;
+                    ptr_CommentItemCode->addTabulation_String( c, token);
+                    start = next + 1; // + 1 pour sauter le \n
+                }
+                break;
+            case 19 : /// pour un mode verbatim
+                ptr_CommentItemVerbatim = new CommentItemVerbatim();
+                listItems.push_back( ptr_CommentItemVerbatim );  //addCommentItem( ptr_CommentItemCode );
+                decalage_ref = pos - start - 1;// pos contient la position de \code, start celle du début de ligne
+                start = next + 1; // on passe à la ligne suivante 
+                nb_espaces_reference = 0;
+                while (start<size)  {
+                    if (!chercher_motif( s,"\n",&next,size,start )) next = size;
+                    c = indentation( &pos2,s,start ); 
+                    if ((c != LINE_VACUUM) && (c <= decalage_ref)) break; // problème potentiel --- pour distinguer la fin d'un code
+                    if ((nb_espaces_reference == 0) && (c != LINE_VACUUM)) nb_espaces_reference = c - decalage_ref;
+                    token.assign(s+pos2,next-pos2 );
+                    if (c != LINE_VACUUM)
+                        c = (c-decalage_ref)/nb_espaces_reference - 1;
+                    else
+                        c = 0;
+                    ptr_CommentItemVerbatim->addTabulation_String( c, token);
+                    start = next + 1; // + 1 pour sauter le \n
+                }
+                break;
+            case 16 : /// pour un tableau
+                token.assign(s+pos2,next-pos2 ); // récupération du header
+                cut_space( token );
+                ptr_CommentItemTable = new CommentItemTable( token );
+                listItems.push_back( ptr_CommentItemTable ); // addCommentItem( ptr_CommentItemTable );
+                decalage_ref = pos - start - 1;// pos contient la position de \code, start celle du début de ligne
+                start = next + 1; // on passe à la ligne suivante 
+                nb_espaces_reference = 0;
+                while (start<size)  {
+                    if (!chercher_motif( s,"\n",&next,size,start )) next = size;
+                    c = indentation( &pos2,s,start ); // pos contient la position de \table
+                    if (nb_espaces_reference == 0) nb_espaces_reference = c; 
+                    if (c <= decalage_ref) 
+                        break;// problème potentiel pour distinguer la fin d'un tableau
+                    token.assign(s+pos2,next-pos2 );
+                    ptr_CommentItemTable->addLine( token );
+                    start = next + 1;
+                }
+                break;
+            case 17 : /// pour une page web
+                decalage_ref = pos - start - 1;// pos contient la position de \webpage, start celle du début de ligne
+                token.assign(s+pos2,next-pos2 ); // récupération des paramètres
+                cut_space( token );
+                start = next + 1; // on passe à la ligne suivante 
+                start_tuto_example = start;
+                while (start<size)  {
+                    if (!chercher_motif( s,"\n",&next,size,start )) next = size;
+                    c = indentation( &pos2,s,start ); // pos contient la position de \code, start celle du début de ligne
+                    if ((c != LINE_VACUUM) && (c <= decalage_ref)) break; // problème potentiel --- pour distinguer la fin d'un exemple ou d'un tutoriel
+                    start = next + 1; // + 1 pour sauter le \n
+            //cout << " ~~~~~~~~~~~~" << endl;
+                }
                 //cout << "++++++++++++++++++++++  token web page +++++++++++++++++++++++" << endl;
                 //cout << " token2 page web =" << token2 << "|||" << endl;
-                                            ptr_CommentItemWebPage = new CommentItemWebPage( token );
-                                            ptr_CommentItemWebPage->source_file = source_file;
-                                            listItems.push_back( ptr_CommentItemWebPage );  //addCommentItem( ptr_CommentItemWebPage );
-                                            parse( ptr_CommentItemWebPage->items,file,start,start_tuto_example );
-                                            break;
-
-                                            case SIZE_TABLE_KEYWORD : /// token inconnu
+                ptr_CommentItemWebPage = new CommentItemWebPage( token );
+                ptr_CommentItemWebPage->source_file = source_file;
+                listItems.push_back( ptr_CommentItemWebPage );  //addCommentItem( ptr_CommentItemWebPage );
+                parse( ptr_CommentItemWebPage->items,s+start_tuto_example,start-start_tuto_example );
+                break;
+            case SIZE_TABLE_KEYWORD : /// token inconnu
                 //cout << "--------------------  token inconnu ---------------------" << endl;
                 //cout << " token =" << token << "|||" << endl;
                 //cout << " j=" << j << endl;
-                                                ptr_CommentItemTxt = new CommentItemTxt();
-                                                listItems.push_back( ptr_CommentItemTxt );  // addCommentItem( ptr_CommentItemTxt );
-                                                token = file.substr( start,next-start );
-                                                cut_space( token );
-                                                if (token.size() > 0)
-                                                    ptr_CommentItemTxt->addString( token );
-                                                start = next + 1;
-                                                break;
-
+                ptr_CommentItemTxt = new CommentItemTxt();
+                listItems.push_back( ptr_CommentItemTxt );  // addCommentItem( ptr_CommentItemTxt );
+                token.assign(s+start,next-start );
+                cut_space( token );
+                if (token.size() > 0)
+                    ptr_CommentItemTxt->addString( token );
+                start = next + 1;
+                break;
             case 20 : case 21 :
-                default : // pas de token trouvé ou \a ou \anchor
-                      // c'est du texte ou une section ou bien une liste
-                    if ( chercher_section(&pos,file,next,start) ) { // c'est un titre de section
-                        //cout << "--------- SECTION -------------" << endl;
-                        token = file.substr(pos+1,next-pos-1 );
+            default : /// pas de token trouvé ou \a ou \anchor
+                    /// c'est du texte ou une section ou bien une liste
+                if ( chercher_section_(&pos,s,next,start) ) { /// c'est un titre de section
+                    //cout << "--------- SECTION -------------" << endl;
+                    token.assign(s+pos+1,next-pos-1 );
+                    cut_space( token );
+                    j = pos-start;
+                    for(i=0;i<order_section.size();i++) {
+                        if (j == order_section[i])
+                            break;
+                    }
+                    if (i==order_section.size()) {
+                        order_section.push_back(j);
+                    }
+                    ptr_CommentItemSection = new CommentItemSection( token,i+1 );
+                    listItems.push_back( ptr_CommentItemSection );  // addCommentItem( ptr_CommentItemSection );
+                    start = next + 1;
+                } else {
+                    if (chercher_liste_(&pos,&caractere,s,next,start)) {/// c'est une liste
+                        //cout << "--------- liste -------------" << endl;
+                        token.assign(s+pos+1,next-pos-1 );
                         cut_space( token );
-                        j = pos-start;
-                        for(i=0;i<order_section.size();i++) {
-                            if (j == order_section[i])
-                                break;
-                        }
-                        if (i==order_section.size()) {
-                            order_section.push_back(j);
-                        }
-                        ptr_CommentItemSection = new CommentItemSection( token,i+1 );
-                        listItems.push_back( ptr_CommentItemSection );  // addCommentItem( ptr_CommentItemSection );
+                        ptr_CommentItemList = new CommentItemList( );
+                        listItems.push_back( ptr_CommentItemList ); //addCommentItem( ptr_CommentItemList );
+                        ptr_CommentItemList->addCaracteristic( token,pos-start,caractere );
                         start = next + 1;
-                    }
-                    else {
-                        if (chercher_liste(&pos,&caractere,file,next,start)) {// c'est une liste
-                            //cout << "--------- liste -------------" << endl;
-                            token = file.substr(pos+1,next-pos-1 );
-                            cut_space( token );
-                            ptr_CommentItemList = new CommentItemList( );
-                            listItems.push_back( ptr_CommentItemList ); //addCommentItem( ptr_CommentItemList );
-                            ptr_CommentItemList->addCaracteristic( token,pos-start,caractere );
-                            start = next + 1;
-                            while (start<end) {
-                                if (!chercher_motif( file,"\n",&next,end,start )) next = end;
-                                if (chercher_liste(&pos,&caractere,file,next,start )) {
-                                    token = file.substr(pos+1,next-pos-1 );
-                                    cut_space( token );
-                                    ptr_CommentItemList->addCaracteristic( token,pos-start,caractere );
-                                } else 
-                                    break;
-                                    start = next + 1; //i++;
-                            }
-                        }
-                        else {// c'est du simple texte
-                            ptr_CommentItemTxt = new CommentItemTxt();
-                            listItems.push_back( ptr_CommentItemTxt ); // addCommentItem( ptr_CommentItemTxt );
-                            token = file.substr(start,next-start);
-                            cut_space( token );
-                            if (token.size()>0)
-                                ptr_CommentItemTxt->addString( token );
-                            //cout << " boucle ttxt ,,, start = " << start << "   ,,, next = " << next << endl;
-                            start = next + 1;
-                            while (start<end) {
-                                if (!chercher_motif( file,"\n",&next,end,start )) next = end;
-                                if (chercher_liste(&pos,&caractere,file,next,start) || chercher_section(&pos,file,next,start )) break;
-                                j = findKeyword( &pos,&pos2,file,next,start );
-                                //cout << "~~~~~~~~~~~~~~ boucle ~~~~~~~~~~~~~~~~ j = " << j << " next = " << next << endl;
-                                if (j>=0) break; //if ((j>=0) && (j<INDEX_TO)) break; // un token intéressant fut trouvé
-                                token = file.substr(start,next-start);
+                        while (start<size) {
+                            if (!chercher_motif( s,"\n",&next,size,start )) next = size;
+                            if (chercher_liste_(&pos,&caractere,s,next,start )) {
+                                token.assign(s+pos+1,next-pos-1 );
                                 cut_space( token );
-                                if (token.size() > 0)
-                                    ptr_CommentItemTxt->addString( token );
-                                start = next + 1; 
-                            }
+                                ptr_CommentItemList->addCaracteristic( token,pos-start,caractere );
+                            } else 
+                                break;
+                                start = next + 1; //i++;
+                        }
+                    } else {/// c'est du simple texte
+                        ptr_CommentItemTxt = new CommentItemTxt();
+                        listItems.push_back( ptr_CommentItemTxt ); // addCommentItem( ptr_CommentItemTxt );
+                        token.assign(s+start,next-start);
+                        cut_space( token );
+                        if (token.size()>0)
+                            ptr_CommentItemTxt->addString( token );
+                        //cout << " boucle ttxt ,,, start = " << start << "   ,,, next = " << next << endl;
+                        start = next + 1;
+                        while (start<size) {
+                            if (!chercher_motif( s,"\n",&next,size,start )) next = size;
+                            if (chercher_liste_(&pos,&caractere,s,next,start) || chercher_section_(&pos,s,next,start )) break;
+                            j = findKeyword_( &pos,&pos2,s,next,start );
+                            //cout << "~~~~~~~~~~~~~~ boucle ~~~~~~~~~~~~~~~~ j = " << j << " next = " << next << endl;
+                            if (j>=0) break; //if ((j>=0) && (j<INDEX_TO)) break; // un token intéressant fut trouvé
+                            token.assign(s+start,next-start);
+                            cut_space( token );
+                            if (token.size() > 0)
+                                ptr_CommentItemTxt->addString( token );
+                            start = next + 1; 
                         }
                     }
-        }
+                }
+            }
         //start = next + 1; // GROSSE ERREUR de modifier le start ici
     }
 }
-*/
+
 
 void Comment::parse( vector<CommentItem*>& listItems, string& file,int end, int start ) {
 

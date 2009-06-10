@@ -40,13 +40,14 @@ struct Target {
     string source_file ;
     string path ;
     string suffix_reference ;// suffix du fichier de référence
-    // Pour un generic_comment , ancestor est un pointeur sur un objet dont le type est celui concerné par generic_comment.
+    /// Pour un generic_comment , ancestor est un pointeur sur un objet dont le type est celui concerné par generic_comment.
+    /// pour une méthode (ou une sous-classe), ancestor est un pointeur sur l'objet possesseur.
     Target* ancestor ;
-    // l'attribut id sert à diférencier les pages web d'objet différents mais ayant le même nom (e.g. les fonctions template)
+    /// l'attribut id sert à diférencier les pages web d'objet différents mais ayant le même nom (e.g. les fonctions template)
     int id ;
-    // certains à distinguer certains target par une propriété quelconque
-    // *  = 0 signifie qu'elle ne la vérifie pas
-    // *  != 0 signifie qu'elle vérifie la propriété
+    /// certains à distinguer certains target par une propriété quelconque
+    /// *  = 0 signifie qu'elle ne la vérifie pas
+    /// *  != 0 signifie qu'elle vérifie la propriété
     int property;
 } ;
 

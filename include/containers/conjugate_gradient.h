@@ -3,7 +3,7 @@
 
 namespace LMT {
 
-/**
+/*!
     L'opérateur precond doit savoir faire * pour renvoyer l'opération de préconditionnement.
     
     \code
@@ -53,7 +53,7 @@ unsigned conjugate_gradient( const Precond &precond, const Matrix &matrix, const
     return cpt;
 }
 
-/**
+/*!
     Utile pour conjugate_gradient
 */
 template<class TK>

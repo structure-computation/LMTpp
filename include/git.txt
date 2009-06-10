@@ -39,7 +39,8 @@
         1 files changed, 1 insertions(+), 1 deletions(-) 
         Enfin, il faut faire de ce patch un fichier *.patch que vous pouvez envoyer par mail à leclerc@lmt.ens-cachan.fr grâce à: 
         \verbatim
-            git-format-patch -1 
+            git format-patch -1 
+            git-format-patch -1 (cette forme est obsolète) 
     
     = CLONAGE 
         Pour obtenir une version actuelle complète: 

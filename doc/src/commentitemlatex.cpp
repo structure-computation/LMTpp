@@ -10,21 +10,27 @@ using namespace std ;
 #include "visitorcommentitem.h"
 #include "token.h"
 
-CommentItemLaTex :: CommentItemLaTex( ) {
+CommentItemLaTex::CommentItemLaTex( ) {
 
     name.name = "image_latex_"  ;
     name.principalName = "image_LaTex" ;
     suffix_reference = "tex" ;
 }
 
-void CommentItemLaTex :: addTxt(string& s,int end,int start ) {
+void CommentItemLaTex::addTxt(string& s,int end,int start ) {
 
     txt += s.substr(start,end-start) ;
     //cerr << " txt = |" << txt << "| somme = " << somme(txt) << endl ;
     name.name += somme(txt);
 }
 
-void CommentItemLaTex :: display( std::ostream &os ) {
+void CommentItemLaTex::addTxt(const char* s,int size ) {
+
+    txt.append(s,size);
+    name.name += somme(txt);
+}
+
+void CommentItemLaTex::display( std::ostream &os ) {
 
     os << "OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO" << endl ;
     os << "OOOOOOOOOO CommentItemLaTex : reference =" << name.name << " OOOOOOOOOOO" << endl ;
@@ -32,4 +38,4 @@ void CommentItemLaTex :: display( std::ostream &os ) {
     os << "fin CommentItemLaTex" << endl ;
 }
 
-CommentItemLaTex :: ~CommentItemLaTex() { }
+CommentItemLaTex::~CommentItemLaTex() { }

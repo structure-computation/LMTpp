@@ -61,67 +61,31 @@ int string2chaine(char* res, int res_t, string& s )
 
 // fonction qui renvoie vrai si elle trouve le motif motif avec la position en pos sinon
 // elle renvoie faux avec la valeur -1 dans pos.
-bool chercher_motif(const char* s, const char* motif,int* pos,int start=0  )
-{
- int l,i=start,j ;
- int p=-1 ;
+bool chercher_motif(const char* s, const char* motif,int* pos, int end, int start=0  ) {
+    int l,i=start ;
 
- *pos = -1 ;
- if (!strlen(motif)) return false ;
- if (start<0) start=0 ;
+    l = strlen(motif);
+    if (!l) return false ;
 
- while (s[i] != '\0') {
-	if (motif[0] == s[i]) {
-		p = i ;
-		j = 1 ;
-		while (motif[j] != '\0') {
-			if ((s[p+j] == '\0') || (motif[j] != s[p+j])) break ;
-			j++ ;
-			}
-		if (motif[j] == '\0') { *pos = p ; return true ; }
-		}
-	i++ ;
-	}
-
- //cout << " (interne) p = " << p << endl ;
- //cout << " (interne) i = " << i << endl ;
- *pos = -1 ;
- return false ;
+    while ((s[i] != '\0') and (i<end)) {
+        if (motif[0] == s[i]) {
+            if (not(strncmp(s+i,motif,l))){ 
+                *pos = i ;
+                return true;
+            }
+        }
+        i++ ;
+    }
+    *pos = -1 ;
+    return false ;
 }
 
-bool chercher_motif( const string& s, const char* motif, int* pos, int end, int start=0 )
-{
-    int l,i,j ;
-    int p=-1 ;
+bool chercher_motif( const string& s, const char* motif, int* pos, int end, int start=0 ) {
 
-    *pos = -1 ;
-    if (!strlen(motif)) return false ;
     if (start<0) start=0 ;
     if (end > s.size()) end = s.size() ;
 
-    for(i=start;i<end;i++) {
-        if (motif[0] == s[i]) {
-            p = i ;
-            j = 1 ;
-            while (motif[j] != '\0') {
-                if ((p+j == end) || (motif[j] != s[p+j])) break ;
-                j++ ;
-            }
-            if (motif[j] == '\0') { *pos = p ; return true ; }
-        }
-    }
-
- //cout << " (interne) p = " << p << endl ;
- //cout << " (interne) i = " << i << endl ;
-    *pos = -1 ;
-    return false ;
-/*
- int i ;
- i = s.find( motif,start ) ;
- *pos = i ;index_begin_signature
- if ((i<0) || (i>=end)) return false ;
-	else return true ;
-*/
+    return chercher_motif(s.c_str(),motif,pos,end,start);
 }
 
 bool chercher_delimitateur( const string& s, const char* liste_delimitateur,int* pos,int end, int start=0 ) {
@@ -281,7 +245,8 @@ int extraire_token(int* suite,char* delimiteurTrouve,string& source,int end,int 
     return retour ;
 }
 */
-// liste ancienne  == "[]{}<>&*/:;()=\n"
+
+/// liste ancienne  == "[]{}<>&*/:;()=\n"
 int extraire_token(int* suite,char* delimiteurTrouve, const char* list_delimitateur, string& source,int end,int start ) {
 
     int retour ;
@@ -340,6 +305,67 @@ int extraire_token(int* suite,char* delimiteurTrouve, const char* list_delimitat
     }
     return retour ;
 }
+
+/// liste ancienne  == "[]{}<>&*/:;()=\n"
+int extraire_token(int* suite,char* delimiteurTrouve, const char* list_delimitateur, const char* source,int end,int start ) {
+
+    int retour ;
+    int i,j,n ;
+    char c,del,delParticulier ;
+
+    del = 0 ;
+    n = strlen(list_delimitateur) ;
+    retour = -1 ;
+    
+/*
+    if (start<end)
+    cout << "~~~~~~~~~~~(" << source.substr(start,end-start) << ")" << endl ;
+    else
+    cout << "~~~~~~~~~~~()" << endl ;
+    */
+    for(i=start;i<end;i++) {
+        // on saute les espaces ou les tabulations ou les saut de ligne
+        c=source[i] ;
+        if ((c != ' ') && (c != '\t') && (c != '\n') && (c != 13))  // ces délimitateurs sont particuliers
+            break ;
+    }
+    if (i >= end) {
+        *suite =  end ;
+        return retour ; // aucun token trouvé
+    }
+    retour = i ;
+    for(;i<end;i++) { 
+        c=source[i] ;
+        ///if ((c == '\t') ||  (c == ' ') || (c== '\n')) {
+        ///    del = c ;
+        ///    break ;
+        ///}
+        //cout << "~~~~~~~~~~~|" << c << "|  num = " << (int) c <<endl ;
+        for(j=0;j<n;j++) {
+            if (c==list_delimitateur[j]) {
+                delParticulier = c ;
+                break ;
+            }
+        }
+        if (j<n)
+            break ;
+    }
+
+    if (i<end) {
+        if (del == 0) { 
+            if (retour == i) *suite = i+1 ; else *suite = i ;
+            *delimiteurTrouve = delParticulier ;
+        } else {
+            *suite = i ; // et là, c'est la fin...
+            *delimiteurTrouve = del ;
+        }
+    } else {
+        *suite = i ;
+        *delimiteurTrouve = '\n' ;
+    }
+    return retour ;
+}
+
 
 /*
 int r_extraire_token(int* suite,char* delimiteurTrouve, const char* list_delimitateur, string& source,int end,int start ) {
@@ -535,6 +561,22 @@ int compter_caractere( const string& s, char c,int start=0 ) {
     for( p = start ; p<l;p++)
         if (s[p] == c ) co++ ;
     return co ;
+}
+
+int indentation(int* pos, const char* s,int start=0 ) {
+
+    int co,p ;
+
+    co = 0 ;
+    for( p = start ; p ;p++)
+        if (s[p] == ' ') co++ ; else break ;
+    *pos = p ;
+    if (p =='\0')
+        return co ;
+    if (s[p] == '\n')
+        return LINE_VACUUM ;
+    else 
+        return co ;
 }
 
 int indentation(int* pos,string& s,int start=0 ) {

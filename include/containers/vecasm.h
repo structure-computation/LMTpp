@@ -35,7 +35,7 @@ template<class T> inline T dot_aligned(const T *a,const T *b,unsigned size) {
     return res1+res2+res3+res4;
 }
 
-/** sum a[i]*b[i] assuming that it is possible to find a+x and b+x that are aligned adresses */
+/*! sum a[i]*b[i] assuming that it is possible to find a+x and b+x that are aligned adresses */
 template<class T> inline T dot_aligned_with_offset(const T *a,const T *b,unsigned size) {
     T res = (T)0;
     while ( size && ( (SizeType)a & (SimdSize<T>::res*sizeof(T)-1) ) ) {
@@ -45,7 +45,7 @@ template<class T> inline T dot_aligned_with_offset(const T *a,const T *b,unsigne
     return res + dot_aligned( a, b, size );
 }
 
-/** sum_i a_i^2 */
+/*! sum_i a_i^2 */
 template<class T> inline T norm_2_p2(const T *a,unsigned size) {
     return dot_aligned_with_offset(a,a,size);
 }
