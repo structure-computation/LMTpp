@@ -418,7 +418,7 @@ class LmtppFormulationAncestor
             
         #
         symm := symbol("symm")
-        cw := CodeWriter("T") # Alt
+        cw := CodeWriterAlt("T") # Alt
         # t0 := time_of_day_in_sec()
         for r in 0 .. F.size
             if assemble_vec and not assumed( F[r] == 0 )
