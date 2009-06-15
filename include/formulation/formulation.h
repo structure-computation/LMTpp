@@ -688,6 +688,7 @@ public:
             toto2.vectors = &vectors_;
             apply( m->node_list, toto2, *this, K, F ); // nodal
             AssembleElem<false,true > toto;
+            toto.vectors = &vectors_;
             apply( m->elem_list, toto, *this , K, F ); // element (and skin elements)
         }
     }
