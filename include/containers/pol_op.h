@@ -3,9 +3,6 @@
 
 namespace LMT {
 
-template <class Op, int nd, int ne, int nx>
-struct PolOp;
-
 //--------------Plus Op------------------
 
 template <int nd, int ne, int nx>
@@ -68,6 +65,50 @@ struct PolOp<Minus,nd,ne,nx> {
         return res;
     }
 };
+
+//--------------Multiplication Op---------------------
+
+template <int nd, int ne, int nx>
+struct PolOp<Multiplies,nd,ne,nx> {
+
+    template <class T1, class T2>
+    Vec<typename TypePromote<Multiplies,T1,T2>::T,DimPol<MIN(nd,ne),nx>::valeur> operator() (const Vec<T1,DimPol<nd,nx>::valeur> &p, const Vec<T2,DimPol<ne,nx>::valeur> &q) {
+        if (PolMultiplies<nd,ne,nx>::needs_initialization)
+            PolMultiplies<nd,ne,nx>::initialize();
+        Vec<typename TypePromote<Multiplies,T1,T2>::T,DimPol<nd,nx>::valeur> res( typename TypePromote<Multiplies,T1,T2>::T(0) );
+        for (int i=0;i<DimPol<MIN(nd,ne),nx>::valeur;i++)
+            for (int j=0;j<PolMultiplies<nd,ne,nx>::table0[i].size();j++)
+                res[i]+=p[PolMultiplies<nd,ne,nx>::table0[i][j]]*q[PolMultiplies<nd,ne,nx>::table1[i][j]];
+        return res;
+    }
+
+    template <class T1, class T2>
+    Vec<typename TypePromote<Multiplies,T1,typename IsScalar<T2>::T>::T,DimPol<nd,nx>::valeur> operator() (const Vec<T1,DimPol<nd,nx>::valeur> &p, const T2 &q) { return p*q; }
+
+    template <class T1, class T2>
+    Vec<typename TypePromote<Multiplies,T1,typename IsScalar<T2>::T>::T,DimPol<ne,nx>::valeur> operator() (const T1 &p, const Vec<T2,DimPol<ne,nx>::valeur> &q) { return p*q; }
+
+};
+
+template <int nd, int ne>
+struct PolOp<Multiplies,nd,ne,1> {
+
+    template <class T1, class T2>
+    Vec<typename TypePromote<Multiplies,T1,T2>::T,DimPol<MIN(nd,ne),1>::valeur> operator() (const Vec<T1,DimPol<nd,1>::valeur> &p, const Vec<T2,DimPol<ne,1>::valeur> &q) {
+        Vec<typename TypePromote<Multiplies,T1,T2>::T,DimPol<MIN(nd,ne),1>::valeur> res( typename TypePromote<Multiplies,T1,T2>::T(0) );
+        for (int i=0;i<DimPol<MIN(nd,ne),1>::valeur;i++)
+            for (int j=0;j<=i;j++)
+                res[i]+=p[i-j]*q[j];
+        return res;
+    }
+
+    template <class T1, class T2>
+    Vec<typename TypePromote<Multiplies,T1,typename IsScalar<T2>::T>::T,DimPol<nd,1>::valeur> operator() (const Vec<T1,DimPol<nd,1>::valeur> &p, const T2 &q) { return p*q; }
+
+    template <class T1, class T2>
+    Vec<typename TypePromote<Multiplies,T1,typename IsScalar<T2>::T>::T,DimPol<ne,1>::valeur> operator() (const T1 &p, const Vec<T2,DimPol<ne,1>::valeur> &q) { return p*q; }
+};
+
 
 }
 

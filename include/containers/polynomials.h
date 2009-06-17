@@ -197,9 +197,7 @@ public:
 
     template <class T2>
     void operator*= (const Pol<nd,nx,T2> &P) {
-        if (PolMultiplies<nd,nd,nx>::needs_initialization)
-            PolMultiplies<nd,nd,nx>::initialize();
-        PolMultiplies<nd,nd,nx> op;
+        PolOp<Multiplies,nd,nd,nx> op;
         coefs = op(coefs,P.coefficients());
     }
 

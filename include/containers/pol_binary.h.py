@@ -2,7 +2,7 @@ import string
 lst=[
     ('Plus','+'),
     ('Minus','-'),
-    #('Multiplies','*'),
+    ('Multiplies','*'),
     #('Divides','/'),
 ]
 
@@ -31,7 +31,6 @@ Pol<nd,nx,typename TypePromote<"""+op+""",typename IsScalar<T1>::T,T2>::T> opera
 """
 
 lst=[
-    ('Multiplies','*'),
     ('Divides','/'),
 ]
 
