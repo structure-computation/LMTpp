@@ -1,5 +1,5 @@
-#ifndef pol_op_HEADER
-#define pol_op_HEADER
+#ifndef pol_binop_HEADER
+#define pol_binop_HEADER
 
 namespace LMT {
 
@@ -182,4 +182,4 @@ struct PolBinOp<Divides,nd,ne,1> {
 
 }
 
-#endif // pol_tables_HEADER
+#endif // pol_binop_HEADER

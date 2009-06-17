@@ -1,21 +1,12 @@
 import string
-lst=[
+
+print 'namespace LMT {\n'
+
+lst = [
     'abs',
     'conj',
     'real',
     'imag',
-]
-
-print 'namespace LMT {\n'
-
-for t in lst:
-    T = string.capitalize(t)
-    print 'template <int nd, int nx, class T>'
-    print 'Pol<nd,nx,typename TypePromote<'+T+',T>::T> '+t+'(const Pol<nd,nx,T> &P) {'
-    print '    return Pol<nd,nx,typename TypePromote<'+T+',T>::T>('+t+'(P.coefficients()));'
-    print '}\n'
-
-lst = [
     'acos' ,
     'asin' ,
     'atan' ,
@@ -34,9 +25,9 @@ lst = [
 for t in lst:
     T = string.capitalize(t)
     print 'template <int nd, int nx, class T>'
-    print 'Pol<nd,nx,typename TypePromote<'+T+',T>::T> '+t+'(const Pol<nd,nx,T> &P) {'
-    print '    assert(0);'
-    print '    /* TODO */'
+    print 'Pol<nd,nx,typename TypePromote<'+T+',T>::T> '+t+'(const Pol<nd,nx,T> &p) {'
+    print '    PolUnOp<'+T+',nd,nx> op;'
+    print '    return Pol<nd,nx,typename TypePromote<'+T+',T>::T>( op(p.coefficients()) );'
     print '}\n'
 
 print 'template <int nd, int nx, class T>'

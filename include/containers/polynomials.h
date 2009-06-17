@@ -6,6 +6,7 @@
 
 #include "pol_dimension.h"
 #include "pol_tables.h"
+#include "pol_unop.h"
 #include "pol_binop.h"
 #include "vec_if_static_size_is_one_and_scalar_if_not.h"
 
