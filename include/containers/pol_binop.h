@@ -4,12 +4,12 @@
 namespace LMT {
 
 template <class Op, int nd, int ne, int nx>
-struct PolOp;
+struct PolBinOp;
 
 //--------------Plus Op------------------
 
 template <int nd, int ne, int nx>
-struct PolOp<Plus,nd,ne,nx> {
+struct PolBinOp<Plus,nd,ne,nx> {
 
     template <class T1, class T2>
     Vec<typename TypePromote<Plus,T1,T2>::T,DimPol<MIN(nd,ne),nx>::valeur> operator() (const Vec<T1,DimPol<nd,nx>::valeur> &p, const Vec<T2,DimPol<ne,nx>::valeur> &q) {
@@ -41,7 +41,7 @@ struct PolOp<Plus,nd,ne,nx> {
 //--------------Minus Op-----------------
 
 template <int nd, int ne, int nx>
-struct PolOp<Minus,nd,ne,nx> {
+struct PolBinOp<Minus,nd,ne,nx> {
 
     template <class T1, class T2>
     Vec<typename TypePromote<Minus,T1,T2>::T,DimPol<MIN(nd,ne),nx>::valeur> operator() (const Vec<T1,DimPol<nd,nx>::valeur> &p, const Vec<T2,DimPol<ne,nx>::valeur> &q) {
@@ -72,7 +72,7 @@ struct PolOp<Minus,nd,ne,nx> {
 //--------------Multiplication Op---------------------
 
 template <int nd, int ne, int nx>
-struct PolOp<Multiplies,nd,ne,nx> {
+struct PolBinOp<Multiplies,nd,ne,nx> {
 
     template <class T1, class T2>
     Vec<typename TypePromote<Multiplies,T1,T2>::T,DimPol<MIN(nd,ne),nx>::valeur> operator() (const Vec<T1,DimPol<nd,nx>::valeur> &p, const Vec<T2,DimPol<ne,nx>::valeur> &q) {
@@ -98,7 +98,7 @@ struct PolOp<Multiplies,nd,ne,nx> {
 };
 
 template <int nd, int ne>
-struct PolOp<Multiplies,nd,ne,1> {
+struct PolBinOp<Multiplies,nd,ne,1> {
 
     template <class T1, class T2>
     Vec<typename TypePromote<Multiplies,T1,T2>::T,DimPol<MIN(nd,ne),1>::valeur> operator() (const Vec<T1,DimPol<nd,1>::valeur> &p, const Vec<T2,DimPol<ne,1>::valeur> &q) {
@@ -124,7 +124,7 @@ struct PolOp<Multiplies,nd,ne,1> {
 //--------------Division Op----------------------
 
 template <int nd, int ne, int nx>
-struct PolOp<Divides,nd,ne,nx> {
+struct PolBinOp<Divides,nd,ne,nx> {
 
     template <class T1, class T2>
     Vec<typename TypePromote<Divides,T1,T2>::T,DimPol<MIN(nd,ne),nx>::valeur> operator() (const Vec<T1,DimPol<nd,nx>::valeur> &p, const Vec<T2,DimPol<ne,nx>::valeur> &q) {
@@ -137,7 +137,7 @@ struct PolOp<Divides,nd,ne,nx> {
                 invq[i]-=q[PolMultiplies<ne,ne,nx>::table0[i][j]]*invq[PolMultiplies<ne,ne,nx>::table1[i][j]];
             invq[i]/=q[0];
         }
-        PolOp<Multiplies,nd,ne,nx> op;
+        PolBinOp<Multiplies,nd,ne,nx> op;
         return op(p,invq);
     }
 
@@ -154,7 +154,7 @@ struct PolOp<Divides,nd,ne,nx> {
 };
 
 template <int nd, int ne>
-struct PolOp<Divides,nd,ne,1> {
+struct PolBinOp<Divides,nd,ne,1> {
 
     template <class T1, class T2>
     Vec<typename TypePromote<Divides,T1,T2>::T,DimPol<MIN(nd,ne),1>::valeur> operator() (const Vec<T1,DimPol<nd,1>::valeur> &p, const Vec<T2,DimPol<ne,1>::valeur> &q) {
@@ -165,7 +165,7 @@ struct PolOp<Divides,nd,ne,1> {
                 invq[i]-=q[i-j]*invq[j];
             invq[i]/=q[0];
         }
-        PolOp<Multiplies,nd,ne,1> op;
+        PolBinOp<Multiplies,nd,ne,1> op;
         return op(p,invq);
     }
 

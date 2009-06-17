@@ -13,19 +13,19 @@ for op,sop in lst :
     print """
 template <int nd, int ne, int nx, class T1, class T2>
 Pol<MIN(nd,ne),nx,typename TypePromote<"""+op+""",T1,T2>::T> operator"""+sop+""" (const Pol<nd,nx,T1> &p, const Pol<ne,nx,T2> &q) {
-    PolOp<"""+op+""",nd,ne,nx> op;
+    PolBinOp<"""+op+""",nd,ne,nx> op;
     return Pol<MIN(nd,ne),nx,typename TypePromote<"""+op+""",T1,T2>::T>( op(p.coefficients(),q.coefficients()) );
 }
 
 template <int nd, int nx, class T1, class T2>
 Pol<nd,nx,typename TypePromote<"""+op+""",T1,typename IsScalar<T2>::T>::T> operator"""+sop+"""(const Pol<nd,nx,T1> &p, const T2 &q) {
-    PolOp<"""+op+""",nd,nd,nx> op;
+    PolBinOp<"""+op+""",nd,nd,nx> op;
     return Pol<nd,nx,typename TypePromote<"""+op+""",T1,typename IsScalar<T2>::T>::T>(op(p.coefficients(),q));
 }
 
 template <int nd, int nx, class T1, class T2>
 Pol<nd,nx,typename TypePromote<"""+op+""",typename IsScalar<T1>::T,T2>::T> operator"""+sop+"""(const T1 &p, const Pol<nd,nx,T2> &q) {
-    PolOp<"""+op+""",nd,nd,nx> op;
+    PolBinOp<"""+op+""",nd,nd,nx> op;
     return Pol<nd,nx,typename TypePromote<"""+op+""",T1,typename IsScalar<T2>::T>::T>(op(p,q.coefficients()));
 }
 """

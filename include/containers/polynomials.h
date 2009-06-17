@@ -6,7 +6,7 @@
 
 #include "pol_dimension.h"
 #include "pol_tables.h"
-#include "pol_op.h"
+#include "pol_binop.h"
 #include "vec_if_static_size_is_one_and_scalar_if_not.h"
 
 namespace LMT {
@@ -197,13 +197,13 @@ public:
 
     template <class T2>
     void operator*= (const Pol<nd,nx,T2> &P) {
-        PolOp<Multiplies,nd,nd,nx> op;
+        PolBinOp<Multiplies,nd,nd,nx> op;
         coefs = op(coefs,P.coefficients());
     }
 
     template <class T2>
     void operator/= (const Pol<nd,nx,T2> &P) {
-        PolOp<Divides,nd,nd,nx> op;
+        PolBinOp<Divides,nd,nd,nx> op;
         coefs = op(coefs,P.coefficients());
     }
 
