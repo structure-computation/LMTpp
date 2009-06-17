@@ -109,6 +109,74 @@ struct PolOp<Multiplies,nd,ne,1> {
     Vec<typename TypePromote<Multiplies,T1,typename IsScalar<T2>::T>::T,DimPol<ne,1>::valeur> operator() (const T1 &p, const Vec<T2,DimPol<ne,1>::valeur> &q) { return p*q; }
 };
 
+//--------------Division Op----------------------
+
+template <int nd, int ne, int nx>
+struct PolOp<Divides,nd,ne,nx> {
+
+    template <class T>
+    Vec<T,DimPol<ne,nx>::valeur> operator() (const Vec<T,DimPol<ne,nx>::valeur> &p) {
+        Vec<T,DimPol<ne,nx>::valeur> res(T(0));
+        res[0]=T(1)/p[0];
+        for (int i=1;i<DimPol<ne,nx>::valeur;i++) {
+            for (int j=0;j<PolMultiplies<ne,ne,nx>::table0[i].size()-1;j++)
+                res[i]-=p[PolMultiplies<ne,ne,nx>::table0[i][j]]*res[PolMultiplies<ne,ne,nx>::table1[i][j]];
+            res[i]/=p[0];
+        }
+        return res;
+    }
+
+    template <class T1, class T2>
+    Vec<typename TypePromote<Divides,T1,T2>::T,DimPol<MIN(nd,ne),nx>::valeur> operator() (const Vec<T1,DimPol<nd,nx>::valeur> &p, const Vec<T2,DimPol<ne,nx>::valeur> &q) {
+        if (PolMultiplies<ne,ne,nx>::needs_initialization)
+            PolMultiplies<ne,ne,nx>::initialize();
+        PolOp<Multiplies,nd,ne,nx> op;
+        return op(p,operator()(q));
+    }
+
+    template <class T1, class T2>
+    Vec<typename TypePromote<Divides,T1,typename IsScalar<T2>::T>::T,DimPol<nd,nx>::valeur> operator() (const Vec<T1,DimPol<nd,nx>::valeur> &p, const T2 &q) { return p/q; }
+
+    template <class T1, class T2>
+    Vec<typename TypePromote<Divides,T1,typename IsScalar<T2>::T>::T,DimPol<ne,nx>::valeur> operator() (const T1 &p, const Vec<T2,DimPol<ne,nx>::valeur> &q) {
+        if (PolMultiplies<ne,ne,nx>::needs_initialization)
+            PolMultiplies<ne,ne,nx>::initialize();
+        PolOp<Multiplies,nd,ne,nx> op;
+        return op(p,operator()(q));
+    }
+
+};
+
+template <int nd, int ne>
+struct PolOp<Divides,nd,ne,1> {
+
+    template <class T>
+    Vec<T,DimPol<ne,1>::valeur> operator() (const Vec<T,DimPol<ne,1>::valeur> &p) {
+        Vec<T,DimPol<ne,1>::valeur> res(T(0));
+        res[0]=T(1)/p[0];
+        for (int i=1;i<DimPol<ne,1>::valeur;i++) {
+            for (int j=0;j<i;j++)
+                res[i]-=p[i-j]*res[j];
+            res[i]/=p[0];
+        }
+        return res;
+    }
+
+    template <class T1, class T2>
+    Vec<typename TypePromote<Divides,T1,T2>::T,DimPol<MIN(nd,ne),1>::valeur> operator() (const Vec<T1,DimPol<nd,1>::valeur> &p, const Vec<T2,DimPol<ne,1>::valeur> &q) {
+        PolOp<Divides,nd,ne,1> op;
+        return op(p,operator()(q));
+    }
+
+    template <class T1, class T2>
+    Vec<typename TypePromote<Divides,T1,typename IsScalar<T2>::T>::T,DimPol<nd,1>::valeur> operator() (const Vec<T1,DimPol<nd,1>::valeur> &p, const T2 &q) { return p/q; }
+
+    template <class T1, class T2>
+    Vec<typename TypePromote<Divides,T1,typename IsScalar<T2>::T>::T,DimPol<ne,1>::valeur> operator() (const T1 &p, const Vec<T2,DimPol<ne,1>::valeur> &q) {
+        return (operator()(Vec<T1,DimPol<nd,1>::valeur>(p),q));
+    }
+};
+
 
 }
 
