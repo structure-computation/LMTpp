@@ -6,11 +6,6 @@
 
 namespace LMT {
 
-template <int nx, class TT>
-struct ScalarTypeIfOne {typedef Vec<TT,nx> T;};
-template <class TT>
-struct ScalarTypeIfOne<1,TT> {typedef TT T;};
-
 //--------------Powers table-------------
 
 template <int nd, int nx>
