@@ -1,5 +1,6 @@
 namespace LMT {
 
+
 template <int nd, int ne, int nx, class T1, class T2>
 Pol<MIN(nd,ne),nx,typename TypePromote<Plus,T1,T2>::T> operator+ (const Pol<nd,nx,T1> &p, const Pol<ne,nx,T2> &q) {
     if (PolPlus<nd,ne,nx>::needs_initialization)
@@ -19,6 +20,7 @@ Pol<nd,nx,typename TypePromote<Plus,typename IsScalar<T1>::T,T2>::T> operator+(c
     PolPlus<nd,nd,nx> op;
     return Pol<nd,nx,typename TypePromote<Plus,T1,typename IsScalar<T2>::T>::T>(op(p,q.coefficients()));
 }
+
 
 template <int nd, int ne, int nx, class T1, class T2>
 Pol<MIN(nd,ne),nx,typename TypePromote<Minus,T1,T2>::T> operator- (const Pol<nd,nx,T1> &p, const Pol<ne,nx,T2> &q) {
@@ -40,6 +42,7 @@ Pol<nd,nx,typename TypePromote<Minus,typename IsScalar<T1>::T,T2>::T> operator-(
     return Pol<nd,nx,typename TypePromote<Minus,T1,typename IsScalar<T2>::T>::T>(op(p,q.coefficients()));
 }
 
+
 template <int nd, int ne, int nx, class T1, class T2>
 Pol<MIN(nd,ne),nx,typename TypePromote<Multiplies,T1,T2>::T> operator* (const Pol<nd,nx,T1> &p, const Pol<ne,nx,T2> &q) {
     if (PolMultiplies<nd,ne,nx>::needs_initialization)
@@ -60,6 +63,7 @@ Pol<nd,nx,typename TypePromote<Multiplies,typename IsScalar<T1>::T,T2>::T> opera
     return Pol<nd,nx,typename TypePromote<Multiplies,T1,typename IsScalar<T2>::T>::T>(op(p,q.coefficients()));
 }
 
+
 template <int nd, int ne, int nx, class T1, class T2>
 Pol<MIN(nd,ne),nx,typename TypePromote<Divides,T1,T2>::T> operator/ (const Pol<nd,nx,T1> &p, const Pol<ne,nx,T2> &q) {
     if (PolDivides<nd,ne,nx>::needs_initialization)
@@ -78,35 +82,6 @@ template <int nd, int nx, class T1, class T2>
 Pol<nd,nx,typename TypePromote<Divides,typename IsScalar<T1>::T,T2>::T> operator/(const T1 &p, const Pol<nd,nx,T2> &q) {
     PolDivides<nd,nd,nx> op;
     return Pol<nd,nx,typename TypePromote<Divides,T1,typename IsScalar<T2>::T>::T>(op(p,q.coefficients()));
-}
-
-
-template <int nd, int nx, class T1, class T2>
-Pol<nd,nx,typename TypePromote<Pow,T1,T2>::T> pow(const Pol<nd,nx,T1> &p, const T2 &t) {
-    return exp(t*log(p));
-}
-
-template <int nd, int nx, class T>
-Pol<nd,nx,T> pow(const Pol<nd,nx,T> &p, unsigned t) {
-    Pol<nd,nx,T> res = T(1);
-    while (t--)
-        res *= p;
-    return res;
-}
-
-template <int nd, int nx, class T>
-Pol<nd,nx,T> pow(const Pol<nd,nx,T> &p_, int t) {
-    typedef Pol<nd,nx,T> P;
-    P res = P(1);
-    if ( t < 0 ) {
-        P p = T(1) / p_;
-        while (t++)
-            res *= p;
-    } else {
-        while (t--)
-            res *= p_;
-    }
-    return res;
 }
 
 }
