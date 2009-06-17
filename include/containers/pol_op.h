@@ -3,6 +3,9 @@
 
 namespace LMT {
 
+template <class Op, int nd, int ne, int nx>
+struct PolOp;
+
 //--------------Plus Op------------------
 
 template <int nd, int ne, int nx>

@@ -6,9 +6,6 @@
 
 namespace LMT {
 
-template <class Op, int nd, int ne, int nx>
-struct PolOp;
-
 //--------------Powers table-------------
 
 template <int nd, int nx>
