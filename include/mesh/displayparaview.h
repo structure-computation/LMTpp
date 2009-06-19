@@ -22,7 +22,7 @@
 
 namespace LMT {
 
-template<class SubStructuresData,class InternalInterfacesData,class ExternalInterfacesData>
+template<class Carac>
 struct SubStructuredProblem;
 
 /*!
@@ -220,12 +220,12 @@ public:
 
     /// need s.number and s.mesh
     struct AddSstMesh {
-        template<class TS> void operator()(const TS &s,DisplayParaview &dp,double time_step) const {
-            disp( s, dp, Number<TS::has_mesh>(), time_step );
+        template<class TS> void operator()(const TS &s,int i,DisplayParaview &dp,double time_step) const {
+            disp( s, i, dp, Number<TS::has_mesh>(), time_step );
         }
-        template<class TS> void disp(const TS &s,DisplayParaview &dp,Number<0>,double time_step) const {
+        template<class TS> void disp(const TS &s,int i,DisplayParaview &dp,Number<0>,double time_step) const {
         }
-        template<class TS> void disp(const TS &s,DisplayParaview &dp,Number<1>,double time_step) const {
+        template<class TS> void disp(const TS &s,int i,DisplayParaview &dp,Number<1>,double time_step) const {
             DynamicData<double,TS::TM::TElemList::nb_elem_type> number("number");
             s.mesh.elem_list.reg_dyn( &number );
             number.set_values( s.number );
@@ -297,11 +297,11 @@ int display( const MeshAncestor<Carac,nvi_to_subs,skin> &m, std::string pvsm_fil
 
 /**
 */
-template<class SubStructuresData,class InternalInterfacesData,class ExternalInterfacesData>
-int display( const SubStructuredProblem<SubStructuresData,InternalInterfacesData,ExternalInterfacesData> &sst_pb, const std::string pvsm_file = "" ) {
+template<class Carac>
+int display( const SubStructuredProblem<Carac> &sst_pb, const std::string pvsm_file = "" ) {
     DisplayParaview dp;
-    apply( sst_pb.sub_structures, DisplayParaview::AddSstMesh(), dp );
-    apply( sst_pb.interfaces    , DisplayParaview::AddSstMesh(), dp );
+    apply_wi( sst_pb.sub_structures, DisplayParaview::AddSstMesh(), dp, 0 );
+    apply_wi( sst_pb.interfaces    , DisplayParaview::AddSstMesh(), dp, 0 );
     dp.make_pvd_file( "paraview.pvd" );
     
     if ( pvsm_file.size() ) {

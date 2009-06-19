@@ -379,6 +379,7 @@ class LmtppFormulationAncestor
         
     #
     def write_mat( K, F, assemble_mat, assemble_vec, want_nodal, want_skin_elem, want_elem, want_global )
+        #
         num_inds := Vec[Int32]()
         off_inds := Vec[Int32]()
         num_ind  := 0
@@ -1168,6 +1169,7 @@ def write_legacy_lmtpp_code( pb_name, TfList, TeList, dim_function = x => x::nvi
             #
             f->make_matrices( @e )
             list_f.push_back( f )
+            # f->K_dV.display_tex()
 
     for func in funcList
         list_sup_all_in_one.append( func( list_f, rep ) )
@@ -1222,7 +1224,6 @@ def write_legacy_lmtpp_code( pb_name, TfList, TeList, dim_function = x => x::nvi
             for c1 in int_elements
                 write_add_W_chap_F_chap( f, @child_cast( c0 ), @child_cast( c1 ) )
                 
-    
     
     
     
