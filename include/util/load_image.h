@@ -133,6 +133,45 @@ void display_image(const Mat<T,Str,Sto,IO> &mat, const std::string &name_file="t
     system(s2.str().c_str());
 }
 
+/** @see display_image */
+struct EchelleCouleurExemple {
+    Vec<double,3> operator()( double grey ) const {
+        return Vec<double,3>( exp( - grey*grey ), exp( - (grey-0.5)*(grey-0.5) ), exp( - (grey-1)*(grey-1) ) );
+    }
+};
+
+/** display_image( m, EchelleCouleurExemple(), ... ); */
+template<class TM,class Op>
+void display_image(const TM &mat, const Op &grey_to_rgb, const std::string &name_file="toto", bool disp_screen = false, bool auto_grey_level_scaling = false ) {
+    typedef typename TM::T TT;
+    using namespace std;
+    
+    ofstream f( name_file.c_str() );
+        
+    TT mi = 0, ma = 1;
+    if ( auto_grey_level_scaling ) {
+        mi = min( mat );
+        ma = max( mat );
+    }
+        
+    for(unsigned l=0;l<mat.nb_rows();++l) {
+        for(unsigned c=0;c<mat.nb_cols();++c) {
+            Vec<double> rgb = grey_to_rgb( ( mat(l,c) - mi ) / ( ma - mi ) );
+            f.put( (unsigned char)( 255 * rgb[0] ) );
+            f.put( (unsigned char)( 255 * rgb[1] ) );
+            f.put( (unsigned char)( 255 * rgb[2] ) );
+        }
+    }
+        
+    f.close();
+    
+    ostringstream s2;
+    s2 << "convert -depth 8 -size " << mat.nb_cols() << "x" << mat.nb_rows() << " rgb:" << name_file << " " << name_file << ".png; rm " << name_file;
+    if ( disp_screen )
+        s2 << "; display " << name_file << ".png";
+    system(s2.str().c_str());
+}
+
 };
 
 #endif // LMT_load_image_HEADER
