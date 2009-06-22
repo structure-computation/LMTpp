@@ -260,7 +260,7 @@ ExVector cos(const ExVector &a);
 ExVector sgn(const ExVector &a);
 ExVector tan(const ExVector &a);
 ExVector log(const ExVector &a);
-//ExVector exp(const ExVector &a);
+ExVector exp(const ExVector &a);
 ExVector neg(const ExVector &a);
 ExVector asin(const ExVector &a);
 ExVector acos(const ExVector &a);

@@ -136,7 +136,7 @@ void display_image(const Mat<T,Str,Sto,IO> &mat, const std::string &name_file="t
 /** @see display_image */
 struct EchelleCouleurExemple {
     Vec<double,3> operator()( double grey ) const {
-        return Vec<double,3>( exp( - grey*grey ), exp( - (grey-0.5)*(grey-0.5) ), exp( - (grey-1)*(grey-1) ) );
+        return Vec<double,3>( exp( - grey*grey*2 ), exp( - (grey-0.5)*(grey-0.5)*2 ), exp( - (grey-1)*(grey-1) )*2 ) / ( 1 + exp( -1 ) + exp( -2 ) );
     }
 };
 
