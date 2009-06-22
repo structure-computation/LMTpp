@@ -29,7 +29,7 @@ def make_dep_py(env):
         METILPATH = ""
         if env.has_key('METILPATH'): adl = env['METILPATH']
         METILEXEC = "metil"
-        if env.has_key('METILEXEC'): adl = env['METILEXEC']
+        if env.has_key('METILEXEC'): METILEXEC = env['METILEXEC']
         env.Command(corh,i,'export METILPATH="'+METILPATH+':$METILPATH";'+METILEXEC+' %s %s'%(i,corh))
     # .h.py
     for i in filter(lambda x:'.h.py' in x or '.cpp.py' in x, all_py):
