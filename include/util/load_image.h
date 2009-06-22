@@ -98,7 +98,7 @@ int load_image( std::string file, Mat &m, int ceil_size = 1, int border_size = 0
 }
 
 /*!
-    Cette fonction convertit la matrice passée en paramètre en une image. Plus précisément, chaque élément de la matrice est convertit en un nombre entier compris entre 0 et 255 et codant un niveau de gris.
+    Cette fonction convertit la matrice passée en paramètre en une image. Plus précisément, chaque élément de la matrice est convertit en un nombre entier (le nombre original doit être compris entre 0 et 255 et codant un niveau de gris, sauf si on met l'option, auto_grey_level_scaling).
 
 
     \keyword Utilitaires
@@ -108,15 +108,21 @@ int load_image( std::string file, Mat &m, int ceil_size = 1, int border_size = 0
     \keyword Algorithme/Affichage  
 */
 template<class T,class Str,class Sto,class IO>
-void display_image(const Mat<T,Str,Sto,IO> &mat, const std::string &name_file="toto", bool disp_screen = false ) {
+void display_image(const Mat<T,Str,Sto,IO> &mat, const std::string &name_file="toto", bool disp_screen = false, bool auto_grey_level_scaling = false ) {
     typedef typename Mat<T,Str,Sto,IO>::T TT;
     using namespace std;
     
     ofstream f( name_file.c_str() );
         
+    T mi = 0, ma = 1;
+    if ( auto_grey_level_scaling ) {
+        mi = min( mat );
+        ma = max( mat );
+    }
+        
     for(unsigned l=0;l<mat.nb_rows();++l)
         for(unsigned c=0;c<mat.nb_cols();++c)
-            f.put( (unsigned char)mat(l,c) );
+            f.put( (unsigned char)( 255 * ( mat(l,c) - mi ) / ( ma - mi ) ) );
         
     f.close();
     
