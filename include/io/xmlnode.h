@@ -39,13 +39,15 @@ public:
     ///
     XmlNode();
     ///
-    XmlNode(const char *file) { parse_file(file); }
+    XmlNode(const char *file) { doc = NULL; parse_file(file); }
     ///
-    XmlNode(const char *file,ParseFile) { parse_file(file); }
+    XmlNode(const char *file,ParseFile) { doc = NULL; parse_file(file); }
     ///
-    XmlNode(const char *text,ParseText) { parse_text(text); }
+    XmlNode(const char *text,ParseText) { doc = NULL; parse_text(text); }
     ///
     XmlNode(const XmlNode &XmlNode);
+    ///
+    ~XmlNode();
     ///
     XmlNode &operator=(const XmlNode &XmlNode);
     ///

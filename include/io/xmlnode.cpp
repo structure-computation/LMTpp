@@ -47,6 +47,9 @@ struct Xml_doc_with_counter {
     }
 };
 
+XmlNode::~XmlNode() {
+    --(*doc);
+}
 
 XmlNode::XmlNode() {
     doc = new Xml_doc_with_counter;
@@ -79,7 +82,8 @@ void XmlNode::parse_file(const char *file) throw (IoException) {
         throw( IoException( "XML file "+std::string(file)+" is empty." ));
     }
 
-    --(*doc);
+    if ( doc )
+        --(*doc);
     doc = new Xml_doc_with_counter( tmp_doc );
 }
 
@@ -94,7 +98,8 @@ void XmlNode::parse_text(const char *text) throw (IoException) {
         throw( IoException( "XML text "+std::string((const char *)text)+" is empty." ));
     }
 
-    --(*doc);
+    if ( doc )
+        --(*doc);
     doc = new Xml_doc_with_counter( tmp_doc );
 }
 
