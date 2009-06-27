@@ -18,6 +18,15 @@ struct RowOfMatWithTinyBlocks {
     Vec<ST> indices;
     Vec<T> data;
     
+    void clear() {
+        indices.free();
+        data   .free();
+    }
+    
+    void set_data_to_0_wo_rm_ind() {
+        data.set( T( 0 ) );
+    }
+    
     void add( ST col, T v_0_0, T v_0_1, T v_0_2, T v_1_0, T v_1_1, T v_1_2, T v_2_0, T v_2_1, T v_2_2 ) {
         for(unsigned i=0;i<indices.size();++i) {
             if ( indices[i] >= col ) {
@@ -126,6 +135,11 @@ struct MatWithTinyBlocks<T,Sym<3> > {
         static const ST nb_values_for_alignement = s;
         T data[ s ];
         
+        void clear() {
+            for(unsigned i=0;i<s;++i)
+                data[i] = 0;
+        }
+        
         DB() {
             for(int i=0;i<s;++i)
                 data[i] = 0;
@@ -156,7 +170,9 @@ struct MatWithTinyBlocks<T,Sym<3> > {
     ST nb_rows() const { return nb_rows_; }
     ST nb_cols() const { return nb_cols_; }
 
-    void resize( ST r, ST c ) {
+    void resize( ST r, ST c = 0 ) {
+        if ( not c )
+            c = r;
         assert( r % n == 0 );
         assert( c % n == 0 );
         nb_rows_ = r;
@@ -167,6 +183,20 @@ struct MatWithTinyBlocks<T,Sym<3> > {
 
     MatWithTinyBlocks( ST r = 0, ST c = 0 ) {
         resize( r, c );
+    }
+    
+    void clear() {
+        for(unsigned i=0;i<rows.size();++i) {
+            rows [i].clear();
+            diags[i].clear();
+        }
+    }
+    
+    void set_data_to_0_wo_rm_ind() {
+        for(unsigned i=0;i<rows.size();++i) {
+            rows [i].set_data_to_0_wo_rm_ind();
+            diags[i].clear();
+        }
     }
     
     void reserve_lines( const Vec<ST> &nb_tiny_blocks_per_line ) {
@@ -384,7 +414,8 @@ struct MatWithTinyBlocks<T,Sym<3> > {
     
     void chol( bool want_symbolic_fact = true ) {
         // symbolic factorisation -> TODO : optimize !
-        symbolic_chol();
+        if ( want_symbolic_fact )
+            symbolic_chol();
         
         // numeric factorisation
         chol_incomp();
