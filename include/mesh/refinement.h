@@ -130,17 +130,51 @@ bool refinement(TM &m,Op &op) {
 /**
     Peut être utilisé pour couper un maillage avec un level-set
 */
-template<class PhiDM>
+template<class PhiExtract>
 struct LevelSetRefinement {
-    template<class TE> typename TE::T operator()( const TE &e ) const {
+    LevelSetRefinement( const PhiExtract &p ) : ed( p ) {}
+    template<class TE> typename TE::T operator()( TE &e ) const {
         typename TE::T d0 = ed( *e.node(0) );
         typename TE::T d1 = ed( *e.node(1) );
         if ( d0 * d1 >= 0 )
             return 0;
-        return d0 / ( d0 - d1 ) * 0.999999;
+        typename TE::T o = d0 / ( d0 - d1 );
+        if ( o < 0.1 ) {
+            e.node( 0 )->pos = e.node( 0 )->pos + ( e.node( 1 )->pos - e.node( 0 )->pos ) * o;
+            return 0;
+        }
+        if ( o > 0.9 ) {
+            e.node( 1 )->pos = e.node( 1 )->pos + ( e.node( 0 )->pos - e.node( 1 )->pos ) * ( 1 - o );
+            return 0;
+        }
+        return o;
     }  
-    ExtractDM<PhiDM> ed;
+    const PhiExtract &ed;
 };
+
+template<class PhiExtract>
+struct LevelSetRemoveNeg {
+    LevelSetRemoveNeg( const PhiExtract &p ) : ed( p ) {}
+    template<class TE> typename TE::T operator()( const TE &e ) const {
+        typename TE::T d = 0;
+        for(unsigned i=0;i<TE::nb_nodes;++i)
+            d += ed( *e.node(i) );
+        d /= TE::nb_nodes;
+        return d <= 0;
+    }  
+    const PhiExtract &ed;
+};
+
+/**
+
+*/
+template<class TM,class PhiExtract>
+bool level_set_cut( TM &m, const PhiExtract &p ) {
+    LevelSetRefinement<PhiExtract> lr( p );
+    refinement( m, lr );
+    LevelSetRemoveNeg<PhiExtract> ln( p );
+    m.remove_elements_if( ln );
+}
 
 /*!
     opérateur créé pour la fonction \a refinement_if_length_sup .
