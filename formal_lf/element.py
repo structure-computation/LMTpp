@@ -119,23 +119,75 @@ class Element:
           res += w * expr.subs(EM(mp))
       return res
 
-    def jacobian(self):
-      self.calculate_jacobian()
+    def Base_n(self,depp):
+        coord = self.pos() + depp
+        coord_res = []
+        # first case : dim==nb_var_inter -> no soucy
+        if self.nb_var_inter==self.dim:
+            for vi in self.var_inter:
+                cr = ExVector(self.dim)
+                for i in range(self.dim): cr[i] = coord[i].diff(vi)
+                # orthogonalization
+                for c in coord_res:
+                    cr -= c * dot( c, cr )
+                coord_res.append( cr / norm(cr) )
+                if len(coord_res)==2:
+                    break
+            normale = vect_prod(coord_res[0],coord_res[1]) 
+            normale /= norm(normale)
+            coord_res.append(normale)            
+            T = ExMatrix(self.dim,self.dim)
+            for i in range(self.dim):
+              for j in range(self.dim):
+                T[i,j]=coord_res[i][j]
+            return T
+
+        # Second case : dim>nb_var_inter 
+        for vi in self.var_inter:
+            cr = ExVector(self.dim)
+            for i in range(self.dim): cr[i] = coord[i].diff(vi)
+            # orthogonalization
+            for c in coord_res:
+                cr -= c * dot( c, cr )
+            coord_res.append( cr / norm(cr) )
+        print coord_res
+        normale = vect_prod(coord_res[0],coord_res[1])
+        normale /= norm(normale)
+        coord_res.append(normale)
+
+        T = ExMatrix(self.dim,self.dim)
+        for i in range(self.dim):
+          for j in range(self.dim):
+            T[i,j]=coord_res[i][j]
+
+        return T
+
+    def rotation_matrix(self,dep):
+        BASE_0 = self.Base_n(0)
+        BASE_n = self.Base_n(dep)
+        return mul(BASE_0,BASE_n.transpose())
+
+    def jacobian(self,dep = False):
+      self.calculate_jacobian(dep)
       return self.jac[0]
 
-    def inverse_jacobian(self):
-      self.calculate_jacobian()
+    def inverse_jacobian(self,dep = False):
+      self.calculate_jacobian(dep)
       return self.inv_jac
 
-    def det_jacobian(self):
-      self.calculate_jacobian()
+    def det_jacobian(self,dep = False ):
+      self.calculate_jacobian(dep)
       return self.det_jac
 
-    def calculate_jacobian(self):
+    def calculate_jacobian(self, dep=False):
       if self.jacobian_is_calculated: return
       self.jacobian_is_calculated = True
       # first case : dim==nb_var_inter -> no soucy
-      coord = self.pos()
+
+      if dep == 0:
+          coord = self.pos()
+      else:
+          coord = mul(self.rotation_matrix(dep),self.pos())
 
       res,coord_res = ExMatrix(self.nb_var_inter,self.nb_var_inter), []
       if self.nb_var_inter==self.dim:
@@ -177,9 +229,9 @@ class Element:
       self.inv_jac = res.inverse()
       return
 
-    def grad(self,v):
+    def grad(self,v, dep=False):
       """ """
-      self.calculate_jacobian()
+      self.calculate_jacobian(dep)
       if isinstance(v,ExVector):
         res = ExMatrix(v.size(),self.nb_var_inter)
         for k in range(v.size()):
@@ -195,9 +247,9 @@ class Element:
         res[j] = tmp
       return res
 
-    def grad_sym(self,v):
+    def grad_sym(self,v, dep=False):
       """ """      
-      m = self.grad(v)
+      m = self.grad(v,dep)
       if isinstance(m,ExVector):
           return m
       n = max( m.nb_rows(), m.nb_cols() )
@@ -221,7 +273,7 @@ class Element:
 #           else: nm[i,j] = (m[i,j]+m[j,i])*0.5
       return nm
           
-    def grad_sym_col(self,v): return mat_sym_to_vec_col(self.grad_sym(v))
+    def grad_sym_col(self,v, dep=False): return mat_sym_to_vec_col(self.grad_sym(v,dep))
     
     def green_lagrange(self,expr):
       """ """
@@ -377,9 +429,9 @@ class Element:
       for var,name_var in new_var: del globals()[name_var]
       for n,i in old_glob.items(): globals()[n] = i
 
-    def normal(self):
+    def normal(self,dep=False):
       assert self.dim==self.nb_var_inter+1
-      self.calculate_jacobian()
+      self.calculate_jacobian(dep)
       if self.dim==2:
         return vector( [ -self.jac[1][0][1], self.jac[1][0][0] ] )
       if self.dim==3:

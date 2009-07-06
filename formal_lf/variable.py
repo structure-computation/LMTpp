@@ -147,6 +147,31 @@ class Variable:
         for i in range(md):
             self.expr_on_node.append( self.symbols[i][3][0] )
 
+    #to create the old value of the unknown #################################################
+    if self.unknown:
+      res =  []
+      for t,n,n2,v in self.symbols:
+          res.append( (t,n,0,n2,v) )
+      res.sort()
+      indices,offsets = [], []
+      cpt_indice,cpt_offset = -1,0
+      old_ne = (0,-1)
+      old_unk_subs = {}
+      for n,ne,num_var,ne2,s in res:
+        if (n,ne)!=old_ne:
+          cpt_indice += 1
+          cpt_offset = 0
+        else:
+          cpt_offset += 1
+        indices.append( cpt_indice )
+        offsets.append( cpt_offset )
+        old_ne = (n,ne)
+
+        for i in range(0,len(s)):
+          old_unk_subs[ s[i] ] = symbol( 'vectors[%i][indices[%i]+%i]' % (i,cpt_indice,cpt_offset) )
+      self.old_expr = self.expr.subs(EM(old_unk_subs))
+    #################################################
+
     # test symbols
     self.test_symbols = []
     if len(self.nb_dim) == 2:
