@@ -36,6 +36,20 @@ std::string to_string() {
     return os.str();
 }
 
+inline void rm_commas( std::string &str ) {
+    for(unsigned i=0;i<str.size();++i)
+        if ( str[i] == ',' )
+            str[i] = ' ';
+}
+
+inline std::string read_until_sp( const std::string &str, int off ) {
+    std::string res; res.reserve( str.size() - off );
+    while( off<str.size() and str[off]!=' ' )
+        res += str[off++];
+    return res;
+}
+
+
 };
 
 #endif // LMT_string_help_HEADER
