@@ -77,11 +77,8 @@ for nb_par in [1,2,3]:
 
 
     # the code     
-    print 'template<'+join(lst_tpar,',')+',int static_size_> struct VecSupportSIMD<Vec<'+VECOP+',static_size_,int> > { static const unsigned res = OpSupportSIMD<OP>::res && '+join(lstcond,' && ')+'; };'
+    print """template<"""+join(lst_tpar,',')+""",int static_size_> struct VecSupportSIMD<Vec<"""+VECOP+""",static_size_,int> > { static const unsigned res = OpSupportSIMD<OP>::res && """+join(lstcond,' && ')+"""; };
 
-    size = 'v0.val.size()'
-
-    print """
 /// range
 template<""" + join(lst_tpar,',') + """,int static_size_>
 class Vec<VecOp<"""+join(lst_par,',')+""">,static_size_,int> {
@@ -110,7 +107,7 @@ public:
     T0 get(unsigned i) const { return op("""+J('v%(i)i.val[i]')+"""); }
     template<unsigned ne> SimdVec<T0,ne> simd(unsigned i,const Number<ne> &NE) const { return op("""+J('v%(i)i.val.simd(i,NE)')+"""); }
     
-    unsigned size() const { return """+size+"""; }
+    unsigned size() const { return v0.val.size(); }
 """+SELFOPC+"""
 """+GETRANGE+"""
 """+'    operator bool() const { return CastBool<OP>::cast_bool(*this,v0.val.size(),v1.val.size()); }'*(nb_par==2)+"""
