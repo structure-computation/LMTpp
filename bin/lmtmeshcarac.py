@@ -140,6 +140,8 @@ class MeshCarac:
             res += '        void dm_data_set_field( const std::string field_name, const Vec<Tpos,4> &value ) { assert(0); /*TODO*/ }\n'
             res += '        void dm_data_set_field( const std::string field_name, const Vec<Tpos,5> &value ) { assert(0); /*TODO*/ }\n'
             res += '        void dm_data_set_field( const std::string field_name, const Vec<Tpos,6> &value ) { assert(0); /*TODO*/ }\n'
+	    for i in range(7):
+	        res += '        void dm_data_set_field( const std::string field_name, const Mat<double, LMT::Gen<'+str(i)+', '+str(i)+'>, LMT::Dense<LMT::Col> > &value) { assert(0); /*TODO*/ }\n'
             res += '        template<class __G__> __G__ dm_data_get_field( const std::string field_name, StructForType<__G__> ) const { assert( 0 /*TODO*/ ); return __G__( 0.0 );  }\n'
             res += ' '*sup_spaces + '    };\n'
             return res
