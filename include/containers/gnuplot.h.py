@@ -110,11 +110,14 @@ print """
         void operator() (const TX &x, unsigned i, const Vec<TY,sy,OY> &y, const Vec<TZ,sz,OZ> &z, FILE *tube) const { fprintf(tube,"%10.6f %10.6f %10.6f\\n",double(x),double(y[i]),double(z[i]) ); }
     };
     /*!
+        Cette fonction affiche un champ de vecteurs (vx,vy) discrétisé, défini aux points (x,y)
+
         mat doit etre une matrice de 4 colonnes au moins tel que :
-            * la premiere colonne soit les x
-            * la deuxieme colonne soit les y
-            * la troisieme soit vx la premiere composante du vecteur
-            * la quatrieme soit vy
+            * la premiere colonne contient les x
+            * la deuxieme colonne contient les y
+            * la troisieme contient vx la premiere composante du vecteur
+            * la quatrieme contient vy
+
         \\friend pasquier@lmt.ens-cachan.fr
         \\friend witz@lmt.ens-cachan.fr
     */
