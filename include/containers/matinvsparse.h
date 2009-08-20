@@ -73,7 +73,7 @@ template<class T,class TS> void chol_factorize( Mat<T,TS,SparseLine<> > &m ) {
                 if ( not HashCH<NN>::cor( hash[col], hash[ line ] ) ) continue;
 
                 T v = dot_chol_factorize( m.data[col], m.data[line] );
-                if ( boolean( v ) ) {
+                if ( boolean_( v ) ) {
                     unsigned os = m.data[line].indices.size();
                     m.data[line].indices.resize( os+1 );
                     m.data[line].data.resize( os+1 );
@@ -111,7 +111,7 @@ template<class T,class TS> void chol_factorize( Mat<T,TS,SparseLine<> > &m ) {
 //                 if ( not HashCH<NN>::cor( hash[col], hash[ line ] ) ) continue;
 // 
 //                 T v = dot_chol_factorize( m.data[col], m.data[line] );
-//                 if ( boolean( v ) ) {
+//                 if ( boolean_( v ) ) {
 //                     unsigned os = m.data[line].indices.size();
 //                     m.data[line].indices.resize( os+1 );
 //                     m.data[line].data.resize( os+1 );
@@ -162,7 +162,7 @@ template<class T> void incomplete_chol_factorize( Mat<T,Sym<>,SparseLine<> > &m 
             unsigned ie = min( m.data[line].indices[ind+1], col+2 );
             while ( ++col < ie ) {
                 T v = dot_chol_factorize( m.data[col], m.data[line] );
-                if ( boolean( v ) ) {
+                if ( boolean_( v ) ) {
                     unsigned os = m.data[line].indices.size();
                     m.data[line].indices.resize( os+1 );
                     m.data[line].data.resize( os+1 );

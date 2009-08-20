@@ -1,6 +1,9 @@
 #ifndef POLYNOMIALS_H
 #define POLYNOMIALS_H
 
+#include <complex>
+using namespace std;
+
 #include <containers/vec.h>
 #include <containers/algo.h>
 
@@ -12,20 +15,40 @@
 
 namespace LMT {
 
+/*!
+    provisoire.
+    retourne les racines de l'éqation x^2+a_1 x + a_2 = 0 où a1 et a2 sont des nombres complexes.
+*/
+template <class T>
+Vec<complex<T> > root_of_second_degree_equation(complex<T> a1, complex<T> a2) {
+    Vec<complex<T> > res;
+    complex<T> delta;
+
+    delta = a1*a1-complex<T>(4,0)*a2;
+    if (std::abs(delta) < 16*std::numeric_limits<T>::epsilon()) {
+        res.push_back(-0.5*a1);
+        return res;
+    }
+    delta = sqrt(delta);
+    res.push_back(-0.5*(a1-delta));
+    res.push_back(-0.5*(a1+delta));
+    return res;
+}
+
 /**
   @author Gouttebroze
 */
 
 /*!
-\\generic_comment Pol 
-    \\brief polynômes à une ou plusieurs indéterminées et de degré quelconque bornés
+\generic_comment Pol 
+    \brief polynômes à une ou plusieurs indéterminées et de degré quelconque bornés
 
      = Remarque générale
         Pour pouvoir manipuler des polynômes (mono et multivariables), il faut utiliser le fichier polynomials.h
 
-        \\relates PolApprox
-        \\relates RatApprox
-        \\relates Rat
+        \relates PolApprox
+        \relates RatApprox
+        \relates Rat
 
     = Parametres templates pour les polynômes 
         Il y a trois parametres templates pour définir un polynome : Pol<nd,nx,T>
@@ -52,56 +75,56 @@ namespace LMT {
 
     = Réponses :
 
-        * \\anchor 1 Pour créer un polynome constant égal a 4 :
-            \\code C/C++
+        * \anchor 1 Pour créer un polynome constant égal a 4 :
+            \code C/C++
                 Pol<nd,nx,T> P(4);
         
-        * \\anchor 2 Pour afficher le polynome P :
-            \\code C/C++
+        * \anchor 2 Pour afficher le polynome P :
+            \code C/C++
                 cout << P << endl;
                 OU
                 PRINT(P);
-        * \\anchor 3 Pour récupérer les coefficients du polynome P :
-            \\code C/C++
+        * \anchor 3 Pour récupérer les coefficients du polynome P :
+            \code C/C++
                 Vec<T> V=P.coefficients();
-        * \\anchor 4 Pour récupérer les puissances du polynome P :
-            \\code C/C++
+        * \anchor 4 Pour récupérer les puissances du polynome P :
+            \code C/C++
                 Vec<Vec<unsigned,nx> > V=P.powers();
-        * \\anchor 5 Pour évaluer le polynome de 3 variables P au point (4,-2,1) :
-            \\code C/C++
+        * \anchor 5 Pour évaluer le polynome de 3 variables P au point (4,-2,1) :
+            \code C/C++
                 Pol<nd,3,T> P = ... blabla ...
                 Vec<T,3> V(4,-2,1);
                 Vec<T> W=P(V);
-        * \\anchor 6 Pour évaluer le polynome monovariable P au point 4 :
-            \\code C/C++
+        * \anchor 6 Pour évaluer le polynome monovariable P au point 4 :
+            \code C/C++
                 Pol<nd,1,T> P = ... blabla ...
                 T s=P(V);
-        * \\anchor 7 Pour obtenir les dérivées du polynome multivariables P :
-            \\code C/C++
+        * \anchor 7 Pour obtenir les dérivées du polynome multivariables P :
+            \code C/C++
                 Vec<Pol<nd-1,nx,T>,nx> V=P.derivative();
-        * \\anchor 8 Pour obtenir la dérivée du polynome monovariable P :
-            \\code C/C++
+        * \anchor 8 Pour obtenir la dérivée du polynome monovariable P :
+            \code C/C++
                 Pol<nd-1,nx,T> Q=P.derivative();
-        * \\anchor 9 Pour obtenir la primitive du polynome monovariable P qui s'annule en a:
-            \\code C/C++
+        * \anchor 9 Pour obtenir la primitive du polynome monovariable P qui s'annule en a:
+            \code C/C++
                 T a; Pol<nd-1,nx,T> Q=P.integral(a);
-        * \\anchor 10 Pour effectuer des opérations algébriques sur des polynomes P et Q :
-            \\code C/C++
+        * \anchor 10 Pour effectuer des opérations algébriques sur des polynomes P et Q :
+            \code C/C++
                 Pol<nd,nx,T> R=P+Q;
                 Pol<nd,nx,T> R=P-Q;
                 Pol<nd,nx,T> R=P*Q;
                 Pol<nd,nx,T> R=P/Q;
-        * \\anchor 11 Pour obtenir les racines du polynome monovariable P :
-            \\code C/C++
-                Vec<T> V=P.roots(); 
+        * \anchor 11 Pour obtenir les racines du polynome monovariable P :
+            \code C/C++
+                Vec<complex<T> > V=P.roots(); 
 
-    \\friend camille.gouttebroze@lmt.ens-cachan.fr
-    \\friend raphael.pasquier@lmt.ens-cachan.fr
-    \\friend hugo.leclerc@lmt.ens-cachan.fr
+    \friend camille.gouttebroze@lmt.ens-cachan.fr
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
 
-    \\keyword Mathématiques/Objet
+    \keyword Mathématiques/Objet
 
-    \\author Camille Gouttebroze
+    \author Camille Gouttebroze
 */
 
 template <int nd=4,int nx=1,class T=double>
@@ -306,11 +329,11 @@ public:
         assert(nx==1);
         Vec<T> r=coefs;
         T norm=norm_inf(r);
-        while (r.size()>1 and abs(r[r.size()-1])/norm<std::numeric_limits<T>::epsilon())
+        while (r.size()>1 and abs(r[r.size()-1])/norm<16*std::numeric_limits<T>::epsilon())
             r.pop_back();
         Vec<T> d=D.coefficients();
         norm=norm_inf(d);
-        while (d.size()>1 and abs(d[d.size()-1])/norm<std::numeric_limits<T>::epsilon())
+        while (d.size()>1 and abs(d[d.size()-1])/norm<16*std::numeric_limits<T>::epsilon())
             d.pop_back();
             if (d.size()<=r.size()) {
             for (unsigned i=1;i<=coefs.size()-d.size()+1;i++) {
@@ -331,7 +354,7 @@ public:
         }
         T c=min(a,b);
         T e=max(a,b);
-        while ((e-c)/(abs(e)+abs(c))>5*dim*std::numeric_limits<T>::epsilon()) {
+        while ((e-c)/(abs(e)+abs(c))>16*dim*std::numeric_limits<T>::epsilon()) {
             T d=(c+e)/2;
             if (sgn(operator()(d))==sgn(operator()(c)))
                 c=d;
@@ -347,7 +370,7 @@ public:
         T b=d-1;
         Derivative Q=derivative();
         int compteur=0;
-        while (abs(a-b)/max(abs(a),abs(b))>10*dim*std::numeric_limits<T>::epsilon()&&compteur<imax) {
+        while (abs(a-b)/max(abs(a),abs(b))>16*dim*std::numeric_limits<T>::epsilon()&&compteur<imax) {
             b=a;
             a-=operator()(a)/Q(a);
             compteur++;
@@ -364,7 +387,7 @@ public:
         Derivative Q=derivative();
         typename Derivative::Derivative R=Q.derivative();
         int compteur=0;
-        while (abs(a-b)/max(abs(a),abs(b))>10*dim*std::numeric_limits<T>::epsilon()&&compteur<imax) {
+        while (abs(a-b)/max(abs(a),abs(b))>16*dim*std::numeric_limits<T>::epsilon()&&compteur<imax) {
             b=a;
             T pa=operator()(a);
             T qa=Q(a);
@@ -376,7 +399,110 @@ public:
         return a;
     }
 
-    Vec<T> roots() const{
+    /// problème si T est du type complex<X> ... à régler. On fera l'hypothèse que T est soit entier, soit float, double, long double.
+    Vec<complex<T> > roots() const{
+        assert(nx==1);
+        Vec<complex<T> > res;
+        int taille=dim;
+        for (int i=dim-1;std::abs(coefs[i])<16*std::numeric_limits<T>::epsilon();i--)
+            taille--;
+        if (taille==2)
+            res.push_back(-coefs[0]/coefs[1]);
+        else if (taille==3) {/// degré 2
+            T tmp = (T)1 / coefs[2];
+            T b = coefs[1]*tmp;
+            T c = coefs[0]*tmp;
+            T delta = b*b-4*c;
+            if (std::abs(delta)<16*std::numeric_limits<T>::epsilon()) {
+                res.push_back(-0.5*b);
+                return res;
+            }
+            if (delta>0) {
+                delta = sqrt(delta);
+                res.push_back(-0.5*(b+delta));
+                res.push_back(-0.5*(b-delta));
+            } else {
+                delta = sqrt(-delta);
+                res.push_back(complex<T>(-0.5*b,0.5*delta));
+                res.push_back(complex<T>(-0.5*b,-0.5*delta));
+            }
+        }
+        else if (taille==4) { /// degré 3
+            /// méthode de Cardan. Source : http://fr.wikipedia.org/wiki/Méthode_de_Cardan
+            T tmp = (T)1 / coefs[3];
+            T b = coefs[2]*tmp;
+            T c = coefs[1]*tmp;
+            T d = coefs[0]*tmp;
+            T del = -b/(T)3;
+            T p = c - b*b/(T)3;;
+            T q = b*(2*b*b-9*c)/(T)27 + d;
+            T delta = 4/(T)27*p*p*p+q*q;
+            //cout << "delta = " << delta << endl;
+            if (std::abs(delta)<16*std::numeric_limits<T>::epsilon()) {
+                /// deux racines réelles
+                T tmp2 = 3*q/p;
+                res.push_back(tmp2+del);
+                tmp2 = -0.5*tmp2+del;
+                res.push_back(tmp2);
+                res.push_back(tmp2);
+                return res;
+            }
+            T ji = 0.5*sqrt(3);
+            if (delta>=0) {
+                /// une racine réelle et deux racines complexes conjuguées
+                delta = sqrt(delta);
+                T u=0.5*(-q+delta);
+                T v=0.5*(-q-delta);
+                u = sgn(u)*std::pow(std::abs(u),1/T(3));
+                v = sgn(v)*std::pow(std::abs(v),1/T(3));
+                res.push_back(u+v+del);
+                res.push_back(complex<T>(-0.5*(u+v)+del,ji*(u-v)));
+                res.push_back(complex<T>(-0.5*(u+v)+del,ji*(v-u)));
+            } else {
+                /// trois racines réelles
+                complex<T> u(std::pow(complex<T>(-0.5*q,0.5*sqrt(-delta)),1/(T)3));
+                complex<T> j(-0.5,ji);
+                res.push_back(2*u.real()+del);
+                u *= j;
+                res.push_back(2*u.real()+del);
+                u *= j;
+                res.push_back(2*u.real()+del);
+                /// pas optimisé ...
+            }
+        }
+        else if (taille==5) { /// degré 4
+            /// méthode de Ferrari. Source : http://fr.wikipedia.org/wiki/Méthode_de_Ferrari
+            /// pas de lien avec la speakrine
+            T tmp = 1/ (T) coefs[4];
+            T b = coefs[3]*tmp;
+            T c = coefs[2]*tmp;
+            T d = coefs[1]*tmp;
+            T e = coefs[0]*tmp;
+            T del = 0.25*b;
+            T b2 = b*b;
+            T b3 = b*b*b;
+            T p = -3*b2/(T)8+c;
+            T q = b3/(T)8 - 0.5*b*c + d;
+            T r = -3*b2*b2/(T)256 + c*del*del - del*d + e;
+            Pol<3,1,T> disc(Vec<T,4>(4*r*p-q*q,-8*r,-4*p,8));
+            Vec<T> r_disc = disc.real_roots(); /// on a au moins une solution
+            complex<T> a0 = -sqrt(complex<T>(2*r_disc[0]-p,0));
+            complex<T> b0 = -0.5*q/a0;
+            Vec<complex<T> > z1 = root_of_second_degree_equation(a0,b0+r_disc[0]);
+            Vec<complex<T> > z2 = root_of_second_degree_equation(-a0,r_disc[0]-b0);
+            for(int j=0;j<z1.size();++j)
+                res.push_back(z1[j]-del);
+            for(int j=0;j<z2.size();++j)
+                res.push_back(z2[j]-del);
+            /// pas optimisé ...
+
+        } else if (taille>5) {
+            assert(0);/** TODO */
+        }
+        return res;
+    }
+
+    Vec<T> real_roots() const{
         assert(nx==1);
         Vec<T> res;
         int taille=dim;
@@ -466,7 +592,7 @@ public:
                 Vec<T> aux=coefs;
                 while (aux[0]==T(0))
                     aux.erase_elem_nb(0);
-                Vec<T> r=Pol<nd,nx,T>(aux).roots();
+                Vec<T> r=Pol<nd,nx,T>(aux).real_roots();
                 while (r.size()>0 and r[0]<0) {
                     res.push_back(r[0]);
                     r.erase_elem_nb(0);
@@ -478,7 +604,7 @@ public:
         return res;
     }
 
-private :
+ private :
 
     Vec<T,DimPol<nd,nx>::valeur> coefs;
 
