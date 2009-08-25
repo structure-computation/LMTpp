@@ -35,6 +35,58 @@ Vec<complex<T> > root_of_second_degree_equation(complex<T> a1, complex<T> a2) {
     return res;
 }
 
+/// code extrait de numerical recipes
+template <class T>
+complex<T> laguerre(Vec< complex<T> >& a, int m, complex<T> x0, bool& rootFound, int maxIter = 100) {
+    typedef complex<T> C;
+    int iter,j;
+    T abx,abp,abm,err;
+    C dx,x1,b,d,f,g,h,sq,gp,gm,g2;
+    static T frac[9] = {0.0,0.5,0.25,0.75,0.13,0.38,0.62,0.88,1.0};
+    static T EPSS = 1.0e-7;
+
+    rootFound = false;
+    for (iter=1;iter<=maxIter;iter++) {
+        b=a[m];
+        err=abs(b);
+        d = f = C(0,0);
+        abx=abs(x0);
+        for (j=m-1;j>=0;j--) {
+            f = x0*f+d; //f=Cadd(Cmul(*x,f),d);
+            d = x0*d+b;//d=Cadd(Cmul(*x,d),b);
+            b = x0*b+a[j];//b=Cadd(Cmul(*x,b),a[j]);
+            err=abs(b)+abx*err;
+        }
+        err *= EPSS;
+        if (abs(b) <= err) { rootFound = true; return x0; }
+        g  = d/b;//g=Cdiv(d,b);
+        g2 =g*g;//g2=Cmul(g,g);
+        h = g2-C(2,0)*f/b;  //h=Csub(g2,RCmul(2.0,Cdiv(f,b)));
+        sq = sqrt(C(m-1,0)*(C(m,0)*h-g2)); //sq=Csqrt(RCmul((float) (m-1),Csub(RCmul((float) m,h),g2)));
+        gp = g+sq;//gp=Cadd(g,sq);
+        gm = g-sq;//gm=Csub(g,sq);
+        abp = abs(gp);//abp=Cabs(gp);
+        abm = abs(gm);//abm=Cabs(gm);
+        if (abp < abm) 
+            gp=gm;
+        //if (max(abp,abm) > (T)0)
+        if (max(abp,abm) > (T)1e-6)
+            dx = C(m,0)/gp;
+        else
+            dx = C(exp(log(1+abx)),0) * C(cos(iter),sin(iter));
+        //dx=((FMAX(abp,abm) > 0.0 ? Cdiv(Complexr((float) m,0.0),gp) : RCmul(exp(log(1+abx)),Complexr(cos((float)iter),sin((float)iter)))));
+        x1 = x0-dx;//x1=Csub(*x,dx);
+        if (x0 == x1) { rootFound = true; return x1; }//if (x->r == x1.r && x->i == x1.i) return;
+        //cout << " x1 = " << x1 << endl;
+        if (iter % 10)
+            x0 = x1;
+        else 
+            x0 = x0 - C(frac[iter%9],0)*dx;//*x=Csub(*x,RCmul(frac[iter/MT],dx));
+    }
+    cerr << "too many iterations in laguerre" << endl;
+}
+
+
 /**
   @author Gouttebroze
 */
@@ -135,6 +187,8 @@ public:
     static const int degree=nd;
     static const int variables_number=nx;
     static const int dim=DimPol<nd,nx>::valeur;
+    
+    typedef complex<T> C;
       
     Pol () {}
 
@@ -157,11 +211,16 @@ public:
     }
 
     template <class T2, int nd2>
-    Pol(const Vec<T2,nd2> &V) {
+    void init(const Vec<T2,nd2> &V) {
         for(unsigned i=0; i<min(V.size(),dim); ++i)
             coefs[i] = T(V[i]);
         for(unsigned i=V.size(); i<dim; ++i)
             coefs[i] = T(0);
+    }
+
+    template <class T2, int nd2>
+    Pol(const Vec<T2,nd2> &V) {
+        init(V);
     }
 
     template <int nd2, class T2>
@@ -364,30 +423,32 @@ public:
         return (c+e)/2;
     }
 
-    T newton(const T &d, bool c, int imax = 100) const{
+    T newton(const T &d, bool& notFound, int imax = 100) const{
         assert(nx==1);
         T a=d;
         T b=d-1;
         Derivative Q=derivative();
         int compteur=0;
-        while (abs(a-b)/max(abs(a),abs(b))>16*dim*std::numeric_limits<T>::epsilon()&&compteur<imax) {
+        while (abs(a-b)/max(abs(a),abs(b))>16*dim*std::numeric_limits<T>::epsilon() && compteur<imax) {
             b=a;
             a-=operator()(a)/Q(a);
             compteur++;
         }
         if (compteur==imax)
-            c=1;
+            notFound = true;
+        else
+            notFound = false;
         return a;
     }
 
-    T householder(const T &d, bool c, int imax = 100) const {
+    T householder(const T &d, bool& c, int imax = 100) const {
         assert(nx==1);
         T a=d;
         T b=d-1;
         Derivative Q=derivative();
         typename Derivative::Derivative R=Q.derivative();
         int compteur=0;
-        while (abs(a-b)/max(abs(a),abs(b))>16*dim*std::numeric_limits<T>::epsilon()&&compteur<imax) {
+        while (abs(a-b)/max(abs(a),abs(b))>16*dim*std::numeric_limits<T>::epsilon() && compteur<imax) {
             b=a;
             T pa=operator()(a);
             T qa=Q(a);
@@ -395,14 +456,61 @@ public:
             compteur++;
         }
         if (compteur==imax)
-            c=1;
+            c = true;
         return a;
     }
 
-    /// problème si T est du type complex<X> ... à régler. On fera l'hypothèse que T est soit entier, soit float, double, long double.
-    Vec<complex<T> > roots() const{
+    /// source : http://fr.wikipedia.org/wiki/Racine_d'un_polynôme
+    /// il faut que x0, x1 et x2 soient différents 2 à 2.
+    T muller_real( T x0, T x1, T x2, bool& rootFound, int imax = 100) const {
         assert(nx==1);
-        Vec<complex<T> > res;
+        T a,b,r,d,f01,f12,y0,y1,c;
+        int i=0;
+        y0 = (*this)(x0);
+        y1 = (*this)(x1);
+       rootFound = false;
+        
+       while (i<imax) {
+            c   = (*this)(x2);
+            if (abs(c) < 16*dim*std::numeric_limits<T>::epsilon()) {
+                rootFound = true;
+                return x2;
+            }
+            f01 = (y1-y0)/(x1-x0);
+            f12 = (c -y1)/(x2-x1);
+            a   = (f12-f01)/(x2-x0);
+            b   = f12+a*(x2-x1);
+            d = b*b-4*a*c;
+            if (d<0)
+                return 0;
+            r   = sqrt(d);
+            if (abs(b+r) < abs(b-r))
+                d = 2*c/(r-b);
+            else
+                d = -2*c/(r+b);
+            if (abs(d/(1+abs(x2))) < 16*dim*std::numeric_limits<T>::epsilon()) {
+                rootFound = true;
+                return x2;
+            }
+            f01 = x2;
+            f12 = x1;
+            x2 += d;
+            x1 = f01;
+            x0 = f12;
+            if (abs(x0-x2) < 16*dim*std::numeric_limits<T>::epsilon()) 
+                return 0;
+            i++;
+            f01 = c;
+            f12 = y1;
+            y1  = f01;
+            y0  = f12;
+        }
+    }
+    
+    /// problème si T est du type complex<X> ... à régler. On fera l'hypothèse que T est soit entier, soit float, double, long double.
+    Vec<C> roots() const{
+        assert(nx==1);
+        Vec<C > res;
         int taille=dim;
         for (int i=dim-1;std::abs(coefs[i])<16*std::numeric_limits<T>::epsilon();i--)
             taille--;
@@ -423,8 +531,8 @@ public:
                 res.push_back(-0.5*(b-delta));
             } else {
                 delta = sqrt(-delta);
-                res.push_back(complex<T>(-0.5*b,0.5*delta));
-                res.push_back(complex<T>(-0.5*b,-0.5*delta));
+                res.push_back(C(-0.5*b,0.5*delta));
+                res.push_back(C(-0.5*b,-0.5*delta));
             }
         }
         else if (taille==4) { /// degré 3
@@ -456,12 +564,12 @@ public:
                 u = sgn(u)*std::pow(std::abs(u),1/T(3));
                 v = sgn(v)*std::pow(std::abs(v),1/T(3));
                 res.push_back(u+v+del);
-                res.push_back(complex<T>(-0.5*(u+v)+del,ji*(u-v)));
-                res.push_back(complex<T>(-0.5*(u+v)+del,ji*(v-u)));
+                res.push_back(C(-0.5*(u+v)+del,ji*(u-v)));
+                res.push_back(C(-0.5*(u+v)+del,ji*(v-u)));
             } else {
                 /// trois racines réelles
-                complex<T> u(std::pow(complex<T>(-0.5*q,0.5*sqrt(-delta)),1/(T)3));
-                complex<T> j(-0.5,ji);
+                C u(std::pow(C(-0.5*q,0.5*sqrt(-delta)),1/(T)3));
+                C j(-0.5,ji);
                 res.push_back(2*u.real()+del);
                 u *= j;
                 res.push_back(2*u.real()+del);
@@ -486,18 +594,49 @@ public:
             T r = -3*b2*b2/(T)256 + c*del*del - del*d + e;
             Pol<3,1,T> disc(Vec<T,4>(4*r*p-q*q,-8*r,-4*p,8));
             Vec<T> r_disc = disc.real_roots(); /// on a au moins une solution
-            complex<T> a0 = -sqrt(complex<T>(2*r_disc[0]-p,0));
-            complex<T> b0 = -0.5*q/a0;
-            Vec<complex<T> > z1 = root_of_second_degree_equation(a0,b0+r_disc[0]);
-            Vec<complex<T> > z2 = root_of_second_degree_equation(-a0,r_disc[0]-b0);
+            C a0 = -sqrt(C(2*r_disc[0]-p,0));
+            C b0 = -0.5*q/a0;
+            Vec<C> z1 = root_of_second_degree_equation(a0,b0+r_disc[0]);
+            Vec<C> z2 = root_of_second_degree_equation(-a0,r_disc[0]-b0);
             for(int j=0;j<z1.size();++j)
                 res.push_back(z1[j]-del);
             for(int j=0;j<z2.size();++j)
                 res.push_back(z2[j]-del);
             /// pas optimisé ...
 
-        } else if (taille>5) {
-            assert(0);/** TODO */
+        } else if (taille>5) { /// degré >= 5
+            /// code de la fonction zroots de numerical recipes
+            /// les erreurs deviennent importantes avec des racines multiples.
+            int i,its,j,jj;
+            C x,b,c;
+            Vec<C> ad;
+            bool rootFound;
+
+            ad.resize(taille);
+            res.resize(taille-1);
+            for (j=0;j<taille;j++) 
+                ad[j] = coefs[j];
+            for (j=taille-1;j>=1;j--) {
+                x=C(0.5,0.0);
+                x = laguerre(ad,j,x,rootFound);
+                if (abs(x.imag()) <= 2.0*2e-6*abs(x.real()))
+                    x.imag() = 0.0;
+                res[j-1]=x;
+                //cout << " x = " << x << "  rootFound = " << rootFound << endl;
+                b=ad[j];
+                for (jj=j-1;jj>=0;jj--) {
+                    c=ad[jj];
+                    ad[jj]=b;
+                    b = x*b+c;//b=Cadd(Cmul(x,b),c);
+                }
+            }
+            //if (polish)
+            //    for (j=1;j<=m;j++)
+            //        laguer(a,m,&roots[j],&its);
+            for (j=0;j<taille;j++) 
+                ad[j] = coefs[j];
+            for (j=0;j<taille-1;j++)
+                res[j] = laguerre(ad,taille-1,res[j],rootFound);
         }
         return res;
     }
@@ -519,7 +658,7 @@ public:
                 res.push_back(-0.5*(coefs[1]-sqrt(delta))/coefs[2]);
             }
         }
-        else if (taille==4) {
+        else if (taille==4) { /// degré 3
             T a=coefs[2]/coefs[3];
             T b=coefs[1]/coefs[3];
             T c=coefs[0]/coefs[3];
@@ -532,17 +671,18 @@ public:
                 res.push_back((sgn(u)*std::pow(std::abs(u),T(1)/T(3))+sgn(v)*std::pow(std::abs(v),T(1)/T(3))-a)/3.);
             }
             if (delta<0) {
-                std::complex<T> j(-0.5,sqrt(3.)/2.);
-                std::complex<T> v(-13.5*q,sqrt(-6.75*delta));
-                std::complex<T> u=std::pow(v,T(1)/T(3));
+                C j(-0.5,sqrt(3.)/2.);
+                C v(-13.5*q,sqrt(-6.75*delta));
+                C u=std::pow(v,T(1)/T(3));
                 res.push_back((2.*std::real(u)-a)/3.);
                 res.push_back((2.*std::real(j*u)-a)/3.);
                 res.push_back((2.*std::real(j*j*u)-a)/3.);
                 sort(res);
             }
         }
-        else if (taille>4) {
-            if (coefs[0]!=0) {
+        else if (taille>4) { /// degré >= 4
+            //if (coefs[0]!=0) {
+            if (std::abs(coefs[0]) > 16*std::numeric_limits<T>::epsilon()) {
                 Vec<Pol<nd,nx,T> > Sturm(*this,derivative());
                 while (Sturm[Sturm.size()-1].coefficients().size()>1)
                     Sturm.push_back(-Sturm[Sturm.size()-2].remainder(Sturm[Sturm.size()-1]));
