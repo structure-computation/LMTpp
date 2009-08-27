@@ -21,8 +21,9 @@ namespace LMT {
 */
 template <class T>
 Vec<complex<T> > root_of_second_degree_equation(complex<T> a1, complex<T> a2) {
-    Vec<complex<T> > res;
-    complex<T> delta;
+    typedef complex<T> C;
+    Vec<C> res;
+    C delta,n1,n2;
 
     delta = a1*a1-complex<T>(4,0)*a2;
     if (std::abs(delta) < 16*std::numeric_limits<T>::epsilon()) {
@@ -30,12 +31,20 @@ Vec<complex<T> > root_of_second_degree_equation(complex<T> a1, complex<T> a2) {
         return res;
     }
     delta = sqrt(delta);
-    res.push_back(-0.5*(a1-delta));
-    res.push_back(-0.5*(a1+delta));
+    n1 = a1-delta;
+    n2 = a1+delta;
+    /// objectif du if suivant est de gérer le cas ou delta et proche de a1 ou -a1.
+    if (abs(n1)<abs(n2)) {
+        res.push_back(C(-2)*a2/n2);
+        res.push_back(-0.5*n2);
+    } else {
+        res.push_back(C(-2)*a2/n1);
+        res.push_back(-0.5*n1);        
+    }
     return res;
 }
 
-/// code extrait de numerical recipes
+/// code extrait de numerical recipes (un peu modifié)
 template <class T>
 complex<T> laguerre(Vec< complex<T> >& a, int m, complex<T> x0, bool& rootFound, int maxIter = 100) {
     typedef complex<T> C;
@@ -52,31 +61,30 @@ complex<T> laguerre(Vec< complex<T> >& a, int m, complex<T> x0, bool& rootFound,
         d = f = C(0,0);
         abx=abs(x0);
         for (j=m-1;j>=0;j--) {
-            f = x0*f+d; //f=Cadd(Cmul(*x,f),d);
-            d = x0*d+b;//d=Cadd(Cmul(*x,d),b);
-            b = x0*b+a[j];//b=Cadd(Cmul(*x,b),a[j]);
+            f = x0*f+d;
+            d = x0*d+b;
+            b = x0*b+a[j];
             err=abs(b)+abx*err;
         }
         err *= EPSS;
         if (abs(b) <= err) { rootFound = true; return x0; }
-        g  = d/b;//g=Cdiv(d,b);
-        g2 =g*g;//g2=Cmul(g,g);
-        h = g2-C(2,0)*f/b;  //h=Csub(g2,RCmul(2.0,Cdiv(f,b)));
-        sq = sqrt(C(m-1,0)*(C(m,0)*h-g2)); //sq=Csqrt(RCmul((float) (m-1),Csub(RCmul((float) m,h),g2)));
-        gp = g+sq;//gp=Cadd(g,sq);
-        gm = g-sq;//gm=Csub(g,sq);
-        abp = abs(gp);//abp=Cabs(gp);
-        abm = abs(gm);//abm=Cabs(gm);
+        g  = d/b;
+        g2 =g*g;
+        h = g2-C(2,0)*f/b;
+        sq = sqrt(C(m-1,0)*(C(m,0)*h-g2));
+        gp = g+sq;
+        gm = g-sq;
+        abp = abs(gp);
+        abm = abs(gm);
         if (abp < abm) 
             gp=gm;
         //if (max(abp,abm) > (T)0)
-        if (max(abp,abm) > (T)1e-6)
+        if (max(abp,abm) > (T)0)
             dx = C(m,0)/gp;
         else
             dx = C(exp(log(1+abx)),0) * C(cos(iter),sin(iter));
-        //dx=((FMAX(abp,abm) > 0.0 ? Cdiv(Complexr((float) m,0.0),gp) : RCmul(exp(log(1+abx)),Complexr(cos((float)iter),sin((float)iter)))));
-        x1 = x0-dx;//x1=Csub(*x,dx);
-        if (x0 == x1) { rootFound = true; return x1; }//if (x->r == x1.r && x->i == x1.i) return;
+        x1 = x0-dx;
+        if (x0 == x1) { rootFound = true; return x1; }
         //cout << " x1 = " << x1 << endl;
         if (iter % 10)
             x0 = x1;
@@ -85,7 +93,6 @@ complex<T> laguerre(Vec< complex<T> >& a, int m, complex<T> x0, bool& rootFound,
     }
     cerr << "too many iterations in laguerre" << endl;
 }
-
 
 /**
   @author Gouttebroze
@@ -181,13 +188,10 @@ complex<T> laguerre(Vec< complex<T> >& a, int m, complex<T> x0, bool& rootFound,
 
 template <int nd=4,int nx=1,class T=double>
 class Pol {
-
-public:
-
+  public:
     static const int degree=nd;
     static const int variables_number=nx;
-    static const int dim=DimPol<nd,nx>::valeur;
-    
+    static const int dim=DimPol<nd,nx>::valeur;  
     typedef complex<T> C;
       
     Pol () {}
@@ -386,21 +390,41 @@ public:
 
     Pol<nd,nx,T> remainder(const Pol<nd,nx,T> &D) const {
         assert(nx==1);
+        if (D.is_zero()) {
+            cerr << "Warning : division by polynom zero !" << endl;
+            return Pol<nd,nx,T>();
+        }
         Vec<T> r=coefs;
-        T norm=norm_inf(r);
-        while (r.size()>1 and abs(r[r.size()-1])/norm<16*std::numeric_limits<T>::epsilon())
-            r.pop_back();
+        //T norm=norm_inf(r);
+        //while (r.size()>0 and abs(r.back())/norm < 16*std::numeric_limits<T>::epsilon())
+        //    r.pop_back();
+        while ((r.size()) and abs(r.back()) < 16*std::numeric_limits<T>::epsilon())
+           r.pop_back();
+
         Vec<T> d=D.coefficients();
-        norm=norm_inf(d);
-        while (d.size()>1 and abs(d[d.size()-1])/norm<16*std::numeric_limits<T>::epsilon())
+        //norm=norm_inf(d);
+        while (abs(d.back()) < 16*std::numeric_limits<T>::epsilon())
             d.pop_back();
-            if (d.size()<=r.size()) {
-            for (unsigned i=1;i<=coefs.size()-d.size()+1;i++) {
+        
+        if (d.size()<=r.size()) {
+            /// méthode naïve
+            /// on commence par normaliser le diviseur puis on retire le dernier terme (inutile).
+            T dominant = d.pop_back();
+            for(int i=0;i<r.size();++i)
+                r[i] /= dominant;
+            for(int i=0;i<d.size();++i)
+                d[i] /= dominant;
+            while(r.size() >= 1+d.size()) { /// tant que deg(r) >= deg(d) on divise. Rappel deg(r) = r.size()+1 et deg(d) = d.size()+2
+                T aux = r.pop_back(); /// terme dominant de r
+                for (int j=0;j<d.size();j++)
+                    r[r.size()-d.size()+j] -= aux*d[j];
+            }
+/*            for (unsigned i=1;i<=coefs.size()-d.size()+1;i++) {
                 T aux=r[r.size()-1]/d[d.size()-1];
                 r.pop_back();
                 for (unsigned j=0;j<d.size()-1;j++)
                     r[r.size()-d.size()+j+1]-=aux*d[j];
-            }
+            }*/
         }
         return Pol<nd,nx,T>(r);
     }
@@ -507,13 +531,40 @@ public:
         }
     }
     
+    /** 
+        renvoie le degré du polynôme pour chaque indéterminée.
+        Si l'indéterminée n'apparaît pas, le degré est -1.
+    */
+    Vec<int,nx> degrees() const {
+        assert(nx==1);
+        int taille = dim /** ??? */; 
+        Vec<int,nx> res;
+        while ((abs(coefs[taille])<16*numeric_limits<T>::epsilon()) and (taille>=0))
+            taille--;
+        res[0] = taille;
+        return res;
+    }
+    
+    /// renvoie vrai si c'est le polynôme nul et faux sinon.
+    /// code à améliorer
+    bool is_zero() const {
+        Vec<int,nx> deg = degrees();
+        for(int i=0;i<nx;++i)
+            if (deg[i]>=0)
+                return false;
+        return true;
+    }
+    
+    void update_degrees() {
+        assert(0); /** TODO : les opérations + - += -= * / peuvent modifier le degré  */   
+    }
+    
     /// problème si T est du type complex<X> ... à régler. On fera l'hypothèse que T est soit entier, soit float, double, long double.
     Vec<C> roots() const{
         assert(nx==1);
-        Vec<C > res;
-        int taille=dim;
-        for (int i=dim-1;std::abs(coefs[i])<16*std::numeric_limits<T>::epsilon();i--)
-            taille--;
+        Vec<C> res;
+        Vec<int,nx> deg = degrees();
+        int taille = deg[0];
         if (taille==2)
             res.push_back(-coefs[0]/coefs[1]);
         else if (taille==3) {/// degré 2
@@ -632,7 +683,7 @@ public:
             }
             //if (polish)
             //    for (j=1;j<=m;j++)
-            //        laguer(a,m,&roots[j],&its);
+            //        laguerre(a,m,&roots[j],&its);
             for (j=0;j<taille;j++) 
                 ad[j] = coefs[j];
             for (j=0;j<taille-1;j++)
@@ -644,9 +695,8 @@ public:
     Vec<T> real_roots() const{
         assert(nx==1);
         Vec<T> res;
-        int taille=dim;
-        for (int i=dim-1;coefs[i]==T(0);i--)
-            taille--;
+        Vec<int,nx> deg = degrees();
+        int taille = deg[0];
         if (taille==2)
             res.push_back(-coefs[0]/coefs[1]);
         else if (taille==3) {
@@ -682,7 +732,7 @@ public:
         }
         else if (taille>4) { /// degré >= 4
             //if (coefs[0]!=0) {
-            if (std::abs(coefs[0]) > 16*std::numeric_limits<T>::epsilon()) {
+            if (abs(coefs[0]) > 16*numeric_limits<T>::epsilon()) {
                 Vec<Pol<nd,nx,T> > Sturm(*this,derivative());
                 while (Sturm[Sturm.size()-1].coefficients().size()>1)
                     Sturm.push_back(-Sturm[Sturm.size()-2].remainder(Sturm[Sturm.size()-1]));
@@ -768,7 +818,80 @@ template<int m, int n,class TT> struct SubComplex<Pol<m,n,TT> > {
     typedef typename TypeInformation<TP>::template Variant<typename SubComplex<typename TypeInformation<TP>::SubType>::T>::T T;
 };
 
+template<class T>
+int nb_changed_signe(Vec<T>& v) {
+    int ret = 0,i;
+    T s1,s2;
+    for(i=0;i<v.size();++i)
+        if (abs(v[i]) > 16*numeric_limits<T>::epsilon()) {
+            s1 = sgn(v[i]);
+            break;
+        }
+    for(++i;i<v.size();++i) {
+        while ((abs(v[i]) < 16*numeric_limits<T>::epsilon()) and (i<v.size()))
+            i++;   
+        if (i<v.size()) {
+            s2 = v[i];
+            if (s1*s2<0)
+                ret++;
+            s1 = s2;
+        }
+    }
+    return ret;
 }
+
+/**
+    Cette classe calcule les "polynômes de Sturm" de P. 
+    Un appel à la méthode nb_roots_in_intervall(a,b) renvoie le nombres de racines réelles distinctes dans l'intervalle [a;b] (i.e. sans compter leur ordre de multiplicité).
+    Un appel à la méthode polynom_of_multiple_roots() renvoie le polynôme dont les racines sont toutes les racines multiples de P. 
+
+ */
+template <int nd=4, class T=double>
+struct Sturm {
+    Sturm(const Pol<nd,1,T>& P) { init(P); }
+    void init( const Pol<nd,1,T>& P) {
+        Pol<nd,1,T> f0,f1,f2;
+        //polys.free();
+        if (not(P.is_zero()))
+            polys.push_back(P);
+        else
+            return;
+        f0 = P;
+        f1 = P.derivative();
+        Vec<int,1> deg = P.degrees();
+        
+        for(int i = deg[0]-1;i>=0;--i) {
+            if (not(f1.is_zero())) {
+                polys.push_back(f1);
+                //f2 = f0.remainder(f1);
+                f0 = f1;
+                f1 = -f2;     
+            } else
+                break;
+        }
+    }
+    int nb_roots_in_intervall(T a, T b) {
+        Vec<T> fa,fb;
+        
+        for(int i=0;i<polys.size();++i)
+            fa.push_back(polys[i](a));
+        for(int i=0;i<polys.size();++i)
+            fb.push_back(polys[i](b));
+        return nb_changed_signe(fa)-nb_changed_signe(fb);
+    }
+    Pol<nd,1,T> polynom_of_multiple_roots() { 
+        if (polys.size())
+            return polys.back();
+        else
+            return Pol<nd,1,T>();
+    }
+    
+    
+    Vec< Pol<nd,1,T> > polys;/// les polynômes sont rangés par degré décroissant.
+};
+
+}
+
 
 #include "pol_unary.h"
 #include "pol_binary.h"
