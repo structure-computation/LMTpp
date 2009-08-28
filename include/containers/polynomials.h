@@ -388,6 +388,11 @@ class Pol {
         return typename TypePromote<Abs,T>::T(-1)-toto;
     }
 
+    /// utilisation du critère de Descartes
+    int bound_positive_roots() {
+        return nb_changed_signe(coefs);
+    }
+
     Pol<nd,nx,T> remainder(const Pol<nd,nx,T> &D) const {
         assert(nx==1);
         if (D.is_zero()) {
@@ -537,7 +542,7 @@ class Pol {
     */
     Vec<int,nx> degrees() const {
         assert(nx==1);
-        int taille = dim /** ??? */; 
+        int taille = degree; /** VERSION ORIGINALE : int taille = dim ??? */; 
         Vec<int,nx> res;
         while ((abs(coefs[taille])<16*numeric_limits<T>::epsilon()) and (taille>=0))
             taille--;
@@ -564,7 +569,7 @@ class Pol {
         assert(nx==1);
         Vec<C> res;
         Vec<int,nx> deg = degrees();
-        int taille = deg[0];
+        int taille = deg[0]+1;
         if (taille==2)
             res.push_back(-coefs[0]/coefs[1]);
         else if (taille==3) {/// degré 2
@@ -696,7 +701,7 @@ class Pol {
         assert(nx==1);
         Vec<T> res;
         Vec<int,nx> deg = degrees();
-        int taille = deg[0];
+        int taille = deg[0]+1;
         if (taille==2)
             res.push_back(-coefs[0]/coefs[1]);
         else if (taille==3) {
@@ -818,13 +823,35 @@ template<int m, int n,class TT> struct SubComplex<Pol<m,n,TT> > {
     typedef typename TypeInformation<TP>::template Variant<typename SubComplex<typename TypeInformation<TP>::SubType>::T>::T T;
 };
 
+template<class T,int static_size_>
+int nb_changed_signe(Vec<T,static_size_>& v) {
+    int ret = 0,i;
+    T s1,s2;
+    for(i=0;i<static_size_;++i)
+        if (abs(v[i]) > 16*numeric_limits<T>::epsilon()) {
+        s1 = v[i];
+        break;
+        }
+        for(++i;i<static_size_;++i) {
+            while ((abs(v[i]) < 16*numeric_limits<T>::epsilon()) and (i<static_size_))
+                i++;   
+            if (i<static_size_) {
+                s2 = v[i];
+                if (s1*s2<0)
+                    ret++;
+                s1 = s2;
+            }
+        }
+        return ret;
+        }
+
 template<class T>
-int nb_changed_signe(Vec<T>& v) {
+int nb_changed_signe(Vec<T,-1>& v) {
     int ret = 0,i;
     T s1,s2;
     for(i=0;i<v.size();++i)
         if (abs(v[i]) > 16*numeric_limits<T>::epsilon()) {
-            s1 = sgn(v[i]);
+            s1 = v[i];
             break;
         }
     for(++i;i<v.size();++i) {
@@ -845,6 +872,7 @@ int nb_changed_signe(Vec<T>& v) {
     Un appel à la méthode nb_roots_in_intervall(a,b) renvoie le nombres de racines réelles distinctes dans l'intervalle [a;b] (i.e. sans compter leur ordre de multiplicité).
     Un appel à la méthode polynom_of_multiple_roots() renvoie le polynôme dont les racines sont toutes les racines multiples de P. 
 
+    Le nombre de racines n'est pas fiable pour des polynômes de degré >= 3
  */
 template <int nd=4, class T=double>
 struct Sturm {
@@ -860,15 +888,19 @@ struct Sturm {
         f1 = P.derivative();
         Vec<int,1> deg = P.degrees();
         
-        for(int i = deg[0]-1;i>=0;--i) {
+        for(int i = deg[0]-2;i>=0;--i) {
             if (not(f1.is_zero())) {
                 polys.push_back(f1);
-                //f2 = f0.remainder(f1);
+                f2 = f0.remainder(f1);
                 f0 = f1;
                 f1 = -f2;     
             } else
                 break;
         }
+//         cout << " ##### suite des polys ##### " << endl;
+//         for(int i =0;i<polys.size();++i)
+//             cout << polys[i] << endl;
+//         cout << " ########## " << endl;
     }
     int nb_roots_in_intervall(T a, T b) {
         Vec<T> fa,fb;
@@ -877,6 +909,8 @@ struct Sturm {
             fa.push_back(polys[i](a));
         for(int i=0;i<polys.size();++i)
             fb.push_back(polys[i](b));
+//         cout << " fa = " << fa << endl;
+//         cout << " fb = " << fb << endl; 
         return nb_changed_signe(fa)-nb_changed_signe(fb);
     }
     Pol<nd,1,T> polynom_of_multiple_roots() { 
