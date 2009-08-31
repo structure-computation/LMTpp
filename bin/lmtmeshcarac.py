@@ -186,9 +186,9 @@ class MeshCarac:
                     tmp += '        void dm_data_set_field( const std::string field_name, const Vec<Tpos,1> &value ) { assert(0); /*TODO*/ }\n'
                     tmp += '        void dm_data_set_field( const std::string field_name, const Vec<Tpos,2> &value ) { assert(0); /*TODO*/ }\n'
                     tmp += '        void dm_data_set_field( const std::string field_name, const Vec<Tpos,3> &value ) { assert(0); /*TODO*/ }\n'
-                    #tmp += '        void dm_data_set_field( const std::string field_name, const Vec<Tpos,4> &value ) { assert(0); /*TODO*/ }\n'
-                    #tmp += '        void dm_data_set_field( const std::string field_name, const Vec<Tpos,5> &value ) { assert(0); /*TODO*/ }\n'
-                    #tmp += '        void dm_data_set_field( const std::string field_name, const Vec<Tpos,6> &value ) { assert(0); /*TODO*/ }\n'
+                    tmp += '        void dm_data_set_field( const std::string field_name, const Vec<Tpos,4> &value ) { assert(0); /*TODO*/ }\n'
+                    tmp += '        void dm_data_set_field( const std::string field_name, const Vec<Tpos,5> &value ) { assert(0); /*TODO*/ }\n'
+                    tmp += '        void dm_data_set_field( const std::string field_name, const Vec<Tpos,6> &value ) { assert(0); /*TODO*/ }\n'
                     tmp += '    };\n'
         res += tmp
         res += '};\n\n'

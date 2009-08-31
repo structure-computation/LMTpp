@@ -43,9 +43,9 @@ template<class TM> void read_inp( TM &m, const std::string &fic_name ) {
         ReadingWedge,
         ReadingTetra
     } ReadingCtxt;
-
+    
     std::ifstream is( fic_name.c_str() );
-
+    
     std::string line;
     ReadingCtxt ctxt = ReadingNothing;
     int nb_nodes = 0;

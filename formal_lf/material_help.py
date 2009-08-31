@@ -98,7 +98,7 @@ def hooke_isotrope_th_3d(E,nu,alpha):
 #loi de hooke isotrope
 def hooke_isotrope_th(E,nu,dim,alpha,type_stress_2D='plane stress'):
    Kglo, Hglo, epsth= hooke_isotrope_th_3d(E,nu,alpha)
-   K,epsth = simplification_behaviour(Kglo,Hglo,epsth,dim,type_stress_2D)
+   K, epsth = simplification_behaviour(Kglo,Hglo,epsth,dim,type_stress_2D)
    return K,epsth
 
 #
@@ -125,10 +125,13 @@ def hooke_orthotrope_th_3d(E1,E2,E3,nu12,nu13,nu23,G12,G13,G23,v1,v2,alpha1,alph
 
 def hooke_orthotrope_th(E1,E2,E3,nu12,nu13,nu23,G12,G13,G23,v1,v2,alpha1,alpha2,alpha3,dim,type_stress_2D='plane stress'):   
    Kglo, Hglo, epsth, P= hooke_orthotrope_th_3d(E1,E2,E3,nu12,nu13,nu23,G12,G13,G23,v1,v2,alpha1,alpha2,alpha3)
-   K,epsth = simplification_behaviour(Kglo,Hglo,epsth,dim,type_stress_2D)
+   K, epsth = simplification_behaviour(Kglo,Hglo,epsth,dim,type_stress_2D)
    P = simplification_projection(P,dim)
-   return K,epsth,P
+   return K, epsth, P
           
+def hooke_orthotrope(E1,E2,E3,nu12,nu13,nu23,G12,G13,G23,v1,v2,dim,type_stress_2D='plane stress'):
+   return hooke_orthotrope_th(E1,E2,E3,nu12,nu13,nu23,G12,G13,G23,v1,v2,number(0),number(0),number(0),dim,type_stress_2D)
+
 #loi de hooke orthotrope endommageable 3d
 def hooke_orthotrope_endommageable_th_3d(E1,E2,E3,nu12,nu13,nu23,G12,G13,G23,v1,v2,alpha1,alpha2,alpha3,d):
    P,Pinv=matrice_passage(v1,v2)
