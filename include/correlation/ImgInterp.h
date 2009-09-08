@@ -338,13 +338,14 @@ struct ImgInterp {
             ptr[ 0 ] = m * ( data[ i ] - o );
             ptr[ 1 ] = m * ( data[ i ] - o );
             ptr[ 2 ] = m * ( data[ i ] - o );
-            ptr[ 3 ] = 255; //255 * ( data[ i ] >= 0 );
+            ptr[ 3 ] = 255 * ( data[ i ] >= 0 );
         }
         return img;
     }
 
-    template<class T2>
-    QImage to_QImage( const ImgInterp<T2,dim,Kernel,PT>& canal_alpha, bool normalize = false ) const {
+    template<class T2, class Kernel2, class PT2>
+    QImage to_QImage( const ImgInterp<T2,dim,Kernel2,PT2>& canal_alpha, bool normalize = false ) const {
+        assert((canal_alpha.sizes[0] == sizes[0]) and (canal_alpha.sizes[1] == sizes[1]));
         T o = 0.0, m = 1.0;
         if ( normalize ) {
             T mi = min( data );
@@ -361,7 +362,7 @@ struct ImgInterp {
             ptr[ 0 ] = m * ( data[ i ] - o );
             ptr[ 1 ] = m * ( data[ i ] - o );
             ptr[ 2 ] = m * ( data[ i ] - o );
-            ptr[ 3 ] = canal_alpah.data[ i ]*255;
+            ptr[ 3 ] = canal_alpha.data[ i ]*255;
         }
         return img;
     }
@@ -431,8 +432,8 @@ struct ImgInterp {
     /*!
     canal_alpha est une image qui doit contenir les valeurs du niveau alpha (valeurs entre 0 et 1, 1 pour opaque et 0 pour transparent)  
     */
-    template<class T2>
-    void save( const ImgInterp<T2,dim,Kernel,PT>& canal_alpha, const std::string filename, bool normalize = false ) const {
+    template<class T2, class Kernel2, class PT2>
+    void save( const ImgInterp<T2,dim,Kernel2,PT2>& canal_alpha, const std::string filename, bool normalize = false ) const {
         QImage img = to_QImage(canal_alpha, normalize );
         img.save( filename.c_str() );
     }
@@ -440,8 +441,8 @@ struct ImgInterp {
     /*!
     canal_alpha est une image qui doit contenir les valeurs du niveau alpha (valeurs entre 0 et 1, 1 pour opaque et 0 pour transparent)  
      */
-    template<class T2>
-    int display( const ImgInterp<T,dim,Kernel,PT>& canal_alpha, bool normalize = false, const std::string namefile = "pouet.png" ) {
+    template<class T2, class Kernel2, class PT2>
+    int display( const ImgInterp<T,dim,Kernel2,PT2>& canal_alpha, bool normalize = false, const std::string namefile = "pouet.png" ) {
         save( canal_alpha, namefile.c_str(), normalize );
         std::string tmp = "display " + namefile + " &";
         return system( tmp.c_str() );
