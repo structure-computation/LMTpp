@@ -482,8 +482,6 @@ class Formulation:
                                                extrapolation.time_steps[0]*self.right_time_integration) # integration sur le temps
     
     unknown_symbols, unknown_test_symbols, indices, offsets, unk_subs = self.get_unknown_symbols(True)
-
-
     form_after_solve = self.apply_on_elements_after_solve(unk_subs)
     form_after_solve_2 = self.apply_on_elements_after_solve_2(unk_subs)
     form_after_solve_3 = self.apply_on_elements_after_solve_3(unk_subs)
@@ -672,62 +670,25 @@ class Formulation:
             
     f.write( '    static const bool has_elementary_matrix = %s;\n'%( ['true','false'][has_not_V_matrix] ) )
     f.write( '    static const bool has_skin_elementary_matrix = %s;\n'%( ['true','false'][has_not_S_matrix] ) )
-    
-    f.write( '    template<class TE,class TF, class TVEVE> static void after_solve(TE &elem,TF &f,TVEVE &vectors,const unsigned *indices) {\n' )
-    f.write( '      #define PNODE(N) (*elem.node(N))\n' )
-    if self.use_asm:
-        asm_fname = asm_apply_name[0]
-        f.write( form_after_solve[0].asm_caller( asm_fname ) )
-        self.asmout.write( 'global %s\n' % asm_fname )
-        self.asmout.write( '%s:\n' % asm_fname )
-        self.asmout.write( form_after_solve[0].to_asm() )
-    else :
-        f.write( form_after_solve[0].to_string() )
-    #f.write( form_after_solve[0] + '\n' )
-    f.write( '      #undef PNODE\n' )
-    f.write( '    }\n' )
-    
-    
-    for i in range(1,6):
+
+    for i in range(0,6):
            #f.write( 'extern "C" void %s( double * );\n' % asm_fname )
-        f.write( '    template<class TE,class TF, class TVEVE> static void after_solve_'+str(i+1)+'(TE &elem,TF &f,TVEVE &vectors,const unsigned *indices) {\n' )
+        f.write( '    template<class TE,class TF, class TVEVE> static void after_solve'+('_'+str(i+1))*(i>0)+'(TE &elem,TF &f,TVEVE &vectors,const unsigned *indices) {\n' )
         f.write( '      #define PNODE(N) (*elem.node(N))\n' ) 
-        if self.use_asm:
-            asm_fname = asm_apply_name[i]
-            f.write( form_after_solve[i].asm_caller( asm_fname ) )
-            self.asmout.write( 'global %s\n' % asm_fname )
-            self.asmout.write( '%s:\n' % asm_fname )
-            self.asmout.write( form_after_solve[i].to_asm() )
+        if isinstance(form_after_solve[i],str):
+            f.write( form_after_solve[i])
         else :
-            f.write( form_after_solve[i].to_string() )
+            if self.use_asm:
+                asm_fname = asm_apply_name[i]
+                f.write( form_after_solve[i].asm_caller( asm_fname ) )
+                self.asmout.write( 'global %s\n' % asm_fname )
+                self.asmout.write( '%s:\n' % asm_fname )
+                self.asmout.write( form_after_solve[i].to_asm() )
+            else :
+                f.write( form_after_solve[i].to_string() )
         f.write( '      #undef PNODE\n' )
         f.write( '    }\n' )
-    #f.write( '    template<class TE,class TF, class TVEVE> static void after_solve_2(TE &elem,TF &f, TVEVE &vectors,const unsigned *indices) {\n' )
-    #f.write( '      #define PNODE(N) (*elem.node(N))\n' )
-    #f.write( form_after_solve[1] + '\n' )
-    #f.write( '      #undef PNODE\n' )
-    #f.write( '    }\n' )
-    #f.write( '    template<class TE,class TF, class TVEVE> static void after_solve_3(TE &elem,TF &f,TVEVE &vectors,const unsigned *indices) {\n' )
-    #f.write( '      #define PNODE(N) (*elem.node(N))\n' )
-    #f.write( form_after_solve[2] + '\n' )
-    #f.write( '      #undef PNODE\n' )
-    #f.write( '    }\n' )
-    #f.write( '    template<class TE,class TF, class TVEVE> static void after_solve_4(TE &elem,TF &f,TVEVE &vectors,const unsigned *indices) {\n' )
-    #f.write( '      #define PNODE(N) (*elem.node(N))\n' )
-    #f.write( form_after_solve[3] + '\n' )
-    #f.write( '      #undef PNODE\n' )
-    #f.write( '    }\n' )
-    #f.write( '    template<class TE,class TF, class TVEVE> static void after_solve_5(TE &elem,TF &f,TVEVE &vectors,const unsigned *indices) {\n' )
-    #f.write( '      #define PNODE(N) (*elem.node(N))\n' )
-    #f.write( form_after_solve[4] + '\n' )
-    #f.write( '      #undef PNODE\n' )
-    #f.write( '    }\n' )   
-    #f.write( '    template<class TE,class TF, class TVEVE> static void after_solve_6(TE &elem,TF &f,TVEVE &vectors,const unsigned *indices) {\n' )
-    #f.write( '      #define PNODE(N) (*elem.node(N))\n' )
-    #f.write( form_after_solve[5] + '\n' )
-    #f.write( '      #undef PNODE\n' )
-    #f.write( '    }\n' )   
-        
+
     for skin in [False,True]:
       self.write_carac_for_t(f,'elementary',skin,e)
     
