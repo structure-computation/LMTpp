@@ -8,8 +8,15 @@
 #include <sstream>
 #include <util/rectilinear_iterator.h>
 
+#include <complex>
+
 namespace LMT {
 
+template<class T>
+std::complex<T> operator*( const std::complex<T> c, int a) {
+    return std::complex<T>(a,0) * c;   
+}
+    
 /** kernel exemple for ImgInterp */
 struct ImgInterpBilinearKernel {
     static std::string name() { return "ImgInterpBilinearKernel"; }
@@ -244,6 +251,7 @@ struct ImgInterp {
         return *div_2;
     }
     
+    Vec<int,dim> size() { return sizes; }
     ///
     void load( const std::string &s ) {
         //
@@ -330,7 +338,7 @@ struct ImgInterp {
             ptr[ 0 ] = m * ( data[ i ] - o );
             ptr[ 1 ] = m * ( data[ i ] - o );
             ptr[ 2 ] = m * ( data[ i ] - o );
-            ptr[ 3 ] = 255 * ( data[ i ] >= 0 );
+            ptr[ 3 ] = 255; //255 * ( data[ i ] >= 0 );
         }
         return img;
     }
@@ -379,7 +387,7 @@ struct ImgInterp {
     }
     
     ///
-    void save( std::string filename, bool normalize = false ) const {
+    void save( const std::string filename, bool normalize = false ) const {
         QImage img = to_QImage( normalize );
         img.save( filename.c_str() );
     }
@@ -391,9 +399,10 @@ struct ImgInterp {
     }
     
     ///
-    int display( bool normalize = false ) {
-        save( "pouet.png", normalize );
-        return system( "display pouet.png &" );
+    int display( bool normalize = false, const std::string namefile = "pouet.png" ) {
+        save( namefile.c_str(), normalize );
+        string tmp = "display " + namefile + " &";
+        return system( tmp.c_str() );
     }
     
     ///
