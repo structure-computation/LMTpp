@@ -342,7 +342,30 @@ struct ImgInterp {
         }
         return img;
     }
-    
+
+    template<class T2>
+    QImage to_QImage( const ImgInterp<T2,dim,Kernel,PT>& canal_alpha, bool normalize = false ) const {
+        T o = 0.0, m = 1.0;
+        if ( normalize ) {
+            T mi = min( data );
+            T ma = max( data );
+            o = mi;
+            m = 255 / ( ma - mi );
+        }
+            
+        //
+        QImage img( sizes[0], sizes[1], QImage::Format_ARGB32 );
+        uchar *ptr = img.bits();
+        int total_size = sizes[0] * sizes[1];
+        for(int i=0;i<total_size;++i,ptr+=4) {
+            ptr[ 0 ] = m * ( data[ i ] - o );
+            ptr[ 1 ] = m * ( data[ i ] - o );
+            ptr[ 2 ] = m * ( data[ i ] - o );
+            ptr[ 3 ] = canal_alpah.data[ i ]*255;
+        }
+        return img;
+    }
+   
     ///
     void load_ascii_mat_file( std::string filename ) {
         using namespace std;
@@ -401,7 +424,26 @@ struct ImgInterp {
     ///
     int display( bool normalize = false, const std::string namefile = "pouet.png" ) {
         save( namefile.c_str(), normalize );
-        string tmp = "display " + namefile + " &";
+        std::string tmp = "display " + namefile + " &";
+        return system( tmp.c_str() );
+    }
+
+    /*!
+    canal_alpha est une image qui doit contenir les valeurs du niveau alpha (valeurs entre 0 et 1, 1 pour opaque et 0 pour transparent)  
+    */
+    template<class T2>
+    void save( const ImgInterp<T2,dim,Kernel,PT>& canal_alpha, const std::string filename, bool normalize = false ) const {
+        QImage img = to_QImage(canal_alpha, normalize );
+        img.save( filename.c_str() );
+    }
+
+    /*!
+    canal_alpha est une image qui doit contenir les valeurs du niveau alpha (valeurs entre 0 et 1, 1 pour opaque et 0 pour transparent)  
+     */
+    template<class T2>
+    int display( const ImgInterp<T,dim,Kernel,PT>& canal_alpha, bool normalize = false, const std::string namefile = "pouet.png" ) {
+        save( canal_alpha, namefile.c_str(), normalize );
+        std::string tmp = "display " + namefile + " &";
         return system( tmp.c_str() );
     }
     
