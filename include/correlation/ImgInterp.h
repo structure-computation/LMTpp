@@ -16,7 +16,11 @@ template<class T>
 std::complex<T> operator*( const std::complex<T> c, int a) {
     return std::complex<T>(a,0) * c;   
 }
-    
+
+std::complex<T> operator*( int a, const std::complex<T> c) {
+    return std::complex<T>(a,0) * c;   
+}
+   
 /** kernel exemple for ImgInterp */
 struct ImgInterpBilinearKernel {
     static std::string name() { return "ImgInterpBilinearKernel"; }
@@ -346,12 +350,18 @@ struct ImgInterp {
     template<class T2, class Kernel2, class PT2>
     QImage to_QImage( const ImgInterp<T2,dim,Kernel2,PT2>& canal_alpha, bool normalize = false ) const {
         assert((canal_alpha.sizes[0] == sizes[0]) and (canal_alpha.sizes[1] == sizes[1]));
-        T o = 0.0, m = 1.0;
+        T o = 0.0, mini = std::numeric_limits<T>::max(), maxi = std::numeric_limits<T>::min(), m, t;
         if ( normalize ) {
-            T mi = min( data );
-            T ma = max( data );
-            o = mi;
-            m = 255 / ( ma - mi );
+            for(int i=0;i<total_size;++i,ptr+=4)
+                if (canal_alpha.data[ i ] == 1) {
+                    t = data[i];
+                    if (t < mini)
+                        mini = t;
+                    if (data[i] > t)
+                        maxi = t;
+                }
+            o = mini;
+            m = 255 / ( maxi - mini );
         }
             
         //
@@ -359,9 +369,10 @@ struct ImgInterp {
         uchar *ptr = img.bits();
         int total_size = sizes[0] * sizes[1];
         for(int i=0;i<total_size;++i,ptr+=4) {
-            ptr[ 0 ] = m * ( data[ i ] - o );
-            ptr[ 1 ] = m * ( data[ i ] - o );
-            ptr[ 2 ] = m * ( data[ i ] - o );
+            T b = canal_alpha.data[ i ] == 1;
+            ptr[ 0 ] = b * m * ( data[ i ] - o );
+            ptr[ 1 ] = b * m * ( data[ i ] - o );
+            ptr[ 2 ] = b * m * ( data[ i ] - o );
             ptr[ 3 ] = canal_alpha.data[ i ]*255;
         }
         return img;
