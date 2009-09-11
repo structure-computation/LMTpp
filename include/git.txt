@@ -46,6 +46,10 @@
         Pour obtenir une version actuelle complète: 
         \verbatim
             git clone givry:/ul/multi/LMT/ 
+
+        Pour ceux qui veulent cloner depuis le wifi ou l'extérieur, la commande est :
+        \verbatim
+            git clone votre_login@ssh.lmt.ens-cachan.fr:/ul/multi/LMT/
     
     
     

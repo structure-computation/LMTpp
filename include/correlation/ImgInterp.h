@@ -8,8 +8,19 @@
 #include <sstream>
 #include <util/rectilinear_iterator.h>
 
+#include <complex>
+
 namespace LMT {
 
+template<class T>
+std::complex<T> operator*( const std::complex<T> c, int a) {
+    return std::complex<T>(a,0) * c;   
+}
+
+std::complex<T> operator*( int a, const std::complex<T> c) {
+    return std::complex<T>(a,0) * c;   
+}
+   
 /** kernel exemple for ImgInterp */
 struct ImgInterpBilinearKernel {
     static std::string name() { return "ImgInterpBilinearKernel"; }
@@ -246,6 +257,7 @@ struct ImgInterp {
         return *div_2;
     }
     
+    Vec<int,dim> size() { return sizes; }
     ///
     void load( const std::string &s ) {
         //
@@ -336,7 +348,38 @@ struct ImgInterp {
         }
         return img;
     }
-    
+
+    template<class T2, class Kernel2, class PT2>
+    QImage to_QImage( const ImgInterp<T2,dim,Kernel2,PT2>& canal_alpha, bool normalize = false ) const {
+        assert((canal_alpha.sizes[0] == sizes[0]) and (canal_alpha.sizes[1] == sizes[1]));
+        T o = 0.0, mini = std::numeric_limits<T>::max(), maxi = std::numeric_limits<T>::min(), m, t;
+        if ( normalize ) {
+            for(int i=0;i<total_size;++i,ptr+=4)
+                if (canal_alpha.data[ i ] == 1) {
+                    t = data[i];
+                    if (t < mini)
+                        mini = t;
+                    if (data[i] > t)
+                        maxi = t;
+                }
+            o = mini;
+            m = 255 / ( maxi - mini );
+        }
+            
+        //
+        QImage img( sizes[0], sizes[1], QImage::Format_ARGB32 );
+        uchar *ptr = img.bits();
+        int total_size = sizes[0] * sizes[1];
+        for(int i=0;i<total_size;++i,ptr+=4) {
+            T b = canal_alpha.data[ i ] == 1;
+            ptr[ 0 ] = b * m * ( data[ i ] - o );
+            ptr[ 1 ] = b * m * ( data[ i ] - o );
+            ptr[ 2 ] = b * m * ( data[ i ] - o );
+            ptr[ 3 ] = canal_alpha.data[ i ]*255;
+        }
+        return img;
+    }
+   
     ///
     void load_ascii_mat_file( std::string filename ) {
         using namespace std;
@@ -381,7 +424,7 @@ struct ImgInterp {
     }
     
     ///
-    void save( std::string filename, bool normalize = false ) const {
+    void save( const std::string filename, bool normalize = false ) const {
         QImage img = to_QImage( normalize );
         img.save( filename.c_str() );
     }
@@ -393,9 +436,29 @@ struct ImgInterp {
     }
     
     ///
-    int display( bool normalize = false ) {
-        save( "pouet.png", normalize );
-        return system( "display pouet.png &" );
+    int display( bool normalize = false, const std::string namefile = "pouet.png" ) {
+        save( namefile.c_str(), normalize );
+        std::string tmp = "display " + namefile + " &";
+        return system( tmp.c_str() );
+    }
+
+    /*!
+    canal_alpha est une image qui doit contenir les valeurs du niveau alpha (valeurs entre 0 et 1, 1 pour opaque et 0 pour transparent)  
+    */
+    template<class T2, class Kernel2, class PT2>
+    void save( const ImgInterp<T2,dim,Kernel2,PT2>& canal_alpha, const std::string filename, bool normalize = false ) const {
+        QImage img = to_QImage(canal_alpha, normalize );
+        img.save( filename.c_str() );
+    }
+
+    /*!
+    canal_alpha est une image qui doit contenir les valeurs du niveau alpha (valeurs entre 0 et 1, 1 pour opaque et 0 pour transparent)  
+     */
+    template<class T2, class Kernel2, class PT2>
+    int display( const ImgInterp<T,dim,Kernel2,PT2>& canal_alpha, bool normalize = false, const std::string namefile = "pouet.png" ) {
+        save( canal_alpha, namefile.c_str(), normalize );
+        std::string tmp = "display " + namefile + " &";
+        return system( tmp.c_str() );
     }
     
     ///

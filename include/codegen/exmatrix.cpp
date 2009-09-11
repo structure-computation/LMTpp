@@ -134,6 +134,22 @@ ExMatrix mul( const ExMatrix &a, const ExMatrix &b ) {
     return res;
 }
 
+/*!
+effectue le produit matriciel point à point; i.e. res[i,j] = a[i,j] * b[i,j]  pour tout i et j
+
+\friend pasquier@lmt.ens-cachan.fr
+*/
+ExMatrix operator^(const ExMatrix &a, const ExMatrix &b ) {
+
+    assert( (a.nb_cols() != b.nb_cols()) or (a.nb_rows() != b.nb_rows()) );
+    ExMatrix res( a.nb_rows(), a.nb_cols() );
+    for(unsigned i=0;i<a.nb_rows();++i)
+        for(unsigned j=0;j<b.nb_cols();++j)
+            res( i, j ) = a( i, j ) * b( i, j );
+    return res;
+
+}
+
 ExVector mul( const ExMatrix &mat, const ExVector &vec ) {
     assert( mat.nb_cols() == vec.size() );
     unsigned nr = mat.nb_rows(), nc = mat.nb_cols();

@@ -84,7 +84,7 @@ private:
     
 ExVector mul( const ExMatrix &a, const ExVector &b );
 ExMatrix mul( const ExMatrix &a, const ExMatrix &b );
-
+ExMatrix operator^( const ExMatrix &a, const ExMatrix &b );// effectue le produit matriciel point à point; i.e. res[i,j] = a[i,j] * b[i,j]
 // if mat.size()=vec.size()+1, do it the OpenGL way
 ExVector operator*(const ExMatrix &mat,const ExVector &vec);
 
