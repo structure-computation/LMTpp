@@ -18,6 +18,7 @@ lst = [
     ('tanh' ,'typename FloatType<P1>::T' , 'true'  ),
     ('real' ,'typename SubComplex<P1>::T', 'true'  ),
     ('imag' ,'typename SubComplex<P1>::T', 'true'  ),
+    ('arg'  ,'typename SubComplex<P1>::T', 'true'  ),    
     ('-'    ,'P1'                        , 'true'  ),
 ]
 for i,ret,conserve_sp in lst:

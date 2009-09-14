@@ -120,6 +120,7 @@ lst = [
     ('tanh' ,'typename FloatType<P1>::T' , ''           , ''            ),
     ('real' ,'typename SubComplex<P1>::T', ''           , ''            ),
     ('imag' ,'typename SubComplex<P1>::T', ''           , ''            ),
+    ('arg'  ,'typename SubComplex<P1>::T', ''           , ''            ),
     ('-'    ,'P1'                        , ''           , ''            ),
 ]
 # generic case

@@ -17,6 +17,7 @@ lst = [
     'tanh' ,
     'real' ,
     'imag' ,
+    'arg' ,
 ]
 
 print 'namespace LMT {'

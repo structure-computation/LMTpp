@@ -2,6 +2,7 @@
 #define LMT_IMG_INTERP_H
 
 #include <containers/mat.h>
+//#include <containers/fft.h>
 #include <QtGui/QImage>
 #include <assert.h>
 #include <fstream>
@@ -17,10 +18,11 @@ std::complex<T> operator*( const std::complex<T> c, int a) {
     return std::complex<T>(a,0) * c;   
 }
 
+template<class T>
 std::complex<T> operator*( int a, const std::complex<T> c) {
     return std::complex<T>(a,0) * c;   
 }
-   
+
 /** kernel exemple for ImgInterp */
 struct ImgInterpBilinearKernel {
     static std::string name() { return "ImgInterpBilinearKernel"; }
@@ -236,7 +238,7 @@ struct ImgInterp {
     }
     
     ///
-    void resize( Vec<int,dim> s ) {
+    void resize( const Vec<int,dim> s ) {
         sizes = s;
         data.resize( product( s ) );
     }
@@ -257,7 +259,7 @@ struct ImgInterp {
         return *div_2;
     }
     
-    Vec<int,dim> size() { return sizes; }
+    Vec<int,dim> size() const { return sizes; }
     ///
     void load( const std::string &s ) {
         //
@@ -328,23 +330,25 @@ struct ImgInterp {
     
     ///
     QImage to_QImage( bool normalize = false ) const {
-        T o = 0.0, m = 1.0;
+        float o = 0.0, m = 1.0;
+        int total_size = sizes[0] * sizes[1];
+        /// Le type T n'est pas forcément ordonné ni facilement convertible en entier 8 bits (e.g. complex<TT>).
+        /// on affiche par défaut sa "norme" (en espérant qu'elle existe). 
+        Vec<float> v = abs(data);
         if ( normalize ) {
-            T mi = min( data );
-            T ma = max( data );
+            float mi = min( v );
+            float ma = max( v );
             o = mi;
-            m = 255 / ( ma - mi );
+            if (ma != mi)
+                m = 255 / ( ma - mi );
         }
-            
-        //
         QImage img( sizes[0], sizes[1], QImage::Format_ARGB32 );
         uchar *ptr = img.bits();
-        int total_size = sizes[0] * sizes[1];
         for(int i=0;i<total_size;++i,ptr+=4) {
-            ptr[ 0 ] = m * ( data[ i ] - o );
-            ptr[ 1 ] = m * ( data[ i ] - o );
-            ptr[ 2 ] = m * ( data[ i ] - o );
-            ptr[ 3 ] = 255 * ( data[ i ] >= 0 );
+            ptr[ 0 ] = m * ( v[ i ] - o );
+            ptr[ 1 ] = m * ( v[ i ] - o );
+            ptr[ 2 ] = m * ( v[ i ] - o );
+            ptr[ 3 ] = 255; //255 * ( data[ i ] >= 0 );
         }
         return img;
     }
@@ -353,8 +357,9 @@ struct ImgInterp {
     QImage to_QImage( const ImgInterp<T2,dim,Kernel2,PT2>& canal_alpha, bool normalize = false ) const {
         assert((canal_alpha.sizes[0] == sizes[0]) and (canal_alpha.sizes[1] == sizes[1]));
         T o = 0.0, mini = std::numeric_limits<T>::max(), maxi = std::numeric_limits<T>::min(), m, t;
+        int total_size = sizes[0] * sizes[1];
         if ( normalize ) {
-            for(int i=0;i<total_size;++i,ptr+=4)
+            for(int i=0;i<total_size;++i)
                 if (canal_alpha.data[ i ] == 1) {
                     t = data[i];
                     if (t < mini)
@@ -363,13 +368,13 @@ struct ImgInterp {
                         maxi = t;
                 }
             o = mini;
-            m = 255 / ( maxi - mini );
+            if (maxi != mini)
+                m = 255 / ( maxi - mini );
         }
             
         //
         QImage img( sizes[0], sizes[1], QImage::Format_ARGB32 );
         uchar *ptr = img.bits();
-        int total_size = sizes[0] * sizes[1];
         for(int i=0;i<total_size;++i,ptr+=4) {
             T b = canal_alpha.data[ i ] == 1;
             ptr[ 0 ] = b * m * ( data[ i ] - o );
@@ -546,7 +551,7 @@ struct ImgInterp {
     Vec<T> data;
     Vec<int,dim> sizes;
     Kernel kernel;
-    mutable ImgInterp<T,dim,Kernel> *div_2;
+    mutable ImgInterp<T,dim,Kernel,PT> *div_2;
 };
 
 
@@ -727,7 +732,6 @@ ImgInterp<TT,2> img_dist_from_front( const ImgInterp<TT,2> &mat, int max_dist, T
             
     return dist;
 }
-
 
 }
 

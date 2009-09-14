@@ -110,52 +110,58 @@ void read_msh(TM &m,std::istream &is) throw(std::runtime_error) {
             LMT::Vec<TNode *> vn; vn.resize(nb_nodes);
             for(int i=0;i<nb_nodes;i++) {
                 s >> number;
-                PRINT(number);
                 vn[i] = map_num_node[number];
             }
       
             if ( type_elem == 1 ) { //TODO
+                m.add_element( Bar(),DefaultBehavior(),vn.ptr() );
             }
             else if ( type_elem == 2 ) { //TODO
                 if ( nvi == 2 ) {
-                    cout << "coucou" << endl;
                     permutation_if_jac_neg ( Triangle(), vn.ptr() );
+                    m.add_element( Triangle(),DefaultBehavior(),vn.ptr() );
                 }
             }
             else if ( type_elem == 3 ) { //TODO
                 if ( nvi == 2 ) {
                     permutation_if_jac_neg ( Quad(), vn.ptr() );
+                    m.add_element( Quad(),DefaultBehavior(),vn.ptr() );
                 }
             }
             else if ( type_elem == 4 ) { //TODO
                 if ( nvi == 3 ) {
                     permutation_if_jac_neg ( Tetra(), vn.ptr() );
+                    m.add_element( Tetra(),DefaultBehavior(),vn.ptr() );
                 }
             }
             else if ( type_elem == 5 ) { //TODO
                 if ( nvi == 3 ) {
                     permutation_if_jac_neg ( Hexa(), vn.ptr() );
+                    m.add_element( Hexa(),DefaultBehavior(),vn.ptr() );
                 }
             }
             else if ( type_elem == 6 ) { //TODO
                 if ( nvi == 3 ) {
                     permutation_if_jac_neg ( Wedge(), vn.ptr() );
+                    m.add_element( Wedge(),DefaultBehavior(),vn.ptr() );
                 }
             }
             else if ( type_elem == 8 ) { //TODO
                 if ( nvi == 1 ) {
-                    ;
+                    m.add_element( Bar_3(),DefaultBehavior(),vn.ptr() );
                 }
             }
             else if ( type_elem == 9 ) { //TODO
                 if ( nvi == 2 ) {
                     permutation_if_jac_neg ( Triangle_6(), vn.ptr() );
+                    m.add_element( Triangle_6(),DefaultBehavior(),vn.ptr() );
                 }
             }
             else if ( type_elem == 11 ) { //TODO
                 if ( nvi == 3 ) {
                     swap( vn[8], vn[9] );
                     permutation_if_jac_neg ( Tetra_10(), vn.ptr() );
+                    m.add_element( Tetra_10(),DefaultBehavior(),vn.ptr() );
                 }
             }
             else if ( type_elem == 15 ) { //TODO
