@@ -733,6 +733,22 @@ ImgInterp<TT,2> img_dist_from_front( const ImgInterp<TT,2> &mat, int max_dist, T
     return dist;
 }
 
+template<class T_,unsigned dim_,class Kernel_,class PT_>
+ImgInterp<T_,dim_,Kernel_,PT_> abs( const ImgInterp<T_,dim_,Kernel_,PT_> &i) {
+    ImgInterp<T_,dim_,Kernel_,PT_> res;
+    res.resize(i.size());
+    res.data = abs(i.data);
+    return res;    
+}
+
+template<class T_,unsigned dim_,class Kernel_,class PT_>
+ImgInterp<T_,dim_,Kernel_,PT_> arg( const ImgInterp<T_,dim_,Kernel_,PT_> &i) {
+    ImgInterp<T_,dim_,Kernel_,PT_> res;
+    res.resize(i.size());
+    res.data = arg(i.data);
+    return res;    
+}
+
 }
 
 #endif // LMT_IMG_INTERP_H
