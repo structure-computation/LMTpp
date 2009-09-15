@@ -144,7 +144,7 @@ ImgInterp<std::complex<double>,dim_,Kernel_,PT_> fft( ImgInterp<T_, dim_, Kernel
 template<class T_,unsigned dim_,class Kernel_,class PT_> 
 ImgInterp<std::complex<double>,dim_,Kernel_,PT_> fft( ImgInterp<T_, dim_, Kernel_, PT_ > &img, int xmin, int xmax, int ymin, int ymax, SymmectricPadding padding) {
     int x_in_max = (xmax-xmin+1)*2-1 , y_in_max = (ymax-ymin+1)*2-1,i,j;
-    ImgInterp<std::complex<double>,dim_,Kernel_,PT_> in, out;//,tem;
+    ImgInterp<std::complex<double>,dim_,Kernel_,PT_> in;//,tem;
     FFT p;
 
     in.resize(Vec<int,2>(x_in_max+1,y_in_max+1));
@@ -163,10 +163,7 @@ ImgInterp<std::complex<double>,dim_,Kernel_,PT_> fft( ImgInterp<T_, dim_, Kernel
     if (padding.div_2)
         in = in.pyramidal_filter();
 
-    PRINT(in.sizes);
-    out = p.fft(in);
-    PRINT(out.sizes);
-    return out;
+    return p.fft(in);
 }
 
 template<class T_,unsigned dim_,class Kernel_,class PT_> 
@@ -174,7 +171,35 @@ ImgInterp<std::complex<double>,dim_,Kernel_,PT_> fft( ImgInterp<T_, dim_, Kernel
     fft( img, topleft[0], bottomright[0], topleft[1], bottomright[1], padding);
 }
 
+template<class T_,unsigned dim_,class Kernel_,class PT_> 
+ImgInterp<std::complex<double>,dim_,Kernel_,PT_> fft( ImgInterp<T_, dim_, Kernel_, PT_ > &img, int xmin, int xmax, int ymin, int ymax, ZeroPadding padding) {
+    int x_in_max = xmax-xmin+2 , y_in_max = ymax-ymin+2,i,j;
+    ImgInterp<std::complex<double>,dim_,Kernel_,PT_> in;
+    FFT p;
 
+    in.resize(Vec<int,2>(x_in_max+1,y_in_max+1));
+    for(int jj=xmin;jj<=xmax;++jj) {
+        j = jj-xmin+1;
+        for(int ii=ymin;ii<=ymax;++ii) {
+            i = ii-ymin+1;
+            in.tex_int(j,i) = img(jj,ii);
+        }
+    }
+    for(i=0;i<=y_in_max;++i)
+        in.tex_int(0,i) = 0;
+    for(i=0;i<=y_in_max;++i)
+        in.tex_int(x_in_max,i) = 0;    
+    for(j=0;j<=x_in_max;++j)
+        in.tex_int(j,0) = 0; 
+    for(j=0;j<=x_in_max;++j)
+        in.tex_int(j,y_in_max) = 0; 
+    return p.fft(in);
+}
+
+template<class T_,unsigned dim_,class Kernel_,class PT_> 
+ImgInterp<std::complex<double>,dim_,Kernel_,PT_> fft( ImgInterp<T_, dim_, Kernel_, PT_ > &img, Vec<int,2> topleft, Vec<int,2> bottomright, ZeroPadding padding) {
+    fft( img, topleft[0], bottomright[0], topleft[1], bottomright[1], padding);
+}
 
 };
 
