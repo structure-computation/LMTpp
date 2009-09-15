@@ -74,7 +74,7 @@ void read_msh_2( TM &m,std::istream &is, unsigned nvi, const VarTag &vt ) throw 
         if ( str.find ( "$EndElements" ) != string::npos ) {
             break;
         }
-        if ( str.find ( "$Nodes" ) < != string::npos ) {
+        if ( str.find ( "$Nodes" ) != string::npos ) {
             getline( is,str );
             ctxte = 1;
             continue;
