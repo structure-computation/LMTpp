@@ -144,7 +144,7 @@ ImgInterp<std::complex<double>,dim_,Kernel_,PT_> fft( ImgInterp<T_, dim_, Kernel
 template<class T_,unsigned dim_,class Kernel_,class PT_> 
 ImgInterp<std::complex<double>,dim_,Kernel_,PT_> fft( ImgInterp<T_, dim_, Kernel_, PT_ > &img, int xmin, int xmax, int ymin, int ymax, SymmectricPadding padding) {
     int x_in_max = (xmax-xmin+1)*2-1 , y_in_max = (ymax-ymin+1)*2-1,i,j;
-    ImgInterp<std::complex<double>,dim_,Kernel_,PT_> in, out;
+    ImgInterp<std::complex<double>,dim_,Kernel_,PT_> in, out;//,tem;
     FFT p;
 
     in.resize(Vec<int,2>(x_in_max+1,y_in_max+1));
@@ -160,10 +160,9 @@ ImgInterp<std::complex<double>,dim_,Kernel_,PT_> fft( ImgInterp<T_, dim_, Kernel
         }
     }
     
-    if (padding.div_2) 
+    if (padding.div_2)
         in = in.pyramidal_filter();
-    
-    in.display(true);
+
     PRINT(in.sizes);
     out = p.fft(in);
     PRINT(out.sizes);
