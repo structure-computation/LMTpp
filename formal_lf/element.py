@@ -246,8 +246,26 @@ class Element:
           tmp += v.diff(self.var_inter[i])*self.inv_jac[j,i];
         res[j] = tmp
       return res
+        
+    def gradT(self,v,dep=False):
+      """ """
+      self.calculate_jacobian(dep)
+      if isinstance(v,ExVector):
+        res = ExMatrix(v.size(),self.nb_var_inter)
+        for k in range(v.size()):
+          for j in range(self.nb_var_inter):
+            for i in range(self.nb_var_inter):
+              res[j,k] += v[k].diff(self.var_inter[i])*self.inv_jac[j,i]
+        return res
+      res = ExVector(self.nb_var_inter)
+      for j in range(self.nb_var_inter):
+        tmp = 0
+        for i in range(self.nb_var_inter):
+          tmp += v.diff(self.var_inter[i])*self.inv_jac[j,i];
+        res[j] = tmp
+      return res
 
-    def grad_sym(self,v, dep=False):
+    def grad_sym(self,v,dep=False):
       """ """      
       m = self.grad(v,dep)
       if isinstance(m,ExVector):
@@ -289,6 +307,21 @@ class Element:
       return tmp
       
     def green_lagrange_col(self,v): return mat_sym_to_vec_col(self.green_lagrange(v))
+    
+    def euler_almansi(self,expr):
+      """ """
+      res = self.grad(expr)
+      tmp = ExMatrix(self.nb_var_inter,self.nb_var_inter)
+      for i in range(self.nb_var_inter):
+        for j in range(self.nb_var_inter):
+          tmp[i,j] = ( res[i,j] + res[j,i] ) / 2
+      for i in range(self.nb_var_inter):
+        for j in range(self.nb_var_inter):
+          for k in range(self.nb_var_inter):
+            tmp[i,j] -= res[k,i] * res[k,j]  / 2
+      return tmp
+          
+    def euler_almansi_col(self,v): return mat_sym_to_vec_col(self.euler_almansi(v))
     
     def div(self,v):
       if isinstance( v, ExMatrix ):    #etienne

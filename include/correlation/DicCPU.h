@@ -191,8 +191,8 @@ struct DicCPU {
             for(int i=0;i<TE::nb_nodes;++i) P[ i ] = e.pos(i);
             for(int i=0;i<TE::nb_nodes;++i) D[ i ] = e.pos(i) + ed( *e.node(i) );
             for(int i=0;i<TE::nb_nodes;++i) G[ i ] = eg( *e.node(i) );
-            for(int i=1;i<TE::nb_nodes;++i) MI = min( MI, D[ i ] ); // hum
-            for(int i=1;i<TE::nb_nodes;++i) MA = max( MA, D[ i ] ); // hum
+            for(int i=1;i<TE::nb_nodes;++i) MI = min( MI, D[ i ] ); // hum (won't work e.g. for Triangle_6...)
+            for(int i=1;i<TE::nb_nodes;++i) MA = max( MA, D[ i ] ); // hum (won't work e.g. for Triangle_6...)
             f.load_if_necessary( MI, MA );
             r.load_if_necessary( MI, MA, true );
             //
@@ -364,13 +364,15 @@ struct DicCPU {
         if ( resol_level < multi_resolution ) {
             ExtractDM<NAME_VAR_DEPL> pd;
             for(unsigned i=0;i<m.node_list.size();++i) {
-                m.node_list[i].pos /= 2;
+                m.node_list[i].pos   /= 2;
                 pd( m.node_list[i] ) /= 2;
+                U_red                /= 2;
             }
             exec_rigid_body( f.pyramidal_filter(), g.pyramidal_filter(), m, name_var_depl, name_var_grey, want_mat, want_vec, resol_level + 1 );
             for(unsigned i=0;i<m.node_list.size();++i) {
-                m.node_list[i].pos *= 2;
+                m.node_list[i].pos   *= 2;
                 pd( m.node_list[i] ) *= 2;
+                U_red                *= 2;
             }
         }
         //

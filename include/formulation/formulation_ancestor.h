@@ -3,7 +3,9 @@
 
 #include "containers/mat.h"
 #include "io/xmlnode.h"
+
 namespace LMT {
+
 struct SparseUMFPACK;
 struct SparseCholMod;
 

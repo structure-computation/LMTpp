@@ -2,15 +2,18 @@
 #define LMT_IMG_INTERP_H
 
 #include <containers/mat.h>
+//#include <containers/fft.h>
 #include <QtGui/QImage>
 #include <assert.h>
 #include <fstream>
 #include <sstream>
 #include <util/rectilinear_iterator.h>
 
+#include <complex>
+
 namespace LMT {
 
-/** kernel exemple for ImgInterp */
+/*! kernel exemple for ImgInterp */
 struct ImgInterpBilinearKernel {
     static std::string name() { return "ImgInterpBilinearKernel"; }
     
@@ -62,14 +65,16 @@ struct ImgInterpBilinearKernel {
     template<class T,class Img,class PT,int dim>
     Vec<T,dim> grad( StructForType<T>, const Img &f, Vec<PT,dim> p ) const {
         Vec<T,dim> res;
-        const double d = 0.05;
+        const double d = 1.0;
+        //const double d = 0.5;
         for(int i=0;i<dim;++i)
-            res[ i ] = ( f( Vec<PT,dim>( p + static_dirac_vec<dim>( d, i ) ) ) - f( p - static_dirac_vec<dim>( d, i ) ) ) / ( 2 * d );
+            res[ i ] = ( f( Vec<PT,dim>( p + static_dirac_vec<dim>( d, i ) ) ) - f( p ) ) / d;
+            //res[ i ] = ( f( Vec<PT,dim>( p + static_dirac_vec<dim>( d, i ) ) ) - f( p - static_dirac_vec<dim>( d, i ) ) ) / ( 2 * d );
         return res;
     }
 };
 
-/** kernel exemple for ImgInterp */
+/*! kernel exemple for ImgInterp */
 struct ImgInterpOrder3_Kernel {
     static std::string name() { return "ImgInterpOrder3_Kernel"; }
     
@@ -154,7 +159,7 @@ struct ImgInterpOrder3_Kernel {
     }
 };
 
-/** kernel exemple for ImgInterp */
+/*! kernel exemple for ImgInterp */
 struct ImgInterpIntegralKernel {
     // 2D
     template<class T,class Img,class PT>
@@ -176,7 +181,7 @@ struct ImgInterpIntegralKernel {
     }
 };
 
-/** kernel exemple for ImgInterp */
+/*! kernel exemple for ImgInterp */
 template<unsigned nb_div>
 struct ImgInterpDivKernel {
     // 2D
@@ -205,7 +210,20 @@ struct ImgInterpDivKernel {
 };
 
 
-/** */
+/*! 
+    \a ImgInterp est un type qui représente une fonction définie sur une partie du réseau carré/cubique unitaire. 
+    Plus précisément soit S le réseau du plan (resp. de l'espace) défini par les points/noeuds de coordonnées s = k1*e1+k2*e2+...+kn*en où (e1,e2,...,en) est la base canonique de IR^n et k1, k2, ..., kn sont des entiers relatifs quelconques et variables. ImgInterp représente une fonction f définie sur une partie de S de la forme {(k1,k2,...,kn), où k1 varie dans [[0..sizes[0]-1]], k2 dans [[0..sizes[1]-1]] etc...}, à valeur dans une ensemble dont les éléments sont du type T_.
+
+    Remarque : f peut être vue comme la restriction d'une fonction g définie sur le pavé [0..sizes[0]-1] x ... x [0..sizes[n-1]-1].
+    Remarque : une image peut être vue comme une fonction définie sur une partie de S : la valeur d'un pixel est la valeur en un noeud du réseau.
+
+    Entrées :
+        * T_ est le type de retour de la fonction,
+        * dim_ est la dimension du réseau ( e.g. 2 pour une image classique (i.e. du plan)),
+        * Kernel_ est l'algorithme d'interpolation entre les points du réseau,
+        * PT_ est le type scalaire des coordonnées (e.g. si le type des coordonnées est Vec<int,2> alors PT_ = int). 
+            WARNING : si vous envisager de faire de la multirésoltion, ne prenez pas PT_ = int ou un autre format entier car la méthode pyramidal_filter() ne calculera pas la moyenne des pixels adjacents. Prenez PT_ = double ou float.
+*/
 template<class T_,unsigned dim_,class Kernel_=ImgInterpBilinearKernel,class PT_=T_>
 struct ImgInterp {
     typedef T_ T;
@@ -223,7 +241,7 @@ struct ImgInterp {
     }
     
     ///
-    void resize( Vec<int,dim> s ) {
+    void resize( const Vec<int,dim> s ) {
         sizes = s;
         data.resize( product( s ) );
     }
@@ -244,6 +262,7 @@ struct ImgInterp {
         return *div_2;
     }
     
+    Vec<int,dim> size() const { return sizes; }
     ///
     void load( const std::string &s ) {
         //
@@ -314,27 +333,61 @@ struct ImgInterp {
     
     ///
     QImage to_QImage( bool normalize = false ) const {
-        T o = 0.0, m = 1.0;
+        float o = 0.0, m = 1.0;
+        int total_size = sizes[0] * sizes[1];
+        /// Le type T n'est pas forcément ordonné ni facilement convertible en entier 8 bits (e.g. complex<TT>).
+        /// on affiche par défaut sa "norme" (en espérant qu'elle existe). 
+        Vec<float> v = abs(data);
         if ( normalize ) {
-            T mi = min( data );
-            T ma = max( data );
+            float mi = min( v );
+            float ma = max( v );
             o = mi;
-            m = 255 / ( ma - mi );
+            if (ma != mi)
+                m = 255 / ( ma - mi );
+        }
+        QImage img( sizes[0], sizes[1], QImage::Format_ARGB32 );
+        uchar *ptr = img.bits();
+        for(int i=0;i<total_size;++i,ptr+=4) {
+            ptr[ 0 ] = m * ( v[ i ] - o );
+            ptr[ 1 ] = m * ( v[ i ] - o );
+            ptr[ 2 ] = m * ( v[ i ] - o );
+            ptr[ 3 ] = 255; //255 * ( data[ i ] >= 0 );
+        }
+        return img;
+    }
+
+    template<class T2, class Kernel2, class PT2>
+    QImage to_QImage( const ImgInterp<T2,dim,Kernel2,PT2>& canal_alpha, bool normalize = false ) const {
+        assert((canal_alpha.sizes[0] == sizes[0]) and (canal_alpha.sizes[1] == sizes[1]));
+        T o = 0.0, mini = std::numeric_limits<T>::max(), maxi = std::numeric_limits<T>::min(), m, t;
+        int total_size = sizes[0] * sizes[1];
+        if ( normalize ) {
+            for(int i=0;i<total_size;++i)
+                if (canal_alpha.data[ i ] == 1) {
+                    t = data[i];
+                    if (t < mini)
+                        mini = t;
+                    if (data[i] > t)
+                        maxi = t;
+                }
+            o = mini;
+            if (maxi != mini)
+                m = 255 / ( maxi - mini );
         }
             
         //
         QImage img( sizes[0], sizes[1], QImage::Format_ARGB32 );
         uchar *ptr = img.bits();
-        int total_size = sizes[0] * sizes[1];
         for(int i=0;i<total_size;++i,ptr+=4) {
-            ptr[ 0 ] = m * ( data[ i ] - o );
-            ptr[ 1 ] = m * ( data[ i ] - o );
-            ptr[ 2 ] = m * ( data[ i ] - o );
-            ptr[ 3 ] = 255 * ( data[ i ] >= 0 );
+            T b = canal_alpha.data[ i ] == 1;
+            ptr[ 0 ] = b * m * ( data[ i ] - o );
+            ptr[ 1 ] = b * m * ( data[ i ] - o );
+            ptr[ 2 ] = b * m * ( data[ i ] - o );
+            ptr[ 3 ] = canal_alpha.data[ i ]*255;
         }
         return img;
     }
-    
+   
     ///
     void load_ascii_mat_file( std::string filename ) {
         using namespace std;
@@ -379,7 +432,7 @@ struct ImgInterp {
     }
     
     ///
-    void save( std::string filename, bool normalize = false ) const {
+    void save( const std::string filename, bool normalize = false ) const {
         QImage img = to_QImage( normalize );
         img.save( filename.c_str() );
     }
@@ -391,9 +444,29 @@ struct ImgInterp {
     }
     
     ///
-    int display( bool normalize = false ) {
-        save( "pouet.png", normalize );
-        return system( "display pouet.png &" );
+    int display( bool normalize = false, const std::string namefile = "pouet.png" ) {
+        save( namefile.c_str(), normalize );
+        std::string tmp = "display " + namefile + " &";
+        return system( tmp.c_str() );
+    }
+
+    /*!
+    canal_alpha est une image qui doit contenir les valeurs du niveau alpha (valeurs entre 0 et 1, 1 pour opaque et 0 pour transparent)  
+    */
+    template<class T2, class Kernel2, class PT2>
+    void save( const ImgInterp<T2,dim,Kernel2,PT2>& canal_alpha, const std::string filename, bool normalize = false ) const {
+        QImage img = to_QImage(canal_alpha, normalize );
+        img.save( filename.c_str() );
+    }
+
+    /*!
+    canal_alpha est une image qui doit contenir les valeurs du niveau alpha (valeurs entre 0 et 1, 1 pour opaque et 0 pour transparent)  
+     */
+    template<class T2, class Kernel2, class PT2>
+    int display( const ImgInterp<T,dim,Kernel2,PT2>& canal_alpha, bool normalize = false, const std::string namefile = "pouet.png" ) {
+        save( canal_alpha, namefile.c_str(), normalize );
+        std::string tmp = "display " + namefile + " &";
+        return system( tmp.c_str() );
     }
     
     ///
@@ -481,11 +554,11 @@ struct ImgInterp {
     Vec<T> data;
     Vec<int,dim> sizes;
     Kernel kernel;
-    mutable ImgInterp<T,dim,Kernel> *div_2;
+    mutable ImgInterp<T,dim,Kernel,PT> *div_2;
 };
 
 
-/** */
+/*! */
 template<class T,unsigned dim,class PT=T>
 struct ImgInterByBlock {
     typedef long long Int64;
@@ -663,6 +736,21 @@ ImgInterp<TT,2> img_dist_from_front( const ImgInterp<TT,2> &mat, int max_dist, T
     return dist;
 }
 
+template<class T_,unsigned dim_,class Kernel_,class PT_>
+ImgInterp<T_,dim_,Kernel_,PT_> abs( const ImgInterp<T_,dim_,Kernel_,PT_> &i) {
+    ImgInterp<T_,dim_,Kernel_,PT_> res;
+    res.resize(i.size());
+    res.data = abs(i.data);
+    return res;    
+}
+
+template<class T_,unsigned dim_,class Kernel_,class PT_>
+ImgInterp<T_,dim_,Kernel_,PT_> arg( const ImgInterp<T_,dim_,Kernel_,PT_> &i) {
+    ImgInterp<T_,dim_,Kernel_,PT_> res;
+    res.resize(i.size());
+    res.data = arg(i.data);
+    return res;    
+}
 
 }
 

@@ -67,19 +67,19 @@ void read_msh_2( TM &m,std::istream &is, unsigned nvi, const VarTag &vt ) throw 
         getline ( is,str );
 
         // évaluation du contexte
-        if ( str.find ( "$EndNodes" ) < str.size() ) {
+        if ( str.find ( "$EndNodes" ) != string::npos ) {
             ctxte=0;
             continue;
         }
-        if ( str.find ( "$EndElements" ) < str.size() ) {
+        if ( str.find ( "$EndElements" ) != string::npos ) {
             break;
         }
-        if ( str.find ( "$Nodes" ) < str.size() ) {
+        if ( str.find ( "$Nodes" ) != string::npos ) {
             getline( is,str );
             ctxte = 1;
             continue;
         }
-        if ( str.find ( "$Elements" ) < str.size() ) {
+        if ( str.find ( "$Elements" ) != string::npos ) {
             getline( is,str );
             ctxte = 2;
             continue;

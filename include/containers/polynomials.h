@@ -735,7 +735,12 @@ class Pol {
                 sort(res);
             }
         }
-        else if (taille>4) { /// degré >= 4
+        else if (taille ==5) { /// degré = 4
+            Vec<C> solutions_complexes = roots();
+            for( int i=0;i<solutions_complexes.size();++i)
+                if (std::abs(solutions_complexes[i].imag()) < 16*std::numeric_limits<T>::epsilon())
+                    res.push_back(solutions_complexes[i].real());
+            } else {
             //if (coefs[0]!=0) {
             if (abs(coefs[0]) > 16*numeric_limits<T>::epsilon()) {
                 Vec<Pol<nd,nx,T> > Sturm(*this,derivative());
@@ -794,8 +799,8 @@ class Pol {
                 }
                 res.push_back(0);
                 res.append(r);
+                }
             }
-        }
         return res;
     }
 

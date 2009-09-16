@@ -44,7 +44,7 @@ inline void rm_commas( std::string &str ) {
 
 inline std::string read_until_sp( const std::string &str, int off ) {
     std::string res; res.reserve( str.size() - off );
-    while( off<str.size() and str[off]!=' ' )
+    while( off<(int)str.size() and str[off]!=' ' )
         res += str[off++];
     return res;
 }

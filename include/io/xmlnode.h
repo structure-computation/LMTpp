@@ -20,6 +20,15 @@
 #ifndef DOUCXMLNODE_H
 #define DOUCXMLNODE_H
 
+#ifdef DONT_WANT_XML
+// WITHOUT XML
+
+class XmlNode {
+};
+
+#else
+// WITH XML
+
 #include <sstream>
 #include <libxml/tree.h>
 #include "factory.h"
@@ -190,6 +199,8 @@ private:
 std::ostream &operator<<(std::ostream &os,const XmlNode &node);
 
 };
+
+#endif // WITHOUT_XML
 
 #endif
 

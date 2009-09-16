@@ -259,7 +259,10 @@ for op in lst:
     
     inline double abs(const std::complex<double> &val) { return std::abs(val); }
     inline long double abs(const std::complex<long double> &val) { return std::abs(val); }
-
+    
+    inline double arg(const std::complex<double> &val) { return std::arg(val); }
+    inline long double arg(const std::complex<long double> &val) { return std::arg(val); }
+    
 /*!
 \generic_comment abs_indication
 

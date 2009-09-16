@@ -98,7 +98,7 @@ def hooke_isotrope_th_3d(E,nu,alpha):
 #
 def hooke_isotrope_th(E,nu,dim,alpha,type_stress_2D='plane stress'):
    Kglo, Hglo, epsth= hooke_isotrope_th_3d(E,nu,alpha)
-   K,epsth = simplification_behaviour(Kglo,Hglo,epsth,dim,type_stress_2D)
+   K, epsth = simplification_behaviour(Kglo,Hglo,epsth,dim,type_stress_2D)
    return K,epsth
 
 #

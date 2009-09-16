@@ -127,7 +127,7 @@ public:
     OP op;
 };
 
-/** Ex : generate( """+J('v%(i)i',', ')+""", _1 * 2 ) ( which can be written v*2 ). Usefull to generate a Vec<VecOp,s> without worrying about typedef and so on
+/*! Ex : generate( """+J('v%(i)i',', ')+""", _1 * 2 ) ( which can be written v*2 ). Usefull to generate a Vec<VecOp,s> without worrying about typedef and so on
     \\relates Vec
 */
 template<"""+J('class TT%(i)i,int s%(i)i')+""",class Op> Vec<VecOp<Op,"""+str(nb_par)+""","""+J('Vec<TT%(i)i,s%(i)i>,true')+"""> >
