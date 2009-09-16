@@ -183,7 +183,7 @@ public:
     TT &push_back(const TT &val) { TT &res = *new_elem(); res = val; return res; } /// Add a copy of val as a new element.
     TT &push_back_in_reserved(const TT &v) { val[s] = v; return val[s++]; } /// Add a copy of val as a new element. Assumes that room for val is already reserved. Only for dynamic vectors.
     TT &push_back_unique(const TT &v) { for(unsigned i=0;i<size();++i) if ( val[i] == v ) return val[i]; return push_back( v ); } /// Add a copy of val as a new element. Assumes that room for val is already reserved. Only for dynamic vectors.
-    void pop_back() { --s; } /// remove the last element.
+    TT& pop_back() { --s; return val[s]; } /// remove the last element.
     void pop_back(unsigned nb_val) { s -= nb_val; } /// remove the nb_val elements at end.
     void fit_memory() { reserve(size()); } /// if size() is lesser than reserved, reallocate memory with 'right' size.
     void erase_elem_nb(unsigned i) { for(unsigned j=i;j<s-1;++j) val[j]=val[j+1]; pop_back(); } /// erase element number i. This procedure maintains the order of elements

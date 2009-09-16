@@ -134,21 +134,22 @@ void display_image(const Mat<T,Str,Sto,IO> &mat, const std::string &name_file="t
 }
 
 /** @see display_image */
+template<class T>
 struct EchelleCouleurExemple {
-    Vec<double,3> operator()( double grey ) const {
-        return Vec<double,3>( exp( - grey*grey*2 ), exp( - (grey-0.5)*(grey-0.5)*2 ), exp( - (grey-1)*(grey-1) )*2 ) / ( 1 + exp( -1 ) + exp( -2 ) );
+    Vec<T,3> operator()( T grey ) const {
+        return Vec<T,3>( exp( - grey*grey*2 ), exp( - (grey-0.5)*(grey-0.5)*2 ), exp( - (grey-1)*(grey-1) )*2 ) / ( 1 + exp( -1 ) + exp( -2 ) );
     }
 };
 
 /** display_image( m, EchelleCouleurExemple(), ... ); */
 template<class TM,class Op>
-void display_image(const TM &mat, const Op &grey_to_rgb, const std::string &name_file="toto", bool disp_screen = false, bool auto_grey_level_scaling = false ) {
-    typedef typename TM::T TT;
+        void display_image(const TM &mat, const Op &grey_to_rgb, const std::string &name_file="toto", bool disp_screen = false, bool auto_grey_level_scaling = false ) {
+    typedef typename TM::T T;
     using namespace std;
     
     ofstream f( name_file.c_str() );
         
-    TT mi = 0, ma = 1;
+    T mi = 0, ma = 1;
     if ( auto_grey_level_scaling ) {
         mi = min( mat );
         ma = max( mat );
@@ -156,7 +157,7 @@ void display_image(const TM &mat, const Op &grey_to_rgb, const std::string &name
         
     for(unsigned l=0;l<mat.nb_rows();++l) {
         for(unsigned c=0;c<mat.nb_cols();++c) {
-            Vec<double> rgb = grey_to_rgb( ( mat(l,c) - mi ) / ( ma - mi ) );
+            Vec<T,3> rgb = grey_to_rgb( ( mat(l,c) - mi ) / ( ma - mi ) );
             f.put( (unsigned char)( 255 * rgb[0] ) );
             f.put( (unsigned char)( 255 * rgb[1] ) );
             f.put( (unsigned char)( 255 * rgb[2] ) );
