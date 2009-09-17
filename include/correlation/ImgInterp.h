@@ -13,17 +13,7 @@
 
 namespace LMT {
 
-template<class T>
-std::complex<T> operator*( const std::complex<T> c, int a) {
-    return std::complex<T>(a,0) * c;   
-}
-
-template<class T>
-std::complex<T> operator*( int a, const std::complex<T> c) {
-    return std::complex<T>(a,0) * c;   
-}
-
-/** kernel exemple for ImgInterp */
+/*! kernel exemple for ImgInterp */
 struct ImgInterpBilinearKernel {
     static std::string name() { return "ImgInterpBilinearKernel"; }
     
@@ -84,7 +74,7 @@ struct ImgInterpBilinearKernel {
     }
 };
 
-/** kernel exemple for ImgInterp */
+/*! kernel exemple for ImgInterp */
 struct ImgInterpOrder3_Kernel {
     static std::string name() { return "ImgInterpOrder3_Kernel"; }
     
@@ -169,7 +159,7 @@ struct ImgInterpOrder3_Kernel {
     }
 };
 
-/** kernel exemple for ImgInterp */
+/*! kernel exemple for ImgInterp */
 struct ImgInterpIntegralKernel {
     // 2D
     template<class T,class Img,class PT>
@@ -191,7 +181,7 @@ struct ImgInterpIntegralKernel {
     }
 };
 
-/** kernel exemple for ImgInterp */
+/*! kernel exemple for ImgInterp */
 template<unsigned nb_div>
 struct ImgInterpDivKernel {
     // 2D
@@ -220,7 +210,20 @@ struct ImgInterpDivKernel {
 };
 
 
-/** */
+/*! 
+    \a ImgInterp est un type qui représente une fonction définie sur une partie du réseau carré/cubique unitaire. 
+    Plus précisément soit S le réseau du plan (resp. de l'espace) défini par les points/noeuds de coordonnées s = k1*e1+k2*e2+...+kn*en où (e1,e2,...,en) est la base canonique de IR^n et k1, k2, ..., kn sont des entiers relatifs quelconques et variables. ImgInterp représente une fonction f définie sur une partie de S de la forme {(k1,k2,...,kn), où k1 varie dans [[0..sizes[0]-1]], k2 dans [[0..sizes[1]-1]] etc...}, à valeur dans une ensemble dont les éléments sont du type T_.
+
+    Remarque : f peut être vue comme la restriction d'une fonction g définie sur le pavé [0..sizes[0]-1] x ... x [0..sizes[n-1]-1].
+    Remarque : une image peut être vue comme une fonction définie sur une partie de S : la valeur d'un pixel est la valeur en un noeud du réseau.
+
+    Entrées :
+        * T_ est le type de retour de la fonction,
+        * dim_ est la dimension du réseau ( e.g. 2 pour une image classique (i.e. du plan)),
+        * Kernel_ est l'algorithme d'interpolation entre les points du réseau,
+        * PT_ est le type scalaire des coordonnées (e.g. si le type des coordonnées est Vec<int,2> alors PT_ = int). 
+            WARNING : si vous envisager de faire de la multirésoltion, ne prenez pas PT_ = int ou un autre format entier car la méthode pyramidal_filter() ne calculera pas la moyenne des pixels adjacents. Prenez PT_ = double ou float.
+*/
 template<class T_,unsigned dim_,class Kernel_=ImgInterpBilinearKernel,class PT_=T_>
 struct ImgInterp {
     typedef T_ T;
@@ -555,7 +558,7 @@ struct ImgInterp {
 };
 
 
-/** */
+/*! */
 template<class T,unsigned dim,class PT=T>
 struct ImgInterByBlock {
     typedef long long Int64;
