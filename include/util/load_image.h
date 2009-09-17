@@ -157,7 +157,7 @@ template<class TM,class Op>
         
     for(unsigned l=0;l<mat.nb_rows();++l) {
         for(unsigned c=0;c<mat.nb_cols();++c) {
-            Vec<T,3> rgb = grey_to_rgb( ( mat(l,c) - mi ) / ( ma - mi ) );
+            Vec<T,3> rgb;// = grey_to_rgb( ( mat(l,c) - mi ) / ( ma - mi ) );
             f.put( (unsigned char)( 255 * rgb[0] ) );
             f.put( (unsigned char)( 255 * rgb[1] ) );
             f.put( (unsigned char)( 255 * rgb[2] ) );
