@@ -7,6 +7,7 @@
 namespace LMT {
 
 struct Triangle;
+struct Quad;
 
 template<class TE>
 void display_gl_elem( const TE &elem ) {
@@ -25,6 +26,23 @@ void display_gl_elem( const Element<Triangle,TN,TNG,TD,NET> &elem ) {
         glVertex3f( elem.node(0)->pos[0], elem.node(0)->pos[1], TNG::dim >= 3 ? elem.node(0)->pos[2] : 0 );
         glVertex3f( elem.node(1)->pos[0], elem.node(1)->pos[1], TNG::dim >= 3 ? elem.node(1)->pos[2] : 0 );
         glVertex3f( elem.node(2)->pos[0], elem.node(2)->pos[1], TNG::dim >= 3 ? elem.node(2)->pos[2] : 0 );
+    }
+    glEnd();
+}
+
+template<class TN,class TNG,class TD,unsigned NET>
+void display_gl_elem( const Element<Quad,TN,TNG,TD,NET> &elem ) {
+    glColor3f( 0.05, 0.05, 0.05 );
+    //if ( TNG::dim >= 3 ) {
+    // }
+    glBegin( GL_QUADS );
+    {
+        typename TNG::Pvec n = sample_normal( elem );
+        glNormal3f( n[0], n[1], n[2] );
+        glVertex3f( elem.node(0)->pos[0], elem.node(0)->pos[1], TNG::dim >= 3 ? elem.node(0)->pos[2] : 0 );
+        glVertex3f( elem.node(1)->pos[0], elem.node(1)->pos[1], TNG::dim >= 3 ? elem.node(1)->pos[2] : 0 );
+        glVertex3f( elem.node(2)->pos[0], elem.node(2)->pos[1], TNG::dim >= 3 ? elem.node(2)->pos[2] : 0 );
+        glVertex3f( elem.node(3)->pos[0], elem.node(3)->pos[1], TNG::dim >= 3 ? elem.node(3)->pos[2] : 0 );
     }
     glEnd();
 }
