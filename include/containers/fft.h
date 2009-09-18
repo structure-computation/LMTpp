@@ -80,7 +80,19 @@ public:
         return res / (double)v.size();
     }
  
-    ///
+
+    /*!
+        Cette fonction calcule Y[k1,k2] = somme pour j1=0..n1-1 pour j2=0..n2-1 de w1^(-j1*k1) w2^(-j2*k2)
+        
+        pour tous les k1 variant dans [[0..n1-1]] et k2 dans [[0..n2-1]]
+        avec w1 := exp(sqrt(-1) 2 pi / n1)
+             w2 := exp(sqrt(-1) 2 pi / n2)
+
+        Le nombre complexe Y[k1,k2] est stocké à l'addresse k2+n2*k1 dans le tableau ImgInterp<T,dim,Kernel,PT>::data
+
+        WARNING : les performances sont excellentes lorsque n1 et n2 sont des puissances de 2 (cf algorithme de la transformée de Fourier rapide FFT)
+                  sinon elles sont moins bonnes en général, voire très mauvaises si n1 ou n2 n'est pas un multiple de petits nombres premiers.
+    */
     template<unsigned dim_,class Kernel_,class PT_> 
     ImgInterp<std::complex<double>,dim_,Kernel_,PT_>  fft(const ImgInterp<std::complex<double>,dim_,Kernel_,PT_> &i) {
         ImgInterp<std::complex<double>,dim_,Kernel_,PT_> res;
@@ -97,6 +109,18 @@ public:
         return res;
     }
     
+    /*!
+        Cette fonction calcule Y[k1,k2] = somme pour j1=0..n1-1 pour j2=0..n2-1 de w1^(j1*k1) w2^(j2*k2)
+        
+        pour tous les k1 variant dans [[0..n1-1]] et k2 dans [[0..n2-1]]
+        avec w1 := exp(sqrt(-1) 2 pi / n1)
+             w2 := exp(sqrt(-1) 2 pi / n2)
+
+        Le nombre complexe Y[k1,k2] est stocké à l'addresse k2+n2*k1 dans le tableau ImgInterp<T,dim,Kernel,PT>::data
+
+        WARNING : les performances sont excellentes lorsque n1 et n2 sont des puissances de 2 (cf algorithme de la transformée de Fourier rapide FFT)
+                  sinon elles sont moins bonnes en général, voire très mauvaises si n1 ou n2 n'est pas un multiple de petits nombres premiers.
+    */
     template<unsigned dim_,class Kernel_,class PT_>
     ImgInterp<std::complex<double>,dim_,Kernel_,PT_> ffti(const ImgInterp<std::complex<double>,dim_,Kernel_,PT_> &i) {
         ImgInterp<std::complex<double>,dim_,Kernel_,PT_> res;
@@ -123,13 +147,37 @@ public:
     fftw_plan p;
 };
 
+/*!
+    Cette classe sert à faire un padding symétrique BBBB.
+    Si div_2 est false, la transformée de Fourier , TF, est calculée sur toute l'image BBBB : i.e. sur une image 4 fois plus grande que l'image initiale.
+    Sinon une moyenne "mobile" étendue sur 4 pixels en carré est faite sur l'image BBBB avant de faire la TF. Du coup Le résultat est une image de même taille que l'image initiale. 
+
+*/
 struct SymmectricPadding { 
     bool div_2; 
     SymmectricPadding():div_2(false) {}
     SymmectricPadding(bool d2):div_2(d2) {}
 };
+
+/*!
+    Cette classe sert à faire un padding qui met des zéros autour de l'image avant de la transformée de Fourier , TF.
+    Du coup Le résultat est une image de taille augmentée de deux pixels suivant chaque dimension. 
+
+*/
 struct ZeroPadding {};
 
+/*!
+    \generic_comment fft
+
+    Cette fonction calcule la transformée de Fourier d'une image après lui avoir appliqué un "padding".
+
+*/
+/*!
+    \generic_comment ffti
+
+    Cette fonction calcule la transformée de Fourier inverse d'une image sur laquelle un "padding" a été appliqué.
+
+*/
 template<class T_, unsigned dim_, class Kernel_, class PT_, class TPadding> 
 ImgInterp<std::complex<double>,dim_,Kernel_,PT_> fft(ImgInterp<T_, dim_, Kernel_, PT_ > &img, Vec<int,2> topleft, Vec<int,2> bottomright, const TPadding padding) {
     fft( img, topleft[0], bottomright[0], topleft[1], bottomright[1], padding);
