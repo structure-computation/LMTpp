@@ -183,7 +183,7 @@ void read_msh_2( TM &m,std::istream &is, unsigned nvi, const VarTag &vt ) throw 
 }
 
 
-/*! 
+/*!
 
     \code
         read_msh_2_tags_for_nvi( m, "toto.msh", Number<1>(), HeteroExplPack<toto_DM,tata_DM>() )
