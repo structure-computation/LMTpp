@@ -2,7 +2,6 @@
 #define LMT_IMG_INTERP_H
 
 #include <containers/mat.h>
-//#include <containers/fft.h>
 #include <QtGui/QImage>
 #include <assert.h>
 #include <fstream>
@@ -24,10 +23,10 @@ struct ImgInterpBilinearKernel {
         int yi = int( y );
         PT xf = x - xi;
         PT yf = y - yi;
-        return f.tex_int( xi + 0, yi + 0 ) * ( 1 - xf ) * ( 1 - yf ) + 
-               f.tex_int( xi + 1, yi + 0 ) * ( 0 + xf ) * ( 1 - yf ) + 
-               f.tex_int( xi + 0, yi + 1 ) * ( 1 - xf ) * ( 0 + yf ) + 
-               f.tex_int( xi + 1, yi + 1 ) * ( 0 + xf ) * ( 0 + yf );
+        return f.tex_int( xi + 0, yi + 0 ) * T( 1 - xf ) * T( 1 - yf ) + 
+               f.tex_int( xi + 1, yi + 0 ) * T( 0 + xf ) * T( 1 - yf ) + 
+               f.tex_int( xi + 0, yi + 1 ) * T( 1 - xf ) * T( 0 + yf ) + 
+               f.tex_int( xi + 1, yi + 1 ) * T( 0 + xf ) * T( 0 + yf );
     }
     // 3D
     template<class T,class Img,class PT>
@@ -38,14 +37,14 @@ struct ImgInterpBilinearKernel {
         PT xf = x - xi;
         PT yf = y - yi;
         PT zf = z - zi;
-        return f.tex_int( xi + 0, yi + 0, zi + 0 ) * ( 1 - xf ) * ( 1 - yf ) * ( 1 - zf ) + 
-               f.tex_int( xi + 1, yi + 0, zi + 0 ) * ( 0 + xf ) * ( 1 - yf ) * ( 1 - zf ) + 
-               f.tex_int( xi + 0, yi + 1, zi + 0 ) * ( 1 - xf ) * ( 0 + yf ) * ( 1 - zf ) + 
-               f.tex_int( xi + 1, yi + 1, zi + 0 ) * ( 0 + xf ) * ( 0 + yf ) * ( 1 - zf ) +
-               f.tex_int( xi + 0, yi + 0, zi + 1 ) * ( 1 - xf ) * ( 1 - yf ) * ( 0 + zf ) + 
-               f.tex_int( xi + 1, yi + 0, zi + 1 ) * ( 0 + xf ) * ( 1 - yf ) * ( 0 + zf ) + 
-               f.tex_int( xi + 0, yi + 1, zi + 1 ) * ( 1 - xf ) * ( 0 + yf ) * ( 0 + zf ) + 
-               f.tex_int( xi + 1, yi + 1, zi + 1 ) * ( 0 + xf ) * ( 0 + yf ) * ( 0 + zf );
+        return f.tex_int( xi + 0, yi + 0, zi + 0 ) * T( 1 - xf ) * T( 1 - yf ) * T( 1 - zf ) + 
+               f.tex_int( xi + 1, yi + 0, zi + 0 ) * T( 0 + xf ) * T( 1 - yf ) * T( 1 - zf ) + 
+               f.tex_int( xi + 0, yi + 1, zi + 0 ) * T( 1 - xf ) * T( 0 + yf ) * T( 1 - zf ) + 
+               f.tex_int( xi + 1, yi + 1, zi + 0 ) * T( 0 + xf ) * T( 0 + yf ) * T( 1 - zf ) +
+               f.tex_int( xi + 0, yi + 0, zi + 1 ) * T( 1 - xf ) * T( 1 - yf ) * T( 0 + zf ) + 
+               f.tex_int( xi + 1, yi + 0, zi + 1 ) * T( 0 + xf ) * T( 1 - yf ) * T( 0 + zf ) + 
+               f.tex_int( xi + 0, yi + 1, zi + 1 ) * T( 1 - xf ) * T( 0 + yf ) * T( 0 + zf ) + 
+               f.tex_int( xi + 1, yi + 1, zi + 1 ) * T( 0 + xf ) * T( 0 + yf ) * T( 0 + zf );
     }
 
     //     template<class T,class Img,class PT>
