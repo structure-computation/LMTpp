@@ -751,6 +751,22 @@ ImgInterp<T_,dim_,Kernel_,PT_> arg( const ImgInterp<T_,dim_,Kernel_,PT_> &i) {
     return res;    
 }
 
+template<class T_,unsigned dim_,class Kernel_,class PT_>
+ImgInterp<T_,dim_,Kernel_,PT_> conj( const ImgInterp<T_,dim_,Kernel_,PT_> &i) {
+    ImgInterp<T_,dim_,Kernel_,PT_> res;
+    res.resize(i.size());
+    res.data = conj(i.data);
+    return res;    
+}
+
+template<class T_,unsigned dim_,class Kernel_,class PT_>
+ImgInterp<T_,dim_,Kernel_,PT_> operator*( const ImgInterp<T_,dim_,Kernel_,PT_> &i, const ImgInterp<T_,dim_,Kernel_,PT_> &i2) {
+    ImgInterp<T_,dim_,Kernel_,PT_> res;
+    res.resize(i.size());
+    res.data = i.data * i2.data;
+    return res;    
+}
+
 }
 
 #endif // LMT_IMG_INTERP_H
