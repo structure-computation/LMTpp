@@ -297,9 +297,15 @@ template<class T_,unsigned dim_,class Kernel_,class PT_>
 
 */
 template<class T_,unsigned dim_,class Kernel_,class PT_>
-Vec<int,2> rigid_body_translation( const ImgInterp<std::complex<T_>,dim_,Kernel_,PT_> &i, const ImgInterp<std::complex<T_>,dim_,Kernel_,PT_> &i2, int xmin, int xmax, int ymin, int ymax ) {
-    ImgInterp<std::complex<double>,dim_,Kernel_,PT_> img  = fft(i,  xmin, xmax, ymin, ymax, ZeroPadding());
-    ImgInterp<std::complex<double>,dim_,Kernel_,PT_> img2 = fft(i2, xmin, xmax, ymin, ymax, ZeroPadding());
+Vec<int,2> rigid_body_translation( const ImgInterp<T_,dim_,Kernel_,PT_> &i, const ImgInterp<T_,dim_,Kernel_,PT_> &i2, int xmin, int xmax, int ymin, int ymax ) {
+    ImgInterp<std::complex<double>,dim_,Kernel_,PT_> _i;
+    ImgInterp<std::complex<double>,dim_,Kernel_,PT_> _i2;
+    _i.resize(i.size());
+    _i2.resize(i2.size());
+    _i.data = i.data;
+    _i2.data = i2.data;
+    ImgInterp<std::complex<double>,dim_,Kernel_,PT_> img  = fft(_i,  xmin, xmax, ymin, ymax, ZeroPadding());
+    ImgInterp<std::complex<double>,dim_,Kernel_,PT_> img2 = fft(_i2, xmin, xmax, ymin, ymax, ZeroPadding());
     ImgInterp<std::complex<double>,dim_,Kernel_,PT_> img3 = abs(img);
     img.data  /= img3.data;
     img2.data /= img3.data;
