@@ -293,6 +293,8 @@ template<class T_,unsigned dim_,class Kernel_,class PT_>
 /*!
     Cette fonction retourne une approximation de la corrélation entre les deux images i et i2 dans le rectangle [xmin, xmax]x[ymin, ymax].
 
+    Réf : http://pixel-shaker.fr/
+
 */
 template<class T_,unsigned dim_,class Kernel_,class PT_>
 Vec<int,2> rigid_body_translation( const ImgInterp<std::complex<T_>,dim_,Kernel_,PT_> &i, const ImgInterp<std::complex<T_>,dim_,Kernel_,PT_> &i2, int xmin, int xmax, int ymin, int ymax ) {
@@ -320,6 +322,8 @@ Vec<int,2> rigid_body_translation( const ImgInterp<std::complex<T_>,dim_,Kernel_
             x += sgn(x);
         if (y)
             y += sgn(y);
+        if (abs(x)+abs(y) < 4)
+            std::cerr << "WARNING rigid_body_translation : do you really need to use the function ? because abs(x)+abs(y) = " << abs(x)+abs(y) << std::endl;
         return Vec<int,2>(x,y);
     } else {
         std::cerr << "ERROR rigid_body_translation : there is not maximum." << std::endl;
