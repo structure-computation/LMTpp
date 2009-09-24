@@ -358,15 +358,15 @@ struct ImgInterp {
     template<class T2, class Kernel2, class PT2>
     QImage to_QImage( const ImgInterp<T2,dim,Kernel2,PT2>& canal_alpha, bool normalize = false ) const {
         assert((canal_alpha.sizes[0] == sizes[0]) and (canal_alpha.sizes[1] == sizes[1]));
-        T o = 0.0, mini = std::numeric_limits<T>::max(), maxi = std::numeric_limits<T>::min(), m, t;
+        float o = 0.0, mini = std::numeric_limits<float>::max(), maxi = std::numeric_limits<float>::min(), m = 1.0, t, b;
         int total_size = sizes[0] * sizes[1];
         if ( normalize ) {
             for(int i=0;i<total_size;++i)
-                if (canal_alpha.data[ i ] == 1) {
-                    t = data[i];
+                if (canal_alpha.data[ i ] >= 1) {
+                    t = abs(data[i]);
                     if (t < mini)
                         mini = t;
-                    if (data[i] > t)
+                    if (t > maxi)
                         maxi = t;
                 }
             o = mini;
@@ -378,10 +378,11 @@ struct ImgInterp {
         QImage img( sizes[0], sizes[1], QImage::Format_ARGB32 );
         uchar *ptr = img.bits();
         for(int i=0;i<total_size;++i,ptr+=4) {
-            T b = canal_alpha.data[ i ] == 1;
-            ptr[ 0 ] = b * m * ( data[ i ] - o );
-            ptr[ 1 ] = b * m * ( data[ i ] - o );
-            ptr[ 2 ] = b * m * ( data[ i ] - o );
+            t = abs(data[i]);
+            b = (canal_alpha.data[ i ] >= 1) * m * ( t - o );
+            ptr[ 0 ] = b;
+            ptr[ 1 ] = b;
+            ptr[ 2 ] = b;
             ptr[ 3 ] = canal_alpha.data[ i ]*255;
         }
         return img;
