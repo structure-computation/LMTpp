@@ -373,6 +373,19 @@ struct ImgInterp {
             if (maxi != mini)
                 m = 255 / ( maxi - mini );
         }
+                    
+        //
+        QImage img( sizes[0], sizes[1], QImage::Format_ARGB32 );
+        uchar *ptr = img.bits();
+        for(int i=0;i<total_size;++i,ptr+=4) {
+            t = abs(data[i]);
+            b = (canal_alpha.data[ i ] >= 1) * m * ( t - o );
+            ptr[ 0 ] = b;
+            ptr[ 1 ] = b;
+            ptr[ 2 ] = b;
+            ptr[ 3 ] = canal_alpha.data[ i ]*255;
+        }
+        return img;
     }
     
     template<class T2, class Kernel2, class PT2>
