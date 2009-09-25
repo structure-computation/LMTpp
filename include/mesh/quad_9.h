@@ -8,7 +8,17 @@ namespace LMT {
 
 // --------------------------------------------------------------------------------------------------------
 /*!
-    Carré
+    Carré à 9 noeuds
+
+    \verbatim
+        3----6----2
+        |    |    |
+        |    |    |
+        7    8    5
+        |    |    |
+        |    |    |
+        0----4----1
+
     \keyword Maillage/Elément
     \friend raphael.pasquier@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
