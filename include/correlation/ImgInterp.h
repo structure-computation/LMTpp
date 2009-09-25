@@ -373,21 +373,45 @@ struct ImgInterp {
             if (maxi != mini)
                 m = 255 / ( maxi - mini );
         }
-            
-        //
-        QImage img( sizes[0], sizes[1], QImage::Format_ARGB32 );
-        uchar *ptr = img.bits();
-        for(int i=0;i<total_size;++i,ptr+=4) {
-            t = abs(data[i]);
-            b = (canal_alpha.data[ i ] >= 1) * m * ( t - o );
-            ptr[ 0 ] = b;
-            ptr[ 1 ] = b;
-            ptr[ 2 ] = b;
-            ptr[ 3 ] = canal_alpha.data[ i ]*255;
-        }
-        return img;
     }
-   
+    
+    template<class T2, class Kernel2, class PT2>
+    T mean( const ImgInterp<T2,dim,Kernel2,PT2>& mask) const {
+        assert((mask.sizes[0] == sizes[0]) and (mask.sizes[1] == sizes[1]));
+        T sum = 0;
+        int total_size = sizes[0] * sizes[1];
+        int nb = 0;
+        for(int i=0;i<total_size;++i)
+            if (mask.data[ i ] >= 1) {
+                sum += data[i];
+                nb++;
+            }
+        if (not(nb)) {
+            nb++;
+            std::cerr << "warning : mask empty" << std::endl;
+        }
+        sum /= nb;
+        return sum ;/// total_size;
+    }
+  
+    template<class T2, class Kernel2, class PT2>
+    T variance( const ImgInterp<T2,dim,Kernel2,PT2>& mask) const {
+        assert((mask.sizes[0] == sizes[0]) and (mask.sizes[1] == sizes[1]));
+        T sum = 0;
+        int nb = 0;
+        int total_size = sizes[0] * sizes[1];
+        for(int i=0;i<total_size;++i)
+            if (mask.data[ i ] >= 1) {
+                sum += data[i]*data[i];
+                nb++;
+            }
+        if (not(nb)) {
+            nb++;
+            std::cerr << "warning : mask empty" << std::endl;
+        }
+        sum /= nb;
+        return sum - pow(mean(mask),2);
+    }
     ///
     void load_ascii_mat_file( std::string filename ) {
         using namespace std;
