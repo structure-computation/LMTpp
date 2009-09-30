@@ -2,7 +2,6 @@
 #define LMT_IMG_INTERP_H
 
 #include <containers/mat.h>
-//#include <containers/fft.h>
 #include <QtGui/QImage>
 #include <assert.h>
 #include <fstream>
@@ -24,10 +23,10 @@ struct ImgInterpBilinearKernel {
         int yi = int( y );
         PT xf = x - xi;
         PT yf = y - yi;
-        return f.tex_int( xi + 0, yi + 0 ) * ( 1 - xf ) * ( 1 - yf ) + 
-               f.tex_int( xi + 1, yi + 0 ) * ( 0 + xf ) * ( 1 - yf ) + 
-               f.tex_int( xi + 0, yi + 1 ) * ( 1 - xf ) * ( 0 + yf ) + 
-               f.tex_int( xi + 1, yi + 1 ) * ( 0 + xf ) * ( 0 + yf );
+        return f.tex_int( xi + 0, yi + 0 ) * T( 1 - xf ) * T( 1 - yf ) + 
+               f.tex_int( xi + 1, yi + 0 ) * T( 0 + xf ) * T( 1 - yf ) + 
+               f.tex_int( xi + 0, yi + 1 ) * T( 1 - xf ) * T( 0 + yf ) + 
+               f.tex_int( xi + 1, yi + 1 ) * T( 0 + xf ) * T( 0 + yf );
     }
     // 3D
     template<class T,class Img,class PT>
@@ -38,14 +37,14 @@ struct ImgInterpBilinearKernel {
         PT xf = x - xi;
         PT yf = y - yi;
         PT zf = z - zi;
-        return f.tex_int( xi + 0, yi + 0, zi + 0 ) * ( 1 - xf ) * ( 1 - yf ) * ( 1 - zf ) + 
-               f.tex_int( xi + 1, yi + 0, zi + 0 ) * ( 0 + xf ) * ( 1 - yf ) * ( 1 - zf ) + 
-               f.tex_int( xi + 0, yi + 1, zi + 0 ) * ( 1 - xf ) * ( 0 + yf ) * ( 1 - zf ) + 
-               f.tex_int( xi + 1, yi + 1, zi + 0 ) * ( 0 + xf ) * ( 0 + yf ) * ( 1 - zf ) +
-               f.tex_int( xi + 0, yi + 0, zi + 1 ) * ( 1 - xf ) * ( 1 - yf ) * ( 0 + zf ) + 
-               f.tex_int( xi + 1, yi + 0, zi + 1 ) * ( 0 + xf ) * ( 1 - yf ) * ( 0 + zf ) + 
-               f.tex_int( xi + 0, yi + 1, zi + 1 ) * ( 1 - xf ) * ( 0 + yf ) * ( 0 + zf ) + 
-               f.tex_int( xi + 1, yi + 1, zi + 1 ) * ( 0 + xf ) * ( 0 + yf ) * ( 0 + zf );
+        return f.tex_int( xi + 0, yi + 0, zi + 0 ) * T( 1 - xf ) * T( 1 - yf ) * T( 1 - zf ) + 
+               f.tex_int( xi + 1, yi + 0, zi + 0 ) * T( 0 + xf ) * T( 1 - yf ) * T( 1 - zf ) + 
+               f.tex_int( xi + 0, yi + 1, zi + 0 ) * T( 1 - xf ) * T( 0 + yf ) * T( 1 - zf ) + 
+               f.tex_int( xi + 1, yi + 1, zi + 0 ) * T( 0 + xf ) * T( 0 + yf ) * T( 1 - zf ) +
+               f.tex_int( xi + 0, yi + 0, zi + 1 ) * T( 1 - xf ) * T( 1 - yf ) * T( 0 + zf ) + 
+               f.tex_int( xi + 1, yi + 0, zi + 1 ) * T( 0 + xf ) * T( 1 - yf ) * T( 0 + zf ) + 
+               f.tex_int( xi + 0, yi + 1, zi + 1 ) * T( 1 - xf ) * T( 0 + yf ) * T( 0 + zf ) + 
+               f.tex_int( xi + 1, yi + 1, zi + 1 ) * T( 0 + xf ) * T( 0 + yf ) * T( 0 + zf );
     }
 
     //     template<class T,class Img,class PT>
@@ -359,35 +358,73 @@ struct ImgInterp {
     template<class T2, class Kernel2, class PT2>
     QImage to_QImage( const ImgInterp<T2,dim,Kernel2,PT2>& canal_alpha, bool normalize = false ) const {
         assert((canal_alpha.sizes[0] == sizes[0]) and (canal_alpha.sizes[1] == sizes[1]));
-        T o = 0.0, mini = std::numeric_limits<T>::max(), maxi = std::numeric_limits<T>::min(), m, t;
+        float o = 0.0, mini = std::numeric_limits<float>::max(), maxi = std::numeric_limits<float>::min(), m = 1.0, t, b;
         int total_size = sizes[0] * sizes[1];
         if ( normalize ) {
             for(int i=0;i<total_size;++i)
-                if (canal_alpha.data[ i ] == 1) {
-                    t = data[i];
+                if (canal_alpha.data[ i ] >= 1) {
+                    t = abs(data[i]);
                     if (t < mini)
                         mini = t;
-                    if (data[i] > t)
+                    if (t > maxi)
                         maxi = t;
                 }
             o = mini;
             if (maxi != mini)
                 m = 255 / ( maxi - mini );
         }
-            
+                    
         //
         QImage img( sizes[0], sizes[1], QImage::Format_ARGB32 );
         uchar *ptr = img.bits();
         for(int i=0;i<total_size;++i,ptr+=4) {
-            T b = canal_alpha.data[ i ] == 1;
-            ptr[ 0 ] = b * m * ( data[ i ] - o );
-            ptr[ 1 ] = b * m * ( data[ i ] - o );
-            ptr[ 2 ] = b * m * ( data[ i ] - o );
+            t = abs(data[i]);
+            b = (canal_alpha.data[ i ] >= 1) * m * ( t - o );
+            ptr[ 0 ] = b;
+            ptr[ 1 ] = b;
+            ptr[ 2 ] = b;
             ptr[ 3 ] = canal_alpha.data[ i ]*255;
         }
         return img;
     }
-   
+    
+    template<class T2, class Kernel2, class PT2>
+    T mean( const ImgInterp<T2,dim,Kernel2,PT2>& mask) const {
+        assert((mask.sizes[0] == sizes[0]) and (mask.sizes[1] == sizes[1]));
+        T sum = 0;
+        int total_size = sizes[0] * sizes[1];
+        int nb = 0;
+        for(int i=0;i<total_size;++i)
+            if (mask.data[ i ] >= 1) {
+                sum += data[i];
+                nb++;
+            }
+        if (not(nb)) {
+            nb++;
+            std::cerr << "warning : mask empty" << std::endl;
+        }
+        sum /= nb;
+        return sum ;/// total_size;
+    }
+  
+    template<class T2, class Kernel2, class PT2>
+    T variance( const ImgInterp<T2,dim,Kernel2,PT2>& mask) const {
+        assert((mask.sizes[0] == sizes[0]) and (mask.sizes[1] == sizes[1]));
+        T sum = 0;
+        int nb = 0;
+        int total_size = sizes[0] * sizes[1];
+        for(int i=0;i<total_size;++i)
+            if (mask.data[ i ] >= 1) {
+                sum += data[i]*data[i];
+                nb++;
+            }
+        if (not(nb)) {
+            nb++;
+            std::cerr << "warning : mask empty" << std::endl;
+        }
+        sum /= nb;
+        return sum - pow(mean(mask),2);
+    }
     ///
     void load_ascii_mat_file( std::string filename ) {
         using namespace std;
@@ -749,6 +786,22 @@ ImgInterp<T_,dim_,Kernel_,PT_> arg( const ImgInterp<T_,dim_,Kernel_,PT_> &i) {
     ImgInterp<T_,dim_,Kernel_,PT_> res;
     res.resize(i.size());
     res.data = arg(i.data);
+    return res;    
+}
+
+template<class T_,unsigned dim_,class Kernel_,class PT_>
+ImgInterp<T_,dim_,Kernel_,PT_> conj( const ImgInterp<T_,dim_,Kernel_,PT_> &i) {
+    ImgInterp<T_,dim_,Kernel_,PT_> res;
+    res.resize(i.size());
+    res.data = conj(i.data);
+    return res;    
+}
+
+template<class T_,unsigned dim_,class Kernel_,class PT_>
+ImgInterp<T_,dim_,Kernel_,PT_> operator*( const ImgInterp<T_,dim_,Kernel_,PT_> &i, const ImgInterp<T_,dim_,Kernel_,PT_> &i2) {
+    ImgInterp<T_,dim_,Kernel_,PT_> res;
+    res.resize(i.size());
+    res.data = i.data * i2.data;
     return res;    
 }
 

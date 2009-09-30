@@ -397,6 +397,7 @@ class Pol {
         assert(nx==1);
         if (D.is_zero()) {
             cerr << "Warning : division by polynom zero !" << endl;
+            assert(0);
             return Pol<nd,nx,T>();
         }
         Vec<T> r=coefs;
@@ -702,7 +703,13 @@ class Pol {
         Vec<T> res;
         Vec<int,nx> deg = degrees();
         int taille = deg[0]+1;
-        if (taille==2)
+        //cout << setprecision(16);
+        //cout << " real roots :  taille = " << taille << "   degree = " << degree << "  coefs " << coefs << endl;
+        if (taille == 0) {
+            res.push_back(0);
+        } else if (taille == 1) {
+            /// pas de solution
+        }else if (taille==2)
             res.push_back(-coefs[0]/coefs[1]);
         else if (taille==3) {
             T delta=coefs[1]*coefs[1]-4*coefs[0]*coefs[2];
