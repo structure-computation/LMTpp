@@ -63,9 +63,9 @@ template<unsigned n> struct TypeChildrenElement<Wedge,3,n> { typedef NodalElemen
 template<class TN,class TNG,class TD,unsigned NET,class TC,class HET>
 void append_skin_elements(Element<Wedge,TN,TNG,TD,NET> &e,TC &ch,HET &het,Number<1> nvi_to_subs) {
     het.add_element(e,ch,Quad(),e.node(0),e.node(1),e.node(4),e.node(3));
-    het.add_element(e,ch,Quad(),e.node(0),e.node(2),e.node(5),e.node(3));
+    het.add_element(e,ch,Quad(),e.node(0),e.node(3),e.node(5),e.node(2));
     het.add_element(e,ch,Quad(),e.node(1),e.node(2),e.node(5),e.node(4));
-    het.add_element(e,ch,Triangle(),e.node(0),e.node(1),e.node(2));
+    het.add_element(e,ch,Triangle(),e.node(0),e.node(2),e.node(1));
     het.add_element(e,ch,Triangle(),e.node(3),e.node(4),e.node(5));
 }
 

@@ -18,13 +18,15 @@ template<class TN,class TNG,class TD,unsigned NET>
 void display_gl_elem( const Element<Triangle,TN,TNG,TD,NET> &elem ) {
     glBegin( GL_TRIANGLES );
     {
-        glColor3f( 1.0, 1.0, 1.0 );
         if ( TNG::dim >= 3 ) {
             typename TNG::Pvec n = sample_normal( elem );
             glNormal3f( n[0], n[1], n[2] );
         }
+        glColor3f( elem.node(0)->pos[0], 1.0, 1.0 );
         glVertex3f( elem.node(0)->pos[0], elem.node(0)->pos[1], TNG::dim >= 3 ? elem.node(0)->pos[2] : 0 );
+        glColor3f( elem.node(1)->pos[0], 1.0, 1.0 );
         glVertex3f( elem.node(1)->pos[0], elem.node(1)->pos[1], TNG::dim >= 3 ? elem.node(1)->pos[2] : 0 );
+        glColor3f( elem.node(1)->pos[0], 1.0, 1.0 );
         glVertex3f( elem.node(2)->pos[0], elem.node(2)->pos[1], TNG::dim >= 3 ? elem.node(2)->pos[2] : 0 );
     }
     glEnd();
@@ -32,17 +34,29 @@ void display_gl_elem( const Element<Triangle,TN,TNG,TD,NET> &elem ) {
 
 template<class TN,class TNG,class TD,unsigned NET>
 void display_gl_elem( const Element<Quad,TN,TNG,TD,NET> &elem ) {
-    glColor3f( 0.05, 0.05, 0.05 );
-    //if ( TNG::dim >= 3 ) {
-    // }
     glBegin( GL_QUADS );
     {
-        typename TNG::Pvec n = sample_normal( elem );
-        glNormal3f( n[0], n[1], n[2] );
-        glVertex3f( elem.node(0)->pos[0], elem.node(0)->pos[1], TNG::dim >= 3 ? elem.node(0)->pos[2] : 0 );
-        glVertex3f( elem.node(1)->pos[0], elem.node(1)->pos[1], TNG::dim >= 3 ? elem.node(1)->pos[2] : 0 );
-        glVertex3f( elem.node(2)->pos[0], elem.node(2)->pos[1], TNG::dim >= 3 ? elem.node(2)->pos[2] : 0 );
-        glVertex3f( elem.node(3)->pos[0], elem.node(3)->pos[1], TNG::dim >= 3 ? elem.node(3)->pos[2] : 0 );
+        if ( TNG::dim >= 3 ) {
+            typename TNG::Pvec n = sample_normal( elem );
+            glNormal3f( n[0], n[1], n[2] );
+        }
+        typename TNG::Pvec P0 = elem.node(0)->pos;
+        typename TNG::Pvec P1 = elem.node(1)->pos;
+        typename TNG::Pvec P2 = elem.node(2)->pos;
+        typename TNG::Pvec P3 = elem.node(3)->pos;
+//         typename TNG::Pvec P4 = 0.25 * ( P0 + P1 + P2 + P3 );
+//         P0 = 0.8 * P0 + 0.2 * P4;
+//         P1 = 0.8 * P1 + 0.2 * P4;
+//         P2 = 0.8 * P2 + 0.2 * P4;
+//         P3 = 0.8 * P3 + 0.2 * P4;
+        glColor3f( elem.node(0)->pos[0], 1.0, 1.0 );
+        glVertex3f( P0[0], P0[1], TNG::dim >= 3 ? P0[2] : 0 );
+        glColor3f( elem.node(1)->pos[0], 1.0, 1.0 );
+        glVertex3f( P1[0], P1[1], TNG::dim >= 3 ? P1[2] : 0 );
+        glColor3f( elem.node(2)->pos[0], 1.0, 1.0 );
+        glVertex3f( P2[0], P2[1], TNG::dim >= 3 ? P2[2] : 0 );
+        glColor3f( elem.node(3)->pos[0], 1.0, 1.0 );
+        glVertex3f( P3[0], P3[1], TNG::dim >= 3 ? P3[2] : 0 );
     }
     glEnd();
 }
