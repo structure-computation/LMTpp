@@ -38,7 +38,14 @@ struct Function {
     Op op;
 };
 
+/*!
+    \internal
+*/
 struct ALGOCompose1 { };
+
+/*!
+    \internal
+*/
 template<class O1,class O2>
 struct Function<ALGOCompose1,O1,O2,void,void> {
     explicit Function(const O1 &o1_ = O1(),const O2 &o2_ = O2()):o1(o1_),o2(o2_) {}
@@ -57,6 +64,9 @@ struct Function<ALGOCompose1,O1,O2,void,void> {
     O2 o2;
 };
 
+/*!
+    \internal
+*/
 template<class O1,bool const_O1,class O2,bool const_O2>
 struct ALGOCompose1WithoutReturn {
     explicit ALGOCompose1WithoutReturn(const O1 &o1_ = O1(),const O2 &o2_ = O2()) { o1.val = &o1_; o2.val = &o2_; }
@@ -101,8 +111,15 @@ struct ALGOCompose1WithoutReturn {
     PtrConstIf<O2,const_O2> o2;
 };
 
-
+/*!
+    \internal
+*/
 struct ALGOCompose2 { };
+
+
+/*!
+    \internal
+*/
 template<class O1,class O2>                                                                      
 struct Function<ALGOCompose2,O1,O2,void,void> {
     explicit Function(const O1 &o1_ = O1(),const O2 &o2_ = O2()):o1(o1_),o2(o2_) {}
@@ -119,7 +136,15 @@ struct Function<ALGOCompose2,O1,O2,void,void> {
     O2 o2;
 };
 
+/*!
+    \internal
+*/
 struct ALGOBinary { };
+
+
+/*!
+    \internal
+*/
 template<class Op,class O1,class O2>
 struct Function<ALGOBinary,Op,O1,O2,void> {
     explicit Function(const Op &op_ = Op(),const O1 &o1_ = O1(),const O2 &o2_ = O2()):op(op_),o1(o1_),o2(o2_) {}
@@ -139,7 +164,14 @@ struct Function<ALGOBinary,Op,O1,O2,void> {
     O2 o2;
 };
 
+/*!
+    \internal
+*/
 struct ALGOAssignExt { };
+
+/*!
+    \internal
+*/
 template<class Op,class TB,class AssOp>
 struct Function<ALGOAssignExt,Op,TB,AssOp,void> {
     explicit Function(TB &tt,const Op &ope = Op(),const AssOp &ao=AssOp()):t(tt),op(ope),assop(ao) {}
@@ -153,7 +185,14 @@ struct Function<ALGOAssignExt,Op,TB,AssOp,void> {
     AssOp assop;
 };
 
+/*!
+    \internal
+*/
 struct ALGOAssign1 { };
+
+/*!
+    \internal
+*/
 template<class Op,class AssOp>
 struct Function<ALGOAssign1,Op,AssOp,void,void> {
     explicit Function(const Op &ope,const AssOp &ao=AssOp()):op(ope),assop(ao) {}
@@ -165,7 +204,14 @@ struct Function<ALGOAssign1,Op,AssOp,void,void> {
     AssOp assop;
 };
 
+/*!
+    \internal
+*/
 struct ALGOCst { };
+
+/*!
+    \internal
+*/
 template<class TT>
 struct Function<ALGOCst,TT,void,void,void> {
     explicit Function(const TT &tt):t(tt) {}
@@ -323,6 +369,9 @@ static Function<C_4> _4;
 
 
 // because we don't want the compiler to complain about unused static variables
+/*!
+    \internal
+*/
 inline void pouet_function() { _1 + _2 + _3 + _4; }
 
 
@@ -334,6 +383,9 @@ struct AbsIndication {
 };
 template<> struct ConserveZeroes<AbsIndication> { static const unsigned res = true; };
 
+/*!
+    \internal
+*/
 template<bool is_scalar,class TT> struct TypePromoteAbsIndicationWithIsScalarBool;
 template<class TT> struct TypePromoteAbsIndicationWithIsScalarBool<true,TT> {
     typedef typename SubComplex<TT>::T T;

@@ -3,6 +3,9 @@
 
 namespace LMT {
 
+/*!
+    \internal
+*/
 struct FindEnglobingElementAndReturnInterpolationException {
 };
 
