@@ -157,6 +157,12 @@ void read_msh(TM &m,std::istream &is) throw(std::runtime_error) {
                     m.add_element( Triangle_6(),DefaultBehavior(),vn.ptr() );
                 }
             }
+            else if ( type_elem == 10 ) { //TODO
+                if ( nvi == 2 ) {
+                    permutation_if_jac_neg ( Quad_9(), vn.ptr() );
+                    m.add_element( Quad_9(),DefaultBehavior(),vn.ptr() );
+                }
+            }
             else if ( type_elem == 11 ) { //TODO
                 if ( nvi == 3 ) {
                     swap( vn[8], vn[9] );
