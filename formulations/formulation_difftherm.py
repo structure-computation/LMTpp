@@ -18,18 +18,13 @@ TOTO = Variable( interpolation='elementary', T="float", default_value='0.0', uni
 left_time_integration  = 0
 right_time_integration = 1
 
-use_subs_instead_of_diff = True
-
 
 #
 def formulation():
-  #sys.stderr.write( str( epslopigh.expr ) )
-  
   a = thermal_conductivity.expr / ( density.expr * heat_capacity.expr ) # 'a' est la diffusivite thermique en m^2/s (ici a=4.3153e-07 m^2/s)
-  # k = heat_capacity.expr*thermal_conductivity.expr #
   t,te = temperature.expr, temperature.test
 
-  res = dot( a * grad(t), grad(te) ) + ( t.diff(time) - Q.expr ) * te * 0
+  res = dot( a * grad(t), grad(te) ) + ( t.diff(time) - Q.expr ) * te
   
   return res * dV + H.expr * ( t - t0.expr ) * te * dS - Qs.expr * te * dN
   

@@ -23,8 +23,8 @@ struct GetVtkFields {
             is.read( (char *)(tmp+i), sizeof(double) );
             swap_byte_order( tmp[i] );
         }
-        if ( name == "num" )
-            e.num = tmp[0];
+        //if ( name == "num" )
+        //    e.num = tmp[0];
     }
 };
 

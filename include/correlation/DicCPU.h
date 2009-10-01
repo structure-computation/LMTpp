@@ -218,7 +218,7 @@ struct DicCPU {
         }
     };
     
-    ///
+    /// toto
     template<class TIMGf,class TIMGg,class TM,class NAME_VAR_DEPL,class NAME_VAR_GREY>
     void assemble( const TIMGf &f, const TIMGg &g, const TM &m, const NAME_VAR_DEPL &name_var_depl, const NAME_VAR_GREY &name_var_grey, bool want_mat = true, bool want_vec = true, int resol_level = 0 ) {
         unsigned nb_ddl = ( dim + want_lum_corr ) * m.node_list.size();
