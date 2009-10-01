@@ -71,6 +71,7 @@ public:
 
     unsigned number;
     unsigned absolute_number;
+    unsigned group;
 
     virtual ~ElementAncestor() {}
 };
