@@ -50,13 +50,19 @@ interpolation["der_nodal"] = val[0]
 
 z1=(1+(1.0/sqrt(3.0)))/2;
 z2=(1-(1.0/sqrt(3.0)))/2;
-interpolation["gauss"] =  ( 2*var_inter[0] + 2*var_inter[1] - 1)   * (1-(var_inter[2]-z2)/(z1-z2))     * val[0]  + \
-                          (-2*var_inter[0]                  + 1)   * (1-(var_inter[2]-z2)/(z1-z2))     * val[1]  + \
-                          (-2*var_inter[1]                  + 1)   * (1-(var_inter[2]-z2)/(z1-z2))     * val[2]  + \
-                          ( 2*var_inter[0] + 2*var_inter[1] - 1)   * (1-((1-var_inter[2])-z2)/(z1-z2)) * val[3]  + \
-                          (-2*var_inter[0]                  + 1)   * (1-((1-var_inter[2])-z2)/(z1-z2)) * val[4]  + \
-                          (-2*var_inter[1]                  + 1)   * (1-((1-var_inter[2])-z2)/(z1-z2)) * val[5]
+#interpolation["gauss"] =  ( 2*var_inter[0] + 2*var_inter[1] - 1)   * (1-(var_inter[2]-z2)/(z1-z2))     * val[0]  + \
+                          #(-2*var_inter[0]                  + 1)   * (1-(var_inter[2]-z2)/(z1-z2))     * val[1]  + \
+                          #(-2*var_inter[1]                  + 1)   * (1-(var_inter[2]-z2)/(z1-z2))     * val[2]  + \
+                          #( 2*var_inter[0] + 2*var_inter[1] - 1)   * (1-((1-var_inter[2])-z2)/(z1-z2)) * val[3]  + \
+                          #(-2*var_inter[0]                  + 1)   * (1-((1-var_inter[2])-z2)/(z1-z2)) * val[4]  + \
+                          #(-2*var_inter[1]                  + 1)   * (1-((1-var_inter[2])-z2)/(z1-z2)) * val[5]
 
+interpolation["gauss"] =  (-2*var_inter[1]                  + 1)   * (1-(var_inter[2]-z2)/(z1-z2))     * val[0]  + \
+                          ( 2*var_inter[0] + 2*var_inter[1] - 1)   * (1-(var_inter[2]-z2)/(z1-z2))     * val[1]  + \
+                          (-2*var_inter[0]                  + 1)   * (1-(var_inter[2]-z2)/(z1-z2))     * val[2]  + \
+                          (-2*var_inter[1]                  + 1)   * (1-((1-var_inter[2])-z2)/(z1-z2)) * val[3]  + \
+                          ( 2*var_inter[0] + 2*var_inter[1] - 1)   * (1-((1-var_inter[2])-z2)/(z1-z2)) * val[4]  + \
+                          (-2*var_inter[0]                  + 1)   * (1-((1-var_inter[2])-z2)/(z1-z2)) * val[5]  
 a = 1.0/6.0
 Flat_Interpolation_gauss_points = [
   ( a, { var_inter[0] : 1.0/2.0, var_inter[1] : 1.0/2.0 , var_inter[2] : 1.0/2.0 } ),

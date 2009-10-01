@@ -26,7 +26,7 @@ class Formulation:
 
     def IS_contact_formulation(): return number(0)
     def elem_contact_formulation(ve): return number(0)
-    def apply_on_elements_after_solve(unk_subs): return ""
+    def apply_on_elements_after_solve(unk_subs): return Write_code('T')
     
     self.ind = {
       "Variable" : Variable,
@@ -632,6 +632,13 @@ class Formulation:
     return res
 
   def write_carac_for_element(self,f,e,matrices,contact_matrices,form_after_solve):
+    
+    asm_apply_name  = []
+    for i in range(6):
+          asm_apply_name.append('apply_on_elements_after_solve_%i_%s_%s_%i' % (i, self.name, self.e.name, self.num_func_write_matrix ) )
+          self.num_func_write_matrix += 1
+          f.write( 'extern "C" void %s( double * );\n' % asm_apply_name[i] )
+    
     f.write( 'class %s;\n'%e.name )
     f.write( 'template<unsigned A,class B,class C> class Node;\n' )
     f.write( 'template<class A,class B,class C,class D,unsigned E> class Element;\n' )
@@ -664,37 +671,24 @@ class Formulation:
     f.write( '    static const bool has_elementary_matrix = %s;\n'%( ['true','false'][has_not_V_matrix] ) )
     f.write( '    static const bool has_skin_elementary_matrix = %s;\n'%( ['true','false'][has_not_S_matrix] ) )
 
-    f.write( '    template<class TE,class TF, class TVEVE> static void after_solve(TE &elem,TF &f,TVEVE &vectors,const unsigned *indices) {\n' )
-    f.write( '      #define PNODE(N) (*elem.node(N))\n' )
-    f.write( form_after_solve[0] + '\n' )
-    f.write( '      #undef PNODE\n' )
-    f.write( '    }\n' )
-    f.write( '    template<class TE,class TF, class TVEVE> static void after_solve_2(TE &elem,TF &f, TVEVE &vectors,const unsigned *indices) {\n' )
-    f.write( '      #define PNODE(N) (*elem.node(N))\n' )
-    f.write( form_after_solve[1] + '\n' )
-    f.write( '      #undef PNODE\n' )
-    f.write( '    }\n' )
-    f.write( '    template<class TE,class TF, class TVEVE> static void after_solve_3(TE &elem,TF &f,TVEVE &vectors,const unsigned *indices) {\n' )
-    f.write( '      #define PNODE(N) (*elem.node(N))\n' )
-    f.write( form_after_solve[2] + '\n' )
-    f.write( '      #undef PNODE\n' )
-    f.write( '    }\n' )
-    f.write( '    template<class TE,class TF, class TVEVE> static void after_solve_4(TE &elem,TF &f,TVEVE &vectors,const unsigned *indices) {\n' )
-    f.write( '      #define PNODE(N) (*elem.node(N))\n' )
-    f.write( form_after_solve[3] + '\n' )
-    f.write( '      #undef PNODE\n' )
-    f.write( '    }\n' )
-    f.write( '    template<class TE,class TF, class TVEVE> static void after_solve_5(TE &elem,TF &f,TVEVE &vectors,const unsigned *indices) {\n' )
-    f.write( '      #define PNODE(N) (*elem.node(N))\n' )
-    f.write( form_after_solve[4] + '\n' )
-    f.write( '      #undef PNODE\n' )
-    f.write( '    }\n' )   
-    f.write( '    template<class TE,class TF, class TVEVE> static void after_solve_6(TE &elem,TF &f,TVEVE &vectors,const unsigned *indices) {\n' )
-    f.write( '      #define PNODE(N) (*elem.node(N))\n' )
-    f.write( form_after_solve[5] + '\n' )
-    f.write( '      #undef PNODE\n' )
-    f.write( '    }\n' )   
-        
+    for i in range(0,6):
+           #f.write( 'extern "C" void %s( double * );\n' % asm_fname )
+        f.write( '    template<class TE,class TF, class TVEVE> static void after_solve'+('_'+str(i+1))*(i>0)+'(TE &elem,TF &f,TVEVE &vectors,const unsigned *indices) {\n' )
+        f.write( '      #define PNODE(N) (*elem.node(N))\n' ) 
+        if isinstance(form_after_solve[i],str):
+            f.write( form_after_solve[i])
+        else :
+            if self.use_asm:
+                asm_fname = asm_apply_name[i]
+                f.write( form_after_solve[i].asm_caller( asm_fname ) )
+                self.asmout.write( 'global %s\n' % asm_fname )
+                self.asmout.write( '%s:\n' % asm_fname )
+                self.asmout.write( form_after_solve[i].to_asm() )
+            else :
+                f.write( form_after_solve[i].to_string() )
+        f.write( '      #undef PNODE\n' )
+        f.write( '    }\n' )
+
     for skin in [False,True]:
       self.write_carac_for_t(f,'elementary',skin,e)
     

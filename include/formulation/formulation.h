@@ -1522,9 +1522,11 @@ public:
     Vec<unsigned>* indice_elem;
     Vec<unsigned>* indice_noda;
     unsigned* indice_glob;
-
+    
     std::vector<Codegen::Ex> symbols;
     Codegen::Ex time_symbol;
+    
+    Vec<Formulation *> enrichissements;
 private:
     Vec<unsigned> indice_elem_internal[ TM::TElemList::nb_sub_type ];
     Vec<unsigned> indice_noda_internal;
