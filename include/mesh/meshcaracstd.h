@@ -21,6 +21,27 @@
 
 namespace LMT {
 
+// template<int nb_var_inter,bool want_cubic=false,unsigned degree=1> struct ElementChoiceMeshCaracStd { typedef void NE; };
+// template<> struct ElementChoiceMeshCaracStd<3,false,1> { typedef Tetra NE; };
+// template<> struct ElementChoiceMeshCaracStd<2,false,1> { typedef Triangle NE; };
+// template<> struct ElementChoiceMeshCaracStd<1,false,1> { typedef Bar NE; };
+// template<> struct ElementChoiceMeshCaracStd<0,false,1> { typedef NodalElement NE; };
+// 
+// template<> struct ElementChoiceMeshCaracStd<3,false,2> { typedef Tetra_10 NE; };
+// template<> struct ElementChoiceMeshCaracStd<2,false,2> { typedef Triangle_6 NE; };
+// template<> struct ElementChoiceMeshCaracStd<1,false,2> { typedef Bar_3 NE; };
+// template<> struct ElementChoiceMeshCaracStd<0,false,2> { typedef NodalElement NE; };
+// 
+// template<> struct ElementChoiceMeshCaracStd<3,true,1> { typedef Hexa NE; };
+// template<> struct ElementChoiceMeshCaracStd<2,true,1> { typedef Quad NE; };
+// template<> struct ElementChoiceMeshCaracStd<1,true,1> { typedef Bar NE; };
+// template<> struct ElementChoiceMeshCaracStd<0,true,1> { typedef NodalElement NE; };
+// 
+// template<> struct ElementChoiceMeshCaracStd<3,true,2> { typedef Hexa_20 NE; };
+// template<> struct ElementChoiceMeshCaracStd<2,true,2> { typedef Quad_8 NE; };
+// template<> struct ElementChoiceMeshCaracStd<1,true,2> { typedef Bar_3 NE; };
+// template<> struct ElementChoiceMeshCaracStd<0,true,2> { typedef NodalElement NE; };
+
 template<int nb_var_inter,bool want_cubic=false,unsigned degree=1> struct ElementChoiceMeshCaracStd { typedef void NE; };
 template<> struct ElementChoiceMeshCaracStd<3,false,1> { typedef Tetra NE; };
 template<> struct ElementChoiceMeshCaracStd<2,false,1> { typedef Triangle NE; };
@@ -41,7 +62,7 @@ template<> struct ElementChoiceMeshCaracStd<3,true,2> { typedef Hexa_20 NE; };
 template<> struct ElementChoiceMeshCaracStd<2,true,2> { typedef Quad_8 NE; };
 template<> struct ElementChoiceMeshCaracStd<1,true,2> { typedef Bar_3 NE; };
 template<> struct ElementChoiceMeshCaracStd<0,true,2> { typedef NodalElement NE; };
-
+    
 /*!
 
 Cette classe peut servir de paramètre à une classe Mesh pour définir un maillage sans champs (autre que pos, la position dans l'espace). On ne mémorise que la position des noeuds. On trouve d'autres exemples pour des formulations dans le dossier formulation (n'hésitez pas à faire du copier/coller). Pour générer un MeshCarac personnel, on peut utiliser la fonction make_pb() dans le fichier Sconstruct (voir le tutorial \a [Comment résoudre un problème éléments finis de façon générale] ).

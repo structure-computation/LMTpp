@@ -17,6 +17,7 @@ extern "C" {
 }
 // #include "containers/vec.h"
 #include "vec.h"
+// #include "vecfull.h"
 #include <correlation/ImgInterp.h>
 
 namespace LMT {
@@ -153,10 +154,10 @@ public:
     Sinon une moyenne "mobile" étendue sur 4 pixels en carré est faite sur l'image BBBB avant de faire la TF. Du coup Le résultat est une image de même taille que l'image initiale. 
 
 */
-struct SymmectricPadding { 
+struct SymmetricPadding { 
     bool div_2; 
-    SymmectricPadding():div_2(false) {}
-    SymmectricPadding(bool d2):div_2(d2) {}
+    SymmetricPadding():div_2(false) {}
+    SymmetricPadding(bool d2):div_2(d2) {}
 };
 
 /*!
@@ -179,29 +180,29 @@ struct ZeroPadding {};
 
 */
 template<class T_, unsigned dim_, class Kernel_, class PT_, class TPadding> 
-ImgInterp<std::complex<double>,dim_,Kernel_,PT_> fft(ImgInterp<T_, dim_, Kernel_, PT_ > &img, Vec<int,2> topleft, Vec<int,2> bottomright, const TPadding padding) {
+ImgInterp<std::complex<double>,dim_,Kernel_,PT_> fft( const ImgInterp<std::complex<T_>, dim_, Kernel_, PT_ > &img, Vec<int,2> topleft, Vec<int,2> bottomright, const TPadding padding) {
     fft( img, topleft[0], bottomright[0], topleft[1], bottomright[1], padding);
 }
     
 template<class T_,unsigned dim_,class Kernel_,class PT_,class TPadding> 
-ImgInterp<std::complex<double>,dim_,Kernel_,PT_> fft( ImgInterp<T_, dim_, Kernel_, PT_ > &img, int xmin, int xmax, int ymin, int ymax, const TPadding padding) {
+ImgInterp<std::complex<double>,dim_,Kernel_,PT_> fft( const ImgInterp<std::complex<T_>, dim_, Kernel_, PT_ > &img, int xmin, int xmax, int ymin, int ymax, const TPadding padding) {
     assert(0);
     return ImgInterp<std::complex<double>,dim_,Kernel_,PT_>();
 }
   
 template<class T_, unsigned dim_, class Kernel_, class PT_, class TPadding> 
-ImgInterp<std::complex<double>,dim_,Kernel_,PT_> ffti(ImgInterp<T_, dim_, Kernel_, PT_ > &img, Vec<int,2> topleft, Vec<int,2> bottomright, const TPadding padding) {
+        ImgInterp<std::complex<double>,dim_,Kernel_,PT_> ffti( const ImgInterp<std::complex<T_>, dim_, Kernel_, PT_ > &img, Vec<int,2> topleft, Vec<int,2> bottomright, const TPadding padding) {
     ffti( img, topleft[0], bottomright[0], topleft[1], bottomright[1], padding);
 }
     
 template<class T_,unsigned dim_,class Kernel_,class PT_,class TPadding> 
-ImgInterp<std::complex<double>,dim_,Kernel_,PT_> ffti( ImgInterp<T_, dim_, Kernel_, PT_ > &img, int xmin, int xmax, int ymin, int ymax, const TPadding padding) {
+        ImgInterp<std::complex<double>,dim_,Kernel_,PT_> ffti( const ImgInterp<std::complex<T_>, dim_, Kernel_, PT_ > &img, int xmin, int xmax, int ymin, int ymax, const TPadding padding) {
     assert(0);
     return ImgInterp<std::complex<double>,dim_,Kernel_,PT_>();
 }
   
 template<class T_,unsigned dim_,class Kernel_,class PT_> 
-ImgInterp<std::complex<double>,dim_,Kernel_,PT_> fft( ImgInterp<T_, dim_, Kernel_, PT_ > &img, int xmin, int xmax, int ymin, int ymax, const SymmectricPadding padding) {
+        ImgInterp<std::complex<double>,dim_,Kernel_,PT_> fft( const ImgInterp<std::complex<T_>, dim_, Kernel_, PT_ > &img, int xmin, int xmax, int ymin, int ymax, const SymmetricPadding padding) {
     int x_in_max = (xmax-xmin+1)*2-1 , y_in_max = (ymax-ymin+1)*2-1,i,j;
     ImgInterp<std::complex<double>,dim_,Kernel_,PT_> in;//,tem;
     FFT p;
@@ -226,7 +227,7 @@ ImgInterp<std::complex<double>,dim_,Kernel_,PT_> fft( ImgInterp<T_, dim_, Kernel
 }
 
 template<class T_,unsigned dim_,class Kernel_,class PT_> 
-ImgInterp<std::complex<double>,dim_,Kernel_,PT_> ffti( ImgInterp<T_, dim_, Kernel_, PT_ > &img, const SymmectricPadding padding) {
+        ImgInterp<std::complex<double>,dim_,Kernel_,PT_> ffti( const ImgInterp<std::complex<T_>, dim_, Kernel_, PT_ > &img, const SymmetricPadding padding) {
 
     ImgInterp<std::complex<double>,dim_,Kernel_,PT_> in,tem;
     FFT p;
@@ -240,21 +241,21 @@ ImgInterp<std::complex<double>,dim_,Kernel_,PT_> ffti( ImgInterp<T_, dim_, Kerne
 }
 
 template<class T_,unsigned dim_,class Kernel_,class PT_> 
-ImgInterp<std::complex<double>,dim_,Kernel_,PT_> fft( ImgInterp<T_, dim_, Kernel_, PT_ > &img, Vec<int,2> topleft, Vec<int,2> bottomright, SymmectricPadding padding) {
+        ImgInterp<std::complex<double>,dim_,Kernel_,PT_> fft( const ImgInterp<std::complex<T_>, dim_, Kernel_, PT_ > &img, Vec<int,2> topleft, Vec<int,2> bottomright, SymmetricPadding padding) {
     fft( img, topleft[0], bottomright[0], topleft[1], bottomright[1], padding);
 }
 
 template<class T_,unsigned dim_,class Kernel_,class PT_> 
-ImgInterp<std::complex<double>,dim_,Kernel_,PT_> fft( ImgInterp<T_, dim_, Kernel_, PT_ > &img, int xmin, int xmax, int ymin, int ymax, ZeroPadding padding) {
-    int x_in_max = xmax-xmin+2 , y_in_max = ymax-ymin+2,i,j;
+        ImgInterp<std::complex<double>,dim_,Kernel_,PT_> fft( const ImgInterp<std::complex<T_>, dim_, Kernel_, PT_ > &img, int xmin, int xmax, int ymin, int ymax, ZeroPadding padding) {
+    int x_in_max = xmax-xmin , y_in_max = ymax-ymin, i, j;
     ImgInterp<std::complex<double>,dim_,Kernel_,PT_> in;
     FFT p;
 
     in.resize(Vec<int,2>(x_in_max+1,y_in_max+1));
-    for(int jj=xmin;jj<=xmax;++jj) {
-        j = jj-xmin+1;
-        for(int ii=ymin;ii<=ymax;++ii) {
-            i = ii-ymin+1;
+    for(int jj=xmin+1;jj<xmax;++jj) {
+        j = jj-xmin;
+        for(int ii=ymin+1;ii<ymax;++ii) {
+            i = ii-ymin;
             in.tex_int(j,i) = img(jj,ii);
         }
     }
@@ -270,12 +271,12 @@ ImgInterp<std::complex<double>,dim_,Kernel_,PT_> fft( ImgInterp<T_, dim_, Kernel
 }
 
 template<class T_,unsigned dim_,class Kernel_,class PT_> 
-ImgInterp<std::complex<double>,dim_,Kernel_,PT_> fft( ImgInterp<T_, dim_, Kernel_, PT_ > &img, Vec<int,2> topleft, Vec<int,2> bottomright, ZeroPadding padding) {
+        ImgInterp<std::complex<double>,dim_,Kernel_,PT_> fft( const ImgInterp<std::complex<T_>, dim_, Kernel_, PT_ > &img, Vec<int,2> topleft, Vec<int,2> bottomright, ZeroPadding padding) {
     fft( img, topleft[0], bottomright[0], topleft[1], bottomright[1], padding);
 }
 
 template<class T_,unsigned dim_,class Kernel_,class PT_> 
-ImgInterp<std::complex<double>,dim_,Kernel_,PT_> ffti( ImgInterp<T_, dim_, Kernel_, PT_ > &img, const ZeroPadding padding) {
+        ImgInterp<std::complex<double>,dim_,Kernel_,PT_> ffti( const ImgInterp<std::complex<T_>, dim_, Kernel_, PT_ > &img, const ZeroPadding padding) {
 
     ImgInterp<std::complex<double>,dim_,Kernel_,PT_> tem, in;
     FFT p;
@@ -287,6 +288,53 @@ ImgInterp<std::complex<double>,dim_,Kernel_,PT_> ffti( ImgInterp<T_, dim_, Kerne
         for(i=0;i<in.sizes[1];++i)
             in.tex_int(j,i) = tem(j+1,i+1);
     return in;
+}
+
+/*!
+    Cette fonction retourne une approximation de la corrélation entre les deux images i et i2 dans le rectangle [xmin, xmax]x[ymin, ymax].
+
+    Réf : http://pixel-shaker.fr/
+
+*/
+template<class T_,unsigned dim_,class Kernel_,class PT_>
+Vec<int,2> rigid_body_translation( const ImgInterp<T_,dim_,Kernel_,PT_> &i, const ImgInterp<T_,dim_,Kernel_,PT_> &i2, int xmin, int xmax, int ymin, int ymax ) {
+    ImgInterp<std::complex<double>,dim_,Kernel_,PT_> _i;
+    ImgInterp<std::complex<double>,dim_,Kernel_,PT_> _i2;
+    _i.resize(i.size());
+    _i2.resize(i2.size());
+    _i.data = i.data;
+    _i2.data = i2.data;
+    ImgInterp<std::complex<double>,dim_,Kernel_,PT_> img  = fft(_i,  xmin, xmax, ymin, ymax, ZeroPadding());
+    ImgInterp<std::complex<double>,dim_,Kernel_,PT_> img2 = fft(_i2, xmin, xmax, ymin, ymax, ZeroPadding());
+    ImgInterp<std::complex<double>,dim_,Kernel_,PT_> img3 = abs(img);
+    img.data  /= img3.data;
+    img2.data /= img3.data;
+    ImgInterp<std::complex<double>,dim_,Kernel_,PT_> img4 = img * conj(img2);
+    ImgInterp<std::complex<double>,dim_,Kernel_,PT_> img5 = ffti( img4, ZeroPadding() );
+    ImgInterp<double,dim_,Kernel_,PT_> img6;
+    img6.data = real(img5.data);
+    img6.resize(img5.size());
+    double maxi = max(img6.data);
+    Vec<unsigned int> indices = find_with_index( generate( img6.data, _1 == maxi ) );
+    
+    if (indices.size()) {
+        int sx = img6.sizes[0];
+        int sy = img6.sizes[1];
+        int x = indices[0] % sx;
+        int y = (indices[0] - x) / sx;
+        x = ((x+sx/2) % (sx)) - sx/2;
+        y = ((y+sy/2) % (sy)) - sy/2;
+        if (x)
+            x += sgn(x);
+        if (y)
+            y += sgn(y);
+        if (abs(x)+abs(y) < 4)
+            std::cerr << "WARNING rigid_body_translation : do you really need to use the function ? because abs(x)+abs(y) = " << abs(x)+abs(y) << std::endl;
+        return Vec<int,2>(x,y);
+    } else {
+        std::cerr << "ERROR rigid_body_translation : there is not maximum." << std::endl;
+        return Vec<int,2>(0,0);
+    }
 }
 
 };
