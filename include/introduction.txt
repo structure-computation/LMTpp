@@ -5,8 +5,8 @@
     Elle contient aussi des scripts Python pour la génération de code. En effet on peut exprimer son problème de mécanique dans le langage Python sous une forme très proche de la notation mathématique puis générer les classes et les fonctions C++ correspondant au problème. Il reste alors à implémenter les méthodes de résolution.  
     
     
-    \author Hugo Leclerc
-    \friend hugo.leclerc@lmt.ens-cachan.fr
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    = Fonctionnement général
+
+    
 
 */
