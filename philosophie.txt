@@ -1,0 +1,15 @@
+/*!
+\webpage Philosophie de la librairie philosophie
+
+    à compléter (ne pas effacer la ligne ci dessus et indenter le texte).
+
+
+
+
+
+
+
+
+
+
+*/

@@ -81,7 +81,7 @@ struct Totito_ELEM {
                 //cout << " changing information of node number " << number << " data "<< name << " value : " << val << endl ;
             }
     }
-    
+
         void operator()(unsigned num,const char *name,typename TM::Tpos &val) const {
             for(unsigned i=0;i<fname.size();++i)
                 if (name==fname[i]) {
@@ -179,6 +179,7 @@ void read_avs(TM &mesh, std::istream &is) throw(std::runtime_error) {
                 vn[i] = map_num_node[number];
             }
             typename TM::EA *ne = reinterpret_cast<typename TM::EA *>(mesh.add_element(Bar(),DefaultBehavior(),&vn[0]));
+            ne->group = number2;
             if(nbelem_data) mesh.elem_list.synchronize_dyn(&dd);
             if(nbelem_data) mesh.elem_list.get_data(dd, *ne) = nb;
         } else if (type_elem=="tri") {
@@ -198,11 +199,13 @@ void read_avs(TM &mesh, std::istream &is) throw(std::runtime_error) {
                 }
                 permutation_if_jac_neg(Triangle(),vn.ptr());
                 typename TM::EA *ne = reinterpret_cast<typename TM::EA *>(mesh.add_element(Triangle(),DefaultBehavior(),&vn[0]));
+                ne->group = number2;
                 if(nbelem_data) mesh.elem_list.synchronize_dyn(&dd);
                 if(nbelem_data) mesh.elem_list.get_data(dd, *ne) = nb;
             } else if ( vn.size()==6 ) {
                 permutation_if_jac_neg(Triangle_6(),vn.ptr());
                 typename TM::EA *ne = reinterpret_cast<typename TM::EA *>(mesh.add_element(Triangle_6(),DefaultBehavior(),&vn[0]));
+                ne->group = number2;
                 if(nbelem_data) mesh.elem_list.synchronize_dyn(&dd);
                 if(nbelem_data) mesh.elem_list.get_data(dd, *ne) = nb;
             } else
@@ -218,6 +221,7 @@ void read_avs(TM &mesh, std::istream &is) throw(std::runtime_error) {
             }
             permutation_if_jac_neg(Quad(),vn.ptr());
             typename TM::EA *ne = reinterpret_cast<typename TM::EA *>(mesh.add_element(Quad(),DefaultBehavior(),&vn[0]));
+            ne->group = number2;
             if(nbelem_data) mesh.elem_list.synchronize_dyn(&dd);
             if(nbelem_data) mesh.elem_list.get_data(dd, *ne) = nb;
         } else if (type_elem=="tet") {
@@ -231,8 +235,10 @@ void read_avs(TM &mesh, std::istream &is) throw(std::runtime_error) {
             permutation_if_jac_neg(Tetra(),vn.ptr());
             //typename TM::template TElem<Tetra,DefaultBehavior>::TE *ne = mesh.add_element(Tetra(),DefaultBehavior(),&vn[0]);
             typename TM::EA *ne = reinterpret_cast<typename TM::EA *>(mesh.add_element(Tetra(),DefaultBehavior(),&vn[0]));
+            ne->group = number2;
             if(nbelem_data) mesh.elem_list.synchronize_dyn(&dd);
             if(nbelem_data) mesh.elem_list.get_data(dd, *ne) = nb;
+
         } else if (type_elem=="cub8" or type_elem=="hex") {
             nnode_elem=8;
             Vec<TNode *> vn;
@@ -244,6 +250,7 @@ void read_avs(TM &mesh, std::istream &is) throw(std::runtime_error) {
             permutation_if_jac_neg(Hexa(),vn.ptr());
             //typename TM::template TElem<Hexa,DefaultBehavior>::TE *ne = mesh.add_element(Hexa(),DefaultBehavior(),&vn[0]);
             typename TM::EA *ne = reinterpret_cast<typename TM::EA *>(mesh.add_element(Hexa(),DefaultBehavior(),&vn[0]));
+            ne->group = number2;
             if(nbelem_data) mesh.elem_list.synchronize_dyn(&dd);
             if(nbelem_data) mesh.elem_list.get_data(dd, *ne) = nb;
         } else if (type_elem=="prism") {
@@ -257,6 +264,7 @@ void read_avs(TM &mesh, std::istream &is) throw(std::runtime_error) {
             permutation_if_jac_neg(Wedge(),vn.ptr());
             //typename TM::template TElem<Wedge,DefaultBehavior>::TE *ne = mesh.add_element(Wedge(),DefaultBehavior(),&vn[0]);
             typename TM::EA *ne = reinterpret_cast<typename TM::EA *>(mesh.add_element(Wedge(),DefaultBehavior(),&vn[0]));
+            ne->group = number2;
             if(nbelem_data) mesh.elem_list.synchronize_dyn(&dd);
             if(nbelem_data) mesh.elem_list.get_data(dd, *ne) = nb;
         } else {
@@ -340,7 +348,7 @@ void read_avs(TM &mesh, std::istream &is) throw(std::runtime_error) {
             DM::apply_with_names( mesh.node_list[i], mmmm);
         }
     }
-    
+
 
     if(nbelem_data){//reading elem fields
         string str;

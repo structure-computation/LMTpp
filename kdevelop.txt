@@ -1,0 +1,38 @@
+/*!
+\webpage Kdevelop kdevelop
+
+    = Qu'est-ce ?
+
+        kdevelop est un gestionnaire de projet, et inclue des éditeurs de code source. Ce n'est pas une usine à gaz : kdevelop expose en priorité les tâches courantes, et les trucs shiny mais moins fréquents sont dans les menus.
+        
+
+    = Créer un projet
+    
+        Pour disposer à plein régime des outils de navigation, il faut créer un projet. Le plus simple, est de faire "Projet -> Importer un projet existant" et de pointer sur le répertoire qui contient vos .cpp, .h, .met, .py, Makefile, SConstruct, ...
+        
+        Remarque : par défaut, on conseille "C++ project with custom Makefile" qui vous donne la plus grande liberté. Vous pourrez en l'occurence utiliser les Makefile pour lancer des exécutions, ... Par contre, dans ce cas, les fichiers SConstruct , *.py et *.met ne sont pas mis automatiquement dans le projet. Pour le faire, vous devez les ajouter les types d'extension au moment de la création du projet ou après en faisant "Project->Repopulate project".
+
+    = Navigation
+
+        Naviguer et éditer les fichiers est donc l'objectif de base de kdevelop.
+        
+        Pour naviguer dans les fichiers ouverts, Alt-flèche (gauche ou droite)
+        
+        Pour trouver un fichier du projet, Ctrl+Alt+o puis des lettres dans le nom du fichier.
+        
+        Pour trouver et aller sur une fonction ou méthode : Ctrl+Alt+m.
+        
+        Pour trouver et aller sur une classe : Ctrl+Alt+c.
+        
+        Remarque : pour trouver la doc sur un truc dont vous connaissez au moins une partie du nom, c'est beaucoup plus rapide avec kdevelop. Quand il vous amène sur la définition d'une fonction ou d'une classe, il vous emmène nécessairement sur sa doc !
+        
+        Pour complèter un nom ou trouver un atttibut ou une méthode, Ctrl-espace.
+
+    = Formater correctement les sources
+    
+        Par convention, au LMT, on formatte avec des espaces, par 4 et pas de tabulations. Pour que ça soit naturel sur kdevelop, "Settings->Configure editor->Editing->insert space instead tabulation" puis "tab width=4" et même chose dans "Settings->Configure editor->indentation".
+        
+        Pour un formattage automatique sur kdevelop, vous pouvez utiliser "Edit->Reformat source" après avoir fait "Project->Project options->Formatting->Style Java"
+        
+        Par convention, on met des espaces après les "," et "(", avant les ")" et avant et après les "+", "-", ...
+*/
