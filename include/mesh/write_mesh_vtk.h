@@ -1,4 +1,3 @@
-//
 // C++ Interface: write_mesh_vtk
 //
 // Description:

@@ -1,0 +1,34 @@
+/*!
+\webpage roles Rôles
+
+    = Le développement au LMT
+
+        Si quelqu'un a quelque chose à programmer au LMT, qu'il soit permanent, doctorant, post-doc, ... il pourra jouir du fait qu'il ne sera pas seul dans ce cas. Dans cette discipline, pour le partage, on bénéficie d'avantages considérables :
+            * copier du code source est immédiat et ne coûte rien (alors que refaire une pièce mécanique comme un mord par exemple est une autre histoire);
+            * les paradigmes et les languages nous aident aujourd'hui à développer des objets "universels" ou des boîtes noires qu'il sera immédiat de plugger (alors qu'en mécanique, on chercher plutôt à tout mettre dans une seule pièce, qui donc se trouve la plupart du temps cantonnée à une utilisation spécifique).
+        
+        S'il y a un rapport de hiérarchie, un n+1 peut demander à un n, n-1... de participer. C'est le fonctionnement de la plupart des thèses : un permanent expérimenté veut quelqu'un pour l'aider à avancer sur un sujet. Il fait alors appel à des thésards, post-doc, etc... pour s'occuper des aspects développement mathématiques, informatiques, tester des hypothèses, lancer des campagnes d'essais, ... Le thésard finit toujours plus ou moins par se consacrer à de la mise en oeuvre.
+        
+        Si le thésard, post-doc n'est pas à l'aise en info ou en maths de base, il avancera à la vitesse d'une mule et finira par passer son temps à faire de l'info et des maths de base. Il tatonnera, il lira des bouquins avec une mauvaise efficacité, etc... Quelqu'un qui bosse pour avoir un bon niveau passera vite les aspects ennuyeux (maths de base style dérivation de formule, manipulation de matrices, info de base style conteneurs, tri, etc...) et il aura du temps pour faire des trucs intéressants.
+
+        Ce qui se conçoit bien s'ennonce clairement, mais il faut bien reconnaître qu'acquérir un niveau minimum de programmation n'est pas immédiat. Malheureusement, aucun individu ne pourra faire cet investissement pour une autre personne.
+
+    = La cellule développement logiciel
+        
+        La cellule développement logiciel a vocation à fédérer les développements, et éventuellement les infléchir pour faciliter cette tâche.
+        
+        La cellule développe des "fondations", outils pour que les développeurs du LMT puissent faire communiquer leurs programmes. Mais la cellule ne développe pas les applications des doctorants. Du reste, si elle le faisait, ça signifierait qu'elle serait en mesure de comprendre en profondeur l'ensemble des travaux d'une centaine de personnes du LMT.
+        
+        Dans certains cas, développer pour un cas particulier va plus vite que développer des outils flexibles qui pourront servir à d'autres personnes. Dans ce cas, la cellule organise et participe aux développements.
+        
+        Certains développements faits par la cellule ont vocation d'exemple ou de "pied à l'étrier". Il s'agit plus de montrer comment faire pour avoir du code qui permette de travailler ensembles, d'aller plus vite, ... que de faire et maintenir un produit final.
+        
+    = Pourquoi je m'embêterai à développer alors que je pourrais payer des esclaves indiens à 0.50€/h pour faire le code à ma place ?
+        
+        Parce que le temps pour leur expliquer votre truc et rétroagir, c'est le temps qu'il vous faut pour vos développements. Du reste, en général, en analyse numérique, les développeurs passent beaucoup de temps aussi et surtout parce qu'ils ne savent pas bien qu'est-ce qu'il faut programmer quand ils débutent.
+        
+        En pratique, pour définir un cahier des charges, il est bon de mettre la main à la pâte.
+        
+        Par ailleurs, programmer, c'est s'exprimer. Et quelqu'un qui sait parler français n'est pas forcément compétent pour parler de sciences en français.
+
+*/
