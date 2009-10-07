@@ -347,7 +347,7 @@ void write_avs(const TM &mesh,
 #endif
 
         Vec<int> node_data_comp;
-        Vec<string> node_data_name;
+        Vec<std::string> node_data_name;
         if ( mesh.node_list.size() ) {
             const char *names[TM::TNode::nb_params+(TM::TNode::nb_params==0)];
             DM::get_names<typename TM::TNode>( names );
@@ -380,12 +380,12 @@ void write_avs(const TM &mesh,
 };
 ///************************************************************************************************************
 template<class TM>
-void write_avs(const TM &mesh,const string &name,const Vec<string> &display_fields, Ascii ) throw(std::runtime_error) {
+void write_avs(const TM &mesh,const std::string &name,const Vec<std::string> &display_fields, Ascii ) /*throw(std::runtime_error)*/ {
 
     std::ofstream outfile(name.c_str());
 
     if(outfile.fail())
-        cerr << "Error al crear el archivo : " << name << std::endl;
+        std::cerr << "Error al crear el archivo : " << name << std::endl;
     else {
 
 
@@ -395,7 +395,7 @@ void write_avs(const TM &mesh,const string &name,const Vec<string> &display_fiel
         int a;
         a=0;
         Vec<int> node_data_comp;
-        Vec<string> node_data_name;
+        Vec<std::string> node_data_name;
 
         if ( mesh.node_list.size() ) {
             const char *names[TM::TNode::nb_params+(TM::TNode::nb_params==0)];
@@ -426,7 +426,7 @@ void write_avs(const TM &mesh,const string &name,const Vec<string> &display_fiel
         a=0;
 
         Vec<int> cell_data_comp;
-        Vec<string> cell_data_name;
+        Vec<std::string> cell_data_name;
 
         if ( mesh.elem_list.size() ) {
             // static
@@ -458,7 +458,7 @@ void write_avs(const TM &mesh,const string &name,const Vec<string> &display_fiel
         outfile << sum(cell_data_comp) << " ";/// The number of cell data is zero if no node data is present
 
         Vec<int> glob_data_comp;
-        Vec<string> glob_data_name;
+        Vec<std::string> glob_data_name;
 
         a= 0;
         const char *names[TM::nb_params+(TM::nb_params==0)];
@@ -541,11 +541,11 @@ void write_avs(const TM &mesh,const string &name,const Vec<string> &display_fiel
 
 ///**************************************************************************************
 template<class TM, class TP>
-void write_avs(TM &mesh, unsigned num, TP &structure, Binary) throw(std::runtime_error) {
+void write_avs(TM &mesh, unsigned num, TP &structure, Binary) /*throw(std::runtime_error)*/ {
 
-    Vec<string> display_fields = structure.output;
-    string path = structure.path;
-    ostringstream ss;
+    Vec<std::string> display_fields = structure.output;
+    std::string path = structure.path;
+    std::ostringstream ss;
     ss << path << "tmp/avs" << setfill('0') << setw(4) << num << ".inp";
     string name(ss.str());
 
@@ -555,13 +555,13 @@ void write_avs(TM &mesh, unsigned num, TP &structure, Binary) throw(std::runtime
 
 ///************************************************************************************************************
 template<class TM, class TP>
-void write_avs(TM &mesh, unsigned num, TP &structure, Ascii ) throw(std::runtime_error) {
+void write_avs(TM &mesh, unsigned num, TP &structure, Ascii ) /*throw(std::runtime_error)*/ {
 
-    Vec<string> display_fields = structure;
-    string path = structure.path;
-    ostringstream ss;
+    Vec<std::string> display_fields = structure;
+    std::string path = structure.path;
+    std::ostringstream ss;
     ss << path << "tmp/avs" << setfill('0') << setw(4) << num << ".inp";
-    string name(ss.str());
+    std::string name(ss.str());
     std::ofstream outfile(name.c_str());
 
     write_avs(mesh,name,display_fields, Ascii());

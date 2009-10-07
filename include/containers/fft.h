@@ -161,9 +161,8 @@ struct SymmetricPadding {
 };
 
 /*!
-    Cette classe sert à faire un padding qui met des zéros autour de l'image avant de la transformée de Fourier , TF.
-    Du coup Le résultat est une image de taille augmentée de deux pixels suivant chaque dimension. 
-
+    Cette classe sert à faire un padding qui met à zéro les pixels des bors de l'image avant de faire la transformée de Fourier , TF.
+     
 */
 struct ZeroPadding {};
 
