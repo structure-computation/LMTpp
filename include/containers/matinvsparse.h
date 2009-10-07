@@ -95,6 +95,47 @@ template<class T,class TS> void chol_factorize( Mat<T,TS,SparseLine<> > &m ) {
     //PRINT( hash );
 }
 
+
+/*!
+ Cette fonction retourne la matrice ret, triangulaire inférieure réelle de la décomposition de Cholesky d'une matrice symétrique réelle m.
+
+ On utilise l'algorithme de Cholesky-Banachiewicz qui fonctionne par lignes (cf l'article http://en.wikipedia.org/wiki/Cholesky_decomposition )
+
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+*/
+template<class T,class TS> void get_Cholesky( Mat<T,TS,SparseLine<> > &m, Mat<T,TriLower<>,SparseLine<> > & ret ) {
+    static const unsigned NN = 16;
+    Vec<HashCH<NN> > hash; hash.resize( m.nb_rows() );
+    ret.clear();
+    ret.resize( m.nb_rows() );
+    for(unsigned line=0;line<m.nb_rows();++line) {
+        for(int ind=0;ind<(int)m.data[line].indices.size()-1;++ind) {
+            /// m_ij != 0
+            unsigned col = m.data[line].indices[ind];
+            ret.data[line].indices.push_back(col);
+            ret.data[line].data.push_back( ( m.data[line].data[ind] - dot_chol_factorize( ret.data[col], ret.data[line] ) ) / ret.data[col].data.back() );
+            hash[ line ].add( col );
+            /// m_ij == 0
+            unsigned ie = m.data[line].indices[ind+1];
+            while ( ++col < ie ) {
+                if ( not HashCH<NN>::cor( hash[col], hash[ line ] ) ) continue;
+
+                T v = dot_chol_factorize( ret.data[col], ret.data[line] );
+                if ( boolean_( v ) ) {
+                    ret.data[line].data.push_back( -v / ret.data[col].data.back() );
+                    ret.data[line].indices.push_back( col );
+                    hash[ line ].add( col );
+                }
+            }
+        }
+        /// on diag
+        if ( m.data[line].data.size() ) {
+            ret.data[line].data.push_back( sqrt( m.data[line].data.back() - norm_2_p2( ret.data[line].data.begin(), ret.data[line].data.size() ) ) );
+            ret.data[line].indices.push_back( m.data[line].indices.back() );
+        }
+    }
+}
+
 // template<class T> void incomplete_chol_factorize( Mat<T,Sym<>,SparseLine<> > &m, int level = 1  ) {
 //     static const unsigned NN = 16; /// ajouté par Raphaël
 //     Vec<HashCH<NN> > hash; hash.resize( m.nb_rows() ); /// ajouté par Raphaël

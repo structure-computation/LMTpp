@@ -3,17 +3,16 @@
 #include <vector>
 #include <map>
 
-//pour les appels systèmes
-#include<sys/types.h>
-#include<fcntl.h>
-#include<unistd.h>
-
 using namespace std ;
 
 #include "pagecomment.h"
 #include "opstructure_site.h"
 #include "visitorbloc_setpath_html.h"
 #include "visitorcommentitem_setpath_html.h"
+                 
+/// pour parcourir, manipuler les fichiers avec Boost
+#include "boost/filesystem.hpp"    // includes all needed Boost.Filesystem declarations
+using namespace boost::filesystem; //  a namespace alias is preferred practice in real code
 
 void OpStructure_site :: initialize() {
 
@@ -25,26 +24,37 @@ void OpStructure_site :: initialize() {
     (*ptr_tree)["generic_comment"] = (*ptr_tree)["root"] + "generic_comment/" ;
     (*ptr_tree)["image"] = (*ptr_tree)["root"] + "image/" ;
     (*ptr_tree)["keyword"] = (*ptr_tree)["root"] + "keyword/" ;
-    // on crée ici le repertoire html, html/function/ html/structure/ html/example/ et html/tutorial html/image/ par exemple
-    if (mkdir("doc",S_IRWXU | S_IRWXG | S_IRWXO ) == -1 )
-        cerr << "doc" <<" existe déjà"<< endl ;
-    if (mkdir((*ptr_tree)["root"].c_str(),S_IRWXU | S_IRWXG | S_IRWXO ) == -1 )
-        cerr << (*ptr_tree)["root"] <<" existe déjà"<< endl ;
-    if (mkdir((*ptr_tree)["function"].c_str(),S_IRWXU | S_IRWXG | S_IRWXO ) == -1 )
-        cerr << (*ptr_tree)["function"] <<" existe déjà"<< endl ;
-    if (mkdir((*ptr_tree)["structure"].c_str(),S_IRWXU | S_IRWXG | S_IRWXO ) == -1 )
-        cerr << (*ptr_tree)["structure"] <<" existe déjà"<< endl ;
-    if (mkdir((*ptr_tree)["example"].c_str(),S_IRWXU | S_IRWXG | S_IRWXO ) == -1 )
-        cerr << (*ptr_tree)["example"] << " existe déjà"<< endl ;
-    if (mkdir((*ptr_tree)["tutorial"].c_str(),S_IRWXU | S_IRWXG | S_IRWXO ) == -1 )
-        cerr << (*ptr_tree)["tutorial"] << " existe déjà"<< endl ;
-    if (mkdir((*ptr_tree)["generic_comment"].c_str(),S_IRWXU | S_IRWXG | S_IRWXO ) == -1 )
-        cerr << (*ptr_tree)["generic_comment"] << " existe déjà"<< endl ;
-    if (mkdir((*ptr_tree)["image"].c_str(),S_IRWXU | S_IRWXG | S_IRWXO ) == -1 )
-        cerr << (*ptr_tree)["image"] << " existe déjà"<< endl ;
-    if (mkdir((*ptr_tree)["keyword"].c_str(),S_IRWXU | S_IRWXG | S_IRWXO ) == -1 )
-        cerr << (*ptr_tree)["keyword"] << " existe déjà"<< endl ;
-    // on génère ici le patron d'en tête pour toutes les pages web.
+    /// on crée ici le repertoire html, html/function/ html/structure/ html/example/ et html/tutorial html/image/ par exemple
+//     create_directory( "doc" ); /// inutile à priori
+    remove_all( (*ptr_tree)["root"] );
+    create_directory( (*ptr_tree)["root"] );
+    create_directory( (*ptr_tree)["function"] );
+    create_directory( (*ptr_tree)["structure"] );
+    create_directory( (*ptr_tree)["example"] );
+    create_directory( (*ptr_tree)["tutorial"] );
+    create_directory( (*ptr_tree)["generic_comment"] );
+    create_directory( (*ptr_tree)["image"] );
+    create_directory( (*ptr_tree)["keyword"] );
+    /// code Linux
+//     if (mkdir("doc",S_IRWXU | S_IRWXG | S_IRWXO ) == -1 )
+//         cerr << "doc" <<" existe déjà"<< endl ;
+//     if (mkdir((*ptr_tree)["root"].c_str(),S_IRWXU | S_IRWXG | S_IRWXO ) == -1 )
+//         cerr << (*ptr_tree)["root"] <<" existe déjà"<< endl ;
+//     if (mkdir((*ptr_tree)["function"].c_str(),S_IRWXU | S_IRWXG | S_IRWXO ) == -1 )
+//         cerr << (*ptr_tree)["function"] <<" existe déjà"<< endl ;
+//     if (mkdir((*ptr_tree)["structure"].c_str(),S_IRWXU | S_IRWXG | S_IRWXO ) == -1 )
+//         cerr << (*ptr_tree)["structure"] <<" existe déjà"<< endl ;
+//     if (mkdir((*ptr_tree)["example"].c_str(),S_IRWXU | S_IRWXG | S_IRWXO ) == -1 )
+//         cerr << (*ptr_tree)["example"] << " existe déjà"<< endl ;
+//     if (mkdir((*ptr_tree)["tutorial"].c_str(),S_IRWXU | S_IRWXG | S_IRWXO ) == -1 )
+//         cerr << (*ptr_tree)["tutorial"] << " existe déjà"<< endl ;
+//     if (mkdir((*ptr_tree)["generic_comment"].c_str(),S_IRWXU | S_IRWXG | S_IRWXO ) == -1 )
+//         cerr << (*ptr_tree)["generic_comment"] << " existe déjà"<< endl ;
+//     if (mkdir((*ptr_tree)["image"].c_str(),S_IRWXU | S_IRWXG | S_IRWXO ) == -1 )
+//         cerr << (*ptr_tree)["image"] << " existe déjà"<< endl ;
+//     if (mkdir((*ptr_tree)["keyword"].c_str(),S_IRWXU | S_IRWXG | S_IRWXO ) == -1 )
+//         cerr << (*ptr_tree)["keyword"] << " existe déjà"<< endl ;
+    /// on génère ici le patron d'en tête pour toutes les pages web.
 #warning à faire ici le patron d'en tête pour toutes les pages web.
 }
 
