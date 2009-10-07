@@ -1,3 +1,6 @@
+#ifndef WRITE_AVS_H
+#define WRITE_AVS_H
+
 //
 // C++ Interface: write_avs
 //
@@ -9,6 +12,15 @@
 // Copyright: See COPYING file that comes with this distribution
 //
 //
+//#include<cstdlib>
+#include<fstream>
+#include <iostream>
+#include <exception>
+#include<cstdlib>
+
+#include <containers/vec.h>
+
+namespace LMT {
 
 /// Mesh in avs.imp file
 struct cell_output_bin {
@@ -48,7 +60,7 @@ struct cell_output_bin {
             //        }
 
 #ifdef DEBUG_FELIPE
-            debug << endl;
+            debug << std::endl;
 #endif
 
         }
@@ -68,7 +80,7 @@ struct cell_output_node_bin {
 #endif
         }
 #ifdef DEBUG_FELIPE
-        debug << endl;
+        debug << std::endl;
 #endif
     }
 };
@@ -98,19 +110,19 @@ struct cell_output_ascii {
             outfile << "hex ";
             for(unsigned i=0;i<8;++i)
                 outfile << (e.node(i)->number_in_original_mesh()+1) << " ";
-            outfile  << endl;
+            outfile  << std::endl;
         } else if(e.name_virtual() == std::string("Wedge") ) {
             /// Number of nodes
             outfile << "prism ";
             for(unsigned i=0;i<6;++i)
                 outfile << (e.node(i)->number_in_original_mesh()+1) << " ";
-            outfile  << endl;
+            outfile  << std::endl;
         } else if(e.name_virtual() == std::string("Tetra") ) {
             /// Number of nodes
             outfile << "tet ";
             for(unsigned i=0;i<4;++i)
                 outfile << (e.node(i)->number_in_original_mesh()+1) << " ";
-            outfile  << endl;
+            outfile  << std::endl;
         }
     }
 };
@@ -121,7 +133,7 @@ struct node_output_ascii {
         outfile << e.number+1 << " ";
         for(unsigned i=0;i<3;++i)
             outfile << e.pos[i] << " ";
-        outfile << endl;
+        outfile << std::endl;
     }
 };
 
@@ -136,13 +148,13 @@ struct Toto {
         }
     }
     template<class TE>
-    void operator()(TE &e,const Vec<std::string> &cell_data_name) {
+    void operator()(TE &e, const Vec<std::string> &cell_data_name) {
         *outfile << e.number+1 << " " ;
         for(unsigned i=0;i<cell_data_name.size();++i) {
             cqjd = cell_data_name[i];
-            DM::apply_with_names( e, *this );
+            /**DM::*/apply_with_names( e, *this );
         }
-        *outfile << endl;
+        *outfile << std::endl;
     }
     std::string cqjd;
     std::ofstream *outfile;
@@ -163,12 +175,15 @@ struct Ascii {}
 
 ///**************************************************************************************
 template<class TM>
-void write_avs(const TM &mesh,const string &name,const Vec<string> &display_fields, Binary) throw(std::runtime_error) {
+void write_avs(const TM &mesh,
+               const std::string &name, 
+               Vec<std::string> &display_fields,
+                Binary) /*throw(std::runtime_error( ) )*/ {
 
-    std::ofstream outfile(name.c_str(), ios::binary);
+    std::ofstream outfile(name.c_str(), std::ios::binary);
 
     if(outfile.fail())
-        cerr << "Error al crear el archivo : " << name << endl;
+        std::cerr << "Error al crear el archivo : " << name << std::endl;
     else {
 
         int a;
@@ -211,13 +226,13 @@ void write_avs(const TM &mesh,const string &name,const Vec<string> &display_fiel
             debug << "(nb_params :" << TM::TNode::nb_params << ") ";
 #endif
             for(unsigned i=0;i<TM::TNode::nb_params;++i) {
-                // debug << "names :" << string(names[i]) << endl;
-                // debug << "nb_comp :" << nb_comp[i] <<endl;
+                // debug << "names :" << string(names[i]) << std::endl;
+                // debug << "nb_comp :" << nb_comp[i] <<std::endl;
             }
 
             for(unsigned i=0;i<TM::TNode::nb_params;++i) {
                 if ( std::find(display_fields.begin(),display_fields.end(),std::string(names[i]))!=display_fields.end() or (display_fields.size()>=1 and display_fields[0]=="all") ) {    //continue;
-                    // debug << std::string(names[i]) << endl;
+                    // debug << std::string(names[i]) << std::endl;
                     ++a;
                 }
             }
@@ -241,8 +256,8 @@ void write_avs(const TM &mesh,const string &name,const Vec<string> &display_fiel
                     if ( iter->second.nb_comp ) {
 
                         ++a;
-                        // debug << "nombre :" <<  iter->first << endl;
-                        // debug << "NumberOfComponents=" << iter->second.nb_comp << endl;
+                        // debug << "nombre :" <<  iter->first << std::endl;
+                        // debug << "NumberOfComponents=" << iter->second.nb_comp << std::endl;
                     }
                 }
             }
@@ -252,17 +267,17 @@ void write_avs(const TM &mesh,const string &name,const Vec<string> &display_fiel
                 if ( std::find(display_fields.begin(),display_fields.end(),dd->get_name())!=display_fields.end() or (display_fields.size()>=1 and display_fields[0]=="all")) {    //continue;
                     if ( dd->nb_comp()==0 )
                         continue;
-                    // debug << "                <DataArray Name='" << dd->get_name() << endl ;
-                    // debug << "' NumberOfComponents='" << dd->nb_comp() << "' type='Float64' format='ascii'>" << endl;
-                    //debug << endl;
-                    //debug << "                </DataArray>" << endl;
+                    // debug << "                <DataArray Name='" << dd->get_name() << std::endl ;
+                    // debug << "' NumberOfComponents='" << dd->nb_comp() << "' type='Float64' format='ascii'>" << std::endl;
+                    //debug << std::endl;
+                    //debug << "                </DataArray>" << std::endl;
                 }
             }
         }
 
 
 
-        // debug << "cantidad de data por cell : " << a << endl;
+        // debug << "cantidad de data por cell : " << a << std::endl;
         a =0 ; /// /////////////////////////////////
         outfile.write ((char *)&a, sizeof(int)); /// The number of cell data fields, is zero if no node data fields is present.
 #ifdef DEBUG_FELIPE
@@ -294,20 +309,20 @@ void write_avs(const TM &mesh,const string &name,const Vec<string> &display_fiel
                 for(unsigned k=0;k<mesh.elem_list.size();++k)
                     s += dvem.os[i].str();
                 //               debug << s;
-                //debug << "                </DataArray>" << std::endl;
+                //debug << "                </DataArray>" << std::std::endl;
                 ++a;
             }
         }
         a=0;/////////////////////////////////////////////////////////
-        // debug << "cantidad de datos globales : "  << a << endl; a = 0 ; /// ///////////////////////////////////
+        // debug << "cantidad de datos globales : "  << a << std::endl; a = 0 ; /// ///////////////////////////////////
         outfile.write ((char *)&a, sizeof(int)); /// number of model data.
 #ifdef DEBUG_FELIPE
-        debug << a << endl;
+        debug << a << std::endl;
 #endif
         int nListNodes = 8;
         outfile.write ((char *)&nListNodes, sizeof(int)); ///Number of nlist nodes. This is equal to the product of the number of cells in each cell set and the number of nodes present in each cell set. This is for cell topology.
 #ifdef DEBUG_FELIPE
-        debug << "(nListNodes :" << nListNodes  << ")" << nListNodes << endl;
+        debug << "(nListNodes :" << nListNodes  << ")" << nListNodes << std::endl;
 #endif
         ;
         ///cell information
@@ -320,15 +335,15 @@ void write_avs(const TM &mesh,const string &name,const Vec<string> &display_fiel
 
         apply(mesh.node_list,node_output_bin(),outfile, 0);
 #ifdef DEBUG_FELIPE
-        debug << endl;
+        debug << std::endl;
 #endif
        apply(mesh.node_list,node_output_bin(),outfile, 1);
 #ifdef DEBUG_FELIPE
-        debug << endl;
+        debug << std::endl;
 #endif
        apply(mesh.node_list,node_output_bin(),outfile, 2);
 #ifdef DEBUG_FELIPE
-        debug << endl;
+        debug << std::endl;
 #endif
 
         Vec<int> node_data_comp;
@@ -347,7 +362,7 @@ void write_avs(const TM &mesh,const string &name,const Vec<string> &display_fiel
 
             for(unsigned i=0;i<TM::TNode::nb_params;++i) {
                 if ( std::find(display_fields.begin(),display_fields.end(),std::string(names[i]))!=display_fields.end() or (display_fields.size()>=1 and display_fields[0]=="all") ) {    //continue;
-                    // debug << std::string(names[i]) << endl;
+                    // debug << std::string(names[i]) << std::endl;
                     ++a;
                     node_data_comp.resize(a);
                     node_data_name.resize(a);
@@ -370,7 +385,7 @@ void write_avs(const TM &mesh,const string &name,const Vec<string> &display_fiel
     std::ofstream outfile(name.c_str());
 
     if(outfile.fail())
-        cerr << "Error al crear el archivo : " << name << endl;
+        cerr << "Error al crear el archivo : " << name << std::endl;
     else {
 
 
@@ -469,7 +484,7 @@ void write_avs(const TM &mesh,const string &name,const Vec<string> &display_fiel
         }
 
         /// number of model data.
-        outfile << sum(glob_data_comp) << endl;
+        outfile << sum(glob_data_comp) << std::endl;
 
         ///cell information
         apply(mesh.node_list,node_output_ascii(),outfile);
@@ -478,10 +493,10 @@ void write_avs(const TM &mesh,const string &name,const Vec<string> &display_fiel
         /// nodes data
         if(node_data_comp.size()) {
 
-            outfile << node_data_comp.size() << " " << node_data_comp << endl;
+            outfile << node_data_comp.size() << " " << node_data_comp << std::endl;
 
             for(unsigned i=0;i<node_data_name.size();++i) {
-                outfile << node_data_name[i] << "," << "1" << endl;
+                outfile << node_data_name[i] << "," << "1" << std::endl;
             }
             for(unsigned j=0;j<mesh.node_list.size();++j) {
                 outfile << j+1 << " " ;
@@ -491,14 +506,14 @@ void write_avs(const TM &mesh,const string &name,const Vec<string> &display_fiel
                     toto.cqjd = node_data_name[i];
                     DM::apply_with_names( mesh.node_list[j], toto);
                 }
-                outfile << endl;
+                outfile << std::endl;
             }
         }
         ///  element data
         if (cell_data_comp.size()) {
-            outfile << cell_data_comp.size() << " " << cell_data_comp << endl;
+            outfile << cell_data_comp.size() << " " << cell_data_comp << std::endl;
             for(unsigned i=0;i<cell_data_name.size();++i) {
-                outfile << cell_data_name[i] << "," << "1" << endl;
+                outfile << cell_data_name[i] << "," << "1" << std::endl;
             }
 
             Toto toto;
@@ -508,14 +523,14 @@ void write_avs(const TM &mesh,const string &name,const Vec<string> &display_fiel
         }
         /// global data
         if (glob_data_comp.size()) {
-            outfile << glob_data_comp.size() << " " << glob_data_comp << endl;
+            outfile << glob_data_comp.size() << " " << glob_data_comp << std::endl;
 
             for(unsigned i=0;i<glob_data_name.size();++i)
-                outfile << glob_data_name[i] << ",1" << endl;
+                outfile << glob_data_name[i] << ",1" << std::endl;
 
             for(unsigned i=0;i<TM::nb_params;++i) {
                 if ( std::find(display_fields.begin(),display_fields.end(),names[i])!=display_fields.end() or (display_fields.size()>=1 and display_fields[0]=="all") ) {
-                    outfile << dvem.os[i].str() << endl;
+                    outfile << dvem.os[i].str() << std::endl;
                 }
             }
         }
@@ -542,7 +557,7 @@ void write_avs(TM &mesh, unsigned num, TP &structure, Binary) throw(std::runtime
 template<class TM, class TP>
 void write_avs(TM &mesh, unsigned num, TP &structure, Ascii ) throw(std::runtime_error) {
 
-    Vec<string> display_fields = structure.output;
+    Vec<string> display_fields = structure;
     string path = structure.path;
     ostringstream ss;
     ss << path << "tmp/avs" << setfill('0') << setw(4) << num << ".inp";
@@ -552,4 +567,7 @@ void write_avs(TM &mesh, unsigned num, TP &structure, Ascii ) throw(std::runtime
     write_avs(mesh,name,display_fields, Ascii());
 
 }
+
+}
+#endif // write_avs.h
 

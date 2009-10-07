@@ -1,4 +1,4 @@
-#ifndef DIV_CPU_H
+﻿#ifndef DIV_CPU_H
 #define DIV_CPU_H
 
 #include <correlation/ImgInterp.h>
