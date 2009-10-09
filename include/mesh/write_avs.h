@@ -547,7 +547,7 @@ void write_avs(TM &mesh, unsigned num, TP &structure, Binary) /*throw(std::runti
     std::string path = structure.path;
     std::ostringstream ss;
     ss << path << "tmp/avs" << setfill('0') << setw(4) << num << ".inp";
-    string name(ss.str());
+    std::string name(ss.str());
 
     write_avs(mesh,name,display_fields, Binary());
 
