@@ -587,6 +587,8 @@ struct ImgInterp {
     ///
     void load_if_necessary( Vec<int,dim> MI, Vec<int,dim> MA, bool may_be_modified = false ) const {}
     
+    template<class TT, unsigned dime, class K, class PTT, class OP> friend void apply_wi( ImgInterp< TT, dime, K, PTT >& img, OP& op );
+    
     ///
     Vec<T> data;
     Vec<int,dim> sizes;
@@ -803,6 +805,28 @@ ImgInterp<T_,dim_,Kernel_,PT_> operator*( const ImgInterp<T_,dim_,Kernel_,PT_> &
     res.resize(i.size());
     res.data = i.data * i2.data;
     return res;    
+}
+
+template<class T_,unsigned dim_,class Kernel_,class PT_, class OP>
+void apply_wi( ImgInterp< T_, dim_, Kernel_, PT_ >& img, OP& op ) { assert(0); }
+
+template<class T_,class Kernel_,class PT_, class OP>
+void apply_wi( ImgInterp< T_, 2, Kernel_, PT_ >& img, OP& op ) {  
+
+    T_* pt = img.data.begin();
+    for(int y=0;y<img.sizes[1];++y)
+        for(int x=0;x<img.sizes[0];++x)
+            op( pt++, x, y );
+}
+
+template<class T_,class Kernel_,class PT_, class OP>
+void apply_wi( ImgInterp< T_, 3, Kernel_, PT_ >& img, OP& op ) {  
+
+    T_* pt = img.data.begin();
+    for(int z=0;z<img.sizes[2];++z)
+        for(int y=0;y<img.sizes[1];++y)
+            for(int x=0;x<img.sizes[0];++x)
+                op( pt++, x, y, z );
 }
 
 }
