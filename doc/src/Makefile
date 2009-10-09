@@ -10,7 +10,7 @@ all: main
 clean: rm -f  *.o
 
 main: $(OBJS)
-	g++ $(OBJS) -lm -lboost_filesystem -o main
+	g++ $(OBJS) -lm -lboost_filesystem -I/opt/local/include/ -o main # -I/opt/local/include/ pour les Mac
 	# cd ../..;./doc/src/main . doc
 
 .cpp.o:
