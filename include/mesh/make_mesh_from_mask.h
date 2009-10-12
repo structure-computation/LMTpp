@@ -100,7 +100,7 @@ struct MakeMeshFromMask {
     
     void set_img( const std::string &mask_filename, int border_color = 255 ) {
         load_image( mask_filename, M, /*ceil_size*/1, border_size, border_color );
-        display_image( M, "tmp/dist", true, true );
+        // display_image( M, "tmp/dist", true, true );
         
         dist = img_dist_from_front( M, border_size, /*gray level*/ mean( M ) );
         // display_image( Mat<int>( dist * 255 / max( dist ) ), "tmp/dist", true );
