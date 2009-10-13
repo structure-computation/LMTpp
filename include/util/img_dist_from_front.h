@@ -15,6 +15,8 @@ Mat<double> img_dist_from_front( const TM &mat, int max_dist, double diff_pix ) 
     int h = mat.nb_rows();
     int w = mat.nb_cols();
     
+    // diff_pix = 10;
+    
     Mat<T> dist( h, w );
     dist.set( max_dist );
     Vec<P> front;
