@@ -807,6 +807,22 @@ ImgInterp<T_,dim_,Kernel_,PT_> operator*( const ImgInterp<T_,dim_,Kernel_,PT_> &
     return res;    
 }
 
+template<class T_,unsigned dim_,class Kernel_,class PT_, class T2>
+ImgInterp<T_,dim_,Kernel_,PT_> operator*( const ImgInterp<T_,dim_,Kernel_,PT_> &i, T2 t) {
+    ImgInterp<T_,dim_,Kernel_,PT_> res;
+    res.resize(i.size());
+    res.data = t * i.data;
+    return res;    
+}
+
+template<class T_,unsigned dim_,class Kernel_,class PT_, class T2>
+ImgInterp<T_,dim_,Kernel_,PT_> operator*( T2 t, const ImgInterp<T_,dim_,Kernel_,PT_> &i ) {
+    ImgInterp<T_,dim_,Kernel_,PT_> res;
+    res.resize(i.size());
+    res.data = t * i.data;
+    return res;    
+}
+
 template<class T_,unsigned dim_,class Kernel_,class PT_, class OP>
 void apply_wi( ImgInterp< T_, dim_, Kernel_, PT_ >& img, OP& op ) { assert(0); }
 
@@ -816,7 +832,7 @@ void apply_wi( ImgInterp< T_, 2, Kernel_, PT_ >& img, OP& op ) {
     T_* pt = img.data.begin();
     for(int y=0;y<img.sizes[1];++y)
         for(int x=0;x<img.sizes[0];++x)
-            op( pt++, x, y );
+            op( pt++ , x, y );
 }
 
 template<class T_,class Kernel_,class PT_, class OP>
