@@ -16,6 +16,7 @@
 #include "mesh/tetra.h"
 #include "mesh/wedge.h"
 #include "mesh/tetra_10.h"
+#include "mesh/quad_9.h"
 
 #include <fstream>
 #include <map>
