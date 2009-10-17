@@ -244,7 +244,7 @@ namespace DM {
     template<class DMSet,class Op,unsigned n>
     void get_types_up_to(Op &op,const Number<n> &nn) { DMPRIVATE::get_types(StructForType<DMSet>(),op,Number<0>(),nn); }
 
-    /// get number of components
+    /// get number of components (nb scalars) in each attribute
     template<class DMSet>
     void get_nb_comp(unsigned *res) { DMPRIVATE::get_nb_comp(StructForType<DMSet>(),res,Number<0>(),Number<NbFields<DMSet>::res>()); }
     template<class DMSet,unsigned n>

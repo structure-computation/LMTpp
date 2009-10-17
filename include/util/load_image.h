@@ -35,9 +35,10 @@ void load_image_pgm( std::string file, Mat &m, int ceil_size = 1, int border_siz
     is >> c >> r;
     
     int depth = 2;
-    if ( PT != "P4" )
+    if ( PT != "P4" ) {
         f >> depth;
-    getline(f,toto);
+        getline(f,toto);
+    }
     
     if ( depth <= 2 ) {
         unsigned char *pen = new unsigned char[ ( r * c + 7 ) / 8 ];
@@ -45,9 +46,11 @@ void load_image_pgm( std::string file, Mat &m, int ceil_size = 1, int border_siz
         
         m.resize( r + 2 * border_size, ceil( c, ceil_size ) + 2 * border_size );
         m.set( border_color );
-        for(unsigned i=0,cpt=0;i<r;++i)
+        for(unsigned i=0,cpt=0;i<r;++i) {
             for(unsigned j=0;j<c;++j,++cpt)
-                m(i+border_size,j+border_size) = bool( pen[ cpt / 8 ] & ( 1 << (cpt&7) ) );
+                m(i+border_size,j+border_size) = 255 - 255 * bool( pen[ cpt / 8 ] & ( 1 << (7 - cpt & 7 ) ) );
+            cpt = ceil( cpt, 8 );
+        }
         delete [] pen;
     } else if ( depth <= 255 ) {
         unsigned char *pen = new unsigned char[ r * c * cpt_jump ];
@@ -114,7 +117,7 @@ void display_image(const Mat<T,Str,Sto,IO> &mat, const std::string &name_file="t
     
     ofstream f( name_file.c_str() );
         
-    T mi = 0, ma = 1;
+    double mi = 0, ma = 1;
     if ( auto_grey_level_scaling ) {
         mi = min( mat );
         ma = max( mat );
@@ -143,7 +146,7 @@ struct EchelleCouleurExemple {
 
 /** display_image( m, EchelleCouleurExemple(), ... ); */
 template<class TM,class Op>
-        void display_image(const TM &mat, const Op &grey_to_rgb, const std::string &name_file="toto", bool disp_screen = false, bool auto_grey_level_scaling = false ) {
+void display_image(const TM &mat, const Op &grey_to_rgb, const std::string &name_file="toto", bool disp_screen = false, bool auto_grey_level_scaling = false ) {
     typedef typename TM::T T;
     using namespace std;
     

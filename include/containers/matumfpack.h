@@ -167,11 +167,19 @@ public:
         umfpack_di_free_symbolic(&Symbolic);
         return true;
     }
+    bool free_factorization() {
+        if ( Numeric ){
+             umfpack_di_free_numeric (&Numeric) ;
+             Numeric=NULL;
+        }
+        return true;
+    }
     /// ...
     LMT::Vec<double> solve( const LMT::Vec<double> &vec ) {
         LMT::Vec<double> res;
         res.resize( vec.size() );
-
+        if (!Numeric) 
+            get_factorization();
         umfpack_di_solve(UMFPACK_At, Ap.ptr(), Ai.ptr(), Ax.ptr(), res.ptr(), vec.ptr(), Numeric, NULL, NULL);
         
         return res;
