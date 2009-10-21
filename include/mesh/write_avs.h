@@ -152,7 +152,7 @@ struct Toto {
         *outfile << e.number+1 << " " ;
         for(unsigned i=0;i<cell_data_name.size();++i) {
             cqjd = cell_data_name[i];
-            /**DM::*/apply_with_names( e, *this );
+            DM::apply_with_names( e, *this );
         }
         *outfile << std::endl;
     }
