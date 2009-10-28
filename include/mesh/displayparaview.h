@@ -20,6 +20,11 @@
 #include <fstream>
 #include <sstream>
 
+#ifdef METIL_COMP_DIRECTIVE
+#pragma src_file displayparaview.cpp
+#endif
+
+
 namespace LMT {
 
 template<class Carac, class X, class Y>   /// modif 22/06/2009

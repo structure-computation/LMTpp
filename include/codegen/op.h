@@ -16,6 +16,9 @@
 #include <set>
 #include "codegen_vector.h"
 
+#ifdef METIL_COMP_DIRECTIVE
+#pragma src_file op.cpp
+#endif
 
 namespace Codegen {
 

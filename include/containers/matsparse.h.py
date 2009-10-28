@@ -10,7 +10,6 @@ def rep(r,m):
     return res
 
 print """// file generated from matsparse.h.py. Do not modify
-#include <containers/vec_mt.h>
 #include <map>
 
 namespace LMT {
