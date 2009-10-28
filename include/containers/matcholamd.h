@@ -180,7 +180,7 @@ public:
         }
         template <class Op, class TT> void apply( const Op &op, const TT &v ) {
             if ( mat.L ) {
-                cholmod_free_factor( &L, &c );
+                cholmod_free_factor( &mat.L, &mat.c );
                 mat.L = NULL;
             }
             //
