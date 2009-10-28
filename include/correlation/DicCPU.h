@@ -8,7 +8,7 @@
 #include <mesh/make_rect.h>
 #include <formulation/FormulationFit.h>
 #include <QtCore/QMutex>
-#include <mesh/mesh.h>
+#include <formulation/formulation.h>
 #include "mesh_carac_correlation.h"
 // #include "containers/eig_lapack.h"
 // #include <correlation/pixelotomie.h>
