@@ -609,18 +609,19 @@ void make_rect(TM &m,const Tetra_10 &t,typename TM::Pvec X0_,typename TM::Pvec X
 }
 
 
-//
-//     5
-//    /|\
-//  11 | 10
-//  /  14  \
-// 3___9___4
-// |   |   |
-// |   2   |
-//12  / \  13
-// | 8   7 |
-// |/     \|
-// 0___6__ 1
+/*
+    5
+   /|\
+ 11 | 10
+ /  14  \
+3___9___4
+|   |   |
+|   2   |
+12  / \  13
+| 8   7 |
+|/     \|
+0___6__ 1
+*/
 template<class TM>
 void make_rect(TM &m,const Wedge_15 &t,typename TM::Pvec X0_,typename TM::Pvec X1_,typename TM::Pvec nb_elements) {
     typedef typename TM::Pvec Pvec;

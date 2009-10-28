@@ -13,8 +13,8 @@
 #define LMTFACTORY_H
 
 #include "ioexception.h"
-#include "containers/vec.h"
-#include "containers/arglist.h"
+#include "../containers/vec.h"
+#include "../containers/arglist.h"
 
 namespace LMT {
 
