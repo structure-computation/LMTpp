@@ -232,13 +232,13 @@ namespace DM {
     template<class DMSet,class Top,unsigned n>
     void apply_with_names_up_to(DMSet &dm_set,Top &op,const Number<n> &nn) { DMPRIVATE::apply_with_names(dm_set,op,Number<0>(),nn); }
     
-    /// get name of vriables contained in DMSet (CARACDM(...))
+    /// get name of variables contained in DMSet (CARACDM(...))
     template<class DMSet>
     void get_names(const char **names) { DMPRIVATE::get_names(StructForType<DMSet>(),names,Number<0>(),Number<NbFields<DMSet>::res>()); }
     template<class DMSet,unsigned n>
     void get_names_up_to(const char **names,const Number<n> &nn) { DMPRIVATE::get_names(StructForType<DMSet>(),names,Number<0>(),nn); }
 
-    /// get name of vriables contained in DMSet (CARACDM(...))
+    /// get name of variables contained in DMSet (CARACDM(...))
     template<class DMSet,class Op>
     void get_types(Op &op) { DMPRIVATE::get_types(StructForType<DMSet>(),op,Number<0>(),Number<NbFields<DMSet>::res>()); }
     template<class DMSet,class Op,unsigned n>

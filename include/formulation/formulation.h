@@ -76,6 +76,11 @@ public:
 };
 
 /**
+    Pour le choix du solveur : wont_add_nz=false implique utilisation des solveurs internes. 
+        wont_add_nz=true implique utilisation de LDL, sauf si "-DWITH_CHOLMOD -DWITH_UMFPACK" sont dans les directives de compilation est à 1 auquel cas on utilise CholMod ou UMFPACK (non symétrique)
+
+    Mais qu'est-ce qu'une directive de compilation ?
+        cf. CPPFLAGS dans vasoSConstuction
 
 */
 template<class TM_,class NameFormulation,class NameVariant=DefaultBehavior,class ScalarType_=typename TM_::Tpos,bool wont_add_nz=false>
