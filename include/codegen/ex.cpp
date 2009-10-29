@@ -68,13 +68,12 @@ Ex::~Ex() {
     op->decreaseCptUse();
 }
 
-void Ex::display_graphviz(const char *filename) const {
+int Ex::display_graphviz(const char *filename) const {
     std::ofstream f( filename );
     write_graphviz( *this, f );
     std::string fi( filename );
     std::string com( "dot -Tps "+fi+" > "+fi+".eps && gv "+fi+".eps" );
-    system( com.c_str() );
-    
+    return system( com.c_str() );
 }
 
 std::string Ex::to_string() const {

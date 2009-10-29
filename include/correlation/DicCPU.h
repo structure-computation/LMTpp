@@ -8,6 +8,7 @@
 #include <mesh/make_rect.h>
 #include <formulation/FormulationFit.h>
 #include <QtCore/QMutex>
+#include <formulation/formulation.h>
 #include "mesh_carac_correlation.h"
 // #include "containers/eig_lapack.h"
 // #include <correlation/pixelotomie.h>
@@ -60,10 +61,10 @@ struct DicCPU {
     struct Assemble {
         template<class TE,class TIMGf,class TIMGg> void operator()( const TE &e, DicCPU &dic, const TIMGf &f, const TIMGg &g ) {
             Vec<T,dim> P[TE::nb_nodes], D[TE::nb_nodes], MA( e.pos(0) ), MI( e.pos(0) );
-            for(int i=0;i<TE::nb_nodes;++i) P[ i ] = e.pos(i) + ed_depl( *e.node(i) ) * ( 0 + use_g_as_ref );
-            for(int i=0;i<TE::nb_nodes;++i) D[ i ] = e.pos(i) + ed_depl( *e.node(i) ) * ( 1 - use_g_as_ref );
-            for(int i=1;i<TE::nb_nodes;++i) MI = min( MI, P[ i ] ); // hum
-            for(int i=1;i<TE::nb_nodes;++i) MA = max( MA, P[ i ] ); // hum
+            for(unsigned i=0;i<TE::nb_nodes;++i) P[ i ] = e.pos(i) + ed_depl( *e.node(i) ) * ( 0 + use_g_as_ref );
+            for(unsigned i=0;i<TE::nb_nodes;++i) D[ i ] = e.pos(i) + ed_depl( *e.node(i) ) * ( 1 - use_g_as_ref );
+            for(unsigned i=1;i<TE::nb_nodes;++i) MI = min( MI, P[ i ] ); // hum
+            for(unsigned i=1;i<TE::nb_nodes;++i) MA = max( MA, P[ i ] ); // hum
             f.load_if_necessary( MI, MA );
             g.load_if_necessary( MI, MA );
             
@@ -95,7 +96,7 @@ struct DicCPU {
                         get_shape_functions( typename TE::NE(), var_inter, shape_functions );
                         
                         T val_grey = 0;
-                        for(int i=0;i<TE::nb_nodes;++i)
+                        for(unsigned i=0;i<TE::nb_nodes;++i)
                             val_grey += shape_functions[ i ] * ed_grey( *e.node(i) ); // dic.U_grey[ dic.indice_noda_grey[ e.node( i )->number ] ];
                             
                         //
@@ -119,16 +120,16 @@ struct DicCPU {
                         
                         // dU part
                         Vec<T,dim*TE::nb_nodes> sham_grad;
-                        for(int i=0,n=0;i<TE::nb_nodes;++i)
-                            for(int d=0;d<dim;++d,++n)
+                        for(unsigned i=0,n=0;i<TE::nb_nodes;++i)
+                            for(unsigned d=0;d<dim;++d,++n)
                                 sham_grad[ n ] = shape_functions[ i ] * grad[ d ];
                         
                         //
-                        for(int i=0;i<TE::nb_nodes;++i) {
-                            for(int d=0;d<dim;++d) {
+                        for(unsigned i=0;i<TE::nb_nodes;++i) {
+                            for(unsigned d=0;d<dim;++d) {
                                 F[ i * ( dim + 1 ) + d ] += imp * sham_grad[ i * dim + d ] * diff_fg;
-                                for(int j=0;j<TE::nb_nodes;++j)
-                                    for(int c=0;c<dim;++c)
+                                for(unsigned j=0;j<TE::nb_nodes;++j)
+                                    for(unsigned c=0;c<dim;++c)
                                         M( i * ( dim + 1 ) + d, j * ( dim + 1 ) + c ) += imp * sham_grad[ i * dim + d ] * sham_grad[ j * dim + c ];
                             }
                         }
@@ -136,11 +137,11 @@ struct DicCPU {
                         
                         // dG part
                         Vec<T,TE::nb_nodes> sham_grey;
-                        for(int i=0;i<TE::nb_nodes;++i)
+                        for(unsigned i=0;i<TE::nb_nodes;++i)
                             sham_grey[ i ] = shape_functions[ i ] * val_g;
                         
-                        for(int i=0;i<TE::nb_nodes;++i) {
-                            for(int j=0;j<TE::nb_nodes;++j)
+                        for(unsigned i=0;i<TE::nb_nodes;++i) {
+                            for(unsigned j=0;j<TE::nb_nodes;++j)
                                 M( i * ( dim + 1 ) + dim, j * ( dim + 1 ) + dim ) += imp * sham_grey[ i ] * sham_grey[ j ];
                             F[ i * ( dim + 1 ) + dim ] += imp * sham_grey[ i ] * diff_fg;
                         }
@@ -158,17 +159,17 @@ struct DicCPU {
                 //
                 mutex.lock();
                 if ( want_mat ) {
-                    for(int i=0,n=0;i<TE::nb_nodes;++i)
-                        for(int d=0;d<dim+want_lum_corr;++d,++n)
-                            for(int j=0,m=0;j<TE::nb_nodes;++j)
-                                for(int c=0;c<dim+want_lum_corr;++c,++m)
+                    for(unsigned i=0,n=0;i<TE::nb_nodes;++i)
+                        for(unsigned d=0;d<dim+want_lum_corr;++d,++n)
+                            for(unsigned j=0,m=0;j<TE::nb_nodes;++j)
+                                for(unsigned c=0;c<dim+want_lum_corr;++c,++m)
                                     if ( n <= m )
                                         dic.M( dic.indice_noda[ e.node(i)->number ] + d, dic.indice_noda[ e.node(j)->number ] + c ) += M( n, m );
                 }
                 //
                 if ( want_vec ) {
-                    for(int i=0,n=0;i<TE::nb_nodes;++i)
-                        for(int d=0;d<dim+want_lum_corr;++d,++n)
+                    for(unsigned i=0,n=0;i<TE::nb_nodes;++i)
+                        for(unsigned d=0;d<dim+want_lum_corr;++d,++n)
                             dic.F[ dic.indice_noda[ e.node(i)->number ] + d ] += F[ n ];
                 }
                 mutex.unlock();
@@ -394,8 +395,8 @@ struct DicCPU {
             for(unsigned i=0;i<nb_search_dir;++i)
                 search_dir[ i ].resize( F.size(), 0 );
             for(unsigned i=0;i<m.node_list.size();++i)
-                for(int j=0;j<dim;++j)
-                    for(int k=0;k<dim;++k)
+                for(unsigned j=0;j<dim;++j)
+                    for(unsigned k=0;k<dim;++k)
                         search_dir[ j ][ indice_noda[i] + k ] = ( j == k );
             if ( dim == 2 ) {
                 for(unsigned i=0;i<m.node_list.size();++i) {
@@ -404,9 +405,9 @@ struct DicCPU {
                 }
             } else {
                 for(unsigned i=0;i<m.node_list.size();++i) {
-                    for(int j=0;j<dim;++j) {
+                    for(unsigned j=0;j<dim;++j) {
                         Pvec D = vect_prod( C - m.node_list[i].pos, static_dirac_vec<dim>( 1, j ) );
-                        for(int k=0;k<dim;++k)
+                        for(unsigned k=0;k<dim;++k)
                             search_dir[ dim + j ][ indice_noda[i] + k ] = D[ k ];
                     }
                 }
@@ -425,7 +426,7 @@ struct DicCPU {
             
             // update_mesh ( translation + "true" rotation )
             ExtractDM<NAME_VAR_DEPL> ed;
-            for(int i=0;i<m.node_list.size();++i) {
+            for(unsigned i=0;i<m.node_list.size();++i) {
                 Pvec cp = m.node_list[i].pos + ed( m.node_list[i] ) - C, nv = cp;
                 for(int j=0;j<1+2*(dim==3);++j)
                     nv += dU_red[ dim + j ] * search_dir[ dim + j ][ indice_noda[i] + range( dim ) ];
@@ -461,8 +462,8 @@ struct DicCPU {
     template<class TM,class NAME_VAR_DEPL,class NAME_VAR_GREY> void update_mesh( TM &m, const NAME_VAR_DEPL &name_var_depl, const NAME_VAR_GREY &name_var_grey ) const {
         ExtractDM<NAME_VAR_DEPL> ed_depl;
         ExtractDM<NAME_VAR_GREY> ed_grey;
-        for(int i=0;i<m.node_list.size();++i) {
-            for(int d=0;d<dim;++d)
+        for(unsigned i=0;i<m.node_list.size();++i) {
+            for(unsigned d=0;d<dim;++d)
                 ed_depl( m.node_list[i] )[ d ] += dU[ indice_noda[ i ] + d ];
             ed_grey( m.node_list[i] ) += dU[ indice_noda[ i ] + dim ];
         }

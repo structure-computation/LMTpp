@@ -14,6 +14,10 @@
 
 #include "exvector.h"
 
+#ifdef METIL_COMP_DIRECTIVE
+#pragma src_file exmatrix.cpp
+#endif
+
 namespace Codegen {
 
 /*!

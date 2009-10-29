@@ -15,6 +15,10 @@
 #include "ex.h"
 #include <assert.h>
 
+#ifdef METIL_COMP_DIRECTIVE
+#pragma src_file exvector.cpp
+#endif
+
 namespace Codegen {
 
 /*!

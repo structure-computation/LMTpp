@@ -31,7 +31,7 @@ public:
     typedef double T;
 
     ///
-    Mat() {
+    Mat() : factorized( false ) {
         A = NULL;
         L = NULL;
     }
@@ -110,6 +110,7 @@ public:
             cholmod_free_sparse ( &A, &c );
             cholmod_finish ( &c );
             A = NULL;
+            L = NULL;
         }
     }
     ///
@@ -117,11 +118,18 @@ public:
         free_data();
     }
     ///
-    void clear() { for(unsigned i=0;i<beg_row[A->nrow];++i) x[i] = 0.0; }
+    void clear() {
+        for(unsigned i=0;i<beg_row[A->nrow];++i)
+            x[i] = 0.0;
+        if ( L )
+            cholmod_free_factor ( &L, &c );
+        L = NULL;
+    }
 
     ///
     bool get_factorization() {
-        if ( L ) cholmod_free_factor ( &L, &c );
+        if ( L )
+            return true;
         // analyze
         //c.nmethods = 1;
         //c.method[0].ordering = CHOLMOD_NATURAL;
@@ -132,6 +140,8 @@ public:
     }
     /// ...
     LMT::Vec<double> solve( const LMT::Vec<double> &vec ) {
+        get_factorization();
+        
         // allocate
         cholmod_dense * b = cholmod_allocate_dense (
                                 vec.size(),    // # of rows of matrix
@@ -169,6 +179,11 @@ public:
             return T(0);
         }
         template <class Op, class TT> void apply( const Op &op, const TT &v ) {
+            if ( mat.L ) {
+                cholmod_free_factor( &mat.L, &mat.c );
+                mat.L = NULL;
+            }
+            //
             unsigned i;
             for ( i = mat.beg_row[ line ];;++i ) {
                 if ( i == mat.beg_row[ line + 1 ] or mat.row_ind[ i ] > col ) {
@@ -249,7 +264,7 @@ public:
     unsigned *beg_row;
     unsigned *row_ind;
     double *x;
-
+    bool factorized;
 };
 
 }

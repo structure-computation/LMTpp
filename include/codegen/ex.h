@@ -18,6 +18,10 @@
 #include <set>
 #include "read_ex_error.h"
 
+#ifdef METIL_COMP_DIRECTIVE
+#pragma src_file ex.cpp
+#endif
+
 namespace Codegen {
 
 class Op;
@@ -70,7 +74,7 @@ public:
     int get_movability_level() const; /// only for symbols
     bool is_a_function_1() const;
     bool is_a_function_2() const;
-    void display_graphviz(const char *filename="tmp.dot") const;
+    int display_graphviz(const char *filename="tmp.dot") const;
     
     bool depends_on(const Ex &ex) const;
     

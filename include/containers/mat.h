@@ -425,6 +425,7 @@ typename Mat<T,STR,STO,IO>::T min(const Mat<T,STR,STO,IO> &m) {
 
 };
 
+#include "vec_mt.h"
 #include "vecsubmat.h"
 #include "matdense.h"
 #include "matsparse.h"
