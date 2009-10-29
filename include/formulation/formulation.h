@@ -115,7 +115,7 @@ public:
         indice_elem = indice_elem_internal;
         indice_noda = &indice_noda_internal;
         indice_glob = &indice_glob_internal;
-
+        offset_lagrange_multipliers = 0;
     }
     virtual std::string get_name() const { return Carac::name(); }
     virtual void set_mesh( void *m_ ) { m = reinterpret_cast<TM *>( m_ ); }
@@ -310,6 +310,12 @@ public:
         m->elem_list.get_sizes(nb_elem_of_type);
         TM::TElemList::apply_static_with_n( GetNbUnknownByElement(), nb_elem_of_type, size, nb_unknowns_for_type );
 
+        //
+        offset_lagrange_multipliers = size;
+        for(int i=0;i<constraints.size();++i)
+            size += ( constraints[i].penalty_value == 0 );
+
+        // resize vectors
         for(unsigned i=0;i<vectors.size();++i) vectors[i].resize( size );
         sollicitation.resize( size );
 
@@ -613,17 +619,35 @@ public:
                     coeffs[j] = (ScalarType)coeff.subs_numerical( vss );
                 }
                 // add to vec and mat
-                for(unsigned j=0;j<coeffs.size();++j) {
-                    ScalarType C = coeffs[j] * this->max_diag * constraints[i].penalty_value;
+                if ( constraints[i].penalty_value ) { // -> penalty
+                    for(unsigned j=0;j<coeffs.size();++j) {
+                        ScalarType C = coeffs[j] * this->max_diag * constraints[i].penalty_value;
+                        if ( assemble_vec )
+                            sollicitation[num_in_fmat[j]] += C * ress;
+                        if ( assemble_mat ) {
+                            if ( MatCarac<0>::symm or MatCarac<0>::herm )
+                                for(unsigned k=0;k<=j;++k)
+                                    matrices(Number<0>())(num_in_fmat[j],num_in_fmat[k]) += C * coeffs[k];
+                            else
+                                for(unsigned k=0;k<coeffs.size();++k)
+                                    matrices(Number<0>())(num_in_fmat[j],num_in_fmat[k]) += C * coeffs[k];
+                        }
+                    }
+                } else { // -> lagrange
+                    assert( coeffs.size() == 1 );
+                    // vec
                     if ( assemble_vec )
-                        sollicitation[num_in_fmat[j]] += C * ress;
+                        sollicitation[ offset_lagrange_multipliers + i ] += ress;
+                    // mat
                     if ( assemble_mat ) {
-                        if ( MatCarac<0>::symm or MatCarac<0>::herm )
-                            for(unsigned k=0;k<=j;++k)
-                                matrices(Number<0>())(num_in_fmat[j],num_in_fmat[k]) += C * coeffs[k];
-                        else
-                            for(unsigned k=0;k<coeffs.size();++k)
-                                matrices(Number<0>())(num_in_fmat[j],num_in_fmat[k]) += C * coeffs[k];
+                        for(unsigned j=0;j<coeffs.size();++j) {
+                            if ( MatCarac<0>::symm or MatCarac<0>::herm ) {
+                                matrices(Number<0>())( offset_lagrange_multipliers + i, num_in_fmat[j] ) += coeffs[j];
+                            } else {
+                                matrices(Number<0>())( num_in_fmat[j], offset_lagrange_multipliers + i ) += coeffs[j];
+                                matrices(Number<0>())( offset_lagrange_multipliers + i, num_in_fmat[j] ) += coeffs[j];
+                            }
+                        }
                     }
                 }
             }
@@ -1434,7 +1458,7 @@ public:
      * @param penalty_value constraint will be * by max(abs(diag))*penalty_value
      * @return number of constraint (usefull in order to remove it...)
      */
-    virtual unsigned add_constraint(const std::string &txt,const ScalarType &penalty_value) { return add_constraint( Constraint<Formulation>(txt,penalty_value,*this) ); }
+    virtual unsigned add_constraint(const std::string &txt,const ScalarType &penalty_value=0) { return add_constraint( Constraint<Formulation>(txt,penalty_value,*this) ); }
     virtual unsigned add_constraint(const Constraint<Formulation> &c) { constraints.push_back( c ); return constraints.size()-1; }
 
     virtual void add_sollicitation(int type_var,const std::string &val,unsigned nb_in_type,unsigned num_in_vec=0) {
@@ -1533,7 +1557,7 @@ public:
 private:
     Vec<unsigned> indice_elem_internal[ TM::TElemList::nb_sub_type ];
     Vec<unsigned> indice_noda_internal;
-    unsigned indice_glob_internal;
+    unsigned indice_glob_internal, offset_lagrange_multipliers;
 
 };
 
