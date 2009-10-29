@@ -1,6 +1,10 @@
 #ifndef LMT_IMG_INTERP_H
 #define LMT_IMG_INTERP_H
 
+#ifdef METIL_COMP_DIRECTIVE
+#pragma lib_name QtGui
+#endif
+
 #include <containers/mat.h>
 #include <QtGui/QImage>
 #include <assert.h>
@@ -277,10 +281,10 @@ struct ImgInterp {
         data.resize( product( sizes ) );
         const uchar *ptr = img.bits();
         if ( img.depth() == 8 ) {
-            for(int i=0;i<data.size();++i,++ptr)
+            for(unsigned i=0;i<data.size();++i,++ptr)
                 data[ i ] = *ptr;
         } else if ( img.depth() == 32 ) {
-            for(int i=0;i<data.size();++i,ptr+=4)
+            for(unsigned i=0;i<data.size();++i,ptr+=4)
                 data[ i ] = ( ptr[0] + ptr[1] + ptr[2] ) / 3.0;
         } else {
             PRINT( sizes );
@@ -306,21 +310,21 @@ struct ImgInterp {
         tmp.resize( sizes[0] );
         if ( dim == 2 ) {
             f.seekg( S[0] * X0[1] * sizeof(TB), std::ios::beg );
-            for(unsigned y=0,od=0;y<sizes[1];++y) {
+            for(int y=0,od=0;y<sizes[1];++y) {
                 f.seekg( X0[0] * sizeof(TB), std::ios::cur );
                 f.read( (char *)tmp.ptr(), sizes[0] * sizeof(TB) );
-                for(unsigned x=0;x<sizes[0];++x,++od)
+                for(int x=0;x<sizes[0];++x,++od)
                     data[ od ] = tmp[ x ];
                 f.seekg( ( S[0] - X1[0] ) * sizeof(TB), std::ios::cur );
             }
         } else if ( dim == 3 ) {
             f.seekg( S[0] * S[1] * X0[2] * sizeof(TB), std::ios::beg );
-            for(unsigned z=0,od=0;z<sizes[2];++z) {
+            for(int z=0,od=0;z<sizes[2];++z) {
                 f.seekg( S[0] * X0[1] * sizeof(TB), std::ios::cur );
-                for(unsigned y=0;y<sizes[1];++y) {
+                for(int y=0;y<sizes[1];++y) {
                     f.seekg( X0[0] * sizeof(TB), std::ios::cur );
                     f.read( (char *)tmp.ptr(), sizes[0] * sizeof(TB) );
-                    for(unsigned x=0;x<sizes[0];++x,++od)
+                    for(int x=0;x<sizes[0];++x,++od)
                         data[ od ] = tmp[ x ];
                     f.seekg( ( S[0] - X1[0] ) * sizeof(TB), std::ios::cur );
                 }
@@ -535,7 +539,7 @@ struct ImgInterp {
     ///
     inline T &tex_int( Vec<int,dim> p ) {
         int o = p[0];
-        for(int i=1, m=sizes[0]; i<dim; m*=sizes[i], ++i )
+        for(unsigned i=1, m=sizes[0]; i<dim; m*=sizes[i], ++i )
             o += m * p[i];
         return data[ o ];
     }

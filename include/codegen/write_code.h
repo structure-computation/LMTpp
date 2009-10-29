@@ -3,6 +3,10 @@
 
 #include "ex.h"
 
+#ifdef METIL_COMP_DIRECTIVE
+#pragma src_file write_code.cpp
+#endif
+
 namespace Codegen {
 
 class Write_code_language;

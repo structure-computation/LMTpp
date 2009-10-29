@@ -78,7 +78,7 @@ template<class T,class TS> void chol_factorize( Mat<T,TS,SparseLine<> > &m ) {
                     m.data[line].indices.resize( os+1 );
                     m.data[line].data.resize( os+1 );
                     ++ind;
-                    for(unsigned k=os;k>ind;--k) {
+                    for(int k=os;k>ind;--k) {
                         m.data[line].indices[k] = m.data[line].indices[k-1];
                         m.data[line].data[k] = m.data[line].data[k-1];
                     }

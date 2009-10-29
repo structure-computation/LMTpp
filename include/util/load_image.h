@@ -48,7 +48,7 @@ void load_image_pgm( std::string file, Mat &m, int ceil_size = 1, int border_siz
         m.set( border_color );
         for(unsigned i=0,cpt=0;i<r;++i) {
             for(unsigned j=0;j<c;++j,++cpt)
-                m(i+border_size,j+border_size) = 255 - 255 * bool( pen[ cpt / 8 ] & ( 1 << (7 - cpt & 7 ) ) );
+                m(i+border_size,j+border_size) = 255 - 255 * bool( pen[ cpt / 8 ] & ( 1 << ( 7 - ( cpt & 7 ) ) ) );
             cpt = ceil( cpt, 8 );
         }
         delete [] pen;

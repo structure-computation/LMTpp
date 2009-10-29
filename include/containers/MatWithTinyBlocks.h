@@ -422,7 +422,7 @@ struct MatWithTinyBlocks<T,Sym<3> > {
     }
     
     void chol_incomp() {
-        for ( ST num_block_set=0;num_block_set<rows.size();++num_block_set ) {
+        for ( unsigned num_block_set=0;num_block_set<rows.size();++num_block_set ) {
             RB &lbs = rows[ num_block_set ];
 
             // L

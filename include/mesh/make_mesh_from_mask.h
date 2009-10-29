@@ -61,7 +61,7 @@ struct MakeMeshFromMask {
             for(unsigned i=0;i<TE::nb_nodes;++i)
                 nb_breaks += break_out[ e.node(i)->number_in_original_mesh() ];
             if ( nb_breaks >= 2 ) {
-                int best_node = e.node(0)->number_in_original_mesh();
+                unsigned best_node = e.node(0)->number_in_original_mesh();
                 for(unsigned i=0;i<TE::nb_nodes;++i) {
                     unsigned n = e.node(i)->number_in_original_mesh();
                     if ( nb_parents[ n ] == 1 ) {
