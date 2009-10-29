@@ -73,6 +73,10 @@ public:
     unsigned absolute_number;
     unsigned group;
 
+    ElementAncestor()
+    {
+        group = 0;
+    }
     virtual ~ElementAncestor() {}
 };
 
