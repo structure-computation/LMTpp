@@ -159,6 +159,8 @@ public:
     bool want_amd;
     AbsScalarType levenberg_marquadt; /// K += levenberg_marquadt * max( abs( K ) ) * Id; 0 by default
     ScalarType max_diag;
+    
+    virtual void *get_mesh() = 0; /// recupere le maillage associee a une formulation (mais pas avec le bin type)
 };
 
 }
