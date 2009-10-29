@@ -65,7 +65,7 @@ void set_vtk_cell_type_and_offsets( const TE &elem, Vec<unsigned> &connectivity,
         cell_type = 0;
         nb_points = 0;
     }
-    
+
     for(unsigned i=0;i<nb_points;++i)
         connectivity.push_back( m->node_list.number(*elem.node(i)) );
     cell_types.push_back( cell_type );
@@ -236,7 +236,7 @@ struct Data_vtk_extract_elem {
                         for(unsigned j=0;j<gds.dynamic_size[i];++j) {
                             std::ostringstream name; name << names[i] << "_" << j;
                             mapd[ name.str() ].nb_comp = gds.nb_comp[i];
-                            
+
                             std::ostringstream os;
                             GetDynamicSizeOs gdsos = { os, i, j };
                             DM::apply(elem,gdsos);
@@ -269,7 +269,7 @@ struct Data_vtk_extract_elem {
             mapd[ name ].os += std::string( (char *)&data, (char *)&data + sizeof(T) );
         else
             mapd[ name ].os += to_string( data ) + " ";
-            
+
         // nb_comp complement
         const unsigned real_nb_comp = DM::NbComponents<T>::n;
         const unsigned want_nb_comp = mapd[ name ].nb_comp;
@@ -280,7 +280,7 @@ struct Data_vtk_extract_elem {
         else
             for(unsigned i=real_nb_comp;i<want_nb_comp;++i)
                 mapd[ name ].os += "0 ";
-                
+
         //
         mapd[ name ].appended = true;
     }
@@ -341,7 +341,7 @@ Fontion utillisée par \a write_mesh_vtk .
 inline void add_encoded( std::string s, std::string &appended ) {
     unsigned s_size = s.size();
     s = std::string( (char *)&s_size, (char *)&s_size + sizeof(s_size) ) + s;
-                        
+
     char o0,o1,o2,o3;
     unsigned k;
     for(k=0;k<s.size()-2;k+=3) {
@@ -364,7 +364,7 @@ void write_mesh_vtk(std::ostream &os,const TM &m,const Vec<std::string> &display
     using namespace std;
 
     std::string appended;
-    os << "<VTKFile type='UnstructuredGrid' byte_order='LittleEndian'>" << endl; // 
+    os << "<VTKFile type='UnstructuredGrid' byte_order='LittleEndian'>" << endl; //
     os << "    <UnstructuredGrid>" << endl;
     os << "        <Piece NumberOfPoints='" << m.node_list.size() << "' NumberOfCells='" << m.elem_list.size() << "'>" << endl;
     // PointData
@@ -389,7 +389,7 @@ void write_mesh_vtk(std::ostream &os,const TM &m,const Vec<std::string> &display
 
         GetVtkTypes get_vtk_types;
         DM::get_types<typename TM::TNode>( get_vtk_types );
-        
+
         for(unsigned i=0;i<TM::TNode::nb_params;++i) {
             if ( std::find(display_fields.begin(),display_fields.end(),std::string(names[i]))!=display_fields.end() or (display_fields.size()>=1 and display_fields[0]=="all") ) {    //continue;
                 if ( names[i]!=const_cast<char *>("pos") and nb_comp[i] ) {
@@ -463,11 +463,21 @@ void write_mesh_vtk(std::ostream &os,const TM &m,const Vec<std::string> &display
                 if ( dd->nb_comp()==0 )
                     continue;
                 os << "                <DataArray Name='" << dd->get_name()
-                << "' NumberOfComponents='" << dd->nb_comp() << "' type='Float64' format='ascii'>" << endl;
+                        << "' NumberOfComponents='" << dd->nb_comp() << "' type='Float64' format='ascii'>" << endl;
                 dd->write_data(os);
                 os << endl;
                 os << "                </DataArray>" << endl;
             }
+        }
+        // ElementAncestor.group
+        if ( std::find(display_fields.begin(),display_fields.end(),"group")!=display_fields.end() or (display_fields.size()>=1 and display_fields[0]=="all"))
+        {
+            os << "                <DataArray Name='group' NumberOfComponents='1' type='UInt32' format='ascii'>" << endl;
+            for(unsigned k_elem=0; k_elem<m.elem_list.size(); k_elem++)
+            {
+                os << m.elem_list[k_elem]->group << endl;
+            }
+            os << "                </DataArray>" << endl;
         }
     }
     // global data
@@ -547,7 +557,7 @@ void write_mesh_vtk(std::ostream &os,const TM &m,const Vec<std::string> &display
     os << "    </UnstructuredGrid>" << endl;
     os << "    <AppendedData encoding='base64'>" << endl;
     os << "        _";
-    
+
     //std::string s; s.resize( 12 + 2 * appended.size() );
     //unsigned long l_s = s.size();
     //compress( (Bytef *)&s[0], &l_s, (Bytef *)&appended[0], appended.size());
@@ -658,7 +668,7 @@ void write_mesh_vtk_v2(std::ostream &os,const TM &m,const Vec<std::string> &disp
         for(unsigned i=0;i<TM::TNode::nb_params;++i) {
             if ( std::find(display_fields.begin(),display_fields.end(),std::string(names[i]))!=display_fields.end() or (display_fields.size()>=1 and display_fields[0]=="all") ) {    //continue;
                 if ( names[i]!=const_cast<char *>("pos") and nb_comp[i] ) {
-                
+
                     os << names[i] << " " << nb_comp[i] << " " << m.node_list.size() << " float " <<endl;
                     os << dve.os[i].str();
                     os <<endl;

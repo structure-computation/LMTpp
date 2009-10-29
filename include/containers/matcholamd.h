@@ -74,7 +74,7 @@ public:
         L = NULL;
         allocate( indices );
     }
-    /// 
+    ///
     template<class T2>
     Mat( const Mat<T2,Sym<>,SparseLine<> > &mat ) {
         init_from_mat( mat );
@@ -96,7 +96,7 @@ private:
                 operator()( i, mat.data[i].indices[k] ) = mat.data[i].data[k];
     }
 public:
-    /// 
+    ///
     template<class T2>
     Mat &operator=( const Mat<T2,Sym<>,SparseLine<> > &mat ) {
         free_data();
@@ -134,14 +134,14 @@ public:
         //c.nmethods = 1;
         //c.method[0].ordering = CHOLMOD_NATURAL;
         //c.postorder = false;
-        
+
         L = cholmod_analyze( A, &c );
         return cholmod_factorize ( A, L, &c );
     }
     /// ...
     LMT::Vec<double> solve( const LMT::Vec<double> &vec ) {
         get_factorization();
-        
+
         // allocate
         cholmod_dense * b = cholmod_allocate_dense (
                                 vec.size(),    // # of rows of matrix
@@ -190,7 +190,7 @@ public:
                     size_t &nz = mat.A->nzmax;
                     // offset
                     cholmod_reallocate_sparse ( nz+1, mat.A, &mat.c ) ;
-                    
+
                     mat.row_ind = ( unsigned * ) mat.A->i;
                     mat.x = ( double * ) mat.A->x;
                     for(unsigned j=line+1;j<=mat.A->nrow;++j) ++mat.beg_row[j];
@@ -215,7 +215,7 @@ public:
     RetOp operator() ( unsigned line,unsigned column ) {
         if ( line < column )
             return operator() ( column,line );
-        return DelayedAssignementCholMod( *this, line, column ); 
+        return DelayedAssignementCholMod( *this, line, column );
     }
     RetOpConst operator() ( unsigned line,unsigned column ) const {
         if ( line < column )
@@ -241,7 +241,7 @@ public:
     typedef Vec<VecSubMat<Mat,false,ExtractCol>,sr> RetCol;
     typedef Vec<VecSubMat<Mat,true ,ExtractRow>,sc> RetRowConst;
     typedef Vec<VecSubMat<Mat,false,ExtractRow>,sc> RetRow;
-    
+
     Vec<VecSubMat<Mat,false,ExtractDiag>,MIN(sr,sc)> diag() { return Vec<VecSubMat<Mat,false,ExtractDiag>,MIN(sr,sc)>(*this); }
     Vec<VecSubMat<Mat,true ,ExtractDiag>,MIN(sr,sc)> diag() const { return Vec<VecSubMat<Mat,true ,ExtractDiag>,MIN(sr,sc)>(*this); }
     Vec<VecSubMat<Mat,false,ExtractCol>,sr> col(unsigned i) { return Vec<VecSubMat<Mat,false,ExtractCol>,sr>(*this,i); }
