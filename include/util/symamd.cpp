@@ -10,9 +10,7 @@
 //
 //
 #include "symamd.h"
-extern "C" {
-    #include "amd/amd.h"
-}
+#include "amd/amd.h"
 
 namespace LMT {
 
