@@ -53,6 +53,8 @@ public:
     typename TM::RetOp operator[](unsigned i) { return (*m.val)("""+[ 'i,i', 's,i', 'i,s' ][ntyp]+"""); }
     // void set(unsigned i,const T &val) { (*m.val)("""+[ 'i,i', 's,i', 'i,s' ][ntyp]+""") = val; }
     
+    Vec operator=(const Vec &v) { for(unsigned i=0;i<size();++i) operator[](i) = v[ i ]; return *this; }
+    
     template<class T2> Vec operator=(const T2 &v) { for(unsigned i=0;i<size();++i) operator[](i) = v; return *this; }
     template<class T2,int s2,class IO> Vec operator=(const Vec<T2,s2,IO> &v) { for(unsigned i=0;i<size();++i) operator[](i) = v[i]; return *this; }
 
