@@ -33,7 +33,7 @@
     = Dépendance et compilation du générateur de documentation
         
         le générateur de documentation dépend de boost partie fichier système ( commande : sudo apt-get install libboost-filesystem-dev devrait suffire).
-        Ensuite pour la générer, allez dans doc/ et lancer make ( commande : cd doc/& make )
+        Ensuite pour la générer, allez dans doc/ et lancer make ( commande : cd doc/& make ).
         La page d'acceuil est doc/html/index.html .
 
 */
