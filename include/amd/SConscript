@@ -17,6 +17,6 @@ src = [
 # libi = env.Library('LMT_amd_i', src, CPPFLAGS = '-DDINT' , src_suffix = '.oi' )
 # libl = env.Library('LMT_amd_l', src, CPPFLAGS = '-DDLONG', src_suffix = '.ol' )
 
-lib = env.Library('LMT_amd', src, CPPFLAGS = '-DDINT -ILMT/include/amd' )
+lib = env.Library('LMT_amd', src, CC='g++', CPPFLAGS = '-DDINT -ILMT/include/amd' )
 
 Return('lib')

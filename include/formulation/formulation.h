@@ -78,7 +78,7 @@ public:
 };
 
 /**
-    Pour le choix du solveur : wont_add_nz=false implique utilisation des solveurs internes. 
+    Pour le choix du solveur : wont_add_nz=false implique utilisation des solveurs internes.
         wont_add_nz=true implique utilisation de LDL, sauf si "-DWITH_CHOLMOD -DWITH_UMFPACK" sont dans les directives de compilation est à 1 auquel cas on utilise CholMod ou UMFPACK (non symétrique)
 
     Mais qu'est-ce qu'une directive de compilation ?
@@ -1530,6 +1530,13 @@ public:
         return res;
     }
 
+    /// Ajout enrichissements numerique (pointeur vers autres formulation et table de voisinage)
+    void add_num_enr(  LMT::FormulationAncestor<ScalarType>* enr_field , Vec< typename TM::TElemList::TListPtr > table_of_neig) {
+        number_of_enrich = enrichissements.size()+1;
+        enrichissements.push_back(enr_field);
+        Neighbor_table.push_back(table_of_neig);
+    }
+
     TM *m;
     Carac carac;
 
@@ -1556,7 +1563,14 @@ public:
     std::vector<Codegen::Ex> symbols;
     Codegen::Ex time_symbol;
 
-    Vec<Formulation *> enrichissements;
+    virtual void *get_mesh() {
+        return reinterpret_cast< void * > ( m );
+    }
+
+    unsigned number_of_enrich;      /// Number of numerical enrichment
+    Vec< FormulationAncestor<ScalarType> *> enrichissements;  /// Storage of pointer to formulations used to do sub-level computations
+    Vec< Vec < typename TM::TElemList::TListPtr > > Neighbor_table ;          /// Table of neighbor-element for each elem from m_macro in m_micro
+
 private:
     Vec<unsigned> indice_elem_internal[ TM::TElemList::nb_sub_type ];
     Vec<unsigned> indice_noda_internal;

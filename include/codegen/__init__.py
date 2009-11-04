@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 from codegen import *
 #arch = os.uname()[4]
@@ -226,7 +227,8 @@ def diag_mat_from_vec( V ):
     return res
 
 
-
+def post_part( e ):
+    return e * heavyside( e )
 
 
 

@@ -887,7 +887,11 @@ class Pol {
                     res.push_back(solutions_complexes[i].real());
             } else {
             //if (coefs[0]!=0) {
-            if (abs(coefs[0]) > 16*numeric_limits<T>::epsilon()) {
+                Vec<C> solutions_complexes = roots();
+                for( int i=0;i<solutions_complexes.size();++i)
+                    if (std::abs(solutions_complexes[i].imag()) < 16*std::numeric_limits<T>::epsilon())
+                        res.push_back(solutions_complexes[i].real());      
+            /*if (abs(coefs[0]) > 16*numeric_limits<T>::epsilon()) {
                 Vec<Pol<nd,nx,T> > Sturm(*this,derivative());
                 while (Sturm[Sturm.size()-1].coefficients().size()>1)
                     Sturm.push_back(-Sturm[Sturm.size()-2].remainder(Sturm[Sturm.size()-1]));
@@ -944,7 +948,7 @@ class Pol {
                 }
                 res.push_back(0);
                 res.append(r);
-                }
+                }*/
             }
         return res;
     }
