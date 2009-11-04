@@ -24,8 +24,6 @@
 #include "containers/matcholamd.h"
 #include "containers/matumfpack.h"
 
-extern LMT::Vec<double>* F_POINTER;
-
 namespace LMT {
 
 template<class NameFormulation, int dim, class ScalarType_>
@@ -117,6 +115,7 @@ public:
         indice_elem = indice_elem_internal;
         indice_noda = &indice_noda_internal;
         indice_glob = &indice_glob_internal;
+        f_nodal = &f_nodal_internal;
         offset_lagrange_multipliers = 0;
     }
     virtual std::string get_name() const { return Carac::name(); }
@@ -1266,6 +1265,9 @@ public:
     virtual void set_indice_glob(unsigned &val){
         indice_glob = &val;
     };
+    virtual void set_f_nodal(Vec<ScalarType>* vec){
+        f_nodal = vec;
+    };
     virtual void call_after_solve() {
         if (vectors_assembly== NULL){
             if ( not allocated )
@@ -1570,11 +1572,13 @@ public:
     unsigned number_of_enrich;      /// Number of numerical enrichment
     Vec< FormulationAncestor<ScalarType> *> enrichissements;  /// Storage of pointer to formulations used to do sub-level computations
     Vec< Vec < typename TM::TElemList::TListPtr > > Neighbor_table ;          /// Table of neighbor-element for each elem from m_macro in m_micro
+    Vec<ScalarType>* f_nodal;
 
 private:
     Vec<unsigned> indice_elem_internal[ TM::TElemList::nb_sub_type ];
     Vec<unsigned> indice_noda_internal;
     unsigned indice_glob_internal, offset_lagrange_multipliers;
+    Vec<ScalarType> f_nodal_internal;
 
 };
 

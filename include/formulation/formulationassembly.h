@@ -62,6 +62,7 @@ namespace LMT {
                     formulation(formulations.size()-1)->set_indice_noda(maf->indice_noda);
                     formulation(formulations.size()-1)->set_indice_glob(maf->indice_glob);
                     formulation(formulations.size()-1)->set_indice_elem(maf->indice_elem);
+                    formulation(formulations.size()-1)->set_f_nodal(&f_nodal);
                     return true;
                 }
             }
