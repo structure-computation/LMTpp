@@ -45,10 +45,10 @@ def make_dep_py(env):
                 dep += get_files("LMT/formal_lf", re.compile( '.*\.py$' ) )
         env.Command(corh,[i]+dep,'export PYTHONPATH=".:$PYTHONPATH";export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:'+adl+'";python %s > %s'%(i,corh))
     # element_Quad.h depend de element_Quad.py
-    for i in filter(lambda x:re_elem_py.match(x), all_py):
-        corh = 'LMT/include/mesh' + i[ i.rfind('/') : -3 ] + '.h'
-        ne = i[ i.rfind('/')+9 : -3 ]
-        env.Command( corh, [i,'LMT/make_elem.py'], 'export PYTHONPATH="'+os.getcwd()+':$PYTHONPATH";python LMT/make_elem.py %s > %s'%(ne,corh) )
+    #for i in filter(lambda x:re_elem_py.match(x), all_py):
+    #    corh = 'LMT/include/mesh' + i[ i.rfind('/') : -3 ] + '.h'
+    #    ne = i[ i.rfind('/')+9 : -3 ]
+    #    env.Command( corh, [i,'LMT/make_elem.py'], 'export PYTHONPATH="'+os.getcwd()+':$PYTHONPATH";python LMT/make_elem.py %s > %s'%(ne,corh) )
     # meshcarac
     for i in get_files(".", re.compile( '.*\.meshcarac.py$' ) ):
         corh = i[:-12] + "h"
