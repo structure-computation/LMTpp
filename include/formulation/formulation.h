@@ -76,7 +76,7 @@ public:
 };
 
 /**
-    Pour le choix du solveur : wont_add_nz=false implique utilisation des solveurs internes. 
+    Pour le choix du solveur : wont_add_nz=false implique utilisation des solveurs internes.
         wont_add_nz=true implique utilisation de LDL, sauf si "-DWITH_CHOLMOD -DWITH_UMFPACK" sont dans les directives de compilation est à 1 auquel cas on utilise CholMod ou UMFPACK (non symétrique)
 
     Mais qu'est-ce qu'une directive de compilation ?
@@ -115,6 +115,7 @@ public:
         indice_elem = indice_elem_internal;
         indice_noda = &indice_noda_internal;
         indice_glob = &indice_glob_internal;
+        f_nodal = &f_nodal_internal;
         offset_lagrange_multipliers = 0;
     }
     virtual std::string get_name() const { return Carac::name(); }
@@ -534,7 +535,7 @@ public:
 
         if ( assemble_vec ) // preinitialisation
             sollicitation.set(ScalarType(0));
-            
+
         if ( not this->assume_skin_not_needed )
             m->update_skin();
 
@@ -685,7 +686,7 @@ public:
         if ( user_want_pierre_precond )
             precond();
     }
-    
+
     ///
     virtual void assemble_clean_mat(Mat<ScalarType,Sym<>,SparseLine<> > &K, Vec<ScalarType> &F, Vec<Vec<ScalarType> > &vectors_, bool assemble_mat=true,bool assemble_vec=true) {
         if ( not initial_condition_initialized ) { // old_vectors
@@ -1127,7 +1128,8 @@ private:
     void get_factorization_matrix(const Number<0> &sym) {
         #ifndef LDL
         #ifndef WITH_UMFPACK
-        precond_matrix = matrices(Number<0>()); lu_factorize( precond_matrix );
+        precond_matrix = matrices(Number<0>());
+        lu_factorize( precond_matrix );
         #endif
         #endif
     }
@@ -1262,6 +1264,9 @@ public:
     //
     virtual void set_indice_glob(unsigned &val){
         indice_glob = &val;
+    };
+    virtual void set_f_nodal(Vec<ScalarType>* vec){
+        f_nodal = vec;
     };
     virtual void call_after_solve() {
         if (vectors_assembly== NULL){
@@ -1533,7 +1538,7 @@ public:
         enrichissements.push_back(enr_field);
         Neighbor_table.push_back(table_of_neig);
     }
-    
+
     TM *m;
     Carac carac;
 
@@ -1556,22 +1561,24 @@ public:
     Vec<unsigned>* indice_elem;
     Vec<unsigned>* indice_noda;
     unsigned* indice_glob;
-    
+
     std::vector<Codegen::Ex> symbols;
     Codegen::Ex time_symbol;
-    
+
     virtual void *get_mesh() {
         return reinterpret_cast< void * > ( m );
     }
-    
+
     unsigned number_of_enrich;      /// Number of numerical enrichment
     Vec< FormulationAncestor<ScalarType> *> enrichissements;  /// Storage of pointer to formulations used to do sub-level computations
-    Vec< Vec < typename TM::TElemList::TListPtr > > Neighbor_table ;          /// Table of neighbor-element for each elem from m_macro in m_micro 
-    
+    Vec< Vec < typename TM::TElemList::TListPtr > > Neighbor_table ;          /// Table of neighbor-element for each elem from m_macro in m_micro
+    Vec<ScalarType>* f_nodal;
+
 private:
     Vec<unsigned> indice_elem_internal[ TM::TElemList::nb_sub_type ];
     Vec<unsigned> indice_noda_internal;
     unsigned indice_glob_internal, offset_lagrange_multipliers;
+    Vec<ScalarType> f_nodal_internal;
 
 };
 

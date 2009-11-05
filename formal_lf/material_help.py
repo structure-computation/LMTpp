@@ -73,8 +73,8 @@ def simplification_projection(P,dim):
          ])
       return P2d
    elif dim==1:
-      return 1   
-      
+      return 1
+
 #loi de hooke isotrope 3d
 def hooke_isotrope_th_3d(E,nu,alpha):
     """ isotrope """
@@ -104,7 +104,7 @@ def hooke_isotrope_th(E,nu,dim,alpha,type_stress_2D='plane stress'):
 #
 def hooke_isotrope(E,nu,dim,type_stress_2D='plane stress'):
    return hooke_isotrope_th(E,nu,dim,number(0),type_stress_2D)
-    
+
 #loi de hooke orthotrope 3d
 def hooke_orthotrope_th_3d(E1,E2,E3,nu12,nu13,nu23,G12,G13,G23,v1,v2,alpha1,alpha2,alpha3):
    P,Pinv=matrice_passage(v1,v2)
@@ -123,12 +123,12 @@ def hooke_orthotrope_th_3d(E1,E2,E3,nu12,nu13,nu23,G12,G13,G23,v1,v2,alpha1,alph
    epsth=mul(Pinv,vecalpha)
    return Kglo, Hglo, epsth, P
 
-def hooke_orthotrope_th(E1,E2,E3,nu12,nu13,nu23,G12,G13,G23,v1,v2,alpha1,alpha2,alpha3,dim,type_stress_2D='plane stress'):   
-   Kglo, Hglo, epsth, P= hooke_orthotrope_th_3d(E1,E2,E3,nu12,nu13,nu23,G12,G13,G23,v1,v2,alpha1,alpha2,alpha3)
+def hooke_orthotrope_th(E1,E2,E3,nu12,nu13,nu23,G12,G13,G23,v1,v2,alpha1,alpha2,alpha3,dim,type_stress_2D='plane stress'):
+   Kglo, Hglo, epsth, P = hooke_orthotrope_th_3d(E1,E2,E3,nu12,nu13,nu23,G12,G13,G23,v1,v2,alpha1,alpha2,alpha3)
    K, epsth = simplification_behaviour(Kglo,Hglo,epsth,dim,type_stress_2D)
    P = simplification_projection(P,dim)
    return K, epsth, P
-          
+
 def hooke_orthotrope(E1,E2,E3,nu12,nu13,nu23,G12,G13,G23,v1,v2,dim,type_stress_2D='plane stress'):
    return hooke_orthotrope_th(E1,E2,E3,nu12,nu13,nu23,G12,G13,G23,v1,v2,number(0),number(0),number(0),dim,type_stress_2D)
 
@@ -149,7 +149,7 @@ def hooke_orthotrope_endommageable_th_3d(E1,E2,E3,nu12,nu13,nu23,G12,G13,G23,v1,
    vecalpha=vector([alpha1,alpha2,alpha3,0,0,0])
    epsth=mul(Pinv,vecalpha)
    return Kglo, Hglo, epsth, P
-   
+
 #definition de la matrice de passage d'une base globale a une base locale : Tl= P*Tg
 def matrice_passage(v1,v2):
    v1 /= norm( v1 )
@@ -169,8 +169,8 @@ def matrice_passage(v1,v2):
       [ b1*b1, b2*b2, b3*b3, 2*b1*b2,     2*b1*b3,     2*b2*b3	   ],
       [ c1*c1, c2*c2, c3*c3, 2*c1*c2,     2*c1*c3,     2*c2*c3	   ],
       [ b1*a1, b2*a2, b3*a3, b1*a2+b2*a1, b1*a3+b3*a1, b2*a3+b3*a2 ],
-      [ c1*a1, c2*a2, c3*a3, c1*a2+c2*a1, a3*c1+c3*a1, c2*a3+c3*a2 ],      
-      [ c1*b1, c2*b2, c3*b3, c1*b2+c2*b1, c1*b3+c3*b1, c2*b3+c3*b2 ],	 
+      [ c1*a1, c2*a2, c3*a3, c1*a2+c2*a1, a3*c1+c3*a1, c2*a3+c3*a2 ],
+      [ c1*b1, c2*b2, c3*b3, c1*b2+c2*b1, c1*b3+c3*b1, c2*b3+c3*b2 ],
    ])
    Pinv = matrix([
       [ a1*a1, b1*b1, c1*c1, 2*a1*b1,     2*a1*c1,     2*b1*c1	   ],
@@ -184,24 +184,24 @@ def matrice_passage(v1,v2):
 
 def hooke_matrix_shell(E,nu,h,dim,type_behaviour='membrane'):
     """ coques sans couplage tension/flexion """
-    
+
     if dim==3:
-        
+
         K = matrix([
         [ 1 , nu, 0        ],
         [ nu, 1 , 0        ],
         [ 0 , 0 , (1 - nu) ],
         ])
         K *= E / ( 1 - nu * nu)
-        
+
         if type_behaviour=='membrane':
             K *= h
             return K
-        
+
         elif type_behaviour=='flexion':
             K *= (h * h * h / 12)
             return K
-        
+
         elif type_behaviour=='cisaillement transverse':
             Ki = 5./6. * h * E / ( 2 + 2 * nu )
             K = matrix([
@@ -211,7 +211,7 @@ def hooke_matrix_shell(E,nu,h,dim,type_behaviour='membrane'):
             return K
         else:
             raise 'Unknown type_behaviour in hook_matrix_shell : ' + str(type_behaviour)
-        
+
     else:
         raise 'Shell behaviour only available in 3D'
 
@@ -239,11 +239,11 @@ def calc_jac_ext( coord, var_inter ):
 
 # grad( v )
 def grad_ext( v, var_inter, inv_jac ):
-    res = ExMatrix( v.size(), var_inter.size() ) 
+    res = ExMatrix( v.size(), var_inter.size() )
     for k in range( v.size() ):
         for j in range( var_inter.size() ):
             for i in range( var_inter.size() ):
-                res[k,j] += v[k].diff( var_inter[i] ) * inv_jac[j,i] 
+                res[k,j] += v[k].diff( var_inter[i] ) * inv_jac[j,i]
     return res
 
 # grad_sym( v ) -> column
@@ -255,7 +255,7 @@ def grad_sym_ext( v, var_inter, inv_jac ):
             res[ i, j ] = 0.5 * ( gr[ i, j ] + gr[ j, i ] )
     return mat_sym_to_vec_col( res )
 
-#loi de comportement anisotrope 3d
+# loi de comportement anisotrope 3d
 def hooke_anisotrope_3d(C):
     H = matrix([
             [C(0, 0), C(0, 1), C(0, 2), C(0, 3), C(0, 4), C(0, 5)],
@@ -265,6 +265,6 @@ def hooke_anisotrope_3d(C):
             [C(4, 0), C(4, 1), C(4, 2), C(4, 3), C(4, 4), C(4, 5)],
             [C(5, 0), C(5, 1), C(5, 2), C(5, 3), C(5, 4), C(5, 5)],
         ])
-#     K = H.inverse()
+    #K = H.inverse()
     K = chol_inv(H)
     return K, H
