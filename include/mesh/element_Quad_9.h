@@ -5,72 +5,72 @@ inline const double *gauss_point_for_order(unsigned order, const Quad_9 &elem) {
     static const unsigned offset[] = { 0, 13, 26, 39, 52, 74, 96, 118, 140, 162, }; // fonction de lordre du poly
     static const double values[] = {
         0.25,0.788675134595,0.788675134595,
-        0.25,0.211324865405,0.788675134595,
         0.25,0.788675134595,0.211324865405,
+        0.25,0.211324865405,0.788675134595,
         0.25,0.211324865405,0.211324865405,
         0.0,
         0.25,0.788675134595,0.788675134595,
-        0.25,0.211324865405,0.788675134595,
         0.25,0.788675134595,0.211324865405,
+        0.25,0.211324865405,0.788675134595,
         0.25,0.211324865405,0.211324865405,
         0.0,
         0.25,0.788675134595,0.788675134595,
-        0.25,0.211324865405,0.788675134595,
         0.25,0.788675134595,0.211324865405,
+        0.25,0.211324865405,0.788675134595,
         0.25,0.211324865405,0.211324865405,
         0.0,
         0.25,0.788675134595,0.788675134595,
-        0.25,0.211324865405,0.788675134595,
         0.25,0.788675134595,0.211324865405,
+        0.25,0.211324865405,0.788675134595,
         0.25,0.211324865405,0.211324865405,
         0.0,
         0.285714285714,0.5,0.5,
         0.14880952381,0.158434974468,0.158434974468,
         0.14880952381,0.841565025532,0.841565025532,
-        0.104166666667,0.94532721089,0.312871678857,
-        0.104166666667,0.0546727891096,0.687128321143,
-        0.104166666667,0.687128321143,0.0546727891096,
         0.104166666667,0.312871678857,0.94532721089,
+        0.104166666667,0.687128321143,0.0546727891096,
+        0.104166666667,0.0546727891096,0.687128321143,
+        0.104166666667,0.94532721089,0.312871678857,
         0.0,
         0.285714285714,0.5,0.5,
         0.14880952381,0.158434974468,0.158434974468,
         0.14880952381,0.841565025532,0.841565025532,
-        0.104166666667,0.94532721089,0.312871678857,
-        0.104166666667,0.0546727891096,0.687128321143,
-        0.104166666667,0.687128321143,0.0546727891096,
         0.104166666667,0.312871678857,0.94532721089,
+        0.104166666667,0.687128321143,0.0546727891096,
+        0.104166666667,0.0546727891096,0.687128321143,
+        0.104166666667,0.94532721089,0.312871678857,
         0.0,
         0.285714285714,0.5,0.5,
         0.14880952381,0.158434974468,0.158434974468,
         0.14880952381,0.841565025532,0.841565025532,
-        0.104166666667,0.94532721089,0.312871678857,
-        0.104166666667,0.0546727891096,0.687128321143,
-        0.104166666667,0.687128321143,0.0546727891096,
         0.104166666667,0.312871678857,0.94532721089,
+        0.104166666667,0.687128321143,0.0546727891096,
+        0.104166666667,0.0546727891096,0.687128321143,
+        0.104166666667,0.94532721089,0.312871678857,
         0.0,
         0.285714285714,0.5,0.5,
         0.14880952381,0.158434974468,0.158434974468,
         0.14880952381,0.841565025532,0.841565025532,
-        0.104166666667,0.94532721089,0.312871678857,
-        0.104166666667,0.0546727891096,0.687128321143,
-        0.104166666667,0.687128321143,0.0546727891096,
         0.104166666667,0.312871678857,0.94532721089,
+        0.104166666667,0.687128321143,0.0546727891096,
+        0.104166666667,0.0546727891096,0.687128321143,
+        0.104166666667,0.94532721089,0.312871678857,
         0.0,
         0.285714285714,0.5,0.5,
         0.14880952381,0.158434974468,0.158434974468,
         0.14880952381,0.841565025532,0.841565025532,
-        0.104166666667,0.94532721089,0.312871678857,
-        0.104166666667,0.0546727891096,0.687128321143,
-        0.104166666667,0.687128321143,0.0546727891096,
         0.104166666667,0.312871678857,0.94532721089,
+        0.104166666667,0.687128321143,0.0546727891096,
+        0.104166666667,0.0546727891096,0.687128321143,
+        0.104166666667,0.94532721089,0.312871678857,
         0.0,
         0.285714285714,0.5,0.5,
         0.14880952381,0.158434974468,0.158434974468,
         0.14880952381,0.841565025532,0.841565025532,
-        0.104166666667,0.94532721089,0.312871678857,
-        0.104166666667,0.0546727891096,0.687128321143,
-        0.104166666667,0.687128321143,0.0546727891096,
         0.104166666667,0.312871678857,0.94532721089,
+        0.104166666667,0.687128321143,0.0546727891096,
+        0.104166666667,0.0546727891096,0.687128321143,
+        0.104166666667,0.94532721089,0.312871678857,
         0.0,
     };
     return values + offset[order];
@@ -87,90 +87,90 @@ template<class TNode> void permutation_if_jac_neg(const Quad_9 &elem,TNode **nod
 }
 template<class PosNodes,class Pvec,class TVI> void get_var_inter_linear(const Quad_9 &elem,const PosNodes &pos_nodes,const Pvec &pos,TVI &var_inter) {
 typedef typename Pvec::template SubType<0>::T T;
-    T reg0=0.5-var_inter[0]; T reg1=var_inter[0]-0.5; T reg2=1-var_inter[0]; T reg3=4*reg0; T reg4=4*reg1;
-    T reg5=4*reg2; T reg6=4*var_inter[0]; reg4=reg6+reg4; T reg7=1-var_inter[1]; reg3=reg5+reg3;
-    T reg8=8*var_inter[0]; T reg9=8*reg2; reg6=reg6*reg1; reg5=reg0*reg5; T reg10=0.5-var_inter[1];
-    T reg11=reg7*reg3; T reg12=reg6*reg7; T reg13=reg9*var_inter[0]; T reg14=reg9-reg8; T reg15=reg5*reg7;
-    T reg16=reg10*reg6; T reg17=reg7*reg4; T reg18=reg5*reg10; T reg19=reg7*reg14; T reg20=var_inter[1]-0.5;
-    reg17=reg10*reg17; reg18=reg15+reg18; reg16=reg12+reg16; T reg21=reg10*reg13; T reg22=reg10*reg11;
-    T reg23=reg13*reg7; T reg24=pos_nodes[1][1]*reg16; reg19=reg10*reg19; T reg25=var_inter[1]*reg3; T reg26=pos_nodes[0][1]*reg18;
-    T reg27=pos_nodes[0][1]*reg22; T reg28=pos_nodes[1][0]*reg17; T reg29=pos_nodes[0][0]*reg22; reg21=reg23+reg21; T reg30=reg5*reg20;
-    T reg31=pos_nodes[0][0]*reg18; T reg32=pos_nodes[1][0]*reg16; T reg33=pos_nodes[1][1]*reg17; T reg34=reg5*var_inter[1]; reg4=var_inter[1]*reg4;
-    T reg35=reg20*reg25; T reg36=pos_nodes[4][0]*reg19; reg29=reg28-reg29; reg28=reg6*var_inter[1]; reg12=reg10*reg12;
-    reg32=reg31+reg32; reg15=reg10*reg15; reg31=8*reg0; reg27=reg33-reg27; reg33=pos_nodes[4][1]*reg19;
-    T reg37=pos_nodes[4][0]*reg21; T reg38=reg6*reg20; reg30=reg34+reg30; reg24=reg26+reg24; reg26=pos_nodes[4][1]*reg21;
-    reg37=reg32+reg37; reg32=pos_nodes[0][0]*reg15; reg36=reg29+reg36; reg29=pos_nodes[3][0]*reg35; T reg39=pos_nodes[3][0]*reg30;
-    T reg40=reg13*reg20; reg38=reg28+reg38; reg26=reg24+reg26; reg24=pos_nodes[3][1]*reg30; T reg41=pos_nodes[3][1]*reg35;
-    reg33=reg27+reg33; reg0=reg0*reg9; reg27=reg13*var_inter[1]; T reg42=pos_nodes[0][1]*reg15; T reg43=reg12*pos_nodes[1][1];
-    reg23=reg10*reg23; reg10=8*reg1; T reg44=reg12*pos_nodes[1][0]; reg31=reg9+reg31; reg14=var_inter[1]*reg14;
-    reg4=reg20*reg4; reg44=reg32+reg44; reg9=pos_nodes[4][0]*reg23; reg37=reg39-reg37; reg32=var_inter[1]*reg0;
-    reg40=reg27+reg40; reg39=pos_nodes[2][0]*reg38; T reg45=pos_nodes[4][1]*reg23; reg41=reg33-reg41; reg33=pos_nodes[2][1]*reg4;
-    T reg46=pos_nodes[2][1]*reg38; reg26=reg24-reg26; reg43=reg42+reg43; reg34=reg34*reg20; reg14=reg20*reg14;
-    reg24=reg7*reg31; reg10=reg8+reg10; reg42=16*var_inter[0]; T reg47=reg7*reg0; reg8=reg1*reg8;
-    reg29=reg36-reg29; reg1=pos_nodes[2][0]*reg4; reg2=16*reg2; reg36=pos_nodes[3][0]*reg34; reg9=reg44+reg9;
-    reg44=var_inter[0]*reg2; T reg48=pos_nodes[3][1]*reg34; T reg49=var_inter[1]*reg24; reg10=reg7*reg10; reg28=reg20*reg28;
-    reg45=reg43+reg45; reg43=pos_nodes[6][0]*reg40; reg39=reg37+reg39; reg32=reg47-reg32; reg37=var_inter[1]*reg8;
-    T reg50=pos_nodes[6][1]*reg14; reg33=reg41+reg33; reg41=reg7*reg8; reg1=reg29+reg1; reg29=pos_nodes[6][0]*reg14;
-    T reg51=pos_nodes[6][1]*reg40; reg42=reg2-reg42; reg46=reg26+reg46; reg2=pos_nodes[7][1]*reg49; reg50=reg33+reg50;
-    reg26=pos_nodes[7][1]*reg32; reg33=reg7*reg44; reg51=reg46+reg51; reg27=reg20*reg27; reg20=var_inter[1]*reg44;
-    reg37=reg41-reg37; reg29=reg1+reg29; reg1=pos_nodes[7][0]*reg49; reg42=reg7*reg42; reg43=reg39+reg43;
-    reg7=pos_nodes[7][0]*reg32; reg39=pos_nodes[2][1]*reg28; reg48=reg45+reg48; reg10=var_inter[1]*reg10; reg36=reg9+reg36;
-    reg9=pos_nodes[2][0]*reg28; reg45=pos_nodes[5][0]*reg10; reg1=reg29-reg1; reg29=pos_nodes[5][1]*reg10; reg2=reg50-reg2;
-    reg46=pos_nodes[6][1]*reg27; reg39=reg48+reg39; reg20=reg33-reg20; reg42=var_inter[1]*reg42; reg47=var_inter[1]*reg47;
-    reg7=reg43+reg7; reg43=pos_nodes[5][0]*reg37; reg26=reg51+reg26; reg48=pos_nodes[5][1]*reg37; reg50=pos_nodes[6][0]*reg27;
-    reg9=reg36+reg9; reg46=reg39+reg46; reg48=reg26+reg48; reg26=pos_nodes[8][1]*reg20; reg36=pos_nodes[7][1]*reg47;
-    reg45=reg1+reg45; reg1=pos_nodes[8][0]*reg42; reg39=pos_nodes[8][1]*reg42; reg29=reg2+reg29; reg43=reg7+reg43;
-    reg41=var_inter[1]*reg41; reg2=pos_nodes[8][0]*reg20; reg50=reg9+reg50; reg7=pos_nodes[7][0]*reg47; reg1=reg45+reg1;
-    reg2=reg43+reg2; reg26=reg48+reg26; reg7=reg50+reg7; reg9=pos_nodes[5][0]*reg41; reg33=var_inter[1]*reg33;
-    reg36=reg46+reg36; reg43=pos_nodes[5][1]*reg41; reg39=reg29+reg39; reg29=reg33*pos_nodes[8][1]; reg43=reg36+reg43;
-    reg9=reg7+reg9; reg7=reg33*pos_nodes[8][0]; reg36=reg2*reg39; reg45=reg1*reg26; reg29=reg43+reg29;
-    reg36=reg45-reg36; reg7=reg9+reg7; reg29=pos[1]-reg29; reg9=reg26/reg36; reg7=pos[0]-reg7;
-    reg43=reg39/reg36; reg46=reg2/reg36; reg36=reg1/reg36; reg9=reg7*reg9; reg46=reg29*reg46;
-    reg43=reg7*reg43; reg36=reg29*reg36; var_inter[0]=reg9-reg46; var_inter[1]=reg36-reg43;
+    T reg0=var_inter[0]-0.5; T reg1=0.5-var_inter[0]; T reg2=1-var_inter[0]; T reg3=4*reg0; T reg4=4*reg1;
+    T reg5=4*var_inter[0]; T reg6=4*reg2; T reg7=1-var_inter[1]; T reg8=reg6*reg1; T reg9=0.5-var_inter[1];
+    T reg10=reg5*reg0; T reg11=8*var_inter[0]; T reg12=8*reg2; reg4=reg6+reg4; reg3=reg5+reg3;
+    reg5=reg8*reg7; reg6=reg12-reg11; T reg13=reg8*reg9; T reg14=reg7*reg10; T reg15=reg9*reg10;
+    T reg16=reg7*reg3; T reg17=var_inter[0]*reg12; T reg18=reg7*reg4; T reg19=reg9*reg17; reg16=reg9*reg16;
+    T reg20=reg7*reg6; T reg21=reg7*reg17; reg15=reg14+reg15; T reg22=var_inter[1]-0.5; reg13=reg5+reg13;
+    T reg23=reg9*reg18; T reg24=pos_nodes[0][1]*reg23; T reg25=reg8*var_inter[1]; reg19=reg21+reg19; T reg26=var_inter[1]*reg4;
+    reg20=reg9*reg20; T reg27=pos_nodes[1][0]*reg15; T reg28=reg23*pos_nodes[0][0]; T reg29=pos_nodes[1][0]*reg16; T reg30=pos_nodes[1][1]*reg15;
+    T reg31=pos_nodes[0][1]*reg13; T reg32=reg8*reg22; T reg33=pos_nodes[1][1]*reg16; T reg34=pos_nodes[0][0]*reg13; reg28=reg29-reg28;
+    reg29=pos_nodes[4][0]*reg20; reg30=reg31+reg30; reg31=pos_nodes[4][1]*reg19; T reg35=pos_nodes[4][1]*reg20; T reg36=var_inter[1]*reg10;
+    T reg37=pos_nodes[4][0]*reg19; reg27=reg34+reg27; reg34=reg10*reg22; reg32=reg25+reg32; reg5=reg5*reg9;
+    reg14=reg9*reg14; T reg38=reg26*reg22; reg3=var_inter[1]*reg3; reg24=reg33-reg24; reg33=8*reg1;
+    reg1=reg1*reg12; T reg39=pos_nodes[1][0]*reg14; reg21=reg9*reg21; reg34=reg36+reg34; reg9=reg17*reg22;
+    T reg40=pos_nodes[0][0]*reg5; T reg41=var_inter[1]*reg17; reg35=reg24+reg35; reg37=reg27+reg37; reg24=pos_nodes[3][1]*reg38;
+    reg27=pos_nodes[1][1]*reg14; T reg42=pos_nodes[0][1]*reg5; T reg43=pos_nodes[3][0]*reg32; reg3=reg3*reg22; reg6=var_inter[1]*reg6;
+    reg33=reg12+reg33; reg12=8*reg0; reg31=reg30+reg31; reg29=reg28+reg29; reg28=pos_nodes[3][0]*reg38;
+    reg30=pos_nodes[3][1]*reg32; T reg44=var_inter[1]*reg1; reg9=reg41+reg9; T reg45=pos_nodes[4][1]*reg21; reg27=reg42+reg27;
+    reg39=reg40+reg39; reg40=pos_nodes[4][0]*reg21; reg2=16*reg2; reg42=pos_nodes[2][0]*reg34; reg37=reg43-reg37;
+    reg0=reg0*reg11; reg43=pos_nodes[2][1]*reg3; T reg46=reg7*reg1; reg24=reg35-reg24; reg35=pos_nodes[2][0]*reg3;
+    reg6=reg6*reg22; T reg47=reg7*reg33; reg25=reg25*reg22; reg28=reg29-reg28; reg29=pos_nodes[2][1]*reg34;
+    reg11=reg12+reg11; reg31=reg30-reg31; reg12=16*var_inter[0]; reg42=reg37+reg42; reg30=pos_nodes[3][1]*reg25;
+    reg37=pos_nodes[6][0]*reg9; reg45=reg27+reg45; reg40=reg39+reg40; reg27=pos_nodes[3][0]*reg25; reg39=pos_nodes[6][1]*reg9;
+    reg29=reg31+reg29; reg43=reg24+reg43; reg24=pos_nodes[6][1]*reg6; reg31=reg7*reg0; T reg48=var_inter[0]*reg2;
+    reg44=reg46-reg44; T reg49=var_inter[1]*reg47; reg11=reg7*reg11; reg12=reg2-reg12; reg2=var_inter[1]*reg0;
+    reg36=reg22*reg36; T reg50=pos_nodes[6][0]*reg6; reg35=reg28+reg35; reg11=var_inter[1]*reg11; reg12=reg7*reg12;
+    reg39=reg29+reg39; reg41=reg22*reg41; reg22=pos_nodes[7][1]*reg44; reg28=pos_nodes[7][0]*reg49; reg50=reg35+reg50;
+    reg29=pos_nodes[2][0]*reg36; reg27=reg40+reg27; reg7=reg7*reg48; reg30=reg45+reg30; reg35=pos_nodes[2][1]*reg36;
+    reg24=reg43+reg24; reg40=pos_nodes[7][0]*reg44; reg37=reg42+reg37; reg2=reg31-reg2; reg42=var_inter[1]*reg48;
+    reg43=pos_nodes[7][1]*reg49; reg43=reg24-reg43; reg24=pos_nodes[5][1]*reg11; reg12=var_inter[1]*reg12; reg22=reg39+reg22;
+    reg39=pos_nodes[5][1]*reg2; reg35=reg30+reg35; reg30=pos_nodes[6][1]*reg41; reg29=reg27+reg29; reg27=pos_nodes[6][0]*reg41;
+    reg45=pos_nodes[5][0]*reg2; reg40=reg37+reg40; reg42=reg7-reg42; reg46=var_inter[1]*reg46; reg28=reg50-reg28;
+    reg37=pos_nodes[5][0]*reg11; reg31=var_inter[1]*reg31; reg50=pos_nodes[8][1]*reg42; reg39=reg22+reg39; reg27=reg29+reg27;
+    reg22=pos_nodes[7][0]*reg46; reg29=pos_nodes[8][0]*reg42; reg45=reg40+reg45; reg24=reg43+reg24; reg40=pos_nodes[8][1]*reg12;
+    reg30=reg35+reg30; reg35=pos_nodes[7][1]*reg46; reg37=reg28+reg37; reg28=pos_nodes[8][0]*reg12; reg29=reg45+reg29;
+    reg43=pos_nodes[5][1]*reg31; reg7=var_inter[1]*reg7; reg35=reg30+reg35; reg40=reg24+reg40; reg28=reg37+reg28;
+    reg50=reg39+reg50; reg22=reg27+reg22; reg24=pos_nodes[5][0]*reg31; reg24=reg22+reg24; reg22=pos_nodes[8][0]*reg7;
+    reg43=reg35+reg43; reg27=pos_nodes[8][1]*reg7; reg30=reg28*reg50; reg35=reg29*reg40; reg22=reg24+reg22;
+    reg27=reg43+reg27; reg35=reg30-reg35; reg24=reg28/reg35; reg37=reg29/reg35; reg39=reg40/reg35;
+    reg35=reg50/reg35; reg27=pos[1]-reg27; reg22=pos[0]-reg22; reg35=reg22*reg35; reg37=reg27*reg37;
+    reg39=reg22*reg39; reg24=reg27*reg24; var_inter[0]=reg35-reg37; var_inter[1]=reg24-reg39;
 
 }
 template<class PosNodes,class Pvec,class TVI> void get_var_inter(const Quad_9 &elem,const PosNodes &pos_nodes,const Pvec &pos,TVI &var_inter) {
 typedef typename Pvec::template SubType<0>::T T;
-    T reg0=0.5-var_inter[0]; T reg1=var_inter[0]-0.5; T reg2=1-var_inter[0]; T reg3=4*reg0; T reg4=4*reg1;
-    T reg5=4*reg2; T reg6=4*var_inter[0]; T reg7=8*reg2; T reg8=reg6*reg1; T reg9=0.5-var_inter[1];
-    T reg10=1-var_inter[1]; T reg11=8*var_inter[0]; reg3=reg5+reg3; reg4=reg6+reg4; reg5=reg0*reg5;
-    reg6=reg10*reg3; T reg12=reg7-reg11; T reg13=reg5*reg10; T reg14=reg10*reg4; T reg15=var_inter[0]*reg7;
-    T reg16=reg9*reg8; T reg17=reg5*reg9; T reg18=reg10*reg8; reg16=reg18+reg16; reg17=reg13+reg17;
-    T reg19=reg15*reg9; reg14=reg9*reg14; T reg20=reg10*reg12; T reg21=reg9*reg6; T reg22=var_inter[1]-0.5;
-    T reg23=reg15*reg10; reg20=reg9*reg20; T reg24=pos_nodes[1][0]*reg16; T reg25=pos_nodes[0][0]*reg17; T reg26=pos_nodes[1][1]*reg14;
-    T reg27=pos_nodes[0][1]*reg21; T reg28=var_inter[1]*reg3; T reg29=reg5*reg22; T reg30=pos_nodes[1][1]*reg16; T reg31=reg5*var_inter[1];
-    T reg32=pos_nodes[0][1]*reg17; reg19=reg23+reg19; T reg33=pos_nodes[0][0]*reg21; T reg34=pos_nodes[1][0]*reg14; T reg35=8*reg0;
-    reg4=var_inter[1]*reg4; T reg36=reg22*reg28; reg33=reg34-reg33; reg29=reg31+reg29; reg34=var_inter[1]*reg8;
-    T reg37=reg22*reg8; T reg38=pos_nodes[4][0]*reg19; T reg39=pos_nodes[4][0]*reg20; reg13=reg13*reg9; reg32=reg30+reg32;
-    reg18=reg9*reg18; reg30=pos_nodes[4][1]*reg19; reg27=reg26-reg27; reg24=reg25+reg24; reg25=pos_nodes[4][1]*reg20;
-    reg26=pos_nodes[1][1]*reg18; reg24=reg38+reg24; reg38=reg13*pos_nodes[0][1]; reg33=reg39+reg33; reg39=pos_nodes[3][0]*reg36;
-    reg32=reg30+reg32; reg30=pos_nodes[3][0]*reg29; T reg40=reg15*reg22; reg9=reg23*reg9; reg37=reg34+reg37;
-    reg23=reg13*pos_nodes[0][0]; T reg41=pos_nodes[3][1]*reg29; T reg42=pos_nodes[3][1]*reg36; reg27=reg25+reg27; reg25=pos_nodes[1][0]*reg18;
-    reg35=reg7+reg35; T reg43=8*reg1; reg7=reg0*reg7; reg12=var_inter[1]*reg12; reg4=reg22*reg4;
-    reg0=reg15*var_inter[1]; T reg44=reg10*reg35; reg12=reg22*reg12; reg31=reg31*reg22; reg40=reg0+reg40;
-    T reg45=reg7*var_inter[1]; T reg46=reg9*pos_nodes[4][0]; T reg47=reg9*pos_nodes[4][1]; reg26=reg38+reg26; reg38=reg7*reg10;
-    reg1=reg11*reg1; T reg48=pos_nodes[2][0]*reg37; reg24=reg30-reg24; reg25=reg23+reg25; reg23=pos_nodes[2][1]*reg4;
-    reg30=pos_nodes[2][1]*reg37; reg32=reg41-reg32; reg42=reg27-reg42; reg27=16*var_inter[0]; reg2=16*reg2;
-    reg43=reg11+reg43; reg39=reg33-reg39; reg11=pos_nodes[2][0]*reg4; reg23=reg42+reg23; reg48=reg24+reg48;
-    reg24=pos_nodes[6][0]*reg40; reg33=pos_nodes[6][1]*reg12; reg41=pos_nodes[6][1]*reg40; reg30=reg32+reg30; reg32=var_inter[0]*reg2;
-    reg42=reg31*pos_nodes[3][0]; reg25=reg46+reg25; reg46=reg31*pos_nodes[3][1]; reg26=reg47+reg26; reg47=var_inter[1]*reg44;
-    reg34=reg22*reg34; reg45=reg38-reg45; T reg49=pos_nodes[6][0]*reg12; reg11=reg39+reg11; reg43=reg10*reg43;
-    reg39=reg1*var_inter[1]; reg27=reg2-reg27; reg2=reg1*reg10; reg49=reg11+reg49; reg43=var_inter[1]*reg43;
-    reg33=reg23+reg33; reg27=reg10*reg27; reg11=pos_nodes[7][1]*reg47; reg23=pos_nodes[7][0]*reg47; reg10=reg32*reg10;
-    T reg50=var_inter[1]*reg32; reg39=reg2-reg39; reg24=reg48+reg24; reg48=pos_nodes[7][0]*reg45; T reg51=pos_nodes[7][1]*reg45;
-    reg41=reg30+reg41; reg0=reg22*reg0; reg42=reg25+reg42; reg22=reg34*pos_nodes[2][0]; reg46=reg26+reg46;
-    reg25=reg34*pos_nodes[2][1]; reg11=reg33-reg11; reg26=pos_nodes[5][1]*reg43; reg51=reg41+reg51; reg30=pos_nodes[5][1]*reg39;
-    reg25=reg46+reg25; reg33=reg0*pos_nodes[6][1]; reg27=var_inter[1]*reg27; reg23=reg49-reg23; reg41=pos_nodes[5][0]*reg43;
-    reg50=reg10-reg50; reg38=reg38*var_inter[1]; reg48=reg24+reg48; reg24=pos_nodes[5][0]*reg39; reg22=reg42+reg22;
-    reg42=reg0*pos_nodes[6][0]; reg46=reg38*pos_nodes[7][1]; reg41=reg23+reg41; reg23=pos_nodes[8][0]*reg27; reg26=reg11+reg26;
-    reg11=pos_nodes[8][1]*reg50; reg30=reg51+reg30; reg49=pos_nodes[8][1]*reg27; reg24=reg48+reg24; reg48=pos_nodes[8][0]*reg50;
-    reg33=reg25+reg33; reg42=reg22+reg42; reg22=reg38*pos_nodes[7][0]; reg2=reg2*var_inter[1]; reg48=reg24+reg48;
-    reg49=reg26+reg49; reg24=reg2*pos_nodes[5][0]; reg11=reg30+reg11; reg10=var_inter[1]*reg10; reg25=reg2*pos_nodes[5][1];
-    reg23=reg41+reg23; reg46=reg33+reg46; reg22=reg42+reg22; reg26=reg10*pos_nodes[8][1]; reg30=reg48*reg49;
-    reg25=reg46+reg25; reg33=reg23*reg11; reg41=reg10*pos_nodes[8][0]; reg24=reg22+reg24; reg30=reg33-reg30;
-    reg26=reg25+reg26; reg41=reg24+reg41; reg26=pos[1]-reg26; reg22=reg11/reg30; reg41=pos[0]-reg41;
-    reg24=reg49/reg30; reg25=reg48/reg30; reg30=reg23/reg30; reg22=reg41*reg22; reg25=reg26*reg25;
-    reg24=reg41*reg24; reg30=reg26*reg30; var_inter[0]+=reg22-reg25; var_inter[1]+=reg30-reg24;
+    T reg0=var_inter[0]-0.5; T reg1=1-var_inter[0]; T reg2=0.5-var_inter[0]; T reg3=4*var_inter[0]; T reg4=4*reg2;
+    T reg5=4*reg0; T reg6=4*reg1; T reg7=0.5-var_inter[1]; reg4=reg6+reg4; T reg8=reg3*reg0;
+    reg6=reg6*reg2; reg5=reg3+reg5; reg3=1-var_inter[1]; T reg9=8*reg1; T reg10=8*var_inter[0];
+    T reg11=reg3*reg8; T reg12=reg3*reg5; T reg13=reg9-reg10; T reg14=reg6*reg7; T reg15=reg3*reg4;
+    T reg16=reg7*reg8; T reg17=reg9*var_inter[0]; T reg18=reg6*reg3; T reg19=var_inter[1]-0.5; T reg20=reg7*reg15;
+    reg12=reg7*reg12; T reg21=reg3*reg13; reg14=reg18+reg14; reg16=reg11+reg16; T reg22=reg7*reg17;
+    T reg23=reg3*reg17; T reg24=pos_nodes[1][0]*reg16; T reg25=pos_nodes[0][0]*reg14; T reg26=pos_nodes[1][1]*reg12; T reg27=pos_nodes[0][1]*reg20;
+    T reg28=reg6*reg19; reg21=reg7*reg21; T reg29=var_inter[1]*reg4; T reg30=pos_nodes[0][1]*reg14; T reg31=pos_nodes[1][1]*reg16;
+    reg22=reg23+reg22; T reg32=pos_nodes[0][0]*reg20; T reg33=reg6*var_inter[1]; T reg34=pos_nodes[1][0]*reg12; T reg35=reg19*reg29;
+    reg5=var_inter[1]*reg5; reg28=reg33+reg28; T reg36=reg8*reg19; T reg37=pos_nodes[4][0]*reg21; reg32=reg34-reg32;
+    reg24=reg25+reg24; reg25=8*reg2; reg34=pos_nodes[4][0]*reg22; T reg38=reg8*var_inter[1]; reg27=reg26-reg27;
+    reg26=pos_nodes[4][1]*reg21; T reg39=pos_nodes[4][1]*reg22; reg18=reg18*reg7; reg11=reg7*reg11; reg31=reg30+reg31;
+    reg30=pos_nodes[1][1]*reg11; T reg40=reg18*pos_nodes[0][1]; reg39=reg31+reg39; reg37=reg32+reg37; reg31=pos_nodes[3][0]*reg35;
+    reg32=pos_nodes[3][1]*reg28; T reg41=pos_nodes[3][1]*reg35; reg26=reg27+reg26; reg36=reg38+reg36; reg27=pos_nodes[1][0]*reg11;
+    T reg42=pos_nodes[0][0]*reg18; T reg43=reg17*reg19; T reg44=pos_nodes[3][0]*reg28; reg34=reg24+reg34; reg13=var_inter[1]*reg13;
+    reg23=reg7*reg23; reg5=reg19*reg5; reg7=reg17*var_inter[1]; reg2=reg2*reg9; reg24=8*reg0;
+    reg25=reg9+reg25; reg1=16*reg1; reg43=reg7+reg43; reg9=reg3*reg25; reg34=reg44-reg34;
+    reg44=pos_nodes[2][0]*reg36; reg27=reg42+reg27; reg42=pos_nodes[4][0]*reg23; reg41=reg26-reg41; reg26=pos_nodes[2][1]*reg5;
+    T reg45=reg23*pos_nodes[4][1]; T reg46=reg3*reg2; reg39=reg32-reg39; reg32=pos_nodes[2][1]*reg36; reg33=reg33*reg19;
+    reg30=reg40+reg30; reg13=reg19*reg13; reg0=reg10*reg0; reg40=16*var_inter[0]; reg24=reg10+reg24;
+    reg31=reg37-reg31; reg10=pos_nodes[2][0]*reg5; reg37=reg2*var_inter[1]; reg42=reg27+reg42; reg27=pos_nodes[3][0]*reg33;
+    T reg47=pos_nodes[6][0]*reg13; reg10=reg31+reg10; reg26=reg41+reg26; reg31=pos_nodes[6][1]*reg13; reg41=pos_nodes[3][1]*reg33;
+    reg45=reg30+reg45; reg24=reg3*reg24; reg38=reg19*reg38; reg32=reg39+reg32; reg30=pos_nodes[6][1]*reg43;
+    reg40=reg1-reg40; reg39=var_inter[1]*reg9; reg37=reg46-reg37; reg44=reg34+reg44; reg34=pos_nodes[6][0]*reg43;
+    T reg48=reg0*var_inter[1]; T reg49=reg3*reg0; reg1=reg1*var_inter[0]; T reg50=pos_nodes[7][0]*reg39; reg47=reg10+reg47;
+    reg31=reg26+reg31; reg10=pos_nodes[7][1]*reg39; reg26=pos_nodes[2][1]*reg38; reg41=reg45+reg41; reg40=reg3*reg40;
+    reg45=pos_nodes[7][0]*reg37; reg30=reg32+reg30; reg3=reg3*reg1; reg32=pos_nodes[7][1]*reg37; T reg51=reg1*var_inter[1];
+    reg48=reg49-reg48; reg7=reg19*reg7; reg24=var_inter[1]*reg24; reg34=reg44+reg34; reg27=reg42+reg27;
+    reg19=pos_nodes[2][0]*reg38; reg19=reg27+reg19; reg27=reg7*pos_nodes[6][0]; reg26=reg41+reg26; reg41=reg7*pos_nodes[6][1];
+    reg51=reg3-reg51; reg42=pos_nodes[5][1]*reg24; reg10=reg31-reg10; reg31=pos_nodes[5][0]*reg48; reg30=reg32+reg30;
+    reg32=pos_nodes[5][1]*reg48; reg50=reg47-reg50; reg46=reg46*var_inter[1]; reg44=pos_nodes[5][0]*reg24; reg34=reg45+reg34;
+    reg40=var_inter[1]*reg40; reg45=reg46*pos_nodes[7][0]; reg49=reg49*var_inter[1]; reg47=pos_nodes[8][0]*reg51; reg31=reg34+reg31;
+    reg32=reg30+reg32; reg30=pos_nodes[8][1]*reg51; reg34=reg46*pos_nodes[7][1]; reg44=reg50+reg44; reg50=pos_nodes[8][0]*reg40;
+    reg41=reg26+reg41; reg26=pos_nodes[8][1]*reg40; reg42=reg10+reg42; reg27=reg19+reg27; reg41=reg34+reg41;
+    reg10=reg49*pos_nodes[5][1]; reg30=reg32+reg30; reg50=reg44+reg50; reg19=reg49*pos_nodes[5][0]; reg27=reg45+reg27;
+    reg3=reg3*var_inter[1]; reg47=reg31+reg47; reg26=reg42+reg26; reg31=reg50*reg30; reg32=reg3*pos_nodes[8][1];
+    reg10=reg41+reg10; reg34=reg47*reg26; reg41=reg3*pos_nodes[8][0]; reg19=reg27+reg19; reg34=reg31-reg34;
+    reg41=reg19+reg41; reg32=reg10+reg32; reg10=reg50/reg34; reg19=reg47/reg34; reg27=reg26/reg34;
+    reg34=reg30/reg34; reg41=pos[0]-reg41; reg32=pos[1]-reg32; reg10=reg10*reg32; reg27=reg41*reg27;
+    reg19=reg19*reg32; reg34=reg41*reg34; var_inter[0]+=reg34-reg19; var_inter[1]+=reg10-reg27;
 
 }
 template<> struct ElemVarInterFromPosNonLinear<Quad_9> { static const bool res = 2; };
@@ -195,17 +195,17 @@ template<class TVI,class TVAL,class T> void get_interp(const Quad_9 &ne,const El
 struct Nodal {};
 #endif // STRUCT_Nodal
 template<class TVI,class TVAL,class T> void get_interp(const Quad_9 &ne,const Nodal &n,const TVI &var_inter,const TVAL &val,T &res) {
-    T reg0=1-var_inter[0]; T reg1=4*reg0; T reg2=0.5-var_inter[0]; T reg3=4*var_inter[0]; T reg4=var_inter[0]-0.5;
-    T reg5=8*reg0; reg3=reg3*reg4; reg1=reg2*reg1; T reg6=1-var_inter[1]; T reg7=var_inter[0]*reg5;
-    T reg8=reg6*reg3; T reg9=reg1*reg6; T reg10=0.5-var_inter[1]; reg9=reg9*reg10; reg8=reg10*reg8;
-    T reg11=reg6*reg7; reg8=val[1]*reg8; reg11=reg10*reg11; reg1=var_inter[1]*reg1; reg10=var_inter[1]-0.5;
-    reg9=val[0]*reg9; reg8=reg9+reg8; reg11=val[4]*reg11; reg3=var_inter[1]*reg3; reg1=reg1*reg10;
-    reg5=reg2*reg5; reg2=8*var_inter[0]; reg7=var_inter[1]*reg7; reg3=reg10*reg3; reg1=val[3]*reg1;
-    reg11=reg8+reg11; reg1=reg11+reg1; reg3=val[2]*reg3; reg7=reg10*reg7; reg2=reg4*reg2;
-    reg0=16*reg0; reg5=reg6*reg5; reg2=reg6*reg2; reg0=var_inter[0]*reg0; reg5=var_inter[1]*reg5;
-    reg7=val[6]*reg7; reg3=reg1+reg3; reg5=val[7]*reg5; reg7=reg3+reg7; reg2=var_inter[1]*reg2;
-    reg0=reg6*reg0; reg5=reg7+reg5; reg2=val[5]*reg2; reg0=var_inter[1]*reg0; reg2=reg5+reg2;
-    reg0=val[8]*reg0; res=reg2+reg0;
+    T reg0=1-var_inter[0]; T reg1=0.5-var_inter[0]; T reg2=4*reg0; T reg3=var_inter[0]-0.5; T reg4=4*var_inter[0];
+    T reg5=8*reg0; reg2=reg2*reg1; T reg6=1-var_inter[1]; reg4=reg4*reg3; T reg7=reg2*reg6;
+    T reg8=0.5-var_inter[1]; T reg9=var_inter[0]*reg5; T reg10=reg6*reg4; reg7=reg7*reg8; reg10=reg8*reg10;
+    T reg11=reg6*reg9; reg10=val[1]*reg10; reg11=reg8*reg11; reg2=var_inter[1]*reg2; reg8=var_inter[1]-0.5;
+    reg7=val[0]*reg7; reg10=reg7+reg10; reg4=var_inter[1]*reg4; reg11=val[4]*reg11; reg2=reg2*reg8;
+    reg2=val[3]*reg2; reg4=reg8*reg4; reg9=var_inter[1]*reg9; reg11=reg10+reg11; reg7=8*var_inter[0];
+    reg5=reg1*reg5; reg9=reg8*reg9; reg0=16*reg0; reg5=reg6*reg5; reg4=val[2]*reg4;
+    reg2=reg11+reg2; reg7=reg3*reg7; reg5=var_inter[1]*reg5; reg7=reg6*reg7; reg9=val[6]*reg9;
+    reg4=reg2+reg4; reg0=var_inter[0]*reg0; reg7=var_inter[1]*reg7; reg0=reg6*reg0; reg5=val[7]*reg5;
+    reg9=reg4+reg9; reg5=reg9+reg5; reg7=val[5]*reg7; reg0=var_inter[1]*reg0; reg7=reg5+reg7;
+    reg0=val[8]*reg0; res=reg7+reg0;
 
 }
 #ifndef STRUCT_Global
@@ -259,8 +259,8 @@ template<class TVI,class TVAL,class T> void get_interp(const Quad_9 &ne,const Sk
 template<class TVI,class TVAL> void get_shape_functions(const Quad_9 &ne,const TVI &var_inter,TVAL &res) {
     typedef typename TVAL::template SubType<0>::T T;
     T reg0=1-var_inter[0]; T reg1=8*var_inter[0]; T reg2=8*reg0; T reg3=var_inter[0]-0.5; T reg4=4*var_inter[0];
-    T reg5=16*reg0; reg0=4*reg0; T reg6=0.5-var_inter[0]; reg5=var_inter[0]*reg5; reg4=reg4*reg3;
-    T reg7=1-var_inter[1]; reg0=reg6*reg0; T reg8=var_inter[0]*reg2; reg1=reg3*reg1; reg2=reg6*reg2;
+    T reg5=16*reg0; T reg6=0.5-var_inter[0]; reg0=4*reg0; reg5=var_inter[0]*reg5; T reg7=1-var_inter[1];
+    reg4=reg4*reg3; reg0=reg0*reg6; T reg8=var_inter[0]*reg2; reg1=reg3*reg1; reg2=reg6*reg2;
     reg5=reg7*reg5; reg1=reg7*reg1; reg2=reg7*reg2; reg3=var_inter[1]*reg8; reg6=var_inter[1]*reg4;
     T reg9=var_inter[1]-0.5; T reg10=var_inter[1]*reg0; reg8=reg7*reg8; reg4=reg7*reg4; T reg11=0.5-var_inter[1];
     reg7=reg0*reg7; reg6=reg9*reg6; res[2]=reg6; reg10=reg10*reg9; res[3]=reg10;
