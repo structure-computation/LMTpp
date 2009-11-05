@@ -19,7 +19,7 @@
             from LMT.formal_lf import *
             
             env = Environment(
-		LIBPATH = [ '/usr/lib','/usr/local/lib/'  ],
+                LIBPATH = [ '/usr/lib','/usr/local/lib/'  ],
                 LIBS = [ 'pthread', 'cholmod', 'm ],
                 CPPPATH = [ '#LMT/include' ],
                 CPPFLAGS = cppflags( ['xml2-config'] ) + " -O3 -g3 -Wall",
@@ -216,59 +216,58 @@
     = Projet Kdevelop
 
         Si vous avez oubliez comment on procède pour créer un projet kdevelop, consultez le tutoriel [[Mon premier programme]] .
-   
-        = Utilisation en C++ des maillages et formulations
-	    = Les fichiers d'en-têtes C++
-		Il est TRES IMPORTANT d'inclure le fichier <strong> d'en_tete de votre problème </strong> dans votre fichier main.cpp.
-		\code C/C++
-		    #include "build/problem_XXX/problem.h"
-		    
-		où XXX est le nom de votre problème ( défini dans le fichier SConstruct, paramètre name de la fonction make_pb() )
+        
+        = Le fichier d'en-têtes C++ nécessaire pour la génération du code C++
+            Il est TRES IMPORTANT d'inclure le fichier <strong> d'en_tete de votre problème </strong> dans votre fichier main.cpp.
+            \code C/C++
+                #include "build/problem_XXX/problem.h"
+        
+            où XXX est le nom de votre problème ( défini dans le fichier SConstruct, paramètre name de la fonction make_pb() )
 
-	    = Définition d'un problème et d'un maillage
-		Cela prend cette forme :
-		\code C/C++
-		    typedef Problem_XXX< TTT , DDD > PB;
-		    typedef PB::TM TM;
-		    typedef TM::Pvec Pvec;
+        = Définition d'un problème et d'un maillage
+            Cela prend cette forme :
+            \code C/C++
+                typedef Problem_XXX< TTT , DDD > PB;
+                typedef PB::TM TM;
+                typedef TM::Pvec Pvec;
 
-		    TM m;
-		    ...
-		    PB pb( m );
-		    
-		Expliquons ce code.
-		La première ligne définit un synonyme du type ( classe en C++ ) représentant votre problème. Cela allège l'écriture. TTT est en général soit le type float, soit le type double, et DDD est la dimension de votre problème (i.e. 2 ou 3). Un exemple est : typedef Problem_zebulon_thermique<double,2> PB; 
-		Ce type PB contient plein d'informations, en autre un synonyme nommé TM du type de maillage de votre problème. En effet les maillages peuvent contenir de nombreuses sortes d'éléments possédant des attributs variés, etc... et ainsi chaque problème a son type de maillage. on obitent ce type en faisant PB::TM. 
-		Le deuxième typedef définit donc un synonyme du type de votre maillage.
-		Le troisième et dernier typedef définit un synonyme du type servant à définir un point dans l'espace ( P pour point, et vec car c'est un vecteur du plan ou de l'espace).
-		Ensuite la ligne TM m; crée une instance appelée m du type TM : c'est donc un maillage, vide en l'occurence.
-		Enfin on crée une instance du problème, par la ligne PB pb( m );, associé au maillage m précédemment créé.
-		
-		Remarque : Pour créer une instance de maillage, on peut récupérer son type dans le fichier build/problem_XXX/problem.h. Ce type est de la forme :
-		\code C/C++
-		    Mesh< Mesh_carac_XXX< TTT, DDD  > >
-		Donc pour instancier un maillage m, on aurait pu faire :
-		\code C/C++
-		    Mesh< Mesh_carac_XXX< TTT, DDD  > > m;
-		Cela dit, il vaut mieux passer par PB::TM ...
-
-            = Pour accéder aux champs definis au maillage :
-                * champs globaux : m.elastic_modulus
-                * champs nodaux : m.node_list[i].dep  
-                * champs aux elements : créer un opérateur pour réaliser l'operation escomptée (exemple, affichage d'un champ particulier)
-                \code C/C++
-                    struct affich_sigma{
-                        template<class TE> void operator()(TE &e) const{
-                        cout<< e.sigma[0] << endl;  // affichage de la contrainte au point de gauss 0
-                        }
-                    };
+                TM m;
+                ...
+                PB pb( m );
+        
+            Expliquons ce code.
+            La première ligne définit un synonyme du type ( classe en C++ ) représentant votre problème. Cela allège l'écriture. TTT est en général soit le type float, soit le type double, et DDD est la dimension de votre problème (i.e. 2 ou 3). Un exemple est : typedef Problem_zebulon_thermique<double,2> PB; 
+            Ce type PB contient plein d'informations, en autre un synonyme nommé TM du type de maillage de votre problème. En effet les maillages peuvent contenir de nombreuses sortes d'éléments possédant des attributs variés, etc... et ainsi chaque problème a son type de maillage. on obitent ce type en faisant PB::TM. 
+            Le deuxième typedef définit donc un synonyme du type de votre maillage.
+            Le troisième et dernier typedef définit un synonyme du type servant à définir un point dans l'espace ( P pour point, et vec car c'est un vecteur du plan ou de l'espace).
+            Ensuite la ligne TM m; crée une instance appelée m du type TM : c'est donc un maillage, vide en l'occurence.
+            Enfin on crée une instance du problème, par la ligne PB pb( m );, associé au maillage m précédemment créé.
     
-            = Définition d'une formulation
-                \code C/C++
-                    typedef Formulation<TM,elasticity> TF;
-                    TF f(m);
-    
-                Remarque : f.m fait référence au maillage de la formulation.
+            Remarque : Pour créer une instance de maillage, on peut récupérer son type dans le fichier build/problem_XXX/problem.h. Ce type est de la forme :
+            \code C/C++
+                Mesh< Mesh_carac_XXX< TTT, DDD  > >
+            Donc pour instancier un maillage m, on aurait pu faire :
+            \code C/C++
+                Mesh< Mesh_carac_XXX< TTT, DDD  > > m;
+            Mais il vaut mieux passer par PB::TM ...
+
+        = Pour accéder ou modifier les champs definis au maillage :
+            * champs globaux : m.elastic_modulus
+            * champs nodaux : m.node_list[i].dep  
+            * champs aux elements : créer un opérateur pour réaliser l'operation escomptée (exemple, affichage d'un champ particulier)
+            \code C/C++
+                struct affich_sigma{
+                    template<class TE> void operator()(TE &e) const{
+                    cout<< e.sigma[0] << endl;  // affichage de la contrainte au point de gauss 0
+                    }
+                };
+
+        = Définition d'une formulation
+            \code C/C++
+                typedef Formulation<TM,elasticity> TF;
+                TF f(m);
+
+            Remarque : f.m fait référence au maillage de la formulation.
 
     Allez voir les pages de :
     \relates Mesh
