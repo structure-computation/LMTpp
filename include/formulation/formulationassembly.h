@@ -62,6 +62,7 @@ namespace LMT {
                     formulation(formulations.size()-1)->set_indice_noda(maf->indice_noda);
                     formulation(formulations.size()-1)->set_indice_glob(maf->indice_glob);
                     formulation(formulations.size()-1)->set_indice_elem(maf->indice_elem);
+                    formulation(formulations.size()-1)->set_f_nodal(&f_nodal);
                     return true;
                 }
             }
@@ -218,14 +219,14 @@ namespace LMT {
             if (want_f_reaction){
                 f_reaction = K_before_constraints * vectors[0] - F_before_contraints;
 
-                #ifdef IFNDEF_f_nodal_2_DM
+#ifdef IFNDEF_f_nodal_2_DM
                 for(unsigned i=0;i<formulations.size();++i){
                 MeshAndForm &maf = formulations[i];
                 for(unsigned j=0;j<maf.m->node_list.size();++j)
                     for(unsigned k=0;k<3;++k)
                         maf.m->node_list[j].f_nodal_2[k] = f_reaction[maf.local_ddl_to_global_ones][j*3+k];
                 }
-                #endif // IFNDEF_dI_DM
+#endif // IFNDEF_f_nodal_2_DM
             }
         }
         //

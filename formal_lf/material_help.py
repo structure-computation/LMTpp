@@ -257,7 +257,7 @@ def grad_sym_ext( v, var_inter, inv_jac ):
             res[ i, j ] = 0.5 * ( gr[ i, j ] + gr[ j, i ] )
     return mat_sym_to_vec_col( res )
 
-#loi de comportement anisotrope 3d
+# loi de comportement anisotrope 3d
 def hooke_anisotrope_3d(C):
     H = matrix([
             [C(0, 0), C(0, 1), C(0, 2), C(0, 3), C(0, 4), C(0, 5)],
@@ -267,6 +267,6 @@ def hooke_anisotrope_3d(C):
             [C(4, 0), C(4, 1), C(4, 2), C(4, 3), C(4, 4), C(4, 5)],
             [C(5, 0), C(5, 1), C(5, 2), C(5, 3), C(5, 4), C(5, 5)],
         ])
-#     K = H.inverse()
+    #K = H.inverse()
     K = chol_inv(H)
     return K, H

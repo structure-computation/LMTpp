@@ -2,9 +2,9 @@
 #define SOLVE_LDL_H
 
 #include "containers/mat.h"
-extern "C" {
+//extern "C" {
 #include "amd/amd.h"
-}
+//}
 #include "beep.h"
 
 class LDL_solver {

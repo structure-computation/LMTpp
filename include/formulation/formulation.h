@@ -78,7 +78,7 @@ public:
 };
 
 /**
-    Pour le choix du solveur : wont_add_nz=false implique utilisation des solveurs internes. 
+    Pour le choix du solveur : wont_add_nz=false implique utilisation des solveurs internes.
         wont_add_nz=true implique utilisation de LDL, sauf si "-DWITH_CHOLMOD -DWITH_UMFPACK" sont dans les directives de compilation est à 1 auquel cas on utilise CholMod ou UMFPACK (non symétrique)
 
     Mais qu'est-ce qu'une directive de compilation ?
@@ -117,7 +117,8 @@ public:
         indice_elem = indice_elem_internal;
         indice_noda = &indice_noda_internal;
         indice_glob = &indice_glob_internal;
-
+        f_nodal = &f_nodal_internal;
+        offset_lagrange_multipliers = 0;
     }
     virtual std::string get_name() const { return Carac::name(); }
     virtual void set_mesh( void *m_ ) { m = reinterpret_cast<TM *>( m_ ); }
@@ -312,6 +313,12 @@ public:
         m->elem_list.get_sizes(nb_elem_of_type);
         TM::TElemList::apply_static_with_n( GetNbUnknownByElement(), nb_elem_of_type, size, nb_unknowns_for_type );
 
+        //
+        offset_lagrange_multipliers = size;
+        for(int i=0;i<constraints.size();++i)
+            size += ( constraints[i].penalty_value == 0 );
+
+        // resize vectors
         for(unsigned i=0;i<vectors.size();++i) vectors[i].resize( size );
         sollicitation.resize( size );
 
@@ -615,17 +622,35 @@ public:
                     coeffs[j] = (ScalarType)coeff.subs_numerical( vss );
                 }
                 // add to vec and mat
-                for(unsigned j=0;j<coeffs.size();++j) {
-                    ScalarType C = coeffs[j] * this->max_diag * constraints[i].penalty_value;
+                if ( constraints[i].penalty_value ) { // -> penalty
+                    for(unsigned j=0;j<coeffs.size();++j) {
+                        ScalarType C = coeffs[j] * this->max_diag * constraints[i].penalty_value;
+                        if ( assemble_vec )
+                            sollicitation[num_in_fmat[j]] += C * ress;
+                        if ( assemble_mat ) {
+                            if ( MatCarac<0>::symm or MatCarac<0>::herm )
+                                for(unsigned k=0;k<=j;++k)
+                                    matrices(Number<0>())(num_in_fmat[j],num_in_fmat[k]) += C * coeffs[k];
+                            else
+                                for(unsigned k=0;k<coeffs.size();++k)
+                                    matrices(Number<0>())(num_in_fmat[j],num_in_fmat[k]) += C * coeffs[k];
+                        }
+                    }
+                } else { // -> lagrange
+                    assert( coeffs.size() == 1 );
+                    // vec
                     if ( assemble_vec )
-                        sollicitation[num_in_fmat[j]] += C * ress;
+                        sollicitation[ offset_lagrange_multipliers + i ] += ress;
+                    // mat
                     if ( assemble_mat ) {
-                        if ( MatCarac<0>::symm or MatCarac<0>::herm )
-                            for(unsigned k=0;k<=j;++k)
-                                matrices(Number<0>())(num_in_fmat[j],num_in_fmat[k]) += C * coeffs[k];
-                        else
-                            for(unsigned k=0;k<coeffs.size();++k)
-                                matrices(Number<0>())(num_in_fmat[j],num_in_fmat[k]) += C * coeffs[k];
+                        for(unsigned j=0;j<coeffs.size();++j) {
+                            if ( MatCarac<0>::symm or MatCarac<0>::herm ) {
+                                matrices(Number<0>())( offset_lagrange_multipliers + i, num_in_fmat[j] ) += coeffs[j];
+                            } else {
+                                matrices(Number<0>())( num_in_fmat[j], offset_lagrange_multipliers + i ) += coeffs[j];
+                                matrices(Number<0>())( offset_lagrange_multipliers + i, num_in_fmat[j] ) += coeffs[j];
+                            }
+                        }
                     }
                 }
             }
@@ -1105,7 +1130,8 @@ private:
     void get_factorization_matrix(const Number<0> &sym) {
         #ifndef LDL
         #ifndef WITH_UMFPACK
-        precond_matrix = matrices(Number<0>()); lu_factorize( precond_matrix );
+        precond_matrix = matrices(Number<0>());
+        lu_factorize( precond_matrix );
         #endif
         #endif
     }
@@ -1240,6 +1266,9 @@ public:
     //
     virtual void set_indice_glob(unsigned &val){
         indice_glob = &val;
+    };
+    virtual void set_f_nodal(Vec<ScalarType>* vec){
+        f_nodal = vec;
     };
     virtual void call_after_solve() {
         if (vectors_assembly== NULL){
@@ -1436,7 +1465,7 @@ public:
      * @param penalty_value constraint will be * by max(abs(diag))*penalty_value
      * @return number of constraint (usefull in order to remove it...)
      */
-    virtual unsigned add_constraint(const std::string &txt,const ScalarType &penalty_value) { return add_constraint( Constraint<Formulation>(txt,penalty_value,*this) ); }
+    virtual unsigned add_constraint(const std::string &txt,const ScalarType &penalty_value=0) { return add_constraint( Constraint<Formulation>(txt,penalty_value,*this) ); }
     virtual unsigned add_constraint(const Constraint<Formulation> &c) { constraints.push_back( c ); return constraints.size()-1; }
 
     virtual void add_sollicitation(int type_var,const std::string &val,unsigned nb_in_type,unsigned num_in_vec=0) {
@@ -1505,6 +1534,13 @@ public:
         return res;
     }
 
+    /// Ajout enrichissements numerique (pointeur vers autres formulation et table de voisinage)
+    void add_num_enr(  LMT::FormulationAncestor<ScalarType>* enr_field , Vec< typename TM::TElemList::TListPtr > table_of_neig) {
+        number_of_enrich = enrichissements.size()+1;
+        enrichissements.push_back(enr_field);
+        Neighbor_table.push_back(table_of_neig);
+    }
+
     TM *m;
     Carac carac;
 
@@ -1531,11 +1567,20 @@ public:
     std::vector<Codegen::Ex> symbols;
     Codegen::Ex time_symbol;
 
-    Vec<Formulation *> enrichissements;
+    virtual void *get_mesh() {
+        return reinterpret_cast< void * > ( m );
+    }
+
+    unsigned number_of_enrich;      /// Number of numerical enrichment
+    Vec< FormulationAncestor<ScalarType> *> enrichissements;  /// Storage of pointer to formulations used to do sub-level computations
+    Vec< Vec < typename TM::TElemList::TListPtr > > Neighbor_table ;          /// Table of neighbor-element for each elem from m_macro in m_micro
+    Vec<ScalarType>* f_nodal;
+
 private:
     Vec<unsigned> indice_elem_internal[ TM::TElemList::nb_sub_type ];
     Vec<unsigned> indice_noda_internal;
-    unsigned indice_glob_internal;
+    unsigned indice_glob_internal, offset_lagrange_multipliers;
+    Vec<ScalarType> f_nodal_internal;
 
 };
 

@@ -58,7 +58,9 @@ class VariableAncestor
     name          := ""
     tex_name      := ""
     
+# enrichissement
     enrich        := EnrichList()
+    is_numericaly_enriched   := false
     
     virtual def make_expr_subs( from, to )
         abstract
@@ -274,6 +276,10 @@ class LmtppFormulationAncestor
     F_dS := Vec[ Vec[ Op ] ]()
     
     name := ""
+
+    # is numericaly enriched (modify pre-integration of elementary matrices if != 0)
+    lst_name_num_enr := Vec[ String ]()
+    lst_elem_num_enr := Vec[ Ptr [SymbolicElementAncestor] ]() # helper
 
     virtual def formulation_init( e ) pertinence 0
         pass
@@ -498,6 +504,161 @@ class LmtppFormulationAncestor
                         }
         stream <<< "} // namespace LMT"
         
+    def write_add_elem_matrices_enriched( stream )
+        stream <<< "namespace LMT {"
+        e_enr_list := ""
+        e_enr_list_ := ""
+        for s in lst_elem_num_enr
+            e_enr_list  += ", const Element<$(s->name),DefaultBehavior,Node<$nb_dim,T_pos,ND>,ED,nim> $(child_cast(s)->name_elem)"
+            e_enr_list_ += ", $(child_cast(s)->name_elem)"
+        # operateur pour les apply
+        stream <<<<
+                    //
+                    template<class TM,class T,bool wont_add_nz,unsigned symm,class T_pos,class ND,class ED,unsigned nim, unsigned ass_mat, unsigned ass_vec>
+                    struct add_elem_matrix_0 { 
+                        const TM *m_enr_0;
+                        const Number<symm> *matrix_is_sym;
+                        const Number<ass_mat> *assemble_mat;
+                        const Number<ass_vec> *assemble_vec;
+                        const Element<$(pe->name),DefaultBehavior,Node<$nb_dim,T_pos,ND>,ED,nim> *elem;
+                        Formulation<TM,$name,DefaultBehavior,T,wont_add_nz> *f;
+                        const unsigned *indices;
+                        template<class TE, class TK, class TF> void operator()( const TE elem_enr, TK &K, TF &F) const {
+                            add_elem_matrix_enriched( *f, K, F, f->vectors, *matrix_is_sym, *assemble_mat, *assemble_vec, *elem, indices , *elem_enr);
+                        }
+                    };
+                    //
+                    template<class TM,class T,bool wont_add_nz,unsigned symm,class T_pos,class ND,class ED,unsigned nim,class ED2,unsigned nim2, unsigned ass_mat, unsigned ass_vec, unsigned num_pc, class name>
+                    struct add_skin_elem_matrix_0 { 
+                        const TM *m_enr_0;
+                        const Number<symm> *matrix_is_sym;
+                        const Number<ass_mat> *assemble_mat;
+                        const Number<ass_vec> *assemble_vec;
+                        const Element<$(pe->name),DefaultBehavior,Node<$nb_dim,T_pos,ND>,ED,nim> *elem;
+                        const Element<name,DefaultBehavior,Node<$nb_dim,T_pos,ND>,ED2,nim2> *skin_elem;
+                        const Number<num_pc> *num_child;
+                        Formulation<TM,$name,DefaultBehavior,T,wont_add_nz> *f;
+                        const unsigned *indices;
+                        template<class TE, class TK, class TF> void operator()( const TE elem_enr, TK &K, TF &F) const {
+                            add_skin_elem_matrix_enriched( *f, K, F, f->vectors, *matrix_is_sym, *assemble_mat, *assemble_vec, *elem, *skin_elem, *num_child, indices , *elem_enr);
+                        }
+                    };
+        for assemble_mat in 0 .. 2
+            for assemble_vec in 0 .. 2
+                stream <<<<
+                    // 
+                    //
+                    template<class TM,class T,bool wont_add_nz,class TK,class TF,class TV,unsigned symm,class T_pos,class ND,class ED,unsigned nim>
+                    void add_elem_matrix_enriched(
+                        Formulation<TM,$name,DefaultBehavior,T,wont_add_nz> &f,
+                        TK &K,
+                        TF &F,
+                        const TV &vectors,
+                        const Number<symm> &matrix_is_sym,
+                        const Number<$assemble_mat> &assemble_mat,
+                        const Number<$assemble_vec> &assemble_vec,
+                        const Element<$(pe->name),DefaultBehavior,Node<$nb_dim,T_pos,ND>,ED,nim> &elem,
+                        const unsigned *indices $(e_enr_list)) {
+                    $( write_mat( K_dV, F_dV, assemble_mat, assemble_vec, want_nodal=true, want_skin_elem=true, want_elem=true, want_global=true ) )
+                    }
+                    //
+                    template<class TM,class T,bool wont_add_nz,class TK,class TF,class TV,unsigned symm,class T_pos,class ND,class ED,unsigned nim>
+                    void add_elem_matrix(
+                        Formulation<TM,$name,DefaultBehavior,T,wont_add_nz> &f,
+                        TK &K,
+                        TF &F,
+                        const TV &vectors,
+                        const Number<symm> &matrix_is_sym,
+                        const Number<$assemble_mat> &assemble_mat,
+                        const Number<$assemble_vec> &assemble_vec,
+                        const Element<$(pe->name),DefaultBehavior,Node<$nb_dim,T_pos,ND>,ED,nim> &elem,
+                        const unsigned *indices) {
+                            TM *m_enr_0 = reinterpret_cast<TM *> ( f.enrichissements[0]->get_mesh() );
+                            add_elem_matrix_0<TM,T, wont_add_nz, symm, T_pos, ND, ED, nim, $assemble_mat, $assemble_vec> str_1;
+                            str_1.matrix_is_sym = &matrix_is_sym;
+                            str_1.assemble_mat = &assemble_mat;
+                            str_1.assemble_vec = &assemble_vec;
+                            str_1.elem = &elem;
+                            str_1.indices = indices;
+                            str_1.f = &f;
+                            str_1.m_enr_0 = m_enr_0;
+                            apply( f.Neighbor_table[ 0 ][ elem.number ], str_1, K, F);
+                            //apply( m_enr_0->elem_list[ f.Neighbor_table[ 0 ][ elem.number ] ], str_1, K, F);
+                        }
+                    //
+                    template<class TM,class T,bool wont_add_nz,unsigned symm,class T_pos,class ND,class ED,unsigned nim>
+                    void add_elem_matrix(
+                        Formulation<TM,$name,DefaultBehavior,T,wont_add_nz> &f,
+                        const Number<symm> &matrix_is_sym,
+                        const Number<$assemble_mat> &assemble_mat,
+                        const Number<$assemble_vec> &assemble_vec,
+                        const Element<$(pe->name),DefaultBehavior,Node<$nb_dim,T_pos,ND>,ED,nim> &elem,
+                        const unsigned *indices ) {
+                        add_elem_matrix( *f, f.matrices(Number<0>()), f.sollicitation, f.vectors, matrix_is_sym, assemble_mat, assemble_vec, elem, indices );
+                        }
+        #
+                for pc, num_pc in pe_children, 0...
+                    stream <<<<
+                        // 
+                        template<class TM,class T,bool wont_add_nz,class TK,class TF,class TV,unsigned symm,class T_pos,class ND,class ED,unsigned nim,class ED2,unsigned nim2>
+                        void add_skin_elem_matrix_enriched(
+                                Formulation<TM,$name,DefaultBehavior,T,wont_add_nz> &f,
+                                TK &K,
+                                TF &F,
+                                const TV &vectors,
+                                const Number<symm> &matrix_is_sym,
+                                const Number<$assemble_mat> &assemble_mat,
+                                const Number<$assemble_vec> &assemble_vec,
+                                const Element<$(pe->name),DefaultBehavior,Node<$nb_dim,T_pos,ND>,ED,nim> &elem,
+                                const Element<$(pc->name),DefaultBehavior,Node<$nb_dim,T_pos,ND>,ED2,nim2> &skin_elem,
+                                const Number<$num_pc> &num_child,
+                                const unsigned *indices $(e_enr_list) ) {
+                        $( write_mat( K_dS[num_pc], F_dS[num_pc], assemble_mat, assemble_vec, want_nodal=true, want_skin_elem=true, want_elem=true, want_global=true ) )
+                        }
+                    stream <<<<
+                        //
+                        template<class TM,class T,bool wont_add_nz,class TK,class TF,class TV,unsigned symm,class T_pos,class ND,class ED,unsigned nim,class ED2,unsigned nim2>
+                        void add_skin_elem_matrix(
+                            Formulation<TM,$name,DefaultBehavior,T,wont_add_nz> &f,
+                            TK &K,
+                            TF &F,
+                            const TV &vectors,
+                            const Number<symm> &matrix_is_sym,
+                            const Number<$assemble_mat> &assemble_mat,
+                            const Number<$assemble_vec> &assemble_vec,
+                            const Element<$(pe->name),DefaultBehavior,Node<$nb_dim,T_pos,ND>,ED,nim> &elem,
+                            const Element<$(pc->name),DefaultBehavior,Node<$nb_dim,T_pos,ND>,ED2,nim2> &skin_elem,
+                            const Number<$num_pc> &num_child,
+                            const unsigned *indices) {
+                                TM *m_enr_0 = reinterpret_cast<TM *> ( f.enrichissements[0]->get_mesh() );
+                                add_skin_elem_matrix_0<TM,T, wont_add_nz, symm, T_pos, ND, ED, nim, ED2, nim2, $assemble_mat, $assemble_vec, $num_pc, $(pc->name)> str_skin_1;
+                                str_skin_1.matrix_is_sym = &matrix_is_sym;
+                                str_skin_1.assemble_mat = &assemble_mat;
+                                str_skin_1.assemble_vec = &assemble_vec;
+                                str_skin_1.elem = &elem;
+                                str_skin_1.skin_elem = &skin_elem;
+                                str_skin_1.num_child = &num_child;
+                                str_skin_1.indices = indices;
+                                str_skin_1.f = &f;
+                                str_skin_1.m_enr_0 = m_enr_0;
+                                apply( f.Neighbor_table[ 0 ][ elem.number ], str_skin_1, K, F);
+                                //apply( m_enr_0->elem_list[ f.Neighbor_table[ 0 ][ elem.number ] ], str_skin_1, K, F);
+                            }
+                        // 
+                            template<class TM,class T,bool wont_add_nz,unsigned symm,class T_pos,class ND,class ED,unsigned nim,class ED2,unsigned nim2>
+                            void add_skin_elem_matrix(
+                                    Formulation<TM,$name,DefaultBehavior,T,wont_add_nz> &f,
+                                    const Number<symm> &matrix_is_sym,
+                                    const Number<$assemble_mat> &assemble_mat,
+                                    const Number<$assemble_vec> &assemble_vec,
+                                    const Element<$(pe->name),DefaultBehavior,Node<$nb_dim,T_pos,ND>,ED,nim> &elem,
+                                    const Element<$(pc->name),DefaultBehavior,Node<$nb_dim,T_pos,ND>,ED2,nim2> &skin_elem,
+                                    const Number<$num_pc> &num_child,
+                                    const unsigned *indices) {
+                                add_skin_elem_matrix( f, f.matrices(Number<0>()), f.sollicitation, f.vectors, matrix_is_sym, assemble_mat, assemble_vec, elem, skin_elem, num_child, indices );
+                            }
+        stream <<< "} // namespace LMT"
+        
     #
     def write_add_nodal_matrices( stream )
         stream <<< "namespace LMT {"
@@ -624,7 +785,7 @@ class LmtppFormulation[ dim ] inherits LmtppFormulationAncestor
         num_in_indices += has__unknowns
 
     #
-    def make_matrices( e )
+    def make_matrices( e , integration_type = "num" )
         residual := Op( formulation( e ) )
         
         # time integration
@@ -634,9 +795,16 @@ class LmtppFormulation[ dim ] inherits LmtppFormulationAncestor
             else
                 residual = integration( residual, time, left_time_integration * time_steps[1], right_time_integration * time_steps[0] )
         
+        #correction for sub-domain integration (for numerical enrichment)
+        for i_elem in lst_elem_num_enr
+            residual *= child_cast( i_elem )->point_is_inside( e.pos )
+        
         # volumic part
         volumic_part := residual.diff( dV )
-        volumic_part = e.integration( volumic_part )
+        if integration_type == "num"
+            volumic_part = e.bestial_num_integration( volumic_part , mul_by_jac = true, div_ = 5 )
+        else if integration_type == "formal"
+            volumic_part = e.integration( volumic_part )
         volumic_part += residual.diff( dE )
         _compute_KF_from_residual( volumic_part, K_dV, F_dV, unk_expr_syms.map( _0->sym ), unk_test_syms.map( _0->sym ) )
         
@@ -655,7 +823,10 @@ class LmtppFormulation[ dim ] inherits LmtppFormulationAncestor
         for pc_, num_child in pe_children, 0...
             pc := child_cast( pc_ )
             loc_surf_part := surf_part.subs( e.var_inter, e.var_inter_from_child_var_inter( sub_nvi = 1, num_child = num_child, child_var_inter = pc->var_inter ) )
-            loc_surf_part = pc->integration( loc_surf_part )
+            if integration_type == "num"
+                loc_surf_part = pc->bestial_num_integration( loc_surf_part , mul_by_jac = true, div_ = 5 )
+            else if integration_type == "formal"
+                loc_surf_part = pc->integration( loc_surf_part )
             _compute_KF_from_residual( loc_surf_part, K_dS[ num_child ], F_dS[ num_child ],
                 unk_expr_syms.map( _0->sym ), 
                 unk_test_syms.map( _0->sym )
@@ -704,6 +875,23 @@ class LmtppFormulation[ dim ] inherits LmtppFormulationAncestor
         else
             F += K * expr_symbols
         
+    # Expression of an enrichment field defined on a different mesh
+    def new_field_on_mesh(e, name = "", type_of_mesh = "Triangle" )
+        # New function defined on an auxiliary mesh
+        test := false
+        if not (name in lst_name_num_enr)
+            lst_name_num_enr.push_back(name)
+            test = true
+        cpt_num_enr := lst_name_num_enr.size
+        e_enr := new SymbolicElement[type_of_mesh, dim]()
+        e_enr->init( name_elem = "elem_enr_" + cpt_num_enr, pos_symbol_function = e_enr->std_pos_symbol_function, tex_symbol_pos = "P", node_numbers_to_node_numbers_in_parent_cpp = range(e_enr->nb_nodes).map( Triangle::corr_cpp ) )
+        # Adding to enrichment elem list of the formulation if not already there
+        if test 
+            lst_elem_num_enr.push_back(e_enr)
+        #
+        infon lst_elem_num_enr.size
+        res := e_enr->new_variable( name )
+        return res.subs(e_enr->var_inter,e_enr->var_inter_for_pos(e->pos))
 
     # helpers
     def grad    ( expr )  return pe->grad    ( expr )
@@ -1150,7 +1338,7 @@ def write_add_W_chap_F_chap( stream, e_sst, e_int )
     funcList -> [ Function1, Function2, ... ]
 ~#
 def write_legacy_lmtpp_code( pb_name, TfList, TeList, dim_function = x => x::nvi, base_rep = "build", type_list = ["double"], 
-        assume_const_jac_in_elems = true, funcList = [], h_file = "", make_latin_funcs = false )
+        assume_const_jac_in_elems = true, funcList = [], h_file = "", make_latin_funcs = false , integration_type = "formal" )
     fe_set := Map[ Int32 #~dim~#, Map[ String #~Formulation~#, Vec[ Ptr[ LmtppFormulationAncestor ] ] ] ]()
     list_sup_all_in_one := Vec[ String ]()
     list_f := Vec[ Ptr[ LmtppFormulationAncestor ] ]()
@@ -1204,7 +1392,10 @@ def write_legacy_lmtpp_code( pb_name, TfList, TeList, dim_function = x => x::nvi
             for fe, cpt_elem in fe_set_by_dim_and_name, 0...
                 if not cpt_elem
                     fe->write_add_nodal_matrices( File( rep + "/add_nodal_matrices_$name_form.$dim.h", "w" ) )
-                fe->write_add_elem_matrices( File( rep + "/add_matrices_$name_form.$dim.$(fe->pe->name).h", "w" ) )
+                if fe->lst_name_num_enr.size
+                    fe->write_add_elem_matrices_enriched( File( rep + "/add_matrices_$name_form.$dim.$(fe->pe->name).h", "w" ) )
+                else
+                    fe->write_add_elem_matrices( File( rep + "/add_matrices_$name_form.$dim.$(fe->pe->name).h", "w" ) )
     
     # latrin -> W_chap and F_chap from interfaces
     if make_latin_funcs
