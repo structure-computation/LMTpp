@@ -15,6 +15,14 @@ using namespace std;
 
 namespace LMT {
 
+template<class T>
+bool is_real( const complex<T> z, T tolerance = 16*std::numeric_limits<T>::epsilon()) {
+    if (std::abs(z.imag()) < tolerance)
+        return true;
+    else
+        return false;       
+}
+             
 /*!
     provisoire.
     retourne les racines de l'éqation x^2+a_1 x + a_2 = 0 où a1 et a2 sont des nombres complexes.
@@ -143,6 +151,76 @@ complex<T> laguerre( const Vec<T,s>& a, int m, complex<T>& x0, bool& rootFound, 
     cerr << "too many iterations in laguerre" << endl;
 }
 
+/// méthode de Newton pour un polynôme de degré 3 pour une racine simple réelle
+template <class T, int s>
+T ret_newton_degree_3_simple( const Vec<T, s>& coefs, T x0) {
+    return (coefs[2]*x0*x0+2*coefs[3]*x0*x0*x0-coefs[0])/(coefs[1]+2*coefs[2]*x0+3*coefs[3]*x0*x0);
+}
+
+/// méthode de Newton pour un polynôme de degré 3 pour une racine simple complexe
+template <class T, int s>
+complex<T> ret_newton_degree_3_simple( const Vec<T, s>& coefs, complex<T> x0) {
+    typedef complex<T> C;
+    return (C(coefs[2])*x0*x0+C(2*coefs[3])*x0*x0*x0-C(coefs[0]))/(C(coefs[1])+C(2*coefs[2])*x0+C(3*coefs[3])*x0*x0);
+}
+
+/// méthode de Newton pour un polynôme de degré 3 pour une racine double réelle
+template <class T, int s>
+T ret_newton_degree_3_double( const Vec<T, s>& coefs, T x0) {
+    return (-coefs[1]*x0+coefs[3]*x0*x0*x0-2*coefs[0])/(coefs[1]+2*coefs[2]*x0+3*coefs[3]*x0*x0);
+}
+
+/// méthode de Haley pour un polynôme de degré 3
+template <class T, int s>
+T ret_haley_degree_3( const Vec<T, s>& coefs, T x0) {
+    T x02 = x0*x0;
+    T x03 = x0*x0*x0;
+    T x04 = x02*x02;
+    T d0  = coefs[1]*coefs[1]-2*coefs[0]*coefs[2];
+    T d1  = 2*coefs[1]*coefs[2]-6*coefs[0]*coefs[3];
+    T d2  = 2*coefs[2]*coefs[2];
+    T d3  = 4*coefs[2]*coefs[3];
+    T d4  = 3*coefs[3]*coefs[3];
+    return x0 - (coefs[0]+coefs[1]*x0+coefs[2]*x02+coefs[3]*x03)*(coefs[1]+2*coefs[2]*x0+3*coefs[3]*x02)/ (d0+d1*x0+d2*x02+d3*x03+d4*x04);
+}
+
+/// méthode de Haley pour un polynôme de degré 4
+template <class T, int s>
+T ret_haley_degree_4( const Vec<T, s>& coefs, T x0) {
+    T x02 = x0*x0;
+    T x03 = x0*x0*x0;
+    T x04 = x02*x02;
+    T x05 = x02*x03;
+    T x06 = x03*x03;
+    T d0  = coefs[1]*coefs[1]-2*coefs[0]*coefs[2];
+    T d1  = 2*coefs[1]*coefs[2]-6*coefs[0]*coefs[3];
+    T d2  = 2*coefs[2]*coefs[2]-12*coefs[0]*coefs[4];
+    T d3  = -4*coefs[1]*coefs[4]+4*coefs[2]*coefs[3];
+    T d4  = 2*coefs[2]*coefs[4]+3*coefs[3]*coefs[3];
+    T d5  = 6*coefs[3]*coefs[4];
+    T d6  = 4*coefs[4]*coefs[4];
+    return x0 - (coefs[0]+coefs[1]*x0+coefs[2]*x02+coefs[3]*x03+coefs[4]*x04)*(coefs[1]+2*coefs[2]*x0+3*coefs[3]*x02+4*coefs[4]*x03) / (d0+d1*x0+d2*x02+d3*x03+d4*x04+d5*x05+d6*x06);
+}
+
+/// méthode de Haley pour un polynôme de degré 4
+template <class T, int s>
+complex<T> ret_haley_degree_4( const Vec<T, s>& coefs, complex<T> x0) {
+    typedef complex<T> C;
+    C x02 = x0*x0;
+    C x03 = x0*x0*x0;
+    C x04 = x02*x02;
+    C x05 = x02*x03;
+    C x06 = x03*x03;
+    C d0  = coefs[1]*coefs[1]-2*coefs[0]*coefs[2];
+    C d1  = 2*coefs[1]*coefs[2]-6*coefs[0]*coefs[3];
+    C d2  = 2*coefs[2]*coefs[2]-12*coefs[0]*coefs[4];
+    C d3  = -4*coefs[1]*coefs[4]+4*coefs[2]*coefs[3];
+    C d4  = 2*coefs[2]*coefs[4]+3*coefs[3]*coefs[3];
+    C d5  = 6*coefs[3]*coefs[4];
+    C d6  = 4*coefs[4]*coefs[4];
+    return x0 - (coefs[0]+coefs[1]*x0+coefs[2]*x02+coefs[3]*x03+coefs[4]*x04)*(coefs[1]+2*coefs[2]*x0+3*coefs[3]*x02+4*coefs[4]*x03) / (d0+d1*x0+d2*x02+d3*x03+d4*x04+d5*x05+d6*x06);
+}
+
 template <class T, int s>
 void ret_roots_degree_3( const Vec<T, s>& coefs, Vec< complex<T> >& res) {
     /// méthode de Cardan. Source : http://fr.wikipedia.org/wiki/Méthode_de_Cardan
@@ -160,10 +238,12 @@ void ret_roots_degree_3( const Vec<T, s>& coefs, Vec< complex<T> >& res) {
     if (std::abs(delta)<16*std::numeric_limits<T>::epsilon()) {
                 /// deux racines réelles
         T tmp2 = 3*q/p;
-        res.push_back(tmp2+del);
+        res.push_back( ret_haley_degree_3( coefs, tmp2+del ) );
         tmp2 = -0.5*tmp2+del;
+        tmp2 = ret_haley_degree_3( coefs, tmp2 );
         res.push_back(tmp2);
         res.push_back(tmp2);
+        return;
     }
     T ji = 0.5*sqrt(3);
     if (delta>=0) {
@@ -173,18 +253,18 @@ void ret_roots_degree_3( const Vec<T, s>& coefs, Vec< complex<T> >& res) {
         T v=0.5*(-q-delta);
         u = sgn(u)*std::pow(std::abs(u),1/T(3));
         v = sgn(v)*std::pow(std::abs(v),1/T(3));
-        res.push_back(u+v+del);
-        res.push_back(C(-0.5*(u+v)+del,ji*(u-v)));
-        res.push_back(C(-0.5*(u+v)+del,ji*(v-u)));
+        res.push_back( ret_newton_degree_3_simple( coefs, u+v+del ) );
+        res.push_back( ret_newton_degree_3_simple( coefs, C( -0.5*(u+v)+del, ji*(u-v) ) ) );
+        res.push_back( ret_newton_degree_3_simple( coefs, C( -0.5*(u+v)+del, ji*(v-u) ) ) );
     } else {
                 /// trois racines réelles
         C u(std::pow(C(-0.5*q,0.5*sqrt(-delta)),1/(T)3));
         C j(-0.5,ji);
-        res.push_back(2*u.real()+del);
+        res.push_back( ret_newton_degree_3_simple( coefs, 2*u.real()+del ) );
         u *= j;
-        res.push_back(2*u.real()+del);
+        res.push_back( ret_newton_degree_3_simple( coefs, 2*u.real()+del ) );
         u *= j;
-        res.push_back(2*u.real()+del);
+        res.push_back( ret_newton_degree_3_simple( coefs, 2*u.real()+del ) );
                 /// pas optimisé ...
     }
 }
@@ -214,34 +294,25 @@ void ret_roots_degree_4( const Vec<T, s>& coefs, Vec< complex<T> >& res) {
     for(i=0;i<r_disc.size();++i)
         if (is_real( r_disc[i]))
             break;
-    //PRINT(r_disc);
     C a0 = -sqrt(C(2*r_disc[i].real()-p,0));
     C b0 = -0.5*q/a0;
     Vec<C> z1 = root_of_second_degree_equation(a0,b0+r_disc[i]);
     Vec<C> z2 = root_of_second_degree_equation(-a0,r_disc[i]-b0);
-    for(int j=0;j<z1.size();++j)
-        res.push_back(z1[j]-del);
-    for(int j=0;j<z2.size();++j)
-        res.push_back(z2[j]-del);
-            /// pas optimisé ...
-//     T ma = max(std::abs(b),std::abs(c),std::abs(d),std::abs(e));
-//     ma = max( ma, std::abs(e), 1 );
-//     if (std::abs(coefs[4])/ma < 1e-2) { /// le 1e-2 n'est pas vraiment justifié
-//         bool rootFound;
-//         for(int j=0;j<res.size();++j)
-//                     //res[j] = laguerre( coefs, 4, res[j], rootFound, 10);
-//             if (is_real((res[j])))
-//                 res[j] = newton( res[j].real(), rootFound, 10);
-//     }
-
-}
-
-template<class T>
-bool is_real( const complex<T>& z, T tolerance = 16*std::numeric_limits<T>::epsilon()) {
-    if (std::abs(z.imag()) < tolerance)
-        return true;
-    else
-        return false;       
+    for(int j=0;j<z1.size();++j) {
+        C racine = z1[j]-del;
+        if ( is_real( racine ) )
+            res.push_back( ret_haley_degree_4( coefs, racine.real() ) );
+        else
+            res.push_back( ret_haley_degree_4( coefs, racine ) );
+    }
+    for(int j=0;j<z2.size();++j) {
+        C racine = z2[j]-del;
+        if ( is_real( racine ) )
+            res.push_back( ret_haley_degree_4( coefs, racine.real() ) );
+        else
+            res.push_back( ret_haley_degree_4( coefs, racine ) );
+    }
+    /// pas optimisé ...
 }
 
 /**
@@ -882,15 +953,31 @@ class Pol {
         }
         else if (taille ==5) { /// degré = 4
             Vec<C> solutions_complexes = roots();
+            T racine;
+            bool notFound;
             for( int i=0;i<solutions_complexes.size();++i)
-                if (std::abs(solutions_complexes[i].imag()) < 16*std::numeric_limits<T>::epsilon())
-                    res.push_back(solutions_complexes[i].real());
+                if (std::abs(solutions_complexes[i].imag()) < 16*std::numeric_limits<T>::epsilon()) {
+                    racine = newton( solutions_complexes[i].real(), notFound );
+                    //PRINT( notFound );
+                    if (notFound)
+                        res.push_back( solutions_complexes[i].real());
+                    else
+                        res.push_back( racine );
+                }
             } else {
             //if (coefs[0]!=0) {
                 Vec<C> solutions_complexes = roots();
+                T racine;
+                bool notFound;
                 for( int i=0;i<solutions_complexes.size();++i)
-                    if (std::abs(solutions_complexes[i].imag()) < 16*std::numeric_limits<T>::epsilon())
-                        res.push_back(solutions_complexes[i].real());      
+                    if (std::abs(solutions_complexes[i].imag()) < 16*std::numeric_limits<T>::epsilon()) {
+                        racine = newton( solutions_complexes[i].real(), notFound );
+                        //PRINT( notFound );
+                        if (notFound)
+                            res.push_back( solutions_complexes[i].real());
+                        else
+                            res.push_back( racine );
+                    }     
             /*if (abs(coefs[0]) > 16*numeric_limits<T>::epsilon()) {
                 Vec<Pol<nd,nx,T> > Sturm(*this,derivative());
                 while (Sturm[Sturm.size()-1].coefficients().size()>1)
