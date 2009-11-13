@@ -228,7 +228,7 @@ char* first_previous_doc_of( const Lexem *l) {
 
     const char blanc[4] = " \t\n";
     char* b;
-    char* c;
+    const char* c;
 
     for( b = (char*) (l->s-1); *b ; b-- )
         if (not(c = strchr(blanc,*b)))
@@ -280,7 +280,7 @@ void append_next_comment(char* start, std::deque<Comment_zone>& list_comment) {
     const char blanc[4] = " \t\n";
     Comment_zone comment_zone;
     char *b;
-    char* c;
+    const char* c;
 
     if (not(*start))
         return;
