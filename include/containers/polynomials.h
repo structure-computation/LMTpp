@@ -4,8 +4,12 @@
 #include <complex>
 using namespace std;
 
-#include <containers/vec.h>
-#include <containers/algo.h>
+// #include <containers/vec.h>
+// #include <containers/algo.h>
+#include "vec.h"
+#include "algo.h"
+
+
 
 #include "pol_dimension.h"
 #include "pol_tables.h"
@@ -99,7 +103,7 @@ complex<T> laguerre( const Vec< complex<T> >& a, int m, complex<T> x0, bool& roo
         else 
             x0 = x0 - C(frac[iter%9],0)*dx;//*x=Csub(*x,RCmul(frac[iter/MT],dx));
     }
-    cerr << "too many iterations in laguerre" << endl;
+    std::cerr << "too many iterations in laguerre" << endl;
 }
 
 template <class T, int s>
@@ -148,31 +152,42 @@ complex<T> laguerre( const Vec<T,s>& a, int m, complex<T>& x0, bool& rootFound, 
         else 
             x0 = x0 - C(frac[iter%9],0)*dx;//*x=Csub(*x,RCmul(frac[iter/MT],dx));
     }
-    cerr << "too many iterations in laguerre" << endl;
+    std::cerr << "too many iterations in laguerre" << endl;
 }
 
 /// méthode de Newton pour un polynôme de degré 3 pour une racine simple réelle
-template <class T, int s>
-T ret_newton_degree_3_simple( const Vec<T, s>& coefs, T x0) {
-    return (coefs[2]*x0*x0+2*coefs[3]*x0*x0*x0-coefs[0])/(coefs[1]+2*coefs[2]*x0+3*coefs[3]*x0*x0);
+template <class T, int s, class T2 >
+T2 ret_newton_degree_3_simple_one_step( const Vec<T, s>& coefs, T2 x0) {
+    return x0 - (coefs[0]+coefs[1]*x0+coefs[2]*x0*x0+coefs[3]*x0*x0*x0)/(coefs[1]+2*coefs[2]*x0+3*coefs[3]*x0*x0);
 }
 
-/// méthode de Newton pour un polynôme de degré 3 pour une racine simple complexe
-template <class T, int s>
-complex<T> ret_newton_degree_3_simple( const Vec<T, s>& coefs, complex<T> x0) {
-    typedef complex<T> C;
-    return (C(coefs[2])*x0*x0+C(2*coefs[3])*x0*x0*x0-C(coefs[0]))/(C(coefs[1])+C(2*coefs[2])*x0+C(3*coefs[3])*x0*x0);
+/// méthode de Newton pour un polynôme de degré 3 pour une racine simple réelle
+template <class T, int s, class T2>
+T2 ret_newton_degree_3_simple( const Vec<T, s>& coefs, T2 x0, unsigned nb_step, T tolerance = 16*std::numeric_limits<T>::epsilon()) {
+    T2 x1;
+    unsigned i = 0;
+    while( true) {
+        x1 = ret_newton_degree_3_simple_one_step( coefs, x0 );
+        //PRINT( x1 );
+        if ( std::abs( x0 - x1 ) / ( 1 + std::abs( x0 ) + std::abs( x1 ) ) < tolerance  )
+            break;
+        if ( i == nb_step )
+            break;
+        i++;
+        x0 = x1;  
+    }
+    return x1;
 }
 
 /// méthode de Newton pour un polynôme de degré 3 pour une racine double réelle
 template <class T, int s>
-T ret_newton_degree_3_double( const Vec<T, s>& coefs, T x0) {
+T ret_newton_degree_3_double_one_step( const Vec<T, s>& coefs, T x0) {
     return (-coefs[1]*x0+coefs[3]*x0*x0*x0-2*coefs[0])/(coefs[1]+2*coefs[2]*x0+3*coefs[3]*x0*x0);
 }
 
 /// méthode de Haley pour un polynôme de degré 3
 template <class T, int s>
-T ret_haley_degree_3( const Vec<T, s>& coefs, T x0) {
+T ret_haley_degree_3_one_step( const Vec<T, s>& coefs, T x0) {
     T x02 = x0*x0;
     T x03 = x0*x0*x0;
     T x04 = x02*x02;
@@ -185,40 +200,39 @@ T ret_haley_degree_3( const Vec<T, s>& coefs, T x0) {
 }
 
 /// méthode de Haley pour un polynôme de degré 4
-template <class T, int s>
-T ret_haley_degree_4( const Vec<T, s>& coefs, T x0) {
-    T x02 = x0*x0;
-    T x03 = x0*x0*x0;
-    T x04 = x02*x02;
-    T x05 = x02*x03;
-    T x06 = x03*x03;
-    T d0  = coefs[1]*coefs[1]-2*coefs[0]*coefs[2];
-    T d1  = 2*coefs[1]*coefs[2]-6*coefs[0]*coefs[3];
-    T d2  = 2*coefs[2]*coefs[2]-12*coefs[0]*coefs[4];
-    T d3  = -4*coefs[1]*coefs[4]+4*coefs[2]*coefs[3];
-    T d4  = 2*coefs[2]*coefs[4]+3*coefs[3]*coefs[3];
-    T d5  = 6*coefs[3]*coefs[4];
-    T d6  = 4*coefs[4]*coefs[4];
+template <class T, int s, class T2>
+T2 ret_haley_degree_4_one_step( const Vec<T, s>& coefs, T2 x0) {
+    T2 x02 = x0*x0;
+    T2 x03 = x0*x0*x0;
+    T2 x04 = x02*x02;
+    T2 x05 = x02*x03;
+    T2 x06 = x03*x03;
+    T2 d0  = coefs[1]*coefs[1]-2*coefs[0]*coefs[2];
+    T2 d1  = 2*coefs[1]*coefs[2]-6*coefs[0]*coefs[3];
+    T2 d2  = 2*coefs[2]*coefs[2]-12*coefs[0]*coefs[4];
+    T2 d3  = -4*coefs[1]*coefs[4]+4*coefs[2]*coefs[3];
+    T2 d4  = 2*coefs[2]*coefs[4]+3*coefs[3]*coefs[3];
+    T2 d5  = 6*coefs[3]*coefs[4];
+    T2 d6  = 4*coefs[4]*coefs[4];
     return x0 - (coefs[0]+coefs[1]*x0+coefs[2]*x02+coefs[3]*x03+coefs[4]*x04)*(coefs[1]+2*coefs[2]*x0+3*coefs[3]*x02+4*coefs[4]*x03) / (d0+d1*x0+d2*x02+d3*x03+d4*x04+d5*x05+d6*x06);
 }
 
-/// méthode de Haley pour un polynôme de degré 4
-template <class T, int s>
-complex<T> ret_haley_degree_4( const Vec<T, s>& coefs, complex<T> x0) {
-    typedef complex<T> C;
-    C x02 = x0*x0;
-    C x03 = x0*x0*x0;
-    C x04 = x02*x02;
-    C x05 = x02*x03;
-    C x06 = x03*x03;
-    C d0  = coefs[1]*coefs[1]-2*coefs[0]*coefs[2];
-    C d1  = 2*coefs[1]*coefs[2]-6*coefs[0]*coefs[3];
-    C d2  = 2*coefs[2]*coefs[2]-12*coefs[0]*coefs[4];
-    C d3  = -4*coefs[1]*coefs[4]+4*coefs[2]*coefs[3];
-    C d4  = 2*coefs[2]*coefs[4]+3*coefs[3]*coefs[3];
-    C d5  = 6*coefs[3]*coefs[4];
-    C d6  = 4*coefs[4]*coefs[4];
-    return x0 - (coefs[0]+coefs[1]*x0+coefs[2]*x02+coefs[3]*x03+coefs[4]*x04)*(coefs[1]+2*coefs[2]*x0+3*coefs[3]*x02+4*coefs[4]*x03) / (d0+d1*x0+d2*x02+d3*x03+d4*x04+d5*x05+d6*x06);
+/// méthode de Newton pour un polynôme de degré 3 pour une racine simple réelle
+template <class T, int s, class T2>
+T2 ret_haley_degree_4( const Vec<T, s>& coefs, T2 x0, unsigned nb_step, T tolerance = 16*std::numeric_limits<T>::epsilon()) {
+    T2 x1;
+    unsigned i = 0;
+    while( true) {
+        x1 = ret_haley_degree_4_one_step( coefs, x0 );
+//PRINT( x1 );
+        if ( std::abs( x0 - x1 ) / ( 1 + std::abs( x0 ) + std::abs( x1 ) ) < tolerance  )
+            break;
+        if ( i == nb_step )
+            break;
+        i++;
+        x0 = x1;  
+    }
+    return x1;
 }
 
 template <class T, int s>
@@ -226,6 +240,7 @@ void ret_roots_degree_3( const Vec<T, s>& coefs, Vec< complex<T> >& res) {
     /// méthode de Cardan. Source : http://fr.wikipedia.org/wiki/Méthode_de_Cardan
     typedef complex<T> C;
     res.resize(0);
+    unsigned nb_step = 5;
     T tmp = (T)1 / coefs[3];
     T b = coefs[2]*tmp;
     T c = coefs[1]*tmp;
@@ -234,13 +249,13 @@ void ret_roots_degree_3( const Vec<T, s>& coefs, Vec< complex<T> >& res) {
     T p = c - b*b/(T)3;;
     T q = b*(2*b*b-9*c)/(T)27 + d;
     T delta = 4/(T)27*p*p*p+q*q;
-            //cout << "delta = " << delta << endl;
+    //PRINT( b ); PRINT( c ); PRINT( d ); PRINT( p ); PRINT( q ); PRINT(  delta );
     if (std::abs(delta)<16*std::numeric_limits<T>::epsilon()) {
                 /// deux racines réelles
         T tmp2 = 3*q/p;
-        res.push_back( ret_haley_degree_3( coefs, tmp2+del ) );
+        res.push_back( ret_haley_degree_3_one_step( coefs, tmp2+del ) );
         tmp2 = -0.5*tmp2+del;
-        tmp2 = ret_haley_degree_3( coefs, tmp2 );
+        tmp2 = ret_haley_degree_3_one_step( coefs, tmp2 );
         res.push_back(tmp2);
         res.push_back(tmp2);
         return;
@@ -253,18 +268,22 @@ void ret_roots_degree_3( const Vec<T, s>& coefs, Vec< complex<T> >& res) {
         T v=0.5*(-q-delta);
         u = sgn(u)*std::pow(std::abs(u),1/T(3));
         v = sgn(v)*std::pow(std::abs(v),1/T(3));
-        res.push_back( ret_newton_degree_3_simple( coefs, u+v+del ) );
-        res.push_back( ret_newton_degree_3_simple( coefs, C( -0.5*(u+v)+del, ji*(u-v) ) ) );
-        res.push_back( ret_newton_degree_3_simple( coefs, C( -0.5*(u+v)+del, ji*(v-u) ) ) );
+        res.push_back( ret_newton_degree_3_simple( coefs, u+v+del, nb_step ) );
+        res.push_back( ret_newton_degree_3_simple( coefs, C( -0.5*(u+v)+del, ji*(u-v) ), nb_step ) );
+        res.push_back( ret_newton_degree_3_simple( coefs, C( -0.5*(u+v)+del, ji*(v-u) ), nb_step ) );
     } else {
                 /// trois racines réelles
         C u(std::pow(C(-0.5*q,0.5*sqrt(-delta)),1/(T)3));
         C j(-0.5,ji);
-        res.push_back( ret_newton_degree_3_simple( coefs, 2*u.real()+del ) );
+        //PRINT( del );
+        //PRINT( 2*u.real()+del );
+        res.push_back( ret_newton_degree_3_simple( coefs, 2*u.real()+del, nb_step ) );
         u *= j;
-        res.push_back( ret_newton_degree_3_simple( coefs, 2*u.real()+del ) );
+        //PRINT( 2*u.real()+del );
+        res.push_back( ret_newton_degree_3_simple( coefs, 2*u.real()+del, nb_step ) );
         u *= j;
-        res.push_back( ret_newton_degree_3_simple( coefs, 2*u.real()+del ) );
+        //PRINT( 2*u.real()+del );
+        res.push_back( ret_newton_degree_3_simple( coefs, 2*u.real()+del, nb_step ) );
                 /// pas optimisé ...
     }
 }
@@ -274,7 +293,8 @@ void ret_roots_degree_4( const Vec<T, s>& coefs, Vec< complex<T> >& res) {
     /// méthode de Ferrari. Source : http://fr.wikipedia.org/wiki/Méthode_de_Ferrari
     /// pas de lien avec la speakrine
     typedef complex<T> C;
-    int i;
+    C racine;
+    unsigned i, nb_step = 5;
     T tmp = 1/ (T) coefs[4];
     T b = coefs[3]*tmp;
     T c = coefs[2]*tmp;
@@ -299,18 +319,18 @@ void ret_roots_degree_4( const Vec<T, s>& coefs, Vec< complex<T> >& res) {
     Vec<C> z1 = root_of_second_degree_equation(a0,b0+r_disc[i]);
     Vec<C> z2 = root_of_second_degree_equation(-a0,r_disc[i]-b0);
     for(int j=0;j<z1.size();++j) {
-        C racine = z1[j]-del;
+        racine = z1[j]-del;
         if ( is_real( racine ) )
-            res.push_back( ret_haley_degree_4( coefs, racine.real() ) );
+            res.push_back( ret_haley_degree_4( coefs, racine.real(), nb_step ) );
         else
-            res.push_back( ret_haley_degree_4( coefs, racine ) );
+            res.push_back( ret_haley_degree_4( coefs, racine, nb_step ) );
     }
     for(int j=0;j<z2.size();++j) {
         C racine = z2[j]-del;
         if ( is_real( racine ) )
-            res.push_back( ret_haley_degree_4( coefs, racine.real() ) );
+            res.push_back( ret_haley_degree_4( coefs, racine.real(), nb_step ) );
         else
-            res.push_back( ret_haley_degree_4( coefs, racine ) );
+            res.push_back( ret_haley_degree_4( coefs, racine, nb_step ) );
     }
     /// pas optimisé ...
 }
@@ -616,7 +636,7 @@ class Pol {
     Pol<nd,nx,T> remainder( /** const */  Pol<nd,nx,T> &D) /**const*/ {
         assert(nx==1);
         if (D.is_zero()) {
-            cerr << "Warning : division by polynom zero !" << endl;
+            std::cerr << "Warning : division by polynom zero !" << endl;
             assert(0);
             return Pol<nd,nx,T>();
         }
