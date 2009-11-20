@@ -2,6 +2,11 @@
 #include <complex>
 #include <iostream>
 #include <containers/polynomials.h>
+
+#ifdef METIL_COMP_DIRECTIVE
+#pragma lib_name lapack
+#endif
+
 using namespace LMT;
 
 #define ERR_UNIT_TEST( a , b ) std::abs( (a) - (b) ) / ( 1 + std::abs( a ) + std::abs( b ) )

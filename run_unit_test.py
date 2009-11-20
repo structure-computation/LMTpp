@@ -80,6 +80,6 @@ class Tests:
         self.find_and_exec( directory )
         self.html.write('</table>\n<br>\n<br> Global Result '+ create_html_image( self.icon[ self.res ], str(self.res ))+'\n<br>' )
     
-t = Tests( "report_test__LMTpp.html", "report unit test for LMT++", ['include/'] )
+t = Tests( "report_test__LMTpp.html", "report unit test for LMT++", ['include/', '/usr/include/libxml2/'] )
 t.run( "tests" )
 

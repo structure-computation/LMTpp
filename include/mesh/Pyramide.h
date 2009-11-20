@@ -1,1 +1,1 @@
-#include "pyramide.h"
+#include "pyramid.h"
