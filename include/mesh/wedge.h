@@ -118,6 +118,15 @@ bool divide_element_using_elem_children(Element<Wedge,TN,TNG,TD,NET> &e,TM &m,TN
     return *( div_wedge_face_center + index * 32 ) >= 0;
 }
 
+template<class TV,class T>
+bool var_inter_is_inside( const Wedge &, const TV &var_inter, T tol = 0 ) {
+    return heaviside( var_inter[0] + tol ) *  
+            heaviside( var_inter[1] + tol ) * 
+            heaviside( var_inter[2] + tol ) * 
+            heaviside( 1 - var_inter[0] + tol ) *
+            heaviside( 1 - var_inter[1] + tol ) *
+            heaviside( 1 - var_inter[0] - var_inter[2] + tol );
+}
 
 };
 

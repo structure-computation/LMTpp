@@ -2,6 +2,8 @@
 #define POLYNOMIALS_H
 
 #include <complex>
+#include<iomanip>
+#include <string.h> /// memset
 using namespace std;
 
 // #include <containers/vec.h>
@@ -17,6 +19,11 @@ using namespace std;
 #include "pol_binop.h"
 #include "vec_if_static_size_is_one_and_scalar_if_not.h"
 
+extern "C" {
+    int dgeev_(char *jobvl, char *jobvr, int *n, double *a, int *lda, double *wr, double *wi, double *vl, int *ldvl, double *vr, int *ldvr, double *work, int *lwork, int *info);
+}
+                 
+                 
 namespace LMT {
 
 template<class T>
@@ -153,6 +160,47 @@ complex<T> laguerre( const Vec<T,s>& a, int m, complex<T>& x0, bool& rootFound, 
             x0 = x0 - C(frac[iter%9],0)*dx;//*x=Csub(*x,RCmul(frac[iter/MT],dx));
     }
     std::cerr << "too many iterations in laguerre" << endl;
+}
+
+/*!
+    résout le polynôme a_0 + a_1 X + a_2 X^2 + ... + a_m X^m grâce à sa matrice compagnon.
+    Si tout ce passe bien, la fonction renvoie zéro avec les racines dans root sinon elle renvoie une valeur non nul et la liste root vide.
+    
+    Rem : la valeur non nulle est le retour de la fonction DGEEV de LaPack sauf sans le cas où la valeur absolue du terme dominant est inférieure à l'epsilon du type T. 
+*/
+template <class T, int s>
+int ret_roots_by_companion_matrix( const Vec<T,s>& a, int m, Vec< complex<T> >& root, int maxIter = 100) {
+
+    root.resize( 0 );
+    if (abs ( a[m] ) < 16*std::numeric_limits<T>::epsilon())
+        return std::numeric_limits<int>::max();
+    int ldvl = 1;
+    int ldvr = 1;
+    int lwork = 16*m;
+    int lda = m;
+    int info;
+    double* zone = new double[m*m+18*m];
+    
+    double* A = zone;
+    double* wr = zone + (m*m);
+    double* wi = zone + (m*m)+m;
+    double* work = zone + (m*m)+2*m;
+    double iam = 1. / a[m];
+    
+    memset( A, 0, m*m*sizeof(double) );
+    A[m-1] = -a[0] * iam;
+    for( unsigned i=1;i<m;++i) {
+        A[m*i+i-1] = 1;
+        A[m*i+m-1] = -a[i] * iam;
+    }
+
+    dgeev_("N","N",&m,A,&lda,wr,wi,NULL,&ldvl,NULL,&ldvr,work,&lwork,&info);
+    if ( not( info )) {
+        for( unsigned i=1;i<m;++i)
+            root.push_back( std::complex<T>( wr[i], wi[i] ) );
+    }
+    delete[] zone;
+    return info;
 }
 
 /// méthode de Newton pour un polynôme de degré 3 pour une racine simple réelle
@@ -866,22 +914,10 @@ class Pol {
             ret_roots_degree_3(coefs, res );
         }
         else if (taille==5) { /// degré 4
-            T ma = max( std::abs(coefs[0]), std::abs(coefs[1]), std::abs(coefs[2]), std::abs(coefs[3]) );
-            if (std::abs(coefs[4]) > 1e-3*ma) { /// le 1e-3 n'est pas vraiment justifié
-                ret_roots_degree_4(coefs, res );
-            } else {
-                /// Ce polynôme ressemble plus à un polynôme de degré 3.
-                ret_roots_degree_3(coefs, res );
-                bool rootFound;
-                for(int j=0;j<res.size();++j)
-                    if (is_real( res[j] ) )
-                    res[j] = newton( res[j].real(), rootFound, 10);
-                    else
-                        res[j] = newton( res[j], rootFound, 10);
-//                     res[j] = laguerre( coefs, 4, res[j], rootFound, 10);
-                res.push_back(-coefs[3]/coefs[4]-res[0]-res[1]-res[2]);
-            }
+            ret_roots_degree_4(coefs, res );
         } else if (taille>5) { /// degré >= 4
+            ret_roots_by_companion_matrix( coefs, taille-1, res );
+            /*
             /// code de la fonction zroots de numerical recipes
             /// les erreurs deviennent importantes avec des racines multiples.
             int j,jj;
@@ -907,13 +943,11 @@ class Pol {
                     b = x*b+c;//b=Cadd(Cmul(x,b),c);
                 }
             }
-            //if (polish)
-            //    for (j=1;j<=m;j++)
-            //        laguerre(a,m,&roots[j],&its);
             for (j=0;j<taille;j++) 
                 ad[j] = coefs[j];
             for (j=0;j<taille-1;j++)
                 res[j] = laguerre(ad,taille-1,res[j],rootFound);
+            */
         }
         return res;
     }
@@ -976,7 +1010,7 @@ class Pol {
             T racine;
             bool notFound;
             for( int i=0;i<solutions_complexes.size();++i)
-                if (std::abs(solutions_complexes[i].imag()) < 16*std::numeric_limits<T>::epsilon()) {
+                if ( is_real( solutions_complexes[i] ) ) {
                     racine = newton( solutions_complexes[i].real(), notFound );
                     //PRINT( notFound );
                     if (notFound)
@@ -990,7 +1024,7 @@ class Pol {
                 T racine;
                 bool notFound;
                 for( int i=0;i<solutions_complexes.size();++i)
-                    if (std::abs(solutions_complexes[i].imag()) < 16*std::numeric_limits<T>::epsilon()) {
+                    if ( is_real( solutions_complexes[i] )) {
                         racine = newton( solutions_complexes[i].real(), notFound );
                         //PRINT( notFound );
                         if (notFound)
