@@ -164,6 +164,7 @@ complex<T> laguerre( const Vec<T,s>& a, int m, complex<T>& x0, bool& rootFound, 
 
 /*!
     résout le polynôme a_0 + a_1 X + a_2 X^2 + ... + a_m X^m grâce à sa matrice compagnon.
+    m est donc le degré.
     Si tout ce passe bien, la fonction renvoie zéro avec les racines dans root sinon elle renvoie une valeur non nul et la liste root vide.
     
     Rem : la valeur non nulle est le retour de la fonction DGEEV de LaPack sauf sans le cas où la valeur absolue du terme dominant est inférieure à l'epsilon du type T. 
@@ -196,7 +197,7 @@ int ret_roots_by_companion_matrix( const Vec<T,s>& a, int m, Vec< complex<T> >& 
 
     dgeev_("N","N",&m,A,&lda,wr,wi,NULL,&ldvl,NULL,&ldvr,work,&lwork,&info);
     if ( not( info )) {
-        for( unsigned i=1;i<m;++i)
+        for( unsigned i=0;i<m;++i)
             root.push_back( std::complex<T>( wr[i], wi[i] ) );
     }
     delete[] zone;
@@ -348,7 +349,7 @@ void ret_roots_degree_4( const Vec<T, s>& coefs, Vec< complex<T> >& res) {
     T c = coefs[2]*tmp;
     T d = coefs[1]*tmp;
     T e = coefs[0]*tmp;
-            //PRINT(b);PRINT(c);PRINT(d);PRINT(e);
+    PRINT(b);PRINT(c);PRINT(d);PRINT(e);
     T del = 0.25*b;
     T b2 = b*b;
     T b3 = b*b*b;
@@ -356,9 +357,10 @@ void ret_roots_degree_4( const Vec<T, s>& coefs, Vec< complex<T> >& res) {
     T q = b3/(T)8 - 0.5*b*c + d;
     T r = -3*b2*b2/(T)256 + c*del*del - del*d + e;
     Vec<T,4> disc(4*r*p-q*q,-8*r,-4*p,8);
-            //PRINT(disc.coefs);
+    PRINT(disc);
     Vec<C> r_disc;
     ret_roots_degree_3( disc, r_disc );
+    PRINT( r_disc );
     for(i=0;i<r_disc.size();++i)
         if (is_real( r_disc[i]))
             break;
@@ -914,7 +916,10 @@ class Pol {
             ret_roots_degree_3(coefs, res );
         }
         else if (taille==5) { /// degré 4
-            ret_roots_degree_4(coefs, res );
+            //ret_roots_degree_4(coefs, res );
+            ret_roots_by_companion_matrix( coefs, taille-1, res );
+            PRINT( taille );
+            PRINT( coefs );
         } else if (taille>5) { /// degré >= 4
             ret_roots_by_companion_matrix( coefs, taille-1, res );
             /*
