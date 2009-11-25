@@ -27,7 +27,7 @@ found_swig = os.system('which swig')
 SharedLibrary(
     'codegen',
     src + [ [ "codegen_wrap.cc", "codegen.i" ][found_swig==0] ],
-    SWIGFLAGS = "-python -c++",
+    SWIGFLAGS = "-python -c++ -classic",
     SHLIBPREFIX = "#_",
     SHLIBSUFFIX = ".so",
     LINKFLAGS = "-flat_namespace -undefined suppress" * mac,
