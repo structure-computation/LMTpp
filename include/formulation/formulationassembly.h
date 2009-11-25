@@ -242,10 +242,11 @@ namespace LMT {
         }
         //
         void local_update(Vec<unsigned> &TODO) {
-            for(unsigned i=0;i<formulations.size();++i)
+            for(unsigned i=0;i<formulations.size();++i){
                 if(TODO[i] == 1){
                     TODO[i] = formulation(i)->localOP_local_update();
-                    }
+                }
+            }
         }
         //
         void call_after_solve() {
