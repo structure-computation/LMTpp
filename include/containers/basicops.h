@@ -193,7 +193,7 @@ template<class T> T pos_part(const T &val) { return val * heaviside(val); }
      x if <= 0, or 0
     \keyword Mathématiques/Fonctions classiques
  */
-template<class T> T neg_part(const T &val) { return val * heaviside(- val); }
+template<class T> T neg_part(const T &val) { return val * heaviside(-val); }
 
 /*!
     true if equal 0
