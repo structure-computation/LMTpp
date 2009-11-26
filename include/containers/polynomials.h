@@ -6,8 +6,6 @@
 #include <string.h> /// memset
 using namespace std;
 
-// #include <containers/vec.h>
-// #include <containers/algo.h>
 #include "vec.h"
 #include "algo.h"
 
