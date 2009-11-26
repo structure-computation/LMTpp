@@ -24,8 +24,6 @@
 #include "containers/matcholamd.h"
 #include "containers/matumfpack.h"
 
-extern LMT::Vec<double>* F_POINTER;
-
 namespace LMT {
 
 template<class NameFormulation, int dim, class ScalarType_>

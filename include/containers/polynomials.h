@@ -6,8 +6,7 @@
 #include <string.h> /// memset
 using namespace std;
 
-// #include <containers/vec.h>
-// #include <containers/algo.h>
+
 #include "vec.h"
 #include "algo.h"
 
@@ -349,7 +348,7 @@ void ret_roots_degree_4( const Vec<T, s>& coefs, Vec< complex<T> >& res) {
     T c = coefs[2]*tmp;
     T d = coefs[1]*tmp;
     T e = coefs[0]*tmp;
-    PRINT(b);PRINT(c);PRINT(d);PRINT(e);
+    //PRINT(b);PRINT(c);PRINT(d);PRINT(e);
     T del = 0.25*b;
     T b2 = b*b;
     T b3 = b*b*b;
@@ -357,10 +356,10 @@ void ret_roots_degree_4( const Vec<T, s>& coefs, Vec< complex<T> >& res) {
     T q = b3/(T)8 - 0.5*b*c + d;
     T r = -3*b2*b2/(T)256 + c*del*del - del*d + e;
     Vec<T,4> disc(4*r*p-q*q,-8*r,-4*p,8);
-    PRINT(disc);
+    //PRINT(disc);
     Vec<C> r_disc;
     ret_roots_degree_3( disc, r_disc );
-    PRINT( r_disc );
+    //PRINT( r_disc );
     for(i=0;i<r_disc.size();++i)
         if (is_real( r_disc[i]))
             break;
@@ -913,13 +912,27 @@ class Pol {
             }
         }
         else if (taille==4) { /// degré 3
-            ret_roots_degree_3(coefs, res );
+            if ( abs(coefs[3]) > abs(coefs[0]) )
+                ret_roots_degree_3(coefs, res );
+            else {
+                Vec<T,4> icoefs;
+                icoefs[0] = coefs[4]; icoefs[1] = coefs[3]; icoefs[2] = coefs[2]; icoefs[3] = coefs[1];
+                ret_roots_degree_3( icoefs, res );
+                for( unsigned t =0; t<3; ++t)
+                    res[t] = 1. /res[t]; 
+            }
         }
         else if (taille==5) { /// degré 4
-            //ret_roots_degree_4(coefs, res );
-            ret_roots_by_companion_matrix( coefs, taille-1, res );
-            PRINT( taille );
-            PRINT( coefs );
+            if ( abs(coefs[4]) > abs(coefs[0]) )
+                ret_roots_degree_4(coefs, res );
+            else {
+                Vec<T,5> icoefs;
+                icoefs[0] = coefs[4]; icoefs[1] = coefs[3]; icoefs[2] = coefs[2]; icoefs[3] = coefs[1]; icoefs[4] = coefs[0];
+                ret_roots_degree_4( icoefs, res );
+                for( unsigned t =0; t<4; ++t)
+                    res[t] = 1. /res[t]; 
+            }
+            ///ret_roots_by_companion_matrix( coefs, taille-1, res );
         } else if (taille>5) { /// degré >= 4
             ret_roots_by_companion_matrix( coefs, taille-1, res );
             /*
