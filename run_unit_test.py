@@ -81,6 +81,11 @@ class Tests:
         self.html.write('</table>\n<br>\n<br> Global Result '+ create_html_image( self.icon[ self.res ], str(self.res ))+'\n<br>' )
     
 t = Tests( "report_test__LMTpp.html", "report unit test for LMT++", ['include/', '/usr/include/', '/usr/include/libxml2/'] )
+
+os.system( "git pull" )
 t.run( "tests" )
-exit( t.res )
+if t.res:
+    print "ok"
+else:
+    print "problem"
 
