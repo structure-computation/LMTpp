@@ -82,4 +82,5 @@ class Tests:
     
 t = Tests( "report_test__LMTpp.html", "report unit test for LMT++", ['include/', '/usr/include/', '/usr/include/libxml2/'] )
 t.run( "tests" )
+exit( t.res )
 
