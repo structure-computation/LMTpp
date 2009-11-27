@@ -176,10 +176,10 @@ int ret_roots_by_companion_matrix( const Vec<T,s>& a, int m, Vec< complex<T> >& 
         return std::numeric_limits<int>::max();
     int ldvl = 1;
     int ldvr = 1;
-    int lwork = 16*m;
+    int lwork = 20*m;
     int lda = m;
     int info;
-    double* zone = new double[m*m+18*m];
+    double* zone = new double[m*m+22*m];
     
     double* A = zone;
     double* wr = zone + (m*m);
