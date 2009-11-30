@@ -154,10 +154,10 @@ namespace LMT {
             if (assemble_mat)
             {
                 K.clear();
-                K.resize(vectors[0].size()); /// a-t-on vraiment besoin de ça? voir allocate_matrices
+                K.resize(vectors[0].size());
                 for (unsigned i=0; i<formulations.size(); ++i)
                 {
-                    formulation(i)->assemble_clean_mat(K, F, vectors, true, true); /// si on ne met pas true, true ça n'assemble rien!! /// a-t-on vraiment besoin de vectors? /// où sont les indices nodaux?
+                    formulation(i)->assemble_clean_mat(K, F, vectors, true, true); /// si on ne met pas "true, true" ça n'assemble rien!!!
                 }
                 K_before_constraints = K;
                 if (K.nb_rows() == 0)
@@ -174,7 +174,7 @@ namespace LMT {
                 F.set(T(0));
                 for (unsigned i=0; i<formulations.size(); ++i)
                 {
-                    formulation(i)->assemble_clean_mat(K, F, vectors, false, true); /// a-t-on vraiment besoin de vectors?
+                    formulation(i)->assemble_clean_mat(K, F, vectors, false, true);
                 }
                 F_before_contraints = F;
             }
