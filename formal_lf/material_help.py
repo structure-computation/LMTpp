@@ -95,6 +95,10 @@ def hooke_isotrope_th_3d(E,nu,alpha):
     sigth = mul(Kglo,vecalpha)
     return Kglo, Hglo, epsth
 
+#
+def hooke_isotrope_3d(E,nu):
+    return hooke_isotrope_th_3d(E,nu,number(0))
+
 #loi de hooke isotrope
 def hooke_isotrope_th(E,nu,dim,alpha,type_stress_2D='plane stress'):
    Kglo, Hglo, epsth= hooke_isotrope_th_3d(E,nu,alpha)
