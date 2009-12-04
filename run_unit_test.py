@@ -81,6 +81,12 @@ class Tests:
         self.html.write('</table>\n<br>\n<br> Global Result '+ create_html_image( self.icon[ self.res ], str(self.res ))+'\n<br>' )
     
 t = Tests( "report_test__LMTpp.html", "report unit test for LMT++", ['include/', '/usr/include/', '/usr/include/libxml2/'] )
+
+os.system( "git pull" )
 t.run( "tests" )
-exit( t.res )
+if t.res:
+    print " Unit tests Succeeded :-)  so i do git pull at romanee"
+    os.system( "ssh pasquier@romanee;cd /u/multi/lmtpp;git pull" )
+else:
+    print " Unit tests has failed :-( ... "
 
