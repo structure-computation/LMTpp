@@ -671,7 +671,6 @@ public:
                 if ( assemble_vec )
                     sollicitation[num_in_fmat] += ress;
             }
-
         }
     }
     /// ...
@@ -804,7 +803,7 @@ public:
         assemble_constraints(K, F, vectors_,  M, assemble_mat, assemble_vec);
         // sollicitations
         assemble_sollicitations(K, F, vectors_,  assemble_mat, assemble_vec);
-    };
+    }
     ///
     bool solve_system_(AbsScalarType iterative_criterium, const Number<1> &n_wont_add_nz, const Number<0> &sym) {
         //matrices(Number<0>()).get_factorization();
