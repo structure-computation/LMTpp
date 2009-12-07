@@ -782,11 +782,6 @@ void Documentation::generate_index() {
     stmp2 = "Kdevelop";
     list_titre_of_webpage.push_back(stmp2);
     pageWeb<< "<td><a href=\"" << "webpage_"+stmp <<".html\"> " << stmp2 << " </a></td>" << std::endl; // CODAGE en DUR   -> pas bien
-    stmp = "gdb";
-    list_webpage.push_back(stmp);
-    stmp2 = "GDB";
-    list_titre_of_webpage.push_back(stmp2);
-    pageWeb<< "<td><a href=\"" << "webpage_"+stmp <<".html\"> " << stmp2 << " </a></td>" << std::endl; // CODAGE en DUR   -> pas bien
     pageWeb<< " </tr>"  << std::endl;
 
     pageWeb<< " <tr>"  << std::endl;
@@ -796,7 +791,11 @@ void Documentation::generate_index() {
     list_titre_of_webpage.push_back(stmp2);
     pageWeb<< "<td><a href=\"" << "webpage_"+stmp <<".html\"> " << stmp2 << " </a></td>" << std::endl; // CODAGE en DUR   -> pas bien
     pageWeb<< "<td></td>" << std::endl;
-    pageWeb<< "<td></td>" << std::endl;
+    stmp = "gdb";
+    list_webpage.push_back(stmp);
+    stmp2 = "GDB";
+    list_titre_of_webpage.push_back(stmp2);
+    pageWeb<< "<td><a href=\"" << "webpage_"+stmp <<".html\"> " << stmp2 << " </a></td>" << std::endl; // CODAGE en DUR   -> pas bien
     pageWeb<< " </tr>"  << std::endl;
 
     pageWeb<< " <tr>"  << std::endl;

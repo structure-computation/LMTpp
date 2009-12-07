@@ -13,6 +13,8 @@
 #define LMT_matinvsparse_HEADER
 
 #include "boolean.h"
+#include "vec.h"
+#include "mat.h"
 
 namespace LMT {
 

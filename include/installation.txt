@@ -11,11 +11,14 @@
 
         Pour générer certaines parties de la libriaire LMT++ et aussi pour compiler vos propres programmes, vous aurez besoin d'installer quelques programmes et en-têtes :
             * g++ et oui en faisant sur ubuntu sudo apt-get install g++
-            * python (commande : sudo apt-get install python ou python2.4 ).
-            * scons (commande : sudo apt-get install scons ).
-            * swig  (commande : sudo apt-get install swig ).
-            * readline (commande : sudo apt-get install libreadline5-dev ).
-            * en-têtes python (commande : sudo apt-get install python-dev ).
+            * python ( commande : sudo apt-get install python ou python2.4 ),
+            * scons ( commande : sudo apt-get install scons ),
+            * swig  ( commande : sudo apt-get install swig ),
+            * readline ( commande : sudo apt-get install libreadline5-dev ),
+            * en-têtes python ( commande : sudo apt-get install python-dev ),
+            * Qt4 ( commande : sudo apt-get install libqtcore4 libqtgui4 libqt4-dev qt4-doc devrait suffire ),
+            * zlib pour compresser (  commande : sudo apt-get install libzip1 libzip-dev )
+            * fftw pour la transfrmée de Fourier rapide ( sudo apt-get install fftw3-3 fftw3-dev
             
         Pour exécuter (fonction de vos besoins)
             * libg2c0 (commande : sudo apt-get install libg2c0 ).
@@ -32,7 +35,7 @@
 
     = Dépendance et compilation du générateur de documentation
         
-        le générateur de documentation dépend de boost partie fichier système ( commande : sudo apt-get install libboost-filesystem-dev devrait suffire).
+        le générateur de documentation dépend de boost partie fichier système ( commande : sudo apt-get install libboost-filesystem1.40.0 libboost-filesystem1.40-dev devrait suffire). Si le paquet n'est pas trouvé tapez en ligne de commande apt-cache search boost-filesystem pour connaître le nom exact du paquet.
         Ensuite pour la générer, allez dans doc/ et lancer make ( commande : cd doc/& make ).
         La page d'acceuil est doc/html/index.html .
 
