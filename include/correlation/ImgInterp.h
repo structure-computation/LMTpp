@@ -68,11 +68,11 @@ struct ImgInterpBilinearKernel {
     template<class T,class Img,class PT,int dim>
     Vec<T,dim> grad( StructForType<T>, const Img &f, Vec<PT,dim> p ) const {
         Vec<T,dim> res;
-        const double d = 1.0;
-        //const double d = 0.5;
+        //const double d = 1.0;
+        const double d = 0.05;
         for(int i=0;i<dim;++i)
-            res[ i ] = ( f( Vec<PT,dim>( p + static_dirac_vec<dim>( d, i ) ) ) - f( p ) ) / d;
-            //res[ i ] = ( f( Vec<PT,dim>( p + static_dirac_vec<dim>( d, i ) ) ) - f( p - static_dirac_vec<dim>( d, i ) ) ) / ( 2 * d );
+            //res[ i ] = ( f( Vec<PT,dim>( p + static_dirac_vec<dim>( d, i ) ) ) - f( p ) ) / d;
+            res[ i ] = ( f( Vec<PT,dim>( p + static_dirac_vec<dim>( d, i ) ) ) - f( p - static_dirac_vec<dim>( d, i ) ) ) / ( 2 * d );
         return res;
     }
 };
