@@ -169,8 +169,7 @@ complex<T> laguerre( const Vec<T,s>& a, int m, complex<T>& x0, bool& rootFound, 
     Rem : la valeur non nulle est le retour de la fonction DGEEV de LaPack sauf sans le cas où la valeur absolue du terme dominant est inférieure à l'epsilon du type T. 
 */
 template <class T, int s>
-int ret_roots_by_companion_matrix( const Vec<T,s>& a, int m, Vec< complex<T> >& root, int maxIter = 100) {
-
+int ret_roots_by_companion_matrix( const Vec<T,s>& a, int m, Vec< complex<T> >& root) {
     root.resize( 0 );
     if (abs ( a[m] ) < 16*std::numeric_limits<T>::epsilon())
         return std::numeric_limits<int>::max();
@@ -203,6 +202,189 @@ int ret_roots_by_companion_matrix( const Vec<T,s>& a, int m, Vec< complex<T> >& 
     return info;
 }
 
+/*!
+function [defl,pz,p1z,p2z,error] = mc02afy(p,dx); 
+Evaluate a polynomial, its first derivative 
+and half of its second derivatives at a point. 
+Compute error in polynomial value at point. 
+
+    Entrées :
+        n : degré du polynôme
+
+*/
+/*
+template <class T, int s>
+void mc02afy( const Vec<T,s>& a, int n, T dx, Vec<T>& defl, T* pz, T* p1z, T* p2z ) {
+    T deps = 1.11e-16; 
+    T absx = abs(dx); 
+    defl = zeros(1,length(p)); 
+    dv = p(1); 
+    w = 0;
+    defl(1) = p(1); 
+    defl(2) = p(2) + dx*defl(1); 
+    for i=3:n+1 
+    w = dv + dx*w; 
+    dv = defl(i-1) + dx*dv; 
+    defl(i) = p(i) + dx*defl(i-1); 
+    end 
+    error = (2/3)*abs(p(1)); 
+    for i = 2:n+1 
+    error = abs(defl(i)) + absx*error; 
+    end 
+    error = 16*deps*abs(defl(n+1))+3*absx*error; 
+    pz = polyval(p, dx); 
+    df = (n:-1:1).*p(1:end-1); 
+    d2f = (n-1:-1:1).*df(1:end-1); 
+    p1z = polyval(df, dx); 
+    p2z = 0.5*polyval(d2f,dx);
+}
+*/
+/*!
+    A MATLAB version of the NAG subroutine C02AFZ 
+    for computing the zeros of polynomials using 
+    Laguerre’s method.
+
+    résout le polynôme a_0 + a_1 X + a_2 X^2 + ... + a_m X^m grâce à sa matrice compagnon.
+    m est donc le degré.
+
+*/
+/*
+template <class T, int s>
+void ret_roots_by_Matlab_code( const Vec<T,s>& a, int ndeg, Vec< complex<T> >& root)  {
+    Vec<T,s> DU = f; 
+    int n = ndeg; 
+    int N = n+1; 
+    int ihalf = 0; 
+    int ispir=0; 
+    int iter = 0; 
+    int cauchy = 0; ///Region containing smallest zero has not been computed 
+    while (n>2) {
+        T small = 1e-3; T bigone=1.0001;
+        T smlone=0.99999; T rconst=1.445;
+        T onepqt=1.25; T gama=1; T theta=2;
+        if (not(cauchy)) { 
+            T rtn = sqrt(n);
+            T G = exp((log(abs(DU(N)))-log(abs(DU(1))))/n+small);
+            T cr = DU(N-1)/DU(N);
+            ctemp = 2*DU(N-2)/(n*(n-1));
+            cf2 = DU(N-1)*2/n;
+            tmp = roots([ctemp cf2 DU(N)]);
+            c = tmp(2); cf1 = tmp(1);
+            cr = cr*(n-2)/n;
+            ctemp = cr*c + n-1;
+            cdiro = c/ctemp;
+            abdiro = abs(cdiro);
+            G = min(G,bigone*min(abs(c),rtn*abdiro)); G = G(1);
+            R = G; 
+            S = bigone*G; ///upper bound for magnitude of smallest zero 
+            deflat(1:N) = abs(DU(1:N));
+            while (R < S) { 
+                T = real(deflat(1));
+                S = 0;
+                for(int i=1; i<n; ++i) { 
+                    S = R*S + T;
+                    T = R*T + real(deflat(i+1)); 
+                }
+                S = R*S + T;
+                T = (R*T - real(deflat(N)))/S;
+                S = R;
+                R = R - T; 
+            }
+            cauchy = 1;
+            upperb = min(rconst*n*R, G);
+            lowerb = smlone*S;
+        } 
+        T fejer = upperb;
+        G = upperb;
+        T cdir = cdiro; T abdir = abdiro; T ratio = abdir/G;
+        dzn = 0;
+        fn = abs(DU(N));
+        f0 = fn;
+        spiral = 0; startd=0; contin= 1;
+        while (contin) { 
+            iter = iter + 1;
+            if (ratio > theta) { 
+                if (startd) {
+                    ihalf = ihalf + 1;
+                    abscl = abscl*0.5;
+                    cl = cl*0.5;
+                    dx = abs(real(dzn))+abs(imag(dzn));
+                    if (dx+abscl ~= dx) 
+                        dzn = dz0 + cl; 
+                    else { 
+                        if (fn >= err*n^2) 
+                            std::cerr << "Contact Wankere \n **Unlikely Failure" << std::endl; 
+                        contin = 0;
+                    }
+                } else {
+                    ispir = ispir + 1; 
+                    if (spiral) 
+                        c = cspir*dzn; 
+                    else { 
+                        spiral = 1; 
+                        cspir = -onepqt/n + 1i; 
+                        abscl = lowerb/n^2; 
+                        ctemp = cdir/abdir; 
+                        c = ctemp*lowerb; 
+                    }
+                    dzn = c; 
+                } 
+            } else { 
+                startd = 1; 
+                if ((ratio > gama) and (startd or spiral or (lowerb <= G))) { 
+                    ratio = gama/ratio; 
+                    cdir = cdir*ratio; 
+                    abdir = abdir*ratio; 
+                }
+                G = fejer; cl = cdir; 
+                abscl = abdir; 
+                f0 = fn; dz0 = dzn;
+                dzn = dz0 + cl; 
+            }
+            [deflat,cf,cf1,cf2,err] = mc02afy(DU,dzn); 
+            fn = abs(cf); 
+            if (cf == 0) /// A root has been found 
+                contin = 0; /// Exit iteration loop 
+            else 
+                if ((fn >= f0) and startd) 
+                    ratio = theta*bigone; 
+            else { 
+                cr = cf1/cf;
+                cf2 = cf2*2/((n-1)*n);
+                ctemp = cf1*2/n;
+                tmp = roots([cf2 ctemp cf]);
+                c = tmp(2);
+                cf1 = tmp(1);
+                fejer = abs(c);
+                cr = cr*(n-2)/n;
+                ctemp = c*cr + n-1;
+                cdir = c/ctemp;
+                abdir = abs(cdir);
+                ratio = abdir/G;
+                fejer = min(rtn*abdir, fejer);
+                dx = abs(real(dzn))+abs(imag(dzn));
+                if (abdir <= 1e-15)
+                    contin = 0; 
+            } 
+        } 
+        DU = deflat; 
+        z(n) = dzn;
+        N = N-1; n = n-1; 
+        cauchy = 0;
+    } 
+    if (n==2) { 
+        tmp = roots([DU(1) DU(2) DU(3)]); 
+        z(1) = tmp(1); 
+        z(2) = tmp(2); 
+    } else { 
+        if (n==1) 
+            z(1) = -DU(2)/DU(1); 
+        else 
+            R = Inf; 
+    }
+    z = z(:);
+}
+*/
 /// méthode de Newton pour un polynôme de degré 3 pour une racine simple réelle
 template <class T, int s, class T2 >
 T2 ret_newton_degree_3_simple_one_step( const Vec<T, s>& coefs, T2 x0) {

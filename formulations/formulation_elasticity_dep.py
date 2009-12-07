@@ -8,6 +8,8 @@ density = Variable( interpolation='global', default_value='7800', unit='kg/m^3' 
 dep = Variable( unknown=True, nb_dim=[dim], nb_der=0, default_value='0.0', unit='m' )
 lum = Variable( default_value='1.0', unit='1' )
 
+dep_sv = Variable( nb_dim=[dim], default_value='0.0', unit='m' )
+
 temperature = Variable( default_value='0.0', unit='K' )
 
 sigma = Variable( interpolation='der_nodal', default_value='0', nb_dim=[dim*(dim+1)/2], unit='N/m^2' )

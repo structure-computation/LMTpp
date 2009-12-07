@@ -75,19 +75,19 @@ def simplification_projection(P,dim):
    elif dim==1:
       return 1
 
-#loi de hooke isotrope 3d direct
+#loi de hooke isotrope direct 3d
 def hooke_direct_isotrope_3d(E,nu):
     l = E * nu / (1. + nu) / (1. - 2. * nu)
     m = E / (1. + nu)
-    Kglo = matrix([
-            [l+m, l  , l  , 0., 0., 0.],
-            [l  , l+m, l  , 0., 0., 0.],
-            [l  , l  , l+m, 0., 0., 0.],
-            [0. , 0. , 0. , m , 0., 0.],
-            [0. , 0. , 0. , 0., m , 0.],
-            [0. , 0. , 0. , 0., 0., m ],
+    H = matrix([
+            [l+m,  l ,  l , 0., 0., 0.],
+            [ l , l+m,  l , 0., 0., 0.],
+            [ l ,  l , l+m, 0., 0., 0.],
+            [ 0.,  0.,  0., m , 0., 0.],
+            [ 0.,  0.,  0., 0., m , 0.],
+            [ 0.,  0.,  0., 0., 0., m ],
             ])
-    return Kglo
+    return H
 
 #loi de hooke isotrope 3d
 def hooke_isotrope_th_3d(E,nu,alpha):

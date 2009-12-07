@@ -67,7 +67,13 @@ struct DicCPU {
             for(unsigned i=1;i<TE::nb_nodes;++i) MA = max( MA, P[ i ] ); // hum
             f.load_if_necessary( MI, MA );
             g.load_if_necessary( MI, MA );
-            
+
+            double sum_abs_diff_fg  = 0;
+            double sum_sq_diff_fg   = 0;
+            double nb_covered_pixel = 0;
+            double min_f = +std::numeric_limits<T>::max();
+            double max_f = -std::numeric_limits<T>::max();
+
             if ( dic.div_pixel < 0 ) {
                 dic_elem_matrix_( e, f, g, dic, MI, MA, StructForType<T>(), mutex );
             } else {
@@ -107,8 +113,8 @@ struct DicCPU {
                         Vec<T,dim> PG( use_g_as_ref ? p.pos : DO );
                         T val_f = f( PF );
                         T val_g = val_grey * g( PG );
-                        Vec<T,dim> grad = 0.5 * ( f.grad( PF ) + val_grey * g.grad( PG ) );
-                        
+//                        Vec<T,dim> grad = 0.5 * ( f.grad( PF ) + val_grey * g.grad( PG ) );
+                        Vec<T,dim> grad = f.grad( PF );
                         T diff_fg = val_f - val_g;
                         
                         
@@ -117,7 +123,7 @@ struct DicCPU {
                         for(unsigned i=0;i<p.pos.size();++i)
                             sum_non_integer += ( abs( round( p.pos[i] ) - p.pos[i] ) > 0.1 );
                         T imp = dic.importance_pixelotomy[ sum_non_integer ];
-                        
+
                         // dU part
                         Vec<T,dim*TE::nb_nodes> sham_grad;
                         for(unsigned i=0,n=0;i<TE::nb_nodes;++i)
@@ -127,10 +133,10 @@ struct DicCPU {
                         //
                         for(unsigned i=0;i<TE::nb_nodes;++i) {
                             for(unsigned d=0;d<dim;++d) {
-                                F[ i * ( dim + 1 ) + d ] += imp * sham_grad[ i * dim + d ] * diff_fg;
+                                F[ i * ( dim + want_lum_corr ) + d ] += imp * sham_grad[ i * dim + d ] * diff_fg;
                                 for(unsigned j=0;j<TE::nb_nodes;++j)
                                     for(unsigned c=0;c<dim;++c)
-                                        M( i * ( dim + 1 ) + d, j * ( dim + 1 ) + c ) += imp * sham_grad[ i * dim + d ] * sham_grad[ j * dim + c ];
+                                        M( i * ( dim + want_lum_corr ) + d, j * ( dim + want_lum_corr ) + c ) += imp * sham_grad[ i * dim + d ] * sham_grad[ j * dim + c ];
                             }
                         }
                         
@@ -147,17 +153,24 @@ struct DicCPU {
                         }
                         
                         // residual
-                        dic.sum_abs_diff_fg += abs( diff_fg );
-                        dic.sum_sq_diff_fg  += pow( diff_fg, 2 );
-                        dic.nb_covered_pixel++;
-                        dic.min_f = min( dic.min_f, val_f );
-                        dic.max_f = max( dic.min_f, val_f );
+                        sum_abs_diff_fg += abs( diff_fg );
+                        sum_sq_diff_fg  += pow( diff_fg, 2 );
+                        nb_covered_pixel++;
+                        min_f = min( min_f, val_f );
+                        max_f = max( max_f, val_f );
                     }
                 }
                 
                 
                 //
                 mutex.lock();
+
+                dic.sum_abs_diff_fg  += sum_abs_diff_fg;
+                dic.sum_sq_diff_fg   += sum_sq_diff_fg;
+                dic.nb_covered_pixel += nb_covered_pixel;
+                dic.min_f = min( dic.min_f, min_f );
+                dic.max_f = max( dic.max_f, max_f );
+
                 if ( want_mat ) {
                     for(unsigned i=0,n=0;i<TE::nb_nodes;++i)
                         for(unsigned d=0;d<dim+want_lum_corr;++d,++n)
@@ -166,12 +179,13 @@ struct DicCPU {
                                     if ( n <= m )
                                         dic.M( dic.indice_noda[ e.node(i)->number ] + d, dic.indice_noda[ e.node(j)->number ] + c ) += M( n, m );
                 }
-                //
+
                 if ( want_vec ) {
                     for(unsigned i=0,n=0;i<TE::nb_nodes;++i)
                         for(unsigned d=0;d<dim+want_lum_corr;++d,++n)
                             dic.F[ dic.indice_noda[ e.node(i)->number ] + d ] += F[ n ];
                 }
+
                 mutex.unlock();
             }
         }
@@ -224,7 +238,6 @@ struct DicCPU {
     void assemble( const TIMGf &f, const TIMGg &g, const TM &m, const NAME_VAR_DEPL &name_var_depl, const NAME_VAR_GREY &name_var_grey, bool want_mat = true, bool want_vec = true, int resol_level = 0 ) {
         unsigned nb_ddl = ( dim + want_lum_corr ) * m.node_list.size();
         if ( want_mat ) {
-            // indice_noda_grey = range( m.node_list.size() );
             indice_noda = ( dim + want_lum_corr ) * symamd( m );
             
             M.clear();
@@ -235,17 +248,11 @@ struct DicCPU {
             F.set( 0.0 );
         }
         
-        sum_abs_diff_fg = 0;
-        sum_sq_diff_fg  = 0;
+        sum_abs_diff_fg  = 0;
+        sum_sq_diff_fg   = 0;
         nb_covered_pixel = 0;
-        min_f = 0;
-        max_f = std::numeric_limits<T>::max();
-        
-        //         //
-        //         Assemble<NAME_VAR_DEPL,NAME_VAR_GREY,true> ass_1;
-        //         ass_1.want_mat = want_mat;
-        //         ass_1.want_vec = want_vec;
-        //         apply_mt( m.elem_list, nb_threads_for_assembly, ass_1, *this, f, g );
+        min_f = +std::numeric_limits<T>::max();
+        max_f = -std::numeric_limits<T>::max();
         
         //
         Assemble<NAME_VAR_DEPL,NAME_VAR_GREY,false> ass_2;
@@ -309,10 +316,13 @@ struct DicCPU {
             double time_old = time_of_day_in_sec();
             
             assemble( f, g, m, name_var_depl, name_var_grey, want_mat, want_vec, resol_level );
+
             // simple break conditions
-            if ( want_vec == false or ( min_norm_inf_dU == 0 and min_norm_2_dU == 0 ) )
+            if ( want_vec == false or ( min_norm_inf_dU == 0 and min_norm_2_dU == 0 ) ) {
+                std::cout << "iter=" << cpt_iter << " adimensioned_residual=" << adimensioned_residual << std::endl;
                 break;
-            
+            }
+
             solve_linear_system();
             
             if ( display_iteration_time ) {
@@ -329,9 +339,9 @@ struct DicCPU {
             history_norm_inf_dU.push_back( norm_inf( dU ) );
             history_norm_2_dU  .push_back( norm_2  ( dU ) );
             if ( display_norm_inf_dU )
-                std::cout << "iter=" << cpt_iter << " norm_inf(dU)=" << norm_inf( dU ) << std::endl;
+                std::cout << "iter=" << cpt_iter << " norm_inf(dU)=" << norm_inf( dU ) << " adimensioned_residual=" << adimensioned_residual << std::endl;
             if ( display_norm_2_dU )
-                std::cout << "iter=" << cpt_iter << " norm_2(dU)=" << norm_2( dU ) << std::endl;
+                std::cout << "iter=" << cpt_iter << " norm_2(dU)="   << norm_2( dU )   << " adimensioned_residual=" << adimensioned_residual << std::endl;
             
             // convergence
             if ( norm_inf( dU ) <= min_norm_inf_dU or norm_2( dU ) <= min_norm_2_dU )
@@ -386,8 +396,10 @@ struct DicCPU {
             }
             assemble( f, g, m, name_var_depl, name_var_grey, want_mat, want_vec, resol_level );
             // simple break conditions
-            if ( want_vec == false or ( min_norm_inf_dU == 0 and min_norm_2_dU == 0 ) )
+            if ( want_vec == false or ( min_norm_inf_dU == 0 and min_norm_2_dU == 0 ) ) {
+                std::cout << "iter=" << cpt_iter << " adimensioned_residual=" << adimensioned_residual << std::endl;
                 break;
+            }
             
             // search_dir
             Pvec C = center( m );
@@ -438,7 +450,7 @@ struct DicCPU {
             history_norm_inf_dU.push_back( norm_inf( dU_red ) );
             history_norm_2_dU  .push_back( norm_2  ( dU_red ) );
             if ( display_norm_inf_dU or display_norm_2_dU )
-                std::cout << "iter=" << cpt_iter << " dU_red=" << dU_red << std::endl;
+                std::cout << "iter=" << cpt_iter << " dU_red=" << dU_red << " adimensioned_residual=" << adimensioned_residual << std::endl;
             
             if ( display_iteration_time ) {
                 double time_cur = time_of_day_in_sec();
@@ -490,10 +502,10 @@ struct DicCPU {
     
     ///
     template<class TIMGf,class TIMGg,class TM,class NAME_VAR_DEPL,class NAME_VAR_GREY>
-    void display_residual_img( const TIMGf &f, const TIMGg &g, TM &m, const NAME_VAR_DEPL &name_var_depl, const NAME_VAR_GREY &name_var_grey ) {
+    void display_residual_img( const TIMGf &f, const TIMGg &g, TM &m, const NAME_VAR_DEPL &name_var_depl, const NAME_VAR_GREY &name_var_grey, bool want_high_contrast = true, const std::string &filename = "residual.png" ) {
         ImgInterp<T,dim> r;
         get_residual_img( f, g, m, name_var_depl, name_var_grey, r );
-        r.display( true );
+        r.display( want_high_contrast, filename );
     }
     
     template<class NAME_VAR>
