@@ -93,7 +93,7 @@ namespace LMT {
         //
         T get_time() const { return time; }
         //
-        void set_time( T ts ) { time = ts; }/// Attention, pilotage a faire soi-meme si utilisation de cette fonction....
+        void set_time( T ts ) { time = ts; } /// Attention, pilotage a faire soi-meme si utilisation de cette fonction....
         //
         void shift(int nb=1) {
             while (nb--) {
@@ -139,13 +139,18 @@ namespace LMT {
             K_CL.clear();
             K_CL.resize( pos.size() * nb_ddl_per_node );
             F.resize( pos.size() * nb_ddl_per_node, T(0) );
-            F_before_contraints.resize( pos.size() * nb_ddl_per_node, T(0) );
+            F_before_constraints.resize( pos.size() * nb_ddl_per_node, T(0) );
             F_CL.resize( pos.size() * nb_ddl_per_node, T(0) );
             f_reaction.resize( pos.size() * nb_ddl_per_node, T(0) );
             f_reaction.set(T(0));
             f_nodal.resize( pos.size() * nb_ddl_per_node, 0.0 );
-            X_before_contraints.resize( pos.size() * nb_ddl_per_node, T(0) );
-            diag_before_contraints.resize( pos.size() * nb_ddl_per_node, T(0) );
+            X_before_constraints.resize( pos.size() * nb_ddl_per_node, T(0) );
+            diag_before_constraints.resize( pos.size() * nb_ddl_per_node, T(0) );
+        }
+        //
+        void assemble_clean_mat (bool assemble_mat=true, bool assemble_vec=true)
+        {
+            assemble_clean_mat (K, F, assemble_mat, assemble_vec);
         }
         //
         void assemble_clean_mat (Mat<T, Sym<>, SparseLine<> > &K, Vec<T> &F, bool assemble_mat=true, bool assemble_vec=true)
@@ -154,10 +159,10 @@ namespace LMT {
             if (assemble_mat)
             {
                 K.clear();
-                K.resize(vectors[0].size()); /// a-t-on vraiment besoin de ça? voir allocate_matrices
+                K.resize(vectors[0].size());
                 for (unsigned i=0; i<formulations.size(); ++i)
                 {
-                    formulation(i)->assemble_clean_mat(K, F, vectors, true, true); /// si on ne met pas true, true ça n'assemble rien!! /// a-t-on vraiment besoin de vectors? /// où sont les indices nodaux?
+                    formulation(i)->assemble_clean_mat(K, F, vectors, true, true); /// si on ne met pas true, true ça n'assemble rien!!
                 }
                 K_before_constraints = K;
                 if (K.nb_rows() == 0)
@@ -174,10 +179,15 @@ namespace LMT {
                 F.set(T(0));
                 for (unsigned i=0; i<formulations.size(); ++i)
                 {
-                    formulation(i)->assemble_clean_mat(K, F, vectors, false, true); /// a-t-on vraiment besoin de vectors?
+                    formulation(i)->assemble_clean_mat(K, F, vectors, false, true);
                 }
-                F_before_contraints = F;
+                F_before_constraints = F;
             }
+        }
+        //
+        void assemble_sollicitations (bool assemble_mat=true, bool assemble_vec=true)
+        {
+            assemble_sollicitations(K, F, assemble_mat, assemble_vec);
         }
         //
         void assemble_sollicitations (Mat<T, Sym<>, SparseLine<> > &K, Vec<T> &F, bool assemble_mat=true, bool assemble_vec=true)
@@ -186,6 +196,11 @@ namespace LMT {
             {
                 formulation(i)->assemble_sollicitations(K, F, vectors, assemble_mat, assemble_vec);
             }
+        }
+        //
+        void assemble_constraints (bool assemble_mat=true, bool assemble_vec=true)
+        {
+            assemble_constraints(K, F, M, assemble_mat, assemble_vec);
         }
         //
         void assemble_constraints (Mat<T, Sym<>, SparseLine<> > &K, Vec<T> &F, T M, bool assemble_mat=true, bool assemble_vec=true)
@@ -198,9 +213,9 @@ namespace LMT {
         //
         void assemble (bool assemble_mat=true, bool assemble_vec=true)
         {
-            assemble_clean_mat(K, F, assemble_mat, assemble_vec);
-            assemble_sollicitations(K, F, assemble_mat, assemble_vec);
-            assemble_constraints(K, F, M, assemble_mat, assemble_vec);
+            assemble_clean_mat(assemble_mat, assemble_vec);
+            assemble_sollicitations(assemble_mat, assemble_vec);
+            assemble_constraints(assemble_mat, assemble_vec);
         }
         //
         void assemble_u() {
@@ -217,7 +232,7 @@ namespace LMT {
             for(unsigned i=0;i<formulations.size();++i)
                 formulation(i)->get_result() = vectors[0][ formulations[i].local_ddl_to_global_ones ];
             if (want_f_reaction){
-                f_reaction = K_before_constraints * vectors[0] - F_before_contraints;
+                f_reaction = K_before_constraints * vectors[0] - F_before_constraints;
 
 #ifdef IFNDEF_f_nodal_2_DM
                 for(unsigned i=0;i<formulations.size();++i){
@@ -434,7 +449,7 @@ namespace LMT {
         //
         Vec<Splitted<MeshAndForm,2> > formulations;
         Mat<T,Sym<>,SparseLine<> > K, K_before_constraints, K_CL;
-        Vec<T> F, F_before_contraints, F_CL, diag_before_contraints, X_before_contraints, f_reaction;
+        Vec<T> F, F_before_constraints, F_CL, diag_before_constraints, X_before_constraints, f_reaction;
         Vec<double> f_nodal;
         unsigned nb_vectors;
         Vec<Vec<T> > vectors;
