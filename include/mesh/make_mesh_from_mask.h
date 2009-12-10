@@ -131,7 +131,6 @@ struct MakeMeshFromMask {
         }
         
         // nodes
-        Vec<int> ref; ref.resize( nb_points, -1 );
         Vec<Vec<unsigned,3> > connectivity;
         for (int yi=0;yi<nb_y-1;++yi) {
             for (int xi=0;xi<nb_x-1;++xi) {
@@ -164,22 +163,30 @@ struct MakeMeshFromMask {
                         ok &= ( out[indices[i]] == false );
                     //
                     if ( ok ) {
-                        for (int i=0;i<3;++i) {
-                            if ( ref[ indices[i] ] == -1 ) {
-                                ref[indices[i]] = m.node_list.size();
-                                m.add_node( pos[ indices[i] ] );
-                            }
-                            indices[i] = ref[indices[i]];
-                        }
+                        // -> test
+
+                        //
                         connectivity.push_back( indices );
                     }
                 }
             }
         }
         
+        // valid nodes
+        Vec<int> node_valid; node_valid.resize( pos.size(), -1 );
+        for(int i=0;i<connectivity.size();++i) {
+            for(int j=0;j<3;++j) {
+                int num_node = connectivity[i][j];
+                if ( node_valid[ num_node ] == -1 ) {
+                    node_valid[ num_node ] = m.node_list.size();
+                    m.add_node( pos[ num_node ] );
+                }
+            }
+        }
+
         // elements
         for(unsigned i=0;i<connectivity.size();++i)
-            m.add_element( Triangle(), DefaultBehavior(), connectivity[i].ptr() );
+            m.add_element( Triangle(), DefaultBehavior(), node_valid[ connectivity[i][0] ], node_valid[ connectivity[i][1] ], node_valid[ connectivity[i][2] ] );
     }
 
     struct RemoveElementIfExt {
