@@ -62,6 +62,42 @@ Vec<complex<T> > root_of_second_degree_equation(complex<T> a1, complex<T> a2) {
     return res;
 }
 
+/*!
+    provisoire.
+    retourne les racines de l'éqation x^2+a_1 x + a_2 = 0 où a1 et a2 sont des nombres complexes.
+ */
+template <class T>
+Vec<complex<T> > root_of_second_degree_equation( T a1, T a2) {
+    typedef complex<T> C;
+    T delta;
+    Vec<C> res;
+    C n1,n2;
+
+    delta = a1*a1-4*a2;
+    if (std::abs(delta) < 16*std::numeric_limits<T>::epsilon()) {
+        res.push_back(-0.5*a1);
+        return res;
+    }
+    if (delta > 0 ) {
+        delta = sqrt(delta);
+        n1 = a1-delta;
+        n2 = a1+delta;
+    } else {
+        C te(0, sqrt(-delta));
+        n1 = a1-te;
+        n2 = a1+te;        
+    }
+    /// objectif du if suivant est de gérer le cas ou delta et proche de a1 ou -a1.
+    if (abs(n1)<abs(n2)) {
+        res.push_back(C(-2*a2)/n2);
+        res.push_back(-0.5*n2);
+    } else {
+        res.push_back(C(-2*a2)/n1);
+        res.push_back(-0.5*n1);        
+    }
+    return res;
+}
+
 /// code extrait de numerical recipes (un peu modifié)
 template <class T>
 complex<T> laguerre( const Vec< complex<T> >& a, int m, complex<T> x0, bool& rootFound, int maxIter = 100) {
@@ -385,6 +421,139 @@ void ret_roots_by_Matlab_code( const Vec<T,s>& a, int ndeg, Vec< complex<T> >& r
     z = z(:);
 }
 */
+
+/*!
+Entrées :
+ * coefs sont les coefficients du polynôme; coefs[0] est le terme constant.
+ * degree es le degré du polynôme ( degree <= si + 1 ).
+ * initial[0] = m doit être une approximation du milieu de deux racines.
+ * initial[1] = e doit être une approximation de la demi-différence des racines.
+        i.e. r1 = m - e
+             r2 = m + e
+Sortie :
+ * res[0] est une approximation du milieu de deux racines.
+ * res[1] est une approximation de la demi-différence des racines.
+ * rootFound indique si l'algorithme a réussi ou échoué.
+
+ */
+template<class T, int si>
+Vec<T,2> bairstow( const Vec<T, si>& coefs, int degree,  Vec<T,2> initial, bool& rootFound, int maxIter = 30, T prec = 1e-4 ) {
+    T b, ba, baa, S, Sa, Saa, Saaa, s, p, R0, dp, err, err_r, dete, ds;
+    int c;
+    bool problem = false;
+
+    s = initial[0];
+    p = initial[1];
+    err_r = numeric_limits<T>::max();
+    //PRINT( s ); PRINT( p ); 
+
+    for( c = 0; c < maxIter; ++c ) {
+        baa = coefs[degree];
+        ba  = coefs[degree-1] + s * baa;
+        Saa = 0;
+        Sa  = coefs[degree];
+        for( int i = 2 ; i<= degree; ++i ) {
+            b = coefs[degree-i] + s * ba - p * baa;
+            S = ba + s * Sa - p * Saa;
+            baa = ba;
+            ba  = b;
+            Saaa = Saa; 
+            Saa  = Sa;
+            Sa   = S;
+        }
+        R0  = ba - s * baa; /// terme constant du reste
+        /// R1  = baa == coeff du x du reste
+        dete = Sa * Saaa - pow( Saa, 2 ); /// déterminant de la dérivée
+        if (dete == 0) { problem = true; break; }
+        dete = 1 / dete;
+        ds = ( baa * Saa - ba * Saaa ) * dete; /// Newton-Raphson
+        dp = ( baa * Sa  - ba * Saa ) * dete;
+        s += ds;
+        p += dp;
+        //PRINT( c+1 );PRINT( ds ); PRINT( dp ); PRINT( baa ); PRINT( R0 ); 
+        err = (abs(ds) + abs(dp))/ ( (s==0) + (p==0) + abs(s) + abs(p) );
+        err_r = abs(baa) + abs(R0); 
+        if ((err  < prec ) or (err_r < 2 * numeric_limits<T>::epsilon() )) 
+            break;
+    }
+    if ((problem) or (c == maxIter)) {
+        rootFound = false;
+        return initial;
+    }
+    rootFound = true;
+    return Vec<T,2>(s,p); 
+}
+
+/*!
+Entrées :
+    * coefs sont les coefficients du polynôme; coefs[0] est le terme constant.
+    * degree es le degré du polynôme ( degree <= si + 1 ).
+    * initial[0] = m doit être une approximation du milieu de deux racines.
+    * initial[1] = e doit être une approximation de la demi-différence des racines.
+        i.e. r1 = m - e
+             r2 = m + e
+Sortie :
+    * res[0] est une approximation du milieu de deux racines.
+    * res[1] est une approximation de la demi-différence des racines.
+    * rootFound indique si l'algorithme a réussi ou échoué.
+
+*/
+template<class T, int si>
+Vec<T,2> bairstow_modified( const Vec<T, si>& coefs, int degree,  Vec<T,2> initial, bool& rootFound, int maxIter = 30, T prec = 1e-4 ) {
+     T b, ba, baa, S, Sa, Saa, E, Ea, Eaa, e, dete, ds, de, s, p, R0, J21, J22, err, err_r;
+     int c;
+     bool problem = false;
+    
+     s = 2*initial[0];
+     e = initial[1]; //e = pow(0.5*initial[1],2);
+     err_r = numeric_limits<T>::max();
+     //PRINT( s ); PRINT( e ); 
+     
+     for( c = 0; c < maxIter; ++c ) {
+        p = 0.25*s*s-e*e; //p = 0.25*s*s-e;
+        baa = 0;
+        ba  = coefs[degree];
+        Saa = 0;
+        Sa  = 0;
+        Eaa = 0;
+        Ea  = 0;
+        for( int i = 1 ; i<= degree; ++i ) {
+            b = coefs[degree-i] + s * ba - p * baa;
+            S = ba -0.5 * s * baa + s * Sa - p * Saa;
+            E = 2 * e * baa + s * Ea - p * Eaa; //E = baa + s * Ea - p * Eaa;
+            baa = ba;
+            ba  = b;
+            Saa = Sa;
+            Sa  = S;
+            Eaa = Ea;
+            Ea  = E; 
+        }
+        J21 = Sa - s * Saa - baa;
+        J22 = Ea - s * Eaa;
+        R0  = ba - s * baa; /// terme constant du reste
+        /// R1  = baa == coeff du x du reste
+        dete = Saa * J22 - Eaa * J21; /// déterminant de la dérivée
+        if (dete == 0) { problem = true; break; }
+        dete = 1 / dete;
+        ds = (  J22 * baa - Eaa * R0 ) * dete; /// Newton-Raphson
+        de = ( -J21 * baa + Saa * R0 ) * dete;
+        s -= ds;
+        e -= de;
+        //PRINT( c+1 );PRINT( ds ); PRINT( de ); PRINT( baa ); PRINT( R0 ); 
+        err = (abs(ds) + abs(de))/ ( (s==0) + (e==0) + abs(s) + abs(e) );
+        err_r = abs(baa) + abs(R0); 
+        if ((err  < prec ) or (err_r < 2 * numeric_limits<T>::epsilon() )) 
+            break;
+    }
+    if ((problem) or (c == maxIter)) {
+        rootFound = false;
+        return initial;
+    }
+    rootFound = true;
+    /*return Vec<T,2>(0.5*s,sqrt(abs(e))); */return Vec<T,2>(0.5*s,e); 
+}
+
+
 /// méthode de Newton pour un polynôme de degré 3 pour une racine simple réelle
 template <class T, int s, class T2 >
 T2 ret_newton_degree_3_simple_one_step( const Vec<T, s>& coefs, T2 x0) {
@@ -471,7 +640,8 @@ void ret_roots_degree_3( const Vec<T, s>& coefs, Vec< complex<T> >& res) {
     typedef complex<T> C;
     res.resize(0);
     unsigned nb_step = 5;
-    T tmp = (T)1 / coefs[3];
+
+    T tmp = T(1) / coefs[3];
     T b = coefs[2]*tmp;
     T c = coefs[1]*tmp;
     T d = coefs[0]*tmp;
@@ -479,7 +649,7 @@ void ret_roots_degree_3( const Vec<T, s>& coefs, Vec< complex<T> >& res) {
     T p = c - b*b/(T)3;;
     T q = b*(2*b*b-9*c)/(T)27 + d;
     T delta = 4/(T)27*p*p*p+q*q;
-    //PRINT( b ); PRINT( c ); PRINT( d ); PRINT( p ); PRINT( q ); PRINT(  delta );
+    //PRINT( tmp ); PRINT( b ); PRINT( c ); PRINT( d ); PRINT( p ); PRINT( q ); PRINT(  delta );
     if (std::abs(delta)<16*std::numeric_limits<T>::epsilon()) {
                 /// deux racines réelles
         T tmp2 = 3*q/p;
@@ -1098,7 +1268,7 @@ class Pol {
                 ret_roots_degree_3(coefs, res );
             else {
                 Vec<T,4> icoefs;
-                icoefs[0] = coefs[4]; icoefs[1] = coefs[3]; icoefs[2] = coefs[2]; icoefs[3] = coefs[1];
+                icoefs[0] = coefs[3]; icoefs[1] = coefs[2]; icoefs[2] = coefs[1]; icoefs[3] = coefs[0];
                 ret_roots_degree_3( icoefs, res );
                 for( unsigned t =0; t<3; ++t)
                     res[t] = 1. /res[t]; 
@@ -1117,6 +1287,23 @@ class Pol {
             ///ret_roots_by_companion_matrix( coefs, taille-1, res );
         } else if (taille>5) { /// degré >= 4
             ret_roots_by_companion_matrix( coefs, taille-1, res );
+            /**
+            Pour certaines racines voisines, on obtient des solutions complexes proches de l'axe des abscisses.
+            Dans ce cas, on lance un baristow pour essayer de corriger le tir
+            */
+            for ( int t = 0; t< res.size(); ++t ) {
+                T absimage = abs(res[t].imag());
+                if (not(is_real(res[t])) and (absimage < 1e-4)) {
+                    bool rootFound;
+                    //Vec<double,2> resbair = bairstow( coefs, taille-1, Vec<T,2>(2 * res[t].real(), 0.01*absimage ), rootFound, 30, 1e-15/*2*std::numeric_limits<T>::epsilon()*/ );
+                    Vec<double,2> resbair = bairstow_modified( coefs, taille-1, Vec<T,2>( res[t].real(), absimage ), rootFound, 30, 2*std::numeric_limits<T>::epsilon() );
+                    if (rootFound) {
+                        res[t]   = resbair[0]-resbair[1];
+                        res[t+1] = resbair[0]+resbair[1];
+                    }
+                    t++; /// on passe la racine conjuguée qui suivait
+                }
+            }
             /*
             /// code de la fonction zroots de numerical recipes
             /// les erreurs deviennent importantes avec des racines multiples.
