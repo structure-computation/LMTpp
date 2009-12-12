@@ -36,7 +36,7 @@ interpolation["nodal"] = X0*(2*X0-1) * val[0] + \
                          4*X0*X2 * val[6] + \
                          4*X0*X3 * val[7] + \
                          4*X1*X3     * val[8] + \
-                         4*X2*X3     * val[9]  
+                         4*X2*X3     * val[9]
 
 # ni = (1-var_inter[0]-var_inter[1]-var_inter[2]) * var_inter[0] * var_inter[1] * var_inter[2] * 256
 # interpolation["bubble"] = (1-var_inter[0]-var_inter[1]-var_inter[2]) * (1-ni) * val[0] + \
@@ -47,7 +47,12 @@ interpolation["nodal"] = X0*(2*X0-1) * val[0] + \
 
 interpolation["der_nodal"] = val[0]
 
-
+a,b,c = 1.0/4.0, 1.0/6.0, 1.0/2.0;
+interpolation["gauss"] = (var_inter[0]-b)*(var_inter[0]-c)/((a-b)*(a-c)) *  (var_inter[1]-b)*(var_inter[1]-c)/((a-b)*(a-c)) * (var_inter[2]-b)*(var_inter[2]-c)/((a-b)*(a-c)) * val[0] + \
+                         (var_inter[0]-a)*(var_inter[0]-c)/((b-a)*(b-c)) *  (var_inter[1]-a)*(var_inter[1]-c)/((b-a)*(b-c)) * (var_inter[2]-a)*(var_inter[2]-c)/((b-a)*(b-c)) * val[1] + \
+                         (var_inter[0]-a)*(var_inter[0]-b)/((c-a)*(c-b)) *  (var_inter[1]-a)*(var_inter[1]-c)/((b-a)*(b-c)) * (var_inter[2]-a)*(var_inter[2]-c)/((b-a)*(b-c)) * val[2] + \
+                         (var_inter[0]-a)*(var_inter[0]-c)/((b-a)*(b-c)) *  (var_inter[1]-a)*(var_inter[1]-b)/((c-a)*(c-b)) * (var_inter[2]-a)*(var_inter[2]-c)/((b-a)*(b-c)) * val[3] + \
+                         (var_inter[0]-a)*(var_inter[0]-c)/((b-a)*(b-c)) *  (var_inter[1]-a)*(var_inter[1]-c)/((b-a)*(b-c)) * (var_inter[2]-a)*(var_inter[2]-b)/((c-a)*(c-b)) * val[4]
 
 quality = 1
 
@@ -87,21 +92,21 @@ p1 = 8.0/405.0; p2 = 5.0/567.0;
 w1 = (2665.0-14.0*sqrt(15.0))/226800.0; w2 = (2665.0+14.0*sqrt(15.0))/226800.0;
 gauss_points[5] = [
   ( p1, { var_inter[0] : a, var_inter[1] : a, var_inter[2] : a } ),
-      
+
   ( w1, { var_inter[0] : b1, var_inter[1] : b1, var_inter[2] : b1 } ),
   ( w1, { var_inter[0] : c1, var_inter[1] : b1, var_inter[2] : b1 } ),
   ( w1, { var_inter[0] : b1, var_inter[1] : c1, var_inter[2] : b1 } ),
   ( w1, { var_inter[0] : b1, var_inter[1] : b1, var_inter[2] : c1 } ),
-      
+
   ( w2, { var_inter[0] : b2, var_inter[1] : b2, var_inter[2] : b2 } ),
   ( w2, { var_inter[0] : c2, var_inter[1] : b2, var_inter[2] : b2 } ),
   ( w2, { var_inter[0] : b2, var_inter[1] : c2, var_inter[2] : b2 } ),
   ( w2, { var_inter[0] : b2, var_inter[1] : b2, var_inter[2] : c2 } ),
-      
+
   ( p2, { var_inter[0] : d, var_inter[1] : d, var_inter[2] : e } ),
   ( p2, { var_inter[0] : d, var_inter[1] : e, var_inter[2] : d } ),
   ( p2, { var_inter[0] : e, var_inter[1] : d, var_inter[2] : d } ),
-      
+
   ( p2, { var_inter[0] : e, var_inter[1] : e, var_inter[2] : d } ),
   ( p2, { var_inter[0] : e, var_inter[1] : d, var_inter[2] : e } ),
   ( p2, { var_inter[0] : d, var_inter[1] : e, var_inter[2] : e } ),
