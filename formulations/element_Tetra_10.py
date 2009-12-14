@@ -21,6 +21,7 @@ children = [
 ]
 
 permutation = [ 0, 1, 3, 2, 4, 8, 7, 6, 5, 9  ]
+degree = 2
 
 X0 = 1 - var_inter[0] - var_inter[1] - var_inter[2]
 X1 = var_inter[0]

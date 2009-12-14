@@ -153,7 +153,7 @@ public:
     ScalarType default_iterative_criterium; /// iterative_criterium for conjugate gradient, GMRES, ... based on norm_inf( delta solution )
     AbsScalarType non_linear_iterative_criterium; /// iterative_criterium for newton-raphson iterations, ... based on norm_inf( delta solution )
     Vec<AbsScalarType> non_linear_iterative_criterium_vec; /// iterative_criterium for newton-raphson iterations, ... based on norm_inf( delta solution )
-    unsigned order_integration_when_integration_totale;
+    // unsigned order_integration_when_integration_totale;
     bool assume_skin_not_needed;
     unsigned max_non_linear_iteration;
     ScalarType premul_KUn_in_sollicitation;

@@ -29,6 +29,7 @@ children = [
 ]
 
 permutation = [ 0, 3, 2, 1, 4, 7, 6, 5 ]
+degree = 2
 
 tmp_authorized_permutations = [
     [0,1,2,3,4,5,6,7],

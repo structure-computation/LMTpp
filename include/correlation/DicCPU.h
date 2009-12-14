@@ -113,8 +113,7 @@ struct DicCPU {
                         Vec<T,dim> PG( use_g_as_ref ? p.pos : DO );
                         T val_f = f( PF );
                         T val_g = val_grey * g( PG );
-//                        Vec<T,dim> grad = 0.5 * ( f.grad( PF ) + val_grey * g.grad( PG ) );
-                        Vec<T,dim> grad = f.grad( PF );
+                        Vec<T,dim> grad = 0.5 * ( f.grad( PF ) + val_grey * g.grad( PG ) );
                         T diff_fg = val_f - val_g;
                         
                         

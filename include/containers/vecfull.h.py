@@ -14,7 +14,7 @@ for static_size in [1,0]:
     constructors = ''
     if static_size:
         constructors  = '    Vec() {}\n'
-        constructors += '    Vec(const TT &v) { for(unsigned i=0;i<(unsigned)static_size;val[i++]=v); } /// copy val in all elements of *this\n'
+        constructors += '    template<class T2> Vec(const T2 &v) { for(unsigned i=0;i<(unsigned)static_size;val[i++]=v); } /// copy val in all elements of *this\n'
         constructors += '    void get_data_from_ptr(const TT *v) { for(unsigned i=0;i<(unsigned)static_size;++i) val[i]=v[i]; } /// copy val in all elements of *this\n'
         for i in range(1,17):
             args = string.join( [ 'const TT &v%i'%k for k in range(i) ], ',')

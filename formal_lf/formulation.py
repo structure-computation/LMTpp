@@ -58,7 +58,7 @@ class Formulation:
       "auto_contact" : False,
       "matrix_will_be_definite_positive" : True,
       "Interpolations" : std_interpolations,
-      "order_integration" : 2, # utilisé uniquement si integration_total = false
+      "order_integration" : -1, # utilisé uniquement si integration_total = false
       "IS_contact_formulation" : IS_contact_formulation,
       "elem_contact_formulation" : elem_contact_formulation,
       'hooke_isotrope_th' : hooke_isotrope_th,
@@ -286,7 +286,6 @@ class Formulation:
     f.write( '  static const bool friction_coeff_is_a_nodal_variable = 0;\n' )
     f.write( '  static const unsigned offset_of_pos_unknown=3;\n' )
     f.write( '  static const unsigned pos_is_an_unknown = %s;\n'%(['false','true'][self.pos.unknown]) )
-    f.write( '  static const unsigned order_integration = %i;\n' % self.order_integration )
     
     #
     f.write( '  static const unsigned nb_der_var = %i;\n' % len(der_var_syms) )
@@ -371,7 +370,7 @@ class Formulation:
     return res,res_test,indices,offsets,unk_subs
 
 
-  def play_with_dS_part( self, dS_part, e, res, dS_normal ):
+  def play_with_dS_part( self, dS_part, e, res, dS_normal, order_integration ):
     """ play with children elements (*dS) """
     unknown_symbols, unknown_test_symbols, indices, offsets, unk_subs = self.get_unknown_symbols(True)
     for cpt_child in range(len( e.children )):
@@ -389,7 +388,7 @@ class Formulation:
                 subs_vi[dS_normal[i]] = n[i]
         local_ds = local_ds.subs(EM(subs_vi))
         
-        local_ds = c.integration( local_ds, self.order_integration ).subs(EM(unk_subs))
+        local_ds = c.integration( local_ds, order_integration ).subs(EM(unk_subs))
 
         # pos substitution
         subs_pos = {}
@@ -489,9 +488,13 @@ class Formulation:
     form_after_solve_5 = self.apply_on_elements_after_solve_5(unk_subs)
     form_after_solve_6 = self.apply_on_elements_after_solve_6(unk_subs)
     
+    order_integration = self.order_integration
+    if order_integration < 0:
+        order_integration = 2 * ( e.degree - 1 )
+
     # surfacic part
     dS_part = form.diff(dS)
-    self.play_with_dS_part( dS_part, e, res, dS_normal )
+    self.play_with_dS_part( dS_part, e, res, dS_normal, order_integration )
     #sys.stderr.write( form.to_string() )
 
     form = form.subs( dS, 0 )
@@ -512,13 +515,13 @@ class Formulation:
     #print "dV"
     unknown_symbols, unknown_test_symbols, indices, offsets, unk_subs = self.get_unknown_symbols(True)
     if self.integration_totale:
-        dV_part = e.integration( form.diff(dV), self.order_integration ).subs(EM(unk_subs))
+        dV_part = e.integration( form.diff(dV), order_integration ).subs(EM(unk_subs))
     else:
         dV_part = form.diff(dV).subs(EM(unk_subs)) * e.det_jacobian() * self.ponderation
     form = form.subs( dV, 0 )
 
     # dSubInter
-    dV_part += e.sub_integration( form.diff(dSubInter), self.order_integration ).subs(EM(unk_subs))
+    dV_part += e.sub_integration( form.diff(dSubInter), order_integration ).subs(EM(unk_subs))
 
     #
     #nb_pts_gauss_if_not_integration_totale = 1.0
@@ -542,7 +545,7 @@ class Formulation:
     for n,i in old_glob.items(): globals()[n] = i
     res['unknown_symbols'] = unknown_symbols
     
-    return res, [form_after_solve,form_after_solve_2,form_after_solve_3,form_after_solve_4,form_after_solve_5,form_after_solve_6]
+    return res, [form_after_solve,form_after_solve_2,form_after_solve_3,form_after_solve_4,form_after_solve_5,form_after_solve_6], order_integration
   
   def contact_pos_is(self,imp_node):
     if self.dim==3:   angle = norm(self.is_rotation.expr)
@@ -631,7 +634,7 @@ class Formulation:
     res['unknown_symbols'] = unknown_symbols
     return res
 
-  def write_carac_for_element(self,f,e,matrices,contact_matrices,form_after_solve):
+  def write_carac_for_element(self,f,e,matrices,contact_matrices,form_after_solve,order_integration):
     
     asm_apply_name  = []
     for i in range(6):
@@ -661,6 +664,7 @@ class Formulation:
     # TODO...
     non_linear_system = not self.assume_linear_system
     f.write( '        static const bool linear = %s;\n'%( ['true','false'][ non_linear_system ] ) )
+    f.write( '        static const unsigned order_integration = %i;\n' % order_integration )
     f.write( '    };\n' )
     
     has_not_V_matrix = matrices['V']['M'].is_null() and matrices['V']['V'].is_null()
@@ -829,7 +833,6 @@ class Formulation:
     self.asmout  = asmout
     if isinstance(e,str): e = Element(e,self.dim)
     self.e = e
-    f.write( '/// @author hugo LECLERC\n' )
     ifndef = self.name.upper()
     for i in range(len(ifndef)):
       if ifndef[i]=='/' or ifndef[i]==',' or ifndef[i]=='.': ifndef = ifndef[:i]+'_'+ifndef[i+1:]
@@ -846,7 +849,7 @@ class Formulation:
     
     # elem and nodal matrices
     self.set_variable_expressions(e)
-    matrices,form_after_solve = self.calculate_matrices(e)
+    matrices,form_after_solve,order_integration = self.calculate_matrices(e)
 
     contact_matrices = self.calculate_contact_matrices(e)
 
@@ -856,7 +859,7 @@ class Formulation:
             der_var_syms += l[3]
     
     self.write_carac( f, e, matrices, contact_matrices, name_der_vars, der_var_syms )
-    self.write_carac_for_element( f, e, matrices, contact_matrices, form_after_solve )
+    self.write_carac_for_element( f, e, matrices, contact_matrices, form_after_solve, order_integration )
 
     # main matrices
     for T in ['V','N']+['S'+str(i) for i in range(len(e.children))]:

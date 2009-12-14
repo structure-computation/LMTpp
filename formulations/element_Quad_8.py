@@ -24,7 +24,9 @@ permutation = [ 0, 7, 3, 6, 2, 5, 1, 4 ]
 
 X = 2 * var_inter[0] - 1
 Y = 2 * var_inter[1] - 1
-                     
+
+degree = 3
+
 interpolation["nodal"] =   1./4. *  (1-X) * (1-Y)* (-X - Y -1) * val[0] + \
                            1./4. *  (1+X) * (1-Y)* ( X - Y -1) * val[1] + \
                            1./4. *  (1+X) * (1+Y)* ( X + Y -1) * val[2] + \

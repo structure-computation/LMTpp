@@ -17,6 +17,7 @@ children = [
 ]
 
 permutation = [ 3, 2, 1, 0, 7, 6, 5, 4 ]
+degree = 4
 
 n11  =                (1.0/3.0-var_inter[0]) * (2.0/3.0-var_inter[0]) * (1-var_inter[0]) * 4.5
 n12  = var_inter[0]                          * (2.0/3.0-var_inter[0]) * (1-var_inter[0]) * 13.5

@@ -9,6 +9,7 @@ interpolation['bubble'] = val[0]
 interpolation["der_nodal"] = val[0]
 
 quality = number(1)
+degree = 0
 
 # ---------------------------------------------------------------------------------
 def local_coordinates(point):
