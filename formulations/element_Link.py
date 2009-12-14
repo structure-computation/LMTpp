@@ -11,6 +11,7 @@ interpolation['nodal'] = (1-var_inter[0])*val[0] + var_inter[0]*val[1]
 interpolation['bubble'] = (1-var_inter[0])*(1-ni)*val[0]+var_inter[0]*(1-ni)*val[1] + ni*val[2];
 
 quality = 1
+degree = 2
 
 # ---------------------------------------------------------------------------------
 def local_coordinates(point):

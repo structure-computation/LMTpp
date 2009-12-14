@@ -105,7 +105,7 @@ public:
         time_steps = AbsScalarType(1e40);
         initial_condition_initialized = false;
         user_want_pierre_precond = true;
-        this->order_integration_when_integration_totale = Carac::order_integration;
+        //this->order_integration_when_integration_totale = Carac::order_integration;
 
         time_symbol = Codegen::symbol("time");
         symbols.push_back( time_symbol );
@@ -1640,8 +1640,9 @@ void add_elem_matrix(
         const TE &elem,
         const unsigned *indices ) {
     typedef typename TF::ScalarType T;
+    typedef CaracFormulationForElement<TF::NameFormulation,TE,TF::NameVariant,TF::ScalarType> CFE;
 
-    for( const double *gp = gauss_point_for_order( f.order_integration_when_integration_totale, typename TE::NameElem() ); *gp!=0.0; gp += elem.nb_var_inter + 1 )
+    for( const double *gp = gauss_point_for_order( CFE::order_integration, typename TE::NameElem() ); *gp!=0.0; gp += elem.nb_var_inter + 1 )
         add_local_elem_matrix( *gp, gp+1, f, matrix, sollicitation , vectors, matrix_is_sym, assemble_mat, assemble_vec, elem, indices );
 }
 
@@ -1695,8 +1696,9 @@ void add_elem_vector_der_var(
         const unsigned *indices,
         Number<num_der_var> ) {
     typedef typename TF::ScalarType T;
+    typedef CaracFormulationForElement<typename TF::NameFormulation,TE,typename TF::NameVariant,typename TF::ScalarType> CFE;
 
-    for( const double *gp = gauss_point_for_order( f.order_integration_when_integration_totale, typename TE::NameElem() ); *gp!=0.0; gp += elem.nb_var_inter + 1 )
+    for( const double *gp = gauss_point_for_order( CFE::order_integration, typename TE::NameElem() ); *gp!=0.0; gp += elem.nb_var_inter + 1 )
         add_local_elem_vector_der_var(
             *gp, gp+1,
             f,

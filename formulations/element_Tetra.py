@@ -21,6 +21,7 @@ children = [
 ]
 
 permutation = [ 0,2,1,3 ]
+degree = 1
 
 interpolation["nodal"] = (1-var_inter[0]-var_inter[1]-var_inter[2]) * val[0] + \
                                    var_inter[0]                     * val[1] + \

@@ -25,6 +25,7 @@ n13  = var_inter[0] * (var_inter[0]-0.5) * 2
 n21  = 1-var_inter[1]
 n23  = var_inter[1]
 
+degree = 3
 
 interpolation['nodal'] =  n11 * n21 * val[0] + \
                           n12 * n21 * val[4] + \

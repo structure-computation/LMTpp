@@ -571,5 +571,3 @@ class Element:
         #print dict( zip( self.var_inter, map( number, self.var_inter_of_node_number[ node_number ]+number() ) ) )
         return expr.subs( EM( dict( zip( self.var_inter, map( number, self.var_inter_of_node_number[ node_number ] ) ) ) ) )
         
-        
-        

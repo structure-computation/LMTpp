@@ -24,6 +24,7 @@ interpolation['nodal_2'] = (1-X)*val[0] + X*val[1]
 interpolation["der_nodal"] = val[0]
 
 quality = 1
+degree = 2
 
 # ---------------------------------------------------------------------------------
 def local_coordinates(point):

@@ -36,6 +36,8 @@ X0 = 1 - var_inter[0]-var_inter[1]
 X1 = var_inter[0]
 X2 = var_inter[1]
 
+degree = 2
+
 interpolation["nodal"] = (2*X0 - 1) * X0 * val[0] + \
                          (2*X1 - 1) * X1 * val[1] + \
                          (2*X2 - 1) * X2 * val[2] + \

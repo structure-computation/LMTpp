@@ -26,6 +26,8 @@ children = [
   {'name':'Triangle', 'nodes':[3, 4, 5], 'var':[var_inter[0],var_inter[1],number(1)]},
 ]
 
+degree = 2
+
 permutation = [ 0, 2, 1, 3, 5, 4 ]
 tmp_authorized_permutations = [
     [0,1,2,3,4,5],

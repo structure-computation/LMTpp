@@ -25,6 +25,7 @@ var_inter_of_node_number = [
 ]
 
 permutation = [ 0, 2, 1 ]
+degree = 1
 
 interpolation["nodal"] = (1-var_inter[0]-var_inter[1]) * val[0] + \
                          var_inter[0]                  * val[1] + \
