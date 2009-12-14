@@ -1640,7 +1640,7 @@ void add_elem_matrix(
         const TE &elem,
         const unsigned *indices ) {
     typedef typename TF::ScalarType T;
-    typedef CaracFormulationForElement<TF::NameFormulation,TE,TF::NameVariant,TF::ScalarType> CFE;
+    typedef CaracFormulationForElement<typename TF::NameFormulation,TE,typename TF::NameVariant,typename TF::ScalarType> CFE;
 
     for( const double *gp = gauss_point_for_order( CFE::order_integration, typename TE::NameElem() ); *gp!=0.0; gp += elem.nb_var_inter + 1 )
         add_local_elem_matrix( *gp, gp+1, f, matrix, sollicitation , vectors, matrix_is_sym, assemble_mat, assemble_vec, elem, indices );
