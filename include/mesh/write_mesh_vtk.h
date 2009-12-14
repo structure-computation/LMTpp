@@ -158,7 +158,6 @@ struct GetDynamicSizeOs {
     unsigned pos_in_vec_wanted;
 };
 
-
 template<class T> struct GetVtkType { };
 template<> struct GetVtkType<double> { static const char *res() { return "Float64"; } };
 template<> struct GetVtkType<float> { static const char *res() { return "Float32"; } };
@@ -177,15 +176,22 @@ template<class T,int a,int m> struct GetVtkTypeSize<Vec<Vec<T,a>,m> > { static c
 template<class T,class TO,class ST> struct GetVtkTypeSize<Mat<T,TO,ST> > { static const unsigned n = sizeof(T); };
 template<class T> struct GetVtkTypeSize<std::complex<T> > { static const unsigned n = sizeof(T); };
 
-
-
 struct GetVtkTypes {
+    /// scalar
     template<unsigned n,class T> void operator()( const Number<n> &nn, const StructForType<T> &st ) { res.push_back( GetVtkType<T>::res() ); }
+    /// complex
     template<unsigned n,class T> void operator()( const Number<n> &nn, const StructForType<std::complex<T> > &st ) { res.push_back( GetVtkType<T>::res() ); }
+    /// vector
     template<unsigned n,class T,int s> void operator()( const Number<n> &nn, const StructForType<Vec<T,s> > &st ) { res.push_back( GetVtkType<T>::res() ); }
-    template<unsigned n,class T,int s,int s2,int s3> void operator()( const Number<n> &nn, const StructForType<Vec<Vec<Vec<T,s>,s2>,s3> > &st ) { res.push_back( GetVtkType<T>::res() ); }
+    /// vector of vector
     template<unsigned n,class T,int s,int s2> void operator()( const Number<n> &nn, const StructForType<Vec<Vec<T,s>,s2 > > &st ) { res.push_back( GetVtkType<T>::res() ); }
+    /// vector of vector of vector
+    template<unsigned n,class T,int s,int s2,int s3> void operator()( const Number<n> &nn, const StructForType<Vec<Vec<Vec<T,s>,s2>,s3> > &st ) { res.push_back( GetVtkType<T>::res() ); }
+    /// generic matrix
     template<unsigned n,class T,int s,int s2> void operator()( const Number<n> &nn, const StructForType<Mat<T,Gen<s,s2> > > &st ) { res.push_back( GetVtkType<T>::res() ); }
+    /// vector of generic matrix
+    template<unsigned n,class T,int s,int s2,int s3> void operator()( const Number<n> &nn, const StructForType<Vec<Mat<T,Gen<s2,s3> >,s > > &st ) { res.push_back( GetVtkType<T>::res() ); }
+    /// matrice symetrique
     template<unsigned n,class T,int s> void operator()( const Number<n> &nn, const StructForType<Mat<T,Sym<s> > > &st ) { res.push_back( GetVtkType<T>::res() ); }
     Vec<const char *> res;
 };
