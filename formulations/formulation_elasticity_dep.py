@@ -12,6 +12,8 @@ dep_sv = Variable( nb_dim=[dim], default_value='0.0', unit='m' )
 
 temperature = Variable( default_value='0.0', unit='K' )
 
+proute = Variable( interpolation='gauss', nb_dim=[3,3], default_value='0', unit='K' )
+
 sigma = Variable( interpolation='der_nodal', default_value='0', nb_dim=[dim*(dim+1)/2], unit='N/m^2' )
 epsilon = Variable( interpolation='der_nodal', default_value='0', nb_dim=[dim*(dim+1)/2], unit='1' )
 tr_epsilon = Variable( interpolation='der_nodal', default_value='0', unit='1' )
@@ -36,7 +38,9 @@ dep_imp_coef_0 = Variable( default_value='0', unit='1' )
 
 pouet = Variable( interpolation='elementary', default_value='0', unit='1' )
 #assume_symmetric_matrix = False
-#integration_totale = False
+
+integration_totale = False
+
 #use_asm = True
 
 # --------------------------------------------------------------------------------------------------------------------------------
@@ -47,7 +51,7 @@ def formulation():
     H = hooke_isotrope( E, poisson_ratio.expr, dim, options['behavior_simplification'] )[0]
     sigma = mul( H, epsilon )
     
-    res = density.expr * dot( dep.expr.diff(time).diff(time) - f_vol.expr, dep.test )
+    res = density.expr * dot( dep.expr.diff(time).diff(time) - f_vol.expr - proute.expr[1,1], dep.test )
     res += trace_sym_col( sigma, epstest )
     
     dmp = dep_imp_coef_0.expr * dot( dep.expr

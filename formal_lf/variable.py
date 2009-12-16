@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import extrapolation, sys
 from LMT.include.codegen import *
 
@@ -48,8 +49,12 @@ class Variable:
         vec_access = ''
         #sys.stderr.write( interpolation )
         #sys.stderr.write( t )
-        if in_vec: vec_access += '['+str( num_t )+']'
-        vec_access += ('['+str(num_element)+']') * (len(self.nb_dim)!=0)
+        if in_vec:
+            vec_access += '['+str( num_t )+']'
+        if len(self.nb_dim) == 1:
+            vec_access += '['+str(num_element[0])+']'
+        elif len(self.nb_dim) == 2:
+            vec_access += '('+str(num_element[0])+','+str(num_element[1])+')'
         # normal
         st = beg+'.'
         if self.unknown:
@@ -107,12 +112,10 @@ class Variable:
     if len(self.nb_dim) == 2:
         self.sub_expr = []
         self.expr = ExMatrix(self.nb_dim[0],self.nb_dim[1])
-        cpt = 0
         for i in range(self.nb_dim[0]):
             for j in range(self.nb_dim[1]):
-                self.expr[i,j] = self.get_scalar_expr(self.name,interpolation,element,cpt,self.symbols)
+                self.expr[i,j] = self.get_scalar_expr(self.name,interpolation,element,[i,j],self.symbols)
                 self.sub_expr.append( self.expr[i,j] )
-                cpt += 1
 
         md = len(self.symbols) / self.nb_elements()
       
@@ -126,7 +129,7 @@ class Variable:
         self.sub_expr = []
         self.expr = ExVector(self.nb_elements())
         for i in range(self.nb_elements()):
-            self.expr[i] = self.get_scalar_expr(self.name,interpolation,element,i,self.symbols)
+            self.expr[i] = self.get_scalar_expr(self.name,interpolation,element,[i],self.symbols)
             self.sub_expr.append( self.expr[i] )
 
         #print self.nb_elements()
@@ -139,7 +142,7 @@ class Variable:
             for d in range(self.nb_dim[0]): tmp[d] = self.symbols[i+md*d][3][0]
             self.expr_on_node.append( tmp )
     else:
-        self.expr = self.get_scalar_expr(self.name,interpolation,element,0,self.symbols)
+        self.expr = self.get_scalar_expr(self.name,interpolation,element,[0],self.symbols)
         self.sub_expr = [ self.expr ]
     
         md = len(self.symbols) / self.nb_elements()
@@ -177,12 +180,10 @@ class Variable:
     if len(self.nb_dim) == 2:
         self.sub_test_expr = []
         self.test = ExMatrix(self.nb_dim[0],self.nb_dim[1])
-        cpt = 0
         for i in range(self.nb_dim[0]):
             for j in range(self.nb_dim[1]):
-                self.test[i,j] = self.get_scalar_expr( "T"+self.name, interpolation, element, cpt, self.test_symbols, True )
+                self.test[i,j] = self.get_scalar_expr( "T"+self.name, interpolation, element, [i,j], self.test_symbols, True )
                 self.sub_test_expr.append( self.test[i,j] )
-                cpt += 1
         #print self.nb_elements()
         #print len(self.test_symbols)
         md = len(self.test_symbols) / self.nb_elements()
@@ -198,7 +199,7 @@ class Variable:
         self.sub_test_expr = []
         self.test = ExVector(self.nb_elements())
         for i in range(self.nb_elements()):
-            self.test[i] = self.get_scalar_expr( "T"+self.name, interpolation, element, i, self.test_symbols, True )
+            self.test[i] = self.get_scalar_expr( "T"+self.name, interpolation, element, [i], self.test_symbols, True )
             self.sub_test_expr.append( self.test[i] )
         #print self.nb_elements()
         #print len(self.test_symbols)
@@ -212,7 +213,7 @@ class Variable:
                     tmp[d] = self.test_symbols[i+md*d][3][0]
                 self.test_on_node.append( tmp )
     else:
-      self.test = self.get_scalar_expr( "test_"+self.name, interpolation, element, 0, self.test_symbols, True )
+      self.test = self.get_scalar_expr( "test_"+self.name, interpolation, element, [0], self.test_symbols, True )
       self.sub_test_expr = [ self.test ]
     
       md = len(self.symbols) / self.nb_elements()

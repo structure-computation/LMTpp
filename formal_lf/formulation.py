@@ -664,9 +664,9 @@ class Formulation:
     # TODO...
     non_linear_system = not self.assume_linear_system
     f.write( '        static const bool linear = %s;\n'%( ['true','false'][ non_linear_system ] ) )
-    f.write( '        static const unsigned order_integration = %i;\n' % order_integration )
     f.write( '    };\n' )
-    
+    f.write( '    static const unsigned order_integration = %i;\n' % order_integration )
+
     has_not_V_matrix = matrices['V']['M'].is_null() and matrices['V']['V'].is_null()
     has_not_S_matrix = True
     for nc in range(len(e.children)):
