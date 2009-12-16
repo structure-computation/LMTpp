@@ -159,6 +159,8 @@ public:
     ///
     #ifdef WITH_UMFPACK
     bool get_factorization() {
+        if ( nb_rows() == 0 )
+            return true;
         if ( Numeric )
             umfpack_di_free_numeric( &Numeric );
         void *Symbolic;
@@ -176,6 +178,8 @@ public:
     }
     /// ...
     LMT::Vec<double> solve( const LMT::Vec<double> &vec ) {
+        if ( nb_rows() == 0 )
+            return LMT::Vec<double>();
         LMT::Vec<double> res;
         res.resize( vec.size() );
         if (!Numeric) 
