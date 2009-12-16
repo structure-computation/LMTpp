@@ -46,7 +46,7 @@ interpolation["nodal"] = (1-var_inter[0]-var_inter[1]) * (1-var_inter[2])   * va
                                    var_inter[1] * (1-var_inter[2])          * val[2] + \
                          (1-var_inter[0]-var_inter[1]) * (var_inter[2]) * val[3] + \
                                   (var_inter[0]) * (var_inter[2])       * val[4] + \
-                                  (var_inter[1]) * (var_inter[2])       * val[5] 
+                                  (var_inter[1]) * (var_inter[2])       * val[5]
 
 interpolation["der_nodal"] = val[0]
 
@@ -64,7 +64,7 @@ interpolation["gauss"] =  (-2*var_inter[1]                  + 1)   * (1-(var_int
                           (-2*var_inter[0]                  + 1)   * (1-(var_inter[2]-z2)/(z1-z2))     * val[2]  + \
                           (-2*var_inter[1]                  + 1)   * (1-((1-var_inter[2])-z2)/(z1-z2)) * val[3]  + \
                           ( 2*var_inter[0] + 2*var_inter[1] - 1)   * (1-((1-var_inter[2])-z2)/(z1-z2)) * val[4]  + \
-                          (-2*var_inter[0]                  + 1)   * (1-((1-var_inter[2])-z2)/(z1-z2)) * val[5]  
+                          (-2*var_inter[0]                  + 1)   * (1-((1-var_inter[2])-z2)/(z1-z2)) * val[5]
 a = 1.0/6.0
 Flat_Interpolation_gauss_points = [
   ( a, { var_inter[0] : 1.0/2.0, var_inter[1] : 1.0/2.0 , var_inter[2] : 1.0/2.0 } ),
@@ -75,7 +75,7 @@ interpolation["Flat_Interpolation"] = ( 2*var_inter[0] + 2*var_inter[1] - 1)   *
                           (-2*var_inter[0]                  + 1)   * val[1]  + \
                           (-2*var_inter[1]                  + 1)   * val[2]
 quality = 1
-                               
+
 def local_coordinates(point):
   v = positions[1]-positions[0]
   l = dot( point-positions[0], v ) / dot(v,v)
@@ -85,12 +85,11 @@ def pos_using_local_coordinates(coords):
   return v * coords[0] + positions[0]
 
 # ---------------------------------------------------------------------------------
-# gauss_points[1] = [
-#   ( 1.0/2.0, { var_inter[0] : 1.0/3.0, var_inter[1] : 1.0/3.0 , var_inter[2] : 1.0/2.0  } ),
-# ]
+gauss_points[1] = [
+  ( 1.0/2.0, { var_inter[0] : 1.0/3.0, var_inter[1] : 1.0/3.0 , var_inter[2] : 1.0/2.0  } ),
+]
 
-
-a = 1.0/6.0 * 1.0/2.0 
+a = 1.0/6.0 * 1.0/2.0
 gauss_points[2] = [
   ( a, { var_inter[0] : 1.0/2.0, var_inter[1] : 0.0     , var_inter[2] : (1.0-sqrt(1.0/3.0))/2.0 } ),
   ( a, { var_inter[0] : 1.0/2.0, var_inter[1] : 1.0/2.0 , var_inter[2] : (1.0-sqrt(1.0/3.0))/2.0 } ),
@@ -99,6 +98,7 @@ gauss_points[2] = [
   ( a, { var_inter[0] : 1.0/2.0, var_inter[1] : 1.0/2.0 , var_inter[2] : (1.0+sqrt(1.0/3.0))/2.0 } ),
   ( a, { var_inter[0] : 0.0,     var_inter[1] : 1.0/2.0 , var_inter[2] : (1.0+sqrt(1.0/3.0))/2.0 } ),
 ]
+
 #a = 1.0/6.0
 #b = 1.0/sqrt(2.0)
 #gauss_points[2] = [
@@ -109,6 +109,7 @@ gauss_points[2] = [
   #( a, { var_inter[0] : 0.0,     var_inter[1] : 1.0/2.0 , var_inter[2] : (1+a)/2.0 } ),
   #( a, { var_inter[0] : 1.0/2.0, var_inter[1] : 0.0 ,     var_inter[2] : (1+a)/2.0 } ),
 #]
+
 a = -27.0/96.0 * 1.0/2.0
 b = 25.0/96.0 * 1.0/2.0
 gauss_points[3] = [
@@ -133,7 +134,7 @@ gauss_points[4] = [
   ( c1, { var_inter[0] : a,         var_inter[1] : 1.0-2.0*a , var_inter[2] : 1.0/2.0 } ),
   ( d1, { var_inter[0] : b,         var_inter[1] : b         , var_inter[2] : 1.0/2.0 } ),
   ( d1, { var_inter[0] : 1.0-2.0*b, var_inter[1] : b         , var_inter[2] : 1.0/2.0 } ),
-  ( d1, { var_inter[0] : b,         var_inter[1] : 1.0-2.0*b , var_inter[2] : 1.0/2.0 } ),  
+  ( d1, { var_inter[0] : b,         var_inter[1] : 1.0-2.0*b , var_inter[2] : 1.0/2.0 } ),
   ( c2, { var_inter[0] : a,         var_inter[1] : a         , var_inter[2] : (1.0-sqrt(3.0/5.0))/2.0 } ),
   ( c2, { var_inter[0] : 1.0-2.0*a, var_inter[1] : a         , var_inter[2] : (1.0-sqrt(3.0/5.0))/2.0 } ),
   ( c2, { var_inter[0] : a,         var_inter[1] : 1.0-2.0*a , var_inter[2] : (1.0-sqrt(3.0/5.0))/2.0 } ),
@@ -172,13 +173,7 @@ gauss_points[5] = [
   ( A*5.0/18.0, { var_inter[0] : a      , var_inter[1] : 1-2*a   , var_inter[2] : (1.0+sqrt(3.0/5.0))/2.0} ),
   ( B*5.0/18.0, { var_inter[0] : b      , var_inter[1] : b       , var_inter[2] : (1.0+sqrt(3.0/5.0))/2.0} ),
   ( B*5.0/18.0, { var_inter[0] : 1-2*b  , var_inter[1] : b       , var_inter[2] : (1.0+sqrt(3.0/5.0))/2.0} ),
-  ( B*5.0/18.0, { var_inter[0] : b      , var_inter[1] : 1-2*b   , var_inter[2] : (1.0+sqrt(3.0/5.0))/2.0} ),                                                                        
-]                                                                        
+  ( B*5.0/18.0, { var_inter[0] : b      , var_inter[1] : 1-2*b   , var_inter[2] : (1.0+sqrt(3.0/5.0))/2.0} ),
+]
 
 has_make_structured = True
-
-
-
-
-
-

@@ -62,7 +62,7 @@ interpolation["nodal"] = ( 1./2. * X0 * (2*X0-1)*(1-Z) - 1./2. * X0 * (1-Z*Z) ) 
                          ( 2 * X2 * X0 * (1+Z) ) * val[11] + \
                          ( X0 * (1-Z*Z) ) * val[12] + \
                          ( X1 * (1-Z*Z) ) * val[13] + \
-                         ( X2 * (1-Z*Z) ) * val[14] 
+                         ( X2 * (1-Z*Z) ) * val[14]
 
 interpolation["der_nodal"] = val[0]
 
@@ -77,7 +77,7 @@ interpolation["gauss"] =  ( 2*var_inter[0] + 2*var_inter[1] - 1)   * (1-(var_int
                           (-2*var_inter[0]                  + 1)   * (1-((1-var_inter[2])-z2)/(z1-z2)) * val[4]  + \
                           (-2*var_inter[1]                  + 1)   * (1-((1-var_inter[2])-z2)/(z1-z2)) * val[5]
 
-a = 1.0/6.0 * 1.0/2.0 
+a = 1.0/6.0 * 1.0/2.0
 Flat_Interpolation_gauss_points = [
   ( a, { var_inter[0] : 1.0/2.0, var_inter[1] : 0.0     , var_inter[2] : (1.0-sqrt(1.0/3.0))/2.0 } ),
   ( a, { var_inter[0] : 1.0/2.0, var_inter[1] : 1.0/2.0 , var_inter[2] : (1.0-sqrt(1.0/3.0))/2.0 } ),
@@ -99,11 +99,11 @@ def pos_using_local_coordinates(coords):
   return v * coords[0] + positions[0]
 
 # ---------------------------------------------------------------------------------
-# gauss_points[1] = [
-#   ( 1.0/2.0, { var_inter[0] : 1.0/3.0, var_inter[1] : 1.0/3.0 , var_inter[2] : 1.0/2.0  } ),
-# ]
+gauss_points[1] = [
+  ( 1.0/2.0, { var_inter[0] : 1.0/3.0, var_inter[1] : 1.0/3.0 , var_inter[2] : 1.0/2.0  } ),
+]
 
-a = 1.0/6.0 * 1.0/2.0 
+a = 1.0/6.0 * 1.0/2.0
 gauss_points[2] = [
   ( a, { var_inter[0] : 1.0/2.0, var_inter[1] : 0.0     , var_inter[2] : (1.0-sqrt(1.0/3.0))/2.0 } ),
   ( a, { var_inter[0] : 1.0/2.0, var_inter[1] : 1.0/2.0 , var_inter[2] : (1.0-sqrt(1.0/3.0))/2.0 } ),
@@ -137,7 +137,7 @@ gauss_points[4] = [
   ( c1, { var_inter[0] : a,         var_inter[1] : 1.0-2.0*a , var_inter[2] : 1.0/2.0 } ),
   ( d1, { var_inter[0] : b,         var_inter[1] : b         , var_inter[2] : 1.0/2.0 } ),
   ( d1, { var_inter[0] : 1.0-2.0*b, var_inter[1] : b         , var_inter[2] : 1.0/2.0 } ),
-  ( d1, { var_inter[0] : b,         var_inter[1] : 1.0-2.0*b , var_inter[2] : 1.0/2.0 } ),  
+  ( d1, { var_inter[0] : b,         var_inter[1] : 1.0-2.0*b , var_inter[2] : 1.0/2.0 } ),
   ( c2, { var_inter[0] : a,         var_inter[1] : a         , var_inter[2] : (1.0-sqrt(3.0/5.0))/2.0 } ),
   ( c2, { var_inter[0] : 1.0-2.0*a, var_inter[1] : a         , var_inter[2] : (1.0-sqrt(3.0/5.0))/2.0 } ),
   ( c2, { var_inter[0] : a,         var_inter[1] : 1.0-2.0*a , var_inter[2] : (1.0-sqrt(3.0/5.0))/2.0 } ),
@@ -176,13 +176,7 @@ gauss_points[5] = [
   ( A*5.0/18.0, { var_inter[0] : a      , var_inter[1] : 1-2*a   , var_inter[2] : (1.0+sqrt(3.0/5.0))/2.0} ),
   ( B*5.0/18.0, { var_inter[0] : b      , var_inter[1] : b       , var_inter[2] : (1.0+sqrt(3.0/5.0))/2.0} ),
   ( B*5.0/18.0, { var_inter[0] : 1-2*b  , var_inter[1] : b       , var_inter[2] : (1.0+sqrt(3.0/5.0))/2.0} ),
-  ( B*5.0/18.0, { var_inter[0] : b      , var_inter[1] : 1-2*b   , var_inter[2] : (1.0+sqrt(3.0/5.0))/2.0} ),                                                                        
-]                                                                        
+  ( B*5.0/18.0, { var_inter[0] : b      , var_inter[1] : 1-2*b   , var_inter[2] : (1.0+sqrt(3.0/5.0))/2.0} ),
+]
 
 has_make_structured = True
-
-
-
-
-
-

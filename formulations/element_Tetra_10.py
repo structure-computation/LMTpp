@@ -58,18 +58,22 @@ interpolation["gauss"] = (var_inter[0]-b)*(var_inter[0]-c)/((a-b)*(a-c)) *  (var
 quality = 1
 
 # ---------------------------------------------------------------------------------
+
 def local_coordinates(point):
   v = positions[1]-positions[0]
   l = dot( point-positions[0], v ) / dot(v,v)
   return vector( [l] )
+
 def pos_using_local_coordinates(coords):
   v = positions[1]-positions[0]
   return v * coords[0] + positions[0]
 
 # ---------------------------------------------------------------------------------
-# gauss_points[1] = [
-#   ( 1.0/6, { var_inter[0] : 1.0/4, var_inter[1] : 1.0/4, var_inter[2] : 1.0/4 } ),
-# ]
+
+gauss_points[1] = [
+  ( 1.0/6, { var_inter[0] : 1.0/4, var_inter[1] : 1.0/4, var_inter[2] : 1.0/4 } ),
+]
+
 a,b,p = (5.0-sqrt(5.0))/20.0, (5.0+3.0*sqrt(5.0))/20.0, 1.0/24.0
 gauss_points[2] = [
   ( p, { var_inter[0] : a, var_inter[1] : a, var_inter[2] : a } ),
@@ -77,6 +81,7 @@ gauss_points[2] = [
   ( p, { var_inter[0] : a, var_inter[1] : b, var_inter[2] : a } ),
   ( p, { var_inter[0] : a, var_inter[1] : a, var_inter[2] : b } ),
 ]
+
 a,b,c = 1.0/4.0, 1.0/6.0, 1.0/2.0;
 p1,p2 = -2.0/15.0, 3.0/40.0;
 gauss_points[3] = [
@@ -86,6 +91,7 @@ gauss_points[3] = [
   ( p2, { var_inter[0] : b, var_inter[1] : c, var_inter[2] : b } ),
   ( p2, { var_inter[0] : b, var_inter[1] : b, var_inter[2] : c } ),
 ]
+
 a = 1.0/4.0; b1 = (7.0+sqrt(15.0))/34.0; b2 = (7.0-sqrt(15.0))/34.0;
 c1 = (13.0-3.0*sqrt(15.0))/34.0; c2 = (13.0+3.0*sqrt(15.0))/34.0;
 d = (5.0-sqrt(15.0))/20.0; e = (5.0+sqrt(15.0))/20.0;
@@ -112,5 +118,7 @@ gauss_points[5] = [
   ( p2, { var_inter[0] : e, var_inter[1] : d, var_inter[2] : e } ),
   ( p2, { var_inter[0] : d, var_inter[1] : e, var_inter[2] : e } ),
 ]
+
+gauss_points[4] = gauss_points[5]
 
 has_make_structured = True
