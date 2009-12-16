@@ -66,15 +66,15 @@ public:
                 printf( "Error : constructor LMT::Vec<%s>(mxArray *) needs a %s Matrix\\n", TypeInformation<TT>::type().c_str(), TypeInformation<typename mxArrayGoodtype<TT>::needed>::type().c_str() );
                 throw std::runtime_error("constructor LMT::Vec<"+TypeInformation<TT>::type()+">(mxArray *) needs a "+TypeInformation<typename mxArrayGoodtype<TT>::needed>::type()+" Matrix");
             }
-            
+
             unsigned m = mxGetM(variable) , n = mxGetN(variable); // dimensions de la matrice
             if ( fixed_size && (static_rows!=m || static_cols != n) ) {
                 PRINTM( "Error : Mat<...>(const mxArray *variable) must take a vector of size " );
                 throw std::runtime_error("size error");
             }
-            
+
             resize( m, n );
-            
+
             double *pr;
             pr = mxGetPr(variable);
                 for(unsigned i=0;i<m;++i)
@@ -86,7 +86,7 @@ public:
                     for(unsigned j=0;j<n;++j)
                         set_imag(operator()(i,j),pr[i+j*m]);
             }
-        
+
         }
         Mat operator=(const mxArray *variable) throw(std::runtime_error) {
             if ( mxIsEmpty(variable) ) {
@@ -97,15 +97,15 @@ public:
                 printf( "Error : constructor LMT::Vec<%s>(mxArray *) needs a %s Matrix\\n", TypeInformation<TT>::type().c_str(), TypeInformation<typename mxArrayGoodtype<TT>::needed>::type().c_str() );
                 throw std::runtime_error("constructor LMT::Vec<"+TypeInformation<TT>::type()+">(mxArray *) needs a "+TypeInformation<typename mxArrayGoodtype<TT>::needed>::type()+" Matrix");
             }
-            
+
             unsigned m = mxGetM(variable) , n = mxGetN(variable); // dimensions de la matrice
             if ( fixed_size && (static_rows!=m || static_cols != n) ) {
                 PRINTM( "Error : Mat<...>(const mxArray *variable) must take a vector of size " );
                 throw std::runtime_error("size error");
             }
-            
+
             resize( m, n );
-            
+
             double *pr;
             pr = mxGetPr(variable);
                 for(unsigned i=0;i<m;++i)
@@ -117,23 +117,36 @@ public:
                     for(unsigned j=0;j<n;++j)
                         set_imag(operator()(i,j),pr[i+j*m]);
             }
-        
+
         }
     #endif
 
+    TT &operator[](unsigned index) { return data[ index ]; }
+    const TT &operator[](unsigned index) const { return data[ index ]; }
+
+    TT &operator[](int index) { return data[ index ]; }
+    const TT &operator[](int index) const { return data[ index ]; }
+
     void clear() { data.set((TT)0); } /// set all values to 0
-    
+
+    TT trace() const
+    {
+        TT tmp = 0;
+        for (unsigned k=0; k<nb_rows(); ++k)
+            tmp += operator()(k,k);
+        return tmp;
+    }
+
     """ + (structure=='Gen') * """
     typedef T& RetOp;
     typedef const T& RetOpConst;
-    
+
     T &operator()(unsigned line,unsigned column) { return data[ INDEX ]; }
     const T &operator()(unsigned line,unsigned column) const { return data[ INDEX ]; }
     """ + (structure!='Gen') * ("""
     typedef MatElem<TV,STRUCTURE,STORAGE,alignement"""+',sr'*(upper_part!=row_oriented)+"""> RetOp;
     typedef T RetOpConst;
 
-        
     MatElem<TV,STRUCTURE,STORAGE,alignement"""+',sr'*(upper_part!=row_oriented)+"""> operator()(unsigned line,unsigned column) {
         return MatElem<TV,STRUCTURE,STORAGE,alignement"""+',sr'*(upper_part!=row_oriented)+""">(
             data,
@@ -159,35 +172,37 @@ public:
     template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
         if ( fixed_size==false )
             resize( val.nb_rows(), val.nb_cols() );
-        if ( (STRUCTURE::need_upper and STRUCTURE::need_lower)==false and STRUCTURE::need_diag )
+        if ( STRUCTURE::need_diag and STRUCTURE::need_upper==false and STRUCTURE::need_lower==false )
+            for(unsigned i=0;i<val.nb_rows();++i)
+                operator()(i, i) = val(i, i);
+        else if ( (STRUCTURE::need_upper and STRUCTURE::need_lower)==false and STRUCTURE::need_diag )
             for(unsigned i=0;i<val.nb_rows();++i)
                 for(unsigned j=0;j<=i;++j)
-                    operator()( i,j ) = val(i,j);
+                    operator()(i, j) = val(i, j);
         else if ( (STRUCTURE::need_upper and STRUCTURE::need_lower)==false )
             for(unsigned i=0;i<val.nb_rows();++i)
                 for(unsigned j=0;j<i;++j)
-                    operator()( i,j ) = val(i,j);
+                    operator()(i, j) = val(i, j);
         else
             for(unsigned i=0;i<val.nb_rows();++i)
                 for(unsigned j=0;j<val.nb_cols();++j)
-                    operator()( i,j ) = val(i,j);
+                    operator()(i, j) = val(i, j);
     }
 
-    
     void resize(unsigned nr) { resize( nr, nr ); }
     void resize(unsigned nr,unsigned nc) { SETDYNDATASIZE this->nr.set(nr); """+'this->nc.set(nc);'*nsquare+""" }
-    
+
     typedef RETDIAG RetDiag;
     typedef CONSTRETDIAG RetDiagConst;
     typedef CONSTRETCOL RetColConst;
     typedef RETCOL RetCol;
     typedef CONSTRETROW RetRowConst;
     typedef RETROW RetRow;
-    
+
     // LINEVEC get_line() { return ; }
     RETDIAG diag() { return FORMDIAG; }
     CONSTRETDIAG diag() const { return CONSTFORMDIAG; }
-    
+
     RETROW row(unsigned i) { return FORMROW; }
     CONSTRETROW row(unsigned i) const { return CONSTFORMROW; }
     RETCOL col(unsigned i) { return FORMCOL; }
@@ -196,9 +211,10 @@ public:
     template<class T2> void set(const T2 &v) { data.set(v); }
 
     //template<class T2> Mat(const T2 &val) { DEBUGASSERT(fixed_size==true); data = val; }
+
     //template<class T2> Mat &operator=(const T2 &val) { data.set((T)val); return *this; }
-    Mat &operator=(int val) { data.set(val); return *this; }   
- 
+    Mat &operator=(int val) { data.set(val); return *this; }
+
     template<class T2> Mat &operator+=(const T2 &val) { data += val; return *this; }
     template<class T2> Mat &operator-=(const T2 &val) { data -= val; return *this; }
     template<class T2> Mat &operator*=(const T2 &val) { data *= val; return *this; }
@@ -220,7 +236,7 @@ public:
     template<class TVEC> Mat<SubMat<Mat,false,TVEC>,STRUCTURE,STORAGE,int> operator[](const TVEC &v) {
         return Mat<SubMat<Mat,false,TVEC>,STRUCTURE,STORAGE,int>( *this, v );
     }
-    
+
     void free() { resize(0,0); data.free(); } /// free data
 
     """+"""
@@ -287,7 +303,7 @@ struct MatElem<TV,STRUCTURE,STORAGE,alignement,nrs> {
                     I2 = ['line','column'][1-row_oriented]
                     IN1 = rep(IN, {'I2':I2, 'I1':I1} )
                     IN2 = rep(IN, {'I2':I1, 'I1':I2} )
-                    
+
                     I1 = ['line','column'][upper_part]
                     I2 = ['line','column'][1-upper_part]
 
@@ -303,7 +319,7 @@ struct MatElem<TV,STRUCTURE,STORAGE,alignement,nrs> {
                     if structure == 'TriLower':
                         R1 = 'if (line<column) return (T)0; ' + R1
                         R2 = 'if (line>=column) { ' + R2 + ' }'
-                
+
                     res = replace(res,'RDATALC',R1)
                     for op in lst_op:
                         res = replace(res,'MATELEM'+op,replace(R2,'OP',op))
@@ -332,7 +348,7 @@ struct MatElem<TV,STRUCTURE,STORAGE,alignement,nrs> {
                 res = replace(res,'RETROW'      , replace(ret,'CST','false') )
                 res = replace(res,'CONSTFORMROW', replace(ret,'CST','true ')+'(*this,i)' )
                 res = replace(res,'FORMROW'     , replace(ret,'CST','false')+'(*this,i)' )
-            
+
             ret = 'Vec<VecSubMat<Mat,CST,ExtractCol>,'+['sr','sc'][nsquare]+'>'
             res = replace(res,'CONSTRETCOL' , replace(ret,'CST','true ') )
             res = replace(res,'RETCOL'      , replace(ret,'CST','false') )
@@ -341,6 +357,7 @@ struct MatElem<TV,STRUCTURE,STORAGE,alignement,nrs> {
 
             # STRUCTURE STORAGE
             ab = { 'a' : ['r','c'][1-row_oriented], 'b' : ['r','c'][row_oriented] }
+            mi = 'unsigned m%(a)s = min(n%(a)s,this->n%(a)s.val); unsigned m%(b)s = min(n%(b)s,this->n%(b)s.val); ' % ab
             RNR = ''
             if upper_part!=row_oriented and structure!='Gen':
                 RNR = 'unsigned t=nr+alignement-1; off.set( res-1 );' # '+'-1'*(structure=='AntiSym')+'
@@ -355,7 +372,7 @@ struct MatElem<TV,STRUCTURE,STORAGE,alignement,nrs> {
                                    'MAX(0,sr*(sr-1)/2)' * ( structure=='AntiSym' ) + \
                                    'MIN(sr,sc)' * (structure=='Diag'),
                 # static size
-                'SETDYNDATASIZE' : ('TV od = data; unsigned o_r = real_n%(a)s.val; unsigned r%(a)s=n%(a)s+alignement-1; r%(a)s-=r%(a)s %% alignement; real_n%(a)s.set(r%(a)s); real_n%(b)s.set(n%(b)s); data.resize(real_nr.val*real_nc.val); for(unsigned i=0;i<(unsigned)this->n%(b)s.val;++i) for(unsigned j=0;j<(unsigned)this->n%(a)s.val;++j) data[real_n%(a)s.val*i+j] = od[o_r*i+j];'%ab) * (structure=='Gen') + \
+                'SETDYNDATASIZE' : (mi+'TV od = data; unsigned o_r = real_n%(a)s.val; unsigned r%(a)s=n%(a)s+alignement-1; r%(a)s-=r%(a)s %% alignement; real_n%(a)s.set(r%(a)s); real_n%(b)s.set(n%(b)s); data.resize(real_nr.val*real_nc.val); for(unsigned i=0;i<m%(b)s;++i) for(unsigned j=0;j<m%(a)s;++j) data[real_n%(a)s.val*i+j] = od[o_r*i+j];'%ab) * (structure=='Gen') + \
                                    ('unsigned ri=nr/alignement; unsigned res=ri*(ri+1)/2*alignement*alignement+(nr % alignement)*(ri+1)*alignement; '+ \
                                     'unsigned o=nr+alignement-1; o-=o % alignement; res -= o-nr; data.resize(res);'+RNR) * (structure in ['Sym','Herm','TriUpper','TriLower']
                                    ) + \
