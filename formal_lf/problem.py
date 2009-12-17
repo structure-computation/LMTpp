@@ -111,7 +111,7 @@ class Problem:
                     if in_vec( var ):
                         for i in range( cond(var) ):
                             if len( var.T ) == 0:
-                                output.write( ' '*nb_sp+'        if ( field_name == "'+namevar+'" ) { '+namevar+'['+str(i)+'] = value; return; } // hum\n' )
+                                output.write( ' '*nb_sp+'        if ( field_name == "'+namevar+'" ) { '+namevar+'['+str(i)+'] = value; } // hum\n' )
                     else:
                         if len( var.T ) == 0:
                             output.write( ' '*nb_sp+'        if ( field_name == "'+namevar+'" ) { '+namevar+' = value; return; }\n' )
@@ -124,7 +124,7 @@ class Problem:
                         if in_vec( var ):
                             for i in range( cond(var) ):
                                 if len( var.T ) == 0:
-                                    output.write( ' '*nb_sp+'        if ( field_name == "'+namevar+'" ) { '+namevar+'['+str(i)+'] = value; return; } // hum\n' )
+                                    output.write( ' '*nb_sp+'        if ( field_name == "'+namevar+'" ) { '+namevar+'['+str(i)+'] = value; } // hum\n' )
                         else:
                             if len( var.T ) == 0:
                                 output.write( ' '*nb_sp+'        if ( field_name == "'+namevar+'" ) { '+namevar+' = value; return; }\n' )
@@ -137,7 +137,7 @@ class Problem:
                         if in_vec( var ):
                             for i in range( cond(var) ):
                                 if len( var.T ) == 0:
-                                    output.write( ' '*nb_sp+'        if ( field_name == "'+namevar+'" ) { '+namevar+'['+str(i)+'] = value; return; } // hum\n' )
+                                    output.write( ' '*nb_sp+'        if ( field_name == "'+namevar+'" ) { '+namevar+'['+str(i)+'] = value; } // hum\n' )
                         else:
                             if len( var.T ) == 0:
                                 output.write( ' '*nb_sp+'        if ( field_name == "'+namevar+'" ) { '+namevar+' = value; return; }\n' )
