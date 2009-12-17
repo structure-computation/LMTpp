@@ -123,49 +123,49 @@ gauss_points[1] = [
   ( 1.0, { var_inter[0] : 1.0/2, var_inter[1] : 1.0/2, var_inter[2] : 1.0/2 } ),
 ]
 
-a,b = sqrt(2.0/3), sqrt(1.0/3)
-gauss_points[2] = [
-  ( 1.0/4.0, { var_inter[0] : 1.0/2.0, var_inter[1] : (1+a)/2.0, var_inter[2] : (1-b)/2 } ),
-  ( 1.0/4.0, { var_inter[0] : 1.0/2.0, var_inter[1] : (1-a)/2.0, var_inter[2] : (1-b)/2 } ),
-  ( 1.0/4.0, { var_inter[0] : (1+a)/2.0, var_inter[1] : 1.0/2.0, var_inter[2] : (1+b)/2 } ),
-  ( 1.0/4.0, { var_inter[0] : (1-a)/2.0, var_inter[1] : 1.0/2.0, var_inter[2] : (1+b)/2 } ),
-]
+#a,b = sqrt(2.0/3), sqrt(1.0/3)
+#gauss_points[2] = [
+  #( 1.0/4.0, { var_inter[0] :   1.0/2.0, var_inter[1] : (1+a)/2.0, var_inter[2] : (1-b)/2 } ),
+  #( 1.0/4.0, { var_inter[0] :   1.0/2.0, var_inter[1] : (1-a)/2.0, var_inter[2] : (1-b)/2 } ),
+  #( 1.0/4.0, { var_inter[0] : (1+a)/2.0, var_inter[1] :   1.0/2.0, var_inter[2] : (1+b)/2 } ),
+  #( 1.0/4.0, { var_inter[0] : (1-a)/2.0, var_inter[1] :   1.0/2.0, var_inter[2] : (1+b)/2 } ),
+#]
 
 a = 1.0/sqrt(3.0)
-gauss_points[3] = [
-  ( 1.0/8.0, { var_inter[0] : (1-a)/2.0, var_inter[1] : (1-a)/2.0,   var_inter[2] : (1-a)/2.0 } ),
-  ( 1.0/8.0, { var_inter[0] : (1+a)/2.0, var_inter[1] : (1-a)/2.0,   var_inter[2] : (1-a)/2.0 } ),
-  ( 1.0/8.0, { var_inter[0] : (1+a)/2.0, var_inter[1] : (1+a)/2.0,   var_inter[2] : (1-a)/2.0 } ),
-  ( 1.0/8.0, { var_inter[0] : (1-a)/2.0, var_inter[1] : (1+a)/2.0,   var_inter[2] : (1-a)/2.0 } ),
-  ( 1.0/8.0, { var_inter[0] : (1-a)/2.0, var_inter[1] : (1-a)/2.0,   var_inter[2] : (1+a)/2.0 } ),
-  ( 1.0/8.0, { var_inter[0] : (1+a)/2.0, var_inter[1] : (1-a)/2.0,   var_inter[2] : (1+a)/2.0 } ),
-  ( 1.0/8.0, { var_inter[0] : (1+a)/2.0, var_inter[1] : (1+a)/2.0,   var_inter[2] : (1+a)/2.0 } ),
-  ( 1.0/8.0, { var_inter[0] : (1-a)/2.0, var_inter[1] : (1+a)/2.0,   var_inter[2] : (1+a)/2.0 } ),
+gauss_points[2] = [
+  ( 1.0/8.0, { var_inter[0] : (1-a)/2.0, var_inter[1] : (1-a)/2.0, var_inter[2] : (1-a)/2.0 } ),
+  ( 1.0/8.0, { var_inter[0] : (1+a)/2.0, var_inter[1] : (1-a)/2.0, var_inter[2] : (1-a)/2.0 } ),
+  ( 1.0/8.0, { var_inter[0] : (1+a)/2.0, var_inter[1] : (1+a)/2.0, var_inter[2] : (1-a)/2.0 } ),
+  ( 1.0/8.0, { var_inter[0] : (1-a)/2.0, var_inter[1] : (1+a)/2.0, var_inter[2] : (1-a)/2.0 } ),
+  ( 1.0/8.0, { var_inter[0] : (1-a)/2.0, var_inter[1] : (1-a)/2.0, var_inter[2] : (1+a)/2.0 } ),
+  ( 1.0/8.0, { var_inter[0] : (1+a)/2.0, var_inter[1] : (1-a)/2.0, var_inter[2] : (1+a)/2.0 } ),
+  ( 1.0/8.0, { var_inter[0] : (1+a)/2.0, var_inter[1] : (1+a)/2.0, var_inter[2] : (1+a)/2.0 } ),
+  ( 1.0/8.0, { var_inter[0] : (1-a)/2.0, var_inter[1] : (1+a)/2.0, var_inter[2] : (1+a)/2.0 } ),
 ]
 
 a = number("0.925820099772552"); b = number("0.330814963699288"); c = number("0.734112528752115");
 p1 = number("0.295747599451303"); p2 = number("0.094101508916324");
 p3 = number("0.412333862271436"); p4 = number("0.224703174765601");
 gauss_points[7] = [
-  ( p1/8.0, { var_inter[0] : (1+a)/2.0, var_inter[1] : 1.0/2.0,   var_inter[2] : 1.0/2 } ),
-  ( p1/8.0, { var_inter[0] : (1-a)/2.0, var_inter[1] : 1.0/2.0,   var_inter[2] : 1.0/2 } ),
-  ( p1/8.0, { var_inter[0] : 1.0/2.0,   var_inter[1] : (1+a)/2.0, var_inter[2] : 1.0/2 } ),
-  ( p1/8.0, { var_inter[0] : 1.0/2.0,   var_inter[1] : (1-a)/2.0, var_inter[2] : 1.0/2 } ),
-  ( p1/8.0, { var_inter[0] : 1.0/2.0,   var_inter[1] : 1.0/2.0,   var_inter[2] : (1+a)/2 } ),
-  ( p1/8.0, { var_inter[0] : 1.0/2.0,   var_inter[1] : 1.0/2.0,   var_inter[2] : (1-a)/2 } ),
+  ( p1/8.0, { var_inter[0] : (1+a)/2.0, var_inter[1] :   1.0/2.0, var_inter[2] :   1.0/2 } ),
+  ( p1/8.0, { var_inter[0] : (1-a)/2.0, var_inter[1] :   1.0/2.0, var_inter[2] :   1.0/2 } ),
+  ( p1/8.0, { var_inter[0] :   1.0/2.0, var_inter[1] : (1+a)/2.0, var_inter[2] :   1.0/2 } ),
+  ( p1/8.0, { var_inter[0] :   1.0/2.0, var_inter[1] : (1-a)/2.0, var_inter[2] :   1.0/2 } ),
+  ( p1/8.0, { var_inter[0] :   1.0/2.0, var_inter[1] :   1.0/2.0, var_inter[2] : (1+a)/2 } ),
+  ( p1/8.0, { var_inter[0] :   1.0/2.0, var_inter[1] :   1.0/2.0, var_inter[2] : (1-a)/2 } ),
 
-  ( p2/8.0, { var_inter[0] : (1+a)/2.0, var_inter[1] : (1+a)/2.0, var_inter[2] : 1.0/2 } ),
-  ( p2/8.0, { var_inter[0] : (1+a)/2.0, var_inter[1] : (1-a)/2.0, var_inter[2] : 1.0/2 } ),
-  ( p2/8.0, { var_inter[0] : (1-a)/2.0, var_inter[1] : (1+a)/2.0, var_inter[2] : 1.0/2 } ),
-  ( p2/8.0, { var_inter[0] : (1-a)/2.0, var_inter[1] : (1-a)/2.0, var_inter[2] : 1.0/2 } ),
-  ( p2/8.0, { var_inter[0] : 1.0/2.0,   var_inter[1] : (1+a)/2.0, var_inter[2] : (1+a)/2 } ),
-  ( p2/8.0, { var_inter[0] : 1.0/2.0,   var_inter[1] : (1+a)/2.0, var_inter[2] : (1-a)/2 } ),
-  ( p2/8.0, { var_inter[0] : 1.0/2.0,   var_inter[1] : (1-a)/2.0, var_inter[2] : (1+a)/2 } ),
-  ( p2/8.0, { var_inter[0] : 1.0/2.0,   var_inter[1] : (1-a)/2.0, var_inter[2] : (1-a)/2 } ),
-  ( p2/8.0, { var_inter[0] : (1+a)/2.0, var_inter[1] : 1.0/2.0,   var_inter[2] : (1+a)/2 } ),
-  ( p2/8.0, { var_inter[0] : (1-a)/2.0, var_inter[1] : 1.0/2.0,   var_inter[2] : (1+a)/2 } ),
-  ( p2/8.0, { var_inter[0] : (1+a)/2.0, var_inter[1] : 1.0/2.0,   var_inter[2] : (1-a)/2 } ),
-  ( p2/8.0, { var_inter[0] : (1-a)/2.0, var_inter[1] : 1.0/2.0,   var_inter[2] : (1-a)/2 } ),
+  ( p2/8.0, { var_inter[0] : (1+a)/2.0, var_inter[1] : (1+a)/2.0, var_inter[2] :   1.0/2 } ),
+  ( p2/8.0, { var_inter[0] : (1+a)/2.0, var_inter[1] : (1-a)/2.0, var_inter[2] :   1.0/2 } ),
+  ( p2/8.0, { var_inter[0] : (1-a)/2.0, var_inter[1] : (1+a)/2.0, var_inter[2] :   1.0/2 } ),
+  ( p2/8.0, { var_inter[0] : (1-a)/2.0, var_inter[1] : (1-a)/2.0, var_inter[2] :   1.0/2 } ),
+  ( p2/8.0, { var_inter[0] :   1.0/2.0, var_inter[1] : (1+a)/2.0, var_inter[2] : (1+a)/2 } ),
+  ( p2/8.0, { var_inter[0] :   1.0/2.0, var_inter[1] : (1+a)/2.0, var_inter[2] : (1-a)/2 } ),
+  ( p2/8.0, { var_inter[0] :   1.0/2.0, var_inter[1] : (1-a)/2.0, var_inter[2] : (1+a)/2 } ),
+  ( p2/8.0, { var_inter[0] :   1.0/2.0, var_inter[1] : (1-a)/2.0, var_inter[2] : (1-a)/2 } ),
+  ( p2/8.0, { var_inter[0] : (1+a)/2.0, var_inter[1] :   1.0/2.0, var_inter[2] : (1+a)/2 } ),
+  ( p2/8.0, { var_inter[0] : (1-a)/2.0, var_inter[1] :   1.0/2.0, var_inter[2] : (1+a)/2 } ),
+  ( p2/8.0, { var_inter[0] : (1+a)/2.0, var_inter[1] :   1.0/2.0, var_inter[2] : (1-a)/2 } ),
+  ( p2/8.0, { var_inter[0] : (1-a)/2.0, var_inter[1] :   1.0/2.0, var_inter[2] : (1-a)/2 } ),
 
   ( p3/8.0, { var_inter[0] : (1+b)/2.0, var_inter[1] : (1+b)/2.0, var_inter[2] : (1+b)/2 } ),
   ( p3/8.0, { var_inter[0] : (1+b)/2.0, var_inter[1] : (1+b)/2.0, var_inter[2] : (1-b)/2 } ),
@@ -186,6 +186,7 @@ gauss_points[7] = [
   ( p4/8.0, { var_inter[0] : (1-c)/2.0, var_inter[1] : (1-c)/2.0, var_inter[2] : (1-c)/2 } ),
 ]
 
+gauss_points[3] = gauss_points[7]
 gauss_points[4] = gauss_points[7]
 gauss_points[5] = gauss_points[7]
 gauss_points[6] = gauss_points[7]

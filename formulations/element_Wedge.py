@@ -40,7 +40,6 @@ for i in range(3):
                                          tmp_authorized_permutations[c][4:6] + [ tmp_authorized_permutations[c][3] ]
 authorized_permutations = authorized_permutations[1:]
 
-
 interpolation["nodal"] = (1-var_inter[0]-var_inter[1]) * (1-var_inter[2])   * val[0] + \
                                    var_inter[0] * (1-var_inter[2])          * val[1] + \
                                    var_inter[1] * (1-var_inter[2])          * val[2] + \
@@ -58,13 +57,13 @@ z2=(1-(1.0/sqrt(3.0)))/2;
                           #( 2*var_inter[0] + 2*var_inter[1] - 1)   * (1-((1-var_inter[2])-z2)/(z1-z2)) * val[3]  + \
                           #(-2*var_inter[0]                  + 1)   * (1-((1-var_inter[2])-z2)/(z1-z2)) * val[4]  + \
                           #(-2*var_inter[1]                  + 1)   * (1-((1-var_inter[2])-z2)/(z1-z2)) * val[5]
-
 interpolation["gauss"] =  (-2*var_inter[1]                  + 1)   * (1-(var_inter[2]-z2)/(z1-z2))     * val[0]  + \
                           ( 2*var_inter[0] + 2*var_inter[1] - 1)   * (1-(var_inter[2]-z2)/(z1-z2))     * val[1]  + \
                           (-2*var_inter[0]                  + 1)   * (1-(var_inter[2]-z2)/(z1-z2))     * val[2]  + \
                           (-2*var_inter[1]                  + 1)   * (1-((1-var_inter[2])-z2)/(z1-z2)) * val[3]  + \
                           ( 2*var_inter[0] + 2*var_inter[1] - 1)   * (1-((1-var_inter[2])-z2)/(z1-z2)) * val[4]  + \
                           (-2*var_inter[0]                  + 1)   * (1-((1-var_inter[2])-z2)/(z1-z2)) * val[5]
+
 a = 1.0/6.0
 Flat_Interpolation_gauss_points = [
   ( a, { var_inter[0] : 1.0/2.0, var_inter[1] : 1.0/2.0 , var_inter[2] : 1.0/2.0 } ),
@@ -74,12 +73,14 @@ Flat_Interpolation_gauss_points = [
 interpolation["Flat_Interpolation"] = ( 2*var_inter[0] + 2*var_inter[1] - 1)   * val[0]  + \
                           (-2*var_inter[0]                  + 1)   * val[1]  + \
                           (-2*var_inter[1]                  + 1)   * val[2]
+
 quality = 1
 
 def local_coordinates(point):
   v = positions[1]-positions[0]
   l = dot( point-positions[0], v ) / dot(v,v)
   return vector( [l] )
+
 def pos_using_local_coordinates(coords):
   v = positions[1]-positions[0]
   return v * coords[0] + positions[0]
