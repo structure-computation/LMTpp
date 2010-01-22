@@ -6,7 +6,6 @@ interval_var_inter = [
   [0,1],
 ]
 
-
 #     7 ---------6
 #    /.         /|
 #   / .        / |
@@ -58,7 +57,6 @@ authorized_permutations = authorized_permutations[1:]
 #                          1./8. * (1. + X) * (1. + Y) * (1. + Z) * val[6] + \
 #                          1./8. * (1. - X) * (1. + Y) * (1. + Z) * val[7]
 
-
 interpolation["nodal"] =  (1-var_inter[0]) * (1-var_inter[1]) * (1-var_inter[2]) * val[0] + \
                             var_inter[0]   * (1-var_inter[1]) * (1-var_inter[2]) * val[1] + \
                             var_inter[0]   *   var_inter[1]   * (1-var_inter[2]) * val[2] + \
@@ -93,8 +91,6 @@ interpolation["gauss"] = (1-(var_inter[0]-z2)/(z1-z2))     * (1-(var_inter[1]-z2
                          (1-((1-var_inter[0])-z2)/(z1-z2)) * (1-((1-var_inter[1])-z2)/(z1-z2)) * (1-((1-var_inter[2])-z2)/(z1-z2))* val[6]  + \
                          (1-(var_inter[0]-z2)/(z1-z2))     * (1-((1-var_inter[1])-z2)/(z1-z2)) * (1-((1-var_inter[2])-z2)/(z1-z2))* val[7]
 
-
-
 a = 1.0/sqrt(3.0)
 Flat_Interpolation_gauss_points = [
   ( 1.0/4.0, { var_inter[0] : (1-a)/2.0, var_inter[1] : (1-a)/2.0,   var_inter[2] : 1.0/2.0 } ),
@@ -110,10 +106,12 @@ interpolation["Flat_Interpolation"] = (1-(var_inter[0]-z2)/(z1-z2))     * (1-(va
                          (1-(var_inter[0]-z2)/(z1-z2))     * (1-((1-var_inter[1])-z2)/(z1-z2))   * val[3]  \
 
 # ---------------------------------------------------------------------------------
+
 def local_coordinates(point):
   v = positions[1]-positions[0]
   l = dot( point-positions[0], v ) / dot(v,v)
   return vector( [l] )
+
 def pos_using_local_coordinates(coords):
   v = positions[1]-positions[0]
   return v * coords[0] + positions[0]

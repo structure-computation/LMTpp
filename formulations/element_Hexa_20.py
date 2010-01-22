@@ -132,17 +132,17 @@ gauss_points[1] = [
   ( 1.0, { var_inter[0] : 1.0/2.0, var_inter[1] : 1.0/2.0, var_inter[2] : 1.0/2.0 } )
 ]
 
-a,b = sqrt(2.0/3), sqrt(1.0/3)
-gauss_points[2] = [
-  ( 1.0/4.0, { var_inter[0] : 1.0/2.0, var_inter[1] : (1+a)/2.0, var_inter[2] : (1-b)/2 } ),
-  ( 1.0/4.0, { var_inter[0] : 1.0/2.0, var_inter[1] : (1-a)/2.0, var_inter[2] : (1-b)/2 } ),
-  ( 1.0/4.0, { var_inter[0] : (1+a)/2.0, var_inter[1] : 1.0/2.0, var_inter[2] : (1+b)/2 } ),
-  ( 1.0/4.0, { var_inter[0] : (1-a)/2.0, var_inter[1] : 1.0/2.0, var_inter[2] : (1+b)/2 } ),
-]
+#a,b = sqrt(2.0/3), sqrt(1.0/3)
+#gauss_points[2] = [
+  #( 1.0/4.0, { var_inter[0] : 1.0/2.0, var_inter[1] : (1+a)/2.0, var_inter[2] : (1-b)/2 } ),
+  #( 1.0/4.0, { var_inter[0] : 1.0/2.0, var_inter[1] : (1-a)/2.0, var_inter[2] : (1-b)/2 } ),
+  #( 1.0/4.0, { var_inter[0] : (1+a)/2.0, var_inter[1] : 1.0/2.0, var_inter[2] : (1+b)/2 } ),
+  #( 1.0/4.0, { var_inter[0] : (1-a)/2.0, var_inter[1] : 1.0/2.0, var_inter[2] : (1+b)/2 } ),
+#]
 
 a=1./8.
 b=sqrt(1.0/3.0)
-gauss_points[3] = [
+gauss_points[2] = [
   ( a, { var_inter[0] : (1.0+b)/2.0, var_inter[1] : (1.0+b)/2.0, var_inter[2] : (1.0-b)/2.0 } ),
   ( a, { var_inter[0] : (1.0-b)/2.0, var_inter[1] : (1.0+b)/2.0, var_inter[2] : (1.0-b)/2.0 } ),
   ( a, { var_inter[0] : (1.0+b)/2.0, var_inter[1] : (1.0-b)/2.0, var_inter[2] : (1.0-b)/2.0 } ),
@@ -206,6 +206,7 @@ gauss_points[7] = [
   ( p4/8.0, { var_inter[0] : (1-c)/2.0, var_inter[1] : (1-c)/2.0, var_inter[2] : (1-c)/2 } ),
 ]
 
+gauss_points[3] = gauss_points[7]
 gauss_points[4] = gauss_points[7]
 gauss_points[5] = gauss_points[7]
 gauss_points[6] = gauss_points[7]
