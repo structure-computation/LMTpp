@@ -173,7 +173,7 @@ bool level_set_cut( TM &m, const PhiExtract &p ) {
     LevelSetRefinement<PhiExtract> lr( p );
     refinement( m, lr );
     LevelSetRemoveNeg<PhiExtract> ln( p );
-    m.remove_elements_if( ln );
+    return m.remove_elements_if( ln );
 }
 
 /*!

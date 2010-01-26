@@ -24,10 +24,20 @@
 // WITHOUT XML
 
 class XmlNode {
+public:
+    bool has_attribute( const char *t ) const { return false; }
+    template<class T> void get_attribute( const char *t, T &val ) const; 
 };
 
 #else
 // WITH XML
+
+#ifdef METIL_COMP_DIRECTIVE
+#pragma lib_name xml2
+#pragma cpp_path /usr/include/libxml2
+#pragma src_file xmlnode.cpp
+#endif
+
 
 #include <sstream>
 #include <libxml/tree.h>

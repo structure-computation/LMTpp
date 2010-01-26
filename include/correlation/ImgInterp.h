@@ -3,6 +3,7 @@
 
 #ifdef METIL_COMP_DIRECTIVE
 #pragma lib_name QtGui
+#pragma cpp_path /usr/include/qt4
 #endif
 
 #include <containers/mat.h>

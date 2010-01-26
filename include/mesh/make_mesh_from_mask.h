@@ -174,7 +174,7 @@ struct MakeMeshFromMask {
         
         // valid nodes
         Vec<int> node_valid; node_valid.resize( pos.size(), -1 );
-        for(int i=0;i<connectivity.size();++i) {
+        for(int i=0;i<(int)connectivity.size();++i) {
             for(int j=0;j<3;++j) {
                 int num_node = connectivity[i][j];
                 if ( node_valid[ num_node ] == -1 ) {
