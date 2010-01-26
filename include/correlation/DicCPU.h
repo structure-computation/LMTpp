@@ -33,7 +33,7 @@ void dic_elem_matrix_( const TE &elem, const TIMG_f &f, const TIMG_g &g, TDIC &d
 */
 template<class T,unsigned dim>
 struct DicCPU {
-    typedef Mesh<Mesh_carac_pb_correlation_basic<double,dim> > TM_exemple;
+    typedef Mesh<Mesh_carac_pb_correlation_basic<double,dim> > TM_exemple; /// 
     static const bool want_lum_corr = true;
 
     ///
@@ -202,11 +202,11 @@ struct DicCPU {
             ExtractDM<NAME_VAR_GREY> eg;
             Vec<T,dim> P[TE::nb_nodes], D[TE::nb_nodes], MA( e.pos(0) + ed( *e.node(0) ) ), MI( e.pos(0) + ed( *e.node(0) ) );
             T G[TE::nb_nodes];
-            for(int i=0;i<TE::nb_nodes;++i) P[ i ] = e.pos(i);
-            for(int i=0;i<TE::nb_nodes;++i) D[ i ] = e.pos(i) + ed( *e.node(i) );
-            for(int i=0;i<TE::nb_nodes;++i) G[ i ] = eg( *e.node(i) );
-            for(int i=1;i<TE::nb_nodes;++i) MI = min( MI, D[ i ] ); // hum (won't work e.g. for Triangle_6...)
-            for(int i=1;i<TE::nb_nodes;++i) MA = max( MA, D[ i ] ); // hum (won't work e.g. for Triangle_6...)
+            for(unsigned i=0;i<TE::nb_nodes;++i) P[ i ] = e.pos(i);
+            for(unsigned i=0;i<TE::nb_nodes;++i) D[ i ] = e.pos(i) + ed( *e.node(i) );
+            for(unsigned i=0;i<TE::nb_nodes;++i) G[ i ] = eg( *e.node(i) );
+            for(unsigned i=1;i<TE::nb_nodes;++i) MI = min( MI, D[ i ] ); // hum (won't work e.g. for Triangle_6...)
+            for(unsigned i=1;i<TE::nb_nodes;++i) MA = max( MA, D[ i ] ); // hum (won't work e.g. for Triangle_6...)
             f.load_if_necessary( MI, MA );
             r.load_if_necessary( MI, MA, true );
             //
@@ -590,9 +590,12 @@ struct DicCPU {
     
     
     // output
-    Mat<T,Sym<>,SparseLine<> > M, C_M;
-    Vec<int> indice_noda;
-    Vec<T> F, dU;
+    Mat<T,Sym<>,SparseLine<> > M; /// matrice de corrélation
+    Mat<T,Sym<>,SparseLine<> > C_M; /// cholesky de M
+    Vec<int> indice_noda; /// numéro de noeud -> positionnement dans la matrice. Les ddl sont organisé par blocs
+        /// nb ddl = nb_dim + 1 si calcul de luminosité
+    Vec<T> F; /// second membre
+    Vec<T> dU; /// dernière itération (inclus la luminosité)
     T sum_abs_diff_fg; // sum_{for each pixel i} | f( x_i + d_i ) - g( x_i ) |
     T sum_sq_diff_fg ; // sum_{for each pixel i} ( f( x_i + d_i ) - g( x_i ) ) ^ 2
     T adimensioned_residual; // sqrt( sum_{for each pixel i} ( f( x_i + d_i ) - a_i * g( x_i ) ) ^ 2 ) / ( max( f ) - min( f ) ) / nb_covered_pixels

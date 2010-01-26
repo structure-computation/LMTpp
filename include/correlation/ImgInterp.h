@@ -548,7 +548,7 @@ struct ImgInterp {
     ///
     inline T tex_int( Vec<int,dim> p ) const {
         int o = p[0];
-        for(int i=1, m=sizes[0]; i<dim; m*=sizes[i], ++i )
+        for(unsigned i=1, m=sizes[0]; i<dim; m*=sizes[i], ++i )
             o += m * p[i];
         return data[ o ];
     }

@@ -200,6 +200,36 @@ bool refinement_if_length_sup(TM &m,T max_length) {
     return refinement(m,rl);
 }
 
+template<class TIMG>
+struct LevelSetImageRefinement {
+    LevelSetImageRefinement( const TIMG &ls_crack, const TIMG &ls_front ) : ls_crack( ls_crack ), ls_front( ls_front ) {}
+    template<class TE> double operator()( TE &e ) const {
+        double step = 1.0/measure( e );
+        for(double x=0;x<=1;x+=step) {
+            typename TE::Pvec P0 = e.pos(0) + (e.pos(1)-e.pos(0))*(x-step); 
+            if ( ls_front( P0 ) > 0 )
+                return 0;
+            typename TE::Pvec P1 = e.pos(0) + (e.pos(1)-e.pos(0))*(x     ); 
+            bool s1 = ls_crack( P0 ) > 0;
+            bool s2 = ls_crack( P1 ) > 0;
+            if ( s1 xor s2 ) {
+                if ( x < 0.2 ) {
+                    e.node(0)->pos = P1;
+                    return 0;
+                }
+                if ( x > 0.8 ) {
+                    e.node(1)->pos = P1;
+                    return 0;
+                }
+                return x;
+            }
+        }
+        return 0;
+    }
+    const TIMG &ls_crack;
+    const TIMG &ls_front;
+};
+
 
 };
 
