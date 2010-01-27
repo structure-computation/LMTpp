@@ -1,7 +1,7 @@
 //
 // C++ Interface: matinvsparse
 //
-// Description: 
+// Description:
 //
 //
 // Author: Hugo LECLERC <hugo.leclerc@lmt.ens-cachan.fr>, (C) 2005
@@ -152,7 +152,7 @@ template<class T,class TS> void get_Cholesky( Mat<T,TS,SparseLine<> > &m, Mat<T,
 //             unsigned ie = min( m.data[line].indices[ind+1], col+level );
 //             while ( ++col < ie ) {
 //                 if ( not HashCH<NN>::cor( hash[col], hash[ line ] ) ) continue;
-// 
+//
 //                 T v = dot_chol_factorize( m.data[col], m.data[line] );
 //                 if ( boolean_( v ) ) {
 //                     unsigned os = m.data[line].indices.size();
@@ -218,8 +218,8 @@ template<class T> void incomplete_chol_factorize( Mat<T,Sym<>,SparseLine<> > &m 
                     m.data[line].indices[ind] = col;
                 }
             }
-        
-        
+
+
         }
         //on diag
         //#ifdef DO_NOT_SQRT_DIAG_CHOL
@@ -232,7 +232,7 @@ template<class T> void incomplete_chol_factorize( Mat<T,Sym<>,SparseLine<> > &m 
     }
 }
 
-/*! 
+/*!
     m is assumed to be factorized
     sol sontient le second membre et res contiendra la solution.
 
@@ -242,13 +242,17 @@ template<class T> void incomplete_chol_factorize( Mat<T,Sym<>,SparseLine<> > &m 
 */
 template<class T,int s,int s2> void solve_using_chol_factorize( const Mat<T,Sym<s>,SparseLine<> > &mat, const Vec<T> &sol, Vec<T,s2> &res ) {
     unsigned nb_lines = mat.nb_rows();
-    
+
     res.resize( nb_lines );
     //
     for(unsigned line=0;line<nb_lines;++line) {
         T v = sol[line];
         for(int i=0;i<(int)mat.data[line].data.size()-1;++i)
             v -= mat.data[line].data[i] * res[ mat.data[line].indices[i] ];
+        if ( mat.data[line].data.size() == 0 ) {
+            std::cerr << "Matrix with a void line." << std::endl;
+            return;
+        }
         res[line] = v * mat.data[line].data.back();
     }
 
@@ -262,7 +266,7 @@ template<class T,int s,int s2> void solve_using_chol_factorize( const Mat<T,Sym<
     }
 }
 
-/*! 
+/*!
     m is assumed to be factorized
     sol sontient le second membre et res contiendra la solution.
 
@@ -272,7 +276,7 @@ template<class T,int s,int s2> void solve_using_chol_factorize( const Mat<T,Sym<
 */
 template<class T,int s,int s2> void solve_using_chol_factorize( const Mat<T,Herm<s>,SparseLine<> > &mat, const Vec<T> &sol, Vec<T,s2> &res ) {
     unsigned nb_lines = mat.nb_rows();
-    
+
     res.resize( nb_lines );
     //
     for(unsigned line=0;line<nb_lines;++line) {
@@ -297,17 +301,17 @@ template<class T,int s2> int solve_using_incomplete_chol_factorize( const Mat<T,
         x.resize( A.nb_rows(), T(0) );
     //
     Vec<T> r, d, q, s;
-    
+
     r = b - A * x;
     for(unsigned i=0;;++i) { if ( i==r.size() ) return 0; if ( LMT::abs(r[i]) > crit ) break; }
     solve_using_chol_factorize( mp, r, d );
-    
-    
+
+
     T deltn = dot( r, d );
     unsigned cpt = 1;
     while ( cpt < 200 ) {
         T delto = deltn;
-        
+
         q = A * d;
         T alpha = deltn / dot( d, q );
         x += alpha * d;
@@ -316,10 +320,10 @@ template<class T,int s2> int solve_using_incomplete_chol_factorize( const Mat<T,
         // r -= alpha * q;
         r = b - A * x;
         for(unsigned i=0;;++i) { if ( i==r.size() ) return cpt; if ( LMT::abs(r[i]) > crit ) break; }
-        
+
         solve_using_chol_factorize( mp, r, s );
         deltn = dot( r, s );
-        
+
         T beta = deltn / delto;
         d = s + beta * d;
         ++cpt;
@@ -343,7 +347,7 @@ vector_permutation[1] = s(1)
 vector_permutation[2] = s(2)
 etc...
 Soit P la matrice de permutation associée. On a   LU = PA
-Pour des infos sur la matrice de permutation, allez voir la page :  
+Pour des infos sur la matrice de permutation, allez voir la page :
     \relates http://en.wikipedia.org/wiki/Permutation_matrix
 
 ATTENTION : le nombre de coefficients par ligne ne doit pas dépasser 2^31-1 pour une architecture 32 bits !!!!
@@ -406,7 +410,7 @@ template<class T> bool lu_factorize( Mat<T,Gen<>,SparseLU> &m, Vec<int> &vector_
             m.U[j].indices[ind] = ii;
         }
 
-        
+
         // pseudo calcul de la vraie colonne j de L. Comme L est stckée en ligne les choses sont bien plus complexes que celles de U...
         // en même temps on recherche le meilleur pivot partiel.
         big_in_abs = m.U[j].data.back() ; // on y met le coefficient de la diagonale.
@@ -473,7 +477,7 @@ template<class T> bool lu_factorize( Mat<T,Gen<>,SparseLU> &m, Vec<int> &vector_
             // puis je l'enlève
             m.U[j].indices.pop_back();
             m.U[j].data.pop_back();
-            
+
             // je complète la ligne 2 avec les éventuels élements de U qui sont à la ligne horizontale line.
             for( jj=j+1;jj<ipivot;++jj) {
                 for( ii=0;ii<m.U[jj].indices.size();++ii)
@@ -577,16 +581,16 @@ template<class T> bool lu_factorize( Mat<T,Gen<>,SparseLU> &m, Vec<int> &vector_
             vector_permutation[j] = k;
         }/// fin de la permutation   ////////////////////////////////////////
 
-        
-        
+
+
         if (abs_indication(big_in_abs) )
             big_in_abs = 1. / big_in_abs;
         else {
             std::cerr << " pivot nul" << std::endl;
             return false;
         }
-        
-        
+
+
         /// Enfin on multiplie toutes les coefficients des lignes j+1 à n et colonne j par l'inverse du pivot partiel
         for(i=j+1;i<n;i++) {
             // on détermine s'il y a un coefficient non nul à la colonne j.
@@ -597,7 +601,7 @@ template<class T> bool lu_factorize( Mat<T,Gen<>,SparseLU> &m, Vec<int> &vector_
                 if (m.L[i].indices[k] == j)
                     m.L[i].data[k] *= big_in_abs;
         }
-        
+
 
     }
     return true;
@@ -608,7 +612,7 @@ template<class T,int s,int s2> void solve_using_lu_factorize( const Mat<T,Gen<s>
     if ( allow_permutation ) {
         Vec<T,s2> tmp_sol = sol[ permutation ];
         solve_using_lu_factorize( mat, tmp_sol, res );
-        //res = tmp_res; 
+        //res = tmp_res;
     } else
         solve_using_lu_factorize( mat, sol, res );
 }
@@ -726,25 +730,25 @@ template<class T> void incomplete_lu_factorize( Mat<T,Gen<>,SparseLU> &m ) {
 template<class T,int s2> void solve_using_incomplete_lu_factorize( const Mat<T,Gen<>,SparseLU> &mp, const Mat<T,Gen<>,SparseLU> &A, const Vec<T> &b, Vec<T,s2> &x, T crit = 1e-4 ) {
     assert(0); /// TODO
 //     Vec<T> r, d, q, s;
-//     
+//
 //     r = b - A * x;
 //     for(unsigned i=0;;++i) { if ( i==r.size() ) return; if ( abs(r[i]) > crit ) break; }
 //     solve_using_lu_factorize( mp, r, d );
-//     
+//
 //     T deltn = dot(r,d);
 //     unsigned cpt = 0;
 //     while ( true ) {
 //         T delto = deltn;
-//         
+//
 //         q = A * d;
 //         T alpha = deltn / dot( d, q );
 //         x += alpha * d;
 //         r -= alpha * q; //r = b - A * x;
 //         for(unsigned i=0;;++i) { if ( i==r.size() ) return; if ( abs(r[i]) > crit ) break; }
-//         
+//
 //         solve_using_lu_factorize( mp, r, s );
 //         deltn = dot( r, s );
-//         
+//
 //         T beta = deltn / delto;
 //         d = s + beta * d;
 //         ++cpt;
