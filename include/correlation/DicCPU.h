@@ -36,6 +36,11 @@ struct DicCPU {
     typedef Mesh<Mesh_carac_pb_correlation_basic<double,dim> > TM_exemple; /// 
     static const bool want_lum_corr = true;
 
+    struct ShapeFunctionAncestor {
+        virtual unsigned size() const = 0;
+        virtual Vec<T,dim> operator()( Vec<T,dim> pos, int i ) const = 0;
+    };
+
     ///
     DicCPU() {
         levenberg_marq = 0.0;
@@ -77,8 +82,10 @@ struct DicCPU {
             if ( dic.div_pixel < 0 ) {
                 dic_elem_matrix_( e, f, g, dic, MI, MA, StructForType<T>(), mutex );
             } else {
-                Vec<T,    (dim+want_lum_corr)*TE::nb_nodes  > F( 0 );
-                Mat<T,Gen<(dim+want_lum_corr)*TE::nb_nodes> > M; M.set( 0 );
+                unsigned nb_ddl_fe = ( dim + want_lum_corr ) * TE::nb_nodes;
+                unsigned s = nb_ddl_fe + dic.sum_nb_additional_shape_functions();
+                Vec<T> F; F.resize( s, 0 );
+                Mat<T> M( s, s ); M.set( 0 );
                 //
                 if ( dic.div_pixel == 0 ) {
                     for( Rectilinear_iterator<int,dim> p( Vec<int,dim>(MI), Vec<int,dim>(MA) + 1, 1 ); p; ++p )
@@ -108,6 +115,12 @@ struct DicCPU {
                         //
                         Vec<T,dim> DO;
                         get_interp( typename TE::NE(), Nodal(), var_inter, D, DO );
+                        for(unsigned n=0,c=0;n<dic.additional_shape_functions.size();++n) {
+                            for(unsigned i=0;i<dic.additional_shape_functions[n]->size();++i,++c) {
+                                DO += dic.coeffs_additional_shape_functions[ c ] * 
+                                        dic.additional_shape_functions[n]->operator()( p.pos, i );
+                            }
+                        }
                         
                         Vec<T,dim> PF( use_g_as_ref ? DO : p.pos );
                         Vec<T,dim> PG( use_g_as_ref ? p.pos : DO );
@@ -139,6 +152,21 @@ struct DicCPU {
                             }
                         }
                         
+                        //
+                        for(unsigned n0=0,c0=nb_ddl_fe;n0<dic.additional_shape_functions.size();++n0) {
+                            for(unsigned i0=0;i0<dic.additional_shape_functions[n0]->size();++i0,++c0) {
+                                F[ c0 ] += 
+                                        imp * dot( dic.additional_shape_functions[n0]->operator()( p.pos, i0 ), grad ) * diff_fg;
+                                for(unsigned n1=0,c1=nb_ddl_fe;n1<dic.additional_shape_functions.size();++n1) {
+                                    for(unsigned i1=0;i1<dic.additional_shape_functions[n1]->size();++i1,++c1) {
+                                        M( c0, c1 ) +=
+                                                imp * dot( dic.additional_shape_functions[n0]->operator()( p.pos, i0 ), grad ) *
+                                                      dot( dic.additional_shape_functions[n1]->operator()( p.pos, i1 ), grad );
+                                    }
+                                }
+                                // coupling
+                            }
+                        }
                         
                         // dG part
                         Vec<T,TE::nb_nodes> sham_grey;
@@ -177,12 +205,19 @@ struct DicCPU {
                                 for(unsigned c=0;c<dim+want_lum_corr;++c,++m)
                                     if ( n <= m )
                                         dic.M( dic.indice_noda[ e.node(i)->number ] + d, dic.indice_noda[ e.node(j)->number ] + c ) += M( n, m );
+                    for(unsigned i=0;i<dic.sum_nb_additional_shape_functions();++i)
+                        for(unsigned j=0;j<=i;++j)
+                            dic.M( dic.indice_additional_shape_functions + i, dic.indice_additional_shape_functions + j ) += 
+                                    M( nb_ddl_fe + i, nb_ddl_fe + j );
+                        
                 }
 
                 if ( want_vec ) {
                     for(unsigned i=0,n=0;i<TE::nb_nodes;++i)
                         for(unsigned d=0;d<dim+want_lum_corr;++d,++n)
                             dic.F[ dic.indice_noda[ e.node(i)->number ] + d ] += F[ n ];
+                    for(unsigned i=0;i<dic.sum_nb_additional_shape_functions();++i)
+                        dic.F[ dic.indice_additional_shape_functions + i ] += F[ nb_ddl_fe + i ];
                 }
 
                 mutex.unlock();
@@ -232,12 +267,21 @@ struct DicCPU {
         }
     };
     
+    unsigned sum_nb_additional_shape_functions() const {
+        unsigned res = 0;
+        for(unsigned n=0;n<additional_shape_functions.size();++n)
+            res += additional_shape_functions[ n ]->size();
+        return res;
+    }
+    
     /// toto
     template<class TIMGf,class TIMGg,class TM,class NAME_VAR_DEPL,class NAME_VAR_GREY>
     void assemble( const TIMGf &f, const TIMGg &g, const TM &m, const NAME_VAR_DEPL &name_var_depl, const NAME_VAR_GREY &name_var_grey, bool want_mat = true, bool want_vec = true, int resol_level = 0 ) {
-        unsigned nb_ddl = ( dim + want_lum_corr ) * m.node_list.size();
+        unsigned nb_ddl_fe = ( dim + want_lum_corr ) * m.node_list.size();
+        unsigned nb_ddl = nb_ddl_fe + sum_nb_additional_shape_functions();
         if ( want_mat ) {
             indice_noda = ( dim + want_lum_corr ) * symamd( m );
+            indice_additional_shape_functions = nb_ddl_fe;
             
             M.clear();
             M.resize( nb_ddl );
@@ -246,6 +290,8 @@ struct DicCPU {
             F.resize( nb_ddl );
             F.set( 0.0 );
         }
+        
+        coeffs_additional_shape_functions.resize( sum_nb_additional_shape_functions(), 0 );
         
         sum_abs_diff_fg  = 0;
         sum_sq_diff_fg   = 0;
@@ -298,12 +344,14 @@ struct DicCPU {
                 m.node_list[i].pos -= 0.5;
                 m.node_list[i].pos /= 2;
                 pd( m.node_list[i] ) /= 2;
+                coeffs_additional_shape_functions /= 2;
             }
             exec( f.pyramidal_filter(), g.pyramidal_filter(), m, name_var_depl, name_var_grey, want_mat, want_vec, resol_level + 1 );
             for(unsigned i=0;i<m.node_list.size();++i) {
                 m.node_list[i].pos *= 2;
                 m.node_list[i].pos += 0.5;
                 pd( m.node_list[i] ) *= 2;
+                coeffs_additional_shape_functions *= 2;
             }
         }
         //
@@ -332,7 +380,15 @@ struct DicCPU {
             
             //
             dU *= relaxation;
-            update_mesh( m, name_var_depl, name_var_grey );
+  
+            PRINT( M );
+            PRINT( F );
+            
+            #warning
+//            update_mesh( m, name_var_depl, name_var_grey );
+            for(unsigned i=0;i<sum_nb_additional_shape_functions();++i)
+                coeffs_additional_shape_functions[ i ] += dU[ indice_additional_shape_functions + i ];
+            PRINT( coeffs_additional_shape_functions );
             
             //
             history_norm_inf_dU.push_back( norm_inf( dU ) );
@@ -480,6 +536,18 @@ struct DicCPU {
         }
     }
     
+    template<class TM,class NAME_VAR_DEPL> void update_mesh_with_additional_shape_functions( TM &m, const NAME_VAR_DEPL &name_var_depl ) {
+        for(unsigned nn=0;nn<m.node_list.size();++nn) {
+            m.node_list[nn].dep = 0;
+            for(unsigned n=0,c=0;n<additional_shape_functions.size();++n) {
+                for(unsigned i=0;i<additional_shape_functions[n]->size();++i,++c) {
+                    m.node_list[nn].dep += coeffs_additional_shape_functions[ c ] * 
+                            additional_shape_functions[n]->operator()( m.node_list[nn].pos, i );
+                }
+            }
+        }
+    }
+
     ///
     template<class TIMGf,class TM,class NAME_VAR_DEPL,class NAME_VAR_GREY,class TIMGr>
     void get_def_img( const TIMGf &f, TM &m, const NAME_VAR_DEPL &name_var_depl, const NAME_VAR_GREY &name_var_grey, TIMGr &r ) {
@@ -594,6 +662,7 @@ struct DicCPU {
     Mat<T,Sym<>,SparseLine<> > C_M; /// cholesky de M
     Vec<int> indice_noda; /// numéro de noeud -> positionnement dans la matrice. Les ddl sont organisé par blocs
         /// nb ddl = nb_dim + 1 si calcul de luminosité
+    int indice_additional_shape_functions;
     Vec<T> F; /// second membre
     Vec<T> dU; /// dernière itération (inclus la luminosité)
     T sum_abs_diff_fg; // sum_{for each pixel i} | f( x_i + d_i ) - g( x_i ) |
@@ -623,6 +692,8 @@ struct DicCPU {
     T remove_eig_val_if_lower_than;
     bool want_epsilon; /// true by default
     Vec<T> U_red; /// vector result of exec_rigid_body
+    Vec<ShapeFunctionAncestor *> additional_shape_functions;
+    Vec<double> coeffs_additional_shape_functions;
 };
 
 }
