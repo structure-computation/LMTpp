@@ -134,6 +134,18 @@ def print_authorized_permutations(e):
     print '};\n'
         
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+def print_det_jac( e ):
+    print 'template<class TN,class TNG,class TD,unsigned NET,class TVI>'
+    print 'typename TNG::T get_det_jac( const Element<'+e.name+',TN,TNG,TD,NET> &e, const TVI &var_inter ) {'
+    print '    typedef typename TNG::T T;'
+    
+    cw = Write_code('T')
+    cw.add( e.det_jacobian(), 'res', Write_code.Return )
+    print cw.to_string()
+    
+    print '}'
+
+# ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
 name_file = sys.argv[1]
 e = Element( name_file, 3 )
 
@@ -150,6 +162,7 @@ for non_linear in [False,True]:
 print_interpolations(e)
 print_shape_functions(e)
 print_authorized_permutations(e)
+print_det_jac(e)
 
 print '}'
 print '#endif // '+nameHEADER
