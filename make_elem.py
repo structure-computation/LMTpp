@@ -136,7 +136,7 @@ def print_authorized_permutations(e):
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
 def print_det_jac( e ):
     print 'template<class TN,class TNG,class TD,unsigned NET,class TVI>'
-    print 'typename TNG::T get_det_jac( const Element<'+e.name+',TN,TNG,TD,NET> &e, const TVI &var_inter ) {'
+    print 'typename TNG::T get_det_jac( const Element<'+e.name+',TN,TNG,TD,NET> &elem, const TVI &var_inter ) {'
     print '    typedef typename TNG::T T;'
     
     cw = Write_code('T')

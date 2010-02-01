@@ -750,7 +750,7 @@ template<> struct AuthorizedPerm<Hexa> {
 };
 
 template<class TN,class TNG,class TD,unsigned NET,class TVI>
-typename TNG::T get_det_jac( const Element<Hexa,TN,TNG,TD,NET> &e, const TVI &var_inter ) {
+typename TNG::T get_det_jac( const Element<Hexa,TN,TNG,TD,NET> &elem, const TVI &var_inter ) {
     typedef typename TNG::T T;
     T reg0=1-var_inter[0]; T reg1=1-var_inter[1]; T reg2=1-var_inter[2]; T reg3=reg0*reg2; T reg4=var_inter[0]*reg2;
     T reg5=reg0*reg1; T reg6=var_inter[0]*reg1; T reg7=reg1*reg2; T reg8=elem.pos(1)[2]*reg4; T reg9=elem.pos(0)[1]*reg3;
