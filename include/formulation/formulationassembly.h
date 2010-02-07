@@ -329,7 +329,7 @@ namespace LMT {
         //
         void get_initial_conditions() {
             for(unsigned i=0;i<formulations.size();++i)
-                formulation(i)->get_initial_conditions();
+                formulation(i)->get_initial_conditions(vectors);
         }
         //
         bool is_unknown(const std::string &s) {
