@@ -492,7 +492,7 @@ struct ImgInterp {
     }
 
     ///
-    int display( bool normalize = false, const std::string namefile = "pouet.png" ) {
+    int display( bool normalize = false, const std::string namefile = "pouet.png" ) const {
         save( namefile.c_str(), normalize );
         std::string tmp = "display " + namefile + " &";
         return system( tmp.c_str() );

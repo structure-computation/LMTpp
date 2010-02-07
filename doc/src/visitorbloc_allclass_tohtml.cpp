@@ -936,7 +936,7 @@ void VisitorBloc_AllClass_toHTML::generate_stream_HTML_for_function( ofstream* o
         //cerr << " f->returnType ooouiiiiiiiiiiiiiiiii= " << stmp << " de la fonction " << f->name.name << endl;
         stmp2 = french2HTML( stmp );
     }
-    *o << stmp2 << " ";
+    *o << stmp2 ;
     //cerr << " f->reference() = " << f->reference() << endl;
     switch(t) {
         case Normal : *o << french2HTML( f->name.name ); break;
