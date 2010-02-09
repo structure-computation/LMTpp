@@ -19,8 +19,8 @@ extern int ldl_numeric_pg (int n, int Ap [ ], int Ai [ ], double Ax [ ],
     double D [ ], double Y [ ], int Pattern [ ], int Flag [ ],
     int P [ ], int Pinv [ ] , int *kersiz , double  **kernel );
 
-extern int ldl_numeric_with_pivots_pg(int n, int Ap [ ], int Ai [ ], 
-    double Ax [ ], int Lp [ ], int Parent [ ], int Lnz [ ], int Li [ ], 
+extern int ldl_numeric_with_pivots_pg(int n, int Ap [ ], int Ai [ ],
+    double Ax [ ], int Lp [ ], int Parent [ ], int Lnz [ ], int Li [ ],
     double Lx [ ], double D [ ], double Y [ ], int Pattern [ ], int Flag [ ],
     int P [ ], int Pinv [ ], int *ksiz, int kernod [ ] );
 
