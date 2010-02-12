@@ -59,11 +59,11 @@ Voici un exemple d'utilisation :
         Vec<Sparse<std::string>,10> vsf; // au plus dix éléments non nuls (nombre maximal fixé à la compilation).
         Vec<int> plage ;
         std::string residu;
-        
+
         vsf.set(1000,"fee clochette");
         residu = vsf.get( 1000 ); // où bien residu = vsf[1000];
 
-    
+
 
 
     \\relates Vec
@@ -74,11 +74,11 @@ class Vec<Sparse<TT>,static_size_> {
 public:
     template<unsigned n> struct SubType { typedef TT T; };
     static const unsigned nb_sub_type = 1;
-    
+
     static const int static_size = static_size_;
     static const bool fixed_size = ( static_size_ >= 0 );
     static const int sparsity_rate = 2;
-    
+
     struct inc_index_access {
         inc_index_access():j(0) {}
         DelayedAssignement<DelayedAssignementSparseSource<TT> > operator[](unsigned i) {
@@ -111,25 +111,25 @@ public:
     };
     inc_index_access begin_inc_index_access() { inc_index_access res; res.vec = this; return res; } /// iter[i] gives the i-th element
     inc_index_access_const begin_inc_index_access_const() const { inc_index_access_const res; res.data=data.ptr(); res.indices=indices.ptr(); res.s=data.size(); return res; } /// iter[i] gives the i-th element
-    
+
     struct Assign { template<class T2> void operator()(const T2 &val,unsigned ind,Vec &th) const { if (val==0) return; th.indices.push_back(ind); th.data.push_back(val); } };
     friend struct Assign;
     template<class T2,int s2> Vec &operator=(const Vec<T2,s2> &v) { DEBUGASSERT(v.size()==size()); indices.free(); data.free(); apply_nz(v,Assign(),*this); return *this; }
-    
+
     template<class T2> Vec(const Vec<Sparse<T2> > &v) { indices = v.indices; data = v.data; }
-       
+
     typedef DelayedAssignement<DelayedAssignementSparseSource<TT> > RetOp;
     typedef TT RetOpConst;
-    
+
     void throw_ref_and_clear( Vec &res ) {
         data   .throw_ref_and_clear( res.data    );
         indices.throw_ref_and_clear( res.indices );
         si     .throw_val_and_clear( res.si      );
     }
-    
+
     RetOp operator[](unsigned i) {
         DEBUGASSERT( i < size() );
-        
+
         RetOp da;
         unsigned b = 0, e = indices.size();
         while ( e-b > 3 ) {
@@ -162,7 +162,14 @@ public:
     TT get(unsigned i) const { return operator[](i); } /// calling get() ensures that the this is the const version of operator[] which is called
     void set(unsigned i,const TT v) { operator[](i)=v; } /// set element i
     unsigned size() const { return si.val; }
-    
+
+    template<class T2>
+    Vec &operator=( const Vec<T2> &v ) {
+        for(unsigned i=0;i<v.size();++i)
+            operator[]( i ) = v[ i ];
+        return *this;
+    }
+
     /// reserve n indices and n data
     void reserve(unsigned n) { indices.reserve(n); data.reserve(n); }
 
@@ -262,7 +269,7 @@ print_apply_ext( 'apply_range',TT,TV,"""DEBUGASSERT(to<v.si.val);
         for(unsigned j=v.indices[i]+1;j<to;++j)
             op((TT)0,PARALIST);
     }""",suppar=['int from','int to'] )
-    
+
 print_apply_ext( 'apply_range_wi',TT,TV,"""DEBUGASSERT(to<v.si.val);
     if ( v.indices.size()==0 )
         for(;from<to;++from)
@@ -284,7 +291,7 @@ print_apply_ext( 'apply_range_wi',TT,TV,"""DEBUGASSERT(to<v.si.val);
         for(unsigned j=v.indices[i]+1;j<to;++j)
             op((TT)0,j,PARALIST);
     }""",suppar=['int from','int to'] )
-    
+
 print_apply_ext('apply_nz',TT,TV,'for(unsigned i=0;i<v.indices.size();++i) op(v.data[i],PARALIST);')
 
 print_apply_ext('apply_nz_wi',TT,TV,'for(unsigned i=0;i<v.indices.size();++i) op(v.data[i],v.indices[i],PARALIST);')

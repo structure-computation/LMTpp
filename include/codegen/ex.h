@@ -128,7 +128,7 @@ public:
     /// an unique values for each different ops
     long id() const { return (long)op; }
     
-    bool operator<(const Ex &e) const { return ( op < e.op ); }
+    bool operator<(const Ex &e) const { return ( (const void *)op < (const void *)e.op ); }
     
     const Op *op;
     static long unsigned current_id;

@@ -19,22 +19,22 @@ struct TypeOfVariableInterpolationInMesh {
         TypeIfNodal,
         TypeIfElementary
     >::T T;
-    
+
     template<class TE,class TV>
     void interp( const TE &elem, const TV &var_inter, Number<0> ) { // nodal
         T val[TE::nb_nodes];
         ExtractDM<NameDM> extract_NameDM_value;
-        for(int i=0;i<TE::nb_nodes;++i)
+        for(unsigned i=0;i<TE::nb_nodes;++i)
             val[ i ] = extract_NameDM_value( *elem.node(i) );
         get_interp( typename TE::NE(), Nodal(), var_inter, val, res );
     }
-    
+
     template<class TE,class TV>
     void interp( const TE &elem, const TV &var_inter, Number<1> ) { // elementary
         ExtractDM<NameDM> extract_NameDM_value;
         res = extract_NameDM_value( elem );
     }
-    
+
     template<class TE>
     bool operator()( const TE &elem, const typename TE::Pvec &pos ) {
         Vec<typename TE::T,TE::nb_var_inter> var_inter;
@@ -45,7 +45,7 @@ struct TypeOfVariableInterpolationInMesh {
         }
         return false;
     }
-    
+
     T res;
 };
 

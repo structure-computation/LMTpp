@@ -1,33 +1,24 @@
-/* *
- *   Copyright (C) 2004 by Hugo LECLERC                                    *
- *   hugo_lec@club-internet.fr                                             *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- ***************************************************************************/
 #ifndef DOUCXMLNODE_H
 #define DOUCXMLNODE_H
+
+#ifdef METIL_COMP_DIRECTIVE
+#pragma lib_name xml2
+#pragma cpp_path /usr/include/libxml2
+#endif
 
 #ifdef DONT_WANT_XML
 // WITHOUT XML
 
 class XmlNode {
+public:
+    bool has_attribute( const char *t ) const { return false; }
+    template<class T> void get_attribute( const char *t, T &val ) const;
 };
 
 #else
 // WITH XML
+
+
 
 #include <sstream>
 #include <libxml/tree.h>
@@ -69,15 +60,15 @@ public:
     unsigned nb_elements() const;
     /// number of sub elements named name_elem
     unsigned nb_elements(const char *nameElem) const;
-    /// 
+    ///
     XmlNode get_element(const char *nameElem,unsigned number=0) const throw (IoException);
-    /// 
+    ///
     XmlNode get_element_nb(unsigned number=0) const throw (IoException);
     /// true if has attribute
     bool has_attribute(const char *nameAttr) const;
-    /// 
+    ///
     std::string get_attribute(const char *name_attr) const throw (IoException);
-    /// 
+    ///
     template<class T>
     const XmlNode &get_attribute(const char *name,T &res) const throw (IoException) {
         std::string att( get_attribute(name) );
@@ -86,7 +77,7 @@ public:
         if ( !is ) { throw IoException( "Error while reading attribute " + std::string( name ) + " value=" + att ); }
         return *this;
     }
-    /// 
+    ///
     template<class T,class T2>
     const XmlNode &get_attribute(const char *name,T &res,T2 default_value) const throw (IoException) {
         if ( has_attribute(name) ) {
@@ -98,9 +89,9 @@ public:
         else
             res = default_value;
         return *this;
-    }    /// 
+    }    ///
     std::string get_content() const throw (IoException);
-    /// 
+    ///
     template<class T>
     const XmlNode &get_content(T &res) const throw (IoException) {
         std::string att( get_content() );
@@ -142,22 +133,22 @@ public:
         return *this;
     }
 
-    ///    
+    ///
     template<class T>
     const XmlNode &get_object(T &res,const char *ancestor="") const throw (IoException) {
         res = reinterpret_cast<T>( factory.create(get_name(),ancestor) );
         res->read_xml_data(*this);
         return *this;
     }
-    ///    
+    ///
     template<class T,class TPar>
     const XmlNode &get_object_with_parameter(T &res,TPar *par,const char *ancestor="") const throw (IoException) {
         res = reinterpret_cast<T>( factory.create(get_name(),ancestor) ); // ,reinterpret_cast<void *>(par)
         res->read_xml_data(*this,par);
         return *this;
     }
-    
-    
+
+
     // --------------------------- write ---------------------------
     ///
     XmlNode &set_attribute(const char *name,const char *val);
@@ -180,10 +171,10 @@ public:
     }
     ///
     XmlNode add_element(const char *name);
-    
+
     /// helper function
     static double getUnitCoeff(const char *coeff) throw(IoException);
-    
+
     /// throw exception with a valid IoException
     void throwIoException(const std::string &msg) const throw(IoException);
 private:
@@ -191,7 +182,7 @@ private:
     mutable class Xml_doc_with_counter *doc;
     ///
     xmlNodePtr node;
-    
+
     ///
     friend std::ostream &operator<<(std::ostream &os,const XmlNode &node);
 };

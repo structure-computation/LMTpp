@@ -777,11 +777,7 @@ void Documentation::generate_index() {
     pageWeb<< " <tr>"  << std::endl;
     pageWeb<< "<td><a href=\"list_touslesexemples.html\">Exemples</a></td>" << std::endl;
     pageWeb<< "<td><a href=\"list_touteslesfonctions.html\">Toutes les fonctions</a></td>" << std::endl;
-    stmp = "kdevelop";
-    list_webpage.push_back(stmp);
-    stmp2 = "Kdevelop";
-    list_titre_of_webpage.push_back(stmp2);
-    pageWeb<< "<td><a href=\"" << "webpage_"+stmp <<".html\"> " << stmp2 << " </a></td>" << std::endl; // CODAGE en DUR   -> pas bien
+    pageWeb<< "<td></td>" << std::endl;
     pageWeb<< " </tr>"  << std::endl;
 
     pageWeb<< " <tr>"  << std::endl;
@@ -791,11 +787,7 @@ void Documentation::generate_index() {
     list_titre_of_webpage.push_back(stmp2);
     pageWeb<< "<td><a href=\"" << "webpage_"+stmp <<".html\"> " << stmp2 << " </a></td>" << std::endl; // CODAGE en DUR   -> pas bien
     pageWeb<< "<td></td>" << std::endl;
-    stmp = "gdb";
-    list_webpage.push_back(stmp);
-    stmp2 = "GDB";
-    list_titre_of_webpage.push_back(stmp2);
-    pageWeb<< "<td><a href=\"" << "webpage_"+stmp <<".html\"> " << stmp2 << " </a></td>" << std::endl; // CODAGE en DUR   -> pas bien
+    pageWeb<< "<td></td>" << std::endl;
     pageWeb<< " </tr>"  << std::endl;
 
     pageWeb<< " <tr>"  << std::endl;
@@ -831,14 +823,6 @@ void Documentation::generate_index() {
     list_titre_of_webpage.push_back(stmp2);
     pageWeb<< "<td><a href=\"" << "webpage_"+stmp <<".html\"> " << stmp2 << " </a></td>" << std::endl; // CODAGE en DUR   -> pas bien
     pageWeb<< " </tr>"  << std::endl;
-    
-    pageWeb<< " <tr>"  << std::endl;
-    pageWeb<< "<td></td>"  << std::endl;
-    pageWeb<< "<td><a href=\"webpage_roles.html\">Roles</a></td>" << std::endl;
-    pageWeb<< "<td></td>" << std::endl;
-    pageWeb<< " </tr>"  << std::endl;
-    
-    
     pageWeb<< " </table>"  << std::endl;
     pageWeb<< "<hr/>" << std::endl;
     pageWeb<< "<form action=\"search.php\" method=\"get\">" << std::endl;

@@ -315,7 +315,7 @@ public:
 
         //
         offset_lagrange_multipliers = size;
-        for(int i=0;i<constraints.size();++i)
+        for(unsigned i=0;i<constraints.size();++i)
             size += ( constraints[i].penalty_value == 0 );
 
         // resize vectors

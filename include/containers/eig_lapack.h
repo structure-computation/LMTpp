@@ -3,32 +3,36 @@
 
 #include "mat.h"
 
+#ifdef METIL_COMP_DIRECTIVE
+#pragma lib_name lapack
+#endif
+
 extern "C" int dsyev_(
     char *jobz, char *uplo, int *n, double *a,
-    int *lda, double *w, double *work, int *lwork, 
+    int *lda, double *w, double *work, int *lwork,
     int *info );
-    
+
 namespace LMT {
 
 /*!
     Get eigen values and vector of a symetric matrix using lapack.
     m will be converted to a dense matrix (compatible with lapack).
     you will need to add gfortran and lapack in libraries.
-    
+
     example:
     \code
         Mat<double,Sym<> > m( 10, 10 );
         m.diag() = range(10);
         m(4,2) = 1.0;
-        
+
         PRINTN( m );
         Vec<double> eig_val;
         Mat<double> eig_vec;
         get_eig_sym( m, eig_val, eig_vec );
-        
+
         PRINT( eig_vec );
         PRINT( eig_val );
-        
+
         m.set( 0.0 );
         m.diag() = eig_val;
         PRINTN( trans( eig_vec ) * m * eig_vec );
@@ -44,7 +48,7 @@ namespace LMT {
 */
 template<class TM>
 void get_eig_sym( const TM &m, Vec<double> &eig_val, Mat<double> &eig_vec ) {
-    char jobz = 'V'; // Compute eigenvalues and eigenvectors.   
+    char jobz = 'V'; // Compute eigenvalues and eigenvectors.
     char uplo = 'L'; // lower
     int n = m.nb_rows();
     Vec<double> A; A.resize( n * n );

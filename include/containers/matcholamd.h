@@ -1,6 +1,13 @@
 #ifndef MATCHOLAMD_H
 #define MATCHOLAMD_H
+
+#ifdef METIL_COMP_DIRECTIVE
+#pragma cpp_path /usr/include/suitesparse/
+#pragma lib_name cholmod
+#endif
+
 #ifdef WITH_CHOLMOD
+
 
 #include "mat.h"
 extern "C" {

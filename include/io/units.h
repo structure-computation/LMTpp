@@ -23,6 +23,10 @@
 
 namespace LMT {
 
+#ifdef METIL_COMP_DIRECTIVE
+#pragma src_file units.cpp
+#endif
+
 class XmlNode;
 
 class Units {

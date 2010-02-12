@@ -1,7 +1,7 @@
 //
 // C++ Interface: refinement
 //
-// Description: 
+// Description:
 //
 //
 // Author: Hugo LECLERC <leclerc@lmt.ens-cachan.fr>, (C) 2004
@@ -24,7 +24,7 @@ namespace LMTPRIVATE {
         typedef Refinment<typename TM::TNext,TMParent,num_sub_mesh+1,max_num_sub_mesh> RNext;
         typedef typename TM::Tpos T;
         typedef DynamicData<TNode *,TM::TElemList::nb_elem_type> TDN;
-        
+
         ///
         Refinment(TMParent *mp):m_parent(mp),cut("cut"),next(mp) {}
         ///
@@ -38,7 +38,7 @@ namespace LMTPRIVATE {
                 if ( val > 0 and val < 1 ) {
                     typename TMParent::TNode *nn = m_parent->add_node();
                     m->elem_list.get_data(*cut,e) = nn;
-                    
+
                     std::pair<typename TM::Tpos,const TN *> pond_list[] = {
                         std::pair<typename TM::Tpos,const TN *>( 1-val, e.node(0) ),
                         std::pair<typename TM::Tpos,const TN *>( val  , e.node(1) )
@@ -57,7 +57,7 @@ namespace LMTPRIVATE {
         template<class Op> void update_cut(TM &m,Op &op) {
             // create nodes on center of Bar elements which are considered to be too long
             next.update_cut(m.next,op);
-            
+
             RefineBars<Op> rb;
             rb.op = &op;
             rb.cut = &cut;
@@ -87,9 +87,9 @@ namespace LMTPRIVATE {
                 nn[i] = m_parent->template sub_mesh<2>().elem_list.get_data(next.next.cut, *m_parent->get_children_of(e,Number<2>())[i] );
             return divide_element( e, *m_parent, nn );
         }
-        /// 
+        ///
         template<class TE> bool operator()(TE &e) { return div(e,Number<TE::nb_var_inter>()); }
-        
+
         TMParent *m_parent;
         TDN cut;
         RNext next;
@@ -122,7 +122,7 @@ bool refinement(TM &m,Op &op) {
     m.elem_list.reg_dyn( &r.cut );
     bool res = m.remove_elements_if( r );
     m.elem_list.unreg_dyn( &r.cut );
-    
+
     m.signal_connectivity_change();
     return res;
 }
@@ -148,7 +148,7 @@ struct LevelSetRefinement {
             return 0;
         }
         return o;
-    }  
+    }
     const PhiExtract &ed;
 };
 
@@ -161,7 +161,7 @@ struct LevelSetRemoveNeg {
             d += ed( *e.node(i) );
         d /= TE::nb_nodes;
         return d <= 0;
-    }  
+    }
     const PhiExtract &ed;
 };
 
@@ -173,7 +173,7 @@ bool level_set_cut( TM &m, const PhiExtract &p ) {
     LevelSetRefinement<PhiExtract> lr( p );
     refinement( m, lr );
     LevelSetRemoveNeg<PhiExtract> ln( p );
-    m.remove_elements_if( ln );
+    return m.remove_elements_if( ln );
 }
 
 /*!
@@ -188,7 +188,7 @@ struct RafinementOpBasedOnLength {
 /*!
 
     Cette fonction divise toutes les barres (segments) du maillage en deux pour lesquelles la longueur est supérieure à max_length.
-    Elle renvoie vrai si elle divise au moins une barre et faux sinon. Ainsi si on souhaite que toutes les barres soient inférieures à max_length, on relancera la fonction autant de fois que nécessaire. 
+    Elle renvoie vrai si elle divise au moins une barre et faux sinon. Ainsi si on souhaite que toutes les barres soient inférieures à max_length, on relancera la fonction autant de fois que nécessaire.
 
     \keyword Maillage/Elément/Opération
     subdivide each element bar e such as length(e)>max_length (true means subdivision).
@@ -199,6 +199,36 @@ bool refinement_if_length_sup(TM &m,T max_length) {
     rl.max_length = max_length;
     return refinement(m,rl);
 }
+
+template<class TIMG>
+struct LevelSetImageRefinement {
+    LevelSetImageRefinement( const TIMG &ls_crack, const TIMG &ls_front ) : ls_crack( ls_crack ), ls_front( ls_front ) {}
+    template<class TE> double operator()( TE &e ) const {
+        double step = 1.0/measure( e );
+        for(double x=0;x<=1;x+=step) {
+            typename TE::Pvec P0 = e.pos(0) + (e.pos(1)-e.pos(0))*(x-step);
+            if ( ls_front( P0 ) > 0 )
+                return 0;
+            typename TE::Pvec P1 = e.pos(0) + (e.pos(1)-e.pos(0))*(x     );
+            bool s1 = ls_crack( P0 ) > 0;
+            bool s2 = ls_crack( P1 ) > 0;
+            if ( s1 xor s2 ) {
+                if ( x < 0.4 ) {
+                    e.node(0)->pos = P1;
+                    return 0;
+                }
+                if ( x > 0.6 ) {
+                    e.node(1)->pos = P1;
+                    return 0;
+                }
+                return x;
+            }
+        }
+        return 0;
+    }
+    const TIMG &ls_crack;
+    const TIMG &ls_front;
+};
 
 
 };

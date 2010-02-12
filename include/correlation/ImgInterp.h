@@ -3,6 +3,7 @@
 
 #ifdef METIL_COMP_DIRECTIVE
 #pragma lib_name QtGui
+#pragma cpp_path /usr/include/qt4
 #endif
 
 #include <containers/mat.h>
@@ -19,7 +20,7 @@ namespace LMT {
 /*! kernel exemple for ImgInterp */
 struct ImgInterpBilinearKernel {
     static std::string name() { return "ImgInterpBilinearKernel"; }
-    
+
     // 2D
     template<class T,class Img,class PT>
     T operator()( StructForType<T>, const Img &f, PT x, PT y ) const {
@@ -27,9 +28,9 @@ struct ImgInterpBilinearKernel {
         int yi = int( y );
         PT xf = x - xi;
         PT yf = y - yi;
-        return f.tex_int( xi + 0, yi + 0 ) * T( 1 - xf ) * T( 1 - yf ) + 
-               f.tex_int( xi + 1, yi + 0 ) * T( 0 + xf ) * T( 1 - yf ) + 
-               f.tex_int( xi + 0, yi + 1 ) * T( 1 - xf ) * T( 0 + yf ) + 
+        return f.tex_int( xi + 0, yi + 0 ) * T( 1 - xf ) * T( 1 - yf ) +
+               f.tex_int( xi + 1, yi + 0 ) * T( 0 + xf ) * T( 1 - yf ) +
+               f.tex_int( xi + 0, yi + 1 ) * T( 1 - xf ) * T( 0 + yf ) +
                f.tex_int( xi + 1, yi + 1 ) * T( 0 + xf ) * T( 0 + yf );
     }
     // 3D
@@ -41,13 +42,13 @@ struct ImgInterpBilinearKernel {
         PT xf = x - xi;
         PT yf = y - yi;
         PT zf = z - zi;
-        return f.tex_int( xi + 0, yi + 0, zi + 0 ) * T( 1 - xf ) * T( 1 - yf ) * T( 1 - zf ) + 
-               f.tex_int( xi + 1, yi + 0, zi + 0 ) * T( 0 + xf ) * T( 1 - yf ) * T( 1 - zf ) + 
-               f.tex_int( xi + 0, yi + 1, zi + 0 ) * T( 1 - xf ) * T( 0 + yf ) * T( 1 - zf ) + 
+        return f.tex_int( xi + 0, yi + 0, zi + 0 ) * T( 1 - xf ) * T( 1 - yf ) * T( 1 - zf ) +
+               f.tex_int( xi + 1, yi + 0, zi + 0 ) * T( 0 + xf ) * T( 1 - yf ) * T( 1 - zf ) +
+               f.tex_int( xi + 0, yi + 1, zi + 0 ) * T( 1 - xf ) * T( 0 + yf ) * T( 1 - zf ) +
                f.tex_int( xi + 1, yi + 1, zi + 0 ) * T( 0 + xf ) * T( 0 + yf ) * T( 1 - zf ) +
-               f.tex_int( xi + 0, yi + 0, zi + 1 ) * T( 1 - xf ) * T( 1 - yf ) * T( 0 + zf ) + 
-               f.tex_int( xi + 1, yi + 0, zi + 1 ) * T( 0 + xf ) * T( 1 - yf ) * T( 0 + zf ) + 
-               f.tex_int( xi + 0, yi + 1, zi + 1 ) * T( 1 - xf ) * T( 0 + yf ) * T( 0 + zf ) + 
+               f.tex_int( xi + 0, yi + 0, zi + 1 ) * T( 1 - xf ) * T( 1 - yf ) * T( 0 + zf ) +
+               f.tex_int( xi + 1, yi + 0, zi + 1 ) * T( 0 + xf ) * T( 1 - yf ) * T( 0 + zf ) +
+               f.tex_int( xi + 0, yi + 1, zi + 1 ) * T( 1 - xf ) * T( 0 + yf ) * T( 0 + zf ) +
                f.tex_int( xi + 1, yi + 1, zi + 1 ) * T( 0 + xf ) * T( 0 + yf ) * T( 0 + zf );
     }
 
@@ -58,13 +59,13 @@ struct ImgInterpBilinearKernel {
     //         PT xf = p[0] - xi;
     //         PT yf = p[1] - yi;
     //         return Vec<T,2>(
-    //             ( f.tex_int( xi + 1, yi + 0 ) - f.tex_int( xi + 0, yi + 0 ) ) * ( 1 - yf ) + 
+    //             ( f.tex_int( xi + 1, yi + 0 ) - f.tex_int( xi + 0, yi + 0 ) ) * ( 1 - yf ) +
     //             ( f.tex_int( xi + 1, yi + 1 ) - f.tex_int( xi + 0, yi + 1 ) ) * ( 0 + yf ),
-    //             ( f.tex_int( xi + 0, yi + 1 ) - f.tex_int( xi + 0, yi + 0 ) ) * ( 1 - xf ) + 
+    //             ( f.tex_int( xi + 0, yi + 1 ) - f.tex_int( xi + 0, yi + 0 ) ) * ( 1 - xf ) +
     //             ( f.tex_int( xi + 1, yi + 1 ) - f.tex_int( xi + 1, yi + 0 ) ) * ( 0 + xf )
     //         );
     //     }
-    
+
     template<class T,class Img,class PT,int dim>
     Vec<T,dim> grad( StructForType<T>, const Img &f, Vec<PT,dim> p ) const {
         Vec<T,dim> res;
@@ -80,37 +81,37 @@ struct ImgInterpBilinearKernel {
 /*! kernel exemple for ImgInterp */
 struct ImgInterpOrder3_Kernel {
     static std::string name() { return "ImgInterpOrder3_Kernel"; }
-    
+
     template<class T>
     T interp( T vm, T v0, T v1, T v2, T xf ) const {
-        return 
-            vm * ( 0 - xf ) * ( 1 - xf ) * ( 2 - xf ) / 6 + 
-            v0 * ( 1 + xf ) * ( 1 - xf ) * ( 2 - xf ) / 2 + 
-            v1 * ( 1 + xf ) * ( 0 + xf ) * ( 2 - xf ) / 2 + 
+        return
+            vm * ( 0 - xf ) * ( 1 - xf ) * ( 2 - xf ) / 6 +
+            v0 * ( 1 + xf ) * ( 1 - xf ) * ( 2 - xf ) / 2 +
+            v1 * ( 1 + xf ) * ( 0 + xf ) * ( 2 - xf ) / 2 +
             v2 * ( 1 + xf ) * ( 0 + xf ) * ( xf - 1 ) / 6;
     }
-    
+
     /*
         vm := symbol("vm")
         v0 := symbol("v0")
         v1 := symbol("v1")
         v2 := symbol("v2")
         xf := symbol("xf")
-        
-        d := vm * ( xf * ( 1 - xf ) - ( 2 - xf ) * ( 1 - 2 * xf ) ) / 6 + 
-                    v0 * ( - ( 1 - xf ) * ( 1 + xf ) - 2 * xf * ( 2 - xf ) ) / 2 + 
-                    v1 * ( ( 2 - xf ) * ( 1 + 2 * xf ) - xf * ( 1 + xf ) ) / 2 + 
+
+        d := vm * ( xf * ( 1 - xf ) - ( 2 - xf ) * ( 1 - 2 * xf ) ) / 6 +
+                    v0 * ( - ( 1 - xf ) * ( 1 + xf ) - 2 * xf * ( 2 - xf ) ) / 2 +
+                    v1 * ( ( 2 - xf ) * ( 1 + 2 * xf ) - xf * ( 1 + xf ) ) / 2 +
                     v2 * ( xf * ( 1 + xf ) + ( xf - 1 ) * ( 1 + 2 * xf ) ) / 6
     */
     template<class T>
     T grad( T vm, T v0, T v1, T v2, T xf ) const {
-        return 
-            vm * ( xf * ( 1 - xf ) - ( 2 - xf ) * ( 1 - 2 * xf ) ) / 6 + 
-            v0 * ( - ( 1 - xf ) * ( 1 + xf ) - 2 * xf * ( 2 - xf ) ) / 2 + 
-            v1 * ( ( 2 - xf ) * ( 1 + 2 * xf ) - xf * ( 1 + xf ) ) / 2 + 
+        return
+            vm * ( xf * ( 1 - xf ) - ( 2 - xf ) * ( 1 - 2 * xf ) ) / 6 +
+            v0 * ( - ( 1 - xf ) * ( 1 + xf ) - 2 * xf * ( 2 - xf ) ) / 2 +
+            v1 * ( ( 2 - xf ) * ( 1 + 2 * xf ) - xf * ( 1 + xf ) ) / 2 +
             v2 * ( xf * ( 1 + xf ) + ( xf - 1 ) * ( 1 + 2 * xf ) ) / 6;
     }
-    
+
     // 2D
     template<class T,class Img,class PT>
     T operator()( StructForType<T>, const Img &f, PT x, PT y ) const {
@@ -118,7 +119,7 @@ struct ImgInterpOrder3_Kernel {
         int yi = int( y );
         PT xf = x - xi;
         PT yf = y - yi;
-        return interp( 
+        return interp(
             interp( f.tex_int( xi - 1, yi - 1 ), f.tex_int( xi + 0, yi - 1 ), f.tex_int( xi + 1, yi - 1 ), f.tex_int( xi + 2, yi - 1 ), xf ),
             interp( f.tex_int( xi - 1, yi + 0 ), f.tex_int( xi + 0, yi + 0 ), f.tex_int( xi + 1, yi + 0 ), f.tex_int( xi + 2, yi + 0 ), xf ),
             interp( f.tex_int( xi - 1, yi + 1 ), f.tex_int( xi + 0, yi + 1 ), f.tex_int( xi + 1, yi + 1 ), f.tex_int( xi + 2, yi + 1 ), xf ),
@@ -143,20 +144,20 @@ struct ImgInterpOrder3_Kernel {
         //         int yi = int( p[1] );
         //         PT xf = p[0] - xi;
         //         PT yf = p[1] - yi;
-        //         return Vec<T,dim>( 
+        //         return Vec<T,dim>(
         //             grad(
         //                 interp( f.tex_int( xi - 1, yi - 1 ), f.tex_int( xi - 1, yi + 0 ), f.tex_int( xi - 1, yi + 1 ), f.tex_int( xi - 1, yi + 2 ), yf ),
         //                 interp( f.tex_int( xi + 0, yi - 1 ), f.tex_int( xi + 0, yi + 0 ), f.tex_int( xi + 0, yi + 1 ), f.tex_int( xi + 0, yi + 2 ), yf ),
         //                 interp( f.tex_int( xi + 1, yi - 1 ), f.tex_int( xi + 1, yi + 0 ), f.tex_int( xi + 1, yi + 1 ), f.tex_int( xi + 1, yi + 2 ), yf ),
         //                 interp( f.tex_int( xi + 2, yi - 1 ), f.tex_int( xi + 2, yi + 0 ), f.tex_int( xi + 2, yi + 1 ), f.tex_int( xi + 2, yi + 2 ), yf ),
-        //                 xf 
+        //                 xf
         //             ),
         //             grad(
         //                 interp( f.tex_int( xi - 1, yi - 1 ), f.tex_int( xi + 0, yi - 1 ), f.tex_int( xi + 1, yi - 1 ), f.tex_int( xi + 2, yi - 1 ), xf ),
         //                 interp( f.tex_int( xi - 1, yi + 0 ), f.tex_int( xi + 0, yi + 0 ), f.tex_int( xi + 1, yi + 0 ), f.tex_int( xi + 2, yi + 0 ), xf ),
         //                 interp( f.tex_int( xi - 1, yi + 1 ), f.tex_int( xi + 0, yi + 1 ), f.tex_int( xi + 1, yi + 1 ), f.tex_int( xi + 2, yi + 1 ), xf ),
         //                 interp( f.tex_int( xi - 1, yi + 2 ), f.tex_int( xi + 0, yi + 2 ), f.tex_int( xi + 1, yi + 2 ), f.tex_int( xi + 2, yi + 2 ), xf ),
-        //                 yf 
+        //                 yf
         //             )
         //         );
     }
@@ -171,9 +172,9 @@ struct ImgInterpIntegralKernel {
         int yi = int( y );
         PT xf = x - xi;
         PT yf = y - yi;
-        return f.tex_int( xi + 0, yi + 0 ) * ( 1 - xf ) * ( 1 - yf ) + 
-               f.tex_int( xi + 1, yi + 0 ) * ( 0 + xf ) * ( 1 - yf ) + 
-               f.tex_int( xi + 0, yi + 1 ) * ( 1 - xf ) * ( 0 + yf ) + 
+        return f.tex_int( xi + 0, yi + 0 ) * ( 1 - xf ) * ( 1 - yf ) +
+               f.tex_int( xi + 1, yi + 0 ) * ( 0 + xf ) * ( 1 - yf ) +
+               f.tex_int( xi + 0, yi + 1 ) * ( 1 - xf ) * ( 0 + yf ) +
                f.tex_int( xi + 1, yi + 1 ) * ( 0 + xf ) * ( 0 + yf );
     }
     // 3D
@@ -198,9 +199,9 @@ struct ImgInterpDivKernel {
         int yfi = int( yf * 20 );
         PT xff = xf * 20 - xfi;
         PT yff = yf * 20 - yfi;
-        return f.tex_int( xi + 0, yi + 0 ) * ( 1 - xf ) * ( 1 - yf ) + 
-               f.tex_int( xi + 1, yi + 0 ) * ( 0 + xf ) * ( 1 - yf ) + 
-               f.tex_int( xi + 0, yi + 1 ) * ( 1 - xf ) * ( 0 + yf ) + 
+        return f.tex_int( xi + 0, yi + 0 ) * ( 1 - xf ) * ( 1 - yf ) +
+               f.tex_int( xi + 1, yi + 0 ) * ( 0 + xf ) * ( 1 - yf ) +
+               f.tex_int( xi + 0, yi + 1 ) * ( 1 - xf ) * ( 0 + yf ) +
                f.tex_int( xi + 1, yi + 1 ) * ( 0 + xf ) * ( 0 + yf );
     }
     // 3D
@@ -213,8 +214,8 @@ struct ImgInterpDivKernel {
 };
 
 
-/*! 
-    \a ImgInterp est un type qui représente une fonction définie sur une partie du réseau carré/cubique unitaire. 
+/*!
+    \a ImgInterp est un type qui représente une fonction définie sur une partie du réseau carré/cubique unitaire.
     Plus précisément soit S le réseau du plan (resp. de l'espace) défini par les points/noeuds de coordonnées s = k1*e1+k2*e2+...+kn*en où (e1,e2,...,en) est la base canonique de IR^n et k1, k2, ..., kn sont des entiers relatifs quelconques et variables. ImgInterp représente une fonction f définie sur une partie de S de la forme {(k1,k2,...,kn), où k1 varie dans [[0..sizes[0]-1]], k2 dans [[0..sizes[1]-1]] etc...}, à valeur dans une ensemble dont les éléments sont du type T_.
 
     Remarque : f peut être vue comme la restriction d'une fonction g définie sur le pavé [0..sizes[0]-1] x ... x [0..sizes[n-1]-1].
@@ -224,7 +225,7 @@ struct ImgInterpDivKernel {
         * T_ est le type de retour de la fonction,
         * dim_ est la dimension du réseau ( e.g. 2 pour une image classique (i.e. du plan)),
         * Kernel_ est l'algorithme d'interpolation entre les points du réseau,
-        * PT_ est le type scalaire des coordonnées (e.g. si le type des coordonnées est Vec<int,2> alors PT_ = int). 
+        * PT_ est le type scalaire des coordonnées (e.g. si le type des coordonnées est Vec<int,2> alors PT_ = int).
             WARNING : si vous envisager de faire de la multirésoltion, ne prenez pas PT_ = int ou un autre format entier car la méthode pyramidal_filter() ne calculera pas la moyenne des pixels adjacents. Prenez PT_ = double ou float.
 */
 template<class T_,unsigned dim_,class Kernel_=ImgInterpBilinearKernel,class PT_=T_>
@@ -234,26 +235,32 @@ struct ImgInterp {
     typedef Kernel_ Kernel;
     typedef PT_ PT;
     typedef ImgInterp T_NewImg;
-    
+
     ///
     ImgInterp() : sizes( 1 ), div_2( NULL ) {}
-    
+
     ///
     ImgInterp( const std::string &s ) : sizes( 1 ), div_2( NULL ) {
         load( s );
     }
-    
+
     ///
     void resize( const Vec<int,dim> s ) {
         sizes = s;
         data.resize( product( s ) );
     }
-    
+
+    ///
+    void resize( const Vec<int,dim> s, T_ val ) {
+        sizes = s;
+        data.resize( product( s ), val );
+    }
+
     ///
     void set( T default_val ) {
         data.set( default_val );
     }
-    
+
     ///
     ImgInterp &pyramidal_filter() const {
         if ( div_2 )
@@ -264,7 +271,7 @@ struct ImgInterp {
             div_2->tex_int( p.pos / 2 ) = operator()( p.pos + 0.5  );
         return *div_2;
     }
-    
+
     Vec<int,dim> size() const { return sizes; }
     ///
     void load( const std::string &s ) {
@@ -272,12 +279,12 @@ struct ImgInterp {
         QImage img( QString( s.c_str() ) );
         if ( img.depth() == 0 )
             throw "Failed to load img" + s;
-        
+
         sizes.set( 1 );
         assert( dim >= 2 );
         sizes[ 0 ] = img.width();
         sizes[ 1 ] = img.height();
-        
+
         data.resize( product( sizes ) );
         const uchar *ptr = img.bits();
         if ( img.depth() == 8 ) {
@@ -292,17 +299,17 @@ struct ImgInterp {
             throw "img.depth() not supported " + to_string( img.depth() );
         }
     }
-    
+
     template<class TB>
     void load_binary( const std::string &filename, Vec<int,dim> S, Vec<int,dim> X0 = 0, Vec<int,dim> X1 = -1 ) {
         assert( dim >= 2 );
-        
+
         for(unsigned i=0;i<dim;++i)
             if ( X1[i] < 0 )
                 X1[i] = S[i];
-        
+
         sizes = X1 - X0;
-        
+
         // data in tmp
         data.resize( product( sizes ) );
         std::ifstream f( filename.c_str() );
@@ -333,13 +340,13 @@ struct ImgInterp {
         } else
             assert( 0 /* TODO */ );
     }
-    
+
     ///
     QImage to_QImage( bool normalize = false ) const {
         float o = 0.0, m = 1.0;
         int total_size = sizes[0] * sizes[1];
         /// Le type T n'est pas forcément ordonné ni facilement convertible en entier 8 bits (e.g. complex<TT>).
-        /// on affiche par défaut sa "norme" (en espérant qu'elle existe). 
+        /// on affiche par défaut sa "norme" (en espérant qu'elle existe).
         Vec<float> v = abs(data);
         if ( normalize ) {
             float mi = min( v );
@@ -377,7 +384,7 @@ struct ImgInterp {
             if (maxi != mini)
                 m = 255 / ( maxi - mini );
         }
-                    
+
         //
         QImage img( sizes[0], sizes[1], QImage::Format_ARGB32 );
         uchar *ptr = img.bits();
@@ -391,7 +398,7 @@ struct ImgInterp {
         }
         return img;
     }
-    
+
     template<class T2, class Kernel2, class PT2>
     T mean( const ImgInterp<T2,dim,Kernel2,PT2>& mask) const {
         assert((mask.sizes[0] == sizes[0]) and (mask.sizes[1] == sizes[1]));
@@ -410,7 +417,7 @@ struct ImgInterp {
         sum /= nb;
         return sum ;/// total_size;
     }
-  
+
     template<class T2, class Kernel2, class PT2>
     T variance( const ImgInterp<T2,dim,Kernel2,PT2>& mask) const {
         assert((mask.sizes[0] == sizes[0]) and (mask.sizes[1] == sizes[1]));
@@ -432,7 +439,7 @@ struct ImgInterp {
     ///
     void load_ascii_mat_file( std::string filename ) {
         using namespace std;
-        
+
         // sizes
         sizes = 0;
         ifstream f( filename.c_str() );
@@ -446,7 +453,7 @@ struct ImgInterp {
             while ( getline( f, line ) )
                 sizes[1]++;
         }
-            
+
         // data
         data.resize( product( sizes ) );
         f.clear();
@@ -454,7 +461,7 @@ struct ImgInterp {
         for(unsigned i=0;i<data.size();++i)
             f >> data[ i ];
     }
-    
+
     ///
     ImgInterp<T,dim> simple_blur() {
         ImgInterp<T,dim> res;
@@ -471,28 +478,28 @@ struct ImgInterp {
         }
         return res;
     }
-    
+
     ///
     void save( const std::string filename, bool normalize = false ) const {
         QImage img = to_QImage( normalize );
         img.save( filename.c_str() );
     }
-    
+
     ///
     void save_binary( std::string filename ) const {
         std::ofstream f( filename.c_str() );
         f.write( (char *)data.ptr(), sizeof(T) * data.size() );
     }
-    
+
     ///
-    int display( bool normalize = false, const std::string namefile = "pouet.png" ) {
+    int display( bool normalize = false, const std::string namefile = "pouet.png" ) const {
         save( namefile.c_str(), normalize );
         std::string tmp = "display " + namefile + " &";
         return system( tmp.c_str() );
     }
 
     /*!
-    canal_alpha est une image qui doit contenir les valeurs du niveau alpha (valeurs entre 0 et 1, 1 pour opaque et 0 pour transparent)  
+    canal_alpha est une image qui doit contenir les valeurs du niveau alpha (valeurs entre 0 et 1, 1 pour opaque et 0 pour transparent)
     */
     template<class T2, class Kernel2, class PT2>
     void save( const ImgInterp<T2,dim,Kernel2,PT2>& canal_alpha, const std::string filename, bool normalize = false ) const {
@@ -501,7 +508,7 @@ struct ImgInterp {
     }
 
     /*!
-    canal_alpha est une image qui doit contenir les valeurs du niveau alpha (valeurs entre 0 et 1, 1 pour opaque et 0 pour transparent)  
+    canal_alpha est une image qui doit contenir les valeurs du niveau alpha (valeurs entre 0 et 1, 1 pour opaque et 0 pour transparent)
      */
     template<class T2, class Kernel2, class PT2>
     int display( const ImgInterp<T,dim,Kernel2,PT2>& canal_alpha, bool normalize = false, const std::string namefile = "pouet.png" ) {
@@ -509,17 +516,17 @@ struct ImgInterp {
         std::string tmp = "display " + namefile + " &";
         return system( tmp.c_str() );
     }
-    
+
     ///
     inline T &tex_int( int x, int y ) {
         return data[ sizes[0] * max( 0, min( sizes[1]-1, y ) ) + max( 0, min( sizes[0]-1, x ) ) ];
     }
-    
+
     ///
     inline T tex_int( int x, int y ) const {
         return data[ sizes[0] * max( 0, min( sizes[1]-1, y ) ) + max( 0, min( sizes[0]-1, x ) ) ];
     }
-    
+
     ///
     inline T &tex_int( int x, int y, int z ) {
         x = max( 0, min( x, sizes[0]-1 ) );
@@ -527,7 +534,7 @@ struct ImgInterp {
         z = max( 0, min( z, sizes[2]-1 ) );
         return data[ sizes[1] * sizes[0] * z + sizes[0] * y + x ];
     }
-    
+
     ///
     inline T tex_int( int x, int y, int z ) const {
         x = max( 0, min( x, sizes[0]-1 ) );
@@ -535,7 +542,7 @@ struct ImgInterp {
         z = max( 0, min( z, sizes[2]-1 ) );
         return data[ sizes[1] * sizes[0] * z + sizes[0] * y + x ];
     }
-    
+
     ///
     inline T &tex_int( Vec<int,dim> p ) {
         int o = p[0];
@@ -543,43 +550,43 @@ struct ImgInterp {
             o += m * p[i];
         return data[ o ];
     }
-    
+
     ///
     inline T tex_int( Vec<int,dim> p ) const {
         int o = p[0];
-        for(int i=1, m=sizes[0]; i<dim; m*=sizes[i], ++i )
+        for(unsigned i=1, m=sizes[0]; i<dim; m*=sizes[i], ++i )
             o += m * p[i];
         return data[ o ];
     }
-    
+
     ///
     inline T operator()( PT x, PT y ) const {
         return kernel( StructForType<T>(), *this, x, y );
     }
-    
+
     ///
     inline T operator()( PT x, PT y, PT z ) const {
         return kernel( StructForType<T>(), *this, x, y, z );
     }
-    
-    
+
+
     ///
     template<class PTT>
     inline T operator()( Vec<PTT,2> p ) const {
         return operator()( p[0], p[1] );
     }
-    
+
     ///
     template<class PTT>
     inline T operator()( Vec<PTT,3> p ) const {
         return operator()( p[0], p[1], p[2] );
     }
-    
+
     ///
     inline Vec<T,dim> grad( Vec<PT,dim> p ) const {
         return kernel.grad( StructForType<T>(), *this, p );
     }
-    
+
     ///
     //     inline Vec<T,dim> grad( Vec<PT,dim> p, PT dec ) const {
     //         Vec<T,dim> res;
@@ -587,12 +594,12 @@ struct ImgInterp {
     //             res[ i ] = ( operator()( Vec<PT,dim>( p + static_dirac_vec<dim>( dec / 2, i ) ) ) - operator()( p - static_dirac_vec<dim>( dec / 2, i ) ) ) / dec;
     //         return res;
     //     }
-    
+
     ///
     void load_if_necessary( Vec<int,dim> MI, Vec<int,dim> MA, bool may_be_modified = false ) const {}
-    
+
     template<class TT, unsigned dime, class K, class PTT, class OP> friend void apply_wi( ImgInterp< TT, dime, K, PTT >& img, OP& op );
-    
+
     ///
     Vec<T> data;
     Vec<int,dim> sizes;
@@ -606,22 +613,22 @@ template<class T,unsigned dim,class PT=T>
 struct ImgInterByBlock {
     typedef long long Int64;
     typedef ImgInterp<T,dim,PT> Img;
-    
+
     ImgInterByBlock() {
         allowed_memory_size = 2 << 31;
         PRINT( allowed_memory_size );
     }
-    
+
     void load( const std::string &filename ) {
         int n = 0;
         int m = 0;
         blocks.resize( n, m );
         blocks.set( (Img *)NULL );
     }
-    
+
     ///
     inline void load_if_necessary( Vec<int,dim> MI, Vec<int,dim> MA, bool may_be_modified = false ) const {}
-    
+
     Mat<Img *> blocks;
     Int64 allowed_memory_size;
 };
@@ -635,25 +642,25 @@ struct ImgInterpDec {
     typedef TIMG T_NewImg;
 
     ImgInterpDec( TIMG *orig, Vec<PT,dim> offset ) : orig( orig ), offset( offset ) {}
-    
+
     inline void load_if_necessary( Vec<int,dim> MI, Vec<int,dim> MA, bool may_be_modified = false ) const {
         orig->load_if_necessary( MI-offset, MA-offset, may_be_modified );
     }
-    
+
     inline T &tex_int( int x, int y ) { return orig->tex_int( x - offset[0], y - offset[1] ); }
     inline T tex_int( int x, int y ) const { return orig->tex_int( x - offset[0], y - offset[1] ); }
     inline T &tex_int( int x, int y, int z ) { return orig->tex_int( x - offset[0], y - offset[1], z - offset[2] ); }
     inline T tex_int( int x, int y, int z ) const { return orig->tex_int( x - offset[0], y - offset[1], z - offset[2] ); }
     inline T &tex_int( Vec<int,dim> p ) { return orig->tex_int( p - offset ); }
     inline T tex_int( Vec<int,dim> p ) const { return orig->tex_int( p - offset ); }
-    
+
     inline T operator()( PT x, PT y ) const { return orig->operator()( x - offset[0], y - offset[1] ); }
     inline T operator()( PT x, PT y, PT z ) const { return orig->operator()( x - offset[0], y - offset[1], z - offset[2] ); }
     template<class PTT> inline T operator()( Vec<PTT,dim> p ) const { return orig->operator()( p - offset ); }
-    
+
     inline Vec<T,dim> grad( Vec<PT,dim> p ) const { return orig->grad( p - offset ); }
-    
-    
+
+
     TIMG *orig;
     Vec<PT,dim> offset;
 };
@@ -662,17 +669,17 @@ struct ImgInterpDec {
 
 /*!
     \keyword Traitement_dimages
-    
+
 */
 template<class TT>
 ImgInterp<TT,3> img_dist_from_front( const ImgInterp<TT,3> &mat, int max_dist, double diff_pix ) {
     typedef TT T;
     typedef Vec<int,3> P;
-    
+
     ImgInterp<TT,3> dist;
     dist.resize( mat.sizes );
     dist.set( max_dist );
-    
+
     Vec<P> front;
     for(int z=1;z<mat.sizes[2];++z) {
         for(int y=1;y<mat.sizes[1];++y) {
@@ -689,7 +696,7 @@ ImgInterp<TT,3> img_dist_from_front( const ImgInterp<TT,3> &mat, int max_dist, d
             }
         }
     }
-    
+
     //
     unsigned of_front = 0;
     while ( of_front < front.size() ) {
@@ -713,30 +720,30 @@ ImgInterp<TT,3> img_dist_from_front( const ImgInterp<TT,3> &mat, int max_dist, d
             }
         }
     }
-    
+
     //
     for(int z=0;z<mat.sizes[2];++z)
         for(int y=0;y<mat.sizes[1];++y)
             for(int x=0;x<mat.sizes[0];++x)
                 dist.tex_int( x, y, z ) *= ( mat.tex_int(x,y,z) >= diff_pix ? 1 : -1 );
-            
+
     return dist;
 }
 
 
 /*!
     \keyword Traitement_dimages
-    
+
 */
 template<class TT>
 ImgInterp<TT,2> img_dist_from_front( const ImgInterp<TT,2> &mat, int max_dist, TT diff_pix ) {
     typedef TT T;
     typedef Vec<int,2> P;
-    
+
     ImgInterp<double,2> dist;
     dist.resize( mat.sizes );
     dist.set( max_dist );
-    
+
     Vec<P> front;
     for(int y=1;y<mat.sizes[1];++y) {
         for(int x=1;x<mat.sizes[0];++x) {
@@ -749,7 +756,7 @@ ImgInterp<TT,2> img_dist_from_front( const ImgInterp<TT,2> &mat, int max_dist, T
             }
         }
     }
-    
+
     //
     unsigned of_front = 0;
     while ( of_front < front.size() ) {
@@ -770,12 +777,12 @@ ImgInterp<TT,2> img_dist_from_front( const ImgInterp<TT,2> &mat, int max_dist, T
             }
         }
     }
-    
+
     //
     for(int y=0;y<mat.sizes[1];++y)
         for(int x=0;x<mat.sizes[0];++x)
             dist.tex_int( x, y ) *= ( mat.tex_int(x,y) >= diff_pix ? 1 : -1 );
-            
+
     return dist;
 }
 
@@ -784,7 +791,7 @@ ImgInterp<T_,dim_,Kernel_,PT_> abs( const ImgInterp<T_,dim_,Kernel_,PT_> &i) {
     ImgInterp<T_,dim_,Kernel_,PT_> res;
     res.resize(i.size());
     res.data = abs(i.data);
-    return res;    
+    return res;
 }
 
 template<class T_,unsigned dim_,class Kernel_,class PT_>
@@ -792,7 +799,7 @@ ImgInterp<T_,dim_,Kernel_,PT_> arg( const ImgInterp<T_,dim_,Kernel_,PT_> &i) {
     ImgInterp<T_,dim_,Kernel_,PT_> res;
     res.resize(i.size());
     res.data = arg(i.data);
-    return res;    
+    return res;
 }
 
 template<class T_,unsigned dim_,class Kernel_,class PT_>
@@ -800,7 +807,7 @@ ImgInterp<T_,dim_,Kernel_,PT_> conj( const ImgInterp<T_,dim_,Kernel_,PT_> &i) {
     ImgInterp<T_,dim_,Kernel_,PT_> res;
     res.resize(i.size());
     res.data = conj(i.data);
-    return res;    
+    return res;
 }
 
 template<class T_,unsigned dim_,class Kernel_,class PT_>
@@ -808,7 +815,7 @@ ImgInterp<T_,dim_,Kernel_,PT_> operator*( const ImgInterp<T_,dim_,Kernel_,PT_> &
     ImgInterp<T_,dim_,Kernel_,PT_> res;
     res.resize(i.size());
     res.data = i.data * i2.data;
-    return res;    
+    return res;
 }
 
 template<class T_,unsigned dim_,class Kernel_,class PT_, class T2>
@@ -816,7 +823,7 @@ ImgInterp<T_,dim_,Kernel_,PT_> operator*( const ImgInterp<T_,dim_,Kernel_,PT_> &
     ImgInterp<T_,dim_,Kernel_,PT_> res;
     res.resize(i.size());
     res.data = t * i.data;
-    return res;    
+    return res;
 }
 
 template<class T_,unsigned dim_,class Kernel_,class PT_, class T2>
@@ -824,14 +831,14 @@ ImgInterp<T_,dim_,Kernel_,PT_> operator*( T2 t, const ImgInterp<T_,dim_,Kernel_,
     ImgInterp<T_,dim_,Kernel_,PT_> res;
     res.resize(i.size());
     res.data = t * i.data;
-    return res;    
+    return res;
 }
 
 template<class T_,unsigned dim_,class Kernel_,class PT_, class OP>
 void apply_wi( ImgInterp< T_, dim_, Kernel_, PT_ >& img, OP& op ) { assert(0); }
 
 template<class T_,class Kernel_,class PT_, class OP>
-void apply_wi( ImgInterp< T_, 2, Kernel_, PT_ >& img, OP& op ) {  
+void apply_wi( ImgInterp< T_, 2, Kernel_, PT_ >& img, OP& op ) {
 
     T_* pt = img.data.begin();
     for(int y=0;y<img.sizes[1];++y)
@@ -840,7 +847,7 @@ void apply_wi( ImgInterp< T_, 2, Kernel_, PT_ >& img, OP& op ) {
 }
 
 template<class T_,class Kernel_,class PT_, class OP>
-void apply_wi( ImgInterp< T_, 3, Kernel_, PT_ >& img, OP& op ) {  
+void apply_wi( ImgInterp< T_, 3, Kernel_, PT_ >& img, OP& op ) {
 
     T_* pt = img.data.begin();
     for(int z=0;z<img.sizes[2];++z)
