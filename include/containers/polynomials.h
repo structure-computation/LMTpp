@@ -1356,7 +1356,8 @@ class Pol {
             T b=coefs[1]/coefs[2];
             T c=coefs[0]/coefs[2];
             T delta=b*b-4*c;
-            if (std::abs(delta) < 16*std::numeric_limits<T>::epsilon())
+            /// rappel : si P = aX^2+bX+c alors P(-b/(2a)) = - (b^2-4ac)/(4a) donc abs(a*delta) < 4*epsilon => racine double  
+            if ( std::abs(coefs[2]) * std::abs(delta) < 32*std::numeric_limits<T>::epsilon() )
                 res.push_back(-0.5*b);
             else if (delta >= 16*std::numeric_limits<T>::epsilon()) {
                 T rd = sqrt(delta);
