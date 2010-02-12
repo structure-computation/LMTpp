@@ -19,6 +19,7 @@
             * Qt4 ( commande : sudo apt-get install libqtcore4 libqtgui4 libqt4-dev qt4-doc devrait suffire ),
             * zlib pour compresser (  commande : sudo apt-get install libzip1 libzip-dev )
             * fftw pour la transfrmée de Fourier rapide ( sudo apt-get install fftw3-3 fftw3-dev
+            * libxml2-dev ( sudo apt-get install libxml2-dev) 
             
         Pour exécuter (fonction de vos besoins)
             * libg2c0 (commande : sudo apt-get install libg2c0 ).
@@ -36,6 +37,7 @@
     = Dépendance et compilation du générateur de documentation
         
         le générateur de documentation dépend de boost partie fichier système ( commande : sudo apt-get install libboost-filesystem1.40.0 libboost-filesystem1.40-dev devrait suffire). Si le paquet n'est pas trouvé tapez en ligne de commande apt-cache search boost-filesystem pour connaître le nom exact du paquet.
+        Le générateur a aussi besoin de latex.
         Ensuite pour la générer, allez dans doc/ et lancer make ( commande : cd doc/& make ).
         La page d'acceuil est doc/html/index.html .
 
