@@ -1,7 +1,7 @@
 //
 // C++ Interface: gnuplot
 //
-// Description:
+// Description: 
 //
 //
 // Author: Hugo LECLERC <hugo.leclerc@lmt.ens-cachan.fr>, (C) 2005
@@ -79,13 +79,13 @@ public:
         fflush(tube);
     }
 
-    void set(const char *str = "") const { print("set \"%s\"\n"); }
-    void set_title(const char *str = "") const { print("set title \"%s\"\n"); }
-    void set_xlabel(const char *str = "") const { print("set xlabel \"%s\"\n"); }
-    void set_ylabel(const char *str = "") const { print("set ylabel \"%s\"\n"); }
-    void set_terminal(const char *str = "") const { print("set_terminal \"%s\"\n"); }
-    void set_terminal_epslatex(const char *str = "") const { print("set_terminal_epslatex \"%s\"\n"); }
-    void set_output(const char *str = "") const { print("set_output \"%s\"\n"); }
+    void set(const char *str = "") const { std::stringstream s; s << "set " << str << "\n"; print( s.str().c_str() ); } 
+    void set_title(const char *str = "") const { std::stringstream s; s << "set title " << str << "\n"; print( s.str().c_str() ); } 
+    void set_xlabel(const char *str = "") const { std::stringstream s; s << "set xlabel " << str << "\n"; print( s.str().c_str() ); } 
+    void set_ylabel(const char *str = "") const { std::stringstream s; s << "set ylabel " << str << "\n"; print( s.str().c_str() ); } 
+    void set_terminal(const char *str = "") const { std::stringstream s; s << "set_terminal " << str << "\n"; print( s.str().c_str() ); } 
+    void set_terminal_epslatex(const char *str = "") const { std::stringstream s; s << "set_terminal_epslatex " << str << "\n"; print( s.str().c_str() ); } 
+    void set_output(const char *str = "") const { std::stringstream s; s << "set_output " << str << "\n"; print( s.str().c_str() ); } 
 
     /// Pour effacer les courbes d'avant
     void reset() { print("reset\n\n"); }
@@ -485,7 +485,7 @@ public:
 
     void fprintf_jumping_lines ( const Vec<> &x, const Vec<> &y, const Vec<> &z ) {
         double old_x = x[0];
-        for (int i=0;i<(int)x.size();i++) {
+        for (int i=0;i<x.size();i++) {
             if (x[i]!=old_x) {
                 fprintf(tube,"\n");
                 old_x = x[i];

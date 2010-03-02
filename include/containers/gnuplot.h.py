@@ -86,7 +86,7 @@ public:
 lst = [ 'set','set title', 'set xlabel', 'set ylabel', 'set_terminal', 'set_terminal_epslatex', 'set_output' ]
 
 for i in lst :
-    print '    void '+i.replace(' ','_')+'(const char *str = "") const { print(\"'+i+' \\\"%s\\\"\\n\"); } '
+    print '    void '+i.replace(' ','_')+'(const char *str = "") const { std::stringstream s; s << \"'+i+' \" << str << \"\\n\"; print( s.str().c_str() ); } '
 
 print """
     /// Pour effacer les courbes d'avant

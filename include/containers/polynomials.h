@@ -26,7 +26,7 @@ extern "C" {
 namespace LMT {
 
 template<class T>
-bool is_real( const complex<T> z, T tolerance = 16*std::numeric_limits<T>::epsilon()) {
+bool is_real( const complex<T> z, T tolerance = 16*std::numeric_limits<T>::epsilon() ) {
     if (std::abs(z.imag()) < tolerance)
         return true;
     else
@@ -38,13 +38,13 @@ bool is_real( const complex<T> z, T tolerance = 16*std::numeric_limits<T>::epsil
     retourne les racines de l'éqation x^2+a_1 x + a_2 = 0 où a1 et a2 sont des nombres complexes.
 */
 template <class T>
-Vec<complex<T> > root_of_second_degree_equation(complex<T> a1, complex<T> a2) {
+Vec<complex<T> > root_of_second_degree_equation(complex<T> a1, complex<T> a2, T tolerance = 16*std::numeric_limits<T>::epsilon()) {
     typedef complex<T> C;
     Vec<C> res;
     C delta,n1,n2;
 
     delta = a1*a1-complex<T>(4,0)*a2;
-    if (std::abs(delta) < 16*std::numeric_limits<T>::epsilon()) {
+    if (std::abs(delta) < tolerance ) {
         res.push_back(-0.5*a1);
         return res;
     }
@@ -67,14 +67,14 @@ Vec<complex<T> > root_of_second_degree_equation(complex<T> a1, complex<T> a2) {
     retourne les racines de l'éqation x^2+a_1 x + a_2 = 0 où a1 et a2 sont des nombres complexes.
  */
 template <class T>
-Vec<complex<T> > root_of_second_degree_equation( T a1, T a2) {
+Vec<complex<T> > root_of_second_degree_equation( T a1, T a2, T tolerance = 16*std::numeric_limits<T>::epsilon()) {
     typedef complex<T> C;
     T delta;
     Vec<C> res;
     C n1,n2;
 
     delta = a1*a1-4*a2;
-    if (std::abs(delta) < 16*std::numeric_limits<T>::epsilon()) {
+    if (std::abs(delta) < tolerance ) {
         res.push_back(-0.5*a1);
         return res;
     }
@@ -635,7 +635,7 @@ T2 ret_haley_degree_4( const Vec<T, s>& coefs, T2 x0, unsigned nb_step, T tolera
 }
 
 template <class T, int s>
-void ret_roots_degree_3( const Vec<T, s>& coefs, Vec< complex<T> >& res) {
+void ret_roots_degree_3( const Vec<T, s>& coefs, Vec< complex<T> >& res, T tolerance = 16*std::numeric_limits<T>::epsilon() ) {
     /// méthode de Cardan. Source : http://fr.wikipedia.org/wiki/Méthode_de_Cardan
     typedef complex<T> C;
     res.resize(0);
@@ -650,7 +650,7 @@ void ret_roots_degree_3( const Vec<T, s>& coefs, Vec< complex<T> >& res) {
     T q = b*(2*b*b-9*c)/(T)27 + d;
     T delta = 4/(T)27*p*p*p+q*q;
     //PRINT( tmp ); PRINT( b ); PRINT( c ); PRINT( d ); PRINT( p ); PRINT( q ); PRINT(  delta );
-    if (std::abs(delta)<16*std::numeric_limits<T>::epsilon()) {
+    if (std::abs(delta) < tolerance ) {
                 /// deux racines réelles
         T tmp2 = 3*q/p;
         res.push_back( ret_haley_degree_3_one_step( coefs, tmp2+del ) );
@@ -1237,7 +1237,7 @@ class Pol {
     }
     
     /// problème si T est du type complex<X> ... à régler. On fera l'hypothèse que T est soit entier, soit float, double, long double.
-    Vec<C> roots() /**const*/ {
+    Vec<C> roots( T tolerance = 16*std::numeric_limits<T>::epsilon()) /**const*/ {
         assert(nx==1);
         Vec<C> res;
         update_degrees(); /// PROVISOIRE : cela ne devrait pas être fait ici.
@@ -1249,7 +1249,7 @@ class Pol {
             T b = coefs[1]*tmp;
             T c = coefs[0]*tmp;
             T delta = b*b-4*c;
-            if (std::abs(delta)<16*std::numeric_limits<T>::epsilon()) {
+            if (std::abs(delta) < tolerance ) {
                 res.push_back(-0.5*b);
                 return res;
             }
@@ -1293,10 +1293,10 @@ class Pol {
             */
             for ( int t = 0; t< res.size(); ++t ) {
                 T absimage = abs(res[t].imag());
-                if (not(is_real(res[t])) and (absimage < 1e-4)) {
+                if (not(is_real(res[t], tolerance )) and (absimage < 1e-4)) {
                     bool rootFound;
                     //Vec<double,2> resbair = bairstow( coefs, taille-1, Vec<T,2>(2 * res[t].real(), 0.01*absimage ), rootFound, 30, 1e-15/*2*std::numeric_limits<T>::epsilon()*/ );
-                    Vec<double,2> resbair = bairstow_modified( coefs, taille-1, Vec<T,2>( res[t].real(), absimage ), rootFound, 30, 2*std::numeric_limits<T>::epsilon() );
+                    Vec<double,2> resbair = bairstow_modified( coefs, taille-1, Vec<T,2>( res[t].real(), absimage ), rootFound, 30, tolerance );
                     if (rootFound) {
                         res[t]   = resbair[0]-resbair[1];
                         res[t+1] = resbair[0]+resbair[1];
@@ -1339,7 +1339,7 @@ class Pol {
         return res;
     }
 
-    Vec<T> real_roots() /**const*/{
+    Vec<T> real_roots( T tolerance = 16*std::numeric_limits<T>::epsilon() ) /**const*/{
         assert(nx==1);
         Vec<T> res;
         update_degrees(); /// PROVISOIRE : cela ne devrait pas être fait ici.
@@ -1350,16 +1350,16 @@ class Pol {
             res.push_back(0);
         } else if (taille == 1) {
             /// pas de solution
-        }else if (taille==2)
+        }else if ( taille == 2 )
             res.push_back(-coefs[0]/coefs[1]);
-        else if (taille==3) {
+        else if ( taille == 3 ) { /// degree 2
             T b=coefs[1]/coefs[2];
             T c=coefs[0]/coefs[2];
             T delta=b*b-4*c;
             /// rappel : si P = aX^2+bX+c alors P(-b/(2a)) = - (b^2-4ac)/(4a) donc abs(a*delta) < 4*epsilon => racine double  
-            if ( std::abs(coefs[2]) * std::abs(delta) < 32*std::numeric_limits<T>::epsilon() )
+            if ( std::abs(coefs[2] * delta) < tolerance )
                 res.push_back(-0.5*b);
-            else if (delta >= 16*std::numeric_limits<T>::epsilon()) {
+            else if (delta >= tolerance ) {
                 T rd = sqrt(delta);
                 if (std::abs(b+rd)> 0.5)
                     res.push_back(-0.5*(b+rd));
@@ -1398,7 +1398,7 @@ class Pol {
             T racine;
             bool notFound;
             for( int i=0;i<solutions_complexes.size();++i)
-                if ( is_real( solutions_complexes[i] ) ) {
+                if ( is_real( solutions_complexes[i], tolerance ) ) {
                     racine = newton( solutions_complexes[i].real(), notFound );
                     //PRINT( notFound );
                     if (notFound)
@@ -1412,7 +1412,7 @@ class Pol {
                 T racine;
                 bool notFound;
                 for( int i=0;i<solutions_complexes.size();++i)
-                    if ( is_real( solutions_complexes[i] )) {
+                    if ( is_real( solutions_complexes[i], tolerance )) {
                         racine = newton( solutions_complexes[i].real(), notFound );
                         //PRINT( notFound );
                         if (notFound)
