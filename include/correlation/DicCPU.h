@@ -1,7 +1,7 @@
 #ifndef DIV_CPU_H
 #define DIV_CPU_H
 
-#include <correlation/ImgInterp.h>
+#include "ImgInterp.h"
 #include <containers/mat.h>
 #include <util/rectilinear_iterator.h>
 #include <util/symamd.h>
@@ -46,7 +46,7 @@ struct DicCPU {
     ///
     DicCPU() {
         levenberg_marq = 0.0;
-        nb_threads_for_assembly = 4;
+        nb_threads_for_assembly = 1;
         div_pixel = 1;
         delta_gray = 1;
         relaxation = 1;
@@ -408,12 +408,12 @@ struct DicCPU {
             // t1 += time_of_day_in_sec() - t0;
         }
 
-        adimensioned_residual = sum_sq_diff_fg / nb_covered_pixel / ( max_f - min_f );
+        adimensioned_residual = sqrt( sum_sq_diff_fg ) / ( max_f - min_f ) / nb_covered_pixel;
     }
 
     /// resol_level must be managed internally
     template<class TIMGf,class TIMGg,class TM,class NAME_VAR_DEPL,class NAME_VAR_GREY>
-    void exec( const TIMGf &f, const TIMGg &g, TM &m, const NAME_VAR_DEPL &name_var_depl, const NAME_VAR_GREY &name_var_grey, bool want_mat = true, bool want_vec = true, int resol_level = 0 ) {
+    bool exec( const TIMGf &f, const TIMGg &g, TM &m, const NAME_VAR_DEPL &name_var_depl, const NAME_VAR_GREY &name_var_grey, bool want_mat = true, bool want_vec = true, int resol_level = 0 ) {
         if ( min_norm_inf_dU == 0 and min_norm_2_dU == 0 )
             std::cerr << "Il faut préciser au moins un critère d'arrêt (ex : min_norm_inf_dU ou min_norm_2_dU)." << std::endl;
 
@@ -469,7 +469,6 @@ struct DicCPU {
                 d_coeffs_additional_shape_functions[ i ] = dU[ indice_additional_shape_functions + i ];
                 coeffs_additional_shape_functions[ i ] += d_coeffs_additional_shape_functions[ i ];
             }
-            PRINT( coeffs_additional_shape_functions );
 
             //
             history_norm_inf_dU.push_back( norm_inf( dU ) );
@@ -493,6 +492,7 @@ struct DicCPU {
         if ( resol_level == 0 and want_epsilon ) {
             get_epsilon( m );
         }
+        return cpt_iter < max_cpt_iter;
     }
 
     /// fill epsilon field in TM
