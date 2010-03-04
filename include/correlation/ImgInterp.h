@@ -299,6 +299,21 @@ struct ImgInterp {
             throw "img.depth() not supported " + to_string( img.depth() );
         }
     }
+    
+    template<class TYPE, class STO, class X>
+    void load( Mat< T, TYPE, STO, X > &mat ) {
+        sizes.set( 1 );
+        assert( dim == 2 );
+        sizes[0] = mat.nb_cols();
+        sizes[1] = mat.nb_rows();
+        data.resize( product( sizes ) );
+        unsigned k = 0;
+        for(unsigned i=0;i<mat.nb_rows();++i)
+            for(unsigned j=0;j<mat.nb_cols();++j) {
+                data[ k ] = mat( i, j );
+                k++; 
+            }
+    }
 
     template<class TB>
     void load_binary( const std::string &filename, Vec<int,dim> S, Vec<int,dim> X0 = 0, Vec<int,dim> X1 = -1 ) {
