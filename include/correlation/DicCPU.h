@@ -31,10 +31,9 @@ void dic_elem_matrix_( const TE &elem, const TIMG_f &f, const TIMG_g &g, TDIC &d
 
     On a besoin de QtGui et de QtCore dans les librairies.
 */
-template<class T,unsigned dim>
+template<class T,unsigned dim,bool want_lum_corr=true>
 struct DicCPU {
     typedef Mesh<Mesh_carac_pb_correlation_basic<double,dim> > TM_exemple; ///
-    static const bool want_lum_corr = true;
     typedef Vec<T,dim> Pvec;
 
     struct ShapeFunctionAncestor {
@@ -169,13 +168,14 @@ struct DicCPU {
                         for(unsigned i=0;i<TE::nb_nodes;++i)
                             sham_grey[ i ] = shape_functions[ i ] * val_g;
 
-                        for(unsigned i=0;i<TE::nb_nodes;++i) {
-                            for(unsigned j=0;j<TE::nb_nodes;++j)
-                                M( i * ( dim + 1 ) + dim, j * ( dim + 1 ) + dim ) += imp * sham_grey[ i ] * sham_grey[ j ];
-                            F[ i * ( dim + 1 ) + dim ] += imp * sham_grey[ i ] * diff_fg;
+                        if ( want_lum_corr ) {
+                            for(unsigned i=0;i<TE::nb_nodes;++i) {
+                                for(unsigned j=0;j<TE::nb_nodes;++j)
+                                    M( i * ( dim + 1 ) + dim, j * ( dim + 1 ) + dim ) += imp * sham_grey[ i ] * sham_grey[ j ];
+                                F[ i * ( dim + 1 ) + dim ] += imp * sham_grey[ i ] * diff_fg;
+                            }
                         }
 
-                        //} else { // want_FE == false
                         if ( want_FE == false ) {
                             // additional_shape_functions
                             for(unsigned n0=0,c0=nb_ddl_fe;n0<dic.additional_shape_functions.size();++n0) {
@@ -624,7 +624,8 @@ struct DicCPU {
             if ( want_FE )
                 for(unsigned d=0;d<dim;++d)
                     ed_depl( m.node_list[nn] )[ d ] += dU[ indice_noda[ nn ] + d ];
-            ed_grey( m.node_list[nn] ) += dU[ indice_noda[ nn ] + dim ];
+            if ( want_lum_corr )
+                ed_grey( m.node_list[nn] ) += dU[ indice_noda[ nn ] + dim ];
         }
     }
 

@@ -15,10 +15,12 @@
 extern "C" {
     #include <fftw3.h>
 }
-// #include "containers/vec.h"
 #include "vec.h"
-// #include "vecfull.h"
 #include <correlation/ImgInterp.h>
+
+#ifdef METIL_COMP_DIRECTIVE
+#pragma lib_name fftw3
+#endif
 
 namespace LMT {
 
@@ -94,22 +96,22 @@ public:
         WARNING : les performances sont excellentes lorsque n1 et n2 sont des puissances de 2 (cf algorithme de la transformée de Fourier rapide FFT)
                   sinon elles sont moins bonnes en général, voire très mauvaises si n1 ou n2 n'est pas un multiple de petits nombres premiers.
     */
-    template<unsigned dim_,class Kernel_,class PT_> 
-    ImgInterp<std::complex<double>,dim_,Kernel_,PT_>  fft(const ImgInterp<std::complex<double>,dim_,Kernel_,PT_> &i) {
-        ImgInterp<std::complex<double>,dim_,Kernel_,PT_> res;
+    template<int dim,class Kernel_,class PT_>
+    ImgInterp<std::complex<double>,dim,Kernel_,PT_> fft(const ImgInterp<std::complex<double>,dim,Kernel_,PT_> &i) {
+        ImgInterp<std::complex<double>,dim,Kernel_,PT_> res;
         res.resize(i.size());
         const fftw_complex *in = (const fftw_complex *)i.data.ptr();
         fftw_complex *out = (fftw_complex *) res.data.ptr();
         if ( init==false ) {
-            p = fftw_plan_dft_2d( i.sizes[1], i.sizes[0], const_cast<fftw_complex *>(in), out, FFTW_FORWARD, FFTW_ESTIMATE);
-            fftw_execute(p);
-        }
-        else {
-            fftw_execute_dft(p,const_cast<fftw_complex *>(in),out);
+            Vec<int,dim> s = i.sizes; //[ dim - 1 - range( dim ) ];
+            p = fftw_plan_dft( dim, s.ptr(), const_cast<fftw_complex *>(in), out, FFTW_FORWARD, FFTW_ESTIMATE );
+            fftw_execute( p );
+        } else {
+            fftw_execute_dft( p, const_cast<fftw_complex *>( in ), out );
         }
         return res;
     }
-    
+
     /*!
         Cette fonction calcule Y[k1,k2] = somme pour j1=0..n1-1 pour j2=0..n2-1 de w1^(j1*k1) w2^(j2*k2)
         
@@ -122,28 +124,26 @@ public:
         WARNING : les performances sont excellentes lorsque n1 et n2 sont des puissances de 2 (cf algorithme de la transformée de Fourier rapide FFT)
                   sinon elles sont moins bonnes en général, voire très mauvaises si n1 ou n2 n'est pas un multiple de petits nombres premiers.
     */
-    template<unsigned dim_,class Kernel_,class PT_>
-    ImgInterp<std::complex<double>,dim_,Kernel_,PT_> ffti(const ImgInterp<std::complex<double>,dim_,Kernel_,PT_> &i) {
-        ImgInterp<std::complex<double>,dim_,Kernel_,PT_> res;
-        res.resize(i.size());
+    template<int dim,class Kernel_,class PT_>
+    ImgInterp<std::complex<double>,dim,Kernel_,PT_> ffti(const ImgInterp<std::complex<double>,dim,Kernel_,PT_> &i) {
+        ImgInterp<std::complex<double>,dim,Kernel_,PT_> res;
+        res.resize( i.size() );
         const fftw_complex *in = (const fftw_complex *)i.data.ptr();
         fftw_complex *out = (fftw_complex *) res.data.ptr();
         if ( init==false ) {
-            p = fftw_plan_dft_2d( i.sizes[1], i.sizes[0], const_cast<fftw_complex *>(in), out, FFTW_BACKWARD, FFTW_ESTIMATE);
+            if ( dim == 2 )
+                p = fftw_plan_dft_2d( i.sizes[1], i.sizes[0], const_cast<fftw_complex *>(in), out, FFTW_BACKWARD, FFTW_ESTIMATE);
+            else
+                p = fftw_plan_dft_3d( i.sizes[2], i.sizes[1], i.sizes[0], const_cast<fftw_complex *>(in), out, FFTW_BACKWARD, FFTW_ESTIMATE);
             fftw_execute(p);
         }
         else {
             fftw_execute_dft(p,const_cast<fftw_complex *>(in),out);
         }
-        //res.data /= product(i.sizes);
-        //res.data = res.data / (i.sizes[0] * i.sizes[1]);
-        int total_size = i.sizes[0] * i.sizes[1];
-        double inv_total_size = double(1.0 /(i.sizes[0] * i.sizes[1]));
-        for(int i=0;i<total_size;++i)
-            res.data[i] *= inv_total_size;
+        res.data /= res.data.size();
         return res;
     }
-    
+
     bool init; /// true if at least one FFT has been queried.
     fftw_plan p;
 };
@@ -178,114 +178,99 @@ struct ZeroPadding {};
     Cette fonction calcule la transformée de Fourier inverse d'une image sur laquelle un "padding" a été appliqué.
 
 */
-template<class T_, unsigned dim_, class Kernel_, class PT_, class TPadding> 
-ImgInterp<std::complex<double>,dim_,Kernel_,PT_> fft( const ImgInterp<std::complex<T_>, dim_, Kernel_, PT_ > &img, Vec<int,2> topleft, Vec<int,2> bottomright, const TPadding padding) {
-    fft( img, topleft[0], bottomright[0], topleft[1], bottomright[1], padding);
-}
+//template<class T_, unsigned dim_, class Kernel_, class PT_, class TPadding>
+//ImgInterp<std::complex<double>,dim_,Kernel_,PT_> fft( const ImgInterp<std::complex<T_>, dim_, Kernel_, PT_ > &img, Vec<int,dim_> topleft, Vec<int,dim_> bottomright, const TPadding padding) {
+//    fft( img, topleft[0], bottomright[0], topleft[1], bottomright[1], padding);
+//}
     
-template<class T_,unsigned dim_,class Kernel_,class PT_,class TPadding> 
-ImgInterp<std::complex<double>,dim_,Kernel_,PT_> fft( const ImgInterp<std::complex<T_>, dim_, Kernel_, PT_ > &img, int xmin, int xmax, int ymin, int ymax, const TPadding padding) {
-    assert(0);
-    return ImgInterp<std::complex<double>,dim_,Kernel_,PT_>();
-}
+//template<class T_,unsigned dim_,class Kernel_,class PT_,class TPadding>
+//ImgInterp<std::complex<double>,dim_,Kernel_,PT_> fft( const ImgInterp<std::complex<T_>, dim_, Kernel_, PT_ > &img, int xmin, int xmax, int ymin, int ymax, const TPadding padding) {
+//    assert(0);
+//    return ImgInterp<std::complex<double>,dim_,Kernel_,PT_>();
+//}
   
-template<class T_, unsigned dim_, class Kernel_, class PT_, class TPadding> 
-        ImgInterp<std::complex<double>,dim_,Kernel_,PT_> ffti( const ImgInterp<std::complex<T_>, dim_, Kernel_, PT_ > &img, Vec<int,2> topleft, Vec<int,2> bottomright, const TPadding padding) {
-    ffti( img, topleft[0], bottomright[0], topleft[1], bottomright[1], padding);
-}
+//template<class T_, unsigned dim_, class Kernel_, class PT_, class TPadding>
+//        ImgInterp<std::complex<double>,dim_,Kernel_,PT_> ffti( const ImgInterp<std::complex<T_>, dim_, Kernel_, PT_ > &img, Vec<int,2> topleft, Vec<int,2> bottomright, const TPadding padding) {
+//    ffti( img, topleft[0], bottomright[0], topleft[1], bottomright[1], padding);
+//}
     
-template<class T_,unsigned dim_,class Kernel_,class PT_,class TPadding> 
-        ImgInterp<std::complex<double>,dim_,Kernel_,PT_> ffti( const ImgInterp<std::complex<T_>, dim_, Kernel_, PT_ > &img, int xmin, int xmax, int ymin, int ymax, const TPadding padding) {
-    assert(0);
-    return ImgInterp<std::complex<double>,dim_,Kernel_,PT_>();
-}
+//template<class T_,unsigned dim_,class Kernel_,class PT_,class TPadding>
+//        ImgInterp<std::complex<double>,dim_,Kernel_,PT_> ffti( const ImgInterp<std::complex<T_>, dim_, Kernel_, PT_ > &img, int xmin, int xmax, int ymin, int ymax, const TPadding padding) {
+//    assert(0);
+//    return ImgInterp<std::complex<double>,dim_,Kernel_,PT_>();
+//}
   
 template<class T_,unsigned dim_,class Kernel_,class PT_> 
-        ImgInterp<std::complex<double>,dim_,Kernel_,PT_> fft( const ImgInterp<std::complex<T_>, dim_, Kernel_, PT_ > &img, int xmin, int xmax, int ymin, int ymax, const SymmetricPadding padding) {
-    int x_in_max = (xmax-xmin+1)*2-1 , y_in_max = (ymax-ymin+1)*2-1,i,j;
-    ImgInterp<std::complex<double>,dim_,Kernel_,PT_> in;//,tem;
-    FFT p;
+        ImgInterp<std::complex<double>,dim_,Kernel_,PT_> fft( const ImgInterp<std::complex<T_>, dim_, Kernel_, PT_ > &img, Vec<int,dim_> xmin, Vec<int,dim_> xmax, const SymmetricPadding padding ) {
+    Vec<int,dim_> x_in_max = ( xmax - xmin + 1 ) * 2 - 1;
 
-    in.resize(Vec<int,2>(x_in_max+1,y_in_max+1));
-    for(int jj=xmin;jj<=xmax;++jj) {
-        j = jj-xmin;
-        for(int ii=ymin;ii<=ymax;++ii) {
-            i = ii-ymin;
+    ImgInterp<std::complex<double>,dim_,Kernel_,PT_> in;
+    in.resize( x_in_max + 1 );
+    assert( dim_ == 2 /*TODO*/ );
+    for(int jj=xmin[0];jj<=xmax[0];++jj) {
+        int j = jj - xmin[ 0 ];
+        for(int ii=xmin[1];ii<=xmax[1];++ii) {
+            int i = ii - xmin[ 1 ];
             std::complex<double> tmp = img(jj,ii);
             in.tex_int(j,i) = tmp;
-            in.tex_int(x_in_max-j,i) = tmp;
-            in.tex_int(j,y_in_max-i) = tmp;
-            in.tex_int(x_in_max-j,y_in_max-i) = tmp;
+            in.tex_int(x_in_max[0]-j,i) = tmp;
+            in.tex_int(j,x_in_max[1]-i) = tmp;
+            in.tex_int(x_in_max[0]-j,x_in_max[1]-i) = tmp;
         }
     }
     
-    if (padding.div_2)
+    if ( padding.div_2 )
         in = in.pyramidal_filter();
 
+    FFT p;
     return p.fft(in);
 }
 
-template<class T_,unsigned dim_,class Kernel_,class PT_> 
-        ImgInterp<std::complex<double>,dim_,Kernel_,PT_> ffti( const ImgInterp<std::complex<T_>, dim_, Kernel_, PT_ > &img, const SymmetricPadding padding) {
+template<class T_,int dim_,class Kernel_,class PT_>
+        ImgInterp<std::complex<double>,dim_,Kernel_,PT_> ffti( const ImgInterp<std::complex<T_>, dim_, Kernel_, PT_ > &img, const SymmetricPadding padding ) {
 
     ImgInterp<std::complex<double>,dim_,Kernel_,PT_> in,tem;
     FFT p;
     
     tem = p.ffti(img);
-    in.resize(Vec<int,2>(img.sizes[0]/2,img.sizes[1]/2));
-    for(int i=0;i<in.sizes[1];++i)
-        for(int j=0;j<in.sizes[0];++j)
-            in.tex_int(j,i) = tem(j,i);
+    in.resize( img.sizes / 2 );
+    for( Rectilinear_iterator<int,dim_> iter( 0, in.sizes ); iter; ++iter )
+        in.tex_int( iter.pos ) = tem( iter.pos );
     return in;
 }
 
-template<class T_,unsigned dim_,class Kernel_,class PT_> 
-        ImgInterp<std::complex<double>,dim_,Kernel_,PT_> fft( const ImgInterp<std::complex<T_>, dim_, Kernel_, PT_ > &img, Vec<int,2> topleft, Vec<int,2> bottomright, SymmetricPadding padding) {
-    fft( img, topleft[0], bottomright[0], topleft[1], bottomright[1], padding);
-}
+//template<class T_,unsigned dim_,class Kernel_,class PT_>
+//        ImgInterp<std::complex<double>,dim_,Kernel_,PT_> fft( const ImgInterp<std::complex<T_>, dim_, Kernel_, PT_ > &img, Vec<int,2> topleft, Vec<int,2> bottomright, SymmetricPadding padding) {
+//    fft( img, topleft[0], bottomright[0], topleft[1], bottomright[1], padding);
+//}
 
-template<class T_,unsigned dim_,class Kernel_,class PT_> 
-        ImgInterp<std::complex<double>,dim_,Kernel_,PT_> fft( const ImgInterp<std::complex<T_>, dim_, Kernel_, PT_ > &img, int xmin, int xmax, int ymin, int ymax, ZeroPadding padding) {
-    int x_in_max = xmax-xmin , y_in_max = ymax-ymin, i, j;
+template<int dim_,class T_,class Kernel_,class PT_>
+        ImgInterp<std::complex<double>,dim_,Kernel_,PT_> fft( const ImgInterp<std::complex<T_>, dim_, Kernel_, PT_ > &img, Vec<int,dim_> xmin, Vec<int,dim_> xmax, ZeroPadding ) {
+
+    Vec<int,dim_> x_in_max = xmax - xmin;
     ImgInterp<std::complex<double>,dim_,Kernel_,PT_> in;
-    FFT p;
 
-    in.resize(Vec<int,2>(x_in_max+1,y_in_max+1));
-    for(int jj=xmin+1;jj<xmax;++jj) {
-        j = jj-xmin;
-        for(int ii=ymin+1;ii<ymax;++ii) {
-            i = ii-ymin;
-            in.tex_int(j,i) = img(jj,ii);
-        }
-    }
-    for(i=0;i<=y_in_max;++i)
-        in.tex_int(0,i) = 0;
-    for(i=0;i<=y_in_max;++i)
-        in.tex_int(x_in_max,i) = 0;    
-    for(j=0;j<=x_in_max;++j)
-        in.tex_int(j,0) = 0; 
-    for(j=0;j<=x_in_max;++j)
-        in.tex_int(j,y_in_max) = 0; 
-    return p.fft(in);
+    in.resize( x_in_max + 2 );
+    in.data.set( 0 );
+    for( Rectilinear_iterator<int,dim_> iter( 0, x_in_max ); iter; ++iter )
+        in.tex_int( iter.pos + 1 ) = img( iter.pos + xmin );
+
+    FFT p;
+    return p.fft<dim_>( in );
 }
 
-template<class T_,unsigned dim_,class Kernel_,class PT_> 
-        ImgInterp<std::complex<double>,dim_,Kernel_,PT_> fft( const ImgInterp<std::complex<T_>, dim_, Kernel_, PT_ > &img, Vec<int,2> topleft, Vec<int,2> bottomright, ZeroPadding padding) {
-    fft( img, topleft[0], bottomright[0], topleft[1], bottomright[1], padding);
-}
+//template<class T_,unsigned dim_,class Kernel_,class PT_>
+//        ImgInterp<std::complex<double>,dim_,Kernel_,PT_> fft( const ImgInterp<std::complex<T_>, dim_, Kernel_, PT_ > &img, Vec<int,2> topleft, Vec<int,2> bottomright, ZeroPadding padding) {
+//    fft( img, topleft[0], bottomright[0], topleft[1], bottomright[1], padding);
+//}
 
-template<class T_,unsigned dim_,class Kernel_,class PT_> 
-        ImgInterp<std::complex<double>,dim_,Kernel_,PT_> ffti( const ImgInterp<std::complex<T_>, dim_, Kernel_, PT_ > &img, const ZeroPadding padding) {
-
-    ImgInterp<std::complex<double>,dim_,Kernel_,PT_> tem, in;
+template<class T_,unsigned dim_,class Kernel_,class PT_>
+        ImgInterp<std::complex<double>,dim_,Kernel_,PT_> ffti( const ImgInterp<std::complex<T_>, dim_, Kernel_, PT_ > &img, const ZeroPadding padding ) {
     FFT p;
-    int i,j;
-
-    tem = p.ffti(img);
-    in.resize(Vec<int,2>(img.sizes[0]-2,img.sizes[1]-2));
-    for(j=0;j<in.sizes[0];++j)
-        for(i=0;i<in.sizes[1];++i)
-            in.tex_int(j,i) = tem(j+1,i+1);
+    ImgInterp<std::complex<double>,dim_,Kernel_,PT_> tem = p.ffti<dim_>( img );
+    ImgInterp<std::complex<double>,dim_,Kernel_,PT_> in; in.resize( img.sizes - 2 );
+    for( Rectilinear_iterator<int,dim_> iter( 0, in.sizes ); iter; ++iter )
+            in.tex_int( iter.pos ) = tem( iter.pos + 1 );
     return in;
 }
 
@@ -295,47 +280,31 @@ template<class T_,unsigned dim_,class Kernel_,class PT_>
     Réf : http://pixel-shaker.fr/
 
 */
-template<class T_,unsigned dim_,class Kernel_,class PT_>
-Vec<int,2> rigid_body_translation( const ImgInterp<T_,dim_,Kernel_,PT_> &i, const ImgInterp<T_,dim_,Kernel_,PT_> &i2, int xmin, int xmax, int ymin, int ymax ) {
-    ImgInterp<std::complex<double>,dim_,Kernel_,PT_> _i;
-    ImgInterp<std::complex<double>,dim_,Kernel_,PT_> _i2;
-    _i.resize(i.size());
-    _i2.resize(i2.size());
-    _i.data = i.data;
-    _i2.data = i2.data;
-    ImgInterp<std::complex<double>,dim_,Kernel_,PT_> img  = fft(_i,  xmin, xmax, ymin, ymax, ZeroPadding());
-    ImgInterp<std::complex<double>,dim_,Kernel_,PT_> img2 = fft(_i2, xmin, xmax, ymin, ymax, ZeroPadding());
+template<int dim_,class T_,class Kernel_,class PT_>
+Vec<int,dim_> rigid_body_translation( const ImgInterp<T_,dim_,Kernel_,PT_> &i, const ImgInterp<T_,dim_,Kernel_,PT_> &i2, Vec<int,dim_> xmin, Vec<int,dim_> xmax ) {
+    ImgInterp<std::complex<double>,dim_,Kernel_,PT_> _i ; _i .resize( i .size() ); _i .data = i .data;
+    ImgInterp<std::complex<double>,dim_,Kernel_,PT_> _i2; _i2.resize( i2.size() ); _i2.data = i2.data;
+    ImgInterp<std::complex<double>,dim_,Kernel_,PT_> img  = fft<dim_>( _i , xmin, xmax, ZeroPadding());
+    ImgInterp<std::complex<double>,dim_,Kernel_,PT_> img2 = fft<dim_>( _i2, xmin, xmax, ZeroPadding());
     ImgInterp<std::complex<double>,dim_,Kernel_,PT_> img3 = abs(img);
     img.data  /= img3.data;
     img2.data /= img3.data;
     ImgInterp<std::complex<double>,dim_,Kernel_,PT_> img4 = img * conj(img2);
     ImgInterp<std::complex<double>,dim_,Kernel_,PT_> img5 = ffti( img4, ZeroPadding() );
-    ImgInterp<double,dim_,Kernel_,PT_> img6;
-    img6.data = real(img5.data);
-    img6.resize(img5.size());
-    double maxi = max(img6.data);
-    Vec<unsigned int> indices = find_with_index( generate( img6.data, _1 == maxi ) );
-    
-    if (indices.size()) {
-        int sx = img6.sizes[0];
-        int sy = img6.sizes[1];
-        int x = indices[0] % sx;
-        int y = (indices[0] - x) / sx;
-        x = ((x+sx/2) % (sx)) - sx/2;
-        y = ((y+sy/2) % (sy)) - sy/2;
-        if (x)
-            x += sgn(x);
-        if (y)
-            y += sgn(y);
-        if (abs(x)+abs(y) < 4)
-            std::cerr << "WARNING rigid_body_translation : do you really need to use the function ? because abs(x)+abs(y) = " << abs(x)+abs(y) << std::endl;
-        return Vec<int,2>(x,y);
-    } else {
-        std::cerr << "ERROR rigid_body_translation : there is not maximum." << std::endl;
-        return Vec<int,2>(0,0);
+    double maxi = std::numeric_limits<double>::max();
+    Vec<int,dim_> res( 0 );
+    for( Rectilinear_iterator<int,dim_> iter( 0, img5.sizes ); iter; ++iter ) {
+        if ( maxi > real( img5( iter.pos ) ) ) {
+            maxi = real( img5( iter.pos ) );
+            res = iter.pos;
+        }
     }
+
+    res = ( ( res + img5.sizes / 2 ) % img5.sizes ) - img5.sizes / 2;
+    res += ( 2 * ( res > 0 ) - 1 ) * ( res != 0 );
+    return res;
 }
 
-};
+}
 
 #endif // LMT_fft_HEADER

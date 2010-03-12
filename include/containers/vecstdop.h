@@ -228,8 +228,8 @@ inline typename TypeReduction<Max,Vec<T,s> >::T max(const Vec<T,s> &c) {
 }
 
 /** index_of_max
- \relates Vec
- */
+ \relates Vec
+ */
 template<class TV,class Op>
 inline unsigned index_of_max( const TV &c, const Op &op ) {
     DEBUGASSERT( c.size() );
@@ -241,15 +241,15 @@ inline unsigned index_of_max( const TV &c, const Op &op ) {
 }
 
 /** index_of_max
- \relates Vec
- */
+ \relates Vec
+ */
 template<class TV>
 inline unsigned index_of_max( const TV &c ) {
     return index_of_max( c, Less() );
 }
 
 /** index_of_min
- \relates Vec
+ \relates Vec
 */
 template<class TV,class Op>
 inline unsigned index_of_min( const TV &c, const Op &op ) {
@@ -262,8 +262,8 @@ inline unsigned index_of_min( const TV &c, const Op &op ) {
 }
 
 /** index_of_max
- \relates Vec
- */
+ \relates Vec
+ */
 template<class TV>
 inline unsigned index_of_min( const TV &c ) {
     return index_of_min( c, Less() );
