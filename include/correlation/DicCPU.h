@@ -96,12 +96,13 @@ struct DicCPU {
                     //
                     Vec<T,TE::nb_var_inter> var_inter( 0 );
                     for( Rectilinear_iterator<T,dim> p( Vec<int,dim>(MI), Vec<int,dim>(MA) + 2, 1.0 / dic.div_pixel ); p; ++p ) {
+                        Vec<double,dim> p_pos = p.pos; // + 0.5;
                         while ( true ) {
-                            get_var_inter( typename TE::NE(), P, p.pos, var_inter );
+                            get_var_inter( typename TE::NE(), P, p_pos, var_inter );
                             if ( not ElemVarInterFromPosNonLinear<typename TE::NE>::res ) break;
                             Vec<T,dim> O;
                             get_interp( typename TE::NE(), Nodal(), var_inter, P, O );
-                            if ( max( p.pos - O ) < 1e-2 ) break;
+                            if ( max( p_pos - O ) < 1e-2 ) break;
                         }
                         if ( not var_inter_is_inside( typename TE::NE(), var_inter, 1e-6 ) )
                             continue;
@@ -121,19 +122,19 @@ struct DicCPU {
                         bool want_FE = true;
                         for(unsigned n=0,c=0;n<dic.additional_shape_functions.size();++n) {
                             for(unsigned i=0;i<dic.additional_shape_functions[n]->size();++i,++c) {
-                                if ( dic.additional_shape_functions[n]->mask( p.pos, i ) ) {
+                                if ( dic.additional_shape_functions[n]->mask( p_pos, i ) ) {
                                     if ( want_FE ) {
-                                        DO = p.pos;
+                                        DO = p_pos;
                                         want_FE = false;
                                     }
                                     DO += dic.coeffs_additional_shape_functions[ c ] *
-                                        dic.additional_shape_functions[n]->operator()( p.pos, i );
+                                        dic.additional_shape_functions[n]->operator()( p_pos, i );
                                 }
                             }
                         }
 
-                        Vec<T,dim> PF( use_g_as_ref ? DO : p.pos );
-                        Vec<T,dim> PG( use_g_as_ref ? p.pos : DO );
+                        Vec<T,dim> PF( use_g_as_ref ? DO : p_pos );
+                        Vec<T,dim> PG( use_g_as_ref ? p_pos : DO );
                         T val_f = f( PF );
                         T val_g = val_grey * g( PG );
                         Vec<T,dim> grad = 0.5 * ( f.grad( PF ) + val_grey * g.grad( PG ) );
@@ -142,8 +143,8 @@ struct DicCPU {
                         //
                         //if ( want_FE ) {
                         unsigned sum_non_integer = 0;
-                        for(unsigned i=0;i<p.pos.size();++i)
-                            sum_non_integer += ( abs( round( p.pos[i] ) - p.pos[i] ) > 0.1 );
+                        for(unsigned i=0;i<p_pos.size();++i)
+                            sum_non_integer += ( abs( round( p_pos[i] ) - p_pos[i] ) > 0.1 );
                         T imp = dic.importance_pixelotomy[ sum_non_integer ];
 
                         // dU part
@@ -180,12 +181,12 @@ struct DicCPU {
                             // additional_shape_functions
                             for(unsigned n0=0,c0=nb_ddl_fe;n0<dic.additional_shape_functions.size();++n0) {
                                 for(unsigned i0=0;i0<dic.additional_shape_functions[n0]->size();++i0,++c0) {
-                                    if ( dic.additional_shape_functions[n0]->mask( p.pos, i0 ) ) {
-                                        F[ c0 ] += dot( dic.additional_shape_functions[n0]->operator()( p.pos, i0 ), grad ) * diff_fg;
+                                    if ( dic.additional_shape_functions[n0]->mask( p_pos, i0 ) ) {
+                                        F[ c0 ] += dot( dic.additional_shape_functions[n0]->operator()( p_pos, i0 ), grad ) * diff_fg;
                                         for(unsigned n1=0,c1=nb_ddl_fe;n1<dic.additional_shape_functions.size();++n1) {
                                             for(unsigned i1=0;i1<dic.additional_shape_functions[n1]->size();++i1,++c1) {
-                                                M( c0, c1 ) += dot( dic.additional_shape_functions[n0]->operator()( p.pos, i0 ), grad ) *
-                                                dot( dic.additional_shape_functions[n1]->operator()( p.pos, i1 ), grad );
+                                                M( c0, c1 ) += dot( dic.additional_shape_functions[n0]->operator()( p_pos, i0 ), grad ) *
+                                                dot( dic.additional_shape_functions[n1]->operator()( p_pos, i1 ), grad );
                                             }
                                         }
                                     }
@@ -194,11 +195,11 @@ struct DicCPU {
 
                             // glue
                             bool has_want_FE_neighbors = false;
-                            for( Rectilinear_iterator<T,dim> o( Pvec(p.pos-1), Pvec(p.pos) + 2 ); o; ++o ) {
+                            for( Rectilinear_iterator<T,dim> o( Pvec(p_pos-1), Pvec(p_pos) + 2 ); o; ++o ) {
                                 if ( o != p ) {
                                     for(unsigned n0=0,c0=nb_ddl_fe;n0<dic.additional_shape_functions.size();++n0) {
                                         for(unsigned i0=0;i0<dic.additional_shape_functions[n0]->size();++i0,++c0) {
-                                            if ( dic.additional_shape_functions[n0]->mask( p.pos, i0 ) == false ) {
+                                            if ( dic.additional_shape_functions[n0]->mask( p_pos, i0 ) == false ) {
                                                 has_want_FE_neighbors = true;
                                                 break; // TODO: optimize
                                             }
@@ -213,8 +214,8 @@ struct DicCPU {
                                     for(unsigned i0=0;i0<dic.additional_shape_functions[n0]->size();++i0,++c0)
                                         for(unsigned n1=0,c1=nb_ddl_fe;n1<dic.additional_shape_functions.size();++n1)
                                             for(unsigned i1=0;i1<dic.additional_shape_functions[n1]->size();++i1,++c1)
-                                                M( c0, c1 ) += dic.pond_surf * dot( dic.additional_shape_functions[n0]->operator()( p.pos, i0 ),
-                                                               dic.additional_shape_functions[n1]->operator()( p.pos, i1 ) );
+                                                M( c0, c1 ) += dic.pond_surf * dot( dic.additional_shape_functions[n0]->operator()( p_pos, i0 ),
+                                                               dic.additional_shape_functions[n1]->operator()( p_pos, i1 ) );
                                 // N_i * N_j
                                 for(unsigned i0=0,n0=0;i0<TE::nb_nodes;++i0)
                                     for(unsigned d0=0;d0<dim;++d0,++n0)
@@ -226,7 +227,7 @@ struct DicCPU {
                                     for(unsigned d0=0;d0<dim;++d0,++n0) {
                                         for(unsigned n1=0,c1=nb_ddl_fe;n1<dic.additional_shape_functions.size();++n1) {
                                             for(unsigned i1=0;i1<dic.additional_shape_functions[n1]->size();++i1,++c1) {
-                                                T res = dic.pond_surf * shape_functions[ i0 ] * dic.additional_shape_functions[n1]->operator()( p.pos, i1 )[ d0 ];
+                                                T res = dic.pond_surf * shape_functions[ i0 ] * dic.additional_shape_functions[n1]->operator()( p_pos, i1 )[ d0 ];
                                                 M( n0, c1 ) += res;
                                                 M( c1, n0 ) += res;
                                             }
@@ -377,6 +378,10 @@ struct DicCPU {
         ass_2.want_mat = want_mat;
         ass_2.want_vec = want_vec;
         apply_mt( m.elem_list, nb_threads_for_assembly, ass_2, *this, f, g );
+        
+        //PRINT( nb_covered_pixel );
+        //PRINT( min_f );
+        //PRINT( max_f );
 
         //
         if ( want_mat ) {
@@ -408,7 +413,7 @@ struct DicCPU {
             // t1 += time_of_day_in_sec() - t0;
         }
 
-        adimensioned_residual = sqrt( sum_sq_diff_fg ) / ( max_f - min_f ) / nb_covered_pixel;
+        adimensioned_residual = sqrt( sum_sq_diff_fg / nb_covered_pixel ) / ( max_f - min_f );
     }
 
     /// resol_level must be managed internally

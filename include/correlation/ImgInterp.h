@@ -130,7 +130,43 @@ struct ImgInterpOrder3_Kernel {
     // 3D
     template<class T,class Img,class PT>
     T operator()( StructForType<T>, const Img &f, PT x, PT y, PT z ) const {
-        assert( 0 /*TODO*/ );
+        int xi = int( x );
+        int yi = int( y );
+        int zi = int( z );
+        PT xf = x - xi;
+        PT yf = y - yi;
+        PT zf = z - zi;
+        return interp(
+                   interp(
+                        interp( f.tex_int( xi - 1, yi - 1, zi - 1 ), f.tex_int( xi + 0, yi - 1, zi - 1 ), f.tex_int( xi + 1, yi - 1, zi - 1 ), f.tex_int( xi + 2, yi - 1, zi - 1 ), xf ),
+                        interp( f.tex_int( xi - 1, yi + 0, zi - 1 ), f.tex_int( xi + 0, yi + 0, zi - 1 ), f.tex_int( xi + 1, yi + 0, zi - 1 ), f.tex_int( xi + 2, yi + 0, zi - 1 ), xf ),
+                        interp( f.tex_int( xi - 1, yi + 1, zi - 1 ), f.tex_int( xi + 0, yi + 1, zi - 1 ), f.tex_int( xi + 1, yi + 1, zi - 1 ), f.tex_int( xi + 2, yi + 1, zi - 1 ), xf ),
+                        interp( f.tex_int( xi - 1, yi + 2, zi - 1 ), f.tex_int( xi + 0, yi + 2, zi - 1 ), f.tex_int( xi + 1, yi + 2, zi - 1 ), f.tex_int( xi + 2, yi + 2, zi - 1 ), xf ),
+                        yf
+                   ),
+                   interp(
+                        interp( f.tex_int( xi - 1, yi - 1, zi - 0 ), f.tex_int( xi + 0, yi - 1, zi - 0 ), f.tex_int( xi + 1, yi - 1, zi - 0 ), f.tex_int( xi + 2, yi - 1, zi - 0 ), xf ),
+                        interp( f.tex_int( xi - 1, yi + 0, zi - 0 ), f.tex_int( xi + 0, yi + 0, zi - 0 ), f.tex_int( xi + 1, yi + 0, zi - 0 ), f.tex_int( xi + 2, yi + 0, zi - 0 ), xf ),
+                        interp( f.tex_int( xi - 1, yi + 1, zi - 0 ), f.tex_int( xi + 0, yi + 1, zi - 0 ), f.tex_int( xi + 1, yi + 1, zi - 0 ), f.tex_int( xi + 2, yi + 1, zi - 0 ), xf ),
+                        interp( f.tex_int( xi - 1, yi + 2, zi - 0 ), f.tex_int( xi + 0, yi + 2, zi - 0 ), f.tex_int( xi + 1, yi + 2, zi - 0 ), f.tex_int( xi + 2, yi + 2, zi - 0 ), xf ),
+                        yf
+                   ),
+                   interp(
+                        interp( f.tex_int( xi - 1, yi - 1, zi + 1 ), f.tex_int( xi + 0, yi - 1, zi + 1 ), f.tex_int( xi + 1, yi - 1, zi + 1 ), f.tex_int( xi + 2, yi - 1, zi + 1 ), xf ),
+                        interp( f.tex_int( xi - 1, yi + 0, zi + 1 ), f.tex_int( xi + 0, yi + 0, zi + 1 ), f.tex_int( xi + 1, yi + 0, zi + 1 ), f.tex_int( xi + 2, yi + 0, zi + 1 ), xf ),
+                        interp( f.tex_int( xi - 1, yi + 1, zi + 1 ), f.tex_int( xi + 0, yi + 1, zi + 1 ), f.tex_int( xi + 1, yi + 1, zi + 1 ), f.tex_int( xi + 2, yi + 1, zi + 1 ), xf ),
+                        interp( f.tex_int( xi - 1, yi + 2, zi + 1 ), f.tex_int( xi + 0, yi + 2, zi + 1 ), f.tex_int( xi + 1, yi + 2, zi + 1 ), f.tex_int( xi + 2, yi + 2, zi + 1 ), xf ),
+                        yf
+                   ),
+                   interp(
+                        interp( f.tex_int( xi - 1, yi - 1, zi + 2 ), f.tex_int( xi + 0, yi - 1, zi + 2 ), f.tex_int( xi + 1, yi - 1, zi + 2 ), f.tex_int( xi + 2, yi - 1, zi + 2 ), xf ),
+                        interp( f.tex_int( xi - 1, yi + 0, zi + 2 ), f.tex_int( xi + 0, yi + 0, zi + 2 ), f.tex_int( xi + 1, yi + 0, zi + 2 ), f.tex_int( xi + 2, yi + 0, zi + 2 ), xf ),
+                        interp( f.tex_int( xi - 1, yi + 1, zi + 2 ), f.tex_int( xi + 0, yi + 1, zi + 2 ), f.tex_int( xi + 1, yi + 1, zi + 2 ), f.tex_int( xi + 2, yi + 1, zi + 2 ), xf ),
+                        interp( f.tex_int( xi - 1, yi + 2, zi + 2 ), f.tex_int( xi + 0, yi + 2, zi + 2 ), f.tex_int( xi + 1, yi + 2, zi + 2 ), f.tex_int( xi + 2, yi + 2, zi + 2 ), xf ),
+                        yf
+                   ),
+                   zf
+               );
     }
 
     template<class T,class Img,class PT,int dim>

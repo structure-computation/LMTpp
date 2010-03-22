@@ -315,8 +315,6 @@ template<class T,int s2> int solve_using_incomplete_chol_factorize( const Mat<T,
         q = A * d;
         T alpha = deltn / dot( d, q );
         x += alpha * d;
-        PRINT( alpha );
-        PRINT( max(abs(r)) );
         // r -= alpha * q;
         r = b - A * x;
         for(unsigned i=0;;++i) { if ( i==r.size() ) return cpt; if ( LMT::abs(r[i]) > crit ) break; }

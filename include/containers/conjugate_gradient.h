@@ -69,6 +69,20 @@ struct SolveUsingCholFactorize {
     const TK &K;
 };
 
+/*
+*/
+template<class TK>
+struct SolveUsingCholMod {
+    SolveUsingCholMod( TK &k ) : K( k ) {}
+    typedef double MatrixScalarType;
+    template<class TV>
+    Vec<typename TypePromote<Multiplies,MatrixScalarType,TV>::T> operator*( const Vec<TV> &v ) const {
+        return K.solve( v );
+    }
+    mutable TK &K;
+};
+
+
 template<class T>
 struct ConvergenceCriteriumNormInfDelta {
     static const bool needs_delta_x = true;
@@ -85,6 +99,11 @@ struct ConvergenceCriteriumNormInfDelta {
 
 template<class TK>
 SolveUsingCholFactorize<TK> new_SolveUsingCholFactorize( const TK &k ) {
+    return k;
+}
+
+template<class TK>
+SolveUsingCholMod<TK> new_SolveUsingCholMod( TK &k ) {
     return k;
 }
 // new_SolveUsingInverseMatrix

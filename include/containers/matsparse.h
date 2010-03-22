@@ -17,6 +17,7 @@ public:
     typedef Vec<TVI,static_rows> TV;
 
     void clear() { for(unsigned i=0;i<data.size();++i) { data[i].indices.free(); data[i].data.free(); } } /// set all values to 0
+    void clear_data_only() { for(unsigned i=0;i<data.size();++i) { data[i].data.set( 0 ); } } /// set all values to 0 but do not free indices
 
     
     typedef DelayedAssignement<DelayedAssignementSparseSource<TT> > RetOp;
@@ -258,6 +259,7 @@ public:
     typedef Vec<TVI,static_cols> TV;
 
     void clear() { for(unsigned i=0;i<data.size();++i) { data[i].indices.free(); data[i].data.free(); } } /// set all values to 0
+    void clear_data_only() { for(unsigned i=0;i<data.size();++i) { data[i].data.set( 0 ); } } /// set all values to 0 but do not free indices
 
     
     typedef DelayedAssignement<DelayedAssignementSparseSource<TT> > RetOp;
@@ -499,6 +501,7 @@ public:
     typedef Vec<TVI,static_rows> TV;
 
     void clear() { for(unsigned i=0;i<data.size();++i) { data[i].indices.free(); data[i].data.free(); } } /// set all values to 0
+    void clear_data_only() { for(unsigned i=0;i<data.size();++i) { data[i].data.set( 0 ); } } /// set all values to 0 but do not free indices
 
     
     typedef MatElem<TV,Sym<sr,0>,SparseLine<Col> > RetOp;
@@ -762,6 +765,7 @@ public:
     typedef Vec<TVI,static_rows> TV;
 
     void clear() { for(unsigned i=0;i<data.size();++i) { data[i].indices.free(); data[i].data.free(); } } /// set all values to 0
+    void clear_data_only() { for(unsigned i=0;i<data.size();++i) { data[i].data.set( 0 ); } } /// set all values to 0 but do not free indices
 
     
     typedef MatElem<TV,Sym<sr,1>,SparseLine<Col> > RetOp;
@@ -1025,6 +1029,7 @@ public:
     typedef Vec<TVI,static_cols> TV;
 
     void clear() { for(unsigned i=0;i<data.size();++i) { data[i].indices.free(); data[i].data.free(); } } /// set all values to 0
+    void clear_data_only() { for(unsigned i=0;i<data.size();++i) { data[i].data.set( 0 ); } } /// set all values to 0 but do not free indices
 
     
     typedef MatElem<TV,Sym<sr,0>,SparseLine<Row> > RetOp;
@@ -1288,6 +1293,7 @@ public:
     typedef Vec<TVI,static_cols> TV;
 
     void clear() { for(unsigned i=0;i<data.size();++i) { data[i].indices.free(); data[i].data.free(); } } /// set all values to 0
+    void clear_data_only() { for(unsigned i=0;i<data.size();++i) { data[i].data.set( 0 ); } } /// set all values to 0 but do not free indices
 
     
     typedef MatElem<TV,Sym<sr,1>,SparseLine<Row> > RetOp;
@@ -1551,6 +1557,7 @@ public:
     typedef Vec<TVI,static_rows> TV;
 
     void clear() { for(unsigned i=0;i<data.size();++i) { data[i].indices.free(); data[i].data.free(); } } /// set all values to 0
+    void clear_data_only() { for(unsigned i=0;i<data.size();++i) { data[i].data.set( 0 ); } } /// set all values to 0 but do not free indices
 
     
     typedef MatElem<TV,Herm<sr,0>,SparseLine<Col> > RetOp;
@@ -1814,6 +1821,7 @@ public:
     typedef Vec<TVI,static_rows> TV;
 
     void clear() { for(unsigned i=0;i<data.size();++i) { data[i].indices.free(); data[i].data.free(); } } /// set all values to 0
+    void clear_data_only() { for(unsigned i=0;i<data.size();++i) { data[i].data.set( 0 ); } } /// set all values to 0 but do not free indices
 
     
     typedef MatElem<TV,Herm<sr,1>,SparseLine<Col> > RetOp;
@@ -2077,6 +2085,7 @@ public:
     typedef Vec<TVI,static_cols> TV;
 
     void clear() { for(unsigned i=0;i<data.size();++i) { data[i].indices.free(); data[i].data.free(); } } /// set all values to 0
+    void clear_data_only() { for(unsigned i=0;i<data.size();++i) { data[i].data.set( 0 ); } } /// set all values to 0 but do not free indices
 
     
     typedef MatElem<TV,Herm<sr,0>,SparseLine<Row> > RetOp;
@@ -2340,6 +2349,7 @@ public:
     typedef Vec<TVI,static_cols> TV;
 
     void clear() { for(unsigned i=0;i<data.size();++i) { data[i].indices.free(); data[i].data.free(); } } /// set all values to 0
+    void clear_data_only() { for(unsigned i=0;i<data.size();++i) { data[i].data.set( 0 ); } } /// set all values to 0 but do not free indices
 
     
     typedef MatElem<TV,Herm<sr,1>,SparseLine<Row> > RetOp;
@@ -2603,6 +2613,7 @@ public:
     typedef Vec<TVI,static_rows> TV;
 
     void clear() { for(unsigned i=0;i<data.size();++i) { data[i].indices.free(); data[i].data.free(); } } /// set all values to 0
+    void clear_data_only() { for(unsigned i=0;i<data.size();++i) { data[i].data.set( 0 ); } } /// set all values to 0 but do not free indices
 
     
     typedef MatElem<TV,AntiSym<sr,0>,SparseLine<Col> > RetOp;
@@ -2866,6 +2877,7 @@ public:
     typedef Vec<TVI,static_rows> TV;
 
     void clear() { for(unsigned i=0;i<data.size();++i) { data[i].indices.free(); data[i].data.free(); } } /// set all values to 0
+    void clear_data_only() { for(unsigned i=0;i<data.size();++i) { data[i].data.set( 0 ); } } /// set all values to 0 but do not free indices
 
     
     typedef MatElem<TV,AntiSym<sr,1>,SparseLine<Col> > RetOp;
@@ -3129,6 +3141,7 @@ public:
     typedef Vec<TVI,static_cols> TV;
 
     void clear() { for(unsigned i=0;i<data.size();++i) { data[i].indices.free(); data[i].data.free(); } } /// set all values to 0
+    void clear_data_only() { for(unsigned i=0;i<data.size();++i) { data[i].data.set( 0 ); } } /// set all values to 0 but do not free indices
 
     
     typedef MatElem<TV,AntiSym<sr,0>,SparseLine<Row> > RetOp;
@@ -3392,6 +3405,7 @@ public:
     typedef Vec<TVI,static_cols> TV;
 
     void clear() { for(unsigned i=0;i<data.size();++i) { data[i].indices.free(); data[i].data.free(); } } /// set all values to 0
+    void clear_data_only() { for(unsigned i=0;i<data.size();++i) { data[i].data.set( 0 ); } } /// set all values to 0 but do not free indices
 
     
     typedef MatElem<TV,AntiSym<sr,1>,SparseLine<Row> > RetOp;
@@ -3655,6 +3669,7 @@ public:
     typedef Vec<TVI,static_rows> TV;
 
     void clear() { for(unsigned i=0;i<data.size();++i) { data[i].indices.free(); data[i].data.free(); } } /// set all values to 0
+    void clear_data_only() { for(unsigned i=0;i<data.size();++i) { data[i].data.set( 0 ); } } /// set all values to 0 but do not free indices
 
     
     typedef MatElem<TV,TriUpper<sr,sc>,SparseLine<Col> > RetOp;
@@ -3918,6 +3933,7 @@ public:
     typedef Vec<TVI,static_cols> TV;
 
     void clear() { for(unsigned i=0;i<data.size();++i) { data[i].indices.free(); data[i].data.free(); } } /// set all values to 0
+    void clear_data_only() { for(unsigned i=0;i<data.size();++i) { data[i].data.set( 0 ); } } /// set all values to 0 but do not free indices
 
     
     typedef MatElem<TV,TriUpper<sr,sc>,SparseLine<Row> > RetOp;
@@ -4181,6 +4197,7 @@ public:
     typedef Vec<TVI,static_rows> TV;
 
     void clear() { for(unsigned i=0;i<data.size();++i) { data[i].indices.free(); data[i].data.free(); } } /// set all values to 0
+    void clear_data_only() { for(unsigned i=0;i<data.size();++i) { data[i].data.set( 0 ); } } /// set all values to 0 but do not free indices
 
     
     typedef MatElem<TV,TriLower<sr,sc>,SparseLine<Col> > RetOp;
@@ -4444,6 +4461,7 @@ public:
     typedef Vec<TVI,static_cols> TV;
 
     void clear() { for(unsigned i=0;i<data.size();++i) { data[i].indices.free(); data[i].data.free(); } } /// set all values to 0
+    void clear_data_only() { for(unsigned i=0;i<data.size();++i) { data[i].data.set( 0 ); } } /// set all values to 0 but do not free indices
 
     
     typedef MatElem<TV,TriLower<sr,sc>,SparseLine<Row> > RetOp;
@@ -4707,6 +4725,7 @@ public:
     typedef Vec<TVI,static_rows> TV;
 
     void clear() { for(unsigned i=0;i<data.size();++i) { data[i].indices.free(); data[i].data.free(); } } /// set all values to 0
+    void clear_data_only() { for(unsigned i=0;i<data.size();++i) { data[i].data.set( 0 ); } } /// set all values to 0 but do not free indices
 
     
     typedef MatElem<TV,Diag<sr,sc>,SparseLine<Col> > RetOp;
@@ -4970,6 +4989,7 @@ public:
     typedef Vec<TVI,static_cols> TV;
 
     void clear() { for(unsigned i=0;i<data.size();++i) { data[i].indices.free(); data[i].data.free(); } } /// set all values to 0
+    void clear_data_only() { for(unsigned i=0;i<data.size();++i) { data[i].data.set( 0 ); } } /// set all values to 0 but do not free indices
 
     
     typedef MatElem<TV,Diag<sr,sc>,SparseLine<Row> > RetOp;

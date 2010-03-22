@@ -37,6 +37,7 @@ public:
     typedef Vec<TVI,"""+['static_rows','static_cols'][row_oriented]+"""> TV;
 
     void clear() { for(unsigned i=0;i<data.size();++i) { data[i].indices.free(); data[i].data.free(); } } /// set all values to 0
+    void clear_data_only() { for(unsigned i=0;i<data.size();++i) { data[i].data.set( 0 ); } } /// set all values to 0 but do not free indices
 
     """ + (structure=='Gen') * ("""
     typedef DelayedAssignement<DelayedAssignementSparseSource<TT> > RetOp;

@@ -140,7 +140,7 @@ public:
         else {
             fftw_execute_dft(p,const_cast<fftw_complex *>(in),out);
         }
-        res.data /= res.data.size();
+        res.data /= std::complex<double>( res.data.size() );
         return res;
     }
 
@@ -250,10 +250,10 @@ template<int dim_,class T_,class Kernel_,class PT_>
     Vec<int,dim_> x_in_max = xmax - xmin;
     ImgInterp<std::complex<double>,dim_,Kernel_,PT_> in;
 
-    in.resize( x_in_max + 2 );
+    in.resize( x_in_max + 1 );
     in.data.set( 0 );
     for( Rectilinear_iterator<int,dim_> iter( 0, x_in_max ); iter; ++iter )
-        in.tex_int( iter.pos + 1 ) = img( iter.pos + xmin );
+        in.tex_int( iter.pos ) = img( iter.pos + xmin );
 
     FFT p;
     return p.fft<dim_>( in );
