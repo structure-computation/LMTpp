@@ -228,10 +228,9 @@ char* first_previous_doc_of( const Lexem *l) {
 
     const char blanc[4] = " \t\n";
     char* b;
-    char* c;
 
     for( b = (char*) (l->s-1); *b ; b-- )
-        if (not(c = strchr(blanc,*b)))
+        if (not(strchr(blanc,*b)))
             break;
     if (*b=='#')
         return b-1;
@@ -280,7 +279,6 @@ void append_next_comment(char* start, std::deque<Comment_zone>& list_comment) {
     const char blanc[4] = " \t\n";
     Comment_zone comment_zone;
     char *b;
-    char* c;
 
     if (not(*start))
         return;
@@ -317,7 +315,7 @@ void append_next_comment(char* start, std::deque<Comment_zone>& list_comment) {
         list_comment.push_back(comment_zone);
         /// on recherche un autre commentaire à la suite
         for( b++ ; *b; ++b )
-            if (not(c = strchr(blanc,*b)))
+            if (not(strchr(blanc,*b)))
                 break;
         if (*b=='#')
             append_next_comment(b+1,list_comment);

@@ -21,6 +21,7 @@
 #include <sys/time.h>
 #include <sys/utsname.h>
 #include "metil_sys_dir.h" /** #include <metil_sys_dir.h> */
+#include <cstdio>
 
 char *cur_dir() {
     for( unsigned st = 1024; ; st *= 2 ) {
