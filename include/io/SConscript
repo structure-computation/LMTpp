@@ -1,0 +1,10 @@
+Import('env')
+
+lib = env.Library('LMT_io', [
+    'factory.cpp',
+    'xmlnode.cpp',
+    'units.cpp',
+  ]
+)
+
+Return('lib')

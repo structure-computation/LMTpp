@@ -1,0 +1,122 @@
+/*!
+\example Exemples d'utilisation des vecteurs hétérogènes
+
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+
+    = Définition d'un vecteur hétérogène.
+
+        On appellera vecteur hétérogène un vecteur ayant des éléments de types différents (ces types ne sont pas obligés de dériver d'une type ancêtre).
+
+        = Première méthode.
+            Si le nombre de types est inférieur ou égal à huit, le plus simple est d'utiliser la classe \a HeteroExplPack .
+            Voici un exemple où le vecteur contiendra des éléments de type double ou std::complex<double> :
+            \code C/C++
+                typedef HeteroExplPack<double,std::complex<double> > C; // C est un synonyme de HeteroExplPack<double,std::complex<double> >
+                Vec<Heterogeneous<C> > h; 
+
+        = Deuxième méthode
+            Si vous souhaitez utiliser plus de huit types, alors il est nécessaire de définir une classe stockant vos types puis la passer en paramètre (template) à la classe \a Heterogeneous . Ce qui donne :
+            \code C/C++
+
+                struct MaCarac {
+
+                    template<unsigned n,unsigned inner=0> struct SubType { typedef void T; };
+                    template<unsigned inner> struct SubType<0,inner> { typedef char T; };
+                    template<unsigned inner> struct SubType<1,inner> { typedef int T; };
+                    template<unsigned inner> struct SubType<2,inner> { typedef short T; };
+                };
+
+                Vec<Heterogeneous<MaCarac> > h;
+
+
+            h est vecteur contenant des éléments de type char, int ou short.
+            <strong> Important : </strong> ne pas oublier le permièr type avec le typedef void T;qui sert de terminaison! 
+            Mais comment fait-on pour manipuler ce vecteur ?
+
+    = Utilisation
+
+        Pour manipuler ou accéder aux éléments d'un vecteur hétérogène, on utilise la fonction \a apply et ses variantes. Bien sûr \a apply sert <strong> aussi </strong> aux autres types de vecteurs mais dans notre cas, son utilisation est obligatoire car nous ne savons pas comment les données sont enregistrées. Ainsi ceux qui rêvaient d'un h[i] pour utiliser le i ième seront peut-être un peu déçus... En fait ils n'y perdent rien car \a apply offre beaucoup de facilité et d'expressvité.
+
+        = Appliquer une opération sur les éléments d'un vecteur hétérogène.
+
+            Comme pour les autres vecteurs, on définit une classe-fonction ( cad contenant l'opérateur operator() ) dont les instances pourront manipuler les éléments de notre vecteur.
+            Voici la forme générale de la classe-fonction :
+            \code 
+                struct MonOp {
+                    template<class T> void operator()( const T &e, Param1 p1, Param2 p2,..., Paramn pn ) const { les instructions. }
+                    // on peut spécialiser operator() pour des types particuliers
+                    A attr ; // on peut aussi mettre des attributs s'il y a besoin (mais uniquement accéssible en lecture)
+                }
+            Puis on applique ainsi une opération à notre vecteur :
+            \code
+                MonOp op; // on crée une instance de MonOp
+                apply(h,op,p1,p2,...,pn); // p1, p2, ..., pn sont les paramètres de op 
+                ou bien
+                apply(h,MonOp(),p1,p2,...,pn); 
+                si on n' a pas besoin de op.
+
+            voici un exemple "réel" qui compte le nombre d'éléments double dans le vecteur  :
+
+            \code c/C++
+
+                struct Compteur_double {
+                    template<class T> void operator()( const T &e, int &nb ) const {} // on ne fait rien dans le cas général.
+                    void operator()(double d, int &nb ) const { nb +=1;} // spécialisation de operator() pour le type double.
+                };
+                int main() {
+
+                    typedef HeteroExplPack<double,const char* > C; 
+                    Vec<Heterogeneous<C> > h; 
+                    Compteur_double compd ;
+
+                    h.push_back("pollux");
+                    h.push_back(3.14);
+                    h.push_back("fée clochette");
+                    h.push_back("zebulon");
+                    h.push_back(2.71);
+                    nb = 0;
+                    apply(h,compd,nb);
+                    PRINT(nb); 
+                         // nb -> 2
+                    return 0;
+                }
+
+        = Accéder à des éléments d'un vecteur hétérogène vérifiant une proprieté.
+
+            On va se servir des fonctions \a generate , \a find_with_index et \a apply_on_number .
+            Sa syntaxe générale est :
+            \code 
+                apply_on_number( vecteur,indice,opérateur,paramètres de l'opérateur)
+
+            Avec l'exemple précédent, cela donnera :
+            \code C/C++
+                struct Compteur_demo {
+                    template<class T> void operator()( const T &e,int& nb ) const {} // on ne fait rien dans le cas général.
+                    void operator()(double d,int& nb ) const { if (d==3.14) nb++; } // spécialisation de operator() pour le type double.
+                };
+                int main() {
+                
+                    typedef HeteroExplPack<double,const char* > C; 
+                    Vec<Heterogeneous<C> > h; 
+                    Compteur_demo compd ;
+                
+                    h.push_back("pollux");
+                    h.push_back(3.14);
+                    h.push_back("fée clochette");
+                    h.push_back("zebulon");
+                    h.push_back(2.71);
+                    int nb_pi = 0;
+                    apply(h,compd,nb_pi);
+                    PRINT(nb_pi);
+                          // nb_pi -> 1
+                    return 0;
+                }
+
+        = Autres utilisations
+
+            un vecteur hétérogène étant un vecteur particulier, on l'utilise avec \a apply . Jettez un coup d'oeil sur cette fonction pour avoir une vue d'ensemble des possibilités.
+
+            Remarque : la fonction \a apply_on_number peut aussi servir aux autres types de vecteurs mais autant préférer le [] ! 
+
+*/ 

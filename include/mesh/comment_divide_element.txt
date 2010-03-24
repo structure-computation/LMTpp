@@ -1,0 +1,12 @@
+/*! 
+\generic_comment divide_element
+
+    Cette fonction prend en paramètre un élément et une liste de pointeurs de noeuds. La taille de cette liste est exactement le nombre d'arêtes de l'élément. Un pointeur pointe soit sur un noeud qui servira à diviser l' arête, soit sur NULL si on ne souhaite pas diviser cette arête. 
+    Remarque : les arêtes sont numérotées conventionnellement.
+
+    \keyword Maillage/Elément/Opération
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \relates Element 
+    \relates length
+*/

@@ -1,0 +1,15 @@
+/*! 
+\generic_comment intersection
+
+    Cette fonction s'applique dans deux cas distincts :
+        * Si elle s'applique à deux vecteurs v1 et v2, elle renvoie un vecteur composé des éléments communs v1 et v2.
+        * Si elle prend en premier paramètre un élément de type barre ou triangle puis les coordonnées de deux points P1 et P2,  elle renvoie dans numP1P2 la distance entre P1 et l'intersection I entre la droite (P1P2) et l'élément puis dans dist_ext soit l'opposé de la plus petite distance de I aux côtés de l'élément si I lui appartient, soit simplement  la plus petite distance de I aux côtés de l'élément si I n'appartient pas à l'élément.
+
+    \keyword Algorithme/Extraire
+    \keyword Maillage/Elément/Opération
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \relates Element 
+    \relates Bar
+    \relates Triangle
+*/

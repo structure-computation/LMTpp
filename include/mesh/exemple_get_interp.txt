@@ -1,0 +1,110 @@
+/*!
+\example Exemple d'utilisation de la fonction get_interp
+
+    L'objet de cet exemple est de caluler la valeur de quelques fonctions de forme de certains éléments puis de créer des images 512x512 en niveaux de gris des valeurs de toutes les fonctions de forme d'un élément ( \a Quad_9 dans notre exemple).
+    Voici le code de la fonction principale :
+
+    \code C/C++
+        #include "mesh/quad.h"
+        #include "mesh/quad_8.h"
+        #include "mesh/quad_9.h"
+        #include "mesh/triangle.h"
+        #include "mesh/triangle_6.h"
+        #include "mesh/element_Bar_3.h"
+        #include "mesh/hexa.h"
+        #include "mesh/element_Bar_3.h"
+        #include "util/load_image.h"
+        
+        using namespace LMT;
+        using namespace std;
+
+        int main(int argc,char* argv[]) {
+        
+            typedef double TT;
+        
+            Vec<TT,2> var_inter(0.2,0.3);
+            TT res;
+            get_interp( Quad(), Nodal(), var_inter,static_dirac_vec<Quad::nb_nodes>( 1.0, 0 ), res );
+            PRINT(res);//   res -> 0.56
+            get_interp( Quad_8(), Nodal(), var_inter,static_dirac_vec<Quad_8::nb_nodes>( 1.0, 1 ), res );
+            PRINT(res);//   res -> -0.168
+            get_interp( Triangle(), Nodal(), var_inter,static_dirac_vec<Triangle::nb_nodes>( 1.0, 0 ), res );
+            PRINT(res);//   res -> 0.5
+            get_interp( Triangle_6(), Nodal(), var_inter,static_dirac_vec<Triangle_6::nb_nodes>( 1.0, 1 ), res );
+            PRINT(res);//   res -> -0.12
+        
+            Vec<TT,1> var_inter1(0.2);
+            get_interp( Bar_3(), Nodal(), var_inter1,static_dirac_vec<Bar_3::nb_nodes>( 1.0, 0 ), res );
+            PRINT(res);//   res -> 0.48
+        
+            Vec<TT,3> var_inter3(0.2,0.1,0.1);
+            get_interp( Hexa(), Nodal(), var_inter3,static_dirac_vec<Hexa::nb_nodes>( 1.0, 0 ), res );
+            PRINT(res);//   res -> 0.648
+        
+            static const int sizeM = 512;
+            Mat<TT,Gen<sizeM,sizeM> > M; // ou bien Mat<TT> M(sizeM,sizeM,0.0);
+            TT invSizeM = 1.0 / sizeM;
+        
+            typedef Quad_9 TEL;
+        
+            for(int k=0;k<TEL::nb_nodes;++k) {
+                for(int i=0;i<sizeM;++i)
+                    for(int j=0;j<sizeM;++j) {
+                        get_interp( TEL(), Nodal(), Vec<TT,2>(j*invSizeM,i*invSizeM),static_dirac_vec<TEL::nb_nodes>( 1.0, k ), res );
+                        M(i,j) = res;
+                    }
+                TT mini = min(M);
+                TT maxi = max(M);
+                TT a = 255./(maxi-mini);
+                TT b = -a*mini;
+                M = a*M+b;
+                stringstream ss;
+                ss << TEL::name() << "__" << k << "_fct_forme" ;
+                display_image(M,ss.str());
+            }
+            return 0;
+        }
+
+
+
+    Explication du code :
+    <strong> typedef double TT; </strong> définit un synonyme de double. On pourra écrire TT à la place de double et si on souhaite changer partout dans le code double en float, il suffira de faire le changement seulement ici.
+    
+    <strong> Vec<TT,2> var_inter(0.2,0.3); </strong> crée un vecteur statique de taille 2, initialisé à (0.2,0.3).
+    
+    <strong> get_interp( Quad(), Nodal(), var_inter,static_dirac_vec<Quad::nb_nodes>( 1.0, 0 ), res ); </strong> appelle la fonction get_interp() pour un élément de type \a Quad (), avec une interpolation par noeud ( \a Nodal ()). Remarque C++ : pour indiquer à la fonction qu' on souhaite l'utiliser avec un élément Quad, on se sert du constructeur de \a Quad qui ne prend aucun paramètre (présence des parenthèses seules). On fait de même avec le type \a Nodal . En suite on passe <strong> var_inter </strong> qui contient les coordonnées dans l'espace de référence. Puis on se sert de la fonction \a static_dirac_vec pour créer un vecteur partout nul sauf en zéro avec une valeur un (dans notre cas). Remarque : tous les éléments \a Bar , etc... ont un attribut static et entier, nb_nodes, qui contient le nombre de noeuds.
+    
+    On continue en donnant d'autres exemples d'appel de \a get_interp () en dimension une, deux ou trois.
+
+    Enfin on souhaite créer des images 512x512 en niveaux de gris des valeurs pour chaque fonction de forme d'un élément ( \a Quad_9 dans notre exemple).
+    <strong> Mat<TT,Gen<sizeM,sizeM> > M; </strong> crée une matrice "pleine" de taille statique.
+    <strong> typedef Quad_9 TEL; </strong> définit un synonyme de \a Quad_9 nommé TEL.
+    Puis on boucle sur le nombre de noeuds, donc de fonctions de forme pour créer toutes les images.
+    Remarques :
+    * <strong> Vec<TT,2>(j*invSizeM,i*invSizeM) </strong> est un appel au constructeur de la classe \a Vec<TT,int> avec initialisation à  (j*invSizeM,i*invSizeM).
+    * Le bout de code :
+        \code C/C++
+            TT mini = min(M);
+            TT maxi = max(M);
+            TT a = 255./(maxi-mini);
+            TT b = -a*mini;
+            M = a*M+b;
+        sert simplelment à ajuster les valeurs de la matrice M dans l'intervalle [0;255] car la fonction \a display_image le demande.
+    * Au sujet de <strong> TEL::name() </strong> signifie qu'on se sert de la méthode statique name() qui retourne le nom de l'élément. 
+    
+    Vous trouverez tout le code [[include/mesh/exemple_get_interp.tar.gz|ici]] .
+    
+    Il y aussi une fonction semblable à \a get_interp (), \a get_shape_functions ( à voir donc).
+ 
+    Enfin je rappelle que les coordonnées sont définies dans <strong> l'espace de référence de l'élément </strong> or dans un maillage par exemple, on est dans le repère du maillage donc très souvent \a get_interp () s'utilise avec les fonctions \a get_var_inter_linear (...), \a var_inter_is_inside ().
+    Pour avoir un exemple d'utilisation de toutes ces fonctions, allez voir l'exemple ici .
+
+
+    \relates get_shape_functions
+    \relates get_var_inter_linear
+    \relates var_inter_is_inside
+    \relates Vec
+    \keyword Maillage/Elément/Opération
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+*/

@@ -1,0 +1,112 @@
+#ifndef LMT_Wedge_15_HEADER
+#define LMT_Wedge_15_HEADER
+
+#include "quad_8.h"
+#include "triangle_6.h"
+
+namespace LMT {
+
+// --------------------------------------------------------------------------------------------------------
+/**
+    \verbatim
+        .                            5
+        .                           /|\
+        .                         11 | 10
+        .                         / 14  \
+        .                        3___9___4
+        .                        |   |   |
+        .                        |   2   |
+        .                       12  / \  13
+        .                        | 8   7 |
+        .                        |/     \|
+        .                        0___6__ 1
+
+    \keyword Maillage/Elément
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+*/
+struct Wedge_15 {
+    static const unsigned nb_var_inter = 3;
+    static const unsigned nb_nodes = 15;
+    static const char *name() { return "Wedge_15"; }
+    static const char *can_directly_be_represented_by() { return "Wedge_15"; }
+};
+
+// --------------------------------------------------------------------------------------------------------
+template<> struct NbChildrenElement<Wedge_15,1> { static const unsigned res = 5; };
+template<> struct NbChildrenElement<Wedge_15,2> { static const unsigned res = 9; };
+template<> struct NbChildrenElement<Wedge_15,3> { static const unsigned res = 15; };
+
+template<unsigned n> struct TypeChildrenElement<Wedge_15,0,n> { typedef Wedge_15 T; };
+template<> struct TypeChildrenElement<Wedge_15,1,0> { typedef Quad_8 T; };
+template<> struct TypeChildrenElement<Wedge_15,1,1> { typedef Quad_8 T; };
+template<> struct TypeChildrenElement<Wedge_15,1,2> { typedef Quad_8 T; };
+template<> struct TypeChildrenElement<Wedge_15,1,3> { typedef Triangle_6 T; };
+template<> struct TypeChildrenElement<Wedge_15,1,4> { typedef Triangle_6 T; };
+template<unsigned n> struct TypeChildrenElement<Wedge_15,2,n> { typedef Bar_3 T; };
+template<unsigned n> struct TypeChildrenElement<Wedge_15,3,n> { typedef NodalElement T; };
+
+template<class TN,class TNG,class TD,unsigned NET,class TC,class HET>
+void append_skin_elements(Element<Wedge_15,TN,TNG,TD,NET> &e,TC &ch,HET &het,Number<1> nvi_to_subs) {
+    het.add_element(e,ch,Quad_8(),e.node(0),e.node(1),e.node(4),e.node(3),e.node(6),e.node(13),e.node(9),e.node(12));
+    het.add_element(e,ch,Quad_8(),e.node(0),e.node(2),e.node(5),e.node(3),e.node(8),e.node(14),e.node(11),e.node(12));
+    het.add_element(e,ch,Quad_8(),e.node(1),e.node(2),e.node(5),e.node(4),e.node(7),e.node(14),e.node(10),e.node(13));
+    het.add_element(e,ch,Triangle_6(),e.node(0),e.node(1),e.node(2),e.node(6),e.node(7),e.node(8));
+    het.add_element(e,ch,Triangle_6(),e.node(3),e.node(4),e.node(5),e.node(9),e.node(10),e.node(11));
+}
+
+template<class TN,class TNG,class TD,unsigned NET,class TC,class HET>
+void append_skin_elements(Element<Wedge_15,TN,TNG,TD,NET> &e,TC &ch,HET &het,Number<2> nvi_to_subs) {
+    het.add_element(e,ch,Bar_3(),e.node(0),e.node(6),e.node(1));
+    het.add_element(e,ch,Bar_3(),e.node(1),e.node(7),e.node(2));
+    het.add_element(e,ch,Bar_3(),e.node(2),e.node(8),e.node(0));
+    het.add_element(e,ch,Bar_3(),e.node(3),e.node(9),e.node(4));
+    het.add_element(e,ch,Bar_3(),e.node(4),e.node(10),e.node(5));
+    het.add_element(e,ch,Bar_3(),e.node(5),e.node(11),e.node(3));
+    het.add_element(e,ch,Bar_3(),e.node(0),e.node(12),e.node(3));
+    het.add_element(e,ch,Bar_3(),e.node(1),e.node(13),e.node(4));
+    het.add_element(e,ch,Bar_3(),e.node(2),e.node(14),e.node(5));
+}
+template<class TN,class TNG,class TD,unsigned NET,class TC,class HET>
+void append_skin_elements(Element<Wedge_15,TN,TNG,TD,NET> &e,TC &ch,HET &het,Number<3> nvi_to_subs) {
+    het.add_element(e,ch,NodalElement(),e.node(0));
+    het.add_element(e,ch,NodalElement(),e.node(1));
+    het.add_element(e,ch,NodalElement(),e.node(2));
+    het.add_element(e,ch,NodalElement(),e.node(3));
+    het.add_element(e,ch,NodalElement(),e.node(4));
+    het.add_element(e,ch,NodalElement(),e.node(5));
+    het.add_element(e,ch,NodalElement(),e.node(6));
+    het.add_element(e,ch,NodalElement(),e.node(7));
+    het.add_element(e,ch,NodalElement(),e.node(8));
+    het.add_element(e,ch,NodalElement(),e.node(9));
+    het.add_element(e,ch,NodalElement(),e.node(10));
+    het.add_element(e,ch,NodalElement(),e.node(11));
+    het.add_element(e,ch,NodalElement(),e.node(12));
+    het.add_element(e,ch,NodalElement(),e.node(13));
+    het.add_element(e,ch,NodalElement(),e.node(14));
+}
+
+
+extern unsigned valid_wedge_face_center[];
+extern int div_wedge_face_center[];
+
+template<class TN,class TNG,class TD,unsigned NET,class TM>
+bool divide_element_using_elem_children(Element<Wedge_15,TN,TNG,TD,NET> &e,TM &m,TNG **nnodes) {
+    std::cout << "Redecoupage des elements Wedge_15 non implemente" << std::endl;
+    assert(0);
+    return false;
+}
+
+template<class TN,class TNG,class TD,unsigned NET>
+typename TNG::T measure( const Element<Wedge_15,TN,TNG,TD,NET> &elem ) {
+typename TNG::T V= 0.041666666666666664354*(((0.72360679774997899161*elem.pos(0)[0]+0.1381966011250105042*elem.pos(1)[0]+0.1381966011250105042*elem.pos(2)[0])-0.72360679774997899161*elem.pos(3)[0]-0.1381966011250105042*elem.pos(4)[0]-0.1381966011250105042*elem.pos(5)[0])*((0.1381966011250105042*elem.pos(2)[2]-0.1381966011250105042*elem.pos(0)[2]-0.8618033988749894958*elem.pos(3)[2]+0.8618033988749894958*elem.pos(5)[2])*(0.1381966011250105042*elem.pos(1)[1]-0.1381966011250105042*elem.pos(0)[1]-0.8618033988749894958*elem.pos(3)[1]+0.8618033988749894958*elem.pos(4)[1])-(0.1381966011250105042*elem.pos(1)[2]-0.1381966011250105042*elem.pos(0)[2]-0.8618033988749894958*elem.pos(3)[2]+0.8618033988749894958*elem.pos(4)[2])*(0.8618033988749894958*elem.pos(5)[1]+0.1381966011250105042*elem.pos(2)[1]-0.1381966011250105042*elem.pos(0)[1]-0.8618033988749894958*elem.pos(3)[1]))+(0.8618033988749894958*elem.pos(4)[0]+0.1381966011250105042*elem.pos(1)[0]-0.1381966011250105042*elem.pos(0)[0]-0.8618033988749894958*elem.pos(3)[0])*((0.8618033988749894958*elem.pos(5)[1]+0.1381966011250105042*elem.pos(2)[1]-0.1381966011250105042*elem.pos(0)[1]-0.8618033988749894958*elem.pos(3)[1])*((0.1381966011250105042*elem.pos(2)[2]+0.1381966011250105042*elem.pos(1)[2]+0.72360679774997899161*elem.pos(0)[2])-0.72360679774997899161*elem.pos(3)[2]-0.1381966011250105042*elem.pos(4)[2]-0.1381966011250105042*elem.pos(5)[2])-(0.1381966011250105042*elem.pos(2)[2]-0.1381966011250105042*elem.pos(0)[2]-0.8618033988749894958*elem.pos(3)[2]+0.8618033988749894958*elem.pos(5)[2])*((0.1381966011250105042*elem.pos(2)[1]+0.1381966011250105042*elem.pos(1)[1]+0.72360679774997899161*elem.pos(0)[1])-0.72360679774997899161*elem.pos(3)[1]-0.1381966011250105042*elem.pos(4)[1]-0.1381966011250105042*elem.pos(5)[1]))-(0.8618033988749894958*elem.pos(5)[0]+0.1381966011250105042*elem.pos(2)[0]-0.1381966011250105042*elem.pos(0)[0]-0.8618033988749894958*elem.pos(3)[0])*((0.1381966011250105042*elem.pos(1)[1]-0.1381966011250105042*elem.pos(0)[1]-0.8618033988749894958*elem.pos(3)[1]+0.8618033988749894958*elem.pos(4)[1])*((0.1381966011250105042*elem.pos(2)[2]+0.1381966011250105042*elem.pos(1)[2]+0.72360679774997899161*elem.pos(0)[2])-0.72360679774997899161*elem.pos(3)[2]-0.1381966011250105042*elem.pos(4)[2]-0.1381966011250105042*elem.pos(5)[2])-(0.1381966011250105042*elem.pos(1)[2]-0.1381966011250105042*elem.pos(0)[2]-0.8618033988749894958*elem.pos(3)[2]+0.8618033988749894958*elem.pos(4)[2])*((0.1381966011250105042*elem.pos(2)[1]+0.1381966011250105042*elem.pos(1)[1]+0.72360679774997899161*elem.pos(0)[1])-0.72360679774997899161*elem.pos(3)[1]-0.1381966011250105042*elem.pos(4)[1]-0.1381966011250105042*elem.pos(5)[1])))+0.041666666666666664354*(((0.1381966011250105042*elem.pos(2)[2]-0.1381966011250105042*elem.pos(0)[2]-0.8618033988749894958*elem.pos(3)[2]+0.8618033988749894958*elem.pos(5)[2])*(0.1381966011250105042*elem.pos(1)[1]-0.1381966011250105042*elem.pos(0)[1]-0.8618033988749894958*elem.pos(3)[1]+0.8618033988749894958*elem.pos(4)[1])-(0.1381966011250105042*elem.pos(1)[2]-0.1381966011250105042*elem.pos(0)[2]-0.8618033988749894958*elem.pos(3)[2]+0.8618033988749894958*elem.pos(4)[2])*(0.8618033988749894958*elem.pos(5)[1]+0.1381966011250105042*elem.pos(2)[1]-0.1381966011250105042*elem.pos(0)[1]-0.8618033988749894958*elem.pos(3)[1]))*((0.1381966011250105042*elem.pos(2)[0]+0.58541019662496851517*elem.pos(1)[0]+0.27639320225002098064*elem.pos(0)[0])-0.27639320225002098064*elem.pos(3)[0]-0.58541019662496851517*elem.pos(4)[0]-0.1381966011250105042*elem.pos(5)[0])+(0.8618033988749894958*elem.pos(4)[0]+0.1381966011250105042*elem.pos(1)[0]-0.1381966011250105042*elem.pos(0)[0]-0.8618033988749894958*elem.pos(3)[0])*((0.8618033988749894958*elem.pos(5)[1]+0.1381966011250105042*elem.pos(2)[1]-0.1381966011250105042*elem.pos(0)[1]-0.8618033988749894958*elem.pos(3)[1])*((0.1381966011250105042*elem.pos(2)[2]+0.58541019662496851517*elem.pos(1)[2]+0.27639320225002098064*elem.pos(0)[2])-0.27639320225002098064*elem.pos(3)[2]-0.58541019662496851517*elem.pos(4)[2]-0.1381966011250105042*elem.pos(5)[2])-(0.1381966011250105042*elem.pos(2)[2]-0.1381966011250105042*elem.pos(0)[2]-0.8618033988749894958*elem.pos(3)[2]+0.8618033988749894958*elem.pos(5)[2])*((0.1381966011250105042*elem.pos(2)[1]+0.58541019662496851517*elem.pos(1)[1]+0.27639320225002098064*elem.pos(0)[1])-0.27639320225002098064*elem.pos(3)[1]-0.58541019662496851517*elem.pos(4)[1]-0.1381966011250105042*elem.pos(5)[1]))-(0.8618033988749894958*elem.pos(5)[0]+0.1381966011250105042*elem.pos(2)[0]-0.1381966011250105042*elem.pos(0)[0]-0.8618033988749894958*elem.pos(3)[0])*((0.1381966011250105042*elem.pos(1)[1]-0.1381966011250105042*elem.pos(0)[1]-0.8618033988749894958*elem.pos(3)[1]+0.8618033988749894958*elem.pos(4)[1])*((0.1381966011250105042*elem.pos(2)[2]+0.58541019662496851517*elem.pos(1)[2]+0.27639320225002098064*elem.pos(0)[2])-0.27639320225002098064*elem.pos(3)[2]-0.58541019662496851517*elem.pos(4)[2]-0.1381966011250105042*elem.pos(5)[2])-(0.1381966011250105042*elem.pos(1)[2]-0.1381966011250105042*elem.pos(0)[2]-0.8618033988749894958*elem.pos(3)[2]+0.8618033988749894958*elem.pos(4)[2])*((0.1381966011250105042*elem.pos(2)[1]+0.58541019662496851517*elem.pos(1)[1]+0.27639320225002098064*elem.pos(0)[1])-0.27639320225002098064*elem.pos(3)[1]-0.58541019662496851517*elem.pos(4)[1]-0.1381966011250105042*elem.pos(5)[1])))+0.041666666666666664354*(((0.1381966011250105042*elem.pos(2)[2]-0.1381966011250105042*elem.pos(0)[2]-0.8618033988749894958*elem.pos(3)[2]+0.8618033988749894958*elem.pos(5)[2])*(0.1381966011250105042*elem.pos(1)[1]-0.1381966011250105042*elem.pos(0)[1]-0.8618033988749894958*elem.pos(3)[1]+0.8618033988749894958*elem.pos(4)[1])-(0.1381966011250105042*elem.pos(1)[2]-0.1381966011250105042*elem.pos(0)[2]-0.8618033988749894958*elem.pos(3)[2]+0.8618033988749894958*elem.pos(4)[2])*(0.8618033988749894958*elem.pos(5)[1]+0.1381966011250105042*elem.pos(2)[1]-0.1381966011250105042*elem.pos(0)[1]-0.8618033988749894958*elem.pos(3)[1]))*((0.58541019662496851517*elem.pos(2)[0]+0.1381966011250105042*elem.pos(1)[0]+0.27639320225002098064*elem.pos(0)[0])-0.27639320225002098064*elem.pos(3)[0]-0.1381966011250105042*elem.pos(4)[0]-0.58541019662496851517*elem.pos(5)[0])+(0.8618033988749894958*elem.pos(4)[0]+0.1381966011250105042*elem.pos(1)[0]-0.1381966011250105042*elem.pos(0)[0]-0.8618033988749894958*elem.pos(3)[0])*((0.8618033988749894958*elem.pos(5)[1]+0.1381966011250105042*elem.pos(2)[1]-0.1381966011250105042*elem.pos(0)[1]-0.8618033988749894958*elem.pos(3)[1])*((0.58541019662496851517*elem.pos(2)[2]+0.1381966011250105042*elem.pos(1)[2]+0.27639320225002098064*elem.pos(0)[2])-0.27639320225002098064*elem.pos(3)[2]-0.1381966011250105042*elem.pos(4)[2]-0.58541019662496851517*elem.pos(5)[2])-(0.1381966011250105042*elem.pos(2)[2]-0.1381966011250105042*elem.pos(0)[2]-0.8618033988749894958*elem.pos(3)[2]+0.8618033988749894958*elem.pos(5)[2])*((0.58541019662496851517*elem.pos(2)[1]+0.1381966011250105042*elem.pos(1)[1]+0.27639320225002098064*elem.pos(0)[1])-0.27639320225002098064*elem.pos(3)[1]-0.1381966011250105042*elem.pos(4)[1]-0.58541019662496851517*elem.pos(5)[1]))-(0.8618033988749894958*elem.pos(5)[0]+0.1381966011250105042*elem.pos(2)[0]-0.1381966011250105042*elem.pos(0)[0]-0.8618033988749894958*elem.pos(3)[0])*((0.1381966011250105042*elem.pos(1)[1]-0.1381966011250105042*elem.pos(0)[1]-0.8618033988749894958*elem.pos(3)[1]+0.8618033988749894958*elem.pos(4)[1])*((0.58541019662496851517*elem.pos(2)[2]+0.1381966011250105042*elem.pos(1)[2]+0.27639320225002098064*elem.pos(0)[2])-0.27639320225002098064*elem.pos(3)[2]-0.1381966011250105042*elem.pos(4)[2]-0.58541019662496851517*elem.pos(5)[2])-(0.1381966011250105042*elem.pos(1)[2]-0.1381966011250105042*elem.pos(0)[2]-0.8618033988749894958*elem.pos(3)[2]+0.8618033988749894958*elem.pos(4)[2])*((0.58541019662496851517*elem.pos(2)[1]+0.1381966011250105042*elem.pos(1)[1]+0.27639320225002098064*elem.pos(0)[1])-0.27639320225002098064*elem.pos(3)[1]-0.1381966011250105042*elem.pos(4)[1]-0.58541019662496851517*elem.pos(5)[1])))+0.041666666666666664354*(((0.72360679774997899161*elem.pos(0)[0]+0.1381966011250105042*elem.pos(1)[0]+0.1381966011250105042*elem.pos(2)[0])-0.72360679774997899161*elem.pos(3)[0]-0.1381966011250105042*elem.pos(4)[0]-0.1381966011250105042*elem.pos(5)[0])*((0.41458980337503148483*elem.pos(4)[1]+0.58541019662496851517*elem.pos(1)[1]-0.58541019662496851517*elem.pos(0)[1]-0.41458980337503148483*elem.pos(3)[1])*(0.41458980337503148483*elem.pos(5)[2]+0.58541019662496851517*elem.pos(2)[2]-0.58541019662496851517*elem.pos(0)[2]-0.41458980337503148483*elem.pos(3)[2])-(0.41458980337503148483*elem.pos(4)[2]+0.58541019662496851517*elem.pos(1)[2]-0.58541019662496851517*elem.pos(0)[2]-0.41458980337503148483*elem.pos(3)[2])*(0.41458980337503148483*elem.pos(5)[1]+0.58541019662496851517*elem.pos(2)[1]-0.58541019662496851517*elem.pos(0)[1]-0.41458980337503148483*elem.pos(3)[1]))+(0.41458980337503148483*elem.pos(4)[0]+0.58541019662496851517*elem.pos(1)[0]-0.58541019662496851517*elem.pos(0)[0]-0.41458980337503148483*elem.pos(3)[0])*(((0.1381966011250105042*elem.pos(2)[2]+0.1381966011250105042*elem.pos(1)[2]+0.72360679774997899161*elem.pos(0)[2])-0.72360679774997899161*elem.pos(3)[2]-0.1381966011250105042*elem.pos(4)[2]-0.1381966011250105042*elem.pos(5)[2])*(0.41458980337503148483*elem.pos(5)[1]+0.58541019662496851517*elem.pos(2)[1]-0.58541019662496851517*elem.pos(0)[1]-0.41458980337503148483*elem.pos(3)[1])-((0.1381966011250105042*elem.pos(2)[1]+0.1381966011250105042*elem.pos(1)[1]+0.72360679774997899161*elem.pos(0)[1])-0.72360679774997899161*elem.pos(3)[1]-0.1381966011250105042*elem.pos(4)[1]-0.1381966011250105042*elem.pos(5)[1])*(0.41458980337503148483*elem.pos(5)[2]+0.58541019662496851517*elem.pos(2)[2]-0.58541019662496851517*elem.pos(0)[2]-0.41458980337503148483*elem.pos(3)[2]))-(0.41458980337503148483*elem.pos(5)[0]+0.58541019662496851517*elem.pos(2)[0]-0.58541019662496851517*elem.pos(0)[0]-0.41458980337503148483*elem.pos(3)[0])*(((0.1381966011250105042*elem.pos(2)[2]+0.1381966011250105042*elem.pos(1)[2]+0.72360679774997899161*elem.pos(0)[2])-0.72360679774997899161*elem.pos(3)[2]-0.1381966011250105042*elem.pos(4)[2]-0.1381966011250105042*elem.pos(5)[2])*(0.41458980337503148483*elem.pos(4)[1]+0.58541019662496851517*elem.pos(1)[1]-0.58541019662496851517*elem.pos(0)[1]-0.41458980337503148483*elem.pos(3)[1])-((0.1381966011250105042*elem.pos(2)[1]+0.1381966011250105042*elem.pos(1)[1]+0.72360679774997899161*elem.pos(0)[1])-0.72360679774997899161*elem.pos(3)[1]-0.1381966011250105042*elem.pos(4)[1]-0.1381966011250105042*elem.pos(5)[1])*(0.41458980337503148483*elem.pos(4)[2]+0.58541019662496851517*elem.pos(1)[2]-0.58541019662496851517*elem.pos(0)[2]-0.41458980337503148483*elem.pos(3)[2])));
+
+return V;
+}
+
+};
+
+#include "element_Wedge_15.h"
+
+#endif // LMT_wedge_HEADER
+

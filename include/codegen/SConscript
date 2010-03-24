@@ -1,0 +1,17 @@
+# codegen
+Import('env')
+
+src = [
+    "ex.cpp",
+    "op.cpp",
+    "read_ex.cpp",
+    "write_graphviz.cpp",
+    "write_code.cpp",
+    "write_code_language_cpp.cpp",
+    "exmatrix.cpp",
+    "exvector.cpp",
+    # "exsolver.cpp",
+]
+
+lib = env.Library( 'codegen_cpp', src ) # , LIBS = [ 'gsl', 'gslcblas', ]
+Return('lib')

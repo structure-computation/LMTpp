@@ -1,0 +1,6 @@
+Import('env')
+
+subdirs = ['io','mesh','tvrc','util','amd','codegen','LDL']
+libs = [ SConscript('%s/SConscript' % subdir, exports='env' ) for subdir in subdirs ]
+
+Return('libs')

@@ -1,0 +1,43 @@
+/*!
+\generic_comment get_interp
+
+
+    Cette fonction permet de calculer l'image d'un point par une fonction définie comme combinaison linéaire des fonctions de forme de l'élément de référence ( e.g. Bar, Triangle, Triangle_6, Quad, Tetra...).
+    <strong> TRES IMPORTANT : </strong> les coordonnées du point sont données dans <strong> l'espace de référence de l'élément </strong> .  
+    Description des paramètres de la fonction get_interp(elem,propApprox,var_inter,val,resultat) :
+
+    * le premier paramètre est le type d'élément. Vous trouverez une longue liste [[Maillage/Element|ici]] .
+    * le deuxième est le type d'interpolation. Il y a six classes standards, \a Global , \a Nodal , \a Elementary , \a Gauss , \a Der_nodal et \a Skin_elementary . Les trois premières sont les plus importantes.
+        * \a Global est utilisée lorsque la fonction est constante sur tout le maillage. Dans ce cas, le tableau val ne contient qu'une seule valeur.
+        * \a Nodal est utilisée quand la fonction est définie par ses valeurs sur les noeuds de l'élément. val doit contenir autant de valeurs qu'il y a de noeuds à lélément.
+        * \a Elementary sert lorsque la fonction est constante sur l'élément. val ne contient donc qu'une seule valeur.
+    * le troisième paramètre var_inter contient les coordonnées dans l'espace de référence du point dont on veut calculer l'interpolation.
+    * le quatrième paramètre, val, est le tableau des valeurs d'interpolations. Pour être plus précis notons :
+        \latex 
+            $$
+            \phi_i
+            $$
+        les n fonctions de référence d'un élément et U les coordonnées dans l'espace de référence (U est un scalaire pour les éléments à une dimension comme \a Bar , \a Bar_3 , \a Bar_4 , un couple pour les éléments à deux dimensions comme \a Triangles , etc ...). Alors la fonction get_interp() renvoie :
+        \latex
+            $$
+            \sum_i \phi_i(U) val_i
+            $$
+        Remarque : val n'est pas forcément un scalaire. Par exemple, val peut être de la forme  Vec<A> où A est une classe représentant un élément d'un espace vectoriel réel : i.e. on doit avoir les opérations a1+a2, a1-a2, l*a1 où l est un réel et a1, a2 des éléments de A.
+    * le dernier paramètre est le résultat de l'appel de get_interp.
+
+    Son utilisation (non évidente) est illustrée dans cette [[Exemple d'utilisation de la fonction get_interp|exemple]] .
+    Vous trouverez le code de l'exemple [[include/mesh/exemple_get_interp.tar.gz|ici]] .
+    
+    Il y aussi une fonction semblable à \a get_interp (), \a get_shape_functions ( à voir donc).
+ 
+    Enfin je rappelle que les coordonnées sont définies dans <strong> l'espace de référence de l'élément </strong> or dans un maillage par exemple, on est dans le repère du maillage donc très souvent \a get_interp () s'utilise avec les fonctions \a get_var_inter_linear (...), \a var_inter_is_inside (...).
+    Pour avoir un exemple d'utilisation de toutes ces fonctions, allez voir l'exemple ici .
+
+    \relates get_shape_functions
+    \relates get_var_inter_linear
+    \relates var_inter_is_inside
+    \relates Vec
+    \keyword Maillage/Elément/Opération
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+*/
