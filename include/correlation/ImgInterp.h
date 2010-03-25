@@ -79,6 +79,72 @@ struct ImgInterpBilinearKernel {
 };
 
 /*! kernel exemple for ImgInterp */
+struct ImgInterpBilinearCyclicKernel {
+    static std::string name() { return "ImgInterpBilinearCyclicKernel"; }
+    // 2D
+    template<class T,class Img,class PT>
+            T operator()( StructForType<T>, const Img &f, PT x, PT y ) const {
+                double tmp, fracpartx, fracparty;
+                fracpartx = modf( double(x)/f.sizes[0], &tmp );
+                if (fracpartx < 0) fracpartx = (1+fracpartx)*f.sizes[0]; else fracpartx *= f.sizes[0];  
+                int xi  = int( fracpartx );
+                int xip = (xi + 1) % f.sizes[0]; 
+                PT xf = fracpartx - xi;
+                fracparty = modf( double(y)/f.sizes[1], &tmp );
+                if (fracparty < 0) fracparty = (1+fracparty)*f.sizes[1]; else fracparty *= f.sizes[1];  
+                int yi  = int( fracparty );
+                int yip = (yi + 1) % f.sizes[1];                 
+                PT yf = fracparty - yi;
+                return  f.tex_int( xi , yi  ) * T( 1 - xf ) * T( 1 - yf ) +
+                        f.tex_int( xip, yi  ) * T( 0 + xf ) * T( 1 - yf ) +
+                        f.tex_int( xi , yip ) * T( 1 - xf ) * T( 0 + yf ) +
+                        f.tex_int( xip, yip ) * T( 0 + xf ) * T( 0 + yf );
+            }
+    // 3D
+    template<class T,class Img,class PT>
+    T operator()( StructForType<T>, const Img &f, PT x, PT y, PT z ) const {
+        int xi = int( x );
+        int yi = int( y );
+        int zi = int( z );
+        PT xf = x - xi;
+        PT yf = y - yi;
+        PT zf = z - zi;
+        return f.tex_int( xi + 0, yi + 0, zi + 0 ) * T( 1 - xf ) * T( 1 - yf ) * T( 1 - zf ) +
+                f.tex_int( xi + 1, yi + 0, zi + 0 ) * T( 0 + xf ) * T( 1 - yf ) * T( 1 - zf ) +
+                f.tex_int( xi + 0, yi + 1, zi + 0 ) * T( 1 - xf ) * T( 0 + yf ) * T( 1 - zf ) +
+                f.tex_int( xi + 1, yi + 1, zi + 0 ) * T( 0 + xf ) * T( 0 + yf ) * T( 1 - zf ) +
+                f.tex_int( xi + 0, yi + 0, zi + 1 ) * T( 1 - xf ) * T( 1 - yf ) * T( 0 + zf ) +
+                f.tex_int( xi + 1, yi + 0, zi + 1 ) * T( 0 + xf ) * T( 1 - yf ) * T( 0 + zf ) +
+                f.tex_int( xi + 0, yi + 1, zi + 1 ) * T( 1 - xf ) * T( 0 + yf ) * T( 0 + zf ) +
+                f.tex_int( xi + 1, yi + 1, zi + 1 ) * T( 0 + xf ) * T( 0 + yf ) * T( 0 + zf );
+    }
+
+    //     template<class T,class Img,class PT>
+    //     Vec<T,2> grad( StructForType<T>, const Img &f, Vec<PT,2> p ) const {
+    //         int xi = int( p[0] );
+    //         int yi = int( p[1] );
+    //         PT xf = p[0] - xi;
+    //         PT yf = p[1] - yi;
+    //         return Vec<T,2>(
+    //             ( f.tex_int( xi + 1, yi + 0 ) - f.tex_int( xi + 0, yi + 0 ) ) * ( 1 - yf ) +
+    //             ( f.tex_int( xi + 1, yi + 1 ) - f.tex_int( xi + 0, yi + 1 ) ) * ( 0 + yf ),
+    //             ( f.tex_int( xi + 0, yi + 1 ) - f.tex_int( xi + 0, yi + 0 ) ) * ( 1 - xf ) +
+    //             ( f.tex_int( xi + 1, yi + 1 ) - f.tex_int( xi + 1, yi + 0 ) ) * ( 0 + xf )
+    //         );
+    //     }
+
+                    template<class T,class Img,class PT,int dim>
+                            Vec<T,dim> grad( StructForType<T>, const Img &f, Vec<PT,dim> p ) const {
+                                Vec<T,dim> res;
+                                const double d = 0.05;
+                                for(int i=0;i<dim;++i)
+            //res[ i ] = ( f( Vec<PT,dim>( p + static_dirac_vec<dim>( d, i ) ) ) - f( p ) ) / d;
+                                    res[ i ] = ( f( Vec<PT,dim>( p + static_dirac_vec<dim>( d, i ) ) ) - f( p - static_dirac_vec<dim>( d, i ) ) ) / ( 2 * d );
+                                return res;
+                            }
+};
+
+/*! kernel exemple for ImgInterp */
 struct ImgInterpOrder3_Kernel {
     static std::string name() { return "ImgInterpOrder3_Kernel"; }
 
