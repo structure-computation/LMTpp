@@ -175,7 +175,7 @@ bool var_inter_is_inside( const Triangle &e, const TV &var_inter, T tol = 0 ) {
 }
 
 /// > 0 -> inside, < 0 -> outside
-template<class TV,class T>
+template<class T,class TV>
 T var_inter_insideness( const Triangle &e, const TV &var_inter ) {
     return min( min( var_inter[0], var_inter[1] ), 1 - var_inter[0] - var_inter[1] );
 }
