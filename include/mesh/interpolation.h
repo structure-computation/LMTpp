@@ -14,11 +14,14 @@ struct TypeOfVariableInterpolationInMesh {
     typedef typename TM::TNode::template SubTypeByName0<NameDM>::TT TypeIfNodal;
     typedef typename TM::Carac::template ElementChoice<0,0,0,0>::TData::template SubTypeByName0<NameDM>::TT TypeIfElementary;
     static const int type_interpolation = AreSameType<TypeIfNodal,void>::res; // 0 -> nodal, 1 -> elementary
+    typedef typename TM::T ScalarType;
     typedef typename AlternativeOnType<
         type_interpolation,
         TypeIfNodal,
         TypeIfElementary
     >::T T;
+
+    TypeOfVariableInterpolationInMesh() : max_vi( -1 ) {}
 
     template<class TE,class TV>
     void interp( const TE &elem, const TV &var_inter, Number<0> ) { // nodal
@@ -38,14 +41,16 @@ struct TypeOfVariableInterpolationInMesh {
     template<class TE>
     bool operator()( const TE &elem, const typename TE::Pvec &pos ) {
         Vec<typename TE::T,TE::nb_var_inter> var_inter;
-        get_var_inter( elem, pos, var_inter, 1e-4 );
-        if ( var_inter_is_inside( typename TE::NE(), var_inter, 1e-6 ) ) {
+        get_var_inter( elem, pos, var_inter, 1e-2 );
+        ScalarType vi = var_inter_insideness<ScalarType>( typename TE::NE(), var_inter );
+        if ( max_vi < vi ) {
+            max_vi = vi;
             interp( elem, var_inter, Number<type_interpolation>() );
-            return true;
         }
-        return false;
+        return vi >= -1e-6;
     }
 
+    ScalarType max_vi;
     T res;
 };
 

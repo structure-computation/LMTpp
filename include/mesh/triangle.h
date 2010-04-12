@@ -17,7 +17,7 @@ namespace LMT {
                             0----1
 
     \relates Mesh
-    \keyword Maillage/Elément 
+    \keyword Maillage/Elément
     \author Hugo LECLERC
     \friend hugo.leclerc@lmt.ens-cachan.fr
     \friend raphael.pasquier@lmt.ens-cachan.fr
@@ -68,11 +68,11 @@ void update_circum_center(const Element<Triangle,TN,TNG,TD,NET> &e,Pvec &C,T &R)
 template<class TN,class TNG,class TD,unsigned NET,class Pvec,class T>
 void intersection(const Element<Triangle,TN,TNG,TD,NET> &e,Pvec P1,Pvec P2,T &numP1P2,T &dist_ext) {
     DEBUGASSERT( (TNG::dim==3) );
-    
+
     Pvec T0(e.node(0)->pos), T1(e.node(1)->pos), T2(e.node(2)->pos);
     Pvec N = vect_prod(T1-T0,T2-T0);
     numP1P2 = dot(T0-P1,N) / dot(P2-P1,N);
-    
+
     Pvec pres = P1 + (P2-P1) * numP1P2;
     T dist0 = dot(vect_prod(T0-T1,T2-T1),vect_prod(pres-T1,T2-T1));
     T dist1 = dot(vect_prod(T1-T2,T0-T2),vect_prod(pres-T2,T0-T2));
@@ -126,7 +126,7 @@ bool divide_element(Element<Triangle,TN,TNG,TD,NET> &e,TM &m,TNG **nnodes) {
         DM::copy( e, *m.add_element( Triangle(), TN(), e.node(0), e.node(1), nnodes[2] ) );
         DM::copy( e, *m.add_element( Triangle(), TN(), nnodes[2], e.node(1), e.node(2) ) );
     }
-    
+
     return ( nnodes[0] || nnodes[1] || nnodes[2] );
 }
 template<class TN,class TNG,class TD,unsigned NET,class TM>
@@ -172,6 +172,12 @@ typename TNG::T measure( const Element<Triangle,TN,TNG,TD,NET> &e ) {
 template<class TV,class T>
 bool var_inter_is_inside( const Triangle &e, const TV &var_inter, T tol = 0 ) {
     return heaviside( var_inter[0] + tol ) * heaviside( var_inter[1] + tol ) * heaviside( 1 - var_inter[0] - var_inter[1] + tol );
+}
+
+/// > 0 -> inside, < 0 -> outside
+template<class TV,class T>
+T var_inter_insideness( const Triangle &e, const TV &var_inter ) {
+    return min( min( var_inter[0], var_inter[1] ), 1 - var_inter[0] - var_inter[1] );
 }
 
 }
