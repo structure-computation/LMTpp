@@ -201,7 +201,7 @@ struct ZeroPadding {};
 //}
   
 template<class T_,unsigned dim_,class Kernel_,class PT_> 
-        ImgInterp<std::complex<double>,dim_,Kernel_,PT_> fft( const ImgInterp<std::complex<T_>, dim_, Kernel_, PT_ > &img, Vec<int,dim_> xmin, Vec<int,dim_> xmax, const SymmetricPadding padding ) {
+ImgInterp<std::complex<double>,dim_,Kernel_,PT_> fft( const ImgInterp<std::complex<T_>, dim_, Kernel_, PT_ > &img, Vec<int,dim_> xmin, Vec<int,dim_> xmax, const SymmetricPadding padding ) {
     Vec<int,dim_> x_in_max = ( xmax - xmin + 1 ) * 2 - 1;
 
     ImgInterp<std::complex<double>,dim_,Kernel_,PT_> in;
@@ -227,7 +227,7 @@ template<class T_,unsigned dim_,class Kernel_,class PT_>
 }
 
 template<class T_,int dim_,class Kernel_,class PT_>
-        ImgInterp<std::complex<double>,dim_,Kernel_,PT_> ffti( const ImgInterp<std::complex<T_>, dim_, Kernel_, PT_ > &img, const SymmetricPadding padding ) {
+ImgInterp<std::complex<double>,dim_,Kernel_,PT_> ffti( const ImgInterp<std::complex<T_>, dim_, Kernel_, PT_ > &img, const SymmetricPadding padding ) {
 
     ImgInterp<std::complex<double>,dim_,Kernel_,PT_> in,tem;
     FFT p;
@@ -245,9 +245,9 @@ template<class T_,int dim_,class Kernel_,class PT_>
 //}
 
 template<int dim_,class T_,class Kernel_,class PT_>
-        ImgInterp<std::complex<double>,dim_,Kernel_,PT_> fft( const ImgInterp<std::complex<T_>, dim_, Kernel_, PT_ > &img, Vec<int,dim_> xmin, Vec<int,dim_> xmax, ZeroPadding ) {
+ImgInterp<std::complex<double>,dim_,Kernel_,PT_> fft( const ImgInterp<std::complex<T_>, dim_, Kernel_, PT_ > &img, Vec<int,dim_> xmin, Vec<int,dim_> xmax, ZeroPadding ) {
 
-    Vec<int,dim_> x_in_max = xmax - xmin;
+    Vec<int,dim_> x_in_max = xmax - xmin + 1;
     ImgInterp<std::complex<double>,dim_,Kernel_,PT_> in;
 
     in.resize( x_in_max + 1 );
@@ -265,12 +265,12 @@ template<int dim_,class T_,class Kernel_,class PT_>
 //}
 
 template<class T_,unsigned dim_,class Kernel_,class PT_>
-        ImgInterp<std::complex<double>,dim_,Kernel_,PT_> ffti( const ImgInterp<std::complex<T_>, dim_, Kernel_, PT_ > &img, const ZeroPadding padding ) {
+ImgInterp<std::complex<double>,dim_,Kernel_,PT_> ffti( const ImgInterp<std::complex<T_>, dim_, Kernel_, PT_ > &img, const ZeroPadding padding ) {
     FFT p;
     ImgInterp<std::complex<double>,dim_,Kernel_,PT_> tem = p.ffti<dim_>( img );
-    ImgInterp<std::complex<double>,dim_,Kernel_,PT_> in; in.resize( img.sizes - 2 );
+    ImgInterp<std::complex<double>,dim_,Kernel_,PT_> in; in.resize( img.sizes - 1 );
     for( Rectilinear_iterator<int,dim_> iter( 0, in.sizes ); iter; ++iter )
-            in.tex_int( iter.pos ) = tem( iter.pos + 1 );
+            in.tex_int( iter.pos ) = tem( iter.pos );
     return in;
 }
 
@@ -280,7 +280,7 @@ template<class T_,unsigned dim_,class Kernel_,class PT_>
     Réf : http://pixel-shaker.fr/
 
 */
-template<int dim_,class T_,class Kernel_,class PT_>
+template< int dim_, class T_, class Kernel_,class PT_>
 Vec<int,dim_> rigid_body_translation( const ImgInterp<T_,dim_,Kernel_,PT_> &i, const ImgInterp<T_,dim_,Kernel_,PT_> &i2, Vec<int,dim_> xmin, Vec<int,dim_> xmax ) {
     ImgInterp<std::complex<double>,dim_,Kernel_,PT_> _i ; _i .resize( i .size() ); _i .data = i .data;
     ImgInterp<std::complex<double>,dim_,Kernel_,PT_> _i2; _i2.resize( i2.size() ); _i2.data = i2.data;
@@ -300,6 +300,81 @@ Vec<int,dim_> rigid_body_translation( const ImgInterp<T_,dim_,Kernel_,PT_> &i, c
         }
     }
 
+    res = ( ( res + img5.sizes / 2 ) % img5.sizes ) - img5.sizes / 2;
+    res += ( 2 * ( res > 0 ) - 1 ) * ( res != 0 );
+    return res;
+}
+
+template< int dim_, class T_, class Kernel_, class PT_>
+Vec<int,dim_> rigid_body_translation_experimental( const ImgInterp<T_,dim_,Kernel_,PT_> &i, const ImgInterp<T_,dim_,Kernel_,PT_> &i2, Vec<int,dim_> xmin, Vec<int,dim_> xmax ) {
+
+    ImgInterp<std::complex<double>,dim_,Kernel_,PT_> _i ; _i .resize( i .size() ); _i .data = i .data;
+    ImgInterp<std::complex<double>,dim_,Kernel_,PT_> _i2; _i2.resize( i2.size() ); _i2.data = i2.data;
+    ImgInterp<std::complex<double>,dim_,Kernel_,PT_> img   = fft<dim_>( _i , xmin, xmax, ZeroPadding());
+    ImgInterp<std::complex<double>,dim_,Kernel_,PT_> img2  = fft<dim_>( _i2, xmin, xmax, ZeroPadding());
+    ImgInterp<std::complex<double>,dim_,Kernel_,PT_> img3  = abs(img);
+    ImgInterp<std::complex<double>,dim_,Kernel_,PT_> img3b = abs(img2);
+    img.data  /= img3.data;
+    img2.data /= img3b.data;
+    ImgInterp<std::complex<double>,dim_,Kernel_,PT_> img4 = img * conj(img2);
+    
+    double garg = 0;
+    Vec<double> varg, varg2;
+    
+    double maxi = std::numeric_limits<double>::min();
+    ImgInterp<std::complex<double>,dim_,Kernel_,PT_> img5 = ffti( img4, ZeroPadding() );
+    ImgInterp<double,dim_,Kernel_,PT_> img6;
+    img6.data = abs( img5.data );
+    img6.resize( img5.sizes );
+    Vec<int,dim_> res( 0 );
+    for( Rectilinear_iterator<int,dim_> iter( 0, img6.sizes ); iter; ++iter ) {
+        if ( maxi < img6( iter.pos ) ) {
+            maxi = img6( iter.pos );
+            res = iter.pos;
+        }
+    }   
+    PRINT( res ); PRINT( img6.sizes - res );
+    int bound = 2;
+    double pi = 3.1415926535897932384626433;
+    ofstream ofs("fcp_maple.txt");
+    ofs << setprecision(16);
+    ofs << " ph := ";
+//     ostringstream oss ( "ph := " );
+    for( int x = -bound; x <= bound; ++x )
+        for( int y = -bound; y <= bound; ++y ) {
+            if (( x != 0) or (y != 0))
+                ofs << " ( " << 
+                img6.tex_int( res ) << " * sin( " << pi << " * ( " << double(res[0])/img6.sizes[0] << " - h1 ) ) * sin( " << pi << " * ( " << double(res[1])/img6.sizes[1] << " - h2 ) ) - " << 
+                img6.tex_int( res[0]+x, res[1]+y ) << " * sin( " << pi << " * ( " << double(res[0]+x)/img6.sizes[0] << " - h1 ) ) * sin( " << pi << " * ( " << double(res[1]+y)/img6.sizes[1] << " - h2 ) ) )**2 + ";
+            
+        }
+//     PRINT( oss.str() );
+    ofs.close();
+        
+    for( int i = 0; i < img6.sizes[0]; ++i )
+        varg.push_back( img6.tex_int( i, res[1] ) );
+    //plot( varg );
+    for( int i = 0; i < img6.sizes[1]; ++i )
+        varg2.push_back( img6.tex_int( res[0], i ) );
+    //plot( varg );
+    varg.resize(0);
+    for( int i = 0; i < img4.sizes[0]-1; ++i ) {
+        double tt = arg( img4.tex_int( i, res[1] ) * conj( img4.tex_int( i+1, res[1] ) ) ) / 2 / 3.1415926535897932384626433;
+        if (tt < 0. ) tt += 1.;
+        varg.push_back( tt  );
+    }
+    //plot( varg );
+    PRINT( (1-mean( varg ))*img4.sizes[0] );
+    varg2.resize(0);
+    for( int i = 0; i < img6.sizes[1]-1; ++i ) {
+        double tt = arg( img4.tex_int( res[0], i ) * conj( img4.tex_int( res[0], i+1 ) ) ) / 2 / 3.1415926535897932384626433;
+        if (tt < 0. ) tt += 1.;
+        varg2.push_back( tt  );   
+    }
+    //plot( varg2 );
+    PRINT( (1-mean( varg2 ))*img4.sizes[1] );
+    PRINT( img6.sizes );
+    
     res = ( ( res + img5.sizes / 2 ) % img5.sizes ) - img5.sizes / 2;
     res += ( 2 * ( res > 0 ) - 1 ) * ( res != 0 );
     return res;
