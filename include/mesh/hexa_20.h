@@ -127,6 +127,12 @@ bool var_inter_is_inside( const Hexa_20 &, const TV &var_inter, T tol = 0 ) {
            heaviside( var_inter[2] + tol ) * heaviside( 1 - var_inter[2] + tol );
 }
 
+/// >= 0 -> inside, < 0 -> outside
+template<class T,class TV>
+T var_inter_insideness( const Hexa_20 &e, const TV &var_inter ) {
+    return min( min( min( min( var_inter[0], var_inter[1] ), 1 - var_inter[0] ), 1 - var_inter[1] ), 1 - var_inter[2] );
+}
+
 template<class TN,class TNG,class TD,unsigned NET,class TM>
 bool divide_element_using_elem_children(Element<Hexa_20,TN,TNG,TD,NET> &e,TM &m,TNG **nnodes) {
 std::cout << "Surdiscretisation non implementee pour les Hexa_20" << std::endl;

@@ -108,6 +108,12 @@ bool var_inter_is_inside( const Triangle_6 &e, const TV &var_inter, T tol = 0 ) 
     return heaviside( var_inter[0] + tol ) * heaviside( var_inter[1] + tol ) * heaviside( 1 - var_inter[0] - var_inter[1] + tol );
 }
 
+/// >= 0 -> inside, < 0 -> outside
+template<class T,class TV>
+T var_inter_insideness( const Triangle_6 &e, const TV &var_inter ) {
+    return min( min( var_inter[0], var_inter[1] ), 1 - var_inter[0] - var_inter[1] );
+}
+
 };
 #include "element_Triangle_6.h"
 

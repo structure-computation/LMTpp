@@ -5,9 +5,13 @@
 
         Pour installer la librairie LMT++, on récupère les sources dans le dépot git de l'utilisateur multi en faisant :
         \code 
-            git clone votre-nom@givry:/u/multi/LMT
+            git clone git://gitosis.lmt.ens-cachan.fr/LMTpp.git
+            
+        Pour ceux qui font de la corrélation d'image sur la plate-forme, if faut aussi installer le répertoire dic :
+        \code
+            git clone git://gitosis.lmt.ens-cachan.fr/dic.git
 
-    = Utilisation de la librairie
+    = Utilisation de la librairie LMT++
 
         Pour générer certaines parties de la libriaire LMT++ et aussi pour compiler vos propres programmes, vous aurez besoin d'installer quelques programmes et en-têtes :
             * g++ et oui en faisant sur ubuntu sudo apt-get install g++

@@ -170,6 +170,9 @@ public:
     T *last;
 };
 
+
+
+
+#lastif // VEC_SORTED_LIST_H
 }
 
-#endif // VEC_SORTED_LIST_H
