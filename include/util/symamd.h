@@ -15,10 +15,6 @@
 #include "containers/vec.h"
 #include <algorithm>
 
-#ifdef METIL_COMP_DIRECTIVE
-#pragma src_file symamd.cpp
-#endif
-
 namespace LMT {
 
 /**
