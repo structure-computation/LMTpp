@@ -81,11 +81,14 @@ public:
 
     void set(const char *str = "") const { std::stringstream s; s << "set " << str << "\n"; print( s.str().c_str() ); } 
     void set_title(const char *str = "") const { std::stringstream s; s << "set title " << str << "\n"; print( s.str().c_str() ); } 
+    void unset(const char *str = "") const { std::stringstream s; s << "unset " << str << "\n"; print( s.str().c_str() ); } 
     void set_xlabel(const char *str = "") const { std::stringstream s; s << "set xlabel " << str << "\n"; print( s.str().c_str() ); } 
     void set_ylabel(const char *str = "") const { std::stringstream s; s << "set ylabel " << str << "\n"; print( s.str().c_str() ); } 
-    void set_terminal(const char *str = "") const { std::stringstream s; s << "set_terminal " << str << "\n"; print( s.str().c_str() ); } 
-    void set_terminal_epslatex(const char *str = "") const { std::stringstream s; s << "set_terminal_epslatex " << str << "\n"; print( s.str().c_str() ); } 
-    void set_output(const char *str = "") const { std::stringstream s; s << "set_output " << str << "\n"; print( s.str().c_str() ); } 
+    void set_terminal(const char *str = "") const { std::stringstream s; s << "set terminal " << str << "\n"; print( s.str().c_str() ); } 
+    void set_terminal_epslatex(const char *str = "") const { std::stringstream s; s << "set terminal epslatex " << str << "\n"; print( s.str().c_str() ); } 
+    void set_output(const char *str = "") const { std::stringstream s; s << "set output " << str << "\n"; print( s.str().c_str() ); } 
+    void set_xrange(const char *str = "") const { std::stringstream s; s << "set xrange " << str << "\n"; print( s.str().c_str() ); } 
+    void set_label(const char *str = "") const { std::stringstream s; s << "set label " << str << "\n"; print( s.str().c_str() ); } 
 
     /// Pour effacer les courbes d'avant
     void reset() { print("reset\n\n"); }

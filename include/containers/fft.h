@@ -106,6 +106,7 @@ public:
             Vec<int,dim> s = i.sizes; //[ dim - 1 - range( dim ) ];
             p = fftw_plan_dft( dim, s.ptr(), const_cast<fftw_complex *>(in), out, FFTW_FORWARD, FFTW_ESTIMATE );
             fftw_execute( p );
+            fftw_destroy_plan( p );
         } else {
             fftw_execute_dft( p, const_cast<fftw_complex *>( in ), out );
         }
@@ -136,6 +137,7 @@ public:
             else
                 p = fftw_plan_dft_3d( i.sizes[2], i.sizes[1], i.sizes[0], const_cast<fftw_complex *>(in), out, FFTW_BACKWARD, FFTW_ESTIMATE);
             fftw_execute(p);
+            fftw_destroy_plan( p );
         }
         else {
             fftw_execute_dft(p,const_cast<fftw_complex *>(in),out);
@@ -303,6 +305,26 @@ Vec<int,dim_> rigid_body_translation( const ImgInterp<T_,dim_,Kernel_,PT_> &i, c
     res = ( ( res + img5.sizes / 2 ) % img5.sizes ) - img5.sizes / 2;
     res += ( 2 * ( res > 0 ) - 1 ) * ( res != 0 );
     return res;
+}
+
+/*!
+Décale la composante zéro de la bande de fréquence obtenue par fft au centre du spectre
+ */
+
+template<class T_,unsigned dim_,class Kernel_,class PT_> 
+ImgInterp< T_,dim_,Kernel_,PT_> fftshift( const ImgInterp<T_, dim_, Kernel_, PT_ > &img) {
+    ImgInterp<double,dim_,Kernel_,PT_> res;
+    res.resize(img.size());
+    int xt=img.sizes[0]/2;
+    int yt=img.sizes[1]/2;
+    for(int x=0;x<xt;x++)
+        for(int y=0;y<yt;y++){
+        res.tex_int(x,y)=img.tex_int(x+xt,y+yt);
+        res.tex_int(x+xt,y+yt)=img.tex_int(x,y);
+        res.tex_int(x+xt,y)=img.tex_int(x,y+yt);
+        res.tex_int(x,y+yt)=img.tex_int(x+xt,y);
+        }
+        return res;
 }
 
 }

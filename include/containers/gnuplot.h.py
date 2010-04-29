@@ -83,7 +83,7 @@ public:
     }
 """
 
-lst = [ 'set','set title', 'set xlabel', 'set ylabel', 'set_terminal', 'set_terminal_epslatex', 'set_output' ]
+lst = [ 'set','set title', 'unset', 'set xlabel', 'set ylabel', 'set terminal', 'set terminal epslatex', 'set output', 'set xrange', 'set label' ]
 
 for i in lst :
     print '    void '+i.replace(' ','_')+'(const char *str = "") const { std::stringstream s; s << \"'+i+' \" << str << \"\\n\"; print( s.str().c_str() ); } '
