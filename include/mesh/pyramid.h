@@ -103,6 +103,7 @@ bool var_inter_is_inside( const Pyramid &, const TV &var_inter, T tol = 0 ) {
 }
 
 /// >= 0 -> inside, < 0 -> outside
+template<class T,class TV>
 T var_inter_insideness( const Pyramid &e, const TV &var_inter ) {
     return min( min( min( var_inter[0], var_inter[1] ), 1 - var_inter[0] - var_inter[2] ), 1 - var_inter[1] - var_inter[2] );
 }
