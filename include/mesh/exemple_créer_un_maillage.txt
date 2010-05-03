@@ -1,0 +1,150 @@
+/*!
+\example Exemple de création d'un maillage et utilisation de la fonction interpolation()
+
+    = Introduction
+    
+        Le type \a Mesh < ... > sert à définir un maillage au sens de la théorie des éléments finis dans un espace à une, deux ou trois dimensions. Il est toujours
+        paramétré par une classe du type \a MeshCarac qui contient toutes les caractéristiques du maillage, i.e. les attributs aux noeuds, aux éléments, sur la peau, etc... . Ainsi pour définir son propre maillage, il faut commencer par choisir un \a MeshCarac convenant à son problème soit en créer un à sa convenance.
+        Parmi les \a MeshCarac prédéfinis, on a :
+            * \a MeshCaracStd qui gére seulement l'aspect géométrie mais est très géénral.
+            * <strong> Mesh_carac_pb_correlation_basic </strong> indispensable pour la corrélation d'image (contenu dans le module <strong> dic </strong> ). Pour installer le module <strong> dic </strong> voir la page d' \a Installation .
+            * \a Meshcaracforgeomset ,
+            * \a Meshcaractvrc , 
+            * \a MeshCaracAllNvi ,
+            * \a CaracMeshShape .
+            
+        Si aucun ne convient, on définit le sien à la main ( tâche très ardue ) soit on utilise un script Python et c'est cette dernière méthode que l'on va maintenant détailler.
+        
+    = Définition des attributs de son maillage
+    
+        on commence par créer un fichier Python nommé par exemple MonMeshCarac.h.py ( le suffixe a son importance ) et contenant :
+        \code Python
+            # -*- coding: utf-8 -*-
+            from LMT.formal_lf import *
+
+            write_pb(
+                name = 'MonMeshCarac',
+                formulations = ['MonMeshCarac'],
+                elements = ['Triangle','Triangle_6','Quad','Tetra','Hexa','Wedge'],
+            )
+
+        Dans la liste "elements" on indique tous les éléments dont on pourrait avoir besoin. Si par hasard, vous en avez oublié, il vous suffira de les ajouter et à la prochaine compilation, un nouveau \a MeshCarac sera créé.
+        
+        Ensuite on crée un deuxième fichier Python nommé formulation_MonMeshCarac.py. Deux points importants, le nom doit commencer par "formulation_" et le reste du nom doit correspondre au nom  du paramétre "formulations" de la fonction write_pb().
+        Ce fichier contient la description de votre maillage. Pour notre exemple, c'est :
+        \code Python
+            # -*- coding: utf-8 -*-
+
+            dep  = Variable( default_value='0.0', nb_dim=[dim], unit='m' )
+            ener = Variable( interpolation='elementary', default_value='0.0', unit='W/m^2/K' )
+            # Par défaut interpolation a la valeur 'nodal'
+            epsilon = Variable( interpolation='gauss', nb_dim=[3,3], default_value='0.0', unit='W/m^2/K' )
+
+            numsst = Variable( interpolation='global', default_value='0.0', unit='' )
+            sigma = Variable( interpolation='elementary', nb_dim=[6], default_value='0.0', unit='W/m^2/K' )
+            sigma_von_mises = Variable( interpolation='elementary', default_value='0.0', unit='W/m^2/K' )
+
+            #attribut_mortel = Variable( T='Mat<double,Gen<>,SparseUMFPACK,void>', unit='Jojo' )
+            # T précise le type exact de l'atribut
+            courbure  = Variable( default_value='0.0', unit='m' )
+
+            #
+            def formulation():
+                return 0
+
+        Pour définir un attribut, on se sert de la classe <strong> Variable </strong> . Les paramètres sont clairs.
+        Juste quelques précisions. Par défaut le paramètre <strong> interpolation </strong> est <strong> nodal </strong> ( i.e. au noeud ). Les valeurs les plus courantes sont :
+            * <strong> elemntary </strong> pour une défintion sur un élément,
+            * <strong> gauss </strong> au point de Gauss,
+            * <strong> der_nodal </strong> pour stocker aux points de Gauss les dérivés partielles d'un champ ( exxemple epsilon, ou sigma ).
+            
+        Ensuite si l'attribut <strong> nb_dim </strong> est [dim] ou [dim,dim] la taille du vecteur ou de la matrice ( pour [dim,dim] ) correspondant s'adapte à la dimension de l'espace contenant le maillage.
+        Enfin Si vous voulez précisement définir le type de l'attribut, utilisez <strong> T </strong> .
+
+
+    = Utilisation dans son code C++
+    
+        Il est tant maintenant de faire tourner la moulinette en Python pour générer le code C++ de votre \a MeshCarac .
+        Le plus simple est de créer son projet ( voir la page [[Mon premier programme]] pour créer un projet ).
+        Voici le code principal (télechargeable [[include/mesh/exemple_créer_un_maillage.tar.gz|ici]] ) où on instancie des maillages 2D et 3D.
+        Remarquez l'utilisation de la fonction interpolation() pour interpoler la valeur d'un attribut dans le maillage.
+        \code C/C++   
+            #include "mesh/make_rect.h"
+            #include "mesh/meshcaracstd.h"
+            #include "mesh/mesh.h"
+            #include "mesh/quad.h"
+            #include "mesh/quad_8.h"
+            #include "mesh/triangle.h"
+            #include "mesh/triangle_6.h"
+            //#include "mesh/element_Bar_3.h"
+            #include "mesh/hexa.h"
+            #include "mesh/interpolation.h"
+            //#include "mesh/element_Bar_3.h"
+
+            //#include "mesh/read_msh_2.h"
+
+            #include "mesh/displayparaview.h"
+            //#include "correlation/mesh_carac_correlation.h"
+
+            // inclusion du code de notre MeshCarac  
+            #include "MonMeshCarac.h"
+
+            using namespace LMT;
+            using namespace std;
+
+            void test_2D() {
+                typedef Mesh< Mesh_carac_MonMeshCarac< double,2> > TM;
+                typedef TM::Pvec Pvec;
+                typedef TM::TNode::T T;
+                
+                TM m;
+                make_rect( m, Quad(), Pvec( 0, 0, 0 ), Pvec( 1., 1., 1. ), Pvec( 2,2,2 ) );
+            
+                for( unsigned i = 0 ; i < m.node_list.size(); ++i )
+                    m.node_list[i].courbure = i; 
+                
+                PRINT( interpolation( m, courbure_DM(), Pvec( 0.01, 0.02 ) ) );
+                PRINT( interpolation( m, courbure_DM(), Pvec( 0.99, 0.01 ) ) );
+                PRINT( interpolation( m, courbure_DM(), Pvec( 0.01, 0.99 ) ) );
+                PRINT( interpolation( m, courbure_DM(), Pvec( 0.991, 0.992 ) ) );
+                
+                display_mesh(m);
+            }
+
+            void test_3D() {
+                typedef Mesh< Mesh_carac_MonMeshCarac< double,3> > TM;
+                typedef TM::Pvec Pvec;
+                typedef TM::TNode::T T;
+                
+                TM m;
+                make_rect( m, Hexa(), Pvec( 0, 0, 0 ), Pvec( 1., 1., 1. ), Pvec( 2,2,2 ) );
+            
+                for( unsigned i = 0 ; i < m.node_list.size(); ++i )
+                    m.node_list[i].courbure = i; 
+                
+                PRINT( interpolation( m, courbure_DM(), Pvec( 0.01, 0.02, 0.01 ) ) );
+                PRINT( interpolation( m, courbure_DM(), Pvec( 0.99, 0.01, 0.01 ) ) );
+                PRINT( interpolation( m, courbure_DM(), Pvec( 0.01, 0.99, 0.0446 ) ) );
+                PRINT( interpolation( m, courbure_DM(), Pvec( 0.01, 0.02, 0.99446 ) ) );
+                PRINT( interpolation( m, courbure_DM(), Pvec( 0.991, 0.992, 0.0446 ) ) );
+                PRINT( interpolation( m, courbure_DM(), Pvec( 0.991, 0.02, 0.99446 ) ) );
+                PRINT( interpolation( m, courbure_DM(), Pvec( 0.01, 0.992, 0.99446 ) ) );
+                PRINT( interpolation( m, courbure_DM(), Pvec( 0.991, 0.992, 0.99446 ) ) );
+                
+                display_mesh(m);
+            }
+
+            int main(int argc,char **argv) {
+
+                test_2D();
+                // test_3D();
+                
+                return 0; 
+            }
+
+    \relates interpolation
+    \relates apply
+    \keyword Maillage/Elément
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+*/
