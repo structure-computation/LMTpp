@@ -1,23 +1,23 @@
 /*!
 \example Exemple de création d'un maillage et utilisation de la fonction interpolation()
 
-    = Introduction
+    == Introduction
     
         Le type \a Mesh < ... > sert à définir un maillage au sens de la théorie des éléments finis dans un espace à une, deux ou trois dimensions. Il est toujours
         paramétré par une classe du type \a MeshCarac qui contient toutes les caractéristiques du maillage, i.e. les attributs aux noeuds, aux éléments, sur la peau, etc... . Ainsi pour définir son propre maillage, il faut commencer par choisir un \a MeshCarac convenant à son problème soit en créer un à sa convenance.
         Parmi les \a MeshCarac prédéfinis, on a :
             * \a MeshCaracStd qui gére seulement l'aspect géométrie mais est très géénral.
-            * <strong> Mesh_carac_pb_correlation_basic </strong> indispensable pour la corrélation d'image (contenu dans le module <strong> dic </strong> ). Pour installer le module <strong> dic </strong> voir la page d' \a Installation .
+            * \a Mesh_carac_pb_correlation_basic indispensable pour la corrélation d'image (contenu dans le module <strong> dic </strong> ). Pour installer le module <strong> dic </strong> voir la page d' \a installation .
             * \a Meshcaracforgeomset ,
             * \a Meshcaractvrc , 
             * \a MeshCaracAllNvi ,
             * \a CaracMeshShape .
             
-        Si aucun ne convient, on définit le sien à la main ( tâche très ardue ) soit on utilise un script Python et c'est cette dernière méthode que l'on va maintenant détailler.
+        Si aucun ne convient, on définit le sien à la main ( tâche très ardue ) soit en utilisant un script Python et c'est cette dernière méthode que l'on va maintenant ilustrer.
         
-    = Définition des attributs de son maillage
+    == Définition des attributs de son maillage
     
-        on commence par créer un fichier Python nommé par exemple MonMeshCarac.h.py ( le suffixe a son importance ) et contenant :
+        on commence par créer un fichier Python nommé par exemple MonMeshCarac.h.py ( le suffixe a son impotance ) et contenant :
         \code Python
             # -*- coding: utf-8 -*-
             from LMT.formal_lf import *
@@ -30,7 +30,7 @@
 
         Dans la liste "elements" on indique tous les éléments dont on pourrait avoir besoin. Si par hasard, vous en avez oublié, il vous suffira de les ajouter et à la prochaine compilation, un nouveau \a MeshCarac sera créé.
         
-        Ensuite on crée un deuxième fichier Python nommé formulation_MonMeshCarac.py. Deux points importants, le nom doit commencer par "formulation_" et le reste du nom doit correspondre au nom  du paramétre "formulations" de la fonction write_pb().
+        Ensuite on crée un deuxième fichier Python nommé formulation_MonMeshCarac.py. Deux points importants, le nom doit commencer par "formulation_" et le reste du nom doit correspondre au nom  du paramétr "formulations" de la fonction write_pb().
         Ce fichier contient la description de votre maillage. Pour notre exemple, c'est :
         \code Python
             # -*- coding: utf-8 -*-
@@ -59,15 +59,14 @@
             * <strong> der_nodal </strong> pour stocker aux points de Gauss les dérivés partielles d'un champ ( exxemple epsilon, ou sigma ).
             
         Ensuite si l'attribut <strong> nb_dim </strong> est [dim] ou [dim,dim] la taille du vecteur ou de la matrice ( pour [dim,dim] ) correspondant s'adapte à la dimension de l'espace contenant le maillage.
-        Enfin Si vous voulez précisement définir le type de l'attribut, utilisez <strong> T </strong> .
+        Enfin Si vous voulez précisement définir le type de l'atribut, utilisez <strong> T </strong> .
 
 
-    = Utilisation dans son code C++
+    == Utilisation dans son code C++
     
         Il est tant maintenant de faire tourner la moulinette en Python pour générer le code C++ de votre \a MeshCarac .
         Le plus simple est de créer son projet ( voir la page [[Mon premier programme]] pour créer un projet ).
-        Voici le code principal (télechargeable [[include/mesh/exemple_créer_un_maillage.tar.gz|ici]] ) où on instancie des maillages 2D et 3D.
-        Remarquez l'utilisation de la fonction interpolation() pour interpoler la valeur d'un attribut dans le maillage.
+        Voici le code principal (télechargeable [[include/mesh/exemple_créer_un_maillage.tar.gz|ici]] ) où on instancie des maillages 2D et 3D :
         \code C/C++   
             #include "mesh/make_rect.h"
             #include "mesh/meshcaracstd.h"
@@ -148,3 +147,4 @@
     \friend hugo.leclerc@lmt.ens-cachan.fr
     \friend raphael.pasquier@lmt.ens-cachan.fr
 */
+

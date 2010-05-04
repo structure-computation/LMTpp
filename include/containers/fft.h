@@ -277,33 +277,86 @@ ImgInterp<std::complex<double>,dim_,Kernel_,PT_> ffti( const ImgInterp<std::comp
 }
 
 /*!
+    calcule x % N.
+    On suppose que x est entre -N et N exclus.
+*/
+template <int s>
+Vec<int, s> modulo( Vec<int, s> x, Vec<int, s> N ) {
+    for( unsigned i = 0; i < x.size(); ++i ) {
+        if ( x[i] < 0 ) x[i] += N[i];
+        if ( x[i] >= N[i] ) x[i] -= N[i];   
+    }
+    return x;
+}
+
+/*!
+    calcule x % N.
+    On suppose que x est entre -N et N exclus.
+*/
+int modulo( int x, int N ) {
+    if ( x < 0 ) x += N;
+    if ( x >= N ) x -= N;   
+    return x;
+}
+
+/*!
     Cette fonction retourne une approximation de la corrélation entre les deux images i et i2 dans le rectangle [xmin, xmax]x[ymin, ymax].
 
     Réf : http://pixel-shaker.fr/
 
 */
 template< int dim_, class T_, class Kernel_,class PT_>
-Vec<int,dim_> rigid_body_translation( const ImgInterp<T_,dim_,Kernel_,PT_> &i, const ImgInterp<T_,dim_,Kernel_,PT_> &i2, Vec<int,dim_> xmin, Vec<int,dim_> xmax ) {
-    ImgInterp<std::complex<double>,dim_,Kernel_,PT_> _i ; _i .resize( i .size() ); _i .data = i .data;
-    ImgInterp<std::complex<double>,dim_,Kernel_,PT_> _i2; _i2.resize( i2.size() ); _i2.data = i2.data;
-    ImgInterp<std::complex<double>,dim_,Kernel_,PT_> img  = fft<dim_>( _i , xmin, xmax, ZeroPadding());
-    ImgInterp<std::complex<double>,dim_,Kernel_,PT_> img2 = fft<dim_>( _i2, xmin, xmax, ZeroPadding());
-    ImgInterp<std::complex<double>,dim_,Kernel_,PT_> img3 = abs(img);
-    img.data  /= img3.data;
-    img2.data /= img3.data;
-    ImgInterp<std::complex<double>,dim_,Kernel_,PT_> img4 = img * conj(img2);
+Vec<int,dim_> rigid_body_translation( const ImgInterp<T_,dim_,Kernel_,PT_> &i, 
+                                      const ImgInterp<T_,dim_,Kernel_,PT_> &i2,
+                                      Vec<int,dim_> xmin,
+                                      Vec<int,dim_> xmax /*,
+                                      Vec<PT_,dim_> h = Vec<PT_,dim_>( 0, 0 )*/ ) {
+    typedef Vec< int, dim_ > POSI;   
+    typedef std::complex<double> C;
+    typedef ImgInterp< C,dim_,Kernel_,PT_> CI;
+    typedef ImgInterp< double,dim_,Kernel_,PT_> RI;
+    
+    CI _i ; _i .resize( i .size() ); _i .data = i .data;
+    CI _i2; _i2.resize( i2.size() ); _i2.data = i2.data;
+    CI img = fft<dim_>( _i , xmin, xmax, ZeroPadding());
+    CI img2 = fft<dim_>( _i2, xmin, xmax, ZeroPadding());
+    /// normalisation
+    for( unsigned l = 0; l < img.data.size(); ++l ) img.data[ l ] /= abs( img.data[ l ] );
+    for( unsigned l = 0; l < img2.data.size(); ++l ) img2.data[ l ] /= abs( img2.data[ l ] ); 
+    /// appplication d'une translation en multipliant par y |-> exp( -2 i pi < h, y > )
+//     double pi = 3.1415926535897932384626433;
+//     for(int y=0;y<img2.sizes[1];++y)
+//         for(int x=0;x<img2.sizes[0];++x) {
+//             double ar = 2 * pi * ( h[0] / double(img2.sizes[0]) * x + h[1] / double(img2.sizes[1]) * y );
+//             img2.tex_int( x , y ) *= C( cos( ar ), -sin( ar ) );   
+//         }
+    
+    
+    ImgInterp<std::complex<double>,dim_,Kernel_,PT_> img4 = img2 * conj( img );
     ImgInterp<std::complex<double>,dim_,Kernel_,PT_> img5 = ffti( img4, ZeroPadding() );
-    double maxi = std::numeric_limits<double>::max();
+    double maxi = std::numeric_limits<double>::min();
     Vec<int,dim_> res( 0 );
     for( Rectilinear_iterator<int,dim_> iter( 0, img5.sizes ); iter; ++iter ) {
-        if ( maxi > real( img5( iter.pos ) ) ) {
-            maxi = real( img5( iter.pos ) );
+        if ( maxi < abs( img5( iter.pos ) ) ) {
+            maxi = abs( img5( iter.pos ) );
             res = iter.pos;
         }
     }
+//     PRINT( res );
+//     RI tt; tt.resize( img5.sizes );
+//     for( unsigned l = 0; l < img5.data.size(); ++l ) tt.data[ l ] = abs( img5.data[ l ] ) / maxi * 255.;
+//     tt.save( "debug.jpg" );
 
-    res = ( ( res + img5.sizes / 2 ) % img5.sizes ) - img5.sizes / 2;
-    res += ( 2 * ( res > 0 ) - 1 ) * ( res != 0 );
+//     res = ( ( res + img5.sizes / 2 ) % img5.sizes ) - img5.sizes / 2;
+//     res += ( 2 * ( res > 0 ) - 1 ) * ( res != 0 );
+    for( unsigned l = 0; l < res.size(); ++l ) {
+        if ( res[ l ] > img5.sizes[ l ] / 2 )
+            res[ l ] -= img5.sizes[ l ] + 1;
+        /// à cause d'un problème avec la translation ( -1; 0 ), j' ajoute :
+        if ( abs ( res[ l ] ) > img5.sizes[ l ] / 5 )
+            res[ l ] = 0;
+    }
+            
     return res;
 }
 
