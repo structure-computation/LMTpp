@@ -174,6 +174,7 @@ template<class T> struct GetVtkTypeSize { static const unsigned n = sizeof(T); }
 template<class T,int a> struct GetVtkTypeSize<Vec<T,a> > { static const unsigned n = sizeof(T); };
 template<class T,int a,int m> struct GetVtkTypeSize<Vec<Vec<T,a>,m> > { static const unsigned n = sizeof(T); };
 template<class T,class TO,class ST> struct GetVtkTypeSize<Mat<T,TO,ST> > { static const unsigned n = sizeof(T); };
+template<class T,class TO,class ST> struct GetVtkTypeSize< Vec< Mat<T,TO,ST> > > { static const unsigned n = sizeof(T); };
 template<class T> struct GetVtkTypeSize<std::complex<T> > { static const unsigned n = sizeof(T); };
 
 struct GetVtkTypes {
