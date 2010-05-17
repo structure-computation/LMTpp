@@ -1510,7 +1510,7 @@ bool get_var_inter_experimental(const Hexa &elem,const PosNodes &pos_nodes,const
     //std::cout << setprecision(16) << " coeff_resultant_U  " << std::endl;
     //for( unsigned i=0; i < coeff_resultant_U.size(); ++i ) std::cout << "(" << coeff_resultant_U[i] << ") * U**" << i << " + " ;
     //std::cout << std::endl;
-    sol_U = Pol<8,1,T>(coeff_resultant_U).real_roots( ldexp( std::numeric_limits<T>::epsilon() , 5 ) );
+    sol_U = Pol<8,1,T>(coeff_resultant_U).real_roots( 1e-2 /*ldexp( std::numeric_limits<T>::epsilon() , 5 )*/ );
     //PRINT( sol_U );
     //Vec< std::complex<T> > croot;
     //croot = Pol<8,1,T>(coeff_resultant_U).roots();
@@ -1750,7 +1750,7 @@ bool get_var_inter_experimental(const Hexa &elem,const PosNodes &pos_nodes,const
                     if ( norm_inf( coeff_V2 ) > norm_inf( coeff_V ) )  coeff_V = coeff_V2; 
                 } break; /// i_pivot == 2
             } /// switch i_pivot
-            sol_V = Pol<2,1,T>( coeff_V ).real_roots( ldexp( std::numeric_limits<T>::epsilon() , 10 ) );
+            sol_V = Pol<2,1,T>( coeff_V ).real_roots( /*1e-2*/ ldexp( std::numeric_limits<T>::epsilon() , 10 ) );
             //PRINT( U ); PRINT( coeff_V );
             //std::cout << setprecision(16) << " coeff_V  " << std::endl;
             //for( unsigned i=0; i < coeff_V.size(); ++i ) std::cout << "(" << coeff_V[i] << ") * V**" << i << " + " ;
@@ -1812,7 +1812,7 @@ bool get_var_inter_experimental(const Hexa &elem,const PosNodes &pos_nodes,const
 
                         } break; /// i_pivot == 2
                     } /// switch i_pivot
-                    sol_W = Pol<2,1,T>( coeff_W ).real_roots();
+                    sol_W = Pol<2,1,T>( coeff_W ).real_roots( 1e-2 );
                     //PRINT( sol_W );
                     for( unsigned k=0; k < sol_W.size(); ++k ) {
                         W = sol_W[k];

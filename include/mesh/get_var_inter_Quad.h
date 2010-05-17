@@ -22,15 +22,15 @@ bool get_var_inter_experimental(const Quad &elem,const PosNodes &pos_nodes,const
     coeff_poly[1].resize(6);
     {
     T R_0 = pos_nodes[2][1]; T R_1 = pos_nodes[3][1]; T R_2 = (-1.0)*R_1; T R_3 = pos_nodes[1][1];
-    T R_4 = (-1.0)*R_3; T R_5 = pos[1]; R_5 = (-1.0)*R_5; T R_6 = pos_nodes[0][1];
-    R_4 = R_6+R_4; R_4 = R_2+R_4; R_4 = R_0+R_4; coeff_poly[1][4] = R_4;
-    R_4 = (-1.0)*R_6; R_1 = R_4+R_1; coeff_poly[1][2] = R_1; R_3 = R_4+R_3;
-    coeff_poly[1][1] = R_3; R_5 = R_6+R_5; coeff_poly[1][0] = R_5; R_5 = pos_nodes[2][0];
-    R_6 = pos_nodes[3][0]; R_3 = (-1.0)*R_6; R_4 = pos_nodes[1][0]; R_1 = (-1.0)*R_4;
-    R_0 = pos[0]; R_0 = (-1.0)*R_0; R_2 = pos_nodes[0][0]; R_1 = R_1+R_2;
-    R_3 = R_1+R_3; R_3 = R_5+R_3; coeff_poly[0][4] = R_3; R_3 = (-1.0)*R_2;
-    R_6 = R_3+R_6; coeff_poly[0][2] = R_6; R_3 = R_4+R_3; coeff_poly[0][1] = R_3;
-    R_0 = R_2+R_0; coeff_poly[0][0] = R_0; 
+    T R_4 = (-1.0)*R_3; T R_5 = pos_nodes[0][1]; R_4 = R_4+R_5; R_2 = R_4+R_2;
+    R_0 = R_2+R_0; coeff_poly[1][4] = R_0; R_0 = (-1.0)*R_5; R_1 = R_0+R_1;
+    coeff_poly[1][2] = R_1; R_3 = R_0+R_3; coeff_poly[1][1] = R_3; R_3 = pos[1];
+    R_3 = (-1.0)*R_3; R_5 = R_3+R_5; coeff_poly[1][0] = R_5; R_5 = pos_nodes[2][0];
+    R_3 = pos_nodes[3][0]; R_0 = (-1.0)*R_3; R_1 = pos_nodes[1][0]; R_2 = (-1.0)*R_1;
+    R_4 = pos[0]; R_4 = (-1.0)*R_4; T R_6 = pos_nodes[0][0]; R_2 = R_2+R_6;
+    R_0 = R_2+R_0; R_0 = R_5+R_0; coeff_poly[0][4] = R_0; R_0 = (-1.0)*R_6;
+    R_3 = R_0+R_3; coeff_poly[0][2] = R_3; R_1 = R_0+R_1; coeff_poly[0][1] = R_1;
+    R_4 = R_6+R_4; coeff_poly[0][0] = R_4; 
     coeff_poly[0][3] = 0.0; coeff_poly[0][5] = 0.0; coeff_poly[1][3] = 0.0; coeff_poly[1][5] = 0.0;
     
 
@@ -44,50 +44,50 @@ bool get_var_inter_experimental(const Quad &elem,const PosNodes &pos_nodes,const
 
 
     
-    T R_0 = pos_nodes[1][1]; T R_1 = (-1.0)*R_0; T R_2 = pos_nodes[2][1]; T R_3 = pos_nodes[1][0];
-    T R_4 = (-1.0)*R_3; T R_5 = pos_nodes[2][0]; T R_6 = pos[1]; R_6 = (-1.0)*R_6;
-    T R_7 = pos_nodes[3][0]; T R_8 = (-1.0)*R_7; T R_9 = pos[0]; R_9 = (-1.0)*R_9;
-    T R_10 = pos_nodes[0][0]; R_4 = R_4+R_10; R_8 = R_4+R_8; R_8 = R_5+R_8;
-    R_5 = (-1.0)*R_10; R_3 = R_3+R_5; R_7 = R_5+R_7; R_9 = R_10+R_9;
-    R_10 = pos_nodes[3][1]; R_5 = (-1.0)*R_10; R_4 = pos_nodes[0][1]; R_1 = R_4+R_1;
-    R_1 = R_5+R_1; R_1 = R_2+R_1; R_2 = R_3*R_1; R_2 = (-1.0)*R_2;
-    R_1 = R_9*R_1; R_1 = (-1.0)*R_1; R_6 = R_4+R_6; R_5 = R_8*R_6;
-    R_6 = R_7*R_6; R_4 = (-1.0)*R_4; R_0 = R_4+R_0; R_8 = R_8*R_0;
-    R_8 = R_2+R_8; coeff_resultant_U[2] = R_8; R_0 = R_7*R_0; R_0 = R_1+R_0;
-    R_10 = R_4+R_10; R_3 = R_3*R_10; R_3 = (-1.0)*R_3; R_3 = R_0+R_3;
-    R_3 = R_5+R_3; coeff_resultant_U[1] = R_3; R_9 = R_10*R_9; R_9 = (-1.0)*R_9;
+    T R_0 = pos_nodes[2][1]; T R_1 = pos_nodes[1][1]; T R_2 = (-1.0)*R_1; T R_3 = pos_nodes[1][0];
+    T R_4 = (-1.0)*R_3; T R_5 = pos_nodes[2][0]; T R_6 = pos[0]; R_6 = (-1.0)*R_6;
+    T R_7 = pos_nodes[3][1]; T R_8 = (-1.0)*R_7; T R_9 = pos_nodes[3][0]; T R_10 = (-1.0)*R_9;
+    T R_11 = pos_nodes[0][0]; R_4 = R_4+R_11; R_10 = R_4+R_10; R_10 = R_5+R_10;
+    R_6 = R_11+R_6; R_11 = (-1.0)*R_11; R_3 = R_11+R_3; R_9 = R_11+R_9;
+    R_11 = pos_nodes[0][1]; R_2 = R_2+R_11; R_8 = R_2+R_8; R_0 = R_8+R_0;
+    R_8 = R_3*R_0; R_8 = (-1.0)*R_8; R_0 = R_6*R_0; R_0 = (-1.0)*R_0;
+    R_2 = (-1.0)*R_11; R_1 = R_2+R_1; R_5 = R_1*R_10; R_5 = R_8+R_5;
+    coeff_resultant_U[2] = R_5; R_1 = R_9*R_1; R_0 = R_1+R_0; R_7 = R_2+R_7;
+    R_3 = R_3*R_7; R_3 = (-1.0)*R_3; R_3 = R_0+R_3; R_6 = R_7*R_6;
+    R_6 = (-1.0)*R_6; R_7 = pos[1]; R_7 = (-1.0)*R_7; R_11 = R_7+R_11;
+    R_10 = R_11*R_10; R_3 = R_10+R_3; coeff_resultant_U[1] = R_3; R_9 = R_11*R_9;
     R_6 = R_9+R_6; coeff_resultant_U[0] = R_6; 
 
     //PRINT( coeff_resultant_U );
     //std::cout << setprecision(16) << " coeff_resultant_U  " << std::endl;
     //for( unsigned i=0; i < coeff_resultant_U.size(); ++i ) std::cout << "(" << coeff_resultant_U[i] << ") * U**" << i << " + " ;
     //std::cout << std::endl;
-    sol_U = Pol<2,1,T>(coeff_resultant_U).real_roots();
+    sol_U = Pol<2,1,T>(coeff_resultant_U).real_roots( 1e-2 );
     //PRINT( sol_U );
     for( unsigned i=0; i < sol_U.size(); ++i ) {
         U = sol_U[i];
         //PRINT(U);
         if ((U >= -0.01) and (U <= 1.01)) {
             /// calcul des coefficients du polynôme en V
-            T R_0 = pos_nodes[3][0]; T R_1 = pos_nodes[2][0]; T R_2 = pos_nodes[0][0]; T R_3 = U;
-            T R_4 = (-1.0)+R_3; R_4 = R_2*R_4; R_1 = R_1*R_3; T R_5 = (-1.0)*R_3;
-            R_5 = 1.0+R_5; R_0 = R_0*R_5; R_5 = R_2*R_5; R_2 = pos_nodes[1][0];
-            R_3 = R_2*R_3; R_2 = (-1.0)*R_3; R_4 = R_2+R_4; R_4 = R_0+R_4;
-            R_4 = R_1+R_4; coeff_V[1] = R_4; R_5 = R_3+R_5; R_3 = pos[0];
-            R_3 = (-1.0)*R_3; R_5 = R_3+R_5; coeff_V[0] = R_5; 
+            T R_0 = pos_nodes[2][0]; T R_1 = pos_nodes[3][0]; T R_2 = pos[0]; R_2 = (-1.0)*R_2;
+            T R_3 = pos_nodes[1][0]; T R_4 = pos_nodes[0][0]; T R_5 = U; R_0 = R_0*R_5;
+            T R_6 = (-1.0)+R_5; R_6 = R_4*R_6; R_3 = R_3*R_5; T R_7 = (-1.0)*R_3;
+            R_7 = R_6+R_7; R_5 = (-1.0)*R_5; R_5 = 1.0+R_5; R_1 = R_5*R_1;
+            R_1 = R_7+R_1; R_0 = R_1+R_0; coeff_V[1] = R_0; R_4 = R_5*R_4;
+            R_3 = R_4+R_3; R_2 = R_3+R_2; coeff_V[0] = R_2; 
             coeff_V[2] = 0.0; 
 
             if ( max( abs( coeff_V ) ) < tolerance ) {
                 T R_0 = pos_nodes[2][1]; T R_1 = pos_nodes[3][1]; T R_2 = pos[1]; R_2 = (-1.0)*R_2;
-                T R_3 = pos_nodes[0][1]; T R_4 = U; R_0 = R_0*R_4; T R_5 = (-1.0)+R_4;
-                R_5 = R_3*R_5; T R_6 = (-1.0)*R_4; R_6 = 1.0+R_6; R_1 = R_1*R_6;
-                R_6 = R_3*R_6; R_3 = pos_nodes[1][1]; R_4 = R_3*R_4; R_3 = (-1.0)*R_4;
-                R_5 = R_3+R_5; R_5 = R_1+R_5; R_0 = R_5+R_0; coeff_V[1] = R_0;
-                R_6 = R_4+R_6; R_2 = R_6+R_2; coeff_V[0] = R_2; 
+                T R_3 = pos_nodes[0][1]; T R_4 = pos_nodes[1][1]; T R_5 = U; R_0 = R_0*R_5;
+                T R_6 = (-1.0)+R_5; R_6 = R_6*R_3; T R_7 = (-1.0)*R_5; R_7 = 1.0+R_7;
+                R_1 = R_7*R_1; R_3 = R_7*R_3; R_4 = R_5*R_4; R_5 = (-1.0)*R_4;
+                R_5 = R_6+R_5; R_5 = R_1+R_5; R_0 = R_5+R_0; coeff_V[1] = R_0;
+                R_3 = R_4+R_3; R_2 = R_3+R_2; coeff_V[0] = R_2; 
                 coeff_V[2] = 0.0; 
 
             }
-            sol_V = Pol<2,1,T>( coeff_V ).real_roots();
+            sol_V = Pol<2,1,T>( coeff_V ).real_roots(  );
             //PRINT( sol_V);
             for( unsigned j=0; j < sol_V.size(); ++j ) {
                 U = sol_U[i];
@@ -99,30 +99,30 @@ bool get_var_inter_experimental(const Quad &elem,const PosNodes &pos_nodes,const
                     isSolution = true;
                     for( unsigned t=0; t<6; ++t ) { /// méthode de Newton-Raphson
                         T R_0 = pos[1]; R_0 = (-1.0)*R_0; T R_1 = pos_nodes[0][1]; T R_2 = pos_nodes[3][1];
-                        T R_3 = (-1.0)*R_2; T R_4 = pos_nodes[1][1]; T R_5 = (-1.0)*R_4; T R_6 = pos_nodes[2][1];
-                        R_3 = R_6+R_3; R_5 = R_6+R_5; T R_7 = pos[0]; R_7 = (-1.0)*R_7;
-                        T R_8 = U; T R_9 = (-1.0)+R_8; T R_10 = R_1*R_9; R_5 = R_5*R_8;
-                        T R_11 = (-1.0)*R_8; R_11 = 1.0+R_11; T R_12 = R_2*R_11; T R_13 = R_12+R_10;
-                        R_13 = R_13+R_5; T R_14 = pos_nodes[1][0]; T R_15 = (-1.0)*R_14; T R_16 = R_14*R_8;
-                        T R_17 = pos_nodes[0][0]; R_9 = R_17*R_9; T R_18 = pos_nodes[3][0]; T R_19 = R_18*R_11;
-                        R_9 = R_19+R_9; R_18 = (-1.0)*R_18; T R_20 = pos_nodes[2][0]; R_15 = R_20+R_15;
-                        R_15 = R_8*R_15; R_15 = R_9+R_15; R_9 = R_20*R_8; R_9 = R_19+R_9;
-                        R_18 = R_20+R_18; R_20 = V; R_6 = R_6*R_20; R_2 = R_20*R_2;
-                        R_11 = R_2*R_11; R_13 = R_20*R_13; R_2 = R_20*R_15; R_3 = R_20*R_3;
-                        R_9 = R_9*R_20; R_19 = (-1.0)*R_20; T R_21 = 1.0+R_19; R_4 = R_4*R_21;
-                        R_6 = R_6+R_4; R_6 = R_6*R_8; R_16 = R_16*R_21; R_21 = R_14*R_21;
-                        R_14 = (-1.0)+R_20; T R_22 = R_1*R_14; R_4 = R_22+R_4; R_3 = R_4+R_3;
-                        R_4 = R_14*R_8; R_19 = R_4+R_19; R_19 = 1.0+R_19; R_1 = R_19*R_1;
-                        R_1 = R_0+R_1; R_11 = R_1+R_11; R_6 = R_11+R_6; R_6 = (-1.0)*R_6;
-                        R_6 = R_13+R_6; R_19 = R_19*R_17; R_16 = R_19+R_16; R_16 = R_7+R_16;
-                        R_9 = R_16+R_9; R_9 = (-1.0)*R_9; R_14 = R_17*R_14; R_21 = R_14+R_21;
-                        R_18 = R_20*R_18; R_21 = R_18+R_21; R_18 = R_8*R_21; R_9 = R_18+R_9;
-                        R_2 = R_9+R_2; R_21 = 1/R_21; R_2 = R_21*R_2; R_2 = (-1.0)*R_2;
-                        R_8 = R_2+R_8; R_8 = R_3*R_8; R_6 = R_8+R_6; R_3 = R_3*R_21;
-                        R_3 = R_3*R_15; R_3 = (-1.0)*R_3; R_3 = R_12+R_3; R_10 = R_3+R_10;
-                        R_10 = R_5+R_10; R_10 = 1/R_10; R_6 = R_10*R_6; V2 = R_6;
-                        R_6 = (-1.0)*R_6; R_6 = R_20+R_6; R_15 = R_6*R_15; R_15 = R_9+R_15;
-                        R_15 = R_21*R_15; U2 = R_15; 
+                        T R_3 = (-1.0)*R_2; T R_4 = pos_nodes[2][1]; R_3 = R_4+R_3; T R_5 = pos_nodes[1][1];
+                        T R_6 = (-1.0)*R_5; R_6 = R_6+R_4; T R_7 = pos_nodes[1][0]; T R_8 = (-1.0)*R_7;
+                        T R_9 = pos_nodes[2][0]; R_8 = R_8+R_9; T R_10 = pos_nodes[0][0]; T R_11 = pos[0];
+                        R_11 = (-1.0)*R_11; T R_12 = U; R_6 = R_6*R_12; R_8 = R_12*R_8;
+                        T R_13 = (-1.0)+R_12; T R_14 = R_13*R_1; R_13 = R_10*R_13; T R_15 = (-1.0)*R_12;
+                        R_15 = 1.0+R_15; T R_16 = R_15*R_2; R_14 = R_16+R_14; R_16 = R_14+R_6;
+                        T R_17 = V; R_16 = R_16*R_17; R_4 = R_4*R_17; R_2 = R_2*R_17;
+                        R_2 = R_15*R_2; R_0 = R_2+R_0; R_3 = R_3*R_17; R_2 = R_9*R_17;
+                        T R_18 = (-1.0)*R_17; T R_19 = 1.0+R_18; R_5 = R_19*R_5; R_4 = R_4+R_5;
+                        R_4 = R_4*R_12; R_7 = R_19*R_7; R_2 = R_2+R_7; R_2 = R_2*R_12;
+                        R_19 = (-1.0)+R_17; T R_20 = R_19*R_1; R_20 = R_5+R_20; R_20 = R_3+R_20;
+                        R_3 = R_10*R_19; R_3 = R_7+R_3; R_19 = R_19*R_12; R_18 = R_19+R_18;
+                        R_18 = 1.0+R_18; R_1 = R_18*R_1; R_1 = R_0+R_1; R_4 = R_1+R_4;
+                        R_4 = (-1.0)*R_4; R_16 = R_4+R_16; R_18 = R_10*R_18; R_10 = pos_nodes[3][0];
+                        R_4 = R_15*R_10; R_4 = R_13+R_4; R_8 = R_4+R_8; R_4 = R_8*R_17;
+                        R_13 = (-1.0)*R_10; R_13 = R_9+R_13; R_13 = R_13*R_17; R_3 = R_13+R_3;
+                        R_13 = 1/R_3; R_9 = R_20*R_13; R_9 = R_8*R_9; R_9 = (-1.0)*R_9;
+                        R_9 = R_14+R_9; R_9 = R_6+R_9; R_9 = 1/R_9; R_3 = R_12*R_3;
+                        R_10 = R_10*R_17; R_15 = R_10*R_15; R_11 = R_15+R_11; R_18 = R_11+R_18;
+                        R_2 = R_18+R_2; R_2 = (-1.0)*R_2; R_3 = R_2+R_3; R_4 = R_4+R_3;
+                        R_4 = R_4*R_13; R_4 = (-1.0)*R_4; R_12 = R_4+R_12; R_12 = R_20*R_12;
+                        R_12 = R_16+R_12; R_12 = R_9*R_12; V2 = R_12; R_12 = (-1.0)*R_12;
+                        R_17 = R_12+R_17; R_17 = R_8*R_17; R_17 = R_3+R_17; R_13 = R_17*R_13;
+                        U2 = R_13; 
 
                         T err = 1 + abs(U) + abs(V); err = (abs(U-U2) + abs(V-V2)) / err;
                         U = U2; V = V2;
@@ -136,17 +136,17 @@ bool get_var_inter_experimental(const Quad &elem,const PosNodes &pos_nodes,const
                     }
                     /// on teste notre solution (U, V) en évaluant la position en ce point (U, V).
                     if (isSolution) {
-                        T R_0 = pos_nodes[3][1]; T R_1 = pos_nodes[0][1]; T R_2 = pos_nodes[1][1]; T R_3 = pos_nodes[2][1];
+                        T R_0 = pos_nodes[2][1]; T R_1 = pos_nodes[3][1]; T R_2 = pos_nodes[0][1]; T R_3 = pos_nodes[1][1];
                         T R_4 = pos[1]; R_4 = (-1.0)*R_4; T R_5 = pos[0]; R_5 = (-1.0)*R_5;
-                        T R_6 = pos_nodes[1][0]; T R_7 = pos_nodes[0][0]; T R_8 = pos_nodes[3][0]; T R_9 = U;
-                        R_2 = R_2*R_9; R_3 = R_3*R_9; R_6 = R_6*R_9; T R_10 = (-1.0)*R_9;
-                        R_10 = 1.0+R_10; T R_11 = pos_nodes[2][0]; R_11 = R_11*R_9; T R_12 = V;
-                        R_0 = R_12*R_0; R_0 = R_0*R_10; R_3 = R_3*R_12; T R_13 = (-1.0)*R_12;
-                        T R_14 = 1.0+R_13; R_2 = R_2*R_14; R_14 = R_6*R_14; R_6 = (-1.0)+R_12;
-                        R_9 = R_6*R_9; R_13 = R_9+R_13; R_13 = 1.0+R_13; R_1 = R_13*R_1;
-                        R_1 = R_2+R_1; R_0 = R_1+R_0; R_0 = R_3+R_0; R_0 = R_4+R_0;
-                        eval2 = R_0; R_7 = R_13*R_7; R_14 = R_7+R_14; R_8 = R_12*R_8;
-                        R_10 = R_8*R_10; R_14 = R_10+R_14; R_11 = R_12*R_11; R_14 = R_11+R_14;
+                        T R_6 = pos_nodes[3][0]; T R_7 = pos_nodes[0][0]; T R_8 = pos_nodes[1][0]; T R_9 = V;
+                        R_1 = R_1*R_9; R_6 = R_6*R_9; T R_10 = (-1.0)+R_9; T R_11 = (-1.0)*R_9;
+                        T R_12 = 1.0+R_11; T R_13 = U; R_0 = R_0*R_13; R_0 = R_0*R_9;
+                        R_3 = R_13*R_3; R_3 = R_3*R_12; T R_14 = (-1.0)*R_13; R_14 = 1.0+R_14;
+                        R_1 = R_14*R_1; R_14 = R_6*R_14; R_10 = R_10*R_13; R_11 = R_10+R_11;
+                        R_11 = 1.0+R_11; R_2 = R_11*R_2; R_2 = R_3+R_2; R_1 = R_2+R_1;
+                        R_0 = R_1+R_0; R_0 = R_4+R_0; eval2 = R_0; R_11 = R_7*R_11;
+                        R_8 = R_8*R_13; R_8 = R_12*R_8; R_11 = R_8+R_11; R_14 = R_11+R_14;
+                        R_11 = pos_nodes[2][0]; R_13 = R_11*R_13; R_9 = R_13*R_9; R_14 = R_9+R_14;
                         R_5 = R_14+R_5; eval = R_5; 
 
                         //PRINT( eval ); PRINT( eval2 );
