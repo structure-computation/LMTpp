@@ -30,7 +30,7 @@
                 codegen:
                     cd LMT/include/codegen; scons
             Attention: dans Makefile, les tabulations doivent être de vraies tabulations et non une séquence d'espaces!
-        * un lien sur la librairie LMT++ (taper ln -s ~/LMT LMT si vous avez mis le répertoire LMT dans votre home ou sinon /chemin/LMT).
+        * un lien sur la librairie LMT++ (taper ln -s ~/LMTpp LMT si vous avez mis le répertoire LMT dans votre home ou sinon /chemin/LMTpp).
 
     Ensuite créer le fichier source, <strong> main.cpp </strong> , avec le contenu :
         \code
