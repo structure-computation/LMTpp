@@ -110,31 +110,31 @@ int load_image( std::string file, Mat &m, int ceil_size = 1, int border_size = 0
     \keyword Mathématiques/Algèbre linéaire/Opération   
     \keyword Algorithme/Affichage  
 */
-template<class T,class Str,class Sto,class IO>
-        void display_image(const Mat<T,Str,Sto,IO> &mat, const std::string &name_file="toto", bool disp_screen = false, bool auto_grey_level_scaling = false, const std::string &format_file=".png" ) {
-    typedef typename Mat<T,Str,Sto,IO>::T TT;
-    using namespace std;
-    
-    ofstream f( name_file.c_str() );
-        
-    double mi = 0, ma = 1;
-    if ( auto_grey_level_scaling ) {
-        mi = min( mat );
-        ma = max( mat );
-    }
-        
-    for(unsigned l=0;l<mat.nb_rows();++l)
-        for(unsigned c=0;c<mat.nb_cols();++c)
-            f.put( (unsigned char)( 255 * ( mat(l,c) - mi ) / ( ma - mi ) ) );
-        
-    f.close();
-    
-    ostringstream s2;
-    s2 << "convert -depth 8 -size " << mat.nb_cols() << "x" << mat.nb_rows() << " gray:" << name_file << " " << name_file << format_file << "; rm " << name_file;
-    if ( disp_screen )
-        s2 << "; display " << name_file << format_file;
-    system(s2.str().c_str());
-}
+// template<class T,class Str,class Sto,class IO>
+//         void display_image(const Mat<T,Str,Sto,IO> &mat, const std::string &name_file="toto", bool disp_screen = false, bool auto_grey_level_scaling = false, const std::string &format_file=".png" ) {
+//     typedef typename Mat<T,Str,Sto,IO>::T TT;
+//     using namespace std;
+//     
+//     ofstream f( name_file.c_str() );
+//         
+//     double mi = 0, ma = 1;
+//     if ( auto_grey_level_scaling ) {
+//         mi = min( mat );
+//         ma = max( mat );
+//     }
+//         
+//     for(unsigned l=0;l<mat.nb_rows();++l)
+//         for(unsigned c=0;c<mat.nb_cols();++c)
+//             f.put( (unsigned char)( 255 * ( mat(l,c) - mi ) / ( ma - mi ) ) );
+//         
+//     f.close();
+//     
+//     ostringstream s2;
+//     s2 << "convert -depth 8 -size " << mat.nb_cols() << "x" << mat.nb_rows() << " gray:" << name_file << " " << name_file << format_file << "; rm " << name_file;
+//     if ( disp_screen )
+//         s2 << "; display " << name_file << format_file;
+//     system(s2.str().c_str());
+// }
 
 /** @see display_image */
 template<class T>
@@ -143,6 +143,35 @@ struct EchelleCouleurExemple {
         return Vec<T,3>( exp( - grey*grey*2 ), exp( - (grey-0.5)*(grey-0.5)*2 ), exp( - (grey-1)*(grey-1) )*2 ) / ( 1 + exp( -1 ) + exp( -2 ) );
     }
 };
+
+/** @see Sépare les valeurs positives ( en rouge ) des valeurs négatives ( en bleu )
+    Plus la couleur est saturée, plus la valeur est proche du max. Au contraire plus la couleur est désaturée, i.e. proche du blanc, plus la valeur est proche de zéro.
+    On suppose que max >= 0 et min < 0.
+*/
+template<class T>
+struct EchelleCouleurPosNeg {
+    EchelleCouleurPosNeg( T _gamma = (T)1 ) : gamma( _gamma ) {}
+    Vec<T,3> operator()( T grey, T min = -1, T max = 1 ) const {
+        if ( grey >= 0 ) {
+            T t = pow( ( 1 - grey / max ), gamma );
+            return Vec<T,3>( 1, t, t );
+        } else {
+            T t = pow( ( 1 - grey / min ), gamma );
+            return Vec<T,3>( t, t, 1 );               
+        }
+    }
+    T gamma;
+};
+
+template<class T>
+struct EchelleCouleurBasic {
+    EchelleCouleurBasic( T _gamma = (T)1 ) : gamma( _gamma ) {}
+    Vec<T,3> operator()( T grey, T min = 0, T max = 1 ) const {
+        return pow( (grey - min) / ( max - min ), gamma );
+    }
+    T gamma;
+};
+
 
 /** display_image( m, EchelleCouleurExemple(), ... ); */
 template<class TM,class Op>
@@ -160,7 +189,8 @@ void display_image(const TM &mat, const Op &grey_to_rgb, const std::string &name
         
     for(unsigned l=0;l<mat.nb_rows();++l) {
         for(unsigned c=0;c<mat.nb_cols();++c) {
-            Vec<T,3> rgb = grey_to_rgb( ( mat(l,c) - mi ) / ( ma - mi ) );
+            //Vec<T,3> rgb = grey_to_rgb( ( mat(l,c) - mi ) / ( ma - mi ) );
+            Vec<T,3> rgb = grey_to_rgb( mat(l,c), mi, ma );
             f.put( (unsigned char)( 255 * rgb[0] ) );
             f.put( (unsigned char)( 255 * rgb[1] ) );
             f.put( (unsigned char)( 255 * rgb[2] ) );
