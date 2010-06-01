@@ -11,11 +11,14 @@
     
         Les schémas de pensée en programmation ont énormément évolués ces dernières années. La programmation orienté objet ou la programmation générique sont maintenant des standards et ont prouvé leur efficacité.  Il a été choisi d'en utiliser les bénéfices de la façon la plus pragmatique qui soit.
     
-    = Évaluation paresseuse
+    = Evaluation paresseuse
 
         Beaucoup des développements de la LMT++ sont centrés sur "l'évaluation paresseuse".
         
-        Dans beaucoup de cas, quand on écrit \code a+b , même si a et b sont connus, on 
+        Dans beaucoup de cas, quand on écrit 
+        \code 
+            a+b 
+        même si a et b sont connus, on 
 
 
 */

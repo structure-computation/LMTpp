@@ -138,6 +138,12 @@ typename TNG::T measure( const Element<Tetra_10,TN,TNG,TD,NET> &e ) {
     D0 = 0.133333*D0; D0 = D1-D0; D0 = D0+D1; D0 = D0+D1; D0 = D0+D1; D0 = abs(D0); return D0; 
 }
 
+/// >= 0 -> inside, < 0 -> outside
+template<class T,class TV>
+T var_inter_insideness( const Tetra_10 &e, const TV &var_inter ) {
+    return min( min( min( var_inter[0], var_inter[1] ), var_inter[2] ), 1 - var_inter[0] - var_inter[1] - var_inter[2] );
+}
+
 };
 
 #include "element_Tetra_10.h"

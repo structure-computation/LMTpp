@@ -14,7 +14,7 @@ struct TypeOfVariableInterpolationInMesh {
     typedef typename TM::TNode::template SubTypeByName0<NameDM>::TT TypeIfNodal;
     typedef typename TM::Carac::template ElementChoice<0,0,0,0>::TData::template SubTypeByName0<NameDM>::TT TypeIfElementary;
     static const int type_interpolation = AreSameType<TypeIfNodal,void>::res; // 0 -> nodal, 1 -> elementary
-    typedef typename TM::T ScalarType;
+    typedef typename TM::Tpos ScalarType;
     typedef typename AlternativeOnType<
         type_interpolation,
         TypeIfNodal,

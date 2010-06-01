@@ -350,6 +350,12 @@ bool var_inter_is_inside( const Hexa &, const TV &var_inter, T tol = 0 ) {
            heaviside( var_inter[2] + tol ) * heaviside( 1 - var_inter[2] + tol );
 }
 
+/// >= 0 -> inside, < 0 -> outside
+template<class T,class TV>
+T var_inter_insideness( const Hexa &e, const TV &var_inter ) {
+    return min( min( min( min( var_inter[0], var_inter[1] ), 1 - var_inter[0] ), 1 - var_inter[1] ), 1 - var_inter[2] );
+}
+
 };
 
 #include "element_Hexa.h"

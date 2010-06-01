@@ -87,6 +87,12 @@ bool var_inter_is_inside( const Quad_42 &, const TV &var_inter, T tol = 0 ) {
     return heaviside( var_inter[0] + tol ) * heaviside( var_inter[1] + tol ) * heaviside( 1 - var_inter[0] + tol ) * heaviside( 1 - var_inter[1] + tol );
 }
 
+/// >= 0 -> inside, < 0 -> outside
+template<class T,class TV>
+T var_inter_insideness( const Quad_42 &e, const TV &var_inter ) {
+    return min( min( min( var_inter[0], var_inter[1] ), 1 - var_inter[0] ), 1 - var_inter[1] );
+}
+
 };
 
 #include "element_Quad_42.h"

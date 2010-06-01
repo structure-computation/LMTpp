@@ -5,9 +5,13 @@
 
         Pour installer la librairie LMT++, on récupère les sources dans le dépot git de l'utilisateur multi en faisant :
         \code 
-            git clone votre-nom@givry:/u/multi/LMT
+            git clone git://gitosis.lmt.ens-cachan.fr/LMTpp.git
+            
+        Pour ceux qui font de la corrélation d'image sur la plate-forme, if faut aussi installer le répertoire dic :
+        \code
+            git clone git://gitosis.lmt.ens-cachan.fr/dic.git
 
-    = Utilisation de la librairie
+    = Dépendance de la librairie LMT++
 
         Pour générer certaines parties de la libriaire LMT++ et aussi pour compiler vos propres programmes, vous aurez besoin d'installer quelques programmes et en-têtes :
             * g++ et oui en faisant sur ubuntu sudo apt-get install g++
@@ -17,7 +21,7 @@
             * readline ( commande : sudo apt-get install libreadline5-dev ),
             * en-têtes python ( commande : sudo apt-get install python-dev ),
             * Qt4 ( commande : sudo apt-get install libqtcore4 libqtgui4 libqt4-dev qt4-doc devrait suffire ),
-            * zlib pour compresser (  commande : sudo apt-get install libzip1 libzip-dev )
+            * zlib pour compresser (  commande : sudo apt-get install libzip1 libzip-dev ou zlib1g zlib1g-dev )
             * fftw pour la transfrmée de Fourier rapide ( sudo apt-get install fftw3-3 fftw3-dev
             * libxml2-dev ( sudo apt-get install libxml2-dev) 
             

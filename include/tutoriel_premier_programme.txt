@@ -21,6 +21,10 @@
 
                 make_dep_py(env)
                 env.Program( "test", ["main.cpp"] )
+                
+            IMPORTANT : pour les futurs utilisateurs de la corrélation d'images, ajoutez '#dic' à la liste CPPPATH, i.e. :
+            \code
+                CPPPATH = [ '#LMT/include', '#dic' ]
 
         * <strong> Makefile </strong> 
             qui contiendra
@@ -30,7 +34,8 @@
                 codegen:
                     cd LMT/include/codegen; scons
             Attention: dans Makefile, les tabulations doivent être de vraies tabulations et non une séquence d'espaces!
-        * un lien sur la librairie LMT++ (taper ln -s ~/LMT LMT si vous avez mis le répertoire LMT dans votre home ou sinon /chemin/LMT).
+        * un lien sur la librairie LMT++ (taper ln -s ~/LMTpp LMT si vous avez mis le répertoire LMT dans votre home ou sinon /chemin/LMTpp).
+            IMPORTANT : pour les futurs utilisateurs de la corrélation d'images, faites aussi un lien sur le répertoire dic, i.e. ln -s /chemin/dic dic .
 
     Ensuite créer le fichier source, <strong> main.cpp </strong> , avec le contenu :
         \code
