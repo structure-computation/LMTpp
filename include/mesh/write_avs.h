@@ -415,7 +415,7 @@ void write_avs(const TM &mesh,const std::string &name,const Vec<std::string> &di
                     node_data_comp.resize(a);
                     node_data_name.resize(a);
                     node_data_comp[a-1]= nb_comp[i];
-                    node_data_name[a-1]= string(names[i]);
+                    node_data_name[a-1]= std::string(names[i]);
                 }
             }
         }
@@ -546,7 +546,7 @@ void write_avs(TM &mesh, unsigned num, TP &structure, Binary) /*throw(std::runti
     Vec<std::string> display_fields = structure.output;
     std::string path = structure.path;
     std::ostringstream ss;
-    ss << path << "tmp/avs" << setfill('0') << setw(4) << num << ".inp";
+    ss << path << "tmp/avs" << std::setfill('0') << std::setw(4) << num << ".inp";
     std::string name(ss.str());
 
     write_avs(mesh,name,display_fields, Binary());
@@ -560,7 +560,7 @@ void write_avs(TM &mesh, unsigned num, TP &structure, Ascii ) /*throw(std::runti
     Vec<std::string> display_fields = structure;
     std::string path = structure.path;
     std::ostringstream ss;
-    ss << path << "tmp/avs" << setfill('0') << setw(4) << num << ".inp";
+    ss << path << "tmp/avs" << std::setfill('0') << std::setw(4) << num << ".inp";
     std::string name(ss.str());
     std::ofstream outfile(name.c_str());
 
