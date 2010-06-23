@@ -150,7 +150,7 @@ class Element:
             for c in coord_res:
                 cr -= c * dot( c, cr )
             coord_res.append( cr / norm(cr) )
-        print coord_res
+        # print coord_res
         normale = vect_prod(coord_res[0],coord_res[1])
         normale /= norm(normale)
         coord_res.append(normale)
