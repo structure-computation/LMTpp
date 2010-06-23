@@ -81,32 +81,32 @@ NodalElements if nb_var_inter==0
 
 */
 template<unsigned d,unsigned nb_var_inter,unsigned nb=0,class T=double,unsigned degree=1,class NodalData=NodalStaticDataStd<T,d>,class GlobalData=VoidDMSet>
-        struct MeshCaracStd {
-            ///
-            typedef T Tpos;
-            ///
-            static const unsigned dim = d;
-            ///
-            typedef Vec<T,d> Pvec;
-            ///
-            typedef NodalData NodalStaticData;
-            ///
-            typedef GlobalData GlobalStaticData;
+struct MeshCaracStd {
+    ///
+    typedef T Tpos;
+    ///
+    static const unsigned dim = d;
+    ///
+    typedef Vec<T,d> Pvec;
+    ///
+    typedef NodalData NodalStaticData;
+    ///
+    typedef GlobalData GlobalStaticData;
     /// inner is a workaround. NE can be Triangle, Tetra, ... end of elements<nvi_to_subs,skin> is marked by NE=void
-            template<unsigned nvi_to_subs,unsigned skin,unsigned num_sub_element,unsigned inner=0>
-                    struct ElementChoice {
-                        typedef void NE;
-                        typedef DefaultBehavior BE;
-                        typedef VoidDMSet TData;
-                    };
-                    ///
-                    template<unsigned nvi_to_subs,unsigned skin,unsigned inner>
-                            struct ElementChoice<nvi_to_subs,skin,0,inner> {
-                                typedef typename ElementChoiceMeshCaracStd<nb_var_inter-(int)nvi_to_subs,nb,degree>::NE NE;
-                                typedef DefaultBehavior BE;
-                                typedef VoidDMSet TData;
-                            };
-        };
+    template<unsigned nvi_to_subs,unsigned skin,unsigned num_sub_element,unsigned inner=0>
+    struct ElementChoice {
+        typedef void NE;
+        typedef DefaultBehavior BE;
+        typedef VoidDMSet TData;
+    };
+    ///
+    template<unsigned nvi_to_subs,unsigned skin,unsigned inner>
+    struct ElementChoice<nvi_to_subs,skin,0,inner> {
+        typedef typename ElementChoiceMeshCaracStd<nb_var_inter-(int)nvi_to_subs,nb,degree>::NE NE;
+        typedef DefaultBehavior BE;
+        typedef VoidDMSet TData;
+    };
+};
 // template<unsigned d,unsigned nb_var_inter,bool want_cubic=false,class T=double,unsigned degree=1,class NodalData=NodalStaticDataStd<T,d>,class GlobalData=VoidDMSet>
 // struct MeshCaracStd {
 //     ///
