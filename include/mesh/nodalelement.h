@@ -35,6 +35,7 @@ void subdivision_element(const Element<NodalElement,TN,TNG,TD,NET> &e,Vec<TNG> &
     DM::copy( *e.node(0), *new_nodes.new_elem() );
 }
 
+inline unsigned vtk_num( StructForType<NodalElement> ) { return 1; }
 
 };
 

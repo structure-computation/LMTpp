@@ -123,6 +123,7 @@ typename TNG::T measure( const Element<Bar,TN,TNG,TD,NET> &e ) {
     return length( e.node(1)->pos - e.node(0)->pos );
 }
 
+inline unsigned vtk_num( StructForType<Bar> ) { return 2; }
 
 };
 
