@@ -7,6 +7,29 @@
 //}
 #include "beep.h"
 
+/*!
+    Cette classe encapsule la décomposition LDL d'une matrice symétrique.
+    On l'utilise ainsi :
+    \code C/C++
+        LDL_solver ldl;
+        Mat<double,LMT::Sym<>,LMT::SparseLine<> > K;
+        /// on construit K
+        ldl.get_factorization( K );
+        /// à ce stade, l'instance ldl contient une factorisation LDL de K
+        Vec<double> f1, f2, ...;
+        /// on construit f1, f2, ...
+        ldl.solve( f1 );
+        /// f1 contient maintenant la solution du problème Ku = f1
+        ldl.solve( f2 );
+        /// f2 contient maintenant la solution du problème Ku = f2
+        ...
+        
+    Les méthodes get_factorization() ont les arguments <strong> want_free </strong> , <strong> want_semi_morse </strong> et <strong> want_amd_order </strong> :
+        * <strong> want_free </strong> : s'il est mis à vrai (valeur par défaut), la méthode libère la mémoire de la matrice <strong> mat </strong> passée en argument sinon mat reste inchangée.
+        * <strong> want_semi_morse </strong> : paramètre de l'algoritme de factorisation
+        * <strong> want_amd_order </strong> : paramètre de l'algoritme de factorisation
+
+*/
 class LDL_solver {
 public:
     typedef double T;
