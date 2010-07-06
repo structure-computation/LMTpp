@@ -198,6 +198,17 @@ namespace LMT {
     inline void operator^=(SimdVecAl<double,2> &a,const SimdVecAl<double,2> &b) { a.val = _mm_xor_pd(a.val,b.val); }
     #endif // __SSE2__
 
+#ifdef __SSE__
+    inline SimdVecAl<float,4> sqrt (const SimdVecAl<float,4> &a) { return _mm_sqrt_ps (a.val); }
+    inline SimdVecAl<float,4> rsqrt(const SimdVecAl<float,4> &a) { return _mm_rsqrt_ps(a.val); }
+#endif // __SSE__
+
+#ifdef __SSE2__
+    inline SimdVecAl<double,2> sqrt (const SimdVecAl<double,2> &a) { return _mm_sqrt_pd (a.val); }
+    // inline SimdVecAl<double,2> rsqrt(const SimdVecAl<double,2> &a) { return _mm_rsqrt_pd(a.val); }
+#endif // __SSE2__
+
+
 }
 
 #endif // LMT_SIMD_AL_H
