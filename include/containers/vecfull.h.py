@@ -301,6 +301,22 @@ public:
                 return true;
         return false;
     }
+    
+    template<class T2 > 
+    unsigned find( const T2 &v ) const {
+        for( unsigned i=0; i<size(); ++i )
+            if ( val[i] == v )
+                return i;
+        return size();
+    }
+
+    template<class T2, class Cmp > 
+    unsigned find( const T2 &v, Cmp cmp ) const {
+        for( unsigned i=0; i<size(); ++i )
+            if ( cmp( val[i], v ) )
+                return i;
+        return size();
+    }
 
     Vec &set(const TT &v) { for(unsigned i=0;i<size();++i) val[i]=v; return *this; }
 
