@@ -110,6 +110,36 @@ print """
         template<class TX, class TY, int sy, class OY, class TZ, int sz, class OZ>
         void operator() (const TX &x, unsigned i, const Vec<TY,sy,OY> &y, const Vec<TZ,sz,OZ> &z, FILE *tube) const { fprintf(tube,"%10.6f %10.6f %10.6f\\n",double(x),double(y[i]),double(z[i]) ); }
     };
+    
+    /*!
+        Cette méthode permet de représenter une surface discrétisée définie "au dessus" d'un rectangle.
+        Entrées :
+            * mat est une matrice de trois colonnes , la premiere colonne regroupe les abscisses, la deuxième les ordonnées et la troisième les côtes. Il y a autant de lignes que de points.
+            * mins[ 0 ] est le minimum des abscisses
+            * mins[ 1 ] est le minimum des ordonnées 
+            * maxs[ 0 ] est le maximum des abscisses
+            * maxs[ 1 ] est le maximum des ordonnées
+            * nb[ 0 ] le nombre points suivant l'axe des abscisses
+            * nb[ 1 ] le nombre points suivant l'axe des ordonnées
+            
+        Rem : le nombre de lignes de mat est donc nb[ 0 ] * nb[ 1 ]
+        ATENTION : pour éviter un affichage bizarre, éviter de vous tromper sur les nb[ 0 ] et nb[ 1 ]. 
+           
+    */
+    template<class T,class STR,class STO>
+    void surface( const Mat<T,STR,STO> &mat, Vec<T,2> mins, Vec<T,2> maxs, Vec<int,2> nb, const char *params="" ) {
+        std::ostringstream oss;
+        oss << "set xrange [" << mins[ 0 ] << ":" << maxs[ 0 ] << "];";
+        oss << "set yrange [" << mins[ 1 ] << ":" << maxs[ 1 ] << "];";
+        oss << "set dgrid3d " << nb[ 0 ] - 1 << "," <<  nb[ 1 ] - 1 << ";";
+        oss << "set hidden3d;"; 
+        fprintf( tube, "%s\\n", oss.str().c_str() );
+        fprintf(tube,"splot '-' using 1:2:3 %s with lines \\n", params );
+        std::ostringstream ss; ss << mat;
+        fprintf(tube,"%s\\ne\\n",ss.str().c_str());
+        fflush(tube);
+    }
+    
     /*!
         Cette fonction affiche un champ de vecteurs (vx,vy) discrétisé, défini aux points (x,y)
 
