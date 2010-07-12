@@ -1978,6 +1978,7 @@ inline void gauss_points( const Triangle &elem, unsigned order, Vec<double> &poi
         valeurs[273] = TPOS( 3.3333333333333333333e-1, 5.5555555555555555556e-1 ); ///  1/3 5/9 
         return;
     }
+   std::cerr << "TODO : order > 21" << std::endl; assert(0);
 }
 
 
