@@ -2,7 +2,7 @@
 #define LMT_gauss_point_for_simplex_Tetra_H
 namespace LMT {
 
-inline void gauss_points( const Tetra &elem, unsigned order, unsigned &nb_points_gauss, Vec<double> &poids, Vec< Vec<double, Tetra::nb_var_inter > > &valeurs ) { 
+inline void gauss_points( const Tetra &elem, unsigned order, Vec<double> &poids, Vec< Vec<double, Tetra::nb_var_inter > > &valeurs ) { 
     typedef Vec<double, Tetra::nb_var_inter > TPOS;
     
     if ( order <= 1 ) {

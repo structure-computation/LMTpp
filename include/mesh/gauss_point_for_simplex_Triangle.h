@@ -2,7 +2,7 @@
 #define LMT_gauss_point_for_simplex_Triangle_H
 namespace LMT {
 
-inline void gauss_points( const Triangle &elem, unsigned order, unsigned &nb_points_gauss, Vec<double> &poids, Vec< Vec<double, Triangle::nb_var_inter > > &valeurs ) { 
+inline void gauss_points( const Triangle &elem, unsigned order, Vec<double> &poids, Vec< Vec<double, Triangle::nb_var_inter > > &valeurs ) { 
     typedef Vec<double, Triangle::nb_var_inter > TPOS;
     
     if ( order <= 1 ) {
