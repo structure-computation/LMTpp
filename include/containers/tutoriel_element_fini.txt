@@ -123,7 +123,7 @@
             = Première partie : définition des variables accessibles au niveau du maillage   
                 C'est la même syntaxe que celle du fichier SConstruct (cf \a #param )  avec un nouveau champ facultatif, <strong> unknown </strong> ,  champs spécial indiquant que la variable est une inconnue du problème (obtenue par résolution d'un systeme en général).
                 Sur l'exemple, l'unique inconnue est la température, calculée sur les noeuds.
-                Avez-vous remarqué le paramètre <strong> nb_dir </strong> de l'inconnue temperature ?
+                Avez-vous remarqué le paramètre <strong> nb_der </strong> de l'inconnue temperature ?
                 C'est le degré des polynômes d'approximation de la temperature. Il doit être supérieur ou égal à l'ordre de dérivation maximal dans l'équation. Par exemple, si des dérivées secondes de l'inconnue apparaissent dans l'équation de formulation, il faut prendre <strong> nb_dir </strong> supérieur ou égal à 2.
                 Et que signifie <strong> left_time_integration </strong> , et <strong> right_time_integration </strong> ?
                 Ce sont les coefficients alpha et beta de la formulation intégrale de l'équation, ci-dessous :
