@@ -7,7 +7,7 @@ namespace LMT {
 
 /*!
 
-    Cette fonction retourne dans les vecteurs poids et valeurs le poids et la position des point d'intégration respectivement.
+    Cette fonction retourne dans les vecteurs poids et valeurs le poids et la position des points d'intégration respectivement.
     Actuellement elle founit des méthodes de cubature exacte jusqu'à l'ordre 23 inclus.
       
     Les coefficients ont été trouvé sur le site http://nines.cs.kuleuven.be/research/ecf/mtables.html
