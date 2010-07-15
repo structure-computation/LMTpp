@@ -5994,7 +5994,7 @@ inline void gauss_points( const Tetra &elem, unsigned order, Vec<double> &poids,
         valeurs[984] = TPOS( 3e-1, 3e-1, 3e-1 ); ///  3/10 3/10 3/10 
         return;
     }
-   std::cerr << "TODO : order > 21" << std::endl; assert(0);
+    std::cerr << "TODO : order > 21" << std::endl; assert(0);
 }
 
 
