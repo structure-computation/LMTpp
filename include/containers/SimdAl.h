@@ -141,6 +141,11 @@ namespace LMT {
     inline void operator&=(SimdVecAl<float,4> &a,const SimdVecAl<float,4> &b) { a.val = _mm_and_ps(a.val,b.val); }
     inline void operator|=(SimdVecAl<float,4> &a,const SimdVecAl<float,4> &b) { a.val = _mm_or_ps(a.val,b.val); }
     inline void operator^=(SimdVecAl<float,4> &a,const SimdVecAl<float,4> &b) { a.val = _mm_xor_ps(a.val,b.val); }
+
+    inline SimdVecAl<float,4> sqrt (const SimdVecAl<float,4> &a) { return _mm_sqrt_ps (a.val); }
+    inline SimdVecAl<float,4> rsqrt(const SimdVecAl<float,4> &a) { return _mm_rsqrt_ps(a.val); }
+    inline SimdVecAl<float,4> neg  (const SimdVecAl<float,4> &a) { return SimdVecAl<float,4>( 0 ) - a; }
+    inline SimdVecAl<float,4> inv  (const SimdVecAl<float,4> &a) { return _mm_rcp_ps(a.val); }
     #endif // __SSE__
     
 
@@ -196,12 +201,7 @@ namespace LMT {
     inline void operator&=(SimdVecAl<double,2> &a,const SimdVecAl<double,2> &b) { a.val = _mm_and_pd(a.val,b.val); }
     inline void operator|=(SimdVecAl<double,2> &a,const SimdVecAl<double,2> &b) { a.val = _mm_or_pd(a.val,b.val); }
     inline void operator^=(SimdVecAl<double,2> &a,const SimdVecAl<double,2> &b) { a.val = _mm_xor_pd(a.val,b.val); }
-    #endif // __SSE2__
-
-#ifdef __SSE__
-    inline SimdVecAl<float,4> sqrt (const SimdVecAl<float,4> &a) { return _mm_sqrt_ps (a.val); }
-    inline SimdVecAl<float,4> rsqrt(const SimdVecAl<float,4> &a) { return _mm_rsqrt_ps(a.val); }
-#endif // __SSE__
+#endif // __SSE2__
 
 #ifdef __SSE2__
     inline SimdVecAl<double,2> sqrt (const SimdVecAl<double,2> &a) { return _mm_sqrt_pd (a.val); }
