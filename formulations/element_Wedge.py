@@ -66,13 +66,13 @@ interpolation["gauss"] =  (-2*var_inter[1]                  + 1)   * (1-(var_int
 
 a = 1.0/6.0
 Flat_Interpolation_gauss_points = [
-  ( a, { var_inter[0] : 1.0/2.0, var_inter[1] : 1.0/2.0 , var_inter[2] : 1.0/2.0 } ),
-  ( a, { var_inter[0] : 0.0,     var_inter[1] : 1.0/2.0 , var_inter[2] : 1.0/2.0 } ),
-  ( a, { var_inter[0] : 1.0/2.0, var_inter[1] : 0.0     , var_inter[2] : 1.0/2.0 } ),
+  ( a, { var_inter[0] : 1.0/2.0, var_inter[1] : 0.0 , var_inter[2] : 1.0/2.0 } ),
+  ( a, { var_inter[0] : 1.0/2.0,     var_inter[1] : 1.0/2.0 , var_inter[2] : 1.0/2.0 } ),
+  ( a, { var_inter[0] : 0.0, var_inter[1] : 1.0/2.0     , var_inter[2] : 1.0/2.0 } ),
 ]
-interpolation["Flat_Interpolation"] = ( 2*var_inter[0] + 2*var_inter[1] - 1)   * val[0]  + \
-                          (-2*var_inter[0]                  + 1)   * val[1]  + \
-                          (-2*var_inter[1]                  + 1)   * val[2]
+interpolation["Flat_Interpolation"] = (1 - 2*var_inter[1])   * val[0]  + \
+                          (-1 + 2*var_inter[0] + 2*var_inter[1])   * val[1]  + \
+                          (1 - 2*var_inter[0])   * val[2]
 
 quality = 1
 
