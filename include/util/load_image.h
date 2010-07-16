@@ -175,7 +175,7 @@ struct EchelleCouleurBasic {
 
 /** display_image( m, EchelleCouleurExemple(), ... ); */
 template<class TM,class Op>
-void display_image(const TM &mat, const Op &grey_to_rgb, const std::string &name_file="toto", bool disp_screen = false, bool auto_grey_level_scaling = false ) {
+void display_image(const TM &mat, const Op grey_to_rgb, const std::string &name_file="toto", bool disp_screen = false, bool auto_grey_level_scaling = false ) {
     typedef typename TM::T T;
     using namespace std;
     

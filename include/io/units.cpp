@@ -61,7 +61,7 @@ void Units::parseXml(const XmlNode &n) {
         continue;
       for(vector<Prefix>::const_iterator itp=prefixes.begin();itp!=prefixes.end();++itp) {
         Unit u;
-        u.scale = unit.scale * pow( 10.0, itp->val );
+        u.scale = unit.scale * std::pow( 10.0, itp->val );
         u.num_group = num_group;
         group_data.push_back( make_pair( itp->name + name_unit, u ) );
       }
@@ -102,12 +102,12 @@ double Units::getCoeff(const string &coeff,const string &unit_system) const {
     for(pos=n;*pos;++pos);
     for(;pos>=n;--pos) {
       if (*pos=='/') {
-        res /= pow( get_coeff_simple(pos+1,iter), expo);
+        res /= std::pow( get_coeff_simple(pos+1,iter), expo);
         *pos = 0;
         expo = 1;
       }
       else if (*pos=='*') {
-        res *= pow( get_coeff_simple(pos+1,iter), expo);
+        res *= std::pow( get_coeff_simple(pos+1,iter), expo);
         *pos = 0;
         expo = 1;
       }
@@ -116,7 +116,7 @@ double Units::getCoeff(const string &coeff,const string &unit_system) const {
         *pos = 0;
       }
     }
-    res *= pow( get_coeff_simple(n,iter), expo);
+    res *= std::pow( get_coeff_simple(n,iter), expo);
     free(n);
     return res;
 }

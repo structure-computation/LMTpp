@@ -28,7 +28,7 @@ double symrcm_cost(const Vec<Vec<unsigned> > &indices,const Vec<unsigned> &perm)
         unsigned mi = i;
         for(unsigned j=0;j<indices[perm[i]].size();++j)
             mi = min( mi, inv[indices[perm[i]][j]] );
-        cost += pow( i - mi + 1 ,2u );
+        cost += std::pow( double( i - mi + 1 ) ,2 );
     }
     return cost;
 }
