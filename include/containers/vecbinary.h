@@ -325,7 +325,7 @@ Vec<VecOp< Pow, 2, Vec<VecCst<T2>,s1>,false,Vec<T1,s1,TO1>,true>,s1> pow( const 
 
 /*! 
     version pour puissance entière
-    elates Vec
+    \relates Vec
 */
 template<class T1,int s1,class TO1>
 Vec<VecOp< Pow, 2, Vec<T1,s1,TO1>,true,Vec<VecCst<int>,s1>,false>,s1> pow( const Vec<T1,s1,TO1> &v1, int v2 ) {

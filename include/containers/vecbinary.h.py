@@ -53,7 +53,7 @@ for op,sop in lst1 + lst2:
 print """
 /*! 
     version pour puissance entière
-    \relates Vec
+    \\relates Vec
 */
 template<class T1,int s1,class TO1>
 Vec<VecOp< Pow, 2, Vec<T1,s1,TO1>,true,Vec<VecCst<int>,s1>,false>,s1> pow( const Vec<T1,s1,TO1> &v1, int v2 ) {
