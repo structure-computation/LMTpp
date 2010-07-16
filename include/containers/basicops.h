@@ -109,47 +109,33 @@ struct Pow;
     fonction puissance
 
 */
-// template<class T1,class T2>
-// typename TypePromote<Pow,T1,T2>::T pow( const T1 &a, const T2 &b ) {
-//     typedef typename TypePromote<Pow,T1,T2>::T T;
-//     return std::pow( T( a ), T( b ) );
-// }
+template<class T1,class T2>
+typename TypePromote<Pow,T1,T2>::T pow( const T1 &a, const T2 &b ) {
+    typedef typename TypePromote<Pow,T1,T2>::T T;
+    return std::pow( T( a ), T( b ) );
+}
 
-// template<class T>
-// inline T pow( T x, unsigned y ) {
-//     T res = 1;
-//     while (y--)
-//         res *= x;
-//     return res;
-// }
+template<class T>
+inline T pow( T x, unsigned y ) {
+    T res = 1;
+    while (y--)
+        res *= x;
+    return res;
+}
 
-// template<class T>
-// inline T pow( T x_, int y ) {
-//     T res = T(1);
-//     if ( y < 0 ) {
-//         T x = T(1) / x_;
-//         while (y++)
-//             res *= x;
-//     } else {
-//         while (y--)
-//             res *= x_;
-//     }
-//     return res;
-// }
-
-// template<class T>
-// inline T pow( const T &x_, int y ) {
-//     T res = T(1);
-//     if ( y < 0 ) {
-//         T x = T(1) / x_;
-//         while (y++)
-//             res *= x;
-//     } else {
-//         while (y--)
-//             res *= x_;
-//     }
-//     return res;
-// }
+template<class T>
+inline T pow( const T &x_, int y ) {
+    T res = T(1);
+    if ( y < 0 ) {
+        T x = T(1) / x_;
+        while (y++)
+            res *= x;
+    } else {
+        while (y--)
+            res *= x_;
+    }
+    return res;
+}
 
 /*!
 \generic_comment ceil

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # operators
 lst1 = [
     ('Plus','+'),
@@ -49,4 +50,14 @@ for op,sop in lst1 + lst2:
     print ''
     print ''
 
+print """
+/*! 
+    version pour puissance entière
+    \relates Vec
+*/
+template<class T1,int s1,class TO1>
+Vec<VecOp< Pow, 2, Vec<T1,s1,TO1>,true,Vec<VecCst<int>,s1>,false>,s1> pow( const Vec<T1,s1,TO1> &v1, int v2 ) {
+    return Vec<VecOp< Pow, 2, Vec<T1,s1,TO1>,true,Vec<VecCst<int>,s1>,false>,s1>(v1, Vec<VecCst<int>,s1>(v2,v1.size()));
+}
+"""
 print '};'
