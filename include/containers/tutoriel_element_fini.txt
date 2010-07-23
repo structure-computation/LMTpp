@@ -111,7 +111,8 @@
                     #
                     def formulation():
                         #sys.stderr.write( str( epslopigh.expr ) )
-                        a = thermal_conductivity.expr / ( density.expr * heat_capacity.expr ) # 'a' est la diffusivite thermique en m^2/s (ici a=4.3153e-07 m^2/s)
+                        a = thermal_conductivity.expr / ( density.expr * heat_capacity.expr ) 
+                        # 'a' est la diffusivite thermique en m^2/s (ici a=4.3153e-07 m^2/s)
                         # k = heat_capacity.expr*thermal_conductivity.expr #
                         t,te = temperature.expr, temperature.test
                         
@@ -124,13 +125,13 @@
                 C'est la même syntaxe que celle du fichier SConstruct (cf \a #param )  avec un nouveau champ facultatif, <strong> unknown </strong> ,  champs spécial indiquant que la variable est une inconnue du problème (obtenue par résolution d'un systeme en général).
                 Sur l'exemple, l'unique inconnue est la température, calculée sur les noeuds.
                 Avez-vous remarqué le paramètre <strong> nb_der </strong> de l'inconnue temperature ?
-                C'est le degré des polynômes d'approximation de la temperature. Il doit être supérieur ou égal à l'ordre de dérivation maximal dans l'équation. Par exemple, si des dérivées secondes de l'inconnue apparaissent dans l'équation de formulation, il faut prendre <strong> nb_dir </strong> supérieur ou égal à 2.
+                C'est le degré des polynômes d'approximation de la temperature. Il doit être supérieur ou égal à l'ordre de dérivation maximal dans l'équation. Par exemple, si des dérivées secondes de l'inconnue apparaissent dans l'équation de formulation, il faut prendre <strong> nb_der </strong> supérieur ou égal à 2.
                 Et que signifie <strong> left_time_integration </strong> , et <strong> right_time_integration </strong> ?
                 Ce sont les coefficients alpha et beta de la formulation intégrale de l'équation, ci-dessous :
                 \latex
                     $$
                     \int_{t_n \, + \, \alpha \, {\Delta t}_n}^{t_n \, + \, \beta \, {\Delta t}_{n+1}} F(u_n,u_{n+1},t,... ) \; dt
-                    $$
+                    $$ 
 
             = Deuxième partie : définition de la formulation.
                 Pour cette exemple, on a une formulation variationnelle.
@@ -149,7 +150,7 @@
                         * la multiplication matrice-matrice et matrice-vecteur se fait avec mul (i.e. mul(m,v) ). Le symbole * est donc réservé au produit scalaire-vecteur et scalaire-matrice.
                         * la division se fait terme à terme.
                 Pour être au courant des derniers ajouts d'opérateurs, consulter le fichier "element.py".
-                Enfin la fonction retourne l'expression de la formulation. Expliquons les termes dV, dS, dN ainsi que dE et dS_normal bien q'ils ne soient pas utilisés dans l'exemple.
+                Enfin la fonction retourne l'expression de la formulation. Expliquons les termes dV, dS, dN ainsi que dE et dS_normal bien q'ils ne soient pas tous  utilisés dans l'exemple.
                 le bout d'expression * dV signifie qu'on intègre sur le volume. Pour * dS on intègre sur les toutes les surfaces des éléments volumiques (mêmes ceux de l'intérieur). * dN (resp. * dE) signifie qu'on fait la somme sur les noeuds (resp. sur les éléments). Enfin avec * dS_normal, on intègre sur la surface avec le vecteur normal de l'élément de surface dS. Exemple :
                 \latex
                     $$
@@ -160,6 +161,13 @@
                     $$
                     \int_{\Omega} a \overrightarrow{\nabla}(T) \cdot \overrightarrow{\nabla}(v) + (\frac{\partial T}{\partial t}-Q) \, v \, dV + \int_{\partial \Omega} H \; (T-T_0) \, v \, dS = \sum_{Noeuds} Q_s \, v \;\;\;\;\; \forall v \in H^1(\Omega)
                     $$  
+                    
+                Dans le code, on trouve aussi des bouts de code mis en commentaire ( i.e. #sys.stderr.write( str( epslopigh.expr ) ) ). C'est classique lorsqu'on met au point un programme. Par exemple ce fameux 
+                \code Python
+                    sys.stderr.write( str( epslopigh.expr ) ) )
+                permet d'envoyer l'expression de epslopigh dans la sortie d'erreur standard (i.e. la console ).
+                Enfin dernier truc en période de mise au point : peut-être avez-vous remarqué le <strong> * 0 </strong> dans la formulation ?
+                Cette multiplication par 0 annule bien sûr le terme et le supprimer de l'expression de la formulation pour un essai.
  
            = Exemple 2 
 
@@ -210,7 +218,7 @@
 
 
 
-            Dans cet exemple, on définit aussi une fonction apply_on_elements_after_solve(). Elle génèrera une fonction C++ de même nom dans ... qui sera appelée juste après la fonction solve_system() (i.e. après la résolution de l'équation). Et au besoin, on peut créer d'autres fonctions du même genre avec les noms apply_on_elements_after_solve_2, apply_on_elements_after_solve_3 ... jusqu'à 6.
+            Dans cet exemple, on définit aussi une fonction apply_on_elements_after_solve(). Elle génèrera une fonction C++ de même nom dans la classe \a Formulation qui sera appelée juste après la fonction solve_system() (i.e. après la résolution de l'équation). Et au besoin, on peut créer d'autres fonctions du même genre avec les noms apply_on_elements_after_solve_2, apply_on_elements_after_solve_3 ... jusqu'à 6.
             Elles contiendront un objet de type Write_code et c'est l'appel à cw.to_string() qui renvoie le code C++ sous forme d'un chaine de caractères. Pour plus de renseignements sur les possibilités de la classe, allez à \a Write_code .
 
     = Projet Kdevelop

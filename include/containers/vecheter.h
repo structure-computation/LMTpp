@@ -589,13 +589,7 @@ public:
   template<class Carac,unsigned nt,class TT,int s,class Op,class TP0,class TP1,class TP2> inline void apply_range(const Vec<Heterogeneous<Carac,nt,TT>,s,int> &v,int from,int to,Op& op,TP0 &p0,TP1 &p1,TP2 &p2) { apply_range(v.vec,max(0,from),min(to,(int)v.vec.size()),op,p0,p1,p2); from -= v.vec.size(); to -= v.vec.size(); if ( to > 0 ) apply_range(v.next,from,to,op,p0,p1,p2); }
   template<class Carac,unsigned nt,class TT,int s,class Op,class TP0,class TP1,class TP2> inline void apply_range(Vec<Heterogeneous<Carac,nt,TT>,s,int> &v,int from,int to,Op& op,TP0 &p0,TP1 &p1,TP2 &p2) { apply_range(v.vec,max(0,from),min(to,(int)v.vec.size()),op,p0,p1,p2); from -= v.vec.size(); to -= v.vec.size(); if ( to > 0 ) apply_range(v.next,from,to,op,p0,p1,p2); }
 
-  template<class Carac,unsigned nt,class TT,int s,class Op> inline void apply_on_number(const Vec<Heterogeneous<Carac,nt,TT>,s,int> &v,int num,const Op& op) {
-   
-   if ( num < v.vec.size() ) 
-    apply_on_number(v.vec,num,op); 
-  num -= v.vec.size(); 
-  apply_on_number(v.next,num,op);
-}
+  template<class Carac,unsigned nt,class TT,int s,class Op> inline void apply_on_number(const Vec<Heterogeneous<Carac,nt,TT>,s,int> &v,int num,const Op& op) { if ( num < v.vec.size() ) apply_on_number(v.vec,num,op); num -= v.vec.size(); apply_on_number(v.next,num,op); }
   template<class Carac,unsigned nt,class TT,int s,class Op> inline void apply_on_number(Vec<Heterogeneous<Carac,nt,TT>,s,int> &v,int num,const Op& op) { if ( num < v.vec.size() ) apply_on_number(v.vec,num,op); num -= v.vec.size(); apply_on_number(v.next,num,op); }
   template<class Carac,unsigned nt,class TT,int s,class Op> inline void apply_on_number(const Vec<Heterogeneous<Carac,nt,TT>,s,int> &v,int num,Op& op) { if ( num < v.vec.size() ) apply_on_number(v.vec,num,op); num -= v.vec.size(); apply_on_number(v.next,num,op); }
   template<class Carac,unsigned nt,class TT,int s,class Op> inline void apply_on_number(Vec<Heterogeneous<Carac,nt,TT>,s,int> &v,int num,Op& op) { if ( num < v.vec.size() ) apply_on_number(v.vec,num,op); num -= v.vec.size(); apply_on_number(v.next,num,op); }
