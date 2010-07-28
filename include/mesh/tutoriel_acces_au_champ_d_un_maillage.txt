@@ -1,0 +1,98 @@
+/*!
+\tutorial Accès aux champs d'un maillage
+
+    == Introduction
+    
+            Pour résoudre vos équations de mécanique dont les inconnues et autres grandeurs sont des fonctions définis sur une partie de l'espace et parfois du temps, vous avez dû discrétiser l'espace. Cela donne un maillage qui contient les valeurs des fonctions en des points ou sur des éléments, voire sur le maillage entier.
+        Le nom des champs, leurs propriétés sont définis dans un fichier Python ( .py ) comme l'extrait ci-dessous du fichier formulation_correlation_basic.py :
+        \code Python
+            dep = Variable( unknown=True, nb_dim=[dim], default_value='0.0', unit='m' )
+            dep_sens = Variable( nb_dim=[dim], default_value='0.0', unit='m' )
+            
+            lum = Variable( unknown=True, default_value='1.0', unit='1' )
+            
+            normal = Variable( nb_dim=[dim], default_value='0.0', unit='1' )
+            
+            epsilon = Variable( interpolation='der_nodal', default_value='0', nb_dim=[dim*(dim+1)/2], unit='1' )
+        
+        Dans cet exemple, il y a cinq champs, dont deux inconnues <strong> dep </strong> et <strong> lum </strong> . dep est un vecteur de la taille de la dimension du problème et lum est un simple scalaire. le paramètre <strong> interpolation </strong> de <strong> Variable </strong> précise le type d'interpolation. Par défaut ce type est <strong> nodal </strong> : i.e. la quantité est définie aux noeuds du maillage ( cas de dep par exemple ).
+        Les autres types d'interpolation importants sont <strong> der_nodal </strong> , <strong> elementary </strong> , <strong> global </strong>.
+        Or point important, l' <strong> accès </strong> à un <strong> champ </strong> varie en fonction du <strong> type d'interpolation </strong> .
+        
+        Ensuite lire ou écrire la valeur d'un champ est primordial pour votre résolution mais parfois voudriez-vous aussi accéder au type du champ ( i.e. la classe en C++ qui le représente ). Nous verrons comment faire au second chapitre.
+        
+        Pour commencer, partons d'un maillage <strong> m </strong> :
+        \code C/C++
+            Mesh< Mesh_carac_pb_correlation_basic<double, dim> > m; /// maillage vide
+            
+            .... je fais un beau maillage
+            
+        Les champs les plus faciles d'accès sont les champs globaux, i.e. constant sur tout le maillage. 
+            
+    == Champ glaobal sur le maillage
+    
+        Dans ce cas, le champ est un attribut du type Mesh donc un 
+        \code C/C++
+            m.f
+        donne accès au champ <strong> f </strong> .
+        Ensuite vient les champs définis aux noeuds.
+    
+    == Champ défini au noeud
+    
+        <strong> m </strong> contient un vecteur des noeuds du maillage, nommé <strong> node_list </strong> .
+        Pour accéder au champs <strong> dep <strong> du noeud d'indice i, on écrit par exemple :
+        \code C/C++
+            m.node_list[ i ].dep = 0
+            PRINT( m.node_list[ i ].pos )       /// affiche la position du noeud d'indice i
+            
+    
+    == Champ défini sur un élément
+    
+        Pour ce type de champ, l'accès est plus compliqué car le vecteur <strong> m.elem_list </strong> qui contient les éléments du maillage <strong> m </strong> est un vecteur hétérogène pouvant contenir différents types d'éléments ( genre Triangle, Triangle_6, Quad en 2D par exemple ) et un banal m.elem_list[ i ]->f ne fonctionnera pas.
+        Pour lire ou écrire ce type de champ, vous avez l'alternativr suivante :
+            * utiliser des méthodes virtuelles : c'est le plus simple mais le moins performant.
+            * utiliser un foncteur et la fonction apply() : c'est moins concis mais très performant et en plus on peut faire en parallèle les opérations.
+                     
+        == Méthodes virtuelles
+        
+            La classe \a Element contient des méthodes <strong> set_field() </strong> et <strong> get_field() </strong> conçues à cet effet.
+            Par exemple pour lire puis écrire la valeur du champ epsilon ( qui est un vecteur de double de taille 3 ) on peut écrire :
+            \code C/C++
+                typedef Vec< double, 3 > TEPS;
+                
+                String name_field = "epsilon";
+  
+                /// lecture du champ epsilon qu'on stocke dans la variable epsi
+                TEPS epsi = m.elem_list[ i ]->get_field( name_field, StructForType<TEPS>() );
+                /// on fait des calculs
+                TEPS tmp = sqrt( sin( epsilon ) + 1 );
+                
+                /// écriture du résultat du calcul
+                m.elem_list[ i ]->set_field( name_field, tmp );
+                
+            Pour connaître la liste des types possibles de champ, consultez la page de \a element .
+            
+            Remarque : il se pose ici le problème du type de l'attribut. Dans l'exemple précédent, on savait que c'était un vecteur de taille 3 de double et on l'a écrit "en dur" dans le code. Si au cours de l'évolution du code, la taille venait à changer par exemple, ce code ne serait plus valable et il n'est pas sûr que ce bug soit détecté à la compilation...
+            Nous reviendrons sur le problème de la détermination du type d'un champ au chapitre suivant. 
+        
+        == Foncteur et apply()
+        
+            On se sert ici d'une classe qui redéfinit paramétriquement l'opérateur parenthèse () de façon à ce qu'il s'adapte à chaque type d'éléments du vecteur elem_list.
+            Un exemple générique de foncteur est :
+            \code C/C++
+                struct MonFoncteur {
+                    template<class E>
+                    void operator()(  E& e ) {
+                        /// je m'adapte à chaque type E   
+                    }
+                    DATA data; /// les données du foncteur (facultatif)
+                }; 
+                     
+                     
+       
+         
+    
+    
+    
+    
+*/
