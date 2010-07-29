@@ -1,9 +1,9 @@
 /*!
 \tutorial Accès aux champs d'un maillage
 
-    == Introduction
+    = Introduction
     
-            Pour résoudre vos équations de mécanique dont les inconnues et autres grandeurs sont des fonctions définis sur une partie de l'espace et parfois du temps, vous avez dû discrétiser l'espace. Cela donne un maillage qui contient les valeurs des fonctions en des points ou sur des éléments, voire sur le maillage entier.
+            Pour résoudre vos équations de mécanique dont les inconnues et autres grandeurs sont des fonctions définies sur une partie de l'espace et parfois du temps, vous avez dû discrétiser l'espace. Cela donne un maillage qui contient les valeurs des fonctions en des points ou sur des éléments, voire sur le maillage entier.
         Le nom des champs, leurs propriétés sont définis dans un fichier Python ( .py ) comme l'extrait ci-dessous du fichier formulation_correlation_basic.py :
         \code Python
             dep = Variable( unknown=True, nb_dim=[dim], default_value='0.0', unit='m' )
@@ -28,71 +28,174 @@
             .... je fais un beau maillage
             
         Les champs les plus faciles d'accès sont les champs globaux, i.e. constant sur tout le maillage. 
-            
-    == Champ glaobal sur le maillage
     
-        Dans ce cas, le champ est un attribut du type Mesh donc un 
-        \code C/C++
-            m.f
-        donne accès au champ <strong> f </strong> .
-        Ensuite vient les champs définis aux noeuds.
+    = Accès à la valeur d'un champ
     
-    == Champ défini au noeud
-    
-        <strong> m </strong> contient un vecteur des noeuds du maillage, nommé <strong> node_list </strong> .
-        Pour accéder au champs <strong> dep <strong> du noeud d'indice i, on écrit par exemple :
-        \code C/C++
-            m.node_list[ i ].dep = 0
-            PRINT( m.node_list[ i ].pos )       /// affiche la position du noeud d'indice i
-            
-    
-    == Champ défini sur un élément
-    
-        Pour ce type de champ, l'accès est plus compliqué car le vecteur <strong> m.elem_list </strong> qui contient les éléments du maillage <strong> m </strong> est un vecteur hétérogène pouvant contenir différents types d'éléments ( genre Triangle, Triangle_6, Quad en 2D par exemple ) et un banal m.elem_list[ i ]->f ne fonctionnera pas.
-        Pour lire ou écrire ce type de champ, vous avez l'alternativr suivante :
-            * utiliser des méthodes virtuelles : c'est le plus simple mais le moins performant.
-            * utiliser un foncteur et la fonction apply() : c'est moins concis mais très performant et en plus on peut faire en parallèle les opérations.
-                     
-        == Méthodes virtuelles
+        = Champs global sur le maillage
         
-            La classe \a Element contient des méthodes <strong> set_field() </strong> et <strong> get_field() </strong> conçues à cet effet.
-            Par exemple pour lire puis écrire la valeur du champ epsilon ( qui est un vecteur de double de taille 3 ) on peut écrire :
+            Dans ce cas, le champ est un attribut du type Mesh donc un 
             \code C/C++
-                typedef Vec< double, 3 > TEPS;
-                
-                String name_field = "epsilon";
-  
-                /// lecture du champ epsilon qu'on stocke dans la variable epsi
-                TEPS epsi = m.elem_list[ i ]->get_field( name_field, StructForType<TEPS>() );
-                /// on fait des calculs
-                TEPS tmp = sqrt( sin( epsilon ) + 1 );
-                
-                /// écriture du résultat du calcul
-                m.elem_list[ i ]->set_field( name_field, tmp );
-                
-            Pour connaître la liste des types possibles de champ, consultez la page de \a element .
-            
-            Remarque : il se pose ici le problème du type de l'attribut. Dans l'exemple précédent, on savait que c'était un vecteur de taille 3 de double et on l'a écrit "en dur" dans le code. Si au cours de l'évolution du code, la taille venait à changer par exemple, ce code ne serait plus valable et il n'est pas sûr que ce bug soit détecté à la compilation...
-            Nous reviendrons sur le problème de la détermination du type d'un champ au chapitre suivant. 
+                m.f
+            donne accès au champ <strong> f </strong> .
+            Ensuite vient les champs définis aux noeuds.
         
-        == Foncteur et apply()
+        = Champs défini au noeud
         
-            On se sert ici d'une classe qui redéfinit paramétriquement l'opérateur parenthèse () de façon à ce qu'il s'adapte à chaque type d'éléments du vecteur elem_list.
-            Un exemple générique de foncteur est :
+            <strong> m </strong> contient un vecteur des noeuds du maillage, nommé <strong> node_list </strong> .
+            Pour accéder au champs <strong> dep </strong> du noeud d'indice i, on écrit par exemple :
             \code C/C++
-                struct MonFoncteur {
-                    template<class E>
-                    void operator()(  E& e ) {
-                        /// je m'adapte à chaque type E   
+                m.node_list[ i ].dep = 0
+                PRINT( m.node_list[ i ].pos )       /// affiche la position du noeud d'indice i
+                
+        
+        = Champs défini sur un élément
+        
+            Pour ce type de champ, l'accès est plus compliqué car le vecteur <strong> m.elem_list </strong> qui contient les éléments du maillage <strong> m </strong> est un vecteur hétérogène pouvant contenir différents types d'éléments ( genre Triangle, Triangle_6, Quad en 2D par exemple ) et un banal m.elem_list[ i ]->f ne fonctionnera pas.
+            Pour lire ou écrire ce type de champ, vous avez l'alternative suivante :
+                * utiliser des méthodes virtuelles : c'est le plus simple mais le moins performant.
+                * utiliser un foncteur et la fonction apply() : c'est moins concis mais très performant et en plus on peut faire en parallèle les opérations.
+                        
+            = Méthodes virtuelles
+            
+                La classe \a Element contient des méthodes <strong> set_field() </strong> et <strong> get_field() </strong> conçues à cet effet.
+                Par exemple pour lire puis écrire la valeur du champ epsilon ( qui est un vecteur de double de taille 3 ) on peut écrire :
+                \code C/C++
+                    typedef Vec< double, 3 > TEPS;
+                    
+                    String name_field = "epsilon";
+    
+                    /// lecture du champ epsilon qu'on stocke dans la variable epsi
+                    TEPS epsi = m.elem_list[ i ]->get_field( name_field, StructForType<TEPS>() );
+                    /// on fait des calculs
+                    TEPS tmp = sqrt( sin( epsilon ) + 1 );
+                    
+                    /// écriture du résultat du calcul
+                    m.elem_list[ i ]->set_field( name_field, tmp );
+                    
+                Pour connaître la liste des types possibles de champs prévus pour <strong> get_field </strong> et <strong> set_field </strong>, consultez la page de \a Element .
+                
+                Remarque : il se pose ici le problème du type de l'attribut. Dans l'exemple précédent, on savait que c'était un vecteur de taille 3 de double et on l'a écrit "en dur" dans le code. Si au cours de l'évolution du code, la taille venait à changer par exemple, ce code ne serait plus valable et il n'est pas sûr que ce bug soit détecté à la compilation...
+                Nous reviendrons sur le problème de la détermination du type d'un champ au chapitre suivant. 
+            
+            = Foncteur et \a apply ()
+            
+                On se sert ici d'une classe qui redéfinit paramétriquement l'opérateur parenthèse () de façon à ce qu'il s'adapte à chaque type d'éléments du vecteur elem_list.
+                Un exemple générique de foncteur est :
+                \code C/C++
+                    struct MonFoncteur {
+                        template<class E>
+                        void operator()(  E& e ) {
+                            /// je m'adapte à chaque type E
+                            /// sinon le code ne compile pas et vous lirez de cryptiques messages d'erreurs
+                            /// subtilement gores... Les habitués apprécient. 
+                        }
+                        DATA data; /// les données du foncteur (facultatif)
+                    }; 
+                        
+                Ensuite dans la méthode <strong> operator() </strong> on peut lire et écrire la valeur d'un champ de deux manières.
+                Soit le foncteur est spécifique à un champs particulier et dans ce cas on utilise ce champ comme un simple attribut de la classe Element. Par exemple :       
+                \code C/C++      
+                    struct Normalize_epsilon {
+                        template<class E>
+                        void operator()(  E& e ) const {
+                            typename E::T neps = norm_inf( e.epsilon[ 0 ] );
+                            if ( abs( neps ) > 1e-5 )
+                                e.epsilon[ 0 ] /= neps;
+                            else
+                                e.epsilon[ 0 ] = 0;
+                        }
+                    };
+                    
+                    int main() {
+                    
+                        /// j'ai fait un beau maillage et des calculs.
+                    
+                        apply( m.elem_list, Normalize_epsilon() );
+                    
+                        return 0;
                     }
-                    DATA data; /// les données du foncteur (facultatif)
-                }; 
-                     
-                     
-       
-         
-    
-    
-    
-    
+        
+                L'attribut epsilon est du type Vec< Vec<T,dim*(dim+1)/2>, 1 > donc epsilon est un vecteur ( de taille 1 ) de vecteurs de taille dim*(dim+1)/2 et epsilon[ 0 ] est un vecteur de taille dim*(dim+1)/2.
+                Le foncteur <strong> Normalize_epsilon </strong> normalise le vecteur epsilon[ 0 ]. 
+                Je l'applique à tous les éléments de <strong> m.elem_list </strong> via la fonction <strong> apply() </strong> .
+                
+                Observez dans <strong> operator() </strong> : on fait les hypothèses que le type E a un attribut epsilon d'un type genre vecteur, qu'il a la définition d'un type T ( qui sera un scalaire pour nous ), qu'on peut appliquer \a norm_inf à epsilon[ 0 ] ( or \a norm_inf ne s'applique qu'à des \a Vec <...> et renvoie un type scalaire correspondant au \a Vec ). 
+                
+                Rm : j'ai ajouté <strong> const </strong> à la fin de la signature de la méthode car elle ne modifie pas le struct.
+                dans la synataxe template < class E > ... operator( E & e) ... , le symbole E peut être remplacé par toute autre chaîne de caractère valide comme en math par exemple avec les indices muets des signes sommes.
+                Dans l'appel de \a apply (), je crée une instance de Normalize_epsilon par appel du constructeur ( rôle des parenthèses à la fin ).
+                J'aurai pu écrire aussi :
+                \code C/C++
+                    Normalize_epsilon nono; /// les parenthèses ici sont inutiles.
+                    apply( m.elem_list, nono );
+        
+        
+        
+                Soit le foncteur opère sur un champ non spécifique et dans ce cas, on peut utiliser le type \a ExtractDM .
+                
+                En effet dans chaque fichier mesh_carac.h qui contient les caractéristiques de votre maillage, vous avez pour chaque champ, disons <strong> f </strong> , une classe nommée <strong> f_DM </strong> qui le représente, comme par exemple :
+                \code C/C++
+                    struct epsilon_DM { static std::string name() { return "epsilon"; } };
+                pour le champ epsilon de la classe Mesh_carac_pb_correlation_basic .
+                
+                Avec cette classe <strong> f_DM </strong> qui servira de paramètre à \a ExtractDM , on peut accéder en lecture ou en écriture à un champ <strong> f </strong> d'un élément <strong> e </strong> comme ceci :
+                \code C/C++
+                    ExtractDM< f_DM > extra;
+                    PRINT( extra( e ) ); /// affichera la valeur du champ f de l'élément e
+                    
+                Un autre exemple cette fois-ci en écriture
+                
+                \code C/C++      
+                    struct Foncteur_demo {
+                        template< class E, class NameDM >
+                        void operator()(  E& e, NameDM n ) const {
+                            ExtractDM< NameDM > extra;
+                            extra( e ) = 2;
+                        }
+                    };
+                    
+                    int main() {
+                    
+                        /// j'ai fait un beau maillage et des calculs.
+                    
+                        apply( m.elem_list, Foncteur_demo(), epsilon_DM() );
+                    
+                        return 0;
+                    }
+                    
+                Le foncteur <strong> Foncteur_demo </strong> s'adapte au type d'élément mais aussi au champs.
+            
+        = Accès au type (informatique) d'un champ
+                    
+            Parfois on aimerait pouvoir créer des objets du même type que celui du champ pour faire des calculs intermèdiaires, ou stocker des résultats pour un autre travail.
+            On a besoin alors de connaître le type du champs ( scalaire, vecteur, matrice symétrique, ... ).
+            C'est simple !
+            En effet un type (classe ou struct en C++ )contient en général des attributs avec leurs types, des méthodes mais aussi des définitions de types et des entiers. Ces définitions et ces entiers seront communs à toutes les instances de ce type. (cela fait beaucoup de types ... ).
+            Par exemple :
+            \code C/C++
+                struct A {
+                    typedef float Mon_scalaire_a_moi;
+                    static int numero = 13;
+                };
+                
+                int A::numero = 13;
+                
+                int main() {
+                
+                    A::Mon_scalaire_a_moi r; /// r est du type float ( i.e. flottant codé sur 32 bits )
+                
+                    if ( A::numero == 13 )
+                        PRINT( "Que j'ai de la chance  :-)" );
+                    else
+                        PRINT( "Comment est-ce ? M'aurait-on menti ?" );
+                        
+                    return 0;
+                }
+            
+            Et bien le type des champs est contenu dans la définition de votre Mesh_carac.
+            
+            TODO
+            
+            
 */
+
