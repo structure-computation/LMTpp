@@ -193,6 +193,36 @@
                 }
             
             Et bien le type des champs est contenu dans la définition de votre Mesh_carac.
+            Accéder à ces définitions dans un Mesh_carac est plutôt délicat mais il existe des types qu'on peut utiliser comme des fonctions qui nous renverra ce que l'on souhaite, i.e. le type d'un champ.
+            On peut par exemple utiliser \a ExtractDM , encore lui, de cette manière :
+            \code C/C++
+                typename ExtractDM< NameDM >::template ReturnType< E >::T mon_champ;
+                
+            où <strong> NameDM </strong> est le type représentant le champs ( e.g. epsilon_DM ), et <strong> E </strong> est le type de l'élément (on n' y a pas accès simplement).
+            
+            Exemple :
+            
+            \code C/C++
+                struct Foncteur_demo_2 {
+                    template<class E, class NameDM>
+                    void operator()( E& e, NameDM nameDM ) const {
+                
+                        typedef typename ExtractDM< NameDM >::template ReturnType< E >::T TDATA;
+                        
+                        TDATA data = 0;
+                        
+                        PRINT( data );
+                        
+                        ExtractDM< NameDM > extra;
+                        data = extra( e );
+                
+                        PRINT( data );
+                    }
+                };
+            
+            
+            
+            
             
             TODO
             
