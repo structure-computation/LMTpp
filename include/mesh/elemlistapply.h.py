@@ -16,5 +16,6 @@ print_apply_ext('apply_simd_wi',TP,TV,'apply_simd_wi(v.hp,op,PARALIST);')
 print_apply_ext('apply_mt',TP,TV,'apply_mt(v.hp,nb_threads,op,PARALIST);', suppar=['unsigned nb_threads'] )
 print_apply_ext('apply_mt_with_num_thread',TP,TV,'apply_mt_with_num_thread(v.hp,nb_threads,op,PARALIST);', suppar=['unsigned nb_threads'] )
 
+print_apply_ext('apply_on_number',TP,TV,'v.apply_on_down_cast(v[num],op,PARALIST);', suppar=['unsigned num'] )
 
 print '} // namespace LMT'
