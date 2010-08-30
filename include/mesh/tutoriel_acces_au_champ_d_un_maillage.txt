@@ -220,8 +220,12 @@
                     }
                 };
             
-            
-            
+                int main() {
+                
+                    apply( m.elem_list, ci, epsilon_DM() );    
+                    
+                    return 0;    
+                }            
             
             
             TODO
