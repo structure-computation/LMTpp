@@ -170,19 +170,30 @@
             Parfois on aimerait pouvoir créer des objets du même type que celui du champ pour faire des calculs intermèdiaires, ou stocker des résultats pour un autre travail.
             On a besoin alors de connaître le type du champs ( scalaire, vecteur, matrice symétrique, ... ).
             C'est simple !
-            En effet un type (classe ou struct en C++ )contient en général des attributs avec leurs types, des méthodes mais aussi des définitions de types et des entiers. Ces définitions et ces entiers seront communs à toutes les instances de ce type. (cela fait beaucoup de types ... ).
+            En effet un type ( classe ou struct en C++ ) contient en général des attributs avec leurs types, des méthodes mais aussi des définitions de types et des entiers. Ces définitions et ces entiers seront communs à toutes les instances de ce type.
             Par exemple :
             \code C/C++
                 struct A {
                     typedef float Mon_scalaire_a_moi;
-                    static int numero = 13;
+                    
+                    static int numero;
+                    
+                    struct Ai {
+                        ...
+                    };
+                    
+                    template< class X > 
+                    struct Ai2 {
+                        typedef X T;
+                    };
+                    
                 };
                 
                 int A::numero = 13;
                 
                 int main() {
                 
-                    A::Mon_scalaire_a_moi r; /// r est du type float ( i.e. flottant codé sur 32 bits )
+                    A::Mon_scalaire_a_moi r; /// r est du type float ( i.e. flottant codé sur 32 bits ) 
                 
                     if ( A::numero == 13 )
                         PRINT( "Que j'ai de la chance  :-)" );
@@ -191,16 +202,38 @@
                         
                     return 0;
                 }
+                
+            le type A définit un type nommé Mon_scalaire_a_moi qui est en fait un synonyme de float et deux types Ai et Ai2 dont le deuxième est paramétrique.
             
             Et bien le type des champs est contenu dans la définition de votre Mesh_carac.
             Accéder à ces définitions dans un Mesh_carac est plutôt délicat mais il existe des types qu'on peut utiliser comme des fonctions qui nous renverra ce que l'on souhaite, i.e. le type d'un champ.
-            On peut par exemple utiliser \a ExtractDM , encore lui, de cette manière :
+            Le plus simple est certainement d' utiliser \a ExtractDM , encore lui, que ce soit un champ au noeud, à un élément ou global de la façon suivante :
             \code C/C++
-                typename ExtractDM< NameDM >::template ReturnType< E >::T mon_champ;
+                ExtractDM< NameDM >::ReturnType< E >::T mon_champ;
+            dans le cas d'une déclaration ou bien :
+            \code C/C++
+                typedef ExtractDM< NameDM >::ReturnType< E >::T DATA;
+                DATA d;
+                ...
+                DATA tempon;
+                ...
                 
-            où <strong> NameDM </strong> est le type représentant le champs ( e.g. epsilon_DM ), et <strong> E </strong> est le type de l'élément (on n' y a pas accès simplement).
+            si on utilise plusieurs fois ce type.                        
+                
+            <strong> NameDM </strong> est le type représentant le champs ( e.g. epsilon_DM ), et <strong> E </strong> est le type "contenant" l'attribut. 
+            Par exemple si on a un attribut global ( i.e. défini globalement sur tout le maillage ) nommé <strong> numsst </strong> , et un attribut nodal, appelé <strong> dep </strong> , on écrira par exemple :
+            \code C/C++
+                typedef ExtractDM< numsst_DM >::ReturnType< TM >::T NUMSST;
+                
+                NUMSST nusst;
+                
+                ExtractDM< dep_DM >::ReturnType< TM::TNode >::T depinou;
+                
+            où <strong> TM </strong> est le type du maillage.
             
-            Exemple :
+            Il nous reste à traiter le cas de l' attribut d'un élément. Comme les éléments (au sens des éléments finis) d'un maillage sont stockés dans un vecteur hétérogène, on donne un exemple sous forme d'un foncteur.
+            
+            Exemple de foncteur :
             
             \code C/C++
                 struct Foncteur_demo_2 {
@@ -209,9 +242,7 @@
                 
                         typedef typename ExtractDM< NameDM >::template ReturnType< E >::T TDATA;
                         
-                        TDATA data = 0;
-                        
-                        PRINT( data );
+                        TDATA data;
                         
                         ExtractDM< NameDM > extra;
                         data = extra( e );
@@ -222,14 +253,16 @@
             
                 int main() {
                 
-                    apply( m.elem_list, ci, epsilon_DM() );    
+                    Foncteur_demo_2 f2;
+                
+                    apply( m.elem_list, f2, epsilon_DM() );    
                     
                     return 0;    
                 }            
             
+            Sur cet exemple de foncteur, dans l'opérateur parenthèse, on définit le type DATA, synonyme du type "nommé" NameDM ( e.g. epsilon_DM ) et on crée une instance data. 
             
-            TODO
-            
+            TODO les skin_element, der_nodal ... ?
             
 */
 
