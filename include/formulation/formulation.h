@@ -316,7 +316,7 @@ public:
         //
         offset_lagrange_multipliers = size;
         for(unsigned i=0;i<constraints.size();++i)
-            size += ( constraints[i].penalty_value == 0 );
+            size += ( constraints[i].penalty_value == ScalarType(0) );
 
         // resize vectors
         for(unsigned i=0;i<vectors.size();++i) vectors[i].resize( size );
@@ -622,7 +622,7 @@ public:
                     coeffs[j] = (ScalarType)coeff.subs_numerical( vss );
                 }
                 // add to vec and mat
-                if ( constraints[i].penalty_value ) { // -> penalty
+                if ( constraints[i].penalty_value != ScalarType(0) ) { // -> penalty
                     for(unsigned j=0;j<coeffs.size();++j) {
                         ScalarType C = coeffs[j] * this->max_diag * constraints[i].penalty_value;
                         if ( assemble_vec )
