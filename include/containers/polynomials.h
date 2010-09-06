@@ -1,6 +1,11 @@
 #ifndef POLYNOMIALS_H
 #define POLYNOMIALS_H
 
+#ifdef METIL_COMP_DIRECTIVE
+#pragma cpp_path /usr/include/suitesparse/
+#pragma lib_name cholmod
+#endif
+
 #include <complex>
 #include<iomanip>
 #include <string.h> /// memset
@@ -214,15 +219,15 @@ int ret_roots_by_companion_matrix( const Vec<T,s>& a, int m, Vec< complex<T> >& 
     int lwork = 20*m;
     int lda = m;
     int info;
-    double* zone = new double[m*m+22*m];
+    double* zone = new double[ m * m + 22 * m ];
     
     double* A = zone;
-    double* wr = zone + (m*m);
-    double* wi = zone + (m*m)+m;
-    double* work = zone + (m*m)+2*m;
+    double* wr = zone + ( m * m );
+    double* wi = zone + ( m * m ) + m;
+    double* work = zone + ( m * m ) + 2 * m;
     double iam = 1. / a[m];
     
-    memset( A, 0, m*m*sizeof(double) );
+    memset( A, 0, m * m * sizeof( double ) );
     A[m-1] = -a[0] * iam;
     for( unsigned i=1;i<m;++i) {
         A[m*i+i-1] = 1;

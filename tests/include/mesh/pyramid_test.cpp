@@ -1,4 +1,4 @@
-#include <tests.h> /// pour la macro UNIT_TEST( )
+#include <util/unit_test.h> /// pour la macro UNIT_TEST( )
 #include <containers/vec.h>
 #include <mesh/pyramid.h>
 using namespace LMT;
