@@ -777,7 +777,7 @@
       <includestyle>3</includestyle>
       <root>/usr/share/qt3</root>
       <designerintegration>EmbeddedKDevDesigner</designerintegration>
-      <qmake>/usr/bin/qmake-qt3</qmake>
+      <qmake>/usr/bin/qmake</qmake>
       <designer>/usr/bin/designer</designer>
       <designerpluginpaths/>
     </qt>
