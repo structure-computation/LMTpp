@@ -270,7 +270,13 @@ private:
  * declare a DisplayParaview instance, push m and interact with user
  * @param m the mesh
  * @param nodal_field_to_display ...
- */
+ 
+    \relates DisplayParaview
+    \keyword Maillage/Affichage
+     
+    \author Hugal
+ 
+*/
 template<class TM> void display_mesh(const TM &m,const char *nodal_field_to_display="",DisplayParaview::TypeField type_field_to_display=DisplayParaview::Nodal) {
     DisplayParaview dp;
     dp.add_mesh(m);
@@ -301,6 +307,13 @@ int display( const MeshAncestor<Carac,nvi_to_subs,skin> &m, std::string pvsm_fil
 
 
 /**
+
+    A commenter
+
+    \keyword Sous-structure/Affichage
+
+
+    \author Hugal
 */
 template<class Carac, class X, class Y>
 int display( const SubStructuredProblem<Carac,X,Y> &sst_pb, const std::string pvsm_file = "" ) {

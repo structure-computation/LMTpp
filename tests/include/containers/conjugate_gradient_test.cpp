@@ -1,4 +1,4 @@
-#include <tests.h> /// pour la macro UNIT_TEST( )
+#include <util/unit_test.h> /// pour la macro UNIT_TEST( )
 #include <containers/matinvsparse.h>
 #include <containers/conjugate_gradient.h>
 using namespace LMT;
