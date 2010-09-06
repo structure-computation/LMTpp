@@ -80,15 +80,29 @@ public:
     }
 
     void set(const char *str = "") const { std::stringstream s; s << "set " << str << "\n"; print( s.str().c_str() ); } 
-    void set_title(const char *str = "") const { std::stringstream s; s << "set title " << str << "\n"; print( s.str().c_str() ); } 
     void unset(const char *str = "") const { std::stringstream s; s << "unset " << str << "\n"; print( s.str().c_str() ); } 
+    void set_title(const char *str = "") const { std::stringstream s; s << "set title " << str << "\n"; print( s.str().c_str() ); } 
+    void unset_title(const char *str = "") const { std::stringstream s; s << "unset title " << str << "\n"; print( s.str().c_str() ); } 
     void set_xlabel(const char *str = "") const { std::stringstream s; s << "set xlabel " << str << "\n"; print( s.str().c_str() ); } 
+    void unset_xlabel(const char *str = "") const { std::stringstream s; s << "unset xlabel " << str << "\n"; print( s.str().c_str() ); } 
     void set_ylabel(const char *str = "") const { std::stringstream s; s << "set ylabel " << str << "\n"; print( s.str().c_str() ); } 
+    void unset_ylabel(const char *str = "") const { std::stringstream s; s << "unset ylabel " << str << "\n"; print( s.str().c_str() ); } 
+    void set_zlabel(const char *str = "") const { std::stringstream s; s << "set zlabel " << str << "\n"; print( s.str().c_str() ); } 
+    void unset_zlabel(const char *str = "") const { std::stringstream s; s << "unset zlabel " << str << "\n"; print( s.str().c_str() ); } 
     void set_terminal(const char *str = "") const { std::stringstream s; s << "set terminal " << str << "\n"; print( s.str().c_str() ); } 
+    void unset_terminal(const char *str = "") const { std::stringstream s; s << "unset terminal " << str << "\n"; print( s.str().c_str() ); } 
     void set_terminal_epslatex(const char *str = "") const { std::stringstream s; s << "set terminal epslatex " << str << "\n"; print( s.str().c_str() ); } 
+    void unset_terminal_epslatex(const char *str = "") const { std::stringstream s; s << "unset terminal epslatex " << str << "\n"; print( s.str().c_str() ); } 
     void set_output(const char *str = "") const { std::stringstream s; s << "set output " << str << "\n"; print( s.str().c_str() ); } 
+    void unset_output(const char *str = "") const { std::stringstream s; s << "unset output " << str << "\n"; print( s.str().c_str() ); } 
     void set_xrange(const char *str = "") const { std::stringstream s; s << "set xrange " << str << "\n"; print( s.str().c_str() ); } 
+    void unset_xrange(const char *str = "") const { std::stringstream s; s << "unset xrange " << str << "\n"; print( s.str().c_str() ); } 
+    void set_yrange(const char *str = "") const { std::stringstream s; s << "set yrange " << str << "\n"; print( s.str().c_str() ); } 
+    void unset_yrange(const char *str = "") const { std::stringstream s; s << "unset yrange " << str << "\n"; print( s.str().c_str() ); } 
+    void set_zrange(const char *str = "") const { std::stringstream s; s << "set zrange " << str << "\n"; print( s.str().c_str() ); } 
+    void unset_zrange(const char *str = "") const { std::stringstream s; s << "unset zrange " << str << "\n"; print( s.str().c_str() ); } 
     void set_label(const char *str = "") const { std::stringstream s; s << "set label " << str << "\n"; print( s.str().c_str() ); } 
+    void unset_label(const char *str = "") const { std::stringstream s; s << "unset label " << str << "\n"; print( s.str().c_str() ); } 
 
     /// Pour effacer les courbes d'avant
     void reset() { print("reset\n\n"); }

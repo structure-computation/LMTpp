@@ -83,10 +83,11 @@ public:
     }
 """
 
-lst = [ 'set','set title', 'unset', 'set xlabel', 'set ylabel', 'set terminal', 'set terminal epslatex', 'set output', 'set xrange', 'set label' ]
+lst = [ '', 'title', 'xlabel', 'ylabel', 'zlabel', 'terminal', 'terminal epslatex', 'output', 'xrange', 'yrange', 'zrange', 'label' ]
 
 for i in lst :
-    print '    void '+i.replace(' ','_')+'(const char *str = "") const { std::stringstream s; s << \"'+i+' \" << str << \"\\n\"; print( s.str().c_str() ); } '
+    print '    void set'+(len(i)>0)*'_'+i.replace(' ','_')+'(const char *str = "") const { std::stringstream s; s << \"set'+(len(i)>0)*' '+i+' \" << str << \"\\n\"; print( s.str().c_str() ); } '
+    print '    void unset'+(len(i)>0)*'_'+i.replace(' ','_')+'(const char *str = "") const { std::stringstream s; s << \"unset'+(len(i)>0)*' '+i+' \" << str << \"\\n\"; print( s.str().c_str() ); } '
 
 print """
     /// Pour effacer les courbes d'avant
