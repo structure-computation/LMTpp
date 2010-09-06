@@ -1,11 +1,7 @@
-#include <tests.h> /// pour la macro UNIT_TEST( )
+#include "util/unit_test.h" /// pour la macro UNIT_TEST( )
 #include <complex>
 #include <iostream>
 #include <containers/polynomials.h>
-
-#ifdef METIL_COMP_DIRECTIVE
-#pragma lib_name lapack
-#endif
 
 using namespace LMT;
 

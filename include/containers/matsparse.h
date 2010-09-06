@@ -62,27 +62,27 @@ public:
         }
     }
 
-    template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
-        resize( val.nb_rows(), val.nb_cols() );
-        if ( (Gen<sr,sc>::need_upper and Gen<sr,sc>::need_lower)==false and Gen<sr,sc>::need_diag )
-            for(unsigned i=0;i<nb_rows();++i)
-                for(unsigned j=0;j<=i;++j) {
-                    if ( /*LMT::*/abs_indication( val(i,j) ) )
-                        operator()(i,j) = val(i,j);
-                }
-        else if ( (Gen<sr,sc>::need_upper and Gen<sr,sc>::need_lower)==false )
-            for(unsigned i=0;i<nb_rows();++i)
-                for(unsigned j=0;j<i;++j) {
-                    if ( /*LMT::*/abs_indication( val(i,j) ) )
-                        operator()(i,j) = val(i,j);
-                }
-        else
-            for(unsigned i=0;i<nb_rows();++i)
-                for(unsigned j=0;j<nb_cols();++j) {
-                    if ( /*LMT::*/abs_indication( val(i,j) ) )
-                        operator()(i,j) = val(i,j);
-                }
-    }
+//     template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
+//         resize( val.nb_rows(), val.nb_cols() );
+//         if ( (Gen<sr,sc>::need_upper and Gen<sr,sc>::need_lower)==false and Gen<sr,sc>::need_diag )
+//             for(unsigned i=0;i<nb_rows();++i)
+//                 for(unsigned j=0;j<=i;++j) {
+//                     if ( /*LMT::*/abs_indication( val(i,j) ) )
+//                         operator()(i,j) = val(i,j);
+//                 }
+//         else if ( (Gen<sr,sc>::need_upper and Gen<sr,sc>::need_lower)==false )
+//             for(unsigned i=0;i<nb_rows();++i)
+//                 for(unsigned j=0;j<i;++j) {
+//                     if ( /*LMT::*/abs_indication( val(i,j) ) )
+//                         operator()(i,j) = val(i,j);
+//                 }
+//         else
+//             for(unsigned i=0;i<nb_rows();++i)
+//                 for(unsigned j=0;j<nb_cols();++j) {
+//                     if ( /*LMT::*/abs_indication( val(i,j) ) )
+//                         operator()(i,j) = val(i,j);
+//                 }
+//     }
     void allocate(const Vec<Vec<unsigned> > &v) {
         resize( v.size(), v.size() );
         for(unsigned i=0;i<nb_rows();++i) {
