@@ -456,7 +456,7 @@ namespace LMT {
         Vec<T> F, F_before_constraints, F_CL, diag_before_constraints, X_before_constraints, f_reaction;
         #ifdef need_f_pointer
             Vec<double> f_nodal;
-        #elif
+        #else
             Vec<T> f_nodal;
         #endif
         unsigned nb_vectors;
