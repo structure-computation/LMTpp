@@ -2,7 +2,9 @@
 #define FORMULATION_ASSEMBLY_H
 #include "containers/mat.h"
 
-extern LMT::Vec<double>* F_POINTER;
+#ifdef need_f_pointer
+    extern LMT::Vec<double>* F_POINTER;
+#endif
 
 namespace LMT {
 
@@ -38,7 +40,9 @@ namespace LMT {
             mat_already_allocated = false;
             connectivity_calculated =false;
             tol = AbsT(0.000001);
-            F_POINTER = &f_nodal;
+            #ifdef need_f_pointer
+                F_POINTER = &f_nodal;
+            #endif
         }
         //
         ~FormulationAssembly() {
@@ -450,7 +454,11 @@ namespace LMT {
         Vec<Splitted<MeshAndForm,2> > formulations;
         Mat<T,Sym<>,SparseLine<> > K, K_before_constraints, K_CL;
         Vec<T> F, F_before_constraints, F_CL, diag_before_constraints, X_before_constraints, f_reaction;
-        Vec<double> f_nodal;
+        #ifdef need_f_pointer
+            Vec<double> f_nodal;
+        #elif
+            Vec<T> f_nodal;
+        #endif
         unsigned nb_vectors;
         Vec<Vec<T> > vectors;
         Vec<AbsT> time_steps;
