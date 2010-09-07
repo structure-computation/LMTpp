@@ -30,7 +30,7 @@ struct PolUnOp<Sqrt,nd,nx> {
 template <int nd, int nx>
 struct PolUnOp<Abs,nd,nx> {
     template <class T>
-    Vec<typename TypePromote<Abs,T>::T,DimPol<nd,nx>::valeur> operator() (const Vec<T,DimPol<nd,nx>::valeur> &p) { return abs(p); }
+    typename TypePromote<Abs,T>::T operator() (const Vec<T,DimPol<nd,nx>::valeur> &p) { return abs(p[0]); }
 };
 
 template <int nd, int nx>

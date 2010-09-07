@@ -70,20 +70,27 @@ public:
     std::string get_attribute(const char *name_attr) const throw (IoException);
     ///
     template<class T>
-    const XmlNode &get_attribute(const char *name,T &res) const throw (IoException) {
+    const XmlNode &get_attribute(const char *name, T &res, const bool use_line_input = true) const throw (IoException) {
         std::string att( get_attribute(name) );
         std::istringstream is( att );
-        line_input(is, res);
+        if (use_line_input)
+            line_input(is, res);
+        else
+            is >> res;
         if ( !is ) { throw IoException( "Error while reading attribute " + std::string( name ) + " value=" + att ); }
         return *this;
     }
     ///
     template<class T,class T2>
-    const XmlNode &get_attribute(const char *name,T &res,T2 default_value) const throw (IoException) {
+    const XmlNode &get_attribute(const char *name, T &res, T2 default_value, const bool use_line_input = true) const throw (IoException) {
         if ( has_attribute(name) ) {
             std::string att( get_attribute(name) );
             std::istringstream is( att );
             line_input(is, res);
+            if (use_line_input)
+                line_input(is, res);
+            else
+                is >> res;
             if ( !is ) { throw IoException( "Error while reading attribute " + std::string( name ) + " value=" + att ); }
         }
         else
