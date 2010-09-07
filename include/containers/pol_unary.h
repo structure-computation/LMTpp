@@ -1,105 +1,105 @@
 namespace LMT {
 
 template <int nd, int nx, class T>
-Pol<nd,nx,typename TypePromote<Abs,T>::T> abs(const Pol<nd,nx,T> &p) {
+typename TypePromote<Abs,Pol<nd,nx,T> >::T abs(const Pol<nd,nx,T> &p) {
     PolUnOp<Abs,nd,nx> op;
-    return Pol<nd,nx,typename TypePromote<Abs,T>::T>( op(p.coefficients()) );
+    return typename TypePromote<Abs,Pol<nd,nx,T> >::T( op(p.coefficients()) );
 }
 
 template <int nd, int nx, class T>
-Pol<nd,nx,typename TypePromote<Conj,T>::T> conj(const Pol<nd,nx,T> &p) {
+typename TypePromote<Conj,Pol<nd,nx,T> >::T conj(const Pol<nd,nx,T> &p) {
     PolUnOp<Conj,nd,nx> op;
-    return Pol<nd,nx,typename TypePromote<Conj,T>::T>( op(p.coefficients()) );
+    return typename TypePromote<Conj,Pol<nd,nx,T> >::T( op(p.coefficients()) );
 }
 
 template <int nd, int nx, class T>
-Pol<nd,nx,typename TypePromote<Real,T>::T> real(const Pol<nd,nx,T> &p) {
+typename TypePromote<Real,Pol<nd,nx,T> >::T real(const Pol<nd,nx,T> &p) {
     PolUnOp<Real,nd,nx> op;
-    return Pol<nd,nx,typename TypePromote<Real,T>::T>( op(p.coefficients()) );
+    return typename TypePromote<Real,Pol<nd,nx,T> >::T( op(p.coefficients()) );
 }
 
 template <int nd, int nx, class T>
-Pol<nd,nx,typename TypePromote<Imag,T>::T> imag(const Pol<nd,nx,T> &p) {
+typename TypePromote<Imag,Pol<nd,nx,T> >::T imag(const Pol<nd,nx,T> &p) {
     PolUnOp<Imag,nd,nx> op;
-    return Pol<nd,nx,typename TypePromote<Imag,T>::T>( op(p.coefficients()) );
+    return typename TypePromote<Imag,Pol<nd,nx,T> >::T( op(p.coefficients()) );
 }
 
 template <int nd, int nx, class T>
-Pol<nd,nx,typename TypePromote<Acos,T>::T> acos(const Pol<nd,nx,T> &p) {
+typename TypePromote<Acos,Pol<nd,nx,T> >::T acos(const Pol<nd,nx,T> &p) {
     PolUnOp<Acos,nd,nx> op;
-    return Pol<nd,nx,typename TypePromote<Acos,T>::T>( op(p.coefficients()) );
+    return typename TypePromote<Acos,Pol<nd,nx,T> >::T( op(p.coefficients()) );
 }
 
 template <int nd, int nx, class T>
-Pol<nd,nx,typename TypePromote<Asin,T>::T> asin(const Pol<nd,nx,T> &p) {
+typename TypePromote<Asin,Pol<nd,nx,T> >::T asin(const Pol<nd,nx,T> &p) {
     PolUnOp<Asin,nd,nx> op;
-    return Pol<nd,nx,typename TypePromote<Asin,T>::T>( op(p.coefficients()) );
+    return typename TypePromote<Asin,Pol<nd,nx,T> >::T( op(p.coefficients()) );
 }
 
 template <int nd, int nx, class T>
-Pol<nd,nx,typename TypePromote<Atan,T>::T> atan(const Pol<nd,nx,T> &p) {
+typename TypePromote<Atan,Pol<nd,nx,T> >::T atan(const Pol<nd,nx,T> &p) {
     PolUnOp<Atan,nd,nx> op;
-    return Pol<nd,nx,typename TypePromote<Atan,T>::T>( op(p.coefficients()) );
+    return typename TypePromote<Atan,Pol<nd,nx,T> >::T( op(p.coefficients()) );
 }
 
 template <int nd, int nx, class T>
-Pol<nd,nx,typename TypePromote<Cos,T>::T> cos(const Pol<nd,nx,T> &p) {
+typename TypePromote<Cos,Pol<nd,nx,T> >::T cos(const Pol<nd,nx,T> &p) {
     PolUnOp<Cos,nd,nx> op;
-    return Pol<nd,nx,typename TypePromote<Cos,T>::T>( op(p.coefficients()) );
+    return typename TypePromote<Cos,Pol<nd,nx,T> >::T( op(p.coefficients()) );
 }
 
 template <int nd, int nx, class T>
-Pol<nd,nx,typename TypePromote<Cosh,T>::T> cosh(const Pol<nd,nx,T> &p) {
+typename TypePromote<Cosh,Pol<nd,nx,T> >::T cosh(const Pol<nd,nx,T> &p) {
     PolUnOp<Cosh,nd,nx> op;
-    return Pol<nd,nx,typename TypePromote<Cosh,T>::T>( op(p.coefficients()) );
+    return typename TypePromote<Cosh,Pol<nd,nx,T> >::T( op(p.coefficients()) );
 }
 
 template <int nd, int nx, class T>
-Pol<nd,nx,typename TypePromote<Exp,T>::T> exp(const Pol<nd,nx,T> &p) {
+typename TypePromote<Exp,Pol<nd,nx,T> >::T exp(const Pol<nd,nx,T> &p) {
     PolUnOp<Exp,nd,nx> op;
-    return Pol<nd,nx,typename TypePromote<Exp,T>::T>( op(p.coefficients()) );
+    return typename TypePromote<Exp,Pol<nd,nx,T> >::T( op(p.coefficients()) );
 }
 
 template <int nd, int nx, class T>
-Pol<nd,nx,typename TypePromote<Log,T>::T> log(const Pol<nd,nx,T> &p) {
+typename TypePromote<Log,Pol<nd,nx,T> >::T log(const Pol<nd,nx,T> &p) {
     PolUnOp<Log,nd,nx> op;
-    return Pol<nd,nx,typename TypePromote<Log,T>::T>( op(p.coefficients()) );
+    return typename TypePromote<Log,Pol<nd,nx,T> >::T( op(p.coefficients()) );
 }
 
 template <int nd, int nx, class T>
-Pol<nd,nx,typename TypePromote<Log10,T>::T> log10(const Pol<nd,nx,T> &p) {
+typename TypePromote<Log10,Pol<nd,nx,T> >::T log10(const Pol<nd,nx,T> &p) {
     PolUnOp<Log10,nd,nx> op;
-    return Pol<nd,nx,typename TypePromote<Log10,T>::T>( op(p.coefficients()) );
+    return typename TypePromote<Log10,Pol<nd,nx,T> >::T( op(p.coefficients()) );
 }
 
 template <int nd, int nx, class T>
-Pol<nd,nx,typename TypePromote<Sin,T>::T> sin(const Pol<nd,nx,T> &p) {
+typename TypePromote<Sin,Pol<nd,nx,T> >::T sin(const Pol<nd,nx,T> &p) {
     PolUnOp<Sin,nd,nx> op;
-    return Pol<nd,nx,typename TypePromote<Sin,T>::T>( op(p.coefficients()) );
+    return typename TypePromote<Sin,Pol<nd,nx,T> >::T( op(p.coefficients()) );
 }
 
 template <int nd, int nx, class T>
-Pol<nd,nx,typename TypePromote<Sinh,T>::T> sinh(const Pol<nd,nx,T> &p) {
+typename TypePromote<Sinh,Pol<nd,nx,T> >::T sinh(const Pol<nd,nx,T> &p) {
     PolUnOp<Sinh,nd,nx> op;
-    return Pol<nd,nx,typename TypePromote<Sinh,T>::T>( op(p.coefficients()) );
+    return typename TypePromote<Sinh,Pol<nd,nx,T> >::T( op(p.coefficients()) );
 }
 
 template <int nd, int nx, class T>
-Pol<nd,nx,typename TypePromote<Sqrt,T>::T> sqrt(const Pol<nd,nx,T> &p) {
+typename TypePromote<Sqrt,Pol<nd,nx,T> >::T sqrt(const Pol<nd,nx,T> &p) {
     PolUnOp<Sqrt,nd,nx> op;
-    return Pol<nd,nx,typename TypePromote<Sqrt,T>::T>( op(p.coefficients()) );
+    return typename TypePromote<Sqrt,Pol<nd,nx,T> >::T( op(p.coefficients()) );
 }
 
 template <int nd, int nx, class T>
-Pol<nd,nx,typename TypePromote<Tan,T>::T> tan(const Pol<nd,nx,T> &p) {
+typename TypePromote<Tan,Pol<nd,nx,T> >::T tan(const Pol<nd,nx,T> &p) {
     PolUnOp<Tan,nd,nx> op;
-    return Pol<nd,nx,typename TypePromote<Tan,T>::T>( op(p.coefficients()) );
+    return typename TypePromote<Tan,Pol<nd,nx,T> >::T( op(p.coefficients()) );
 }
 
 template <int nd, int nx, class T>
-Pol<nd,nx,typename TypePromote<Tanh,T>::T> tanh(const Pol<nd,nx,T> &p) {
+typename TypePromote<Tanh,Pol<nd,nx,T> >::T tanh(const Pol<nd,nx,T> &p) {
     PolUnOp<Tanh,nd,nx> op;
-    return Pol<nd,nx,typename TypePromote<Tanh,T>::T>( op(p.coefficients()) );
+    return typename TypePromote<Tanh,Pol<nd,nx,T> >::T( op(p.coefficients()) );
 }
 
 template <int nd, int nx, class T>
