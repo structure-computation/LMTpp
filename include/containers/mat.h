@@ -31,8 +31,13 @@ template<class MATOP> struct IsMatOp { typedef void T; };
     = Introduction
 
         Cette classe permet de stocker et manipuler des tableaux à deux dimensions (cad des matrices) comme sur Matlab mais avec la LMT++ vous irez beaucoup plus vite et vous pourrez construire de très grosses matrices.
-        Il existe  des exemples de base ici.
+        Si vous utilisez des matrices denses sans options particulières, la FAQ ci-dessous vous expliquera comment :
+             * [[#defimat|définir et instancier une matrice]]
+             * [[#manimat|manipuler une matrice]] 
+             * [[#affimat|afficher une matrice]]
+             * [[#resolumat|résoudre un système]]
 
+        Sinon il existe différentes types de matrices commes les matrices creuses ou symétrques ou les matrices adaptées pour certains algorithmes ou implémentations. 
 
     = Spécialisations
 
@@ -49,7 +54,7 @@ template<class MATOP> struct IsMatOp { typedef void T; };
 
         Cette FAQ est tirée de celle de l'intranet : 
 
-        * Définition, instantiation
+        * \anchor defimat Définition, instantiation
             * \a #1 Les paramètres template des matrices et exemples de déclaration
             * \a #8 Pour créer une matrice (ici taille 100,20) constituee du meme nombre (ici 1.0) partout  
             * \a #5 Pour affecter la valeur 4 a toute la matrice 
@@ -61,7 +66,7 @@ template<class MATOP> struct IsMatOp { typedef void T; };
             * \a #20 Pour initialiser une matrice dont les valeurs sont contenues dans un fichier texte
             * \a #13 Pour concaténer deux matrices
             * \a #22 Pour extraire une sous-matrice (à faire).
-        * Manipulation
+        * \anchor manimat Manipulation
             *  pour accéder à l'élément de ligne i et de colonne j, on fait M(i,j) (les indices commencent à zéro).
             * \a #7 Pour faire des operations matrice-vecteur  
             * \a #9 Pour obtenir le nombre de colonnes ou de lignes 
@@ -69,10 +74,10 @@ template<class MATOP> struct IsMatOp { typedef void T; };
             * \a #14 Pour modifier la diagonale de la matrice (ajouter 3) 
             * \a #19 Pour vraiment inverser une matrice (à ne pas utiliser sans l'autorisation formelle de la Leclerc Corp. Inc.)
             * \a #21 Pour calculer la moyenne, la variance, le min, le max des éléments d'une matrice
-        * Affichage
+        * \anchor affimat Affichage
             * \a #4 Pour afficher la matrice  
             * \a #16 Pour afficher la forme des elements d'une matrice M sparse ou skyline  
-        * Résolution d'équations linéaires
+        * \anchor resolumat Résolution d'équations linéaires
             * \a #17 Pour faire une factorisation de cholesky d'une matrice M et la stocker dans une nouvelle matrice I (M doit etre du type : Mat<type, Sym<>, stockage >) 
             * \a #18 Pour résoudre un problème directement sans factoriser préalablement ni inverser de matrice
 
@@ -234,6 +239,27 @@ template<class MATOP> struct IsMatOp { typedef void T; };
                 mean(M);variance(M);min(M);max(M);
 
     = Divers
+
+        * Le produit de deux matrices A et b, A * B, peut être lent, voire très lent. Cela est dû à une mauvaise disposition des éléments de la matrice B qui sont rangées en lignes alors qu'une disposition en colonne est préférable. Comme à cette heure, on ne peut convertir une matrice stocké en lignes en une matrice stockée en colonne mais qu'il est possible de faire la conversion inverse ( colonne en ligne) et que la fonction transpose transforme une matrice lignes en une matrice colonnes, on contourne le problème en écrivant  A * B = A * trans( TM( trans( B ) ) ) où TM est le type de votre matrice ligne.
+        Un exemple :
+        \code C/C++
+           typedef Mat< double, SparseLine<>> TM;
+           
+           TM A, B, RES;
+           
+           RES = A * trans( TM( trans( b ) ) ) 
+           
+        * Le produit de deux matrices est représenté par un type qui n'est pas une matrice mais une classe qui peut calculer un terme quelconque du produit (A * B)_i_j. C'est très performant pour ensuite faire des produits matrice fois vecteur, ça ne l'est pas si on souhaite faire que des produits de matrices. Il faut alors dans ce cas, faire une conversion explicite en vrai matrice comme par exemple :
+        \code C/C++
+            typedef Mat< double, SparseLine<>> TM;
+            
+            TM A, B, C, RES;
+            
+            RES = A * TM( B * C )
+            RES = A * B * C;
+            
+        Le premier calcul est bien plus performant que le second grâce à la conversion de <strong> B * C </strong> en <strong> TM </strong> .
+            
 
         * si mat est de type matrice, mat.diag(), mat.row(), mat.col() peut être affecté (i.e. placé à gauche du signe =). 
 

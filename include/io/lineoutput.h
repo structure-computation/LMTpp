@@ -61,7 +61,7 @@ std::ostream &line_output( std::ostream &s, const std::complex<T> &v ) {
     <strong> Remarque importante : </strong> son comportement est différent de l'opérateur >> pour lequel les deux nombres doivent se présenter sous la forme (a,b).
     Voici quelques exemples illustratifs :
     \code C/C++
-        td::istringstream iss0 ("(1,2)"); 
+        std::istringstream iss0 ("(1,2)"); 
         std::complex<double> complex0; 
         iss0 >> complex0; 
         PRINT(complex0); // complex0 -> (1,2)

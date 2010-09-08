@@ -83,7 +83,6 @@ names.cpp
 names.h
 nstring.cpp
 nstring.h
-old_main.cpp
 op.cpp
 op.h
 opallalphasummary.h

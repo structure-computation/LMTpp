@@ -257,36 +257,43 @@ string ancreHTML( const string& s,bool display ) {
 }
 
 bool isURL(string& res, string& s,int end,int start) {
-
     int pos ;
-
-    if (chercher_motif(s,"http:",&pos,end,start)) {
-        if (pos == start) {
-            res = s.substr(start,end-start) ;
+    if ( chercher_motif( s, "http:", &pos, end, start ) ) {
+        //if ( pos < start + 3 ) {
+        if ( pos == start ) {
+            //res = s.substr(start,end-start) ;
+            res = s.substr( pos, end - pos );
             return true;
         }
     }
     if (chercher_motif(s,"https:",&pos,end,start)) {
-        if (pos == start) {
-            res = s.substr(start,end-start) ;
+        //if (pos < start + 3 ) {
+        if ( pos == start ) {
+            //res = s.substr(start,end-start);
+            res = s.substr( pos, end - pos );
             return true;
         }
     }
     if (chercher_motif(s,"ftp.",&pos,end,start)) {
-        if (pos == start) {
-            res = s.substr(start,end-start) ;
+        //if (pos < start + 3 ) {
+        if ( pos == start ) {
+            //res = s.substr(start,end-start);
+            res = s.substr( pos, end - pos );
             return true;
         }
     }
     if (chercher_motif(s,"www.",&pos,end,start)) {
-        if (pos == start) {
-            res = "http://" + s.substr(start,end-start) ;
+        //if ( pos < start + 3 ) {
+        if ( pos == start ) {
+            //res = "http://" + s.substr(start,end-start) ;
+            res = "http://" + s.substr( pos, end - pos );
             return true;
         }
     }
     if (chercher_motif(s,"#",&pos,end,start)) {
-        if (pos == start) {
-            res = s.substr(start,end-start) ;
+        //if (pos < start + 3 ) {
+        if ( pos == start ) {
+            res = s.substr( pos, end - pos ) ;
             return true;
         }
     }
@@ -399,8 +406,9 @@ string text2HTML(string& s,Target* ptr_parent, ListTarget* ptr_lt ) {
             /// * [[Mesh]]
             if ((suite2 = s.find("]]",pos+2)) != string::npos) {
                 //cerr << "------ stmp = |" << stmp << "|  et pos2 = " << stmp.find('|') << endl; /// problème avec find...
-                start = pos+2;// on se met juste après les [[
-                stmp = s.substr(start,suite2-start);
+                start = pos + 2;// on se met juste après les [[
+                stmp = s.substr( start, suite2 - start );
+                //cerr << "------ stmp = |" << stmp << "|" << endl;
                 if ((pos2 = stmp.find('|')) == string::npos) {
                     if (isURL(stmp2,s,suite2,start)) {
                         html += linkHTML("",stmp2,stmp2) + " " ;
@@ -421,14 +429,14 @@ string text2HTML(string& s,Target* ptr_parent, ListTarget* ptr_lt ) {
                     }
                 } else {
                     /// il y a un symbole |
-                    stmp = s.substr(start+pos2+1,suite2-pos2-start-1);
-                    if (isURL(stmp2,s,start+pos2,start)) {
-                        html += linkHTML("",stmp2,stmp) + " ";
+                    stmp = s.substr( start + pos2 + 1, suite2 - pos2 - start - 1 );
+                    if (isURL( stmp2, s, start+pos2, start ) ) {
+                        html += linkHTML( "", stmp2, stmp ) + " ";
                         start = suite2 + 2 ;
                         continue;
                     } else {
                         /// c'est probablement un nom de fonction ou de classe.
-                        stmp2 = s.substr(start,pos2); // stmp2 contient le A de [[A|B]]
+                        stmp2 = s.substr( start, pos2 ); // stmp2 contient le A de [[A|B]]
                         ptr_t = ptr_lt->isName( stmp2 ) ;
                         if (ptr_t != NULL) {
                             if (stmp.size()==0)
