@@ -29,7 +29,7 @@ void construct_matrix( Mat<T0,Str0,Sto0> &res, const Mat<T1,Str1,Sto1> &src ) {
 }
 
 template<class T0,class Str0,class Orientation0,class T1,class Str1>
-void construct_matrix( Mat<T0,Str0,Dense<Orientation0> > &res, const Mat<T1,Str1,SparseLine<Col> > &src ) {
+void construct_matrix( Mat<T0,Str0,Dense<Orientation0>,void> &res, const Mat<T1,Str1,SparseLine<Col>,void> &src ) {
     res.resize( src.nb_rows(), src.nb_cols() );
     res.clear();
     for( unsigned r = 0; r < src.nb_rows(); ++r )
@@ -38,7 +38,7 @@ void construct_matrix( Mat<T0,Str0,Dense<Orientation0> > &res, const Mat<T1,Str1
 }
 
 template<class T0,class Str0,class O0,class T1,class Str1,class O1>
-void construct_matrix( Mat<T0,Str0,SparseLine<O0> > &res, const Mat<T1,Str1,SparseLine<O1> > &src ) {
+void construct_matrix( Mat<T0,Str0,SparseLine<O0>,void> &res, const Mat<T1,Str1,SparseLine<O1>,void> &src ) {
     res.resize( src.nb_rows(), src.nb_cols() );
     Str1::apply_sparse_line( Private::CopyConstructMatWithValidPosition(), res, src );
 }
