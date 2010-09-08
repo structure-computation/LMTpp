@@ -44,7 +44,7 @@ void construct_matrix( Mat<T0,Str0,SparseLine<O0> > &res, const Mat<T1,Str1,Spar
 }
 
 template<class T0,class Str,class O,class T1>
-void construct_matrix( Mat<T0,Str,SparseLine<O> > &res, const Mat<T1,Str,SparseLine<O> > &src ) {
+void construct_matrix( Mat<T0,Str,SparseLine<O>,void> &res, const Mat<T1,Str,SparseLine<O>,void> &src ) {
     res.resize( src.nb_rows(), src.nb_cols() );
     for( unsigned r = 0; r < src.nb_rows(); ++r ) {
         res.data[ r ].indices = src.data[ r ].indices;
@@ -53,7 +53,6 @@ void construct_matrix( Mat<T0,Str,SparseLine<O> > &res, const Mat<T1,Str,SparseL
 }
 
 // MatMult.........
-
 template<class T0,class Str0,class Sto0,class T0_,class T1_,class Str2,class Sto2>
 void construct_matrix( Mat<T0,Str0,Sto0> &res, const Mat<MatMultMat<Mat<T0_,Gen<>,SparseLine<Col> >,Mat<T1_,Gen<>,SparseLine<Col> > >,Str2,Sto2> &src ) {
     typedef typename TypePromote<Multiplies,T0_,T1_>::T T;
