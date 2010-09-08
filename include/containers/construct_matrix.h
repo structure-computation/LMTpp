@@ -29,7 +29,7 @@ void construct_matrix( Mat<T0,Str0,Sto0> &res, const Mat<T1,Str1,Sto1> &src ) {
 }
 
 template<class T0,class Str0,class Orientation0,class T1,class Str1>
-void construct_matrix( Mat<T0,Str0,Dense<Orientation0> > &res, const Mat<T1,Str1,SparseLine<Col> > &src ) {
+void construct_matrix( Mat<T0,Str0,Dense<Orientation0>,void> &res, const Mat<T1,Str1,SparseLine<Col>,void> &src ) {
     res.resize( src.nb_rows(), src.nb_cols() );
     res.clear();
     for( unsigned r = 0; r < src.nb_rows(); ++r )
@@ -38,13 +38,13 @@ void construct_matrix( Mat<T0,Str0,Dense<Orientation0> > &res, const Mat<T1,Str1
 }
 
 template<class T0,class Str0,class O0,class T1,class Str1,class O1>
-void construct_matrix( Mat<T0,Str0,SparseLine<O0> > &res, const Mat<T1,Str1,SparseLine<O1> > &src ) {
+void construct_matrix( Mat<T0,Str0,SparseLine<O0>,void> &res, const Mat<T1,Str1,SparseLine<O1>,void> &src ) {
     res.resize( src.nb_rows(), src.nb_cols() );
     Str1::apply_sparse_line( Private::CopyConstructMatWithValidPosition(), res, src );
 }
 
 template<class T0,class Str,class O,class T1>
-void construct_matrix( Mat<T0,Str,SparseLine<O> > &res, const Mat<T1,Str,SparseLine<O> > &src ) {
+void construct_matrix( Mat<T0,Str,SparseLine<O>,void> &res, const Mat<T1,Str,SparseLine<O>,void> &src ) {
     res.resize( src.nb_rows(), src.nb_cols() );
     for( unsigned r = 0; r < src.nb_rows(); ++r ) {
         res.data[ r ].indices = src.data[ r ].indices;
@@ -53,7 +53,6 @@ void construct_matrix( Mat<T0,Str,SparseLine<O> > &res, const Mat<T1,Str,SparseL
 }
 
 // MatMult.........
-
 template<class T0,class Str0,class Sto0,class T0_,class T1_,class Str2,class Sto2>
 void construct_matrix( Mat<T0,Str0,Sto0> &res, const Mat<MatMultMat<Mat<T0_,Gen<>,SparseLine<Col> >,Mat<T1_,Gen<>,SparseLine<Col> > >,Str2,Sto2> &src ) {
     typedef typename TypePromote<Multiplies,T0_,T1_>::T T;
