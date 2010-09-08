@@ -44,7 +44,10 @@ public:
         data = val.data;
     }
 
-    template<bool const_TM,class TVEC>
+    template<class T2,class STR2,class STO2>
+    Mat( const Mat<T2,STR2,STO2> &mat ) { construct_matrix( *this, mat ); }
+
+    /*template<bool const_TM,class TVEC>
     Mat(const Mat<SubMat<Mat,const_TM,TVEC>,Gen<sr,sc>,SparseLine<Col>,int> &val) { // from SubMat
         resize( val.v.size(), val.v.size() );
 
@@ -62,27 +65,28 @@ public:
         }
     }
 
-//     template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
-//         resize( val.nb_rows(), val.nb_cols() );
-//         if ( (Gen<sr,sc>::need_upper and Gen<sr,sc>::need_lower)==false and Gen<sr,sc>::need_diag )
-//             for(unsigned i=0;i<nb_rows();++i)
-//                 for(unsigned j=0;j<=i;++j) {
-//                     if ( /*LMT::*/abs_indication( val(i,j) ) )
-//                         operator()(i,j) = val(i,j);
-//                 }
-//         else if ( (Gen<sr,sc>::need_upper and Gen<sr,sc>::need_lower)==false )
-//             for(unsigned i=0;i<nb_rows();++i)
-//                 for(unsigned j=0;j<i;++j) {
-//                     if ( /*LMT::*/abs_indication( val(i,j) ) )
-//                         operator()(i,j) = val(i,j);
-//                 }
-//         else
-//             for(unsigned i=0;i<nb_rows();++i)
-//                 for(unsigned j=0;j<nb_cols();++j) {
-//                     if ( /*LMT::*/abs_indication( val(i,j) ) )
-//                         operator()(i,j) = val(i,j);
-//                 }
-//     }
+    template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
+        resize( val.nb_rows(), val.nb_cols() );
+        if ( (Gen<sr,sc>::need_upper and Gen<sr,sc>::need_lower)==false and Gen<sr,sc>::need_diag )
+            for(unsigned i=0;i<nb_rows();++i)
+                for(unsigned j=0;j<=i;++j) {
+                    if ( abs_indication( val(i,j) ) )
+                        operator()(i,j) = val(i,j);
+                }
+        else if ( (Gen<sr,sc>::need_upper and Gen<sr,sc>::need_lower)==false )
+            for(unsigned i=0;i<nb_rows();++i)
+                for(unsigned j=0;j<i;++j) {
+                    if ( abs_indication( val(i,j) ) )
+                        operator()(i,j) = val(i,j);
+                }
+        else
+            for(unsigned i=0;i<nb_rows();++i)
+                for(unsigned j=0;j<nb_cols();++j) {
+                    if ( abs_indication( val(i,j) ) )
+                        operator()(i,j) = val(i,j);
+                }
+    } */
+    
     void allocate(const Vec<Vec<unsigned> > &v) {
         resize( v.size(), v.size() );
         for(unsigned i=0;i<nb_rows();++i) {
@@ -286,7 +290,10 @@ public:
         data = val.data;
     }
 
-    template<bool const_TM,class TVEC>
+    template<class T2,class STR2,class STO2>
+    Mat( const Mat<T2,STR2,STO2> &mat ) { construct_matrix( *this, mat ); }
+
+    /*template<bool const_TM,class TVEC>
     Mat(const Mat<SubMat<Mat,const_TM,TVEC>,Gen<sr,sc>,SparseLine<Row>,int> &val) { // from SubMat
         resize( val.v.size(), val.v.size() );
 
@@ -309,22 +316,23 @@ public:
         if ( (Gen<sr,sc>::need_upper and Gen<sr,sc>::need_lower)==false and Gen<sr,sc>::need_diag )
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<=i;++j) {
-                    if ( /*LMT::*/abs_indication( val(i,j) ) )
+                    if ( abs_indication( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
         else if ( (Gen<sr,sc>::need_upper and Gen<sr,sc>::need_lower)==false )
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<i;++j) {
-                    if ( /*LMT::*/abs_indication( val(i,j) ) )
+                    if ( abs_indication( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
         else
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<nb_cols();++j) {
-                    if ( /*LMT::*/abs_indication( val(i,j) ) )
+                    if ( abs_indication( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
-    }
+    } */
+    
     void allocate(const Vec<Vec<unsigned> > &v) {
         resize( v.size(), v.size() );
         for(unsigned i=0;i<nb_rows();++i) {
@@ -531,7 +539,10 @@ public:
         data = val.data;
     }
 
-    template<bool const_TM,class TVEC>
+    template<class T2,class STR2,class STO2>
+    Mat( const Mat<T2,STR2,STO2> &mat ) { construct_matrix( *this, mat ); }
+
+    /*template<bool const_TM,class TVEC>
     Mat(const Mat<SubMat<Mat,const_TM,TVEC>,Sym<sr,0>,SparseLine<Col>,int> &val) { // from SubMat
         resize( val.v.size(), val.v.size() );
 
@@ -554,22 +565,23 @@ public:
         if ( (Sym<sr,0>::need_upper and Sym<sr,0>::need_lower)==false and Sym<sr,0>::need_diag )
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<=i;++j) {
-                    if ( /*LMT::*/abs_indication( val(i,j) ) )
+                    if ( abs_indication( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
         else if ( (Sym<sr,0>::need_upper and Sym<sr,0>::need_lower)==false )
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<i;++j) {
-                    if ( /*LMT::*/abs_indication( val(i,j) ) )
+                    if ( abs_indication( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
         else
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<nb_cols();++j) {
-                    if ( /*LMT::*/abs_indication( val(i,j) ) )
+                    if ( abs_indication( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
-    }
+    } */
+    
     void allocate(const Vec<Vec<unsigned> > &v) {
         resize( v.size(), v.size() );
         for(unsigned i=0;i<nb_rows();++i) {
@@ -795,7 +807,10 @@ public:
         data = val.data;
     }
 
-    template<bool const_TM,class TVEC>
+    template<class T2,class STR2,class STO2>
+    Mat( const Mat<T2,STR2,STO2> &mat ) { construct_matrix( *this, mat ); }
+
+    /*template<bool const_TM,class TVEC>
     Mat(const Mat<SubMat<Mat,const_TM,TVEC>,Sym<sr,1>,SparseLine<Col>,int> &val) { // from SubMat
         resize( val.v.size(), val.v.size() );
 
@@ -818,22 +833,23 @@ public:
         if ( (Sym<sr,1>::need_upper and Sym<sr,1>::need_lower)==false and Sym<sr,1>::need_diag )
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<=i;++j) {
-                    if ( /*LMT::*/abs_indication( val(i,j) ) )
+                    if ( abs_indication( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
         else if ( (Sym<sr,1>::need_upper and Sym<sr,1>::need_lower)==false )
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<i;++j) {
-                    if ( /*LMT::*/abs_indication( val(i,j) ) )
+                    if ( abs_indication( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
         else
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<nb_cols();++j) {
-                    if ( /*LMT::*/abs_indication( val(i,j) ) )
+                    if ( abs_indication( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
-    }
+    } */
+    
     void allocate(const Vec<Vec<unsigned> > &v) {
         resize( v.size(), v.size() );
         for(unsigned i=0;i<nb_rows();++i) {
@@ -1059,7 +1075,10 @@ public:
         data = val.data;
     }
 
-    template<bool const_TM,class TVEC>
+    template<class T2,class STR2,class STO2>
+    Mat( const Mat<T2,STR2,STO2> &mat ) { construct_matrix( *this, mat ); }
+
+    /*template<bool const_TM,class TVEC>
     Mat(const Mat<SubMat<Mat,const_TM,TVEC>,Sym<sr,0>,SparseLine<Row>,int> &val) { // from SubMat
         resize( val.v.size(), val.v.size() );
 
@@ -1082,22 +1101,23 @@ public:
         if ( (Sym<sr,0>::need_upper and Sym<sr,0>::need_lower)==false and Sym<sr,0>::need_diag )
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<=i;++j) {
-                    if ( /*LMT::*/abs_indication( val(i,j) ) )
+                    if ( abs_indication( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
         else if ( (Sym<sr,0>::need_upper and Sym<sr,0>::need_lower)==false )
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<i;++j) {
-                    if ( /*LMT::*/abs_indication( val(i,j) ) )
+                    if ( abs_indication( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
         else
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<nb_cols();++j) {
-                    if ( /*LMT::*/abs_indication( val(i,j) ) )
+                    if ( abs_indication( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
-    }
+    } */
+    
     void allocate(const Vec<Vec<unsigned> > &v) {
         resize( v.size(), v.size() );
         for(unsigned i=0;i<nb_rows();++i) {
@@ -1323,7 +1343,10 @@ public:
         data = val.data;
     }
 
-    template<bool const_TM,class TVEC>
+    template<class T2,class STR2,class STO2>
+    Mat( const Mat<T2,STR2,STO2> &mat ) { construct_matrix( *this, mat ); }
+
+    /*template<bool const_TM,class TVEC>
     Mat(const Mat<SubMat<Mat,const_TM,TVEC>,Sym<sr,1>,SparseLine<Row>,int> &val) { // from SubMat
         resize( val.v.size(), val.v.size() );
 
@@ -1346,22 +1369,23 @@ public:
         if ( (Sym<sr,1>::need_upper and Sym<sr,1>::need_lower)==false and Sym<sr,1>::need_diag )
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<=i;++j) {
-                    if ( /*LMT::*/abs_indication( val(i,j) ) )
+                    if ( abs_indication( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
         else if ( (Sym<sr,1>::need_upper and Sym<sr,1>::need_lower)==false )
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<i;++j) {
-                    if ( /*LMT::*/abs_indication( val(i,j) ) )
+                    if ( abs_indication( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
         else
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<nb_cols();++j) {
-                    if ( /*LMT::*/abs_indication( val(i,j) ) )
+                    if ( abs_indication( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
-    }
+    } */
+    
     void allocate(const Vec<Vec<unsigned> > &v) {
         resize( v.size(), v.size() );
         for(unsigned i=0;i<nb_rows();++i) {
@@ -1587,7 +1611,10 @@ public:
         data = val.data;
     }
 
-    template<bool const_TM,class TVEC>
+    template<class T2,class STR2,class STO2>
+    Mat( const Mat<T2,STR2,STO2> &mat ) { construct_matrix( *this, mat ); }
+
+    /*template<bool const_TM,class TVEC>
     Mat(const Mat<SubMat<Mat,const_TM,TVEC>,Herm<sr,0>,SparseLine<Col>,int> &val) { // from SubMat
         resize( val.v.size(), val.v.size() );
 
@@ -1610,22 +1637,23 @@ public:
         if ( (Herm<sr,0>::need_upper and Herm<sr,0>::need_lower)==false and Herm<sr,0>::need_diag )
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<=i;++j) {
-                    if ( /*LMT::*/abs_indication( val(i,j) ) )
+                    if ( abs_indication( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
         else if ( (Herm<sr,0>::need_upper and Herm<sr,0>::need_lower)==false )
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<i;++j) {
-                    if ( /*LMT::*/abs_indication( val(i,j) ) )
+                    if ( abs_indication( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
         else
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<nb_cols();++j) {
-                    if ( /*LMT::*/abs_indication( val(i,j) ) )
+                    if ( abs_indication( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
-    }
+    } */
+    
     void allocate(const Vec<Vec<unsigned> > &v) {
         resize( v.size(), v.size() );
         for(unsigned i=0;i<nb_rows();++i) {
@@ -1851,7 +1879,10 @@ public:
         data = val.data;
     }
 
-    template<bool const_TM,class TVEC>
+    template<class T2,class STR2,class STO2>
+    Mat( const Mat<T2,STR2,STO2> &mat ) { construct_matrix( *this, mat ); }
+
+    /*template<bool const_TM,class TVEC>
     Mat(const Mat<SubMat<Mat,const_TM,TVEC>,Herm<sr,1>,SparseLine<Col>,int> &val) { // from SubMat
         resize( val.v.size(), val.v.size() );
 
@@ -1874,22 +1905,23 @@ public:
         if ( (Herm<sr,1>::need_upper and Herm<sr,1>::need_lower)==false and Herm<sr,1>::need_diag )
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<=i;++j) {
-                    if ( /*LMT::*/abs_indication( val(i,j) ) )
+                    if ( abs_indication( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
         else if ( (Herm<sr,1>::need_upper and Herm<sr,1>::need_lower)==false )
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<i;++j) {
-                    if ( /*LMT::*/abs_indication( val(i,j) ) )
+                    if ( abs_indication( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
         else
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<nb_cols();++j) {
-                    if ( /*LMT::*/abs_indication( val(i,j) ) )
+                    if ( abs_indication( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
-    }
+    } */
+    
     void allocate(const Vec<Vec<unsigned> > &v) {
         resize( v.size(), v.size() );
         for(unsigned i=0;i<nb_rows();++i) {
@@ -2115,7 +2147,10 @@ public:
         data = val.data;
     }
 
-    template<bool const_TM,class TVEC>
+    template<class T2,class STR2,class STO2>
+    Mat( const Mat<T2,STR2,STO2> &mat ) { construct_matrix( *this, mat ); }
+
+    /*template<bool const_TM,class TVEC>
     Mat(const Mat<SubMat<Mat,const_TM,TVEC>,Herm<sr,0>,SparseLine<Row>,int> &val) { // from SubMat
         resize( val.v.size(), val.v.size() );
 
@@ -2138,22 +2173,23 @@ public:
         if ( (Herm<sr,0>::need_upper and Herm<sr,0>::need_lower)==false and Herm<sr,0>::need_diag )
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<=i;++j) {
-                    if ( /*LMT::*/abs_indication( val(i,j) ) )
+                    if ( abs_indication( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
         else if ( (Herm<sr,0>::need_upper and Herm<sr,0>::need_lower)==false )
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<i;++j) {
-                    if ( /*LMT::*/abs_indication( val(i,j) ) )
+                    if ( abs_indication( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
         else
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<nb_cols();++j) {
-                    if ( /*LMT::*/abs_indication( val(i,j) ) )
+                    if ( abs_indication( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
-    }
+    } */
+    
     void allocate(const Vec<Vec<unsigned> > &v) {
         resize( v.size(), v.size() );
         for(unsigned i=0;i<nb_rows();++i) {
@@ -2379,7 +2415,10 @@ public:
         data = val.data;
     }
 
-    template<bool const_TM,class TVEC>
+    template<class T2,class STR2,class STO2>
+    Mat( const Mat<T2,STR2,STO2> &mat ) { construct_matrix( *this, mat ); }
+
+    /*template<bool const_TM,class TVEC>
     Mat(const Mat<SubMat<Mat,const_TM,TVEC>,Herm<sr,1>,SparseLine<Row>,int> &val) { // from SubMat
         resize( val.v.size(), val.v.size() );
 
@@ -2402,22 +2441,23 @@ public:
         if ( (Herm<sr,1>::need_upper and Herm<sr,1>::need_lower)==false and Herm<sr,1>::need_diag )
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<=i;++j) {
-                    if ( /*LMT::*/abs_indication( val(i,j) ) )
+                    if ( abs_indication( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
         else if ( (Herm<sr,1>::need_upper and Herm<sr,1>::need_lower)==false )
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<i;++j) {
-                    if ( /*LMT::*/abs_indication( val(i,j) ) )
+                    if ( abs_indication( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
         else
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<nb_cols();++j) {
-                    if ( /*LMT::*/abs_indication( val(i,j) ) )
+                    if ( abs_indication( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
-    }
+    } */
+    
     void allocate(const Vec<Vec<unsigned> > &v) {
         resize( v.size(), v.size() );
         for(unsigned i=0;i<nb_rows();++i) {
@@ -2643,7 +2683,10 @@ public:
         data = val.data;
     }
 
-    template<bool const_TM,class TVEC>
+    template<class T2,class STR2,class STO2>
+    Mat( const Mat<T2,STR2,STO2> &mat ) { construct_matrix( *this, mat ); }
+
+    /*template<bool const_TM,class TVEC>
     Mat(const Mat<SubMat<Mat,const_TM,TVEC>,AntiSym<sr,0>,SparseLine<Col>,int> &val) { // from SubMat
         resize( val.v.size(), val.v.size() );
 
@@ -2666,22 +2709,23 @@ public:
         if ( (AntiSym<sr,0>::need_upper and AntiSym<sr,0>::need_lower)==false and AntiSym<sr,0>::need_diag )
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<=i;++j) {
-                    if ( /*LMT::*/abs_indication( val(i,j) ) )
+                    if ( abs_indication( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
         else if ( (AntiSym<sr,0>::need_upper and AntiSym<sr,0>::need_lower)==false )
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<i;++j) {
-                    if ( /*LMT::*/abs_indication( val(i,j) ) )
+                    if ( abs_indication( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
         else
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<nb_cols();++j) {
-                    if ( /*LMT::*/abs_indication( val(i,j) ) )
+                    if ( abs_indication( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
-    }
+    } */
+    
     void allocate(const Vec<Vec<unsigned> > &v) {
         resize( v.size(), v.size() );
         for(unsigned i=0;i<nb_rows();++i) {
@@ -2907,7 +2951,10 @@ public:
         data = val.data;
     }
 
-    template<bool const_TM,class TVEC>
+    template<class T2,class STR2,class STO2>
+    Mat( const Mat<T2,STR2,STO2> &mat ) { construct_matrix( *this, mat ); }
+
+    /*template<bool const_TM,class TVEC>
     Mat(const Mat<SubMat<Mat,const_TM,TVEC>,AntiSym<sr,1>,SparseLine<Col>,int> &val) { // from SubMat
         resize( val.v.size(), val.v.size() );
 
@@ -2930,22 +2977,23 @@ public:
         if ( (AntiSym<sr,1>::need_upper and AntiSym<sr,1>::need_lower)==false and AntiSym<sr,1>::need_diag )
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<=i;++j) {
-                    if ( /*LMT::*/abs_indication( val(i,j) ) )
+                    if ( abs_indication( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
         else if ( (AntiSym<sr,1>::need_upper and AntiSym<sr,1>::need_lower)==false )
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<i;++j) {
-                    if ( /*LMT::*/abs_indication( val(i,j) ) )
+                    if ( abs_indication( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
         else
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<nb_cols();++j) {
-                    if ( /*LMT::*/abs_indication( val(i,j) ) )
+                    if ( abs_indication( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
-    }
+    } */
+    
     void allocate(const Vec<Vec<unsigned> > &v) {
         resize( v.size(), v.size() );
         for(unsigned i=0;i<nb_rows();++i) {
@@ -3171,7 +3219,10 @@ public:
         data = val.data;
     }
 
-    template<bool const_TM,class TVEC>
+    template<class T2,class STR2,class STO2>
+    Mat( const Mat<T2,STR2,STO2> &mat ) { construct_matrix( *this, mat ); }
+
+    /*template<bool const_TM,class TVEC>
     Mat(const Mat<SubMat<Mat,const_TM,TVEC>,AntiSym<sr,0>,SparseLine<Row>,int> &val) { // from SubMat
         resize( val.v.size(), val.v.size() );
 
@@ -3194,22 +3245,23 @@ public:
         if ( (AntiSym<sr,0>::need_upper and AntiSym<sr,0>::need_lower)==false and AntiSym<sr,0>::need_diag )
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<=i;++j) {
-                    if ( /*LMT::*/abs_indication( val(i,j) ) )
+                    if ( abs_indication( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
         else if ( (AntiSym<sr,0>::need_upper and AntiSym<sr,0>::need_lower)==false )
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<i;++j) {
-                    if ( /*LMT::*/abs_indication( val(i,j) ) )
+                    if ( abs_indication( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
         else
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<nb_cols();++j) {
-                    if ( /*LMT::*/abs_indication( val(i,j) ) )
+                    if ( abs_indication( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
-    }
+    } */
+    
     void allocate(const Vec<Vec<unsigned> > &v) {
         resize( v.size(), v.size() );
         for(unsigned i=0;i<nb_rows();++i) {
@@ -3435,7 +3487,10 @@ public:
         data = val.data;
     }
 
-    template<bool const_TM,class TVEC>
+    template<class T2,class STR2,class STO2>
+    Mat( const Mat<T2,STR2,STO2> &mat ) { construct_matrix( *this, mat ); }
+
+    /*template<bool const_TM,class TVEC>
     Mat(const Mat<SubMat<Mat,const_TM,TVEC>,AntiSym<sr,1>,SparseLine<Row>,int> &val) { // from SubMat
         resize( val.v.size(), val.v.size() );
 
@@ -3458,22 +3513,23 @@ public:
         if ( (AntiSym<sr,1>::need_upper and AntiSym<sr,1>::need_lower)==false and AntiSym<sr,1>::need_diag )
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<=i;++j) {
-                    if ( /*LMT::*/abs_indication( val(i,j) ) )
+                    if ( abs_indication( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
         else if ( (AntiSym<sr,1>::need_upper and AntiSym<sr,1>::need_lower)==false )
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<i;++j) {
-                    if ( /*LMT::*/abs_indication( val(i,j) ) )
+                    if ( abs_indication( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
         else
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<nb_cols();++j) {
-                    if ( /*LMT::*/abs_indication( val(i,j) ) )
+                    if ( abs_indication( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
-    }
+    } */
+    
     void allocate(const Vec<Vec<unsigned> > &v) {
         resize( v.size(), v.size() );
         for(unsigned i=0;i<nb_rows();++i) {
@@ -3698,7 +3754,10 @@ public:
         data = val.data;
     }
 
-    template<bool const_TM,class TVEC>
+    template<class T2,class STR2,class STO2>
+    Mat( const Mat<T2,STR2,STO2> &mat ) { construct_matrix( *this, mat ); }
+
+    /*template<bool const_TM,class TVEC>
     Mat(const Mat<SubMat<Mat,const_TM,TVEC>,TriUpper<sr,sc>,SparseLine<Col>,int> &val) { // from SubMat
         resize( val.v.size(), val.v.size() );
 
@@ -3721,22 +3780,23 @@ public:
         if ( (TriUpper<sr,sc>::need_upper and TriUpper<sr,sc>::need_lower)==false and TriUpper<sr,sc>::need_diag )
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<=i;++j) {
-                    if ( /*LMT::*/abs_indication( val(i,j) ) )
+                    if ( abs_indication( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
         else if ( (TriUpper<sr,sc>::need_upper and TriUpper<sr,sc>::need_lower)==false )
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<i;++j) {
-                    if ( /*LMT::*/abs_indication( val(i,j) ) )
+                    if ( abs_indication( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
         else
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<nb_cols();++j) {
-                    if ( /*LMT::*/abs_indication( val(i,j) ) )
+                    if ( abs_indication( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
-    }
+    } */
+    
     void allocate(const Vec<Vec<unsigned> > &v) {
         resize( v.size(), v.size() );
         for(unsigned i=0;i<nb_rows();++i) {
@@ -3962,7 +4022,10 @@ public:
         data = val.data;
     }
 
-    template<bool const_TM,class TVEC>
+    template<class T2,class STR2,class STO2>
+    Mat( const Mat<T2,STR2,STO2> &mat ) { construct_matrix( *this, mat ); }
+
+    /*template<bool const_TM,class TVEC>
     Mat(const Mat<SubMat<Mat,const_TM,TVEC>,TriUpper<sr,sc>,SparseLine<Row>,int> &val) { // from SubMat
         resize( val.v.size(), val.v.size() );
 
@@ -3985,22 +4048,23 @@ public:
         if ( (TriUpper<sr,sc>::need_upper and TriUpper<sr,sc>::need_lower)==false and TriUpper<sr,sc>::need_diag )
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<=i;++j) {
-                    if ( /*LMT::*/abs_indication( val(i,j) ) )
+                    if ( abs_indication( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
         else if ( (TriUpper<sr,sc>::need_upper and TriUpper<sr,sc>::need_lower)==false )
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<i;++j) {
-                    if ( /*LMT::*/abs_indication( val(i,j) ) )
+                    if ( abs_indication( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
         else
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<nb_cols();++j) {
-                    if ( /*LMT::*/abs_indication( val(i,j) ) )
+                    if ( abs_indication( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
-    }
+    } */
+    
     void allocate(const Vec<Vec<unsigned> > &v) {
         resize( v.size(), v.size() );
         for(unsigned i=0;i<nb_rows();++i) {
@@ -4226,7 +4290,10 @@ public:
         data = val.data;
     }
 
-    template<bool const_TM,class TVEC>
+    template<class T2,class STR2,class STO2>
+    Mat( const Mat<T2,STR2,STO2> &mat ) { construct_matrix( *this, mat ); }
+
+    /*template<bool const_TM,class TVEC>
     Mat(const Mat<SubMat<Mat,const_TM,TVEC>,TriLower<sr,sc>,SparseLine<Col>,int> &val) { // from SubMat
         resize( val.v.size(), val.v.size() );
 
@@ -4249,22 +4316,23 @@ public:
         if ( (TriLower<sr,sc>::need_upper and TriLower<sr,sc>::need_lower)==false and TriLower<sr,sc>::need_diag )
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<=i;++j) {
-                    if ( /*LMT::*/abs_indication( val(i,j) ) )
+                    if ( abs_indication( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
         else if ( (TriLower<sr,sc>::need_upper and TriLower<sr,sc>::need_lower)==false )
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<i;++j) {
-                    if ( /*LMT::*/abs_indication( val(i,j) ) )
+                    if ( abs_indication( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
         else
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<nb_cols();++j) {
-                    if ( /*LMT::*/abs_indication( val(i,j) ) )
+                    if ( abs_indication( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
-    }
+    } */
+    
     void allocate(const Vec<Vec<unsigned> > &v) {
         resize( v.size(), v.size() );
         for(unsigned i=0;i<nb_rows();++i) {
@@ -4490,7 +4558,10 @@ public:
         data = val.data;
     }
 
-    template<bool const_TM,class TVEC>
+    template<class T2,class STR2,class STO2>
+    Mat( const Mat<T2,STR2,STO2> &mat ) { construct_matrix( *this, mat ); }
+
+    /*template<bool const_TM,class TVEC>
     Mat(const Mat<SubMat<Mat,const_TM,TVEC>,TriLower<sr,sc>,SparseLine<Row>,int> &val) { // from SubMat
         resize( val.v.size(), val.v.size() );
 
@@ -4513,22 +4584,23 @@ public:
         if ( (TriLower<sr,sc>::need_upper and TriLower<sr,sc>::need_lower)==false and TriLower<sr,sc>::need_diag )
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<=i;++j) {
-                    if ( /*LMT::*/abs_indication( val(i,j) ) )
+                    if ( abs_indication( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
         else if ( (TriLower<sr,sc>::need_upper and TriLower<sr,sc>::need_lower)==false )
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<i;++j) {
-                    if ( /*LMT::*/abs_indication( val(i,j) ) )
+                    if ( abs_indication( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
         else
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<nb_cols();++j) {
-                    if ( /*LMT::*/abs_indication( val(i,j) ) )
+                    if ( abs_indication( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
-    }
+    } */
+    
     void allocate(const Vec<Vec<unsigned> > &v) {
         resize( v.size(), v.size() );
         for(unsigned i=0;i<nb_rows();++i) {
@@ -4754,7 +4826,10 @@ public:
         data = val.data;
     }
 
-    template<bool const_TM,class TVEC>
+    template<class T2,class STR2,class STO2>
+    Mat( const Mat<T2,STR2,STO2> &mat ) { construct_matrix( *this, mat ); }
+
+    /*template<bool const_TM,class TVEC>
     Mat(const Mat<SubMat<Mat,const_TM,TVEC>,Diag<sr,sc>,SparseLine<Col>,int> &val) { // from SubMat
         resize( val.v.size(), val.v.size() );
 
@@ -4777,22 +4852,23 @@ public:
         if ( (Diag<sr,sc>::need_upper and Diag<sr,sc>::need_lower)==false and Diag<sr,sc>::need_diag )
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<=i;++j) {
-                    if ( /*LMT::*/abs_indication( val(i,j) ) )
+                    if ( abs_indication( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
         else if ( (Diag<sr,sc>::need_upper and Diag<sr,sc>::need_lower)==false )
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<i;++j) {
-                    if ( /*LMT::*/abs_indication( val(i,j) ) )
+                    if ( abs_indication( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
         else
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<nb_cols();++j) {
-                    if ( /*LMT::*/abs_indication( val(i,j) ) )
+                    if ( abs_indication( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
-    }
+    } */
+    
     void allocate(const Vec<Vec<unsigned> > &v) {
         resize( v.size(), v.size() );
         for(unsigned i=0;i<nb_rows();++i) {
@@ -5018,7 +5094,10 @@ public:
         data = val.data;
     }
 
-    template<bool const_TM,class TVEC>
+    template<class T2,class STR2,class STO2>
+    Mat( const Mat<T2,STR2,STO2> &mat ) { construct_matrix( *this, mat ); }
+
+    /*template<bool const_TM,class TVEC>
     Mat(const Mat<SubMat<Mat,const_TM,TVEC>,Diag<sr,sc>,SparseLine<Row>,int> &val) { // from SubMat
         resize( val.v.size(), val.v.size() );
 
@@ -5041,22 +5120,23 @@ public:
         if ( (Diag<sr,sc>::need_upper and Diag<sr,sc>::need_lower)==false and Diag<sr,sc>::need_diag )
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<=i;++j) {
-                    if ( /*LMT::*/abs_indication( val(i,j) ) )
+                    if ( abs_indication( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
         else if ( (Diag<sr,sc>::need_upper and Diag<sr,sc>::need_lower)==false )
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<i;++j) {
-                    if ( /*LMT::*/abs_indication( val(i,j) ) )
+                    if ( abs_indication( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
         else
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<nb_cols();++j) {
-                    if ( /*LMT::*/abs_indication( val(i,j) ) )
+                    if ( abs_indication( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
-    }
+    } */
+    
     void allocate(const Vec<Vec<unsigned> > &v) {
         resize( v.size(), v.size() );
         for(unsigned i=0;i<nb_rows();++i) {

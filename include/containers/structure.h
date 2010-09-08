@@ -29,6 +29,22 @@ struct Gen {
     
     template<class V> inline typename V::T get_strutured(const V &t,unsigned line,unsigned column) const { return t(line,column); }
     template<class V,class T> inline void set_strutured(V &t,unsigned line,unsigned column,const T &val) const { t(line,column) = val; }
+    
+    template<class Op,class T0,class T1>
+    static void apply( const Op &op, T0 &res, T1 &src ) {
+        for( unsigned r = 0; r < src.nb_rows(); ++r )
+            for( unsigned c = 0; c < src.nb_cols(); ++c )
+                op( r, c, res, src( r, c) );
+    }
+    
+    template<class Op,class T0,class T1>
+    static void apply_sparse_line( const Op &op, T0 &res, T1 &src ) {
+        for( unsigned r = 0; r < src.nb_rows(); ++r )
+            for( unsigned i = 0; i < src.data[ r ].indices.size(); ++i )
+                op( r, src.data[ r ].indices[ i ], res, src.data[ r ].data[ i ] );
+    }
+    
+    static bool valid_position( unsigned r, unsigned c ) { return true; }
 };
 
 /*! Type of matrix structure. Symmetric matrix
@@ -43,7 +59,30 @@ struct Sym {
 
     static const bool need_diag = true;
     static const bool need_upper = stored_in_upper_part_;
-    static const bool need_lower = !stored_in_upper_part_;
+    static const bool need_lower = not stored_in_upper_part_;
+    
+    template<class Op,class T0,class T1>
+    static void apply( const Op &op, T0 &res, T1 &src ) {
+        for( unsigned r = 0; r < src.nb_rows(); ++r )
+            for( unsigned c = 0; c <= r; ++c )
+                op( r, c, res, src( r, c ) );
+    }
+    
+    template<class Op,class T0,class T1>
+    static void apply_sparse_line( const Op &op, T0 &res, T1 &src ) {
+        for( unsigned r = 0; r < src.nb_rows(); ++r ) {
+            for( unsigned i = 0; i < src.data[ r ].indices.size(); ++i ) {
+                unsigned c = src.data[ r ].indices[ i ];
+                op( r, c, res, src.data[ r ].data[ i ] );
+                if ( r != c )
+                    op( c, r, res, src.data[ r ].data[ i ] );
+            }
+        }
+    }
+    
+    static bool valid_position( unsigned r, unsigned c ) {
+        return stored_in_upper_part_ ? r <= c : c <= r;
+    }
 };
 
 /*! Type of matrix structure. Symmetric matrix
@@ -59,6 +98,29 @@ struct Herm {
     static const bool need_diag = true;
     static const bool need_upper = stored_in_upper_part_;
     static const bool need_lower = !stored_in_upper_part_;
+    
+    template<class Op,class T0,class T1>
+    static void apply( const Op &op, T0 &res, T1 &src ) {
+        for( unsigned r = 0; r < src.nb_rows(); ++r )
+            for( unsigned c = 0; c <= r; ++c )
+                op( r, c, res, src( r, c) );
+    }
+    
+    template<class Op,class T0,class T1>
+    static void apply_sparse_line( const Op &op, T0 &res, T1 &src ) {
+        for( unsigned r = 0; r < src.nb_rows(); ++r ) {
+            for( unsigned i = 0; i < src.data[ r ].indices.size(); ++i ) {
+                unsigned c = src.data[ r ].indices[ i ];
+                op( r, c, res, src.data[ r ].data[ i ] );
+                if ( r != c )
+                    op( c, r, res, conj( src.data[ r ].data[ i ] ) );
+            }
+        }
+    }
+    
+    static bool valid_position( unsigned r, unsigned c ) {
+        return stored_in_upper_part_ ? r <= c : c <= r;
+    }
 };
 
 
@@ -75,6 +137,29 @@ struct AntiSym {
     static const bool need_diag = false;
     static const bool need_upper = stored_in_upper_part_;
     static const bool need_lower = !stored_in_upper_part_;
+    
+    template<class Op,class T0,class T1>
+    static void apply( const Op &op, T0 &res, T1 &src ) {
+        for( unsigned r = 0; r < src.nb_rows(); ++r )
+            for( unsigned c = 0; c <= r; ++c )
+                op( r, c, res, src( r, c) );
+    }
+    
+    template<class Op,class T0,class T1>
+    static void apply_sparse_line( const Op &op, T0 &res, T1 &src ) {
+        for( unsigned r = 0; r < src.nb_rows(); ++r ) {
+            for( unsigned i = 0; i < src.data[ r ].indices.size(); ++i ) {
+                unsigned c = src.data[ r ].indices[ i ];
+                op( r, c, res, src.data[ r ].data[ i ] );
+                if ( r != c )
+                    op( c, r, res, - src.data[ r ].data[ i ] );
+            }
+        }
+    }
+    
+    static bool valid_position( unsigned r, unsigned c ) {
+        return stored_in_upper_part_ ? r <= c : c <= r;
+    }
 };
 
 
@@ -90,6 +175,22 @@ struct Diag {
     static const bool need_diag = true;
     static const bool need_upper = false;
     static const bool need_lower = false;
+    
+    template<class Op,class T0,class T1>
+    static void apply( const Op &op, T0 &res, T1 &src ) {
+        for( unsigned r = 0; r < src.nb_rows(); ++r )
+            op( r, r, res, src( r, r ) );
+    }
+    
+    template<class Op,class T0,class T1>
+    static void apply_sparse_line( const Op &op, T0 &res, T1 &src ) {
+        for( unsigned r = 0; r < src.nb_rows(); ++r )
+            op( r, r, res, src( r, r ) );
+    }
+    
+    static bool valid_position( unsigned r, unsigned c ) {
+        return r == c;
+    }
 };
 
 
@@ -105,6 +206,17 @@ struct TriUpper {
     static const bool need_diag = true;
     static const bool need_upper = true;
     static const bool need_lower = false;
+    
+    template<class Op,class T0,class T1>
+    static void apply( const Op &op, T0 &res, T1 &src ) {
+        for( unsigned r = 0; r < src.nb_rows(); ++r )
+            for( unsigned c = r; c < src.nb_cols(); ++c )
+                op( r, c, res, src );
+    }
+    
+    static bool valid_position( unsigned r, unsigned c ) {
+        return r <= c;
+    }
 };
 
 /*! Type of matrix structure.
@@ -119,6 +231,17 @@ struct TriLower {
     static const bool need_diag = true;
     static const bool need_upper = false;
     static const bool need_lower = true;
+    
+    template<class Op,class T0,class T1>
+    static void apply( const Op &op, T0 &res, T1 &src ) {
+        for( unsigned r = 0; r < src.nb_rows(); ++r )
+            for( unsigned c = 0; c <= r; ++c )
+                op( r, c, res, src );
+    }
+    
+    static bool valid_position( unsigned r, unsigned c ) {
+        return c <= r;
+    }
 };
 
 /*!

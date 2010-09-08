@@ -1,3 +1,4 @@
+
 //
 // C++ Interface: mat
 //
@@ -423,6 +424,9 @@ typename Mat<T,STR,STO,IO>::T min(const Mat<T,STR,STO,IO> &m) {
     return res;
 }
 
+template<class T0,class Str0,class Sto0,class T1,class Str1,class Sto1>
+void construct_matrix( Mat<T0,Str0,Sto0> &res, const Mat<T1,Str1,Sto1> &src );
+
 };
 
 #include "vec_mt.h"
@@ -441,6 +445,7 @@ typename Mat<T,STR,STO,IO>::T min(const Mat<T,STR,STO,IO> &m) {
 #include "matpointed.h"
 #include "matsparselu.h"
 #include "MatWithTinyBlocks.h"
+#include "construct_matrix.h"
 
 namespace LMT {
 

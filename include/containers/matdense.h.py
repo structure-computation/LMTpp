@@ -169,7 +169,7 @@ public:
     Mat(unsigned nr,unsigned nc,const TT &val) { this->nr.set(default_nb_rows); """+"real_nr.set(default_nb_rows);"*(structure=='Gen')+(" this->nc.set(default_nb_cols); "+"real_nc.set(default_nb_cols);"*(structure=='Gen'))*nsquare+""" resize(nr,nc); set(val); }
     template<class T2,int s2> Mat(unsigned r,unsigned c,const Vec<T2,s2> &v):data(v) { this->nr.set(default_nb_rows); """+"real_nr.set(default_nb_rows);"*(structure=='Gen')+(" this->nc.set(default_nb_cols); "+"real_nc.set(default_nb_cols);"*(structure=='Gen'))*nsquare+""" resize(r,c); }
 
-    template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
+    /*template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
         if ( fixed_size==false )
             resize( val.nb_rows(), val.nb_cols() );
         if ( STRUCTURE::need_diag and STRUCTURE::need_upper==false and STRUCTURE::need_lower==false )
@@ -187,6 +187,9 @@ public:
             for(unsigned i=0;i<val.nb_rows();++i)
                 for(unsigned j=0;j<val.nb_cols();++j)
                     operator()(i, j) = val(i, j);
+    }*/
+    template<class T2,class STR2,class STO2,class O2> Mat( const Mat<T2,STR2,STO2,O2> &val ) {
+        construct_matrix( *this, val );
     }
 
     void resize(unsigned nr) { resize( nr, nr ); }
