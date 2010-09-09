@@ -135,7 +135,7 @@ public:
     Mat(unsigned nr,unsigned nc,const TT &val) { this->nr.set(default_nb_rows); real_nr.set(default_nb_rows); this->nc.set(default_nb_cols); real_nc.set(default_nb_cols); resize(nr,nc); set(val); }
     template<class T2,int s2> Mat(unsigned r,unsigned c,const Vec<T2,s2> &v):data(v) { this->nr.set(default_nb_rows); real_nr.set(default_nb_rows); this->nc.set(default_nb_cols); real_nc.set(default_nb_cols); resize(r,c); }
 
-    template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
+    /*template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
         if ( fixed_size==false )
             resize( val.nb_rows(), val.nb_cols() );
         if ( Gen<sr,sc>::need_diag and Gen<sr,sc>::need_upper==false and Gen<sr,sc>::need_lower==false )
@@ -153,6 +153,9 @@ public:
             for(unsigned i=0;i<val.nb_rows();++i)
                 for(unsigned j=0;j<val.nb_cols();++j)
                     operator()(i, j) = val(i, j);
+    }*/
+    template<class T2,class STR2,class STO2,class O2> Mat( const Mat<T2,STR2,STO2,O2> &val ) {
+        construct_matrix( *this, val );
     }
 
     void resize(unsigned nr) { resize( nr, nr ); }
@@ -333,7 +336,7 @@ public:
     Mat(unsigned nr,unsigned nc,const TT &val) { this->nr.set(default_nb_rows); real_nr.set(default_nb_rows); this->nc.set(default_nb_cols); real_nc.set(default_nb_cols); resize(nr,nc); set(val); }
     template<class T2,int s2> Mat(unsigned r,unsigned c,const Vec<T2,s2> &v):data(v) { this->nr.set(default_nb_rows); real_nr.set(default_nb_rows); this->nc.set(default_nb_cols); real_nc.set(default_nb_cols); resize(r,c); }
 
-    template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
+    /*template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
         if ( fixed_size==false )
             resize( val.nb_rows(), val.nb_cols() );
         if ( Gen<sr,sc>::need_diag and Gen<sr,sc>::need_upper==false and Gen<sr,sc>::need_lower==false )
@@ -351,6 +354,9 @@ public:
             for(unsigned i=0;i<val.nb_rows();++i)
                 for(unsigned j=0;j<val.nb_cols();++j)
                     operator()(i, j) = val(i, j);
+    }*/
+    template<class T2,class STR2,class STO2,class O2> Mat( const Mat<T2,STR2,STO2,O2> &val ) {
+        construct_matrix( *this, val );
     }
 
     void resize(unsigned nr) { resize( nr, nr ); }
@@ -540,7 +546,7 @@ public:
     Mat(unsigned nr,unsigned nc,const TT &val) { this->nr.set(default_nb_rows);  resize(nr,nc); set(val); }
     template<class T2,int s2> Mat(unsigned r,unsigned c,const Vec<T2,s2> &v):data(v) { this->nr.set(default_nb_rows);  resize(r,c); }
 
-    template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
+    /*template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
         if ( fixed_size==false )
             resize( val.nb_rows(), val.nb_cols() );
         if ( Sym<sr,0>::need_diag and Sym<sr,0>::need_upper==false and Sym<sr,0>::need_lower==false )
@@ -558,6 +564,9 @@ public:
             for(unsigned i=0;i<val.nb_rows();++i)
                 for(unsigned j=0;j<val.nb_cols();++j)
                     operator()(i, j) = val(i, j);
+    }*/
+    template<class T2,class STR2,class STO2,class O2> Mat( const Mat<T2,STR2,STO2,O2> &val ) {
+        construct_matrix( *this, val );
     }
 
     void resize(unsigned nr) { resize( nr, nr ); }
@@ -769,7 +778,7 @@ public:
     Mat(unsigned nr,unsigned nc,const TT &val) { this->nr.set(default_nb_rows);  resize(nr,nc); set(val); }
     template<class T2,int s2> Mat(unsigned r,unsigned c,const Vec<T2,s2> &v):data(v) { this->nr.set(default_nb_rows);  resize(r,c); }
 
-    template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
+    /*template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
         if ( fixed_size==false )
             resize( val.nb_rows(), val.nb_cols() );
         if ( Sym<sr,1>::need_diag and Sym<sr,1>::need_upper==false and Sym<sr,1>::need_lower==false )
@@ -787,6 +796,9 @@ public:
             for(unsigned i=0;i<val.nb_rows();++i)
                 for(unsigned j=0;j<val.nb_cols();++j)
                     operator()(i, j) = val(i, j);
+    }*/
+    template<class T2,class STR2,class STO2,class O2> Mat( const Mat<T2,STR2,STO2,O2> &val ) {
+        construct_matrix( *this, val );
     }
 
     void resize(unsigned nr) { resize( nr, nr ); }
@@ -1003,7 +1015,7 @@ public:
     Mat(unsigned nr,unsigned nc,const TT &val) { this->nr.set(default_nb_rows);  resize(nr,nc); set(val); }
     template<class T2,int s2> Mat(unsigned r,unsigned c,const Vec<T2,s2> &v):data(v) { this->nr.set(default_nb_rows);  resize(r,c); }
 
-    template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
+    /*template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
         if ( fixed_size==false )
             resize( val.nb_rows(), val.nb_cols() );
         if ( Sym<sr,0>::need_diag and Sym<sr,0>::need_upper==false and Sym<sr,0>::need_lower==false )
@@ -1021,6 +1033,9 @@ public:
             for(unsigned i=0;i<val.nb_rows();++i)
                 for(unsigned j=0;j<val.nb_cols();++j)
                     operator()(i, j) = val(i, j);
+    }*/
+    template<class T2,class STR2,class STO2,class O2> Mat( const Mat<T2,STR2,STO2,O2> &val ) {
+        construct_matrix( *this, val );
     }
 
     void resize(unsigned nr) { resize( nr, nr ); }
@@ -1237,7 +1252,7 @@ public:
     Mat(unsigned nr,unsigned nc,const TT &val) { this->nr.set(default_nb_rows);  resize(nr,nc); set(val); }
     template<class T2,int s2> Mat(unsigned r,unsigned c,const Vec<T2,s2> &v):data(v) { this->nr.set(default_nb_rows);  resize(r,c); }
 
-    template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
+    /*template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
         if ( fixed_size==false )
             resize( val.nb_rows(), val.nb_cols() );
         if ( Sym<sr,1>::need_diag and Sym<sr,1>::need_upper==false and Sym<sr,1>::need_lower==false )
@@ -1255,6 +1270,9 @@ public:
             for(unsigned i=0;i<val.nb_rows();++i)
                 for(unsigned j=0;j<val.nb_cols();++j)
                     operator()(i, j) = val(i, j);
+    }*/
+    template<class T2,class STR2,class STO2,class O2> Mat( const Mat<T2,STR2,STO2,O2> &val ) {
+        construct_matrix( *this, val );
     }
 
     void resize(unsigned nr) { resize( nr, nr ); }
@@ -1466,7 +1484,7 @@ public:
     Mat(unsigned nr,unsigned nc,const TT &val) { this->nr.set(default_nb_rows);  resize(nr,nc); set(val); }
     template<class T2,int s2> Mat(unsigned r,unsigned c,const Vec<T2,s2> &v):data(v) { this->nr.set(default_nb_rows);  resize(r,c); }
 
-    template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
+    /*template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
         if ( fixed_size==false )
             resize( val.nb_rows(), val.nb_cols() );
         if ( Herm<sr,0>::need_diag and Herm<sr,0>::need_upper==false and Herm<sr,0>::need_lower==false )
@@ -1484,6 +1502,9 @@ public:
             for(unsigned i=0;i<val.nb_rows();++i)
                 for(unsigned j=0;j<val.nb_cols();++j)
                     operator()(i, j) = val(i, j);
+    }*/
+    template<class T2,class STR2,class STO2,class O2> Mat( const Mat<T2,STR2,STO2,O2> &val ) {
+        construct_matrix( *this, val );
     }
 
     void resize(unsigned nr) { resize( nr, nr ); }
@@ -1695,7 +1716,7 @@ public:
     Mat(unsigned nr,unsigned nc,const TT &val) { this->nr.set(default_nb_rows);  resize(nr,nc); set(val); }
     template<class T2,int s2> Mat(unsigned r,unsigned c,const Vec<T2,s2> &v):data(v) { this->nr.set(default_nb_rows);  resize(r,c); }
 
-    template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
+    /*template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
         if ( fixed_size==false )
             resize( val.nb_rows(), val.nb_cols() );
         if ( Herm<sr,1>::need_diag and Herm<sr,1>::need_upper==false and Herm<sr,1>::need_lower==false )
@@ -1713,6 +1734,9 @@ public:
             for(unsigned i=0;i<val.nb_rows();++i)
                 for(unsigned j=0;j<val.nb_cols();++j)
                     operator()(i, j) = val(i, j);
+    }*/
+    template<class T2,class STR2,class STO2,class O2> Mat( const Mat<T2,STR2,STO2,O2> &val ) {
+        construct_matrix( *this, val );
     }
 
     void resize(unsigned nr) { resize( nr, nr ); }
@@ -1929,7 +1953,7 @@ public:
     Mat(unsigned nr,unsigned nc,const TT &val) { this->nr.set(default_nb_rows);  resize(nr,nc); set(val); }
     template<class T2,int s2> Mat(unsigned r,unsigned c,const Vec<T2,s2> &v):data(v) { this->nr.set(default_nb_rows);  resize(r,c); }
 
-    template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
+    /*template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
         if ( fixed_size==false )
             resize( val.nb_rows(), val.nb_cols() );
         if ( Herm<sr,0>::need_diag and Herm<sr,0>::need_upper==false and Herm<sr,0>::need_lower==false )
@@ -1947,6 +1971,9 @@ public:
             for(unsigned i=0;i<val.nb_rows();++i)
                 for(unsigned j=0;j<val.nb_cols();++j)
                     operator()(i, j) = val(i, j);
+    }*/
+    template<class T2,class STR2,class STO2,class O2> Mat( const Mat<T2,STR2,STO2,O2> &val ) {
+        construct_matrix( *this, val );
     }
 
     void resize(unsigned nr) { resize( nr, nr ); }
@@ -2163,7 +2190,7 @@ public:
     Mat(unsigned nr,unsigned nc,const TT &val) { this->nr.set(default_nb_rows);  resize(nr,nc); set(val); }
     template<class T2,int s2> Mat(unsigned r,unsigned c,const Vec<T2,s2> &v):data(v) { this->nr.set(default_nb_rows);  resize(r,c); }
 
-    template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
+    /*template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
         if ( fixed_size==false )
             resize( val.nb_rows(), val.nb_cols() );
         if ( Herm<sr,1>::need_diag and Herm<sr,1>::need_upper==false and Herm<sr,1>::need_lower==false )
@@ -2181,6 +2208,9 @@ public:
             for(unsigned i=0;i<val.nb_rows();++i)
                 for(unsigned j=0;j<val.nb_cols();++j)
                     operator()(i, j) = val(i, j);
+    }*/
+    template<class T2,class STR2,class STO2,class O2> Mat( const Mat<T2,STR2,STO2,O2> &val ) {
+        construct_matrix( *this, val );
     }
 
     void resize(unsigned nr) { resize( nr, nr ); }
@@ -2392,7 +2422,7 @@ public:
     Mat(unsigned nr,unsigned nc,const TT &val) { this->nr.set(default_nb_rows);  resize(nr,nc); set(val); }
     template<class T2,int s2> Mat(unsigned r,unsigned c,const Vec<T2,s2> &v):data(v) { this->nr.set(default_nb_rows);  resize(r,c); }
 
-    template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
+    /*template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
         if ( fixed_size==false )
             resize( val.nb_rows(), val.nb_cols() );
         if ( AntiSym<sr,0>::need_diag and AntiSym<sr,0>::need_upper==false and AntiSym<sr,0>::need_lower==false )
@@ -2410,6 +2440,9 @@ public:
             for(unsigned i=0;i<val.nb_rows();++i)
                 for(unsigned j=0;j<val.nb_cols();++j)
                     operator()(i, j) = val(i, j);
+    }*/
+    template<class T2,class STR2,class STO2,class O2> Mat( const Mat<T2,STR2,STO2,O2> &val ) {
+        construct_matrix( *this, val );
     }
 
     void resize(unsigned nr) { resize( nr, nr ); }
@@ -2621,7 +2654,7 @@ public:
     Mat(unsigned nr,unsigned nc,const TT &val) { this->nr.set(default_nb_rows);  resize(nr,nc); set(val); }
     template<class T2,int s2> Mat(unsigned r,unsigned c,const Vec<T2,s2> &v):data(v) { this->nr.set(default_nb_rows);  resize(r,c); }
 
-    template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
+    /*template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
         if ( fixed_size==false )
             resize( val.nb_rows(), val.nb_cols() );
         if ( AntiSym<sr,1>::need_diag and AntiSym<sr,1>::need_upper==false and AntiSym<sr,1>::need_lower==false )
@@ -2639,6 +2672,9 @@ public:
             for(unsigned i=0;i<val.nb_rows();++i)
                 for(unsigned j=0;j<val.nb_cols();++j)
                     operator()(i, j) = val(i, j);
+    }*/
+    template<class T2,class STR2,class STO2,class O2> Mat( const Mat<T2,STR2,STO2,O2> &val ) {
+        construct_matrix( *this, val );
     }
 
     void resize(unsigned nr) { resize( nr, nr ); }
@@ -2855,7 +2891,7 @@ public:
     Mat(unsigned nr,unsigned nc,const TT &val) { this->nr.set(default_nb_rows);  resize(nr,nc); set(val); }
     template<class T2,int s2> Mat(unsigned r,unsigned c,const Vec<T2,s2> &v):data(v) { this->nr.set(default_nb_rows);  resize(r,c); }
 
-    template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
+    /*template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
         if ( fixed_size==false )
             resize( val.nb_rows(), val.nb_cols() );
         if ( AntiSym<sr,0>::need_diag and AntiSym<sr,0>::need_upper==false and AntiSym<sr,0>::need_lower==false )
@@ -2873,6 +2909,9 @@ public:
             for(unsigned i=0;i<val.nb_rows();++i)
                 for(unsigned j=0;j<val.nb_cols();++j)
                     operator()(i, j) = val(i, j);
+    }*/
+    template<class T2,class STR2,class STO2,class O2> Mat( const Mat<T2,STR2,STO2,O2> &val ) {
+        construct_matrix( *this, val );
     }
 
     void resize(unsigned nr) { resize( nr, nr ); }
@@ -3089,7 +3128,7 @@ public:
     Mat(unsigned nr,unsigned nc,const TT &val) { this->nr.set(default_nb_rows);  resize(nr,nc); set(val); }
     template<class T2,int s2> Mat(unsigned r,unsigned c,const Vec<T2,s2> &v):data(v) { this->nr.set(default_nb_rows);  resize(r,c); }
 
-    template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
+    /*template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
         if ( fixed_size==false )
             resize( val.nb_rows(), val.nb_cols() );
         if ( AntiSym<sr,1>::need_diag and AntiSym<sr,1>::need_upper==false and AntiSym<sr,1>::need_lower==false )
@@ -3107,6 +3146,9 @@ public:
             for(unsigned i=0;i<val.nb_rows();++i)
                 for(unsigned j=0;j<val.nb_cols();++j)
                     operator()(i, j) = val(i, j);
+    }*/
+    template<class T2,class STR2,class STO2,class O2> Mat( const Mat<T2,STR2,STO2,O2> &val ) {
+        construct_matrix( *this, val );
     }
 
     void resize(unsigned nr) { resize( nr, nr ); }
@@ -3317,7 +3359,7 @@ public:
     Mat(unsigned nr,unsigned nc,const TT &val) { this->nr.set(default_nb_rows);  this->nc.set(default_nb_cols);  resize(nr,nc); set(val); }
     template<class T2,int s2> Mat(unsigned r,unsigned c,const Vec<T2,s2> &v):data(v) { this->nr.set(default_nb_rows);  this->nc.set(default_nb_cols);  resize(r,c); }
 
-    template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
+    /*template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
         if ( fixed_size==false )
             resize( val.nb_rows(), val.nb_cols() );
         if ( TriUpper<sr,sc>::need_diag and TriUpper<sr,sc>::need_upper==false and TriUpper<sr,sc>::need_lower==false )
@@ -3335,6 +3377,9 @@ public:
             for(unsigned i=0;i<val.nb_rows();++i)
                 for(unsigned j=0;j<val.nb_cols();++j)
                     operator()(i, j) = val(i, j);
+    }*/
+    template<class T2,class STR2,class STO2,class O2> Mat( const Mat<T2,STR2,STO2,O2> &val ) {
+        construct_matrix( *this, val );
     }
 
     void resize(unsigned nr) { resize( nr, nr ); }
@@ -3551,7 +3596,7 @@ public:
     Mat(unsigned nr,unsigned nc,const TT &val) { this->nr.set(default_nb_rows);  this->nc.set(default_nb_cols);  resize(nr,nc); set(val); }
     template<class T2,int s2> Mat(unsigned r,unsigned c,const Vec<T2,s2> &v):data(v) { this->nr.set(default_nb_rows);  this->nc.set(default_nb_cols);  resize(r,c); }
 
-    template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
+    /*template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
         if ( fixed_size==false )
             resize( val.nb_rows(), val.nb_cols() );
         if ( TriUpper<sr,sc>::need_diag and TriUpper<sr,sc>::need_upper==false and TriUpper<sr,sc>::need_lower==false )
@@ -3569,6 +3614,9 @@ public:
             for(unsigned i=0;i<val.nb_rows();++i)
                 for(unsigned j=0;j<val.nb_cols();++j)
                     operator()(i, j) = val(i, j);
+    }*/
+    template<class T2,class STR2,class STO2,class O2> Mat( const Mat<T2,STR2,STO2,O2> &val ) {
+        construct_matrix( *this, val );
     }
 
     void resize(unsigned nr) { resize( nr, nr ); }
@@ -3780,7 +3828,7 @@ public:
     Mat(unsigned nr,unsigned nc,const TT &val) { this->nr.set(default_nb_rows);  this->nc.set(default_nb_cols);  resize(nr,nc); set(val); }
     template<class T2,int s2> Mat(unsigned r,unsigned c,const Vec<T2,s2> &v):data(v) { this->nr.set(default_nb_rows);  this->nc.set(default_nb_cols);  resize(r,c); }
 
-    template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
+    /*template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
         if ( fixed_size==false )
             resize( val.nb_rows(), val.nb_cols() );
         if ( TriLower<sr,sc>::need_diag and TriLower<sr,sc>::need_upper==false and TriLower<sr,sc>::need_lower==false )
@@ -3798,6 +3846,9 @@ public:
             for(unsigned i=0;i<val.nb_rows();++i)
                 for(unsigned j=0;j<val.nb_cols();++j)
                     operator()(i, j) = val(i, j);
+    }*/
+    template<class T2,class STR2,class STO2,class O2> Mat( const Mat<T2,STR2,STO2,O2> &val ) {
+        construct_matrix( *this, val );
     }
 
     void resize(unsigned nr) { resize( nr, nr ); }
@@ -4009,7 +4060,7 @@ public:
     Mat(unsigned nr,unsigned nc,const TT &val) { this->nr.set(default_nb_rows);  this->nc.set(default_nb_cols);  resize(nr,nc); set(val); }
     template<class T2,int s2> Mat(unsigned r,unsigned c,const Vec<T2,s2> &v):data(v) { this->nr.set(default_nb_rows);  this->nc.set(default_nb_cols);  resize(r,c); }
 
-    template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
+    /*template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
         if ( fixed_size==false )
             resize( val.nb_rows(), val.nb_cols() );
         if ( TriLower<sr,sc>::need_diag and TriLower<sr,sc>::need_upper==false and TriLower<sr,sc>::need_lower==false )
@@ -4027,6 +4078,9 @@ public:
             for(unsigned i=0;i<val.nb_rows();++i)
                 for(unsigned j=0;j<val.nb_cols();++j)
                     operator()(i, j) = val(i, j);
+    }*/
+    template<class T2,class STR2,class STO2,class O2> Mat( const Mat<T2,STR2,STO2,O2> &val ) {
+        construct_matrix( *this, val );
     }
 
     void resize(unsigned nr) { resize( nr, nr ); }
@@ -4243,7 +4297,7 @@ public:
     Mat(unsigned nr,unsigned nc,const TT &val) { this->nr.set(default_nb_rows);  this->nc.set(default_nb_cols);  resize(nr,nc); set(val); }
     template<class T2,int s2> Mat(unsigned r,unsigned c,const Vec<T2,s2> &v):data(v) { this->nr.set(default_nb_rows);  this->nc.set(default_nb_cols);  resize(r,c); }
 
-    template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
+    /*template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
         if ( fixed_size==false )
             resize( val.nb_rows(), val.nb_cols() );
         if ( Diag<sr,sc>::need_diag and Diag<sr,sc>::need_upper==false and Diag<sr,sc>::need_lower==false )
@@ -4261,6 +4315,9 @@ public:
             for(unsigned i=0;i<val.nb_rows();++i)
                 for(unsigned j=0;j<val.nb_cols();++j)
                     operator()(i, j) = val(i, j);
+    }*/
+    template<class T2,class STR2,class STO2,class O2> Mat( const Mat<T2,STR2,STO2,O2> &val ) {
+        construct_matrix( *this, val );
     }
 
     void resize(unsigned nr) { resize( nr, nr ); }
@@ -4472,7 +4529,7 @@ public:
     Mat(unsigned nr,unsigned nc,const TT &val) { this->nr.set(default_nb_rows);  this->nc.set(default_nb_cols);  resize(nr,nc); set(val); }
     template<class T2,int s2> Mat(unsigned r,unsigned c,const Vec<T2,s2> &v):data(v) { this->nr.set(default_nb_rows);  this->nc.set(default_nb_cols);  resize(r,c); }
 
-    template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
+    /*template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
         if ( fixed_size==false )
             resize( val.nb_rows(), val.nb_cols() );
         if ( Diag<sr,sc>::need_diag and Diag<sr,sc>::need_upper==false and Diag<sr,sc>::need_lower==false )
@@ -4490,6 +4547,9 @@ public:
             for(unsigned i=0;i<val.nb_rows();++i)
                 for(unsigned j=0;j<val.nb_cols();++j)
                     operator()(i, j) = val(i, j);
+    }*/
+    template<class T2,class STR2,class STO2,class O2> Mat( const Mat<T2,STR2,STO2,O2> &val ) {
+        construct_matrix( *this, val );
     }
 
     void resize(unsigned nr) { resize( nr, nr ); }

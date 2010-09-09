@@ -73,7 +73,10 @@ public:
         data = val.data;
     }
 
-    template<bool const_TM,class TVEC>
+    template<class T2,class STR2,class STO2>
+    Mat( const Mat<T2,STR2,STO2> &mat ) { construct_matrix( *this, mat ); }
+
+    /*template<bool const_TM,class TVEC>
     Mat(const Mat<SubMat<Mat,const_TM,TVEC>,STRUCTURE,STORAGE,int> &val) { // from SubMat
         resize( val.v.size(), val.v.size() );
 
@@ -96,22 +99,23 @@ public:
         if ( (STRUCTURE::need_upper and STRUCTURE::need_lower)==false and STRUCTURE::need_diag )
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<=i;++j) {
-                    if ( /*LMT::*/abs_indication( val(i,j) ) )
+                    if ( abs_indication( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
         else if ( (STRUCTURE::need_upper and STRUCTURE::need_lower)==false )
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<i;++j) {
-                    if ( /*LMT::*/abs_indication( val(i,j) ) )
+                    if ( abs_indication( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
         else
             for(unsigned i=0;i<nb_rows();++i)
                 for(unsigned j=0;j<nb_cols();++j) {
-                    if ( /*LMT::*/abs_indication( val(i,j) ) )
+                    if ( abs_indication( val(i,j) ) )
                         operator()(i,j) = val(i,j);
                 }
-    }
+    } */
+    
     void allocate(const Vec<Vec<unsigned> > &v) {
         resize( v.size(), v.size() );
         for(unsigned i=0;i<nb_rows();++i) {

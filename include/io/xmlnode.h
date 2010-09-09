@@ -73,8 +73,8 @@ public:
     const XmlNode &get_attribute(const char *name, T &res, const bool use_line_input = true) const throw (IoException) {
         std::string att( get_attribute(name) );
         std::istringstream is( att );
-        if (use_line_input)
-            line_input(is, res);
+        if ( use_line_input )
+            line_input( is, res );
         else
             is >> res;
         if ( !is ) { throw IoException( "Error while reading attribute " + std::string( name ) + " value=" + att ); }
@@ -86,9 +86,8 @@ public:
         if ( has_attribute(name) ) {
             std::string att( get_attribute(name) );
             std::istringstream is( att );
-            line_input(is, res);
-            if (use_line_input)
-                line_input(is, res);
+            if ( use_line_input )
+                line_input( is, res );
             else
                 is >> res;
             if ( !is ) { throw IoException( "Error while reading attribute " + std::string( name ) + " value=" + att ); }
@@ -103,7 +102,7 @@ public:
     const XmlNode &get_content(T &res) const throw (IoException) {
         std::string att( get_content() );
         std::istringstream is( att );
-        line_input(is, res);
+        line_input( is, res );
         if ( !is ) { throw IoException( "Error while reading content : " + att ); }
         return *this;
     }
@@ -112,7 +111,7 @@ public:
     const XmlNode &get_attribute_with_unit(const char *name,const char *final_unit,T &res) const throw (IoException) {
         std::string att( get_attribute(name) ), unit;
         std::istringstream is( att );
-        line_input(is, res);
+        line_input( is, res );
         if ( !is ) { throw IoException( "Error while reading attribute " + std::string( name ) + " value=" + att ); }
         is >> unit;
         if ( is )
