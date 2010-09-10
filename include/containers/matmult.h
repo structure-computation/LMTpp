@@ -124,7 +124,7 @@ public:
     template<class TR,class TS,class TT>
     operator Mat<TR,TS,TT>() const {
         Mat<TR,TS,TT> res;
-        PRINT( __LINE__ );
+        PRINT( __LINE__ ); PRINT( " conversion dans Mat< MatMultMat<...> > " );
         if ( IsAMatMult<TM1>::res )
             return Mat<TR,TS,TT>( m1 ) * m2;
         if ( IsAMatMult<TM2>::res )
