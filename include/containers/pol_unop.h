@@ -6,7 +6,7 @@ namespace LMT {
 template <class Op, int nd, int nx>
 struct PolUnOp{
     template <class T>
-    Vec<typename TypePromote<Sqrt,T>::T,DimPol<nd,nx>::valeur> operator() (const Vec<T,DimPol<nd,nx>::valeur> &p) { assert(0); }
+    Vec<typename TypePromote<Op,T>::T,DimPol<nd,nx>::valeur> operator() (const Vec<T,DimPol<nd,nx>::valeur> &p) { assert(0); }
 };
 
 template <int nd, int nx>
