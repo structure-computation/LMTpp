@@ -29,6 +29,28 @@ struct PolUnOp<Sqrt,nd,nx> {
 };
 
 template <int nd, int nx>
+struct PolUnOp<Exp,nd,nx> {
+    template <class T>
+    Vec<typename TypePromote<Exp,T>::T,DimPol<nd,nx>::valeur> operator() (const Vec<T,DimPol<nd,nx>::valeur> &p) {
+        typedef typename TypePromote<Exp,T>::T TC;
+        PolBinOp<Multiplies,nd,nd,nx> opmul;
+        Vec<TC,DimPol<nd,nx>::valeur> res(TC(0));
+        Vec<TC,DimPol<nd,nx>::valeur> puissance(TC(0));
+        TC factorielle = TC(1);
+        res[0]=TC(1);
+        puissance[0]=TC(1);
+        Vec<TC,DimPol<nd,nx>::valeur> element_somme = puissance/factorielle;
+        for (int i=1;max(abs(element_somme))>DimPol<nd,nx>::valeur*std::numeric_limits<TC>::epsilon();i++) {
+            factorielle *= TC(i);
+            puissance = opmul(puissance,p);
+            element_somme = puissance/factorielle;
+            res+=element_somme;
+        }
+        return res;
+    }
+};
+
+template <int nd, int nx>
 struct PolUnOp<Abs,nd,nx> {
     template <class T>
     typename TypePromote<Abs,T>::T operator() (const Vec<T,DimPol<nd,nx>::valeur> &p) { return abs(p[0]); }
