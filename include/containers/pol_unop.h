@@ -3,6 +3,8 @@
 
 namespace LMT {
 
+template <class Op, int nd, int ne, int nx> struct PolBinOp;
+
 template <class Op, int nd, int nx>
 struct PolUnOp{
     template <class T>
