@@ -4,7 +4,18 @@
 namespace LMT {
 
 template <class Op, int nd, int ne, int nx>
-struct PolBinOp;
+struct PolBinOp {
+
+    template <class T1, class T2>
+    Vec<typename TypePromote<Op,T1,T2>::T,DimPol<MIN(nd,ne),nx>::valeur> operator() (const Vec<T1,DimPol<nd,nx>::valeur> &p, const Vec<T2,DimPol<ne,nx>::valeur> &q) { assert(0); }
+
+    template <class T1, class T2>
+    Vec<typename TypePromote<Plus,T1,typename IsScalar<T2>::T>::T,DimPol<nd,nx>::valeur> operator() (const Vec<T1,DimPol<nd,nx>::valeur> &p, const T2 &q) { assert(0); }
+
+    template <class T1, class T2>
+    Vec<typename TypePromote<Plus,T1,typename IsScalar<T2>::T>::T,DimPol<ne,nx>::valeur> operator() (const T1 &p, const Vec<T2,DimPol<ne,nx>::valeur> &q) { assert(0); }
+
+};
 
 //--------------Plus Op------------------
 
