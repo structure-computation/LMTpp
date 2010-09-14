@@ -155,6 +155,58 @@ def hooke_orthotrope_th_3d(E1,E2,E3,nu12,nu13,nu23,G12,G13,G23,v1,v2,alpha1,alph
    epsth=mul(Pinv,vecalpha)
    return Kglo, Hglo, epsth, P
 
+def hooke_orthotrope_th_3d_endo(E1,E2,E3,nu12,nu13,nu23,G12,G13,G23,v1,v2,alpha1,alpha2,alpha3,d,dp,df):
+   print 'toto'
+   P,Pinv=matrice_passage(v1,v2)
+   Hloc = matrix([
+   [1./(E1*(1-df)), -nu12/(E1*(1-df)), -nu13/(E1*(1-df)), 0, 0, 0],
+   [-nu12/(E1*(1-df)), 1./(E2*(1-dp)), -nu23/E2, 0, 0, 0],
+   [-nu13/(E1*(1-df)), -nu23/E2, 1./(E3*(1-dp)), 0, 0, 0],
+   [0, 0, 0, 1./(2.*G12*(1-d)), 0, 0],
+   [0, 0, 0, 0, 1./(2.*G13*(1-d)), 0],
+   [0, 0, 0, 0, 0, 1./(2.*G23)],
+   ])
+   Kloc = Hloc.inverse()
+   Kglo=mul(Pinv,mul(Kloc,P))
+   Hglo = mul(P,mul(Hloc,Pinv))
+   vecalpha=vector([alpha1,alpha2,alpha3,0,0,0])
+   epsth=mul(Pinv,vecalpha)
+   return Kglo, Hglo, epsth, P
+
+def hooke_orthotrope_th_3d_loc(E1,E2,E3,nu12,nu13,nu23,G12,G13,G23,v1,v2,alpha1,alpha2,alpha3):
+   P,Pinv=matrice_passage(v1,v2)
+   Hloc = matrix([
+   [1./E1, -nu12/E1, -nu13/E1, 0, 0, 0],
+   [-nu12/E1, 1./E2, -nu23/E2, 0, 0, 0],
+   [-nu13/E1, -nu23/E2, 1./E3, 0, 0, 0],
+   [0, 0, 0, 1./(2.*G12), 0, 0],
+   [0, 0, 0, 0, 1./(2.*G13), 0],
+   [0, 0, 0, 0, 0, 1./(2.*G23)],
+   ])
+   Kloc = Hloc.inverse()
+   Kglo = mul(Pinv,mul(Kloc,P))
+   Hglo = mul(P,mul(Hloc,Pinv))
+   vecalpha=vector([alpha1,alpha2,alpha3,0,0,0])
+   epsth=mul(Pinv,vecalpha)
+   return Kglo, Hglo, epsth, P, Kloc, Hloc
+
+def hooke_orthotrope_th_3d_endo_loc(E1,E2,E3,nu12,nu13,nu23,G12,G13,G23,v1,v2,alpha1,alpha2,alpha3,d,dp,df):
+   P,Pinv=matrice_passage(v1,v2)
+   Hloc = matrix([
+   [1./(E1*(1-df)), -nu12/(E1*(1-df)), -nu13/(E1*(1-df)), 0, 0, 0],
+   [-nu12/(E1*(1-df)), 1./(E2*(1-dp)), -nu23/E2, 0, 0, 0],
+   [-nu13/(E1*(1-df)), -nu23/E2, 1./(E3*(1-dp)), 0, 0, 0],
+   [0, 0, 0, 1./(2.*G12*(1-d)), 0, 0],
+   [0, 0, 0, 0, 1./(2.*G13*(1-d)), 0],
+   [0, 0, 0, 0, 0, 1./(2.*G23)],
+   ])
+   Kloc = Hloc.inverse()
+   Kglo = mul(Pinv,mul(Kloc,P))
+   Hglo = mul(P,mul(Hloc,Pinv))
+   vecalpha=vector([alpha1,alpha2,alpha3,0,0,0])
+   epsth=mul(Pinv,vecalpha)
+   return Kglo, Hglo, epsth, P, Kloc, Hloc
+
 def hooke_orthotrope_th(E1,E2,E3,nu12,nu13,nu23,G12,G13,G23,v1,v2,alpha1,alpha2,alpha3,dim,type_stress_2D='plane stress'):
    Kglo, Hglo, epsth, P = hooke_orthotrope_th_3d(E1,E2,E3,nu12,nu13,nu23,G12,G13,G23,v1,v2,alpha1,alpha2,alpha3)
    K, epsth = simplification_behaviour(Kglo,Hglo,epsth,dim,type_stress_2D)

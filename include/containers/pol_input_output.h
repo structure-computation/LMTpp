@@ -2,9 +2,23 @@ namespace LMT {
 
 template <int nd, int nx, class T>
 std::istream &operator>>(std::istream &is, Pol<nd,nx,T> &P) { /// Definit un polynome grace à operator>>
-    Vec<T> coefs;
-    is >> coefs;
-    P=Pol<nd,nx,T>(coefs);
+	char parenthesis;
+	std::string buffer;
+	is >> parenthesis;
+	if ( parenthesis == '(' ) {
+		for (int i=0;i<DimPol<nd,nx>::valeur-1;i++) {
+			getline(is,buffer,',');
+			std::istringstream iss(buffer);
+			iss >> P.coefs[i];
+		}
+		is >> buffer;
+		std::istringstream iss(buffer);
+		iss >> P.coefs[DimPol<nd,nx>::valeur-1];
+		if ( buffer[buffer.size()-1]!=')' or buffer.find(',')!=-1 )
+			is.setstate(ios::failbit);
+	}
+	else
+		is.setstate(ios::failbit);
     return is;
 }
 
@@ -32,6 +46,15 @@ std::ostream &power_stream(std::ostream &os, Relative_Number<nd> nd_, Relative_N
 }
 
 template <int nd, int nx, class T>
+std::ostream &operator<<(std::ostream &os, const Pol<nd,nx,T> &P) { /// Convertit un polynome en flux de sortie
+    os << "(";
+    for (unsigned i=0;i<DimPol<nd,nx>::valeur-1;i++)
+        os << P.coefs[i] << ",";
+    os << P.coefs[DimPol<nd,nx>::valeur-1] << ")";
+    return os;
+}
+
+/*template <int nd, int nx, class T>
 std::ostream &operator<<(std::ostream &os, const Pol<nd,nx,T> &P) { /// Convertit un polynome non complexe en flux de sortie
     if (PolPowers<nd,nx>::needs_initialization)
         PolPowers<nd,nx>::initialize();
@@ -61,6 +84,6 @@ std::ostream &operator<<(std::ostream &os, const Pol<nd,nx,std::complex<T> > &P)
     }
     os << " ";
     return os;
-}
+}*/
 
 }

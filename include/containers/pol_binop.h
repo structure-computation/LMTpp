@@ -4,7 +4,18 @@
 namespace LMT {
 
 template <class Op, int nd, int ne, int nx>
-struct PolBinOp;
+struct PolBinOp {
+
+    template <class T1, class T2>
+    Vec<typename TypePromote<Op,T1,T2>::T,DimPol<MIN(nd,ne),nx>::valeur> operator() (const Vec<T1,DimPol<nd,nx>::valeur> &p, const Vec<T2,DimPol<ne,nx>::valeur> &q) { assert(0); }
+
+    template <class T1, class T2>
+    Vec<typename TypePromote<Plus,T1,typename IsScalar<T2>::T>::T,DimPol<nd,nx>::valeur> operator() (const Vec<T1,DimPol<nd,nx>::valeur> &p, const T2 &q) { assert(0); }
+
+    template <class T1, class T2>
+    Vec<typename TypePromote<Plus,T1,typename IsScalar<T2>::T>::T,DimPol<ne,nx>::valeur> operator() (const T1 &p, const Vec<T2,DimPol<ne,nx>::valeur> &q) { assert(0); }
+
+};
 
 //--------------Plus Op------------------
 
@@ -178,6 +189,41 @@ struct PolBinOp<Divides,nd,ne,1> {
         vecp[0]=p;
         return operator()(vecp,q);
     }
+};
+
+
+//--------------Pow Op------------------
+
+template <int nd, int ne, int nx>
+struct PolBinOp<Pow,nd,ne,nx> {
+
+    template <class T1, class T2>
+    Vec<typename TypePromote<Pow,T1,T2>::T,DimPol<MIN(nd,ne),nx>::valeur> operator() (const Vec<T1,DimPol<nd,nx>::valeur> &p, const Vec<T2,DimPol<ne,nx>::valeur> &q) {
+        if (PolTroncates<nd,MIN(nd,ne),nx>::needs_initialization)
+            PolTroncates<nd,MIN(nd,ne),nx>::initialize();
+        if (PolTroncates<ne,MIN(nd,ne),nx>::needs_initialization)
+            PolTroncates<ne,MIN(nd,ne),nx>::initialize();
+        PolTroncates<nd,MIN(nd,ne),nx> op;
+        PolTroncates<ne,MIN(nd,ne),nx> oq;
+        PolUnOp<Log,MIN(nd,ne),nx> oplog;
+        PolBinOp<Multiplies,MIN(nd,ne),MIN(nd,ne),nx> opmul;
+        PolUnOp<Exp,MIN(nd,ne),nx> opexp;
+        return opexp(opmul(oq(q),oplog(op(p))));
+    }
+
+    template <class T1, class T2>
+    Vec<typename TypePromote<Pow,T1,typename IsScalar<T2>::T>::T,DimPol<nd,nx>::valeur> operator() (const Vec<T1,DimPol<nd,nx>::valeur> &p, const T2 &q) {
+        PolUnOp<Log,nd,nx> oplog;
+        PolUnOp<Exp,nd,nx> opexp;
+        return opexp(q*oplog(p));
+    }
+
+    template <class T1, class T2>
+    Vec<typename TypePromote<Pow,T1,typename IsScalar<T2>::T>::T,DimPol<ne,nx>::valeur> operator() (const T1 &p, const Vec<T2,DimPol<ne,nx>::valeur> &q) {
+        PolUnOp<Exp,MIN(nd,ne),nx> opexp;
+        return opexp(q*log(p));
+    }
+
 };
 
 }

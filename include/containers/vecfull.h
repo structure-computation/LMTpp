@@ -32,6 +32,7 @@ public:
     static const bool fixed_size = true;
     static const int sparsity_rate = 0;
     
+    static const int notFound = 2147483647;
 
     Vec() {}
     template<class T2> Vec(const T2 &v) { for(unsigned i=0;i<(unsigned)static_size;val[i++]=v); } /// copy val in all elements of *this
@@ -265,7 +266,7 @@ public:
         for( unsigned i=0; i<size(); ++i )
             if ( val[i] == v )
                 return i;
-        return size();
+        return notFound;
     }
 
     template<class T2, class Cmp > 
@@ -273,7 +274,7 @@ public:
         for( unsigned i=0; i<size(); ++i )
             if ( cmp( val[i], v ) )
                 return i;
-        return size();
+        return notFound;
     }
 
     Vec &set(const TT &v) { for(unsigned i=0;i<size();++i) val[i]=v; return *this; }
@@ -328,6 +329,8 @@ public:
     static const bool fixed_size = false;
     static const int sparsity_rate = 0;
     typedef typename PreferredAllocator<TT>::T Allocator;
+    
+    static const int notFound = 2147483647;
 
     Vec() { init(); }
     explicit Vec(const TT &v0) { init(); resize(1); val[0]=v0; } /// declare a vector containing args
@@ -618,7 +621,7 @@ public:
         for( unsigned i=0; i<size(); ++i )
             if ( val[i] == v )
                 return i;
-        return size();
+        return notFound;
     }
 
     template<class T2, class Cmp > 
@@ -626,7 +629,7 @@ public:
         for( unsigned i=0; i<size(); ++i )
             if ( cmp( val[i], v ) )
                 return i;
-        return size();
+        return notFound;
     }
 
     Vec &set(const TT &v) { for(unsigned i=0;i<size();++i) val[i]=v; return *this; }
