@@ -45,6 +45,14 @@ void append_skin_elements(Element<Penta,TN,TNG,TD,NET> &e,TC &ch,HET &het,Number
 }
 
 
+// --------------------------------------------------------------------------------------------------------
+template<class TN,class TNG,class TD,unsigned NET>
+typename TNG::T measure( const Element<Penta,TN,TNG,TD,NET> &e ) {
+	std::cout << "Error measure not implemented for type Penta - do it if you need it" << std::endl;
+	assert(0);
+}
+
+
 
 };
 
