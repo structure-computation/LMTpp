@@ -100,12 +100,6 @@ struct MatMultMat {};
 
 template<class TM1,class TM2> struct IsMatOp<MatMultMat<TM1,TM2> > { typedef int T; };
 
-template<class TM>
-struct IsAMatMult { enum { res = 0 }; };
-
-template<class TM1,class TM2,class Structure,class Storage>
-struct IsAMatMult<Mat<MatMultMat<TM1,TM2>,Structure,Storage,int> > { enum { res = 1 }; };
-
 template<class TM1,class TM2,class Structure,class Storage>
 class Mat<MatMultMat<TM1,TM2>,Structure,Storage,int> {
 public:
@@ -121,21 +115,6 @@ public:
 
     T operator()(unsigned i,unsigned j) const { return dot( m1.row(i), m2.col(j) ); }
 
-    template<class TR,class TS,class TT>
-    operator Mat<TR,TS,TT>() const {
-        Mat<TR,TS,TT> res;
-        PRINT( __LINE__ ); PRINT( " conversion dans Mat< MatMultMat<...> > " );
-        if ( IsAMatMult<TM1>::res )
-            return Mat<TR,TS,TT>( m1 ) * m2;
-        if ( IsAMatMult<TM2>::res )
-            return m1 * Mat<TR,TS,TT>( m2 );
-        // else
-        res.resize( nb_rows(), nb_cols() );
-        for( int r = 0; r < nb_rows(); ++r )
-            for( int c = 0; c < nb_cols(); ++c )
-                res( r, c ) = operator()( r, c );
-        return res;
-    }
 
     typedef Vec<VecSubMat<Mat,false,ExtractDiag> > RetDiag;
     typedef Vec<VecSubMat<Mat,true ,ExtractDiag> > RetDiagConst;

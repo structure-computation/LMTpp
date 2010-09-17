@@ -54,6 +54,14 @@ public:
     typedef typename MA::TElemList TElemList;
     typedef MeshGenericBis< Carac, true, nb_sub_meshes > TSkin;
     template<class NE,class BE=DefaultBehavior> struct TElem { typedef typename TElemList::template TElem<NE,BE>::TE TE; };
+    /*!
+    Type utilisé seulement pour add_element().
+    Il ne fait pas que transformer TE en TE*. lorsque l'utilisateur de add_element() souhaite ajouter un élément dont ne nom n'est pas dans le MeshCarac du maillage, add_element() ne renvoie pas un void* mais un ElementAncestor<TNode>* (mais la valeur reste NULL ).
+    */
+    template<class NE,class BE=DefaultBehavior> struct TElemPtr { 
+        typedef typename TElem<NE,BE>::TE TE_;
+        typedef typename AlternativeOnType< AreSameType<void, TE_>::res, TE_, typename MA::EA >::T* TE;
+    };
     
     ///
     Mesh() {
@@ -73,29 +81,58 @@ public:
     }
 
     ///
-    template<class NE,class BE> typename TElem<NE,BE>::TE *add_element(const NE &ne,const BE &be,TNode **n) { return MA::add_element_(ne,be,n); }
-    template<class NE,class BE> typename TElem<NE,BE>::TE *add_element(const NE &ne,const BE &be,TNode *n0) { TNode *n[] = {n0}; return add_element(ne,be,n); }
-    template<class NE,class BE> typename TElem<NE,BE>::TE *add_element(const NE &ne,const BE &be,TNode *n0,TNode *n1) { TNode *n[] = {n0,n1}; return add_element(ne,be,n); }
-    template<class NE,class BE> typename TElem<NE,BE>::TE *add_element(const NE &ne,const BE &be,TNode *n0,TNode *n1,TNode *n2) { TNode *n[] = {n0,n1,n2}; return add_element(ne,be,n); }
-    template<class NE,class BE> typename TElem<NE,BE>::TE *add_element(const NE &ne,const BE &be,TNode *n0,TNode *n1,TNode *n2,TNode *n3) { TNode *n[] = {n0,n1,n2,n3}; return this->add_element(ne,be,n); }
-    template<class NE,class BE> typename TElem<NE,BE>::TE *add_element(const NE &ne,const BE &be,TNode *n0,TNode *n1,TNode *n2,TNode *n3,TNode *n4) { TNode *n[] = {n0,n1,n2,n3,n4}; return this->add_element(ne,be,n); }
-    template<class NE,class BE> typename TElem<NE,BE>::TE *add_element(const NE &ne,const BE &be,TNode *n0,TNode *n1,TNode *n2,TNode *n3,TNode *n4,TNode *n5) { TNode *n[] = {n0,n1,n2,n3,n4,n5}; return this->add_element(ne,be,n); }
-    template<class NE,class BE> typename TElem<NE,BE>::TE *add_element(const NE &ne,const BE &be,TNode *n0,TNode *n1,TNode *n2,TNode *n3,TNode *n4,TNode *n5,TNode *n6) { TNode *n[] = {n0,n1,n2,n3,n4,n5,n6}; return this->add_element(ne,be,n); }
-    template<class NE,class BE> typename TElem<NE,BE>::TE *add_element(const NE &ne,const BE &be,TNode *n0,TNode *n1,TNode *n2,TNode *n3,TNode *n4,TNode *n5,TNode *n6,TNode *n7) { TNode *n[] = {n0,n1,n2,n3,n4,n5,n6,n7}; return this->add_element(ne,be,n); }
-    template<class NE,class BE> typename TElem<NE,BE>::TE *add_element(const NE &ne,const BE &be,TNode *n0,TNode *n1,TNode *n2,TNode *n3,TNode *n4,TNode *n5,TNode *n6,TNode *n7, TNode *n8) { TNode *n[] = {n0,n1,n2,n3,n4,n5,n6,n7,n8}; return this->add_element(ne,be,n); }
-    template<class NE,class BE> typename TElem<NE,BE>::TE *add_element(const NE &ne,const BE &be,TNode *n0,TNode *n1,TNode *n2,TNode *n3,TNode *n4,TNode *n5,TNode *n6,TNode *n7, TNode *n8,TNode *n9) { TNode *n[] = {n0,n1,n2,n3,n4,n5,n6,n7,n8,n9}; return this->add_element(ne,be,n); }
+    template<class NE,class BE> typename TElemPtr<NE,BE>::TE add_element(const NE &ne,const BE &be,TNode **n) { 
     
-    template<class NE,class BE> typename TElem<NE,BE>::TE *add_element(const NE &ne,const BE &be,unsigned *n) { TNode *np[NE::nb_nodes]; for(unsigned i=0;i<NE::nb_nodes;++i) np[i] = &this->node_list[n[i]]; return MA::add_element_(ne,be,np); }
-    template<class NE,class BE> typename TElem<NE,BE>::TE *add_element(const NE &ne,const BE &be,unsigned n0) { unsigned n[] = {n0}; return add_element(ne,be,n); }
-    template<class NE,class BE> typename TElem<NE,BE>::TE *add_element(const NE &ne,const BE &be,unsigned n0,unsigned n1) { unsigned n[] = {n0,n1}; return add_element(ne,be,n); }
-    template<class NE,class BE> typename TElem<NE,BE>::TE *add_element(const NE &ne,const BE &be,unsigned n0,unsigned n1,unsigned n2) { unsigned n[] = {n0,n1,n2}; return add_element(ne,be,n); }
-    template<class NE,class BE> typename TElem<NE,BE>::TE *add_element(const NE &ne,const BE &be,unsigned n0,unsigned n1,unsigned n2,unsigned n3) { unsigned n[] = {n0,n1,n2,n3}; return add_element(ne,be,n); }
     
-    template<class NE,class BE> typename TElem<NE,BE>::TE *add_element(const NE &ne,const BE &be,unsigned n0,unsigned n1,unsigned n2,unsigned n3,unsigned n4,unsigned n5) { unsigned n[] = {n0,n1,n2,n3,n4,n5}; return add_element(ne,be,n); }
-    template<class NE,class BE> typename TElem<NE,BE>::TE *add_element(const NE &ne,const BE &be,unsigned n0,unsigned n1,unsigned n2,unsigned n3,unsigned n4,unsigned n5,unsigned n6) { unsigned n[] = {n0,n1,n2,n3,n4,n5,n6}; return add_element(ne,be,n); }
-    template<class NE,class BE> typename TElem<NE,BE>::TE *add_element(const NE &ne,const BE &be,unsigned n0,unsigned n1,unsigned n2,unsigned n3,unsigned n4,unsigned n5,unsigned n6,unsigned n7) { unsigned n[] = {n0,n1,n2,n3,n4,n5,n6,n7}; return add_element(ne,be,n); }
-    template<class NE,class BE> typename TElem<NE,BE>::TE *add_element(const NE &ne,const BE &be,unsigned n0,unsigned n1,unsigned n2,unsigned n3,unsigned n4,unsigned n5,unsigned n6,unsigned n7,unsigned n8) { unsigned n[] = {n0,n1,n2,n3,n4,n5,n6,n7,n8}; return add_element(ne,be,n); }
-    template<class NE,class BE> typename TElem<NE,BE>::TE *add_element(const NE &ne,const BE &be,unsigned n0,unsigned n1,unsigned n2,unsigned n3,unsigned n4,unsigned n5,unsigned n6,unsigned n7,unsigned n8,unsigned n9) { unsigned n[] = {n0,n1,n2,n3,n4,n5,n6,n7,n8,n9}; return add_element(ne,be,n); }
+    return MA::add_element_(ne,be,n); }
+    template<class NE,class BE> typename TElemPtr<NE,BE>::TE add_element(const NE &ne,const BE &be,TNode *n0) { TNode *n[] = {n0}; return add_element(ne,be,n); }
+    template<class NE,class BE> typename TElemPtr<NE,BE>::TE add_element(const NE &ne,const BE &be,TNode *n0,TNode *n1) { TNode *n[] = {n0,n1}; return add_element(ne,be,n); }
+    template<class NE,class BE> typename TElemPtr<NE,BE>::TE add_element(const NE &ne,const BE &be,TNode *n0,TNode *n1,TNode *n2) { TNode *n[] = {n0,n1,n2}; return add_element(ne,be,n); }
+    template<class NE,class BE> typename TElemPtr<NE,BE>::TE add_element(const NE &ne,const BE &be,TNode *n0,TNode *n1,TNode *n2,TNode *n3) { TNode *n[] = {n0,n1,n2,n3}; return this->add_element(ne,be,n); }
+    template<class NE,class BE> typename TElemPtr<NE,BE>::TE add_element(const NE &ne,const BE &be,TNode *n0,TNode *n1,TNode *n2,TNode *n3,TNode *n4) { TNode *n[] = {n0,n1,n2,n3,n4}; return this->add_element(ne,be,n); }
+    template<class NE,class BE> typename TElemPtr<NE,BE>::TE add_element(const NE &ne,const BE &be,TNode *n0,TNode *n1,TNode *n2,TNode *n3,TNode *n4,TNode *n5) { TNode *n[] = {n0,n1,n2,n3,n4,n5}; return this->add_element(ne,be,n); }
+    template<class NE,class BE> typename TElemPtr<NE,BE>::TE add_element(const NE &ne,const BE &be,TNode *n0,TNode *n1,TNode *n2,TNode *n3,TNode *n4,TNode *n5,TNode *n6) { TNode *n[] = {n0,n1,n2,n3,n4,n5,n6}; return this->add_element(ne,be,n); }
+    template<class NE,class BE> typename TElemPtr<NE,BE>::TE add_element(const NE &ne,const BE &be,TNode *n0,TNode *n1,TNode *n2,TNode *n3,TNode *n4,TNode *n5,TNode *n6,TNode *n7) { TNode *n[] = {n0,n1,n2,n3,n4,n5,n6,n7}; return this->add_element(ne,be,n); }
+    template<class NE,class BE> typename TElemPtr<NE,BE>::TE add_element(const NE &ne,const BE &be,TNode *n0,TNode *n1,TNode *n2,TNode *n3,TNode *n4,TNode *n5,TNode *n6,TNode *n7, TNode *n8) { TNode *n[] = {n0,n1,n2,n3,n4,n5,n6,n7,n8}; return this->add_element(ne,be,n); }
+    template<class NE,class BE> typename TElemPtr<NE,BE>::TE add_element(const NE &ne,const BE &be,TNode *n0,TNode *n1,TNode *n2,TNode *n3,TNode *n4,TNode *n5,TNode *n6,TNode *n7, TNode *n8,TNode *n9) { TNode *n[] = {n0,n1,n2,n3,n4,n5,n6,n7,n8,n9}; return this->add_element(ne,be,n); }
+    
+    template<class NE,class BE> typename TElemPtr<NE,BE>::TE add_element(const NE &ne,const BE &be,unsigned *n) { TNode *np[NE::nb_nodes]; for(unsigned i=0;i<NE::nb_nodes;++i) np[i] = &this->node_list[n[i]]; return MA::add_element_(ne,be,np); }
+    template<class NE,class BE> typename TElemPtr<NE,BE>::TE add_element(const NE &ne,const BE &be,unsigned n0) { unsigned n[] = {n0}; return add_element(ne,be,n); }
+    template<class NE,class BE> typename TElemPtr<NE,BE>::TE add_element(const NE &ne,const BE &be,unsigned n0,unsigned n1) { unsigned n[] = {n0,n1}; return add_element(ne,be,n); }
+    template<class NE,class BE> typename TElemPtr<NE,BE>::TE add_element(const NE &ne,const BE &be,unsigned n0,unsigned n1,unsigned n2) { unsigned n[] = {n0,n1,n2}; return add_element(ne,be,n); }
+    template<class NE,class BE> typename TElemPtr<NE,BE>::TE add_element(const NE &ne,const BE &be,unsigned n0,unsigned n1,unsigned n2,unsigned n3) { unsigned n[] = {n0,n1,n2,n3}; return add_element(ne,be,n); }
+    
+    template<class NE,class BE> typename TElemPtr<NE,BE>::TE add_element(const NE &ne,const BE &be,unsigned n0,unsigned n1,unsigned n2,unsigned n3,unsigned n4,unsigned n5) { unsigned n[] = {n0,n1,n2,n3,n4,n5}; return add_element(ne,be,n); }
+    template<class NE,class BE> typename TElemPtr<NE,BE>::TE add_element(const NE &ne,const BE &be,unsigned n0,unsigned n1,unsigned n2,unsigned n3,unsigned n4,unsigned n5,unsigned n6) { unsigned n[] = {n0,n1,n2,n3,n4,n5,n6}; return add_element(ne,be,n); }
+    template<class NE,class BE> typename TElemPtr<NE,BE>::TE add_element(const NE &ne,const BE &be,unsigned n0,unsigned n1,unsigned n2,unsigned n3,unsigned n4,unsigned n5,unsigned n6,unsigned n7) { unsigned n[] = {n0,n1,n2,n3,n4,n5,n6,n7}; return add_element(ne,be,n); }
+    template<class NE,class BE> typename TElemPtr<NE,BE>::TE add_element(const NE &ne,const BE &be,unsigned n0,unsigned n1,unsigned n2,unsigned n3,unsigned n4,unsigned n5,unsigned n6,unsigned n7,unsigned n8) { unsigned n[] = {n0,n1,n2,n3,n4,n5,n6,n7,n8}; return add_element(ne,be,n); }
+    template<class NE,class BE> typename TElemPtr<NE,BE>::TE add_element(const NE &ne,const BE &be,unsigned n0,unsigned n1,unsigned n2,unsigned n3,unsigned n4,unsigned n5,unsigned n6,unsigned n7,unsigned n8,unsigned n9) { unsigned n[] = {n0,n1,n2,n3,n4,n5,n6,n7,n8,n9}; return add_element(ne,be,n); }
+
+
+    ///
+//     template<class NE,class BE> typename TElem<NE,BE>::TE *add_element(const NE &ne,const BE &be,TNode **n) { return MA::add_element_(ne,be,n); }
+//     template<class NE,class BE> typename TElem<NE,BE>::TE *add_element(const NE &ne,const BE &be,TNode *n0) { TNode *n[] = {n0}; return add_element(ne,be,n); }
+//     template<class NE,class BE> typename TElem<NE,BE>::TE *add_element(const NE &ne,const BE &be,TNode *n0,TNode *n1) { TNode *n[] = {n0,n1}; return add_element(ne,be,n); }
+//     template<class NE,class BE> typename TElem<NE,BE>::TE *add_element(const NE &ne,const BE &be,TNode *n0,TNode *n1,TNode *n2) { TNode *n[] = {n0,n1,n2}; return add_element(ne,be,n); }
+//     template<class NE,class BE> typename TElem<NE,BE>::TE *add_element(const NE &ne,const BE &be,TNode *n0,TNode *n1,TNode *n2,TNode *n3) { TNode *n[] = {n0,n1,n2,n3}; return this->add_element(ne,be,n); }
+//     template<class NE,class BE> typename TElem<NE,BE>::TE *add_element(const NE &ne,const BE &be,TNode *n0,TNode *n1,TNode *n2,TNode *n3,TNode *n4) { TNode *n[] = {n0,n1,n2,n3,n4}; return this->add_element(ne,be,n); }
+//     template<class NE,class BE> typename TElem<NE,BE>::TE *add_element(const NE &ne,const BE &be,TNode *n0,TNode *n1,TNode *n2,TNode *n3,TNode *n4,TNode *n5) { TNode *n[] = {n0,n1,n2,n3,n4,n5}; return this->add_element(ne,be,n); }
+//     template<class NE,class BE> typename TElem<NE,BE>::TE *add_element(const NE &ne,const BE &be,TNode *n0,TNode *n1,TNode *n2,TNode *n3,TNode *n4,TNode *n5,TNode *n6) { TNode *n[] = {n0,n1,n2,n3,n4,n5,n6}; return this->add_element(ne,be,n); }
+//     template<class NE,class BE> typename TElem<NE,BE>::TE *add_element(const NE &ne,const BE &be,TNode *n0,TNode *n1,TNode *n2,TNode *n3,TNode *n4,TNode *n5,TNode *n6,TNode *n7) { TNode *n[] = {n0,n1,n2,n3,n4,n5,n6,n7}; return this->add_element(ne,be,n); }
+//     template<class NE,class BE> typename TElem<NE,BE>::TE *add_element(const NE &ne,const BE &be,TNode *n0,TNode *n1,TNode *n2,TNode *n3,TNode *n4,TNode *n5,TNode *n6,TNode *n7, TNode *n8) { TNode *n[] = {n0,n1,n2,n3,n4,n5,n6,n7,n8}; return this->add_element(ne,be,n); }
+//     template<class NE,class BE> typename TElem<NE,BE>::TE *add_element(const NE &ne,const BE &be,TNode *n0,TNode *n1,TNode *n2,TNode *n3,TNode *n4,TNode *n5,TNode *n6,TNode *n7, TNode *n8,TNode *n9) { TNode *n[] = {n0,n1,n2,n3,n4,n5,n6,n7,n8,n9}; return this->add_element(ne,be,n); }
+//     
+//     template<class NE,class BE> typename TElem<NE,BE>::TE *add_element(const NE &ne,const BE &be,unsigned *n) { TNode *np[NE::nb_nodes]; for(unsigned i=0;i<NE::nb_nodes;++i) np[i] = &this->node_list[n[i]]; return MA::add_element_(ne,be,np); }
+//     template<class NE,class BE> typename TElem<NE,BE>::TE *add_element(const NE &ne,const BE &be,unsigned n0) { unsigned n[] = {n0}; return add_element(ne,be,n); }
+//     template<class NE,class BE> typename TElem<NE,BE>::TE *add_element(const NE &ne,const BE &be,unsigned n0,unsigned n1) { unsigned n[] = {n0,n1}; return add_element(ne,be,n); }
+//     template<class NE,class BE> typename TElem<NE,BE>::TE *add_element(const NE &ne,const BE &be,unsigned n0,unsigned n1,unsigned n2) { unsigned n[] = {n0,n1,n2}; return add_element(ne,be,n); }
+//     template<class NE,class BE> typename TElem<NE,BE>::TE *add_element(const NE &ne,const BE &be,unsigned n0,unsigned n1,unsigned n2,unsigned n3) { unsigned n[] = {n0,n1,n2,n3}; return add_element(ne,be,n); }
+//     
+//     template<class NE,class BE> typename TElem<NE,BE>::TE *add_element(const NE &ne,const BE &be,unsigned n0,unsigned n1,unsigned n2,unsigned n3,unsigned n4,unsigned n5) { unsigned n[] = {n0,n1,n2,n3,n4,n5}; return add_element(ne,be,n); }
+//     template<class NE,class BE> typename TElem<NE,BE>::TE *add_element(const NE &ne,const BE &be,unsigned n0,unsigned n1,unsigned n2,unsigned n3,unsigned n4,unsigned n5,unsigned n6) { unsigned n[] = {n0,n1,n2,n3,n4,n5,n6}; return add_element(ne,be,n); }
+//     template<class NE,class BE> typename TElem<NE,BE>::TE *add_element(const NE &ne,const BE &be,unsigned n0,unsigned n1,unsigned n2,unsigned n3,unsigned n4,unsigned n5,unsigned n6,unsigned n7) { unsigned n[] = {n0,n1,n2,n3,n4,n5,n6,n7}; return add_element(ne,be,n); }
+//     template<class NE,class BE> typename TElem<NE,BE>::TE *add_element(const NE &ne,const BE &be,unsigned n0,unsigned n1,unsigned n2,unsigned n3,unsigned n4,unsigned n5,unsigned n6,unsigned n7,unsigned n8) { unsigned n[] = {n0,n1,n2,n3,n4,n5,n6,n7,n8}; return add_element(ne,be,n); }
+//     template<class NE,class BE> typename TElem<NE,BE>::TE *add_element(const NE &ne,const BE &be,unsigned n0,unsigned n1,unsigned n2,unsigned n3,unsigned n4,unsigned n5,unsigned n6,unsigned n7,unsigned n8,unsigned n9) { unsigned n[] = {n0,n1,n2,n3,n4,n5,n6,n7,n8,n9}; return add_element(ne,be,n); }
     
     
     /// to be called after add_element or add_node to say that update_... should recalculate (but it's not necessary the first time updates are called).
