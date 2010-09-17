@@ -25,7 +25,7 @@ namespace Private {
 template<class T0,class Str0,class Sto0,class T1,class Str1,class Sto1>
 void construct_matrix( Mat<T0,Str0,Sto0> &res, const Mat<T1,Str1,Sto1> &src ) {
     res.resize( src.nb_rows(), src.nb_cols() );
-    PRINT( " conversion Mat< >" );
+    //PRINT( " conversion Mat< >" );
     Str0::apply( Private::CopyConstructMat(), res, src );
 }
 
@@ -33,7 +33,7 @@ template<class T0,class Str0,class Orientation0,class T1,class Str1>
 void construct_matrix( Mat<T0,Str0,Dense<Orientation0>,void> &res, const Mat<T1,Str1,SparseLine<Col>,void> &src ) {
     res.resize( src.nb_rows(), src.nb_cols() );
     res.clear();
-    PRINT( " conversion Mat< Str1, SparseLine<Col> > hhhhhhhhhhhhhhh" );
+    //PRINT( " conversion Mat< Str1, SparseLine<Col> > hhhhhhhhhhhhhhh" );
     //res.push_back( 2 ); /// pour tester Str1
     Str1::apply_sparse_line( Private::CopyConstructMatWithValidPosition(), res, src );
 //     for( unsigned r = 0; r < src.nb_rows(); ++r )
@@ -44,14 +44,14 @@ void construct_matrix( Mat<T0,Str0,Dense<Orientation0>,void> &res, const Mat<T1,
 template<class T0,class Str0,class O0,class T1,class Str1,class O1>
 void construct_matrix( Mat<T0,Str0,SparseLine<O0>,void> &res, const Mat<T1,Str1,SparseLine<O1>,void> &src ) {
     res.resize( src.nb_rows(), src.nb_cols() );
-    PRINT( " conversion Mat< Str0, SparseLine<Col> >" );
+    //PRINT( " conversion Mat< Str0, SparseLine<Col> >" );
     Str1::apply_sparse_line( Private::CopyConstructMatWithValidPosition(), res, src );
 }
 
 template<class T0,class Str,class O,class T1>
 void construct_matrix( Mat<T0,Str,SparseLine<O>,void> &res, const Mat<T1,Str,SparseLine<O>,void> &src ) {
     res.resize( src.nb_rows(), src.nb_cols() );
-    PRINT( " conversion Mat< Str, SparseLine<Col> >" );
+    //PRINT( " conversion Mat< Str, SparseLine<Col> >" );
     for( unsigned r = 0; r < src.nb_rows(); ++r ) {
         res.data[ r ].indices = src.data[ r ].indices;
         res.data[ r ].data    = src.data[ r ].data   ;
@@ -64,7 +64,7 @@ void construct_matrix( Mat<T0,Str0,Sto0> &res, const Mat<MatMultMat<Mat<T0_,Gen<
     typedef typename TypePromote<Multiplies,T0_,T1_>::T T;
     const Mat<T0_,Gen<>,SparseLine<Col> > &A = src.m1;
     const Mat<T1_,Gen<>,SparseLine<Col> > &B = src.m2;
-    PRINT( " conversion Mat< Gen, sparseLine<Col> > * Mat< Gen, SparseLine<Col> >" );
+    //PRINT( " conversion Mat< Gen, sparseLine<Col> > * Mat< Gen, SparseLine<Col> >" );
     res.resize( A.nb_rows(), B.nb_cols() );
     Vec<T> tmp; tmp.resize( B.nb_cols() );
     for( unsigned ra = 0; ra < A.nb_rows(); ++ra ) {
@@ -85,7 +85,7 @@ void construct_matrix( Mat<T0,Str0,Sto0> &res, const Mat< MatMultMat< Mat<T0_,Sy
     typedef typename TypePromote<Multiplies,T0_,T1_>::T T;
     const Mat< T0_,Sym<s0_,false>,Dense<Col>,void >   &A = src.m1;
     const Mat< T1_,Gen<s_r1_,s_c1_>,Dense<Col>,void > &B = src.m2;
-    PRINT( "conversion  Mat< Sym<s,false>, Dense<Col> > * Mat< Gen, Dense<Col> >" );
+    //PRINT( "conversion  Mat< Sym<s,false>, Dense<Col> > * Mat< Gen, Dense<Col> >" );
     res.resize( A.nb_rows(), B.nb_cols() );
     Vec<T> tmp; tmp.resize( B.nb_cols() );
     for( unsigned ra = 0; ra < A.nb_rows(); ++ra ) {
@@ -108,7 +108,7 @@ void construct_matrix( Mat<T0,Str0,Sto0> &res,
     
     res.resize( A.nb_rows(), B.nb_cols() );
     Vec<T> tmp; tmp.resize( B.nb_cols() );
-    PRINT( "Mat< Sym<s,false>, Dense<Col> > * Mat< Gen, SparseLine<Col> >" );
+    //PRINT( "Mat< Sym<s,false>, Dense<Col> > * Mat< Gen, SparseLine<Col> >" );
     for( unsigned ra = 0; ra < A.nb_rows(); ++ra ) {
         tmp.set( 0 );
         for( unsigned ca = 0; ca <= ra; ca++ )
@@ -167,23 +167,23 @@ void construct_matrix( Mat<T0,Str0,Sto0> &res,
 
 
 /// conversion de  Mat< Gen, Dense<Col> > * Mat< Sym<s,false>, Dense<Col> >
-template<class T0,class Str0,class Sto0,class T0_,int s0_,class T1_,int s_r1_,int s_c1_, class Str2,class Sto2>
-void construct_matrix( Mat<T0,Str0,Sto0> &res, const Mat< MatMultMat< Mat<T1_,Gen<s_r1_,s_c1_>,Dense<Col>,void >, Mat<T0_,Sym<s0_,false>,Dense<Col>,void > >,Str2,Sto2> &src ) {
-    typedef typename TypePromote<Multiplies,T0_,T1_>::T T;
-    const Mat< T1_,Gen<s_r1_,s_c1_>,Dense<Col>,void > &A = src.m1;
-    const Mat< T0_,Sym<s0_,false>,Dense<Col>,void >   &B = src.m2;
-    PRINT( "conversion  Mat< Gen, Dense<Col> > * Mat< Sym<s,false>, Dense<Col> >" );
-    res.resize( A.nb_rows(), B.nb_cols() );
-    Vec<T> tmp; tmp.resize( B.nb_cols() );
-    for( unsigned ra = 0; ra < A.nb_rows(); ++ra ) {
-        tmp.set( 0 );
-        for( unsigned ca = 0; ca <= ra; ca++ )
-            tmp += A( ra, ca ) * B.row( ca );
-        for( unsigned ca = ra + 1; ca < A.nb_cols(); ca++ ) 
-            tmp += A( ca, ra ) * B.row( ca );
-        res.row( ra ) = tmp;
-    }
-}
+// template<class T0,class Str0,class Sto0,class T0_,int s0_,class T1_,int s_r1_,int s_c1_, class Str2,class Sto2>
+// void construct_matrix( Mat<T0,Str0,Sto0> &res, const Mat< MatMultMat< Mat<T1_,Gen<s_r1_,s_c1_>,Dense<Col>,void >, Mat<T0_,Sym<s0_,false>,Dense<Col>,void > >,Str2,Sto2> &src ) {
+//     typedef typename TypePromote<Multiplies,T0_,T1_>::T T;
+//     const Mat< T1_,Gen<s_r1_,s_c1_>,Dense<Col>,void > &A = src.m1;
+//     const Mat< T0_,Sym<s0_,false>,Dense<Col>,void >   &B = src.m2;
+//     PRINT( "conversion  Mat< Gen, Dense<Col> > * Mat< Sym<s,false>, Dense<Col> >" );
+//     res.resize( A.nb_rows(), B.nb_cols() );
+//     Vec<T> tmp; tmp.resize( B.nb_cols() );
+//     for( unsigned ra = 0; ra < A.nb_rows(); ++ra ) {
+//         tmp.set( 0 );
+//         for( unsigned ca = 0; ca <= ra; ca++ )
+//             tmp += A( ra, ca ) * B.row( ca );
+//         for( unsigned ca = ra + 1; ca < A.nb_cols(); ca++ ) 
+//             tmp += A( ca, ra ) * B.row( ca );
+//         res.row( ra ) = tmp;
+//     }
+// }
 /*
 /// conversion de Mat< Gen, SparseLine<Col> > * Mat< Sym<s,false>, Dense<Col> >
 template<class T0,class Str0,class Sto0,class T0_,int s0_,class T1_,int s_r1_,int s_c1_, class Str2,class Sto2>
