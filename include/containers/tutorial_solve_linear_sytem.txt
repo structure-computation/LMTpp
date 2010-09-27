@@ -1,19 +1,19 @@
 /*!
 \tutorial Résoudre un système linéaire
 
-Résoudre un système linéaire est primordial pour de nombreux calculs. Il se fait généralement après linéarisation donc en bout de traitement mais il peut aussi se faire au début en calcul formel.
-
-Sur la plateforme LMT++, les calculs symboliques se font en général en Python dans les fichiers formulations ( 1ère partie ) et les calculs numériques en C++ ( 2è partie ).
-
-    = Résolution formelle
-
-
-    = Résolution numérique
+    Résoudre un système linéaire est primordial pour de nombreux calculs. Il se fait généralement après linéarisation donc en bout de traitement mais il peut aussi se faire au début en calcul formel.
     
-        La résolution dépend de plusieurs paramètres :
-            * taille de la matrice
-            * son type de stockage
-            * l
+    Sur la plateforme LMT++, les calculs symboliques se font en général en Python dans les fichiers formulations ( 1ère partie ) et les calculs numériques en C++ ( 2è partie ).
+    
+        = Résolution formelle
+    
+    
+        = Résolution numérique
+        
+            La résolution dépend de plusieurs paramètres :
+                * taille de la matrice
+                * son type de stockage
+                * l
     
         
 

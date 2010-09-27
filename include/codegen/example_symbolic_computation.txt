@@ -1,6 +1,91 @@
 /*!
 \example Calcul symbolique en C++
 
+    On fait généralement du calcul symbolique en Python dans ses formulations mais il est parfois nécessaire d'en faire en C++. Pour cela on va utiliser le code C++ qui sert à celui du code Python, cad la nommée \a Ex .
+    Le problème est le suivant : on a une expression stockée sous forme d'une chaine de caractères et on souhaite la traitait comme une expression mathématique. 
+    La solution est de transformer la chaine de caractères en une instance de  la classe \a Ex qui sera manipulable comme une expression mathématique (ou presque ). 
+    
+    Commencons par un premier exemple où seule une variable intervient, x.
+    
+    \code C/C++
+        #include <codegen/ex.h>
 
+        #include <vector>
+        using namespace std;
+        using namespace LMT;
+        using namespace Codegen;
+    
+        int main() {
+        
+            Ex x( "x" );
+            string expstr = "1-x-tan( x )";
+            
+            vector<Ex> lsym;
+            lsym.push_back( x );
+            Ex res = Ex::from_string( expstr, lsym );
+            
+            PRINT( res );
+            
+            Ex resdif = res.diff( x );
+            
+            PRINT( resdif );
+            
+            double v = res.subs_numerical( x, 1 );;
+            
+            PRINT( v );   
+        
+            return 0;
+        }
+    
+    Les points importants dans ce code sont :
+        * la création d'une instance de \a Ex avec le nom "x",
+        * la création d'une liste de symboles dont les noms apparaissent dans l'expression,
+        * utilisation de la méthode statique <strong> from_string() </strong> .
+        
+    Remarquez l'ajout de lespace de nom <strong> codegen </strong> . En effet il contient \a Ex . 
+        
+    Ensuite on dérive l'expression par la méthode <strong> diff() </strong> , et on évalue l'expression en 1 par la méthode <strong> subs_numerical( x, valeur) </strong> avec dans l'ordre d'appel : le nom de la variable puis sa valeur.  
+      
+    ATTENTION : <strong> subs_numerical() </strong> ne s'applique qu'à des expressions à une seule variable ! Passons donc au cas de plusieurs variables.
+    
+    \code C/C++   
+        #include <codegen/ex.h>
+
+        #include <vector>
+        using namespace std;
+        using namespace LMT;
+        using namespace Codegen;     
+     
+        int main() {
+        
+            Ex x( "x" ), y( "y" );
+            string expstr = "1-x-x*y";
+            
+            vector<Ex> lsym;
+            lsym.push_back( x );
+            lsym.push_back( y );
+            
+            Ex res = Ex::from_string( expstr, lsym );
+            
+            PRINT( res );
+            
+            Ex resdif = res.diff( x );
+    
+            PRINT( resdif );
+            
+            Ex ex = res.subs( x, Ex( 3. ) ).subs( y, Ex( 7. ) );
+            
+            double v = ex.get_val();
+            PRINT( v );
+        
+            return 0;
+        }
+       
+    Première constatation, la conversion d'une chaine de caractères en un objet mathématiquement manipulable se fait de la même façon. Il y a juste plus de variables.
+    La différentation par rapport à une variable se fait toujours avec <strong> diff() </strong> .
+    Pour l'évaluation, on se sert de la méthode <strong> subs </strong> qui a la même signature que <strong> subs_numerical() </strong> .
+    Mais à  la différence de cette dernière, le résultat renvoyé est un objet de type \a Ex . Il faut donc deux substitutions dans notre cas pour avoir une valeur numérique ( qui sera contenu dans un objet Ex ! ).
+    Si votre instance de \a Ex contient une valeur numérique, la méthode <strong> get_val() </strong> vous la donne. 
+    
 
 */
