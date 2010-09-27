@@ -1,0 +1,6 @@
+/*!
+\example Calcul symbolique en C++
+
+
+
+*/

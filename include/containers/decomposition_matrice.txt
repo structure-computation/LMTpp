@@ -3,7 +3,7 @@
 
     Pourquoi une décomposition ?
     Décomposer une matrice est intéressant par exemple lorsque il est nécessaire de résoudre plusieurs systèmes linéaires mx=f où la matrice m ne varie pas.
-    Et suivant que la matrice est réelle symétrique, on prendra la décomposition de Cholesky ou sinon la décomposition LU dans le cas général.
+    Et suivant que la matrice est réelle symétrique, on prendra la décomposition de Cholesky ou LDL sinon la décomposition LU dans le cas général.
 
     = Décomposition de Cholesky pour matrice symétrique ou hermitienne
 
@@ -46,6 +46,10 @@
         \relates solve_using_chol_factorize
 
         Remarque : les fonctions chol_factorize (m) solve_using_chol_factorize(m,f,x) peuvent aussi être utilisée pour des matrices hermitiennes de type \a Mat<T,Herm<s>,SparseLine<>> .
+
+    = Décomposition LDL
+    
+    
 
     = Décomposition LU
 
