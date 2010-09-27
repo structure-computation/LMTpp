@@ -280,6 +280,22 @@ template<class TV1,class Structure1,class Storage1,unsigned alignement1,int nr1,
 typename OrOr::template ReturnType<typename MatElem<TV1,Structure1,Storage1,alignement1,nr1>::T0,typename MatElem<TV2,Structure2,Storage2,alignement2,nr2>::T0>::T operator||(const MatElem<TV1,Structure1,Storage1,alignement1,nr1> &m1,const MatElem<TV2,Structure2,Storage2,alignement2,nr2> &m2) {
     return m1.conv() || m2.conv();
 }
+template<class T1,class TV,class Structure,class Storage,unsigned alignement,int nr>
+typename Pow::template ReturnType<T1,typename MatElem<TV,Structure,Storage,alignement,nr>::T0>::T pow(const T1 &v,const MatElem<TV,Structure,Storage,alignement,nr> &me) {
+    return pow( v, me.conv() );
+}
+template<class TV,class Structure,class Storage,unsigned alignement,int nr,class T1>
+typename Pow::template ReturnType<typename MatElem<TV,Structure,Storage,alignement,nr>::T0,T1>::T pow(const MatElem<TV,Structure,Storage,alignement,nr> &me,const T1 &v) {
+    return pow( me.conv(), v );
+}
+template<class TV1,class Structure1,class Storage1,unsigned alignement1,int nr1,class TV2,class Structure2,class Storage2,unsigned alignement2,int nr2>
+typename Pow::template ReturnType<typename MatElem<TV1,Structure1,Storage1,alignement1,nr1>::T0,typename MatElem<TV2,Structure2,Storage2,alignement2,nr2>::T0>::T operatorpow(const MatElem<TV1,Structure1,Storage1,alignement1,nr1> &m1,const MatElem<TV2,Structure2,Storage2,alignement2,nr2> &m2) {
+    return pow( m1.conv(), m2.conv() );
+}
+template<class TV,class Structure,class Storage,unsigned alignement,int nr>
+typename Pow::template ReturnType<typename MatElem<TV,Structure,Storage,alignement,nr>::T0,int>::T pow(const MatElem<TV,Structure,Storage,alignement,nr> &me,int v) {
+    return pow( me.conv(), v );
+}
 
 };
 

@@ -65,7 +65,29 @@ for I,i in lst:
     print 'typename '+I+'::template ReturnType<typename MatElem<TV1,Structure1,Storage1,alignement1,nr1>::T0,typename MatElem<TV2,Structure2,Storage2,alignement2,nr2>::T0>::T operator'+i+'(const MatElem<TV1,Structure1,Storage1,alignement1,nr1> &m1,const MatElem<TV2,Structure2,Storage2,alignement2,nr2> &m2) {'
     print '    return m1.conv() '+i+' m2.conv();'
     print '}'
-    
+
+lst = [
+    ('Pow','pow'),
+]
+for I,i in lst:
+    print 'template<class T1,class TV,class Structure,class Storage,unsigned alignement,int nr>'
+    print 'typename '+I+'::template ReturnType<T1,typename MatElem<TV,Structure,Storage,alignement,nr>::T0>::T '+i+'(const T1 &v,const MatElem<TV,Structure,Storage,alignement,nr> &me) {'
+    print '    return '+i+'( v, me.conv() );'
+    print '}'
+    print 'template<class TV,class Structure,class Storage,unsigned alignement,int nr,class T1>'
+    print 'typename '+I+'::template ReturnType<typename MatElem<TV,Structure,Storage,alignement,nr>::T0,T1>::T '+i+'(const MatElem<TV,Structure,Storage,alignement,nr> &me,const T1 &v) {'
+    print '    return '+i+'( me.conv(), v );'
+    print '}'
+    print 'template<class TV1,class Structure1,class Storage1,unsigned alignement1,int nr1,class TV2,class Structure2,class Storage2,unsigned alignement2,int nr2>'
+    print 'typename '+I+'::template ReturnType<typename MatElem<TV1,Structure1,Storage1,alignement1,nr1>::T0,typename MatElem<TV2,Structure2,Storage2,alignement2,nr2>::T0>::T operator'+i+'(const MatElem<TV1,Structure1,Storage1,alignement1,nr1> &m1,const MatElem<TV2,Structure2,Storage2,alignement2,nr2> &m2) {'
+    print '    return '+i+'( m1.conv(), m2.conv() );'
+    print '}'
+
+print 'template<class TV,class Structure,class Storage,unsigned alignement,int nr>'
+print 'typename '+I+'::template ReturnType<typename MatElem<TV,Structure,Storage,alignement,nr>::T0,int>::T '+i+'(const MatElem<TV,Structure,Storage,alignement,nr> &me,int v) {'
+print '    return '+i+'( me.conv(), v );'
+print '}'
+
 print """
 };
 
