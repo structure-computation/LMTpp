@@ -230,9 +230,12 @@ def diag_mat_from_vec( V ):
 def post_part( e ):
     return e * heavyside( e )
 
+def pos_part( e ):
+    return e * heavyside( e )
 
-
-
+# assume m <= M
+def clamp( x, m, M ):
+    return M - pos_part( M - m - pos_part( x - m ) )
 
 
 # partie positive affectee de l'endommagement d'un vecteur colonne
