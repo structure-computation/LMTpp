@@ -1,147 +1,146 @@
 #include "containers/vec.h"
-using namespace LMT;
-typedef std::string String;
+#include "containers/CudaHelper.h"
+
+namespace LMT {
 
 #define APPLY_BS( res, n ) res.apply( #n, n )
 
-struct Toto {
-    template<class TB>
-    void apply_bs( TB &res ) {
-        APPLY_BS( res, a );
-        APPLY_BS( res, b );
-        APPLY_BS( res, c );
-    }
-    Vec<double> a;
-    Vec<float > b;
-    Vec<Vec<double> > c;
-};
-
-struct BinStructCudaMakeCpp_1 {
+struct BinStructCudaMakeCpp {
     template<class T>
     void apply( const char *name, const Vec<T> & ) {
-        std::cout << "    inline " << TypeInformation<T>::type() << " *ptr_" << name << "() { return (char *)this + off_" << name << "; }\n";
+        std::cout << "    Vec<" << TypeInformation<T>::type() << "> " << name << ";\n";
     }
     template<class T>
     void apply( const char *name, const Vec<Vec<T> > & ) {
-        std::cout << "    inline " << TypeInformation<T>::type() << " *ptr_" << name << "( int n ) {\n";
-        std::cout << "        int off = reinterpret_cast<int *>( reinterpret_cast<char *>( this ) + off_" << name << " )[ 2 * n + 1 ]; }\n";
-        std::cout << "        return reinterpret_cast<" << TypeInformation<T>::type() << " *>( reinterpret_cast<char *>( this ) + off ); }\n";
-        std::cout << "    }\n";
+        std::cout << "    Vec<Vec<" << TypeInformation<T>::type() << "> > " << name << ";\n";
     }
 };
 
-struct BinStructCudaMakeCpp_2 {
-    template<class T>
-    void apply( const char *name, const Vec<T> & ) {
-        std::cout << "    int len_" << name << ";\n";
-        std::cout << "    int off_" << name << ";\n";
-    }
-};
-
+template<bool gpu>
 struct BinStructCudaGetRoomAndCopyData {
-    BinStructCudaGetRoomAndCopyData( int alig = 16 * 4 ) : alig( alig ) {}
+    typedef int I;
+    typedef typename AlternativeOnType<gpu,size_t,int>::T P;
+    static const int alig = gpu ? 16 * 4 : 16;
 
-    void phase_1() {
+    struct TV {
+        TV() {}
+        TV( I len, P ptr ) : len( len ), ptr( ptr ) {}
+
+        I len;
+        P ptr;
+    };
+
+    BinStructCudaGetRoomAndCopyData() {
+    }
+
+    void begin_phase_1() {
         copy_data = false;
 
         head = 0;
         data = 0;
     }
 
-    void phase_2() {
+    void begin_phase_2() {
         copy_data = true;
 
         int room = ceil( head, alig ) + data;
-        pt = (char *)malloc( room ); // cuda
+        if ( gpu )
+            cudaMalloc( &pt, room );
+        else
+            pt = reinterpret_cast<char *>( malloc( room ) );
         tm = (char *)malloc( head ); // local
 
         data = ceil( head, alig );
         head = 0;
-
     }
 
-    void phase_3() {
-        memcpy( pt, tm, head ); // cuda
+    void begin_phase_3() {
+        cudaMemcpy( pt, tm, head, gpu ? cudaMemcpyDeviceToHost : cudaMemcpyHostToHost );
     }
+
+    template<class T>
+    P append_head( const T &val ) {
+        if ( copy_data )
+            *reinterpret_cast<T *>( tm + head ) = val;
+        P res = P( SizeType( pt + head ) );
+        head += sizeof( T ); // len
+        return res;
+    }
+
+    template<class T>
+    P append_data( const T &val ) {
+        if ( copy_data )
+            cudaMemcpy( pt + data, &val, sizeof( T ), gpu ? cudaMemcpyDeviceToHost : cudaMemcpyHostToHost );
+        P res = P( pt + data );
+        data += sizeof( T ); // len
+        return res;
+    }
+
+    template<class T,class S>
+    P append_data( const T *val, S size ) { /// returns ptr
+        data = ceil( data, alig );
+        P res = P( SizeType( pt + data ) );
+        if ( copy_data )
+            cudaMemcpy( pt + data, val, sizeof( T ) * size, gpu ? cudaMemcpyDeviceToHost : cudaMemcpyHostToHost );
+        data += sizeof( T ) * size;
+        return res;
+    }
+
 
     template<class T>
     void apply( const char *, const Vec<T> &val ) {
-        if ( copy_data ) {
-            reinterpret_cast<int *>( tm + head )[ 0 ] = val.size();
-            reinterpret_cast<int *>( tm + head )[ 1 ] = data;
-        }
-        head += sizeof( int ) * 2; // len + off
-
-        data = ceil( data, alig );
-        if ( copy_data )
-            memcpy( pt + data, val.ptr(), sizeof( T ) * val.size() ); // cuda
-        data += sizeof( T ) * val.size();
+        // data
+        P data_ptr = append_data( val.ptr(), val.size() );
+        // len_v, ptr_v
+        append_head( TV( val.size(), data_ptr ) );
     }
 
     template<class T>
-    void apply( const char *, const Vec<Vec<double> > &val ) {
-        if ( copy_data ) {
-            reinterpret_cast<int *>( tm + head )[ 0 ] = val.size();
-            reinterpret_cast<int *>( tm + head )[ 1 ] = data;
-        }
-        head += sizeof( int ) * 2; // len + off
+    void apply( const char *, const Vec<Vec<T> > &val ) {
+        // tmp vec with len_0 ptr_0 len_1 ptr_1 ...
+        Vec<TV> tmp; tmp.resize( val.size() );
+        for( unsigned i = 0; i < val.size(); ++i )
+            tmp[ i ] = TV( val[ i ].size(), append_data( val[ i ].ptr(), val[ i ].size() ) );
 
-        int pos_off = data;
-        data += sizeof( int ) * 2; // len + off for each sub vec
-
-        Vec<int> off;
-        if ( copy_data )
-            off.resize( 2 * val.size() );
-        for( unsigned i = 0; i < val.size(); ++i ) {
-            data = ceil( data, alig );
-            if ( copy_data ) {
-                off[ 2 * i + 0 ] = val[ i ].size();
-                off[ 2 * i + 0 ] = data;
-                memcpy( pt + data, val[ i ].ptr(), sizeof( T ) * val.size() ); // cuda
-            }
-            data += sizeof( T ) * val[ i ].size();
-        }
-
-        if ( copy_data )
-            memcpy( pt + pos_off, off.ptr(), sizeof( int ) * 2 * val.size() );
+        // copy tmp vec in data
+        append_head( TV( tmp.size(), append_data( tmp.ptr(), tmp.size() ) ) );
     }
 
-    int room() const { return ceil( head, alig ) + data; }
-
-    int alig;
-    int head;
-    int data;
-    char *pt; ///< used if copy_data
-    char *tm; ///< used if copy_data
+    int head; /// offset in header
+    int data; /// offset in data
+    char *pt; ///< target data
+    char *tm; ///< tmp local data (used for header)
     bool copy_data;
+    int ptr_size; ///< in target
 };
 
 template<class T>
-void make_cuda_struct( std::ostream &os, Toto &toto, const char *name ) {
+void generate_cuda_struct( std::ostream &os, const T &str, const char *name ) {
     os << "struct " << name << " {\n";
-    os << "struct " << name << " {\n";
+    os << "    template<class T> struct Vec {\n";
+    os << "        T operator[]( int index ) const { return ptr[ index ]; }\n";
+    os << "        int size() const { return len; }\n";
+    os << "        int len;\n";
+    os << "        T  *ptr;\n";
+    os << "    };\n";
+    BinStructCudaMakeCpp mc;
+    str.apply_bs( mc );
     os << "};\n";
 }
 
-int main() {
-    Toto toto;
-    toto.a = Vec<double>( 1, 2, 3 );
-    toto.c = Vec<Vec<double> >( Vec<double>( 1, 2, 3 ),  Vec<double>( 4, 5, 6 ) );
+template<bool gpu,class T>
+void *copy_cuda_struct( const T &str ) {
+    BinStructCudaGetRoomAndCopyData<gpu> gr;
+    gr.begin_phase_1();
+    str.apply_bs( gr );
 
-    BinStructCudaGetRoomAndCopyData gr;
-    gr.phase_1();
-    toto.apply_bs( gr );
-    gr.phase_2();
-    toto.apply_bs( gr );
-    gr.phase_3();
-    toto.apply_bs( gr );
+    gr.begin_phase_2();
+    str.apply_bs( gr );
 
-    PRINT( gr.room() );
+    gr.begin_phase_3();
 
+    PRINT( (SizeType)gr.pt );
+    return gr.pt;
+}
 
-    BinStructCudaMakeCpp_1 mc_1;
-    toto.apply_bs( mc_1 );
-
-    BinStructCudaMakeCpp_2 mc_2;
-    toto.apply_bs( mc_2 );
 }
