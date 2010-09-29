@@ -128,6 +128,51 @@ void generate_cuda_struct( std::ostream &os, const T &str, const char *name ) {
     os << "};\n";
 }
 
+/**
+#include "containers/BinStructCuda.h"
+using namespace LMT;
+
+struct Toto {
+    template<class TB>
+    void apply_bs( TB &res ) const {
+        APPLY_BS( res, a );
+        APPLY_BS( res, b );
+        APPLY_BS( res, c );
+    }
+    Vec<double> a;
+    Vec<float > b;
+    Vec<Vec<double> > c;
+};
+
+struct TotoGpu {
+    template<class T> struct Vec {
+        T operator[]( int index ) const { return ptr[ index ]; }
+        int size() const { return len; }
+        int len;
+        T  *ptr;
+    };
+    Vec<double> a;
+    Vec<float> b;
+    Vec<Vec<double> > c;
+};
+
+int main() {
+    Toto toto;
+    toto.a = Vec<double>( 10, 2, 3 );
+    toto.c = Vec<Vec<double> >( Vec<double>( 1, 2, 3 ),  Vec<double>( 4, 5, 6 ) );
+
+    generate_cuda_struct( std::cout, toto, "TotoGpu" );
+
+    TotoGpu *res = (TotoGpu *)copy_cuda_struct<false>( toto );
+    PRINT( res->a.size() );
+    PRINT( res->a[ 0 ] );
+    PRINT( res->c.size() );
+    PRINT( res->c[ 0 ][ 0 ] );
+    PRINT( res->c[ 0 ][ 1 ] );
+    PRINT( res->c[ 1 ][ 0 ] );
+    PRINT( res->c[ 1 ][ 1 ] );
+}
+*/
 template<bool gpu,class T>
 void *copy_cuda_struct( const T &str ) {
     BinStructCudaGetRoomAndCopyData<gpu> gr;
