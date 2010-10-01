@@ -234,6 +234,8 @@ def pos_part( e ):
     return e * heavyside( e )
 
 # assume m <= M
+# il y a deux formules possibles clamp( x, 0, 1 ) = ( 1 - ( 1 - x )+ )+ ou 1 - ( 1 - x+ )+ : on a choisi la seconde.
+# cette fonction renvoie x si x est dans l'intervalle [ m ; M ], renvoie m si x <= m et M si x >= M.
 def clamp( x, m, M ):
     return M - pos_part( M - m - pos_part( x - m ) )
 
