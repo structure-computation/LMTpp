@@ -1081,7 +1081,7 @@ struct ReaderINP {
                     for( unsigned j = 0; j < mesh.node_list.size(); ++j )
                         if ( LMT::distance( po, mesh.node_list[ j ].pos ) < tol ) {
                             index.push_back( j );
-                            ///break; on retire le "break" à cause d'éventuelles doublons
+                            break;
                         }
                 }
                 return index.size();
@@ -1093,7 +1093,7 @@ struct ReaderINP {
                     for( unsigned j = 0; j < mesh.node_list.size(); ++j )
                         if ( LMT::distance( po, mesh.node_list[ j ].pos ) < tol ) {
                             index.push_back( j );
-                            ///break; on retire le "break" à cause d'éventuelles doublons
+                            break;
                         }
                 }
                 return index.size();
