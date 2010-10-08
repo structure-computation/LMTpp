@@ -46,6 +46,7 @@ class Element:
       self.nb_nodes = len(self.permutation)
       self.nb_var_inter = len(self.interval_var_inter)
       self.var_inter = self.var_inter[:self.nb_var_inter]
+      self.nb_gauss_points = 0
 
       self.std_map = {
         "dim":self.dim,

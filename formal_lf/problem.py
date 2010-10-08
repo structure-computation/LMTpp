@@ -26,7 +26,7 @@ class Problem:
         self.options = options
         self.additional_fields = additional_fields
 
-    def write_mesh_carac(self,dim,fe_sets,output):
+    def write_mesh_carac( self, dim, fe_sets, output ):
         # get mesh data
         all_vars,all_is_vars = {},{}
         for f,e in fe_sets:
@@ -62,7 +62,7 @@ class Problem:
         output.write( "    typedef Vec<TP,%i> Pvec;\n" % dim )
 
         #
-        def write_static_data(nf,cond,in_vec,nb_sp=4):
+        def write_static_data( nf, cond, in_vec, nb_sp = 4 ):
             #
             output.write( ' '*nb_sp+"struct %s {\n"%nf )
 
@@ -198,6 +198,7 @@ class Problem:
             def get_nb_var(self,name): return 0
             def sum_nb_nodes_of_each_children(self): return 0
             nb_nodes = 0
+            nb_gauss_points = 0
         write_static_data( 'NodalStaticData',  lambda var:std_interpolations[var.interpolation](Toto()).nb_nodal,  lambda var:std_interpolations[var.interpolation](Toto()).in_vec )
         write_static_data( 'GlobalStaticData', lambda var:std_interpolations[var.interpolation](Toto()).nb_global, lambda var:std_interpolations[var.interpolation](Toto()).in_vec )
 
@@ -221,18 +222,18 @@ class Problem:
             if e.dim == dim:
                 elements[0].append( e )
         find_sub_elems_rec(elements,0)
-        for nvi,el in elements.items():
+        for nvi, el in elements.items():
             cpt = 0
             for e in el:
                 output.write( '    template<unsigned skin,unsigned inner> struct ElementChoice<'+str(nvi)+',skin,'+str(cpt)+',inner> { typedef '+e.name+' NE; typedef DefaultBehavior BE; ' )
-                if nvi>=2:
+                if nvi >= 2:
                     output.write( 'typedef VoidDMSet TData;' )
-                elif nvi==1:
+                elif nvi == 1:
                     output.write( '\n' )
-                    write_static_data( 'TData', lambda var:std_interpolations[var.interpolation](e).nb_skin_elementary, lambda var:std_interpolations[var.interpolation](e).in_vec, 8 )
+                    write_static_data( 'TData', lambda var:std_interpolations[var.interpolation]( e ).nb_skin_elementary, lambda var:std_interpolations[var.interpolation]( e ).in_vec, 8 )
                 else:
                     output.write( '\n' )
-                    write_static_data( 'TData', lambda var:std_interpolations[var.interpolation](e).nb_elementary, lambda var:std_interpolations[var.interpolation](e).in_vec, 8 )
+                    write_static_data( 'TData', lambda var:std_interpolations[var.interpolation]( e ).nb_elementary, lambda var:std_interpolations[var.interpolation]( e ).in_vec, 8 )
                 output.write( '    };\n' )
                 #if nvi:
                 #    output.write( '    template<unsigned inner> struct ElementChoice<'+str(nvi)+',1,'+str(cpt)+',inner> { typedef '+e.name+' NE; typedef DefaultBehavior BE; typedef VoidDMSet TData; };\n' )
@@ -298,12 +299,13 @@ class Problem:
         output.write( '#include "formulation/formulation.h"\n' )
         output.write( '\n' )
 
+        # formulations
+        for f, e in fe_sets:
+            f.write( e, output, name_der_vars = name_der_vars )
+
+        # mesh carac
         self.write_all_mesh_carac( output, fe_sets, all_dims )
         output.write( '\n' )
-
-        # formulations
-        for f,e in fe_sets:
-            f.write( e, output, name_der_vars = name_der_vars )
 
         output.write( '\n' )
         output.write( '#endif // PROBLEM_' + ifndef + '\n' )

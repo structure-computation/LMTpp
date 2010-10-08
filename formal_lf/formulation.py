@@ -9,7 +9,7 @@ import extrapolation
 from element import *
 from material_help import *
 from fluid_help import *
-import gauss_integration
+import gauss_integration, sys
 
 class Formulation:
   def __init__( self, name_form, dim, nb_form=0, incpaths=['.','LMT/formulations'],options={}, name_file=None ):
@@ -99,14 +99,15 @@ class Formulation:
         res[name_var] = var
     return res
       
-  def set_variable_expressions(self,e):
+  def set_variable_expressions( self, e ):
     e.order_integration = self.formulation_order( e.degree )
-    e.nb_gauss_points = min( filter( lambda x : x >= e.order_integration, e.gauss_points.keys() ) )
+    k = min( filter( lambda x : x >= e.order_integration, e.gauss_points.keys() ) )
+    self.gauss_points = e.gauss_points[ k ]
+    e.nb_gauss_points = len( self.gauss_points )
     for name_var,var in self.get_variables().items():
       var.set_expr( name_var, self.Interpolations[ var.interpolation ]( e ), e )
     for name_var,var in self.get_is_variables().items():
       var.set_expr( name_var )
-    self.gauss_points = e.gauss_points[ e.nb_gauss_points ]
 
   def write_nb__unknowns( self, f, t, skin, t_tot, TE, e=None ):
     nb_unknowns = 0
@@ -833,7 +834,9 @@ class Formulation:
   
   def write( self, e, f = sys.stdout, asmout = sys.stdout, name_der_vars = [] ):
     self.asmout  = asmout
-    if isinstance(e,str): e = Element(e,self.dim)
+    if isinstance(e,str):
+        raise "Bong"
+        e = Element(e,self.dim)
     self.e = e
     ifndef = self.name.upper()
     for i in range(len(ifndef)):
@@ -850,8 +853,8 @@ class Formulation:
         exec ( "der_vars.append( self." + n + " )" )
     
     # elem and nodal matrices
-    self.set_variable_expressions(e)
-    matrices,form_after_solve,order_integration = self.calculate_matrices(e)
+    self.set_variable_expressions( e )
+    matrices,form_after_solve,order_integration = self.calculate_matrices( e )
 
     contact_matrices = self.calculate_contact_matrices(e)
 
@@ -874,69 +877,10 @@ class Formulation:
     for n in range(len(der_var_syms)):
         for T in ['V','N']+['S'+str(i) for i in range(len(e.children))]:
             self.write_der_var_vector( f, T, matrices, e, der_var_syms[n], n )
-    
-    # contact matrices
-    #     sub_elems = []
-    #     for c in e.children:
-    #       if not c['name'] in sub_elems: sub_elems.append( c['name'] )
-    #     for name_child in sub_elems:
-    #       child = Element( name_child, self.dim, self.incpaths )
-    #       for update_only_vec in [True,False]:
-    #         for symmetric in [False,True][update_only_vec:]:
-    #           self.write_contact_matrix(f,'V',update_only_vec,symmetric,contact_matrices,child)
-    #     for update_only_vec in [True,False]:
-    #       for symmetric in [False,True][update_only_vec:]:
-    #         self.write_contact_matrix(f,'N',update_only_vec,symmetric,contact_matrices,'')
 
     self.write_xml_mat_to_mesh(f)
     f.write( '} // namespace LMT\n' )
     f.write( '\n' )
-    
-    #f.write( '#endif // %s\n'%(ifndef) )
-    #   def write_contact_matrix(self,f,T,update_only_vec,symmetric,matrices,e):
-    #     f.write( '// \n' )
-    #     BU = ',bool symmetric_version' * update_only_vec
-    #     if T=='V':
-    #       f.write( '#ifndef ADD_CONTACT_ELEMENTARY_MATRIX_%s_%s_%i_%i_%i_%i\n'%(e.name,self.name,self.dim,self.nb_form,symmetric,update_only_vec) )
-    #       f.write( '#define ADD_CONTACT_ELEMENTARY_MATRIX_%s_%s_%i_%i_%i_%i\n'%(e.name,self.name,self.dim,self.nb_form,symmetric,update_only_vec) )
-    #       f.write( 'template<class T,class TM,class Tnode,class T_pos,class ND,class ED,class TSys,class TTs%s,class CD>\n'%BU )
-    #       f.write( 'void add_contact_elementary_matrix(\n' )
-    #       f.write( '      %s<T> f,\n'%(self.name) )
-    #       f.write( '      Matrix_is_symmetric<%s> mis,\n'%( ['false','true','symmetric_version'][symmetric+update_only_vec] ) )
-    #       f.write( '      Update_only_vec<%s> uov,\n'%( ['false','true'][update_only_vec] ) )
-    #       f.write( '      Number<%i> nfo,\n'%self.nb_form )
-    #       f.write( '      const TM &mesh,\n' )
-    #       f.write( '      const Tnode &node,\n' )
-    #       f.write( '      const Element<%s,Node<T_pos,%i,ND>,ED> &elem,\n'%(e.name,self.dim) )
-    #       f.write( '      TSys &syst,\n' )
-    #       f.write( '      const unsigned *indices,\n' )
-    #       f.write( '      T surtension_coefficient,\n' )
-    #       f.write( '      const CD &cd,\n' )
-    #       f.write( '      T time,\n' )
-    #       f.write( '      const TTs &time_steps) {\n' )
-    #       f.write( '  #define PNODE(N) (*elem.node(N))\n' )
-    #     elif T=='N':
-    #       f.write( '#ifndef  ADD_CONTACT_NODAL_MATRIX_%s_%i_%i_%i_%i\n'%(self.name,self.dim,self.nb_form,symmetric,update_only_vec) )
-    #       f.write( '#define  ADD_CONTACT_NODAL_MATRIX_%s_%i_%i_%i_%i\n'%(self.name,self.dim,self.nb_form,symmetric,update_only_vec) )
-    #       f.write( 'template<class T,class TM,class Tnode,class TTs,class CD,class TSys%s>\n'%BU )
-    #       f.write( 'void add_contact_nodal_matrix(\n' )
-    #       f.write( '      %s<T> f,\n'%self.name )
-    #       f.write( '      Matrix_is_symmetric<%s> mis,\n'%( ['false','true','symmetric_version'][symmetric+update_only_vec] ) )
-    #       f.write( '      Update_only_vec<%s> uov,\n'%( ['false','true'][update_only_vec] ) )
-    #       f.write( '      Number<%i> nfo,\n'%self.nb_form )
-    #       f.write( '      const TM &mesh,\n' )
-    #       f.write( '      const Tnode &node,\n' )
-    #       f.write( '      TSys &syst,\n' )
-    #       f.write( '      const unsigned *indices,\n' )
-    #       f.write( '      T surtension_coefficient,\n' )
-    #       f.write( '      const CD &cd,\n' )
-    #       f.write( '      T time,\n' )
-    #       f.write( '      const TTs &time_steps) {\n' )
-    #       f.write( '  #define PNODE(N) node\n' )
-    #     write_matrix( f, matrices[T]['M'], matrices[T]['V'], symmetric, matrices[T]['i'], matrices[T]['o'], update_only_vec )
-    #     f.write( '  #undef PNODE\n' )
-    #     f.write( '}\n' )
-    #     f.write( '#endif\n' )
       
   def write_xml_mat_to_mesh(self, f=sys.stdout):
     f.write( '\n' )
