@@ -298,7 +298,7 @@ class Problem:
         output.write( '\n' )
         output.write( '#include "formulation/formulation.h"\n' )
         for f, e in fe_sets:
-            output.write( '#include "' + e.name + '.h"\n' )
+            output.write( '#include "mesh/' + e.name + '.h"\n' )
         output.write( '\n' )
 
         # formulations
