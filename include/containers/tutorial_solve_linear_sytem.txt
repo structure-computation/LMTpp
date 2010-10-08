@@ -7,6 +7,7 @@
     
         = Résolution formelle
     
+            TODO
     
         = Résolution numérique
         
@@ -31,8 +32,7 @@
                         typedef double T;
                         unsigned n = 10;
                         Vec<T> d, b, xth;
-                        
-                        /** initialize random seed: */
+
                         //srand ( time(NULL) );
                         
                         /// Matrice pleine
@@ -86,7 +86,6 @@
                     
                     int main() {
                         unsigned n;
-                        /** initialize random seed: */
                         //srand ( time(NULL) );
                         Vec<double> d;
                         
@@ -107,6 +106,8 @@
             = Cas des matrices de dimension moyenne ~ 10000
     
                 = Matrice générale
+                    
+                    TODO
                 
                 = Matrice symétrique
     
@@ -118,14 +119,93 @@
                         La classe \a LDL_solver encapsule le code de Tim et mémorise les options de la résolution.
                         voici un exemple d'utilisation :
                         \code C/C++
-                            TODO 
-                    
-                    = Décomposition de Cholesky
-    
-            = Cas des matrices de grande dimension ~ 1000000000000000
-        
+                            #include <containers/mat.h>
+                            #include <util/solveLDL.h>
+                            using namespace std;
+                            using namespace LMT;
+                            
+                            int main() {
+                                typedef double T;
+                                unsigned n = 10;
+                                Vec<T> b, xth;
 
-        = Pré-conditionnement
+                                //srand ( time(NULL) );
+                            
+                                xth.resize( n );
+                                for( unsigned i = 0; i < xth.size(); ++i ) xth[ i ] = rand()% 10 - 5;
+                                
+                                Mat< T, Sym<>, SparseLine<> > Asp;
+                                
+                                Asp.resize( n, n );
+                                
+                                for( unsigned i = 0; i < n; ++i ) 
+                                    for( unsigned j = 0; j <= i; ++j ) 
+                                    if ( ( rand() % 10 ) == 0 ) 
+                                        Asp( i, j ) = rand()% 10 - 5;
+                                Asp.diag() = 10;
+                                
+                                PRINTN( Asp ); PRINT( xth );
+                            
+                                b = Asp * xth;
+                            
+                                LDL_solver ldl;
+                                
+                                ldl.get_factorization( Asp );
+                                
+                                ldl.solve( b );
+                                
+                                PRINT( b );
+                                
+                                return 0;
+                            }
+                            
+                        Les méthodes get_factorization() ont les arguments <strong> want_free </strong> , <strong> want_semi_morse </strong> et <strong> want_amd_order </strong> :
+                            * <strong> want_free </strong> : s'il est mis à vrai (valeur par défaut), la méthode libère la mémoire de la matrice <strong> mat </strong> passée en argument sinon mat reste inchangée.
+                            * <strong> want_semi_morse </strong> : paramètre de l'algoritme de factorisation  ?????
+                            * <strong> want_amd_order </strong> : paramètre de l'algoritme de factorisation ?????
+                        Ce sont elles qui effectuent la factorisation LDL.
+                        Ensuite pour résoudre le système Ax = b, on appelle la méthode <strong> solve( b ) </strong> qui efface la valeur de b et la remplace par la solution A^(-1) * b.
+                        
+                    = Décomposition de Cholesky
+                
+                        On utilise les fonctions <strong> chol_factorize() </strong> et <strong> solve_using_chol_factorize() </strong> qui respectivement décompose la matrice et résout un système linéaire.
+                        IMPORTANT : il FAUT avoir DECOMPOSER la matrice avant d'utiliser <strong> solve_using_chol_factorize() </strong> !
+                        Exemple :
+                        \code C/C++
+                            #include <containers/mat.h>
+                            using namespace std;
+                            using namespace LMT;
+                            
+                            int main() {
+                            
+                                Mat<double,Sym<>,SparseLine<> > m(3);
+                                m.diag() = 130.;
+                                m(0,1) = 30.;
+                                m(0,2) = 1.;
+                                Mat<double,Sym<>,SparseLine<> > msa = m;
+                                PRINTN( msa );
+                                        // msa ->
+                                        // 130 30  1
+                                        // 30  130 0
+                                        // 1   0   130
+                                chol_factorize( m );
+                                Vec<double> f( -45, 40, -1 );
+                                PRINTN( f );
+                                        // f ->
+                                        // -45 40 -1
+                                Vec<double> x;
+                                solve_using_chol_factorize( m, f, x );
+                                PRINTN( x );
+                                        //  x ->
+                                        //  -0.44059 0.409367 -0.00430315
+                                PRINTN( msa * x - f );
+                                        //  msa * x - f ->
+                                        //  -7.10543e-15 7.10543e-15 0
+                                
+                                return 0;
+                            }
+                                
+            = Cas des matrices de grande dimension ~ 1000000000000000 au moins
 
 
 */
