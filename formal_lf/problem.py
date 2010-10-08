@@ -297,6 +297,8 @@ class Problem:
         output.write( '#define PROBLEM_' + ifndef + '\n' )
         output.write( '\n' )
         output.write( '#include "formulation/formulation.h"\n' )
+        for f, e in fe_sets:
+            output.write( '#include "mesh/' + e.name + '.h"\n' )
         output.write( '\n' )
 
         # formulations
