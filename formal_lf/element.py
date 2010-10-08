@@ -27,7 +27,7 @@ class Element:
         "children" : [],
         "var_inter" : [symbol('var_inter['+str(i)+']','\eta_{'+str(i)+'}') for i in range(5)],
         "val" : val,
-        "interpolation" : {'global':val[0],'gauss':val[0],'Flat_Interpolation':val[0],'elementary':val[0],'skin_elementary':val[0],\
+        "interpolation" : {'global':val[0],'gauss_0':val[0],'Flat_Interpolation':val[0],'elementary':val[0],'skin_elementary':val[0],\
             'elementary_mul_nb_nodes':val[0],'elementary_mul_nb_nodes_of_each_children_elem':val[0]},
         "dim" : dim,
         "max_dim" : 3,

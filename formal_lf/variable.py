@@ -6,6 +6,7 @@ class Variable:
   """ Class to manage Variables (unknowns or not, nodal, elementary or global) """
   def __init__(self,unit,interpolation="nodal",unknown=False,nb_dim=[],nb_der=0,skin_var=False,default_value="",extr=extrapolation.Pol_extr,sup_nb_der=0,T="",dont_use_caracdm = False, sym = False, id_dependant = 0):
     self.interpolation = interpolation
+    self.interpolation_gauss_order = interpolation
     self.nb_dim = nb_dim
     self.nb_der = nb_der
     self.skin_var = skin_var
@@ -113,7 +114,7 @@ class Variable:
           append_s( t_alt, element.val[cpt], t, 0, num_t, interpolation.in_vec )
           cpt += 1
 
-    return element.interpolation[self.interpolation].subs(EM( map_sym ))
+    return element.interpolation[self.interpolation_gauss_order].subs(EM( map_sym ))
 
   def set_expr(self,name_var,interpolation,element):
     self.element = element
