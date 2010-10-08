@@ -105,7 +105,10 @@ class Formulation:
     self.gauss_points = e.gauss_points[ k ]
     e.nb_gauss_points = len( self.gauss_points )
     for name_var,var in self.get_variables().items():
-      var.set_expr( name_var, self.Interpolations[ var.interpolation ]( e ), e )
+        interp = var.interpolation
+        if interp == "gauss":
+            interp += "_" + str( e.order_integration )
+        var.set_expr( name_var, self.Interpolations[ interp ]( e ), e )
     for name_var,var in self.get_is_variables().items():
       var.set_expr( name_var )
 
