@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from LMT.formal_lf.variable import Variable
 from LMT.include.codegen import *
 import os, math, sys, string
