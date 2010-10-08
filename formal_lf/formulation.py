@@ -59,6 +59,7 @@ class Formulation:
       "matrix_will_be_definite_positive" : True,
       "Interpolations" : std_interpolations,
       "order_integration" : -1, # utilisé uniquement si integration_total = false
+      "formulation_order" : ( lambda x: 2 * x - 2 ), # utilisé uniquement si integration_total = false
       "IS_contact_formulation" : IS_contact_formulation,
       "elem_contact_formulation" : elem_contact_formulation,
       'hooke_isotrope_th' : hooke_isotrope_th,
@@ -99,12 +100,13 @@ class Formulation:
     return res
       
   def set_variable_expressions(self,e):
+    e.order_integration = self.formulation_order( e.degree )
+    e.nb_gauss_points = min( filter( lambda x : x >= e.order_integration, e.gauss_points.keys() ) )
     for name_var,var in self.get_variables().items():
-      var.set_expr( name_var, self.Interpolations[ var.interpolation ](e), e )
+      var.set_expr( name_var, self.Interpolations[ var.interpolation ]( e ), e )
     for name_var,var in self.get_is_variables().items():
       var.set_expr( name_var )
-    k = min( filter(lambda x:x>=self.order_integration,e.gauss_points.keys()) )
-    self.gauss_points = e.gauss_points[k]
+    self.gauss_points = e.gauss_points[ e.nb_gauss_points ]
 
   def write_nb__unknowns( self, f, t, skin, t_tot, TE, e=None ):
     nb_unknowns = 0

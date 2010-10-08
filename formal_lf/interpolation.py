@@ -15,7 +15,7 @@ std_interpolations = {
     "global"     : lambda e : Interpolation( nb_nodal = 0, nb_elementary = 0, nb_global = 1 ),
     "bubble"     : lambda e : Interpolation( nb_nodal = 1, nb_elementary = 1, nb_global = 0 ),
     "der_nodal"  : lambda e : Interpolation( nb_nodal = 0, nb_elementary = e.get_nb_var("der_nodal"), nb_global = 0, in_vec=True ),
-    "gauss"      : lambda e : Interpolation( nb_nodal = 0, nb_elementary = e.get_nb_var("gauss"), nb_global = 0, in_vec=True ),
+    "gauss"      : lambda e : Interpolation( nb_nodal = 0, nb_elementary = e.nb_gauss_points, nb_global = 0, in_vec=True ),
     "Flat_Interpolation"      : lambda e : Interpolation( nb_nodal = 0, nb_elementary = e.get_nb_var("Flat_Interpolation"), nb_global = 0, in_vec=True ),
     "skin_elementary" : lambda e : Interpolation( nb_nodal = 0, nb_elementary = 0, nb_global = 0, nb_skin_elementary=1 ),
     "elementary_mul_nb_nodes" : lambda e : Interpolation( nb_nodal = 0, nb_elementary = e.nb_nodes, nb_global = 0, in_vec=True ),

@@ -34,8 +34,8 @@ interpolation["nodal"] = X0*(2*X0-1) * val[0] + \
                          X3*(2*X3-1) * val[3] + \
                          4*X0*X1     * val[4] + \
                          4*X1*X2     * val[5] + \
-                         4*X0*X2 * val[6] + \
-                         4*X0*X3 * val[7] + \
+                         4*X0*X2     * val[6] + \
+                         4*X0*X3     * val[7] + \
                          4*X1*X3     * val[8] + \
                          4*X2*X3     * val[9]
 
