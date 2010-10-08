@@ -499,6 +499,17 @@ class Element:
                 return i
       return 0
 
+    # retourne la moyenne arithmétique des valeurs d'interpolation
+    def mean_val(self, name ):
+      m = self.get_nb_var( name )
+      s = 0
+      for i in range( m ):
+          s += self.val[ i ]
+      if m : 
+          return s / m
+      else:
+          return s
+
     def get_nb_var_der_nodal(self):
       ex = self.interpolation["der_nodal"]
       for i in range(len( self.val )):
