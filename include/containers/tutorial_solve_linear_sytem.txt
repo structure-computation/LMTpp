@@ -11,13 +11,121 @@
         = Résolution numérique
         
             La résolution dépend de plusieurs paramètres :
-                * taille de la matrice
+                * la dimension de la matrice
+                * les propriétés de symétrie de la matrice
                 * son type de stockage
-                * l
+                * si l'on souhaite calculer plusieurs systèmes avec la même matrice
+              
+            = Cas des matrices de petite dimension <= ~ 50
+            
+                Le plus simple est de décomposer la matrice dans une structure qui gèrera le produit matrice-vecteur en utilisant la fonction <strong> inv() </strong>.
+                Voici un exemple :
+                \code C/C++
+                    #include <containers/mat.h>
+                    #include <containers/mat_true_inv.h>
+                    #include <containers/matsparse.h>
+                    using namespace std;
+                    using namespace LMT;
+                    
+                    int main() {
+                        typedef double T;
+                        unsigned n = 10;
+                        Vec<T> d, b, xth;
+                        
+                        /** initialize random seed: */
+                        //srand ( time(NULL) );
+                        
+                        /// Matrice pleine
+                        
+                        d.resize( n * n );
+                        for( unsigned i = 0; i < d.size(); ++i ) d[ i ] = rand()% 10 - 5;
+                        xth.resize( n );
+                        for( unsigned i = 0; i < xth.size(); ++i ) xth[ i ] = rand()% 10 - 5;
+                        
+                        Mat<T> A( n, n, d );    
+                        b = A * xth;
+                    
+                        PRINTN( A ); PRINT( xth ); PRINT( b ); 
+                        
+                        Inv<T> iA = inv( A );
+                        PRINT( iA * b );
+                        
+                        /// Matrice creuse
+                        
+                        cout << "***********" << endl;
+                        
+                        Mat< T, Gen<>, SparseLine<> > Asp;
+                        
+                        Asp.resize( n, n );
+                        for( unsigned i = 0; i < n; ++i ) 
+                            for( unsigned j = 0; j < n; ++j ) 
+                            if ( ( rand() % 10 ) == 0 ) 
+                                Asp( i, j ) = rand()% 10 - 5;
+                        Asp.diag() = 10;
+                        PRINTN( Asp ); 
+                    
+                        b = Asp * xth;
+                    
+                        Inv<T, Gen<>, SparseLine<> > iAsp = inv( Asp );
+                        PRINT( iAsp * b );
+                    
+                        return 0;
+                    } 
+                    
+                Remarque : la fonction <strong> inv() </strong> est spécialisée pour s'adapter automatiquement au type de la matrice du système ( e.g. pleine, creuse, symétrique ).
+            
+                Remarque : la fonction \a solve () encapsule le produit A^(-1) * b .
+            
+                on peut enfin calculer la matrice inverse par la fonction <strong> true_inv() </strong> puis faire le produit avec le second membre. C'est la méthode la plus coûteuse en temps de calcul.
+                Exemple :
+                \code C/C++
+                    #include <containers/mat.h>
+                    #include <containers/mat_true_inv.h>
+                    using namespace std;
+                    using namespace LMT;
+                    
+                    int main() {
+                        unsigned n;
+                        /** initialize random seed: */
+                        //srand ( time(NULL) );
+                        Vec<double> d;
+                        
+                        n = 4;
+                        
+                        d.resize( n * n );
+                        for( unsigned i = 0; i < d.size(); ++i ) d[ i ] = rand()% 10 -5;
+                        Mat<double> A( n, n, d );
+                        PRINTN( A ); 
+                        
+                        Mat<double> iA = true_inv( A );
+                        PRINTN( iA * A ); /// identité à espilon ( i.e. ~ 1e-16 ) près
+                        
+                    
+                        return 0;
+                    }
+                    
+            = Cas des matrices de dimension moyenne ~ 10000
     
+                = Matrice générale
+                
+                = Matrice symétrique
+    
+                    Pour de tels systèmes, il est possible d'utiliser la librairie de Timothy A Davis qui réalise une décomposition LDL ( valable seulement pour les matrices creuses ) ou réaliser une décomposition de Cholesky avec la fonction <strong> chol???() </strong> .
+                    Comme la décomposition LDL est dans la pratique plus robuste que la décomposition de Cholesky, on la présente en premier. Rappelons que la librairie de Timothy s'applique seulement aux matrices creuses.   
+                    
+                    = Décomposition LDL
+                    
+                        La classe \a LDL_solver encapsule le code de Tim et mémorise les options de la résolution.
+                        voici un exemple d'utilisation :
+                        \code C/C++
+                            TODO 
+                    
+                    = Décomposition de Cholesky
+    
+            = Cas des matrices de grande dimension ~ 1000000000000000
         
 
-
+        = Pré-conditionnement
 
 
 */
