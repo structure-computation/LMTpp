@@ -1,3 +1,7 @@
+
+#ifndef LMT_matsparse_HEADER
+#define LMT_matsparse_HEADER
+
 // file generated from matsparse.h.py. Do not modify
 #include <map>
 
@@ -5365,3 +5369,4 @@ template<class T1,int s1,class T2_,int s2> Vec<typename TypePromote<Multiplies,T
 
 #include "matsparseop.h"
 } // namespace LMT
+#endif ///LMT_matsparse_HEADER

@@ -9,7 +9,11 @@ def rep(r,m):
         res = replace(tmp,k,v)
     return res
 
-print """// file generated from matsparse.h.py. Do not modify
+print """
+#ifndef LMT_matsparse_HEADER
+#define LMT_matsparse_HEADER
+
+// file generated from matsparse.h.py. Do not modify
 #include <map>
 
 namespace LMT {
@@ -414,3 +418,4 @@ template<class T1,int s1,class T2_,int s2> Vec<typename TypePromote<Multiplies,T
 
 print '#include "matsparseop.h"'
 print '} // namespace LMT'
+print '#endif ///LMT_matsparse_HEADER'
