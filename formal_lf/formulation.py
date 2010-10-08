@@ -70,6 +70,15 @@ class Formulation:
       'apply_on_elements_after_solve_4' : apply_on_elements_after_solve,
       'apply_on_elements_after_solve_5' : apply_on_elements_after_solve,
       'apply_on_elements_after_solve_6' : apply_on_elements_after_solve,
+      'apply_on_elements_after_solve_7' : apply_on_elements_after_solve,
+      'apply_on_elements_after_solve_8' : apply_on_elements_after_solve,
+      'apply_on_elements_after_solve_9' : apply_on_elements_after_solve,
+      'apply_on_elements_after_solve_10' : apply_on_elements_after_solve,
+      'apply_on_elements_after_solve_11' : apply_on_elements_after_solve,
+      'apply_on_elements_after_solve_12' : apply_on_elements_after_solve,
+      'apply_on_elements_after_solve_13' : apply_on_elements_after_solve,
+      'apply_on_elements_after_solve_14' : apply_on_elements_after_solve,
+      'apply_on_elements_after_solve_15' : apply_on_elements_after_solve,
       'options' : options,
       'gauss_points' : [],
       'user_headers' : [],
@@ -490,7 +499,16 @@ class Formulation:
     form_after_solve_4 = self.apply_on_elements_after_solve_4(unk_subs)
     form_after_solve_5 = self.apply_on_elements_after_solve_5(unk_subs)
     form_after_solve_6 = self.apply_on_elements_after_solve_6(unk_subs)
-    
+    form_after_solve_7 = self.apply_on_elements_after_solve_7(unk_subs)
+    form_after_solve_8 = self.apply_on_elements_after_solve_8(unk_subs)
+    form_after_solve_9 = self.apply_on_elements_after_solve_9(unk_subs)
+    form_after_solve_10 = self.apply_on_elements_after_solve_10(unk_subs)
+    form_after_solve_11 = self.apply_on_elements_after_solve_11(unk_subs)
+    form_after_solve_12 = self.apply_on_elements_after_solve_12(unk_subs)
+    form_after_solve_13 = self.apply_on_elements_after_solve_13(unk_subs)
+    form_after_solve_14 = self.apply_on_elements_after_solve_14(unk_subs)
+    form_after_solve_15 = self.apply_on_elements_after_solve_15(unk_subs)
+
     order_integration = self.order_integration
     if order_integration < 0:
         order_integration = 2 * ( e.degree - 1 )
@@ -548,7 +566,7 @@ class Formulation:
     for n,i in old_glob.items(): globals()[n] = i
     res['unknown_symbols'] = unknown_symbols
     
-    return res, [form_after_solve,form_after_solve_2,form_after_solve_3,form_after_solve_4,form_after_solve_5,form_after_solve_6], order_integration
+    return res, [form_after_solve,form_after_solve_2,form_after_solve_3,form_after_solve_4,form_after_solve_5,form_after_solve_6,form_after_solve_7,form_after_solve_8,form_after_solve_9,form_after_solve_10,form_after_solve_11,form_after_solve_12,form_after_solve_13,form_after_solve_14,form_after_solve_15], order_integration
   
   def contact_pos_is(self,imp_node):
     if self.dim==3:   angle = norm(self.is_rotation.expr)
@@ -640,7 +658,7 @@ class Formulation:
   def write_carac_for_element(self,f,e,matrices,contact_matrices,form_after_solve,order_integration):
     
     asm_apply_name  = []
-    for i in range(6):
+    for i in range(15):
           asm_apply_name.append('apply_on_elements_after_solve_%i_%s_%s_%i' % (i, self.name, self.e.name, self.num_func_write_matrix ) )
           self.num_func_write_matrix += 1
           f.write( 'extern "C" void %s( double * );\n' % asm_apply_name[i] )
@@ -678,7 +696,7 @@ class Formulation:
     f.write( '    static const bool has_elementary_matrix = %s;\n'%( ['true','false'][has_not_V_matrix] ) )
     f.write( '    static const bool has_skin_elementary_matrix = %s;\n'%( ['true','false'][has_not_S_matrix] ) )
 
-    for i in range(0,6):
+    for i in range(0,15):
            #f.write( 'extern "C" void %s( double * );\n' % asm_fname )
         f.write( '    template<class TE,class TF, class TVEVE> static void after_solve'+('_'+str(i+1))*(i>0)+'(TE &elem,TF &f,TVEVE &vectors,const unsigned *indices) {\n' )
         f.write( '      #define PNODE(N) (*elem.node(N))\n' ) 

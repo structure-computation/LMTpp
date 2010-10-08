@@ -1,6 +1,11 @@
 
 #ifndef VEC_MT_H
 #define VEC_MT_H
+
+#ifdef METIL_COMP_DIRECTIVE
+#pragma lib_name pthread
+#endif
+
 namespace LMT {
 
 
