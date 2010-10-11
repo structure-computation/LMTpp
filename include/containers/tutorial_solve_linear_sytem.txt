@@ -107,7 +107,60 @@
     
                 = Matrice générale
                     
-                    TODO
+                    Sous l'hypothèse que l'on doit résoudre des systèmes avec la même matrice, on réalise une décomposition <strong> LU </strong> avec ou sans pivot partiel. Le pivot partiel demande un plus de calcul mais on gagne en stabilité numrique.
+                    Vu la taille des matrices, on fait aussi l'hypothèse qu ' elles sont creuses. Alors on se sert des matrices du type \a Mat<T,Gen<>,SparseLU> qui sont adaptées.
+                    Pour la décomposition on utilise les fonctions <strong> lu_factorize(  Mat < T , Gen < > , SparseLU > &  m ) </strong> et <strong> lu_factorize( Mat<T,Gen<>,SparseLU> &m, Vec<int> &vector_permutation ) </strong> qui stocke dans m le résultat de la décomposition. La matrice m initiale est donc effacée. Enfin la deuxième <strong> lu_factorize() </strong> renvoie aussi le vecteur permutation des lignes
+lors des changements de pivots.
+                    Ensuite pour résoudre le système, on se sert de  la fonction <strong>  solve_using_lu_factorize() </strong> .
+                    
+                    Voici un exemple de code qui utilise les deux fonctions ( avec ou sans pivot partiel ) :
+                    \code C/C++
+                        #include <containers/mat.h>
+
+                        using namespace std;
+                        using namespace LMT;
+                        
+                        int main() {
+                            typedef double T;
+                            unsigned n = 1000;
+                            Vec<T> b, b2, xth, x, x2;
+                            Vec<int> perm;
+                        
+                            //srand ( time(NULL) );
+                        
+                            xth.resize( n );
+                            for( unsigned i = 0; i < xth.size(); ++i ) xth[ i ] = rand()% 10 - 5;
+                            
+                            Mat< T, Gen<>, SparseLU > A, A2;
+                            
+                            A.resize( n );
+                            
+                            for( unsigned i = 0; i < n; ++i ) 
+                                for( unsigned j = 0; j < n; ++j ) 
+                                if ( ( rand() % 20 ) == 0 ) 
+                                    A( i, j ) = rand() % 40 - 20;
+                            A.diag() = 10;
+                            A2 = A;
+                            
+                            //PRINTN( A );
+                            Mat< T > Agen = A; /// pour 
+                                
+                            //PRINT( xth );
+                        
+                            b = Agen * xth;
+                            b2 = b;
+                            
+                            lu_factorize( A );
+                            lu_factorize( A2, perm );
+                        
+                            solve_using_lu_factorize( A, b, x );
+                            PRINT( max( abs( x - xth ) ) );
+                                
+                            solve_using_lu_factorize( A2, perm, b2, x2 );
+                            PRINT( max( abs( x2 - xth ) ) );
+                                
+                            return 0;
+                        }
                 
                 = Matrice symétrique
     
@@ -209,6 +262,7 @@
 
                 = Matrice générale
                     
+                    On peut essayer la décomposition <strong> LU </strong> ... 
                     Bonne chance ! 
                 
                 = Matrice symétrique
@@ -271,3 +325,5 @@
                         }
 
 */
+
+
