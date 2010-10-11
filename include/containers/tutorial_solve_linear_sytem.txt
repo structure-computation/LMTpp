@@ -111,7 +111,7 @@
                 
                 = Matrice symétrique
     
-                    Pour de tels systèmes, il est possible d'utiliser la librairie de Timothy A Davis qui réalise une décomposition LDL ( valable seulement pour les matrices creuses ) ou réaliser une décomposition de Cholesky avec la fonction <strong> chol???() </strong> .
+                    Pour de tels systèmes, il est possible d'utiliser la librairie de Timothy A Davis qui réalise une décomposition LDL ( valable seulement pour les matrices creuses ) ou réaliser une décomposition de Cholesky avec la fonction <strong> solve_using_chol_factorize() </strong> .
                     Comme la décomposition LDL est dans la pratique plus robuste que la décomposition de Cholesky, on la présente en premier. Rappelons que la librairie de Timothy s'applique seulement aux matrices creuses.   
                     
                     = Décomposition LDL
@@ -136,7 +136,7 @@
                                 
                                 Mat< T, Sym<>, SparseLine<> > Asp;
                                 
-                                Asp.resize( n, n );
+                                Asp.resize( n );
                                 
                                 for( unsigned i = 0; i < n; ++i ) 
                                     for( unsigned j = 0; j <= i; ++j ) 
@@ -205,7 +205,69 @@
                                 return 0;
                             }
                                 
-            = Cas des matrices de grande dimension ~ 1000000000000000 au moins
+            = Cas des matrices de grande dimension ~ 1000000 ou plus
 
+                = Matrice générale
+                    
+                    Bonne chance ! 
+                
+                = Matrice symétrique
+
+                    Dans le cas de matrices symétriques définies positives, en place de la méthode de Cholesky, on peut se servir de la méthode du <strong> gradient conjugué </strong> qui certes requiert plus de calculs mais seulement des produits matrice-vecteur. Or pour les problèmes éléments finis, les matrices sont parfois de grande taille mais creuses et donc effectuer seulement de tels produits permet de ne pas stocker la matrice et de plus ils demandent bien moins d'opérations que les produits matrice-vecteur standards. 
+                    
+                    Voici la signature de la fonction <strong>
+                    conjugate_gradient( const Precond &, const Matrix &, const Sollicitation &, SOLUTION &, const CritOperator & ) </strong> qu'on utilise.
+
+                        * Le type <strong> Precond </strong> sert de pré-conditionneur. Actuellement il y en a deux dans la plateforme \a SolveUsingCholFactorize et \a SolveUsingCholMod . Leur unique constructeur prend en paramètre une matrice ( creuse ) celle du système à résoudre et une instance de ces types gardera une référence à cette matrice creuse. Ensuite le pré-conditionneur doit fournir un produit à droite avec un vecteur. Les deux classes précédentes se distinguent à ce niveau car la première utilise la fonction <strong> solve_using_chol_factorize() </strong> et la seconde utilise la méthode <strong> solve() </strong> de la matrice passée en paramètre. Enfin on peut utiliser les fonctions <strong> new_SolveUsingCholFactorize() </strong> et <strong> new_SolveUsingCholMod() </strong> pour créer une instance de ces pré-conditionneurs.
+                        * Le type <strong> Matrice </strong> est le type de la matrice du système i.e. Mat< T,Sym<>,SparseLine<> > où T est de type scalaire ( e.g. double ou float ).
+                        * Les types <strong> Sollicitation </strong> et <strong> SOLUTION </strong> sont des vecteurs de scalaires de même taille.
+                        * Le type <strong> CritOperator </strong> est un  type qui contient le type de mesure d'erreur avec ces éventuels paramètres. Un exemple est \a ConvergenceCriteriumNormInfDelta  et pour créer un tel objet, on écrirait :
+                        \code C/C++
+                            ConvergenceCriteriumNormInfDelta<double> critere( 1e-5 );
+                    
+                    Cette fonction renvoie le nombre d'iérations nécessaires à la résolution.
+                    
+                    Exemple :
+                    \code C/C++
+                        #include <containers/mat.h>
+                        #include <containers/conjugate_gradient.h>
+                        using namespace std;
+                        using namespace LMT;
+                        
+                        int main() {
+                            typedef double T;
+                            unsigned n = 400;
+                            Vec<T> b, xth, x;
+                        
+                            //srand ( time(NULL) );
+                        
+                            xth.resize( n );
+                            for( unsigned i = 0; i < xth.size(); ++i ) xth[ i ] = rand()% 10 - 5;
+                            
+                            Mat< T, Sym<>, SparseLine<> > Asp;
+                            
+                            Asp.resize( n );
+                            
+                            for( unsigned i = 0; i < n; ++i ) 
+                                for( unsigned j = 0; j <= i; ++j ) 
+                                if ( ( rand() % 20 ) == 0 ) 
+                                    Asp( i, j ) = rand() % 10 - 5;
+                            Asp.diag() = 10;
+                            
+                            //PRINTN( Asp );
+                            
+                            incomplete_chol_factorize( Asp ); 
+                            
+                            //PRINTN( Asp ); PRINT( xth );
+                        
+                            b = Asp * xth;
+                            
+                            unsigned cpt_iter = conjugate_gradient( new_SolveUsingCholFactorize( Asp ), Asp, b, x, ConvergenceCriteriumNormInfDelta<double>( 1e-14 ) );
+                            
+                            PRINT( max( abs( x - xth ) ) );
+                            PRINT( cpt_iter );
+                            
+                            return 0;
+                        }
 
 */
