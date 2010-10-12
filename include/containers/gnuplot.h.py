@@ -101,15 +101,15 @@ print """
 
     struct Disp {
         template<class TX>
-        void operator() (const TX &x, FILE *tube) const { fprintf(tube,"%10.6f\\n",double(x)); }
+        void operator() (const TX &x, FILE *tube) const { fprintf(tube,"%e\\n",double(x)); }
         template<class TX,class TY>
-        void operator() (const TX &x, unsigned i, const TY &y, FILE *tube) const { fprintf( tube, "%10.6f %10.6f\\n", double(x), double(y(x)) ); }
+        void operator() (const TX &x, unsigned i, const TY &y, FILE *tube) const { fprintf( tube, "%e %e\\n", double(x), double(y(x)) ); }
         template<class TX, class T, int s, class O>
-        void operator() (const TX &x, unsigned i, const Vec<T,s,O> &y, FILE *tube) const { fprintf( tube, "%10.6f %10.6f\\n", double(x), double(y[i]) ); }
+        void operator() (const TX &x, unsigned i, const Vec<T,s,O> &y, FILE *tube) const { fprintf( tube, "%e %e\\n", double(x), double(y[i]) ); }
         template<class TX, class TY, int sy, class OY, class TZ>
-        void operator() (const TX &x, unsigned i, const Vec<TY,sy,OY> &y, const TZ &z, FILE *tube) const { fprintf( tube, "%10.6f %10.6f %10.6f\\n", double(x), double(y[i]), double(z(x,y[i])) ); }
+        void operator() (const TX &x, unsigned i, const Vec<TY,sy,OY> &y, const TZ &z, FILE *tube) const { fprintf( tube, "%e %e %e\\n", double(x), double(y[i]), double(z(x,y[i])) ); }
         template<class TX, class TY, int sy, class OY, class TZ, int sz, class OZ>
-        void operator() (const TX &x, unsigned i, const Vec<TY,sy,OY> &y, const Vec<TZ,sz,OZ> &z, FILE *tube) const { fprintf(tube,"%10.6f %10.6f %10.6f\\n",double(x),double(y[i]),double(z[i]) ); }
+        void operator() (const TX &x, unsigned i, const Vec<TY,sy,OY> &y, const Vec<TZ,sz,OZ> &z, FILE *tube) const { fprintf(tube,"%e %e %e\\n",double(x),double(y[i]),double(z[i]) ); }
     };
     
     /*!
@@ -242,6 +242,7 @@ print """
         }
         fflush(tube);
         holded_data.resize( 0 );
+        hold = false;
     }
 
     template <class TY>
@@ -250,23 +251,23 @@ print """
     template <class TZ>
     void fprintf_jumping_lines ( const Vec<> &x, const Vec<> &y, const TZ &z ) {
         double old_x = x[0];
-        for (int i=0;i<x.size();i++) {
+        for (unsigned i=0;i<x.size();i++) {
             if (x[i]!=old_x) {
                 fprintf(tube,"\\n");
                 old_x = x[i];
             }
-            fprintf(tube,"%10.6f %10.6f %10.6f\\n",x[i],y[i],z(x[i],y[i]));
+            fprintf(tube,"%e %e %e\\n",x[i],y[i],z(x[i],y[i]));
         }
     }
 
     void fprintf_jumping_lines ( const Vec<> &x, const Vec<> &y, const Vec<> &z ) {
         double old_x = x[0];
-        for (int i=0;i<x.size();i++) {
+        for (unsigned i=0;i<x.size();i++) {
             if (x[i]!=old_x) {
                 fprintf(tube,"\\n");
                 old_x = x[i];
             }
-            fprintf(tube,"%10.6f %10.6f %10.6f\\n",x[i],y[i],z[i]);
+            fprintf(tube,"%e %e %e\\n",x[i],y[i],z[i]);
         }
     }
 

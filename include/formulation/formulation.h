@@ -286,7 +286,7 @@ public:
         return size;
     }
     //
-    void free_matrices() {
+    virtual void free_matrices() {
         allocated = false;
         matrices( Number<0>() ).free();
         sollicitation.free();
@@ -1247,6 +1247,87 @@ private:
             CaracFormulationForElement<NameFormulation,TE,NameVariant,ScalarType>::after_solve_6(e,f,vectors_,in);
         }
     };
+    struct CallAfterSolve_7 {
+        template<class TE,class TV> void operator()(TE &e,Formulation &f,TV &vectors_) const {
+            unsigned in[ TE::nb_nodes+1 ];
+            for(unsigned i=0;i<TE::nb_nodes;++i)
+                in[i] = (*f.indice_noda)[ f.m->node_list.number(*e.node(i)) ];
+            in[ TE::nb_nodes ] = f.indice_elem[TE::num_in_elem_list][e.number];
+            CaracFormulationForElement<NameFormulation,TE,NameVariant,ScalarType>::after_solve_7(e,f,vectors_,in);
+        }
+    };
+    struct CallAfterSolve_8 {
+        template<class TE,class TV> void operator()(TE &e,Formulation &f,TV &vectors_) const {
+            unsigned in[ TE::nb_nodes+1 ];
+            for(unsigned i=0;i<TE::nb_nodes;++i)
+                in[i] = (*f.indice_noda)[ f.m->node_list.number(*e.node(i)) ];
+            in[ TE::nb_nodes ] = f.indice_elem[TE::num_in_elem_list][e.number];
+            CaracFormulationForElement<NameFormulation,TE,NameVariant,ScalarType>::after_solve_8(e,f,vectors_,in);
+        }
+    };
+    struct CallAfterSolve_9 {
+        template<class TE,class TV> void operator()(TE &e,Formulation &f,TV &vectors_) const {
+            unsigned in[ TE::nb_nodes+1 ];
+            for(unsigned i=0;i<TE::nb_nodes;++i)
+                in[i] = (*f.indice_noda)[ f.m->node_list.number(*e.node(i)) ];
+            in[ TE::nb_nodes ] = f.indice_elem[TE::num_in_elem_list][e.number];
+            CaracFormulationForElement<NameFormulation,TE,NameVariant,ScalarType>::after_solve_9(e,f,vectors_,in);
+        }
+    };
+    struct CallAfterSolve_10 {
+        template<class TE,class TV> void operator()(TE &e,Formulation &f,TV &vectors_) const {
+            unsigned in[ TE::nb_nodes+1 ];
+            for(unsigned i=0;i<TE::nb_nodes;++i)
+                in[i] = (*f.indice_noda)[ f.m->node_list.number(*e.node(i)) ];
+            in[ TE::nb_nodes ] = f.indice_elem[TE::num_in_elem_list][e.number];
+            CaracFormulationForElement<NameFormulation,TE,NameVariant,ScalarType>::after_solve_10(e,f,vectors_,in);
+        }
+    };
+    struct CallAfterSolve_11 {
+        template<class TE,class TV> void operator()(TE &e,Formulation &f,TV &vectors_) const {
+            unsigned in[ TE::nb_nodes+1 ];
+            for(unsigned i=0;i<TE::nb_nodes;++i)
+                in[i] = (*f.indice_noda)[ f.m->node_list.number(*e.node(i)) ];
+            in[ TE::nb_nodes ] = f.indice_elem[TE::num_in_elem_list][e.number];
+            CaracFormulationForElement<NameFormulation,TE,NameVariant,ScalarType>::after_solve_11(e,f,vectors_,in);
+        }
+    };
+    struct CallAfterSolve_12 {
+        template<class TE,class TV> void operator()(TE &e,Formulation &f,TV &vectors_) const {
+            unsigned in[ TE::nb_nodes+1 ];
+            for(unsigned i=0;i<TE::nb_nodes;++i)
+                in[i] = (*f.indice_noda)[ f.m->node_list.number(*e.node(i)) ];
+            in[ TE::nb_nodes ] = f.indice_elem[TE::num_in_elem_list][e.number];
+            CaracFormulationForElement<NameFormulation,TE,NameVariant,ScalarType>::after_solve_12(e,f,vectors_,in);
+        }
+    };
+    struct CallAfterSolve_13 {
+        template<class TE,class TV> void operator()(TE &e,Formulation &f,TV &vectors_) const {
+            unsigned in[ TE::nb_nodes+1 ];
+            for(unsigned i=0;i<TE::nb_nodes;++i)
+                in[i] = (*f.indice_noda)[ f.m->node_list.number(*e.node(i)) ];
+            in[ TE::nb_nodes ] = f.indice_elem[TE::num_in_elem_list][e.number];
+            CaracFormulationForElement<NameFormulation,TE,NameVariant,ScalarType>::after_solve_13(e,f,vectors_,in);
+        }
+    };
+    struct CallAfterSolve_14 {
+        template<class TE,class TV> void operator()(TE &e,Formulation &f,TV &vectors_) const {
+            unsigned in[ TE::nb_nodes+1 ];
+            for(unsigned i=0;i<TE::nb_nodes;++i)
+                in[i] = (*f.indice_noda)[ f.m->node_list.number(*e.node(i)) ];
+            in[ TE::nb_nodes ] = f.indice_elem[TE::num_in_elem_list][e.number];
+            CaracFormulationForElement<NameFormulation,TE,NameVariant,ScalarType>::after_solve_14(e,f,vectors_,in);
+        }
+    };
+    struct CallAfterSolve_15 {
+        template<class TE,class TV> void operator()(TE &e,Formulation &f,TV &vectors_) const {
+            unsigned in[ TE::nb_nodes+1 ];
+            for(unsigned i=0;i<TE::nb_nodes;++i)
+                in[i] = (*f.indice_noda)[ f.m->node_list.number(*e.node(i)) ];
+            in[ TE::nb_nodes ] = f.indice_elem[TE::num_in_elem_list][e.number];
+            CaracFormulationForElement<NameFormulation,TE,NameVariant,ScalarType>::after_solve_15(e,f,vectors_,in);
+        }
+    };
 public:
     /**
      * call all after_solve in carac elem ( generated by apply_on_elements_after_solve() in formulation_...py )
@@ -1348,6 +1429,114 @@ public:
     virtual void call_after_solve_6(Vec<Vec<ScalarType> > &vectors_)  {
         apply( m->elem_list, CallAfterSolve_6(), *this, vectors_ );
     }
+    virtual void call_after_solve_7() {
+        if (vectors_assembly== NULL){
+            if ( not allocated )
+                allocate_matrices();
+            apply( m->elem_list, CallAfterSolve_7(), *this, vectors );
+        } else {
+            apply( m->elem_list, CallAfterSolve_7(), *this, *vectors_assembly );
+        }
+    }
+    virtual void call_after_solve_7(Vec<Vec<ScalarType> > &vectors_)  {
+        apply( m->elem_list, CallAfterSolve_7(), *this, vectors_ );
+    }
+    virtual void call_after_solve_8() {
+        if (vectors_assembly== NULL){
+            if ( not allocated )
+                allocate_matrices();
+            apply( m->elem_list, CallAfterSolve_8(), *this, vectors );
+        } else {
+            apply( m->elem_list, CallAfterSolve_8(), *this, *vectors_assembly );
+        }
+    }
+    virtual void call_after_solve_8(Vec<Vec<ScalarType> > &vectors_)  {
+        apply( m->elem_list, CallAfterSolve_8(), *this, vectors_ );
+    }
+    virtual void call_after_solve_9() {
+        if (vectors_assembly== NULL){
+            if ( not allocated )
+                allocate_matrices();
+            apply( m->elem_list, CallAfterSolve_9(), *this, vectors );
+        } else {
+            apply( m->elem_list, CallAfterSolve_9(), *this, *vectors_assembly );
+        }
+    }
+    virtual void call_after_solve_9(Vec<Vec<ScalarType> > &vectors_)  {
+        apply( m->elem_list, CallAfterSolve_9(), *this, vectors_ );
+    }
+    virtual void call_after_solve_10() {
+        if (vectors_assembly== NULL){
+            if ( not allocated )
+                allocate_matrices();
+            apply( m->elem_list, CallAfterSolve_10(), *this, vectors );
+        } else {
+            apply( m->elem_list, CallAfterSolve_10(), *this, *vectors_assembly );
+        }
+    }
+    virtual void call_after_solve_10(Vec<Vec<ScalarType> > &vectors_)  {
+        apply( m->elem_list, CallAfterSolve_10(), *this, vectors_ );
+    }
+    virtual void call_after_solve_11() {
+        if (vectors_assembly== NULL){
+            if ( not allocated )
+                allocate_matrices();
+            apply( m->elem_list, CallAfterSolve_11(), *this, vectors );
+        } else {
+            apply( m->elem_list, CallAfterSolve_11(), *this, *vectors_assembly );
+        }
+    }
+    virtual void call_after_solve_11(Vec<Vec<ScalarType> > &vectors_)  {
+        apply( m->elem_list, CallAfterSolve_11(), *this, vectors_ );
+    }
+    virtual void call_after_solve_12() {
+        if (vectors_assembly== NULL){
+            if ( not allocated )
+                allocate_matrices();
+            apply( m->elem_list, CallAfterSolve_12(), *this, vectors );
+        } else {
+            apply( m->elem_list, CallAfterSolve_12(), *this, *vectors_assembly );
+        }
+    }
+    virtual void call_after_solve_12(Vec<Vec<ScalarType> > &vectors_)  {
+        apply( m->elem_list, CallAfterSolve_12(), *this, vectors_ );
+    }
+    virtual void call_after_solve_13() {
+        if (vectors_assembly== NULL){
+            if ( not allocated )
+                allocate_matrices();
+            apply( m->elem_list, CallAfterSolve_13(), *this, vectors );
+        } else {
+            apply( m->elem_list, CallAfterSolve_13(), *this, *vectors_assembly );
+        }
+    }
+    virtual void call_after_solve_13(Vec<Vec<ScalarType> > &vectors_)  {
+        apply( m->elem_list, CallAfterSolve_13(), *this, vectors_ );
+    }
+    virtual void call_after_solve_14() {
+        if (vectors_assembly== NULL){
+            if ( not allocated )
+                allocate_matrices();
+            apply( m->elem_list, CallAfterSolve_14(), *this, vectors );
+        } else {
+            apply( m->elem_list, CallAfterSolve_14(), *this, *vectors_assembly );
+        }
+    }
+    virtual void call_after_solve_14(Vec<Vec<ScalarType> > &vectors_)  {
+        apply( m->elem_list, CallAfterSolve_14(), *this, vectors_ );
+    }
+    virtual void call_after_solve_15() {
+        if (vectors_assembly== NULL){
+            if ( not allocated )
+                allocate_matrices();
+            apply( m->elem_list, CallAfterSolve_15(), *this, vectors );
+        } else {
+            apply( m->elem_list, CallAfterSolve_15(), *this, *vectors_assembly );
+        }
+    }
+    virtual void call_after_solve_15(Vec<Vec<ScalarType> > &vectors_)  {
+        apply( m->elem_list, CallAfterSolve_15(), *this, vectors_ );
+    }
     virtual void call_after_solve(const Vec<void *> &elem_list) {
         if (vectors_assembly == NULL){
             if ( not allocated )
@@ -1412,6 +1601,105 @@ public:
         } else {
             for(unsigned i=0;i<elem_list.size();++i)
                 TM::TElemList::apply_on_down_cast( reinterpret_cast<typename TM::EA *>(elem_list[i]), CallAfterSolve_6(), *this, *vectors_assembly);
+        }
+    }
+    virtual void call_after_solve_7(const Vec<void *> &elem_list) {
+        if (vectors_assembly== NULL){
+            if ( not allocated )
+                allocate_matrices();
+            for(unsigned i=0;i<elem_list.size();++i)
+                TM::TElemList::apply_on_down_cast( reinterpret_cast<typename TM::EA *>(elem_list[i]), CallAfterSolve_7(), *this, vectors );
+        } else {
+            for(unsigned i=0;i<elem_list.size();++i)
+                TM::TElemList::apply_on_down_cast( reinterpret_cast<typename TM::EA *>(elem_list[i]), CallAfterSolve_7(), *this, *vectors_assembly);
+        }
+    }
+    virtual void call_after_solve_8(const Vec<void *> &elem_list) {
+        if (vectors_assembly== NULL){
+            if ( not allocated )
+                allocate_matrices();
+            for(unsigned i=0;i<elem_list.size();++i)
+                TM::TElemList::apply_on_down_cast( reinterpret_cast<typename TM::EA *>(elem_list[i]), CallAfterSolve_8(), *this, vectors );
+        } else {
+            for(unsigned i=0;i<elem_list.size();++i)
+                TM::TElemList::apply_on_down_cast( reinterpret_cast<typename TM::EA *>(elem_list[i]), CallAfterSolve_8(), *this, *vectors_assembly);
+        }
+    }
+    virtual void call_after_solve_9(const Vec<void *> &elem_list) {
+        if (vectors_assembly== NULL){
+            if ( not allocated )
+                allocate_matrices();
+            for(unsigned i=0;i<elem_list.size();++i)
+                TM::TElemList::apply_on_down_cast( reinterpret_cast<typename TM::EA *>(elem_list[i]), CallAfterSolve_9(), *this, vectors );
+        } else {
+            for(unsigned i=0;i<elem_list.size();++i)
+                TM::TElemList::apply_on_down_cast( reinterpret_cast<typename TM::EA *>(elem_list[i]), CallAfterSolve_9(), *this, *vectors_assembly);
+        }
+    }
+    virtual void call_after_solve_10(const Vec<void *> &elem_list) {
+        if (vectors_assembly== NULL){
+            if ( not allocated )
+                allocate_matrices();
+            for(unsigned i=0;i<elem_list.size();++i)
+                TM::TElemList::apply_on_down_cast( reinterpret_cast<typename TM::EA *>(elem_list[i]), CallAfterSolve_10(), *this, vectors );
+        } else {
+            for(unsigned i=0;i<elem_list.size();++i)
+                TM::TElemList::apply_on_down_cast( reinterpret_cast<typename TM::EA *>(elem_list[i]), CallAfterSolve_10(), *this, *vectors_assembly);
+        }
+    }
+    virtual void call_after_solve_11(const Vec<void *> &elem_list) {
+        if (vectors_assembly== NULL){
+            if ( not allocated )
+                allocate_matrices();
+            for(unsigned i=0;i<elem_list.size();++i)
+                TM::TElemList::apply_on_down_cast( reinterpret_cast<typename TM::EA *>(elem_list[i]), CallAfterSolve_11(), *this, vectors );
+        } else {
+            for(unsigned i=0;i<elem_list.size();++i)
+                TM::TElemList::apply_on_down_cast( reinterpret_cast<typename TM::EA *>(elem_list[i]), CallAfterSolve_11(), *this, *vectors_assembly);
+        }
+    }
+    virtual void call_after_solve_12(const Vec<void *> &elem_list) {
+        if (vectors_assembly== NULL){
+            if ( not allocated )
+                allocate_matrices();
+            for(unsigned i=0;i<elem_list.size();++i)
+                TM::TElemList::apply_on_down_cast( reinterpret_cast<typename TM::EA *>(elem_list[i]), CallAfterSolve_12(), *this, vectors );
+        } else {
+            for(unsigned i=0;i<elem_list.size();++i)
+                TM::TElemList::apply_on_down_cast( reinterpret_cast<typename TM::EA *>(elem_list[i]), CallAfterSolve_12(), *this, *vectors_assembly);
+        }
+    }
+    virtual void call_after_solve_13(const Vec<void *> &elem_list) {
+        if (vectors_assembly== NULL){
+            if ( not allocated )
+                allocate_matrices();
+            for(unsigned i=0;i<elem_list.size();++i)
+                TM::TElemList::apply_on_down_cast( reinterpret_cast<typename TM::EA *>(elem_list[i]), CallAfterSolve_13(), *this, vectors );
+        } else {
+            for(unsigned i=0;i<elem_list.size();++i)
+                TM::TElemList::apply_on_down_cast( reinterpret_cast<typename TM::EA *>(elem_list[i]), CallAfterSolve_13(), *this, *vectors_assembly);
+        }
+    }
+    virtual void call_after_solve_14(const Vec<void *> &elem_list) {
+        if (vectors_assembly== NULL){
+            if ( not allocated )
+                allocate_matrices();
+            for(unsigned i=0;i<elem_list.size();++i)
+                TM::TElemList::apply_on_down_cast( reinterpret_cast<typename TM::EA *>(elem_list[i]), CallAfterSolve_14(), *this, vectors );
+        } else {
+            for(unsigned i=0;i<elem_list.size();++i)
+                TM::TElemList::apply_on_down_cast( reinterpret_cast<typename TM::EA *>(elem_list[i]), CallAfterSolve_14(), *this, *vectors_assembly);
+        }
+    }
+    virtual void call_after_solve_15(const Vec<void *> &elem_list) {
+        if (vectors_assembly== NULL){
+            if ( not allocated )
+                allocate_matrices();
+            for(unsigned i=0;i<elem_list.size();++i)
+                TM::TElemList::apply_on_down_cast( reinterpret_cast<typename TM::EA *>(elem_list[i]), CallAfterSolve_15(), *this, vectors );
+        } else {
+            for(unsigned i=0;i<elem_list.size();++i)
+                TM::TElemList::apply_on_down_cast( reinterpret_cast<typename TM::EA *>(elem_list[i]), CallAfterSolve_15(), *this, *vectors_assembly);
         }
     }
     /**

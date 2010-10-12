@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from LMT.formal_lf.variable import Variable
 from LMT.include.codegen import *
 import os, math, sys, string
@@ -27,7 +28,7 @@ class Element:
         "children" : [],
         "var_inter" : [symbol('var_inter['+str(i)+']','\eta_{'+str(i)+'}') for i in range(5)],
         "val" : val,
-        "interpolation" : {'global':val[0],'gauss':val[0],'Flat_Interpolation':val[0],'elementary':val[0],'skin_elementary':val[0],\
+        "interpolation" : {'global':val[0],'gauss_0':val[0],'Flat_Interpolation':val[0],'elementary':val[0],'skin_elementary':val[0],\
             'elementary_mul_nb_nodes':val[0],'elementary_mul_nb_nodes_of_each_children_elem':val[0]},
         "dim" : dim,
         "max_dim" : 3,
@@ -498,6 +499,17 @@ class Element:
             if not ex.diff( self.val[i] ):
                 return i
       return 0
+
+    # retourne la moyenne arithmétique des valeurs d'interpolation
+    def mean_val(self, name ):
+      m = self.get_nb_var( name )
+      s = 0
+      for i in range( m ):
+          s += self.val[ i ]
+      if m : 
+          return s / m
+      else:
+          return s
 
     def get_nb_var_der_nodal(self):
       ex = self.interpolation["der_nodal"]

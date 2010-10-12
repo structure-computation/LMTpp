@@ -352,7 +352,8 @@ ATTENTION : le nombre de coefficients par ligne ne doit pas dépasser 2^31-1 pou
 
 */
 
-template<class T> bool lu_factorize( Mat<T,Gen<>,SparseLU> &m, Vec<int> &vector_permutation ) {
+template<class T>
+bool lu_factorize( Mat<T,Gen<>,SparseLU> &m, Vec<int> &vector_permutation ) {
     int n = m.nb_rows();
     int jj,ii,i,ipivot,j2,ind,indc;
     int ideb, k;
@@ -606,16 +607,14 @@ template<class T> bool lu_factorize( Mat<T,Gen<>,SparseLU> &m, Vec<int> &vector_
 }
 
 /// m is assumed to be factorized
-template<class T,int s,int s2> void solve_using_lu_factorize( const Mat<T,Gen<s>,SparseLU> &mat, const Vec<int> &permutation, const Vec<T> &sol, Vec<T,s2> &res, bool allow_permutation = true ) {
-    if ( allow_permutation ) {
+template<class T,int s,int s2> void solve_using_lu_factorize( const Mat<T,Gen<s>,SparseLU> &mat, const Vec<int> &permutation, const Vec<T> &sol, Vec<T,s2> &res /*, bool allow_permutation = true*/ ) {
+    //if ( allow_permutation ) {
         Vec<T,s2> tmp_sol = sol[ permutation ];
         solve_using_lu_factorize( mat, tmp_sol, res );
         //res = tmp_res;
-    } else
-        solve_using_lu_factorize( mat, sol, res );
+    //} else
+    //    solve_using_lu_factorize( mat, sol, res );
 }
-
-
 
 /// in place...
 template<class T> void lu_factorize( Mat<T,Gen<>,SparseLU> &m ) {

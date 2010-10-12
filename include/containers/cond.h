@@ -15,7 +15,7 @@ typename TM::T _cond( const TM &m, TV &vp, T crit, T offset ) {
         Vec<T> new_vp = m * vp + offset * vp;
         T new_lambda = norm_2( new_vp ); // * ( dot( vp, new_vp ) < 0 ? -1 : 1 );
         if ( new_lambda == T( 0 ) )
-            return std::numeric_limits<T>::max();
+            return 0;
         if ( abs_indication( new_lambda - lambda ) < abs_indication( crit * new_lambda ) )
             break;
         vp = new_vp / new_lambda;

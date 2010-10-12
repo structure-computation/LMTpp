@@ -187,13 +187,19 @@ struct GetVtkTypes {
     /// vector of vector
     template<unsigned n,class T,int s,int s2> void operator()( const Number<n> &nn, const StructForType<Vec<Vec<T,s>,s2 > > &st ) { res.push_back( GetVtkType<T>::res() ); }
     /// vector of vector of vector
-    template<unsigned n,class T,int s,int s2,int s3> void operator()( const Number<n> &nn, const StructForType<Vec<Vec<Vec<T,s>,s2>,s3> > &st ) { res.push_back( GetVtkType<T>::res() ); }
+    template<unsigned n,class T,int s,int s2,int s3> void operator()( const Number<n> &nn, const StructForType<Vec<Vec<Vec<T,s>,s2>,s3> > &st ){ res.push_back( GetVtkType<T>::res() ); }
+    /// vector of vector of vector of vector
+    template<unsigned n,class T,int s,int s2,int s3,int s4> void operator()( const Number<n> &nn, const StructForType<Vec<Vec<Vec<Vec<T,s>,s2>,s3>,s4> > &st ){ res.push_back( GetVtkType<T>::res() ); }
     /// generic matrix
     template<unsigned n,class T,int s,int s2> void operator()( const Number<n> &nn, const StructForType<Mat<T,Gen<s,s2> > > &st ) { res.push_back( GetVtkType<T>::res() ); }
     /// vector of generic matrix
     template<unsigned n,class T,int s,int s2,int s3> void operator()( const Number<n> &nn, const StructForType<Vec<Mat<T,Gen<s2,s3> >,s > > &st ) { res.push_back( GetVtkType<T>::res() ); }
     /// matrice symetrique
     template<unsigned n,class T,int s> void operator()( const Number<n> &nn, const StructForType<Mat<T,Sym<s> > > &st ) { res.push_back( GetVtkType<T>::res() ); }
+    /// vecteur de matrice symetrique
+    template<unsigned n,class T,int s,int s1> void operator()( const Number<n> &nn, const StructForType<Vec<Mat<T,Sym<s> >,s1> > &st ){ res.push_back( GetVtkType<T>::res() ); }
+    /// vecteur de vecteur de matrice symetrique
+    template<unsigned n,class T,int s,int s1,int s2> void operator()( const Number<n> &nn, const StructForType<Vec<Vec<Mat<T,Sym<s> >,s1>,s2> > &st ){ res.push_back( GetVtkType<T>::res() ); }
     Vec<const char *> res;
 };
 

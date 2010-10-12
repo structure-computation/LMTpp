@@ -4,8 +4,9 @@ from LMT.include.codegen import *
 
 class Variable:
   """ Class to manage Variables (unknowns or not, nodal, elementary or global) """
-  def __init__(self,unit,interpolation="nodal",unknown=False,nb_dim=[],nb_der=0,skin_var=False,default_value="",extr=extrapolation.Pol_extr,sup_nb_der=0,T="",dont_use_caracdm = False):
+  def __init__(self,unit,interpolation="nodal",unknown=False,nb_dim=[],nb_der=0,skin_var=False,default_value="",extr=extrapolation.Pol_extr,sup_nb_der=0,T="",dont_use_caracdm = False, sym = False, id_dependant = 0):
     self.interpolation = interpolation
+    self.interpolation_gauss_order = interpolation
     self.nb_dim = nb_dim
     self.nb_der = nb_der
     self.skin_var = skin_var
@@ -16,16 +17,25 @@ class Variable:
     self.T = T
     self.unit = unit
     self.dont_use_caracdm = dont_use_caracdm
+    self.sym = sym
+    self.id_dependant = id_dependant
 
   def extr(self,test_expr=False): return self.extrapolation( (self.nb_der+self.sup_nb_der)*(not test_expr) )
     
   def type_to_str(self,in_vec,vec_size):
         if len(self.T): res = self.T
         elif len(self.nb_dim)==1: res = "Vec<Tpos,"+str(self.nb_dim[0])+">"
-        elif len(self.nb_dim)==2: res = "Mat<Tpos,Gen<"+str(self.nb_dim[0])+","+str(self.nb_dim[1])+"> >"
+        elif len(self.nb_dim)==2: 
+              if self.sym:
+                #if self.nb_dim[1]!=self.nb_dim[0]: probleme
+                res = "Mat<Tpos,Sym<"+str(self.nb_dim[0])+"> >"
+              else:
+                res = "Mat<Tpos,Gen<"+str(self.nb_dim[0])+","+str(self.nb_dim[1])+"> >"
         else: res = "Tpos"
         
         if in_vec: res = 'Vec<' + res + ',' + str( vec_size ) + '>'
+        #id_dependant, a redimensinner (dynamique)
+        for id_ in range(self.id_dependant): res = 'Vec<' + res + ' >'
         return res
 
   def nb_elements(self):
@@ -49,6 +59,8 @@ class Variable:
         vec_access = ''
         #sys.stderr.write( interpolation )
         #sys.stderr.write( t )
+        for id_ in range(self.id_dependant):
+          vec_access += '[f.id['+str(id_)+']]'
         if in_vec:
             vec_access += '['+str( num_t )+']'
         if len(self.nb_dim) == 1:
@@ -102,7 +114,7 @@ class Variable:
           append_s( t_alt, element.val[cpt], t, 0, num_t, interpolation.in_vec )
           cpt += 1
 
-    return element.interpolation[self.interpolation].subs(EM( map_sym ))
+    return element.interpolation[self.interpolation_gauss_order].subs(EM( map_sym ))
 
   def set_expr(self,name_var,interpolation,element):
     self.element = element
@@ -112,7 +124,16 @@ class Variable:
     if len(self.nb_dim) == 2:
         self.sub_expr = []
         self.expr = ExMatrix(self.nb_dim[0],self.nb_dim[1])
-        for i in range(self.nb_dim[0]):
+        if self.sym:
+          for i in range(self.nb_dim[0]):
+            self.expr[i,i] = self.get_scalar_expr(self.name,interpolation,element,[i,i],self.symbols)
+            for j in range(i+1,self.nb_dim[1]):
+                self.expr[i,j] = self.get_scalar_expr(self.name,interpolation,element,[i,j],self.symbols)
+                self.expr[j,i] = self.expr[i,j]
+                self.sub_expr.append( self.expr[i,j] )
+                self.sub_expr.append( self.expr[j,i] )
+        else:
+          for i in range(self.nb_dim[0]):
             for j in range(self.nb_dim[1]):
                 self.expr[i,j] = self.get_scalar_expr(self.name,interpolation,element,[i,j],self.symbols)
                 self.sub_expr.append( self.expr[i,j] )

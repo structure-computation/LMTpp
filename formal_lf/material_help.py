@@ -311,7 +311,7 @@ def dev( sigma ):
 # ne fonctionne qu'en 3D
 def von_mises( sigma ):
     d = dev( sigma )
-    return sqrt(3.0)/2.0 * sqrt( dot(d,d) )
+    return sqrt( 3.0/2.0 * trace_sym_col(d,d) )
 
 # jac
 def calc_jac_ext( coord, var_inter ):
@@ -352,3 +352,12 @@ def hooke_anisotrope_3d(C):
     #K = H.inverse()
     K = chol_inv(H)
     return K, H
+
+# produit tensoriel pour notation en colonne (nicolas R)
+def tens_col(v1,v2):
+    dim = (v1.size()+1)/2
+    res=ExMatrix(dim*(dim+1)/2,dim*(dim+1)/2)
+    for i in range(dim*(dim+1)/2):
+        for j in range(dim*(dim+1)/2):
+                res[i,j]=v1[i]*v2[j]
+    return res
