@@ -14,6 +14,11 @@
 
 #include "triangle.h"
 
+#ifdef METIL_COMP_DIRECTIVE
+#pragma src_file refine_tetra_face.cpp
+#endif
+
+
 namespace LMT {
 /*!
     \verbatim
