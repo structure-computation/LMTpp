@@ -25,7 +25,7 @@ typename TM::T _cond( const TM &m, TV &vp, T crit, T offset ) {
 }
 
 /**
-    conditionnement d'un opérateur.
+    conditionnement d'un opérateur ou d'une matrice carré.
 */
 template<class TM>
 typename TM::T cond( const TM &m, typename TM::T prec = 1e-6 ) {
