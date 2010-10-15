@@ -55,10 +55,11 @@ extern Crout crout;
 //     return t2-t1;
 // }
 
-/** \keyword Utilitaires 
+/*!
+\keyword Utilitaires 
 \brief Structure permettant de déterminer le temps écoulé entre deux instants donnés.
 
-En délarant une instance de type TicToc, on d�ermine le temps �oul�en ��utant la fonction :
+En délarant une instance de type TicToc, on détermine le temps écoulé en éxecutant la fonction :
 \code
     TicToc t;
     t.start();
