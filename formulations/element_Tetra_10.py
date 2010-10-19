@@ -14,10 +14,10 @@ interval_var_inter = [
 # 0/--- 4----\1
 
 children = [
-  {'name':'Triangle_6', 'nodes':[0, 2, 1, 6, 5, 4], 'var':[1-var_inter[0]-var_inter[1],var_inter[0],var_inter[1]]},
-  {'name':'Triangle_6', 'nodes':[0, 1, 3, 4, 8, 7], 'var':[1-var_inter[0]-var_inter[1],var_inter[0],number(0)]},
-  {'name':'Triangle_6', 'nodes':[0, 3, 2, 7, 9, 6], 'var':[number(0),var_inter[0],var_inter[1]]},
-  {'name':'Triangle_6', 'nodes':[1, 2, 3, 5, 9, 8], 'var':[number(0),1-var_inter[0]-var_inter[1],var_inter[0]]},
+  {'name':'Triangle_6', 'nodes':[0, 2, 1, 6, 5, 4], 'var':[ var_inter[1],var_inter[0],number(0) ]},
+  {'name':'Triangle_6', 'nodes':[0, 1, 3, 4, 8, 7], 'var':[ var_inter[1],number(0),var_inter[0] ]},
+  {'name':'Triangle_6', 'nodes':[0, 3, 2, 7, 9, 6], 'var':[ number(0),var_inter[0],var_inter[1] ]},
+  {'name':'Triangle_6', 'nodes':[1, 2, 3, 5, 9, 8], 'var':[ 1-var_inter[0]-var_inter[1],var_inter[0],var_inter[1] ]},
 ]
 
 permutation = [ 0, 1, 3, 2, 4, 8, 7, 6, 5, 9  ]
