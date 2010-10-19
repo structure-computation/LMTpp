@@ -32,6 +32,7 @@
     * \a #25 Que signifient les paramètres remplate Pvec, T, TE, TM, PB, etc... ?
     * \a #26 Mes produits matrice, matrice ou matrice, vecteurs sont lents.
     * \a #27 Mes produits de plusieurs matrices sont lents.
+    * \a #28 Calculer le conditionnement d'une matrice.
 
     = Réponses :
 
@@ -226,6 +227,10 @@
             RES = A * B * C;
             
         Le premier calcul est bien plus performant que le second grâce à la conversion de <strong> B * C </strong> en <strong> TM </strong> .
+
+    \anchor 28
+    
+        On peut utiliser la fonction \a cond () qui prend en paramètre une matrice et la précision souhaitée. La méthode utilisée est celle consistant à calculer les itérés de vecteurs aléatoires pour déterminer la valeur absolue de la plus grande valeur propre et de la plus petite valeur propre. 
 
 
 

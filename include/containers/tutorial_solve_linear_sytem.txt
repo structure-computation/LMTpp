@@ -107,23 +107,41 @@
     
                 = Matrice générale
                     
-                    Sous l'hypothèse que l'on doit résoudre des systèmes avec la même matrice, on réalise une décomposition <strong> LU </strong> avec ou sans pivot partiel. Le pivot partiel demande un plus de calcul mais on gagne en stabilité numrique.
-                    Vu la taille des matrices, on fait aussi l'hypothèse qu ' elles sont creuses. Alors on se sert des matrices du type \a Mat<T,Gen<>,SparseLU> qui sont adaptées.
-                    Pour la décomposition on utilise les fonctions <strong> lu_factorize(  Mat < T , Gen < > , SparseLU > &  m ) </strong> et <strong> lu_factorize( Mat<T,Gen<>,SparseLU> &m, Vec<int> &vector_permutation ) </strong> qui stocke dans m le résultat de la décomposition. La matrice m initiale est donc effacée. Enfin la deuxième <strong> lu_factorize() </strong> renvoie aussi le vecteur permutation des lignes lors des changements de pivots.
-                    Ensuite pour résoudre le système, on se sert de  la fonction <strong>  solve_using_lu_factorize() </strong> .
+                    Si on doit résoudre plusieurs systèmes avec la même matrice, la décomposition <strong> LU </strong> s'impose. Sinon une méthode itérative peut être plus intéressante (voir le cas des matrices de grande dimension ci-dessous ).
+                    De plus avec de telle dimension, les matrices sont généralement creuses. Nous ferons cette hypothèse pour ce paragraphe.
+                    Pour la résolution de votre problème, il s'offre plusieurs choix :
+                        * utiliser la sous-librairie <strong> UMFPACK </strong> ( paquet debian suitesparse ) . Elle est très rapide, stable numériquement. On la conseille par défaut.
+                        * le code de la plateforme avec pivot partiel.
+                        * le code de la plateforme sans pivot partiel. C'est un plus rapide que le précédent code mais on perd en stabilité numérique.
+                          
+                    Sur une machine Intel Core2 à 2.66 GHz, on obtient les résultats suivants pour une matrice asssez creuse de taille 2500 :  
+                        * <strong> UMFPACK </strong>
+                            erreur absolue -> 8.86035e-14
+                            durée = 3.06 seconds
+                        * avec pivot 
+                            erreur absolue -> 3.892e-12
+                            durée = 46.29 seconds
+                        * sans pivot
+                            erreur absolue -> 2.82353e-09
+                            durée = 37.57 seconds
                     
-                    Voici un exemple de code qui utilise les deux fonctions ( avec ou sans pivot partiel ) :
+                    Voici le code du test :
                     \code C/C++
+                        #include <time.h> /// fonction clock()
+    
                         #include <containers/mat.h>
-
+                        #include <containers/matumfpack.h>
+                        
                         using namespace std;
                         using namespace LMT;
                         
                         int main() {
-                            typedef double T;
-                            unsigned n = 1000;
-                            Vec<T> b, b2, xth, x, x2;
+                            typedef double T;          
+                            unsigned n = 2500;
+                            Vec<T> b, b2, b3, xth, x, x2, x3;
                             Vec<int> perm;
+                            clock_t t1, t2;
+                            double dt1, dt2, dt3;
                         
                             //srand ( time(NULL) );
                         
@@ -141,25 +159,64 @@
                             A.diag() = 10;
                             A2 = A;
                             
-                            //PRINTN( A );
-                            Mat< T > Agen = A; /// pour 
-                                
-                            //PRINT( xth );
+                            Mat<double, Gen<>, SparseUMFPACK, void> A3( A );
                         
+                            Mat< T > Agen = A; /// pour générer le vecteur b
+                                
                             b = Agen * xth;
                             b2 = b;
+                            b3 = b;
                             
+                            /// LU sans pivot
+                            t1  = clock(); 
                             lu_factorize( A );
+                            t2  = clock();
+                            dt1 = double( t2 - t1 ) / CLOCKS_PER_SEC;
+                            
+                            /// LU avec pivot
+                            t1  = clock(); 
                             lu_factorize( A2, perm );
+                            t2  = clock();
+                            dt2 = double( t2 - t1 ) / CLOCKS_PER_SEC; 
+                            
+                            /// LU par UMFPACK 
+                            t1  = clock(); 
+                            A3.get_factorization();
+                            t2  = clock();  
+                            dt3 = double( t2 - t1 ) / CLOCKS_PER_SEC;
                         
                             solve_using_lu_factorize( A, b, x );
                             PRINT( max( abs( x - xth ) ) );
+                            cout << "duration = " << dt1 << " seconds" << endl;
                                 
                             solve_using_lu_factorize( A2, perm, b2, x2 );
                             PRINT( max( abs( x2 - xth ) ) );
-                                
+                            cout << "duration = " << dt2 << " seconds" << endl;
+                                                        
+                            x3 = A3.solve( b3 );
+                            PRINT( max( abs( x3 - xth ) ) );    
+                            cout << "duration = " << dt3 << " seconds" << endl;
+                                                        
                             return 0;
                         }
+
+                    Pour compiler ce code il faut le lier à la sous-librairie <strong> UMFPACK </strong> , i.e. il faut ajouter les directives suivantes au compilateur :
+                        *  <strong> -DWITH_UMFPACK </strong> ,
+                        *  <strong> -lumfpack </strong> ,
+                        *  <strong> -I/usr/include/suitesparse </strong> . 
+                        
+                    Dans un fichier SConstruct, cela donne :
+                    \verbatim
+                        CPPPATH = [ '#LMT/include' , '/usr/include/suitesparse' ],
+                        LIBS = [ 'pthread', 'cholmod' , 'umfpack' ],
+                        CPPFLAGS = cppflags( ['xml2-config'] ) + " -g3 -O3 " + " -DWITH_UMFPACK " ,
+                    
+                    Remarques :
+                    La classe \a Mat<double,Gen<>,SparseUMFPACK,void> encapsule le code de la <strong> UMFPACK </strong> .
+                    Pour le code de la plateforme, on se sert des matrices du type \a Mat<T,Gen<>,SparseLU> qui sont adaptées.
+                    Pour la décomposition on utilise la méthode <strong> get_factorization() </strong> de \a Mat<double,Gen<>,SparseUMFPACK,void> et, pour le code de la plateforme, les fonctions <strong> lu_factorize(  Mat < T , Gen < > , SparseLU > &  m ) </strong> et <strong> lu_factorize( Mat<T,Gen<>,SparseLU> &m, Vec<int> &vector_permutation ) </strong> qui stocke dans m le résultat de la décomposition. La matrice m initiale est donc effacée. Enfin la deuxième <strong> lu_factorize() </strong> renvoie aussi le vecteur permutation des lignes lors des changements de pivots.
+                    Ensuite pour résoudre le système, on se sert de  la fonction <strong>  solve_using_lu_factorize() </strong> ou la méthode <strong> solve( ) </strong> de \a Mat<double,Gen<>,SparseUMFPACK,void> .
+ 
                 
                 = Matrice symétrique
     
