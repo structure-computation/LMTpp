@@ -103,9 +103,19 @@ namespace LMTPRIVATE {
 
 /*!
     Cette fonction divise les barres (segments) du maillage suivant l'opérateur op.
-    L'opérateur op peut soit renvoyer  un booléen soit un double. Il prend aussi forcément un élément barre en paramètre.
+    L'opérateur op peut soit renvoyer  un booléen soit un double. Il prend aussi forcément un élément de type barre en paramètre. 
+    C'est-à-dire qu'il est au moins de la forme :
+    \code C/C++
+        struct MyOp {
+            
+            template<class NB,class TN,class TD,unsigned nl> 
+            RET operator()(Element<Bar,NB,TN,TD,nl> &e) const {
+                  /// votre code 
+            }
+        };
+    où RET est soit un type flottant, soit un booléen.
     S'il renvoie un booléen, il y a opération de division au milieu de la barre s'il renvoie vrai.
-    S'il renvoie un double r, rien n'est fait lorsque r=0, il divise la barre lorsque r est compris entre 0 et 1. La position de la division dépend de r. Lorsque r=1, il divise au milieu.
+    S'il renvoie un double r, rien n'est fait lorsque r=0, il divise la barre lorsque r est compris entre 0 et 1. La position de la division dépend de r suivant les points barycentrique ( pos(0); 1 - r ) ( pos(1); r ) . Lorsque r=1, il divise au milieu.
     Enfin refinement() renvoie vrai si elle divise au moins une barre et faux sinon.
 
     \keyword Maillage/Elément/Opération
@@ -127,7 +137,7 @@ bool refinement(TM &m,Op &op) {
     return res;
 }
 
-/**
+/*!
     Peut être utilisé pour couper un maillage avec un level-set
 */
 template<class PhiExtract>

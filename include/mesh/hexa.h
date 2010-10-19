@@ -10,6 +10,17 @@ namespace LMT {
 
 /*!
     Hexa représente un pavé quelconque.
+    
+    \verbatim
+        .                
+        .          4____7
+        .          /   /|
+        .        5/__6/ |
+        .        |    | |
+        .        | 0  | /3
+        .        |____|/
+        .        1     2
+
 
     \keyword Maillage/Elément
     \friend raphael.pasquier@lmt.ens-cachan.fr

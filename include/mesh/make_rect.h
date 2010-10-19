@@ -85,7 +85,7 @@ void make_rect(TM &m,const Bar_3 &t,typename TM::Pvec X0,typename TM::Pvec X1,ty
         m.add_element( Bar_3(), DefaultBehavior(), i, i+2, i+1 );
 }
 
-/**
+/*!
  * Triangle
  * @param m 
  * @param t 
@@ -120,7 +120,7 @@ void make_rect(TM &m,const Triangle &t,typename TM::Pvec X0_,typename TM::Pvec X
         }
     }
 }
-/**
+/*!
  * Quad
  * @param m 
  * @param t 
@@ -153,7 +153,7 @@ void make_rect(TM &m,const Quad &t,typename TM::Pvec X0_,typename TM::Pvec X1_,t
     }
 }
 
-/**
+/*!
  * Triangle_6
  * @param m 
  * @param t 
@@ -192,7 +192,7 @@ void make_rect(TM &m,const Triangle_6 &t,typename TM::Pvec X0_,typename TM::Pvec
     }
 }
 
-/**
+/*!
  * Hexa
  * @param m 
  * @param t 
@@ -228,7 +228,7 @@ void make_rect(TM &m,const Hexa &t,typename TM::Pvec X0_,typename TM::Pvec X1_,t
                              );
 }
 
-/**
+/*!
  * Tetra
  * @param m 
  * @param t 
@@ -279,7 +279,7 @@ void make_rect(TM &m,const Tetra &t,typename TM::Pvec X0_,typename TM::Pvec X1_,
     
 }
 
-/**
+/*!
  * Quad_8
  */
 template<class TM>
@@ -320,7 +320,7 @@ void make_rect(TM &m,const Quad_8 &t,typename TM::Pvec X0_,typename TM::Pvec X1_
     }    
 }
 
-/**
+/*!
  * Quad_9
  */
 template<class TM>
@@ -362,7 +362,7 @@ void make_rect(TM &m,const Quad_9 &t,typename TM::Pvec X0_,typename TM::Pvec X1_
                          );
 }
 
-/**
+/*!
  * Quad_6
  */
 template<class TM> void make_rect(TM &m,const Quad_6 &t,typename TM::Pvec X0_,typename TM::Pvec X1_,typename TM::Pvec nb_points_) {
@@ -408,7 +408,7 @@ template<class TM> void make_rect(TM &m,const Quad_6 &t,typename TM::Pvec X0_,ty
     }
 }
 
-/**
+/*!
  * Quad_42
  */
 template<class TM> void make_rect(TM &m,const Quad_42 &t,typename TM::Pvec X0_,typename TM::Pvec X1_,typename TM::Pvec nb_points_) {
@@ -459,7 +459,7 @@ template<class TM> void make_rect(TM &m,const Quad_42 &t,typename TM::Pvec X0_,t
     }
 }
 
-/**
+/*!
  * Wedge
  * @param m
  * @param t
@@ -513,7 +513,7 @@ struct BestialNodeAdder {
     T prec;
 };
 
-/**
+/*!
   Hexa_20
     \verbatim
         .                        7 ---14----6
@@ -569,7 +569,7 @@ void make_rect(TM &m,const Hexa_20 &t,typename TM::Pvec X0_,typename TM::Pvec X1
     }
 }
 
-/**  
+/*!  
     \verbatim
         .                        Tetra_10
         .                            3
@@ -609,7 +609,7 @@ void make_rect(TM &m,const Tetra_10 &t,typename TM::Pvec X0_,typename TM::Pvec X
 }
 
 
-/*
+/*!
     5
    /|\
  11 | 10
