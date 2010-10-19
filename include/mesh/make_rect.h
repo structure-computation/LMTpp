@@ -593,13 +593,14 @@ void make_rect(TM &m,const Tetra_10 &t,typename TM::Pvec X0_,typename TM::Pvec X
     Mat< double, Gen<3,3> > chgt;
     Vec< typename TM::TNode*, 10 > vn;
     Pvec O, tr, incr;
+    Tpos dist_ref = distance( X0, X1 );
     
-    if ( distance( X0, X1 ) < 16 * std::numeric_limits<Tpos>::epsilon() ) {
+    if ( dist_ref / ( 1. + length( X0 ) + length( X1 ) ) < 16 * std::numeric_limits<Tpos>::epsilon() ) {
         std::cerr << "error make_rect() : vacuum space " << std::endl;
         return;
     }
     
-    BestialNodeAdder<TM> ban; ban.m = &m; ban.prec = 16 * std::numeric_limits<Tpos>::epsilon();
+    BestialNodeAdder<TM> ban; ban.m = &m; ban.prec = 16 * dist_ref * std::numeric_limits<Tpos>::epsilon();
     
     Vec<unsigned, 3 > nb_elem( nb_points_ ); nb_elem -= 1;
     
@@ -628,6 +629,7 @@ void make_rect(TM &m,const Tetra_10 &t,typename TM::Pvec X0_,typename TM::Pvec X
                 chgt.col( 0 ) = basis[ 0 ]; chgt.col( 1 ) = basis[ 1 ]; chgt.col( 2 ) = basis[ 2 ]; 
                 for( unsigned i = 0; i < 10; ++i ) 
                     vn[ i ] = ban.get_node( O + chgt * rela[ i ] );
+                permutation_if_jac_neg( Tetra_10(), vn.ptr() );
                 m.add_element( Tetra_10(), DefaultBehavior(), vn.ptr() ); 
                 /// Tetra 1
                 tr = Pvec( incr[ 0 ], incr[ 1 ], 0.0 );
@@ -637,6 +639,7 @@ void make_rect(TM &m,const Tetra_10 &t,typename TM::Pvec X0_,typename TM::Pvec X
                 chgt.col( 0 ) = basis[ 0 ]; chgt.col( 1 ) = basis[ 1 ]; chgt.col( 2 ) = basis[ 2 ]; 
                 for( unsigned i = 0; i < 10; ++i ) 
                     vn[ i ] = ban.get_node( O + tr + chgt * rela[ i ] );
+                permutation_if_jac_neg( Tetra_10(), vn.ptr() );
                 m.add_element( Tetra_10(), DefaultBehavior(), vn.ptr() );               
                 /// Tetra 2
                 tr = Pvec( incr[ 0 ], 0.0, 0.0 );
@@ -646,6 +649,7 @@ void make_rect(TM &m,const Tetra_10 &t,typename TM::Pvec X0_,typename TM::Pvec X
                 chgt.col( 0 ) = basis[ 0 ]; chgt.col( 1 ) = basis[ 1 ]; chgt.col( 2 ) = basis[ 2 ]; 
                 for( unsigned i = 0; i < 10; ++i ) 
                     vn[ i ] = ban.get_node( O + tr + chgt * rela[ i ] );
+                permutation_if_jac_neg( Tetra_10(), vn.ptr() );
                 m.add_element( Tetra_10(), DefaultBehavior(), vn.ptr() );               
                 /// Tetra 3
                 tr = Pvec( incr[ 0 ], 0.0, incr[ 2 ] );
@@ -655,6 +659,7 @@ void make_rect(TM &m,const Tetra_10 &t,typename TM::Pvec X0_,typename TM::Pvec X
                 chgt.col( 0 ) = basis[ 0 ]; chgt.col( 1 ) = basis[ 1 ]; chgt.col( 2 ) = basis[ 2 ]; 
                 for( unsigned i = 0; i < 10; ++i ) 
                     vn[ i ] = ban.get_node( O + tr + chgt * rela[ i ] );
+                permutation_if_jac_neg( Tetra_10(), vn.ptr() );
                 m.add_element( Tetra_10(), DefaultBehavior(), vn.ptr() );                
                 /// Tetra 4
                 tr = Pvec( incr[ 0 ], incr[ 1 ], 0.0 );
@@ -664,6 +669,7 @@ void make_rect(TM &m,const Tetra_10 &t,typename TM::Pvec X0_,typename TM::Pvec X
                 chgt.col( 0 ) = basis[ 0 ]; chgt.col( 1 ) = basis[ 1 ]; chgt.col( 2 ) = basis[ 2 ]; 
                 for( unsigned i = 0; i < 10; ++i ) 
                     vn[ i ] = ban.get_node( O + tr + chgt * rela[ i ] );
+                permutation_if_jac_neg( Tetra_10(), vn.ptr() );
                 m.add_element( Tetra_10(), DefaultBehavior(), vn.ptr() ); 
                 /// Tetra 5
                 tr = Pvec( incr[ 0 ], incr[ 1 ], incr[ 2 ] );
@@ -673,6 +679,7 @@ void make_rect(TM &m,const Tetra_10 &t,typename TM::Pvec X0_,typename TM::Pvec X
                 chgt.col( 0 ) = basis[ 0 ]; chgt.col( 1 ) = basis[ 1 ]; chgt.col( 2 ) = basis[ 2 ]; 
                 for( unsigned i = 0; i < 10; ++i ) 
                     vn[ i ] = ban.get_node( O + tr + chgt * rela[ i ] );
+                permutation_if_jac_neg( Tetra_10(), vn.ptr() );
                 m.add_element( Tetra_10(), DefaultBehavior(), vn.ptr() );             
             }
 }
