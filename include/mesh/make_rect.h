@@ -2,6 +2,7 @@
 #define LMT_mesh_make_rect_HEADER
 
 #include "util/rectilinear_iterator.h"
+#include "containers/mat.h"
 
 namespace LMT {
 
@@ -581,31 +582,99 @@ void make_rect(TM &m,const Hexa_20 &t,typename TM::Pvec X0_,typename TM::Pvec X1
         .                     0/--- 4------\1
  */
 template<class TM>
-void make_rect(TM &m,const Tetra_10 &t,typename TM::Pvec X0_,typename TM::Pvec X1_,typename TM::Pvec nb_elements) {
+void make_rect(TM &m,const Tetra_10 &t,typename TM::Pvec X0_,typename TM::Pvec X1_,typename TM::Pvec nb_points_ ) {
     typedef typename TM::Pvec Pvec;
     typedef typename TM::Tpos Tpos;
+    
     Pvec X0 = min(X0_,X1_);
     Pvec X1 = max(X0_,X1_);
-
-    BestialNodeAdder<TM> ban; ban.m = &m; ban.prec = min( (X1-X0)/nb_elements ) * 1e-6;
+    Vec< Pvec, 10 > rela;
+    Vec< Pvec,  3 > basis;
+    Mat< double, Gen<3,3> > chgt;
+    Vec< typename TM::TNode*, 10 > vn;
+    Pvec O, tr, incr;
     
-    Pvec step = (X1-X0) / nb_elements;
-    for(Rectilinear_iterator<Tpos,TM::dim> iter( X0, X1 - 0.1 * step, step ); iter; ++iter ) {
-        typename TM::TNode *n[] = {
-            ban.get_node( iter.pos + step * Pvec(0.0,0.0,0.0) ),
-            ban.get_node( iter.pos + step * Pvec(1.0,0.0,0.0) ),
-            ban.get_node( iter.pos + step * Pvec(0.0,1.0,0.0) ),
-            ban.get_node( iter.pos + step * Pvec(0.0,0.0,1.0) ),
-                       
-            ban.get_node( iter.pos + step * Pvec(0.5,0.0,0.0) ),
-            ban.get_node( iter.pos + step * Pvec(0.5,0.5,0.0) ),
-            ban.get_node( iter.pos + step * Pvec(0.0,0.5,0.0) ),
-            ban.get_node( iter.pos + step * Pvec(0.0,0.0,0.5) ),
-            ban.get_node( iter.pos + step * Pvec(0.5,0.0,0.5) ),
-            ban.get_node( iter.pos + step * Pvec(0.0,0.5,0.5) ),
-        };
-        m.add_element( Tetra_10(), DefaultBehavior(), n );
+    if ( distance( X0, X1 ) < 16 * std::numeric_limits<Tpos>::epsilon() ) {
+        std::cerr << "error make_rect() : vacuum space " << std::endl;
+        return;
     }
+    
+    BestialNodeAdder<TM> ban; ban.m = &m; ban.prec = 16 * std::numeric_limits<Tpos>::epsilon();
+    
+    Vec<unsigned, 3 > nb_elem( nb_points_ ); nb_elem -= 1;
+    
+    incr = ( X1 - X0 ) / nb_elem;
+    
+    rela[ 0 ] = Pvec(0.0,0.0,0.0) * incr;
+    rela[ 1 ] = Pvec(1.0,0.0,0.0) * incr;
+    rela[ 2 ] = Pvec(0.0,1.0,0.0) * incr;
+    rela[ 3 ] = Pvec(0.0,0.0,1.0) * incr;
+            
+    rela[ 4 ] = Pvec(0.5,0.0,0.0) * incr;
+    rela[ 5 ] = Pvec(0.5,0.5,0.0) * incr;
+    rela[ 6 ] = Pvec(0.0,0.5,0.0) * incr;
+    rela[ 7 ] = Pvec(0.0,0.0,0.5) * incr;
+    rela[ 8 ] = Pvec(0.5,0.0,0.5) * incr;
+    rela[ 9 ] = Pvec(0.0,0.5,0.5) * incr;
+    
+    for( unsigned i = 0; i < nb_elem[ 2 ]; ++i )
+        for( unsigned j = 0; j < nb_elem[ 1 ]; ++j )
+            for( unsigned k = 0; k < nb_elem[ 0 ]; ++k ) {
+                O = X0 + Pvec( k * incr[ 0 ], j * incr[ 1 ], i * incr[ 2 ] );
+                /// Tetra 0
+                basis[ 0 ] = Pvec(1.0,0.0,0.0);
+                basis[ 1 ] = Pvec(0.0,1.0,0.0);
+                basis[ 2 ] = Pvec(0.0,0.0,1.0);
+                chgt.col( 0 ) = basis[ 0 ]; chgt.col( 1 ) = basis[ 1 ]; chgt.col( 2 ) = basis[ 2 ]; 
+                for( unsigned i = 0; i < 10; ++i ) 
+                    vn[ i ] = ban.get_node( O + chgt * rela[ i ] );
+                m.add_element( Tetra_10(), DefaultBehavior(), vn.ptr() ); 
+                /// Tetra 1
+                tr = Pvec( incr[ 0 ], incr[ 1 ], 0.0 );
+                basis[ 0 ] = Pvec(-1.0,0.0,0.0);
+                basis[ 1 ] = Pvec(0.0,-1.0,0.0);
+                basis[ 2 ] = Pvec(0.0,-1.0,1.0);
+                chgt.col( 0 ) = basis[ 0 ]; chgt.col( 1 ) = basis[ 1 ]; chgt.col( 2 ) = basis[ 2 ]; 
+                for( unsigned i = 0; i < 10; ++i ) 
+                    vn[ i ] = ban.get_node( O + tr + chgt * rela[ i ] );
+                m.add_element( Tetra_10(), DefaultBehavior(), vn.ptr() );               
+                /// Tetra 2
+                tr = Pvec( incr[ 0 ], 0.0, 0.0 );
+                basis[ 0 ] = Pvec(-1.0,0.0,1.0);
+                basis[ 1 ] = Pvec(-1.0,1.0,0.0);
+                basis[ 2 ] = Pvec(0.0,0.0,1.0);
+                chgt.col( 0 ) = basis[ 0 ]; chgt.col( 1 ) = basis[ 1 ]; chgt.col( 2 ) = basis[ 2 ]; 
+                for( unsigned i = 0; i < 10; ++i ) 
+                    vn[ i ] = ban.get_node( O + tr + chgt * rela[ i ] );
+                m.add_element( Tetra_10(), DefaultBehavior(), vn.ptr() );               
+                /// Tetra 3
+                tr = Pvec( incr[ 0 ], 0.0, incr[ 2 ] );
+                basis[ 0 ] = Pvec(-1.0,0.0,0.0);
+                basis[ 1 ] = Pvec(-1.0,1.0,0.0);
+                basis[ 2 ] = Pvec(-1.0,1.0,-1.0);
+                chgt.col( 0 ) = basis[ 0 ]; chgt.col( 1 ) = basis[ 1 ]; chgt.col( 2 ) = basis[ 2 ]; 
+                for( unsigned i = 0; i < 10; ++i ) 
+                    vn[ i ] = ban.get_node( O + tr + chgt * rela[ i ] );
+                m.add_element( Tetra_10(), DefaultBehavior(), vn.ptr() );                
+                /// Tetra 4
+                tr = Pvec( incr[ 0 ], incr[ 1 ], 0.0 );
+                basis[ 0 ] = Pvec(-1.0,0.0,0.0);
+                basis[ 1 ] = Pvec(-1.0,0.0,1.0);
+                basis[ 2 ] = Pvec(0.0,-1.0,1.0);
+                chgt.col( 0 ) = basis[ 0 ]; chgt.col( 1 ) = basis[ 1 ]; chgt.col( 2 ) = basis[ 2 ]; 
+                for( unsigned i = 0; i < 10; ++i ) 
+                    vn[ i ] = ban.get_node( O + tr + chgt * rela[ i ] );
+                m.add_element( Tetra_10(), DefaultBehavior(), vn.ptr() ); 
+                /// Tetra 5
+                tr = Pvec( incr[ 0 ], incr[ 1 ], incr[ 2 ] );
+                basis[ 0 ] = Pvec(-1.0,0.0,0.0);
+                basis[ 1 ] = Pvec(0.0,-1.0,0.0);
+                basis[ 2 ] = Pvec(0.0,0.0,-1.0);
+                chgt.col( 0 ) = basis[ 0 ]; chgt.col( 1 ) = basis[ 1 ]; chgt.col( 2 ) = basis[ 2 ]; 
+                for( unsigned i = 0; i < 10; ++i ) 
+                    vn[ i ] = ban.get_node( O + tr + chgt * rela[ i ] );
+                m.add_element( Tetra_10(), DefaultBehavior(), vn.ptr() );             
+            }
 }
 
 

@@ -1,4 +1,7 @@
-// file generated from matdense.h.py. Do not modify
+
+#ifndef MATDENSE_H
+#define MATDENSE_H
+/// file generated from matdense.h.py. Do not modify
 
 namespace LMT {
 
@@ -4647,3 +4650,6 @@ struct MatElem<TV,Diag<sr,sc>,Dense<Row>,alignement,nrs> {
 };
 
 } // namespace LMT
+
+#endif /// MATDENSE_H
+
