@@ -38,7 +38,7 @@ void read_msh(TM &m,std::istream &is) throw(std::runtime_error) {
     int ctxte=0;
     int nvi = TM::nvi;
     int nb_args;
-    PRINT(nvi);
+    //PRINT(nvi);
 
     // correspondance between number in file -> ref in mesh
     map<int,TNode *> map_num_node;
@@ -109,7 +109,7 @@ void read_msh(TM &m,std::istream &is) throw(std::runtime_error) {
                 s >> number;
             
             LMT::Vec<TNode *> vn; vn.resize(nb_nodes);
-            for(int i=0;i<nb_nodes;i++) {
+            for( unsigned i=0;i<nb_nodes;i++) {
                 s >> number;
                 vn[i] = map_num_node[number];
             }
