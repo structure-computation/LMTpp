@@ -234,7 +234,7 @@ T var_inter_insideness( const Quad &e, const TV &var_inter ) {
 
 /*!
     objectif :
-        la fonction renvoie vrai si pos est dans le \a Quad et faux sinon sous la condition que le \a Quad est dans le plan.
+        la fonction renvoie vrai si pos est dans le \a Quad et faux sinon ( sous la condition que le \a Quad est dans le plan ).
         
     param :
         Quad : le type d'élément
@@ -247,8 +247,6 @@ bool is_inside_linear( const Quad &elem, const PosNodes &pos_nodes, const Pvec &
     typedef typename Pvec::template SubType<0>::T T;
     Pvec AB = pos_nodes[ 1 ] - pos_nodes[ 0 ];
     Pvec BC = pos_nodes[ 2 ] - pos_nodes[ 1 ];
-//     Pvec CD = pos_nodes[ 3 ] - pos_nodes[ 2 ];
-//     Pvec DA = pos_nodes[ 0 ] - pos_nodes[ 3 ];
     Pvec XM = pos - pos_nodes[ 0 ];
     
     T det1 = AB[ 0 ] * XM[ 1 ] - AB[ 1 ] * XM[ 0 ];
@@ -264,7 +262,6 @@ bool is_inside_linear( const Quad &elem, const PosNodes &pos_nodes, const Pvec &
             Pvec DA = pos_nodes[ 0 ] - pos_nodes[ 3 ];
             XM = pos - pos_nodes[ 3 ];
             T det4 = DA[ 0 ] * XM[ 1 ] - DA[ 1 ] * XM[ 0 ];
-            
             if ( ( det1 * det4 ) >= 0 )
                 return true;
             else

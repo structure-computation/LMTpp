@@ -93,6 +93,47 @@ T var_inter_insideness( const Quad_42 &e, const TV &var_inter ) {
     return min( min( min( var_inter[0], var_inter[1] ), 1 - var_inter[0] ), 1 - var_inter[1] );
 }
 
+/*!
+    objectif :
+        la fonction renvoie vrai si pos est dans le \a Quad_42 et faux sinon ( sous la condition que le \a Quad_42 est dans le plan ).
+        Mais pour cet élément non linéaire , on considère le \a Quad engendré par les 4 premiers noeuds.
+        
+    param :
+        Quad : le type d'élément
+        pos_nodes : le position des sommets dans le plan. Il faut que le Quad ne soit pas "croisé".
+        po : la position du point dans le plan
+
+*/
+template< class PosNodes, class Pvec > 
+bool is_inside_linear( const Quad_42 &elem, const PosNodes &pos_nodes, const Pvec &pos ) {
+    typedef typename Pvec::template SubType<0>::T T;
+    Pvec AB = pos_nodes[ 1 ] - pos_nodes[ 0 ];
+    Pvec BC = pos_nodes[ 2 ] - pos_nodes[ 1 ];
+    Pvec XM = pos - pos_nodes[ 0 ];
+    
+    T det1 = AB[ 0 ] * XM[ 1 ] - AB[ 1 ] * XM[ 0 ];
+    XM = pos - pos_nodes[ 1 ];
+    T det2 = BC[ 0 ] * XM[ 1 ] - BC[ 1 ] * XM[ 0 ];
+    
+    if ( ( det1 * det2 ) >= 0 ) {
+        Pvec CD = pos_nodes[ 3 ] - pos_nodes[ 2 ];
+        XM = pos - pos_nodes[ 2 ];
+        T det3 = CD[ 0 ] * XM[ 1 ] - CD[ 1 ] * XM[ 0 ];
+        
+        if ( ( det1 * det3 ) >= 0 ) {
+            Pvec DA = pos_nodes[ 0 ] - pos_nodes[ 3 ];
+            XM = pos - pos_nodes[ 3 ];
+            T det4 = DA[ 0 ] * XM[ 1 ] - DA[ 1 ] * XM[ 0 ];
+            if ( ( det1 * det4 ) >= 0 )
+                return true;
+            else
+                return false;        
+        } else
+            return false;
+    } else
+        return false;
+}
+
 };
 
 #include "element_Quad_42.h"

@@ -114,6 +114,42 @@ T var_inter_insideness( const Triangle_6 &e, const TV &var_inter ) {
     return min( min( var_inter[0], var_inter[1] ), 1 - var_inter[0] - var_inter[1] );
 }
 
+/*!
+    object :
+        la fonction renvoie vrai si pos est dans le triangle et faux sinon ( sous la condition que le \a Triangle_6 est dans le plan ).
+        Mais pour cet élément non linéaire , on considère le \a Triangle engendré par les 3 premiers noeuds.
+        
+    paramètre :
+        Tirangle_6 : le type d'élément
+        pos_nodes : le position des sommets dans le plan
+        po : la position du point dans le plan
+
+*/
+template< class PosNodes, class Pvec > 
+bool is_inside_linear( const Triangle_6 &elem, const PosNodes &pos_nodes, const Pvec &pos ) {
+    typedef typename Pvec::template SubType<0>::T T;
+    
+    Pvec AB = pos_nodes[ 1 ] - pos_nodes[ 0 ];
+    Pvec BC = pos_nodes[ 2 ] - pos_nodes[ 1 ];
+    Pvec XM = pos - pos_nodes[ 0 ];
+    
+    T det1 = AB[ 0 ] * XM[ 1 ] - AB[ 1 ] * XM[ 0 ];
+    XM = pos - pos_nodes[ 1 ];
+    T det2 = BC[ 0 ] * XM[ 1 ] - BC[ 1 ] * XM[ 0 ];
+    
+    if ( ( det1 * det2 ) >= 0 ) {
+        Pvec CA = pos_nodes[ 0 ] - pos_nodes[ 2 ];
+        XM = pos - pos_nodes[ 2 ];
+        T det3 = CA[ 0 ] * XM[ 1 ] - CA[ 1 ] * XM[ 0 ];
+        if ( ( det1 * det3 ) >= 0 )
+            return true;
+        else
+            return false;
+    } else
+        return false;
+}
+
+
 };
 #include "element_Triangle_6.h"
 
