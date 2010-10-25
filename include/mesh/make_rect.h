@@ -606,17 +606,17 @@ void make_rect(TM &m,const Tetra_10 &t,typename TM::Pvec X0_,typename TM::Pvec X
     
     incr = ( X1 - X0 ) / nb_elem;
     
-    rela[ 0 ] = Pvec(0.0,0.0,0.0) * incr;
-    rela[ 1 ] = Pvec(1.0,0.0,0.0) * incr;
-    rela[ 2 ] = Pvec(0.0,1.0,0.0) * incr;
-    rela[ 3 ] = Pvec(0.0,0.0,1.0) * incr;
+    rela[ 0 ] = Pvec(0.0,0.0,0.0);
+    rela[ 1 ] = Pvec(1.0,0.0,0.0);
+    rela[ 2 ] = Pvec(0.0,1.0,0.0);
+    rela[ 3 ] = Pvec(0.0,0.0,1.0);
             
-    rela[ 4 ] = Pvec(0.5,0.0,0.0) * incr;
-    rela[ 5 ] = Pvec(0.5,0.5,0.0) * incr;
-    rela[ 6 ] = Pvec(0.0,0.5,0.0) * incr;
-    rela[ 7 ] = Pvec(0.0,0.0,0.5) * incr;
-    rela[ 8 ] = Pvec(0.5,0.0,0.5) * incr;
-    rela[ 9 ] = Pvec(0.0,0.5,0.5) * incr;
+    rela[ 4 ] = Pvec(0.5,0.0,0.0);
+    rela[ 5 ] = Pvec(0.5,0.5,0.0);
+    rela[ 6 ] = Pvec(0.0,0.5,0.0);
+    rela[ 7 ] = Pvec(0.0,0.0,0.5);
+    rela[ 8 ] = Pvec(0.5,0.0,0.5);
+    rela[ 9 ] = Pvec(0.0,0.5,0.5);
     
     for( unsigned i = 0; i < nb_elem[ 2 ]; ++i )
         for( unsigned j = 0; j < nb_elem[ 1 ]; ++j )
@@ -628,7 +628,7 @@ void make_rect(TM &m,const Tetra_10 &t,typename TM::Pvec X0_,typename TM::Pvec X
                 basis[ 2 ] = Pvec(0.0,0.0,1.0);
                 chgt.col( 0 ) = basis[ 0 ]; chgt.col( 1 ) = basis[ 1 ]; chgt.col( 2 ) = basis[ 2 ]; 
                 for( unsigned i = 0; i < 10; ++i ) 
-                    vn[ i ] = ban.get_node( O + chgt * rela[ i ] );
+                    vn[ i ] = ban.get_node( O + incr * ( chgt * rela[ i ] ) );
                 permutation_if_jac_neg( Tetra_10(), vn.ptr() );
                 m.add_element( Tetra_10(), DefaultBehavior(), vn.ptr() ); 
                 /// Tetra 1
@@ -638,7 +638,7 @@ void make_rect(TM &m,const Tetra_10 &t,typename TM::Pvec X0_,typename TM::Pvec X
                 basis[ 2 ] = Pvec(0.0,-1.0,1.0);
                 chgt.col( 0 ) = basis[ 0 ]; chgt.col( 1 ) = basis[ 1 ]; chgt.col( 2 ) = basis[ 2 ]; 
                 for( unsigned i = 0; i < 10; ++i ) 
-                    vn[ i ] = ban.get_node( O + tr + chgt * rela[ i ] );
+                    vn[ i ] = ban.get_node( O + tr + incr * ( chgt * rela[ i ] ) );
                 permutation_if_jac_neg( Tetra_10(), vn.ptr() );
                 m.add_element( Tetra_10(), DefaultBehavior(), vn.ptr() );               
                 /// Tetra 2
@@ -648,7 +648,7 @@ void make_rect(TM &m,const Tetra_10 &t,typename TM::Pvec X0_,typename TM::Pvec X
                 basis[ 2 ] = Pvec(0.0,0.0,1.0);
                 chgt.col( 0 ) = basis[ 0 ]; chgt.col( 1 ) = basis[ 1 ]; chgt.col( 2 ) = basis[ 2 ]; 
                 for( unsigned i = 0; i < 10; ++i ) 
-                    vn[ i ] = ban.get_node( O + tr + chgt * rela[ i ] );
+                    vn[ i ] = ban.get_node( O + tr + incr * ( chgt * rela[ i ] ) );
                 permutation_if_jac_neg( Tetra_10(), vn.ptr() );
                 m.add_element( Tetra_10(), DefaultBehavior(), vn.ptr() );               
                 /// Tetra 3
@@ -658,7 +658,7 @@ void make_rect(TM &m,const Tetra_10 &t,typename TM::Pvec X0_,typename TM::Pvec X
                 basis[ 2 ] = Pvec(-1.0,1.0,-1.0);
                 chgt.col( 0 ) = basis[ 0 ]; chgt.col( 1 ) = basis[ 1 ]; chgt.col( 2 ) = basis[ 2 ]; 
                 for( unsigned i = 0; i < 10; ++i ) 
-                    vn[ i ] = ban.get_node( O + tr + chgt * rela[ i ] );
+                    vn[ i ] = ban.get_node( O + tr + incr * ( chgt * rela[ i ] ) );
                 permutation_if_jac_neg( Tetra_10(), vn.ptr() );
                 m.add_element( Tetra_10(), DefaultBehavior(), vn.ptr() );                
                 /// Tetra 4
@@ -668,7 +668,7 @@ void make_rect(TM &m,const Tetra_10 &t,typename TM::Pvec X0_,typename TM::Pvec X
                 basis[ 2 ] = Pvec(0.0,-1.0,1.0);
                 chgt.col( 0 ) = basis[ 0 ]; chgt.col( 1 ) = basis[ 1 ]; chgt.col( 2 ) = basis[ 2 ]; 
                 for( unsigned i = 0; i < 10; ++i ) 
-                    vn[ i ] = ban.get_node( O + tr + chgt * rela[ i ] );
+                    vn[ i ] = ban.get_node( O + tr + incr * ( chgt * rela[ i ] ) );
                 permutation_if_jac_neg( Tetra_10(), vn.ptr() );
                 m.add_element( Tetra_10(), DefaultBehavior(), vn.ptr() ); 
                 /// Tetra 5
@@ -678,9 +678,9 @@ void make_rect(TM &m,const Tetra_10 &t,typename TM::Pvec X0_,typename TM::Pvec X
                 basis[ 2 ] = Pvec(0.0,0.0,-1.0);
                 chgt.col( 0 ) = basis[ 0 ]; chgt.col( 1 ) = basis[ 1 ]; chgt.col( 2 ) = basis[ 2 ]; 
                 for( unsigned i = 0; i < 10; ++i ) 
-                    vn[ i ] = ban.get_node( O + tr + chgt * rela[ i ] );
+                    vn[ i ] = ban.get_node( O + tr + incr * ( chgt * rela[ i ] ) );
                 permutation_if_jac_neg( Tetra_10(), vn.ptr() );
-                m.add_element( Tetra_10(), DefaultBehavior(), vn.ptr() );             
+                m.add_element( Tetra_10(), DefaultBehavior(), vn.ptr() );      
             }
 }
 
