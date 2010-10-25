@@ -8,7 +8,10 @@ def rep(r,m):
         res = replace(tmp,k,v)
     return res
 
-print """// file generated from matdense.h.py. Do not modify
+print """
+#ifndef MATDENSE_H
+#define MATDENSE_H
+/// file generated from matdense.h.py. Do not modify
 
 namespace LMT {
 
@@ -386,5 +389,8 @@ struct MatElem<TV,STRUCTURE,STORAGE,alignement,nrs> {
 
             print res
 
-print '} // namespace LMT'
+print """} // namespace LMT
+
+#endif /// MATDENSE_H
+"""
 

@@ -181,13 +181,13 @@ T var_inter_insideness( const Triangle &e, const TV &var_inter ) {
 }
 
 /*!
-    objectif :
-        la fonction renvoie vrai si pos est dans le triangle et faux sinon sous la condition que le \a Quad est dans le plan.
+    object :
+        la fonction renvoie vrai si pos est dans le triangle et faux sinon ( sous la condition que le \a Triangle est dans le plan ).
         
-    param :
+    paramètre :
         Tirangle : le type d'élément
         pos_nodes : le position des sommets dans le plan
-        po : la position du point dans le plan
+        pos : la position du point dans le plan
 
 */
 template< class PosNodes, class Pvec > 

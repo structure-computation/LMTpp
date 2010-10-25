@@ -23,6 +23,16 @@ struct CalculateNormals {
     }
 };
 
+/*!
+Objet :
+    calculer une certaine normale aux noeuds d'un maillage : plus précisément elle calcule la normale de chaque élément puis l'ajoute à l'attribut nommé "normal" des noeuds de l'élément et enfin normalise l'addition.
+
+Paramètre:
+     TM doit être la classe d'un maillage surfacique défini dans l'espace 3D tel que les noeuds aient un champ "normal".
+
+\friend raphael.pasquier@lmt.ens-cachan.fr  
+\friend hugo.leclerc@lmt.ens-cachan.fr
+*/
 template<class TM>
 void calculate_normals(TM &m) {
     apply( m.elem_list, CalculateNormals() );

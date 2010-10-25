@@ -118,11 +118,11 @@ void read_avs(TM &mesh, std::istream &is) throw(std::runtime_error) {
     // correspondance between number in file -> ref in mesh
 
     // obtaining nbnode, nbelem
-    int nbnode;
-    int nbelem;
-    int nbnode_data;
-    int nbelem_data;
-    int nbglobal_data;
+    unsigned nbnode;
+    unsigned nbelem;
+    unsigned nbnode_data;
+    unsigned nbelem_data;
+    unsigned nbglobal_data;
     {
         string str;
         getline(is,str);
@@ -130,7 +130,7 @@ void read_avs(TM &mesh, std::istream &is) throw(std::runtime_error) {
         s >> nbnode >> nbelem >> nbnode_data >> nbelem_data >> nbglobal_data;
     }
     // reading nodes coordinates
-    int nb=0;
+    unsigned nb = 0;
     Vec<int> NodeNumber;
     NodeNumber.resize(nbnode);
     while(nb<nbnode) {
@@ -284,10 +284,10 @@ void read_avs(TM &mesh, std::istream &is) throw(std::runtime_error) {
         istringstream s(str);
 
         nb=0;
-        int nb_of_node_fields;
+        unsigned nb_of_node_fields;
         s >> nb_of_node_fields;
 //         cout << "nb_of_node_fields " << nb_of_node_fields << endl;
-        Vec<int> nb_of_comp;
+        Vec<unsigned> nb_of_comp;
         nb_of_comp.resize(nb_of_node_fields);
         while(nb<nb_of_node_fields) {
             s >> nb_of_comp[nb];
