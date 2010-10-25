@@ -293,7 +293,7 @@ public:
         #endif
         delete last_atom;
         atoms.pop_back();
-        last_atom = atoms.back();
+        last_atom = atoms.size() ? atoms.back() : 0;
         if ( atoms.size() )
             size_last_atom = atomic_size;
         else
