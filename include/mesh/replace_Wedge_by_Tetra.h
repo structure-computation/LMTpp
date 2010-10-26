@@ -11,26 +11,70 @@ struct Replace_Wedge_by_Tetra {
     bool operator() ( Element< Wedge, NameBehavior, TNode_, TData, num_in_elem_list_ > &e ) {
         Vec< typename Element< Wedge, NameBehavior, TNode_, TData, num_in_elem_list_ >::TNode*, 4 > vn;
         /// Tetra 0
+//         vn[ 0 ] = e.node( 0 );
+//         vn[ 1 ] = e.node( 1 );
+//         vn[ 2 ] = e.node( 2 );
+//         vn[ 3 ] = e.node( 5 );
+//         permutation_if_jac_neg ( Tetra(), vn.ptr() );
+//         ptr_m->add_element( Tetra(), DefaultBehavior(), vn.ptr() );
+//         /// Tetra 1
+//         vn[ 0 ] = e.node( 0 );
+//         vn[ 1 ] = e.node( 1 );
+//         vn[ 2 ] = e.node( 3 );
+//         vn[ 3 ] = e.node( 5 );
+//         permutation_if_jac_neg ( Tetra(), vn.ptr() );
+//         ptr_m->add_element( Tetra(), DefaultBehavior(), vn.ptr() );
+//         /// Tetra 2
+//         vn[ 0 ] = e.node( 1 );
+//         vn[ 1 ] = e.node( 3 );
+//         vn[ 2 ] = e.node( 4 );
+//         vn[ 3 ] = e.node( 5 );
+//         permutation_if_jac_neg ( Tetra(), vn.ptr() );
+//         ptr_m->add_element( Tetra(), DefaultBehavior(), vn.ptr() );
+
+/// well
         vn[ 0 ] = e.node( 0 );
         vn[ 1 ] = e.node( 1 );
         vn[ 2 ] = e.node( 2 );
-        vn[ 3 ] = e.node( 4 );
+        vn[ 3 ] = e.node( 3 );
         permutation_if_jac_neg ( Tetra(), vn.ptr() );
         ptr_m->add_element( Tetra(), DefaultBehavior(), vn.ptr() );
         /// Tetra 1
-        vn[ 0 ] = e.node( 0 );
-        vn[ 1 ] = e.node( 2 );
-        vn[ 2 ] = e.node( 4 );
-        vn[ 3 ] = e.node( 5 );
-        permutation_if_jac_neg ( Tetra(), vn.ptr() );
-        ptr_m->add_element( Tetra(), DefaultBehavior(), vn.ptr() );
-        /// Tetra 2
-        vn[ 0 ] = e.node( 0 );
+        vn[ 0 ] = e.node( 2 );
         vn[ 1 ] = e.node( 3 );
         vn[ 2 ] = e.node( 4 );
         vn[ 3 ] = e.node( 5 );
         permutation_if_jac_neg ( Tetra(), vn.ptr() );
         ptr_m->add_element( Tetra(), DefaultBehavior(), vn.ptr() );
+        /// Tetra 2
+        vn[ 0 ] = e.node( 1 );
+        vn[ 1 ] = e.node( 2 );
+        vn[ 2 ] = e.node( 3 );
+        vn[ 3 ] = e.node( 4 );
+        permutation_if_jac_neg ( Tetra(), vn.ptr() );
+        ptr_m->add_element( Tetra(), DefaultBehavior(), vn.ptr() );
+
+/// old
+//         vn[ 0 ] = e.node( 0 );
+//         vn[ 1 ] = e.node( 1 );
+//         vn[ 2 ] = e.node( 2 );
+//         vn[ 3 ] = e.node( 4 );
+//         permutation_if_jac_neg ( Tetra(), vn.ptr() );
+//         ptr_m->add_element( Tetra(), DefaultBehavior(), vn.ptr() );
+//         /// Tetra 1
+//         vn[ 0 ] = e.node( 0 );
+//         vn[ 1 ] = e.node( 2 );
+//         vn[ 2 ] = e.node( 4 );
+//         vn[ 3 ] = e.node( 5 );
+//         permutation_if_jac_neg ( Tetra(), vn.ptr() );
+//         ptr_m->add_element( Tetra(), DefaultBehavior(), vn.ptr() );
+//         /// Tetra 2
+//         vn[ 0 ] = e.node( 0 );
+//         vn[ 1 ] = e.node( 3 );
+//         vn[ 2 ] = e.node( 4 );
+//         vn[ 3 ] = e.node( 5 );
+//         permutation_if_jac_neg ( Tetra(), vn.ptr() );
+//         ptr_m->add_element( Tetra(), DefaultBehavior(), vn.ptr() );
         return true;    
     }
     
