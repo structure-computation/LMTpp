@@ -1,4 +1,4 @@
-/***************************************************************************
+/*!*************************************************************************
                           Rectilinear_iterator.h  -  description
                              -------------------
     begin                : lun oct 21 2002
@@ -6,7 +6,7 @@
     email                : hleclerc@lmamef23
  ***************************************************************************/
 
-/***************************************************************************
+/*!*************************************************************************
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -21,7 +21,7 @@
 
 namespace LMT {
 
-/// allows to sweep a multidimensional box, Pt \in [beg,end[
+/// allows to sweep a multidimensional box, Pt in [beg,end[
 template<class T,int dim>
 class Rectilinear_iterator {
 public:

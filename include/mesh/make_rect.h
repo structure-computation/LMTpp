@@ -23,7 +23,7 @@ struct Hexa_20;
 struct Tetra_10;
 struct Wedge_15;
 
-/**
+/*!
  * Bar
  * @param m 
  * @param t 
@@ -72,7 +72,9 @@ void make_rect(TM &m,const Bar &t,typename TM::Pvec X0_,typename TM::Pvec X1_,ty
     }
 }
 
-/**
+/*!
+
+
 */
 template<class TM>
 void make_rect(TM &m,const Bar_3 &t,typename TM::Pvec X0,typename TM::Pvec X1,typename TM::Pvec nb_points_) {
@@ -87,12 +89,8 @@ void make_rect(TM &m,const Bar_3 &t,typename TM::Pvec X0,typename TM::Pvec X1,ty
 }
 
 /*!
- * Triangle
- * @param m 
- * @param t 
- * @param extent 
- * @param nb_x 
- * @param nb_y 
+ Triangle
+
  */
 template<class TM>
 void make_rect(TM &m,const Triangle &t,typename TM::Pvec X0_,typename TM::Pvec X1_,Vec<unsigned,2> nb_points_) {
@@ -122,12 +120,8 @@ void make_rect(TM &m,const Triangle &t,typename TM::Pvec X0_,typename TM::Pvec X
     }
 }
 /*!
- * Quad
- * @param m 
- * @param t 
- * @param extent 
- * @param nb_x 
- * @param nb_y 
+ Quad
+
  */
 template<class TM>
 void make_rect(TM &m,const Quad &t,typename TM::Pvec X0_,typename TM::Pvec X1_,typename TM::Pvec nb_points_) {
@@ -155,12 +149,7 @@ void make_rect(TM &m,const Quad &t,typename TM::Pvec X0_,typename TM::Pvec X1_,t
 }
 
 /*!
- * Triangle_6
- * @param m 
- * @param t 
- * @param extent 
- * @param nb_x 
- * @param nb_y 
+    Triangle_6
  */
 template<class TM>
 void make_rect(TM &m,const Triangle_6 &t,typename TM::Pvec X0_,typename TM::Pvec X1_,typename TM::Pvec nb_points_) {
@@ -194,12 +183,8 @@ void make_rect(TM &m,const Triangle_6 &t,typename TM::Pvec X0_,typename TM::Pvec
 }
 
 /*!
- * Hexa
- * @param m 
- * @param t 
- * @param extent 
- * @param nb_x 
- * @param nb_y 
+ Hexa
+
  */
 template<class TM>
 void make_rect(TM &m,const Hexa &t,typename TM::Pvec X0_,typename TM::Pvec X1_,typename TM::Pvec nb_points_) {
@@ -230,12 +215,8 @@ void make_rect(TM &m,const Hexa &t,typename TM::Pvec X0_,typename TM::Pvec X1_,t
 }
 
 /*!
- * Tetra
- * @param m 
- * @param t 
- * @param extent 
- * @param nb_x 
- * @param nb_y 
+ Tetra
+
  */
 template<class TM>
 void make_rect(TM &m,const Tetra &t,typename TM::Pvec X0_,typename TM::Pvec X1_,typename TM::Pvec nb_points_) {
@@ -281,7 +262,7 @@ void make_rect(TM &m,const Tetra &t,typename TM::Pvec X0_,typename TM::Pvec X1_,
 }
 
 /*!
- * Quad_8
+ Quad_8
  */
 template<class TM>
 void make_rect(TM &m,const Quad_8 &t,typename TM::Pvec X0_,typename TM::Pvec X1_,typename TM::Pvec nb_points_) {
@@ -322,7 +303,7 @@ void make_rect(TM &m,const Quad_8 &t,typename TM::Pvec X0_,typename TM::Pvec X1_
 }
 
 /*!
- * Quad_9
+ Quad_9
  */
 template<class TM>
 void make_rect(TM &m,const Quad_9 &t,typename TM::Pvec X0_,typename TM::Pvec X1_,typename TM::Pvec nb_points_) {
@@ -364,7 +345,7 @@ void make_rect(TM &m,const Quad_9 &t,typename TM::Pvec X0_,typename TM::Pvec X1_
 }
 
 /*!
- * Quad_6
+ Quad_6
  */
 template<class TM> void make_rect(TM &m,const Quad_6 &t,typename TM::Pvec X0_,typename TM::Pvec X1_,typename TM::Pvec nb_points_) {
     typedef typename TM::Pvec Pvec;
@@ -410,7 +391,7 @@ template<class TM> void make_rect(TM &m,const Quad_6 &t,typename TM::Pvec X0_,ty
 }
 
 /*!
- * Quad_42
+ Quad_42
  */
 template<class TM> void make_rect(TM &m,const Quad_42 &t,typename TM::Pvec X0_,typename TM::Pvec X1_,typename TM::Pvec nb_points_) {
     typedef typename TM::Pvec Pvec;
@@ -461,12 +442,8 @@ template<class TM> void make_rect(TM &m,const Quad_42 &t,typename TM::Pvec X0_,t
 }
 
 /*!
- * Wedge
- * @param m
- * @param t
- * @param extent
- * @param nb_x
- * @param nb_y
+ Wedge
+
  */
 template<class TM> void make_rect(TM &m,const Wedge &t,typename TM::Pvec X0_,typename TM::Pvec X1_,typename TM::Pvec nb_points_) {
     typedef typename TM::Pvec Pvec;
@@ -528,6 +505,7 @@ struct BestialNodeAdder {
         .                    |11        | 9
         .                    |/         |/
         .                    0-----8----1
+ 
  */
 template<class TM>
 void make_rect(TM &m,const Hexa_20 &t,typename TM::Pvec X0_,typename TM::Pvec X1_,typename TM::Pvec nb_elements) {
@@ -686,17 +664,18 @@ void make_rect(TM &m,const Tetra_10 &t,typename TM::Pvec X0_,typename TM::Pvec X
 
 
 /*!
-    5
-   /|\
- 11 | 10
- /  14  \
-3___9___4
-|   |   |
-|   2   |
-12  / \  13
-| 8   7 |
-|/     \|
-0___6__ 1
+\verbatim
+    .            5
+    .          /|\
+    .        11 | 10
+    .        /  14  \
+    .        3___9___4
+    .        |   |   |
+    .        |   2   |
+    .       12  / \  13
+    .        | 8   7 |
+    .        |/     \|
+    .        0___6__ 1
 */
 template<class TM>
 void make_rect(TM &m,const Wedge_15 &t,typename TM::Pvec X0_,typename TM::Pvec X1_,typename TM::Pvec nb_elements) {
