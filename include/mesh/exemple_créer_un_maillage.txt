@@ -1,7 +1,7 @@
 /*!
 \example Exemple de création d'un maillage et utilisation de la fonction interpolation()
 
-    == Introduction
+    = Introduction
     
         Le type \a Mesh < ... > sert à définir un maillage au sens de la théorie des éléments finis dans un espace à une, deux ou trois dimensions. Il est toujours
         paramétré par une classe du type \a MeshCarac qui contient toutes les caractéristiques du maillage, i.e. les attributs aux noeuds, aux éléments, sur la peau, etc... . Ainsi pour définir son propre maillage, il faut commencer par choisir un \a MeshCarac convenant à son problème soit en créer un à sa convenance.
@@ -15,7 +15,7 @@
             
         Si aucun ne convient, on définit le sien à la main ( tâche très ardue ) soit en utilisant un script Python et c'est cette dernière méthode que l'on va maintenant ilustrer.
         
-    == Définition des attributs de son maillage
+    = Définition des attributs de son maillage
     
         on commence par créer un fichier Python nommé par exemple MonMeshCarac.h.py ( le suffixe a son impotance ) et contenant :
         \code Python
@@ -62,7 +62,7 @@
         Enfin Si vous voulez précisement définir le type de l'atribut, utilisez <strong> T </strong> .
 
 
-    == Utilisation dans son code C++
+    = Utilisation dans son code C++
     
         Il est tant maintenant de faire tourner la moulinette en Python pour générer le code C++ de votre \a MeshCarac .
         Le plus simple est de créer son projet ( voir la page [[Mon premier programme]] pour créer un projet ).

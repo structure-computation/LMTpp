@@ -71,7 +71,26 @@ template<> struct ElementChoiceMeshCaracStd<0,2,2> { typedef NodalElement NE; };
     
 /*!
 
-Cette classe peut servir de paramètre à une classe Mesh pour définir un maillage sans champs (autre que pos, la position dans l'espace). On ne mémorise que la position des noeuds. On trouve d'autres exemples pour des formulations dans le dossier formulation (n'hésitez pas à faire du copier/coller). Pour générer un MeshCarac personnel, on peut utiliser la fonction make_pb() dans le fichier Sconstruct (voir le tutorial \a [Comment résoudre un problème éléments finis de façon générale] ).
+    Cette classe peut servir de paramètre à une classe Mesh pour définir un maillage sans champs (autre que pos, la position dans l'espace). On ne mémorise que la position des noeuds. On trouve d'autres exemples de MeshCarac pour des formulations dans le dossier formulation (n'hésitez pas à faire du copier/coller). Pour générer un MeshCarac personnel, on peut utiliser la fonction make_pb() dans le fichier Sconstruct (voir les tutoriels TODO  \a [Comment résoudre un problème éléments finis de façon générale] ).
+
+    Voici des cas particuliers courants que vous pouvez copier/coller :
+  
+    \table exemples de définition de maillage 
+        \a Tetra                       &   Mesh< MeshCaracStd< 3, 3, 0, double, 1  > > 
+        \a Hexa                        &   Mesh< MeshCaracStd< 3, 3, 1, double, 1  > > 
+        \a Triangle dans l'espace      &   Mesh< MeshCaracStd< 3, 2, 0, double, 1  > >  
+        \a Quad dans l'espace          &   Mesh< MeshCaracStd< 3, 2, 1, double, 1  > >  
+        \a Tetra_10                    &   Mesh< MeshCaracStd< 3, 3, 0, double, 2  > >
+        \a Hexa_20                     &   Mesh< MeshCaracStd< 3, 3, 1, double, 2  > >  
+        \a Triangle_6 dans l'espace    &   Mesh< MeshCaracStd< 3, 2, 0, double, 2  > >
+        \a Quad_8 dans l'espace        &   Mesh< MeshCaracStd< 3, 2, 1, double, 2  > >
+        \a Quad_9 dans l'espace        &   Mesh< MeshCaracStd< 3, 2, 2, double, 2  > >        
+        \a Triangle                    &   Mesh< MeshCaracStd< 2, 2, 0, double, 1  > >  
+        \a Quad                        &   Mesh< MeshCaracStd< 2, 2, 1, double, 1  > >  
+        \a Triangle_6                  &   Mesh< MeshCaracStd< 2, 2, 0, double, 2  > >
+        \a Quad_8                      &   Mesh< MeshCaracStd< 2, 2, 1, double, 2  > >
+        \a Quad_9                      &   Mesh< MeshCaracStd< 2, 2, 2, double, 2  > > 
+        
 
 MeshCarac class (usable as Mesh<MeshCaracStd<...> > to instantiate a mesh) with
 Tetras if nb_var_inter==3
