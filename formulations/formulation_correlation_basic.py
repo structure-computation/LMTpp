@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 dep = Variable( unknown=True, nb_dim=[dim], default_value='0.0', unit='m' )
 dep_sens = Variable( nb_dim=[dim], default_value='0.0', unit='m' )
 

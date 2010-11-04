@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 can_directly_be_represented_by = 'Quad'
 
 interval_var_inter = [

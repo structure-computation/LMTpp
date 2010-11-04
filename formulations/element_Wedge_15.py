@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 can_directly_be_represented_by = 'Wedge_15'
 
 interval_var_inter = [

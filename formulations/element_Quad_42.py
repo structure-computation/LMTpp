@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 interval_var_inter = [
   [0,1],
   [0,1],

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 f_vol = Variable( interpolation='global', nb_dim=[dim], default_value='0.0,'*(dim-1)+'0.0', unit='N/m^3' )
 elastic_modulus = Variable( interpolation='global', default_value='210e9', unit='N/m^2' ) #
 poisson_ratio = Variable( interpolation='global', default_value='0.33', unit='1' ) # 

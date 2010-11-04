@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 dep = Variable( unknown=True, nb_dim=[dim], nb_der=1, default_value='0.0', unit='m' )
 pressure = Variable( nb_der=1, default_value='380e6*0', unit='Pa' )
 

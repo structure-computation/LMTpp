@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 interval_var_inter = [
   [0,1],
   [0,1-var_inter[0]],
@@ -48,22 +49,42 @@ interpolation["nodal"] = X0*(2*X0-1) * val[0] + \
 
 interpolation["der_nodal"] = val[0]
 
-a = 1.0/4
+## version dûe à Nicolas Relun
+interpolation["gauss_0"] = val[0]
+
+a = number(1.0)/number(4)
 interpolation["gauss_1"] = ((var_inter[0]-a)+a)/a *  ((var_inter[1]-a)+a)/a * ((var_inter[2]-a)+a)/a * val[0] #a verifier
 
-a,b = (5.0-sqrt(5.0))/20.0, (5.0+3.0*sqrt(5.0))/20.0
+a,b = (number(5.0)-sqrt(number(5.0)))/number(20.0), (number(5.0)+number(3.0)*sqrt(number(5.0)))/number(20.0)
 interpolation["gauss_2"] = (var_inter[0]-b)/(a-b) *  (var_inter[1]-b)/(a-b) * (var_inter[2]-b)/(a-b) * val[0] + \
                          (var_inter[0]-a)/(b-a) *  (var_inter[1]-b)/(a-b) * (var_inter[2]-b)/(a-b) * val[1] + \
                          (var_inter[0]-b)/(a-b) *  (var_inter[1]-a)/(b-a) * (var_inter[2]-b)/(a-b) * val[2] + \
                          (var_inter[0]-b)/(a-b) *  (var_inter[1]-b)/(a-b) * (var_inter[2]-a)/(b-a) * val[3]
                          
-
-a,b,c = 1.0/4.0, 1.0/6.0, 1.0/2.0;
+a,b,c = number(1.0)/number(4.0), number(1.0)/number(6.0), number(1.0)/number(2.0);
 interpolation["gauss_3"] = (var_inter[0]-b)*(var_inter[0]-c)/((a-b)*(a-c)) *  (var_inter[1]-b)*(var_inter[1]-c)/((a-b)*(a-c)) * (var_inter[2]-b)*(var_inter[2]-c)/((a-b)*(a-c)) * val[0] + \
                          (var_inter[0]-a)*(var_inter[0]-c)/((b-a)*(b-c)) *  (var_inter[1]-a)*(var_inter[1]-c)/((b-a)*(b-c)) * (var_inter[2]-a)*(var_inter[2]-c)/((b-a)*(b-c)) * val[1] + \
                          (var_inter[0]-a)*(var_inter[0]-b)/((c-a)*(c-b)) *  (var_inter[1]-a)*(var_inter[1]-c)/((b-a)*(b-c)) * (var_inter[2]-a)*(var_inter[2]-c)/((b-a)*(b-c)) * val[2] + \
                          (var_inter[0]-a)*(var_inter[0]-c)/((b-a)*(b-c)) *  (var_inter[1]-a)*(var_inter[1]-b)/((c-a)*(c-b)) * (var_inter[2]-a)*(var_inter[2]-c)/((b-a)*(b-c)) * val[3] + \
                          (var_inter[0]-a)*(var_inter[0]-c)/((b-a)*(b-c)) *  (var_inter[1]-a)*(var_inter[1]-c)/((b-a)*(b-c)) * (var_inter[2]-a)*(var_inter[2]-b)/((c-a)*(c-b)) * val[4]
+
+## ancienne version des points de Gauss
+#a = 1.0/4
+#interpolation["gauss_1"] = ((var_inter[0]-a)+a)/a *  ((var_inter[1]-a)+a)/a * ((var_inter[2]-a)+a)/a * val[0] #a verifier
+
+#a,b = (5.0-sqrt(5.0))/20.0, (5.0+3.0*sqrt(5.0))/20.0
+#interpolation["gauss_2"] = (var_inter[0]-b)/(a-b) *  (var_inter[1]-b)/(a-b) * (var_inter[2]-b)/(a-b) * val[0] + \
+                         #(var_inter[0]-a)/(b-a) *  (var_inter[1]-b)/(a-b) * (var_inter[2]-b)/(a-b) * val[1] + \
+                         #(var_inter[0]-b)/(a-b) *  (var_inter[1]-a)/(b-a) * (var_inter[2]-b)/(a-b) * val[2] + \
+                         #(var_inter[0]-b)/(a-b) *  (var_inter[1]-b)/(a-b) * (var_inter[2]-a)/(b-a) * val[3]
+                         
+
+#a,b,c = 1.0/4.0, 1.0/6.0, 1.0/2.0;
+#interpolation["gauss_3"] = (var_inter[0]-b)*(var_inter[0]-c)/((a-b)*(a-c)) *  (var_inter[1]-b)*(var_inter[1]-c)/((a-b)*(a-c)) * (var_inter[2]-b)*(var_inter[2]-c)/((a-b)*(a-c)) * val[0] + \
+                         #(var_inter[0]-a)*(var_inter[0]-c)/((b-a)*(b-c)) *  (var_inter[1]-a)*(var_inter[1]-c)/((b-a)*(b-c)) * (var_inter[2]-a)*(var_inter[2]-c)/((b-a)*(b-c)) * val[1] + \
+                         #(var_inter[0]-a)*(var_inter[0]-b)/((c-a)*(c-b)) *  (var_inter[1]-a)*(var_inter[1]-c)/((b-a)*(b-c)) * (var_inter[2]-a)*(var_inter[2]-c)/((b-a)*(b-c)) * val[2] + \
+                         #(var_inter[0]-a)*(var_inter[0]-c)/((b-a)*(b-c)) *  (var_inter[1]-a)*(var_inter[1]-b)/((c-a)*(c-b)) * (var_inter[2]-a)*(var_inter[2]-c)/((b-a)*(b-c)) * val[3] + \
+                         #(var_inter[0]-a)*(var_inter[0]-c)/((b-a)*(b-c)) *  (var_inter[1]-a)*(var_inter[1]-c)/((b-a)*(b-c)) * (var_inter[2]-a)*(var_inter[2]-b)/((c-a)*(c-b)) * val[4]
 
 quality = 1
 

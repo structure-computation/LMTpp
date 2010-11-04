@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 X = Variable( unknown=True, nb_der=2, default_value='1.0', unit='1' )
 
 #supplementary_order_for_time_integration = 3

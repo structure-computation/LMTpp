@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 elastic_modulus = Variable( interpolation='global', default_value='210e9', unit='N/m^2' ) #
 poisson_ratio = Variable( interpolation='global', default_value='0.33', unit='1' ) # 
 density = Variable( interpolation='global', default_value='7800', unit='kg/m^3' ) # 
