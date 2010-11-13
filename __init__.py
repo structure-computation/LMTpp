@@ -126,12 +126,8 @@ class MakePb:
             output.write( '#define has_formulation_'+f_name+'\n' )
             output.write( '#endif\n' )
         
-        for T in self.types:
-            if T[:3]=='Pol' :
-                output.write( '#include "containers/polynomials.h"\n' )
-                break     
-        output.write( '#include "mesh_carac.h"\n' )
-        output.write( '#include "formulation/problem_ancestor.h"\n' )
+        for inc in self.includes:
+            output.write( '#include "'+inc+'"\n' )
         output.write( 'namespace LMT {\n\n' )
         output.write( 'template<class T,unsigned dim> class Problem_'+self.name+';\n\n' )
         for d in self.all_dims.keys():
@@ -227,7 +223,8 @@ def make_pb( env,
              additional_fields = {},
              types = ['double'],
              dep_py = True,
-             name_der_vars = [] ):
+             name_der_vars = [],
+			 includes = ['mesh_carac.h','formulation/problem_ancestor.h'] ):
    #
    if len( formulations ) == 0:
         print "Attention, tu demandes de générer des fichiers de problème mais aucune formulation n'a été spécifiée. On peut utiliser d'autres fonctions pour faire des MeshCarac."
@@ -272,6 +269,7 @@ def make_pb( env,
    pb.formulations      = formulations
    pb.elements          = elements
    pb.name_der_vars     = name_der_vars
+   pb.includes          = includes
    fe_sets, all_dims, map_f = pb.get_fe_sets_and_dims()
    pb.fe_sets, pb.all_dims, pb.map_f = fe_sets, all_dims, map_f
 
