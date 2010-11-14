@@ -303,7 +303,7 @@ template<class T,int s2> int solve_using_incomplete_chol_factorize( const Mat<T,
     Vec<T> r, d, q, s;
 
     r = b - A * x;
-    for(unsigned i=0;;++i) { if ( i==r.size() ) return 0; if ( LMT::abs(r[i]) > crit ) break; }
+    for(unsigned i=0;;++i) { if ( i==r.size() ) return 0; if ( abs(r[i]) > crit ) break; }
     solve_using_chol_factorize( mp, r, d );
 
 
@@ -317,7 +317,7 @@ template<class T,int s2> int solve_using_incomplete_chol_factorize( const Mat<T,
         x += alpha * d;
         // r -= alpha * q;
         r = b - A * x;
-        for(unsigned i=0;;++i) { if ( i==r.size() ) return cpt; if ( LMT::abs(r[i]) > crit ) break; }
+        for(unsigned i=0;;++i) { if ( i==r.size() ) return cpt; if ( abs(r[i]) > crit ) break; }
 
         solve_using_chol_factorize( mp, r, s );
         deltn = dot( r, s );
