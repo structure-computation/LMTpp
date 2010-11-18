@@ -12,6 +12,7 @@
 #ifndef LMTELEMENT_H
 #define LMTELEMENT_H
 
+#include <iostream>
 #include "meshdata.h"
 #include "nbchildrenelement.h"
 
@@ -320,7 +321,11 @@ template<class TE,class Pvec,class TVI> void get_var_inter(const TE &elem,const 
 
     get_var_inter_linear( typename TE::NE(), pos_nodes, pos, var_inter );
     Vec<typename TE::T,TE::nb_var_inter> old_var_inter = var_inter;
-    while ( true ) {
+    for( int i = 0; ; ++i ) {
+        if ( i == 50 ) {
+            std::cerr << __FILE__ << ":" << __LINE__ << ":convergence problem" << std::endl;
+            break;
+        }
         get_var_inter( typename TE::NE(), pos_nodes, pos, var_inter );
         if ( length( old_var_inter - var_inter ) < criterium )
             break;

@@ -266,9 +266,9 @@ namespace DM {
 
     ///
     template<class DMSet1,class DMSet2>
-    void copy(const DMSet1 &dm_set1,DMSet2 &dm_set2) { DMPRIVATE::copy(dm_set1,dm_set2,Number<0>(),Number<NbFields<DMSet1>::res>()); }
+    void copy( const DMSet1 &dm_set1, DMSet2 &dm_set2 ) { DMPRIVATE::copy(dm_set1,dm_set2,Number<0>(),Number<NbFields<DMSet1>::res>()); }
     template<class DMSet1,class DMSet2,unsigned n>
-    void copy_up_to(const DMSet1 &dm_set1,DMSet2 &dm_set2,const Number<n> &nn) { DMPRIVATE::copy(dm_set1,dm_set2,Number<0>(),nn); }
+    void copy_up_to( const DMSet1 &dm_set1, DMSet2 &dm_set2, const Number<n> &nn ) { DMPRIVATE::copy(dm_set1,dm_set2,Number<0>(),nn); }
 
     /// data dm_set2 will be copied from sum_{i in {0..nb_pond}} pond_list[i].first * pond_list[i].second.member(...)
     template<class Tpond,class DMSet1,class DMSet2>

@@ -47,7 +47,7 @@ struct TypeOfVariableInterpolationInMesh {
             max_vi = vi;
             interp( elem, var_inter, Number<type_interpolation>() );
         }
-        return vi >= -1e-6;
+        return vi >= -1e-2;
     }
 
     ScalarType max_vi;
