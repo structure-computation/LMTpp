@@ -30,6 +30,23 @@ struct PolUnOp<Sqrt,nd,nx> {
     }
 };
 
+template <int nd>
+struct PolUnOp<Sqrt,nd,1> {
+    template <class T>
+    Vec<typename TypePromote<Sqrt,T>::T,DimPol<nd,1>::valeur> operator() (const Vec<T,DimPol<nd,1>::valeur> &p) {
+        typedef typename TypePromote<Sqrt,T>::T TC;
+        Vec<TC,DimPol<nd,1>::valeur> res;
+        res[0]=sqrt(p[0]);
+        for (int i=1;i<DimPol<nd,1>::valeur;i++) {
+            res[i]=p[i];
+            for (int j=1;j<i;j++)
+                res[i]-=res[j]*res[i-j];
+            res[i]/=TC(2)*res[0];
+        }
+        return res;
+    }
+};
+
 template <int nd, int nx>
 struct PolUnOp<Exp,nd,nx> {
     template <class T>

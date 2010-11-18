@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # supplementary_order_for_time_integration = 4
 
 f_vol = Variable( interpolation='global', nb_dim=[dim], default_value='0.0,'*(dim-1)+'0.0', unit='N/m^3' )

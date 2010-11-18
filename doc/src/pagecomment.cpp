@@ -1307,18 +1307,18 @@ void PageComment::parse_language_Cpp( string& textOfCode) {
     stringstream ss;
     
     /// on recherche les commentaires que l'on veut parser
-    /// on balance les commentaires normaux ou ceux de doxygen
+    /// on jette les commentaires normaux ou ceux de doxygen
     start = 0;
-    while(chercher_motif( textOfCode,"/*",&pos,textOfCode.size(),start )) {
+    while( chercher_motif( textOfCode, "/*", &pos, textOfCode.size(), start  ) ) {
         //cout << " CODE  ___|" << texte.substr(start,pos-start) << "|___" << endl;
         if (textOfCode[pos+2] == '!') { 
-            // c'est un bon commentaire. un vrai de vrai
-            // on regarde si du code précède ce commentaire.
+            /// c'est un bon commentaire. un vrai de vrai
+            /// on regarde si du code précède ce commentaire.
             if (code_before_comment(textOfCode ,pos-1)) prefix = 1; else prefix = 0; 
             if (chercher_motif( textOfCode ,"*/",&pos2,textOfCode.size(),pos+3 )) {
-                // on a trouvé la fin du commentaire.
+                /// on a trouvé la fin du commentaire.
                 if (pos+3 < pos2) {
-                    // on a un bout de vrai commentaire
+                    /// on a un bout de vrai commentaire
                     stmp = textOfCode.substr(pos+3,pos2-pos-3);
                     commentaire.push_back( stmp );
                     if (comment_of_code( stmp )) {
@@ -1332,21 +1332,21 @@ void PageComment::parse_language_Cpp( string& textOfCode) {
                     ss.str("");
                     ss << commentaire.size() - 1;
                     tag = prefixTag[prefix] + ss.str();
-                    textOfCode.erase( pos,pos2+2-pos ); // on retire le commentaire
-                    textOfCode.insert( pos, tag ); // on met un tag en référence au commentaire
+                    textOfCode.erase( pos, pos2 + 2 - pos ); /// on retire le commentaire
+                    textOfCode.insert( pos, tag ); /// on met un tag en référence au commentaire
                 }
                 start = pos + 2;
             } else {
-                // on n' a pas trouvé la fin : ce qui n'est pas normal...
-                cerr << " Il manque la balise de fin de commentaire." << endl;
+                /// on n' a pas trouvé la fin : ce qui n'est pas normal...
+                cout << " Il manque la balise de fin de commentaire." << endl;
                 //cout << " COMMENTAIRE  ---|" << texte.substr(pos,texte.size()-pos) << "|---" << endl;
-                if (pos+3 < textOfCode.size()) {
+                if ( pos + 3 < textOfCode.size() ) {
                     // on a un bout de vrai commentaire mais il n'y a pas de */ final...
                     pos2 = textOfCode.size();
-                    stmp = textOfCode.substr(pos+3,pos2-pos2-3);
-                    commentaire.push_back( textOfCode.substr(pos+3,pos2-pos2-3) );
-                    if (comment_of_code( stmp )) {
-                        if (code_before_comment(textOfCode,pos-1))
+                    stmp = textOfCode.substr( pos + 3, pos2 - pos2 - 3 );
+                    commentaire.push_back( textOfCode.substr( pos + 3, pos2 - pos2 - 3 ) );
+                    if (comment_of_code( stmp ) ) {
+                        if (code_before_comment( textOfCode, pos - 1 ) )
                             prefix = 1; 
                         else 
                             prefix = 0;
@@ -1355,16 +1355,16 @@ void PageComment::parse_language_Cpp( string& textOfCode) {
                         prefix = 2;
                     ss.str("");
                     ss << commentaire.size() - 1;
-                    tag = prefixTag[prefix] + ss.str();
-                    textOfCode.erase( pos,pos2-pos ); // on retire le commentaire
-                    textOfCode.insert( pos, tag ); // on met un tag en référence au commentaire
+                    tag = prefixTag[ prefix ] + ss.str();
+                    textOfCode.erase( pos,pos2-pos ); /// on retire le commentaire
+                    textOfCode.insert( pos, tag ); /// on met un tag en référence au commentaire
                 }
                 start = pos2;
             }
         } else {
-            // c'est un commentaire doxygen ou un commentaire normal et donc on passe à la suite
+            /// c'est un commentaire doxygen ou un commentaire normal et donc on passe à la suite
             if (chercher_motif( textOfCode,"*/",&pos2,textOfCode.size(),pos+2 )) {
-                // on a trouvé la fin du commentaire.
+                /// on a trouvé la fin du commentaire.
                 textOfCode.erase( pos,pos2+2-pos );
                 start = pos;
             } else {
@@ -1750,11 +1750,11 @@ void PageComment::parse_language_Cpp_rec( Bloc* code, string& textOfCode, int en
 }
 
 
-void PageComment::parse(Language_id id) {
+void PageComment::parse( Language_id id ) {
     string str,texte;
 
-    texte.reserve(65536);
-    str.reserve(65536);
+    texte.reserve( 65536 );
+    str.reserve( 65536 );
     ifstream entree( nameFile.c_str() , ios::in );
 
     if (! entree) {

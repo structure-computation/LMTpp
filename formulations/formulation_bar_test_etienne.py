@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 X = Variable( unknown=True, default_value='1.0', nb_der=1, unit='1' )
 
 order_integration = 5

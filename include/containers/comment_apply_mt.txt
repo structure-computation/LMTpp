@@ -1,0 +1,43 @@
+/*! 
+\generic_comment apply_mt
+
+    Objectif :
+        Réaliser une opération sur chaque élément d'un vecteur ( simple ou hétérogène ) en utilisant plusieurs <strong> threads </strong> .
+
+    Paramètres :
+        Cela dépend de la spécialisation. La forme générale est :
+        \code C/C++
+            apply_mt( vecteur, nombre de threads, opérateur ) 
+            apply_mt( vecteur, nombre de threads, opérateur, param1 ) 
+            apply_mt( vecteur, nombre de threads, opérateur, param1, param2 )
+            etc...
+             
+        le premier paramètre est un vecteur;
+        le deuxième est le nombre de threads ( de type unsigned );
+        le troisième est un foncteur sur un élément du vecteur; i.e. si le vecteur a pour type par exemple :
+        \code C/C++
+            Vec<Object> vecteur; 
+         
+         Sa forme est :
+        \code C/C++
+            struct operateur {
+                template<class EL>  
+                T operator() ( EL &el ) {  ... }
+            };
+             
+        Dans cet exemple, EL sera remplacé par Object à la compilation si on écrit :
+        \code C/C++
+            operateur op;
+            apply_mt( vecteur, 8, op );
+            /// ou
+            apply_mt( vecteur, 8, operateur() );
+            
+        Enfin <strong> param1 </strong> , <strong> param2 </strong> sont les paramètres facultatifs de l'opérateur. Dans l'exemple précédent, il n'y avait aucun paramètre. 
+
+    Cette fonction s'utilise donc de la même façon que \a apply ( voir sa documentation ).
+
+    \keyword Parallélisme
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \relates apply 
+*/

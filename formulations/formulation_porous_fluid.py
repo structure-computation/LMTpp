@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 pressure = Variable( unknown=True, nb_der=1, default_value='380e6', unit='Pa' )
 flow = Variable( interpolation='der_nodal', default_value='0.0', unit='1/s' )
 

@@ -82,7 +82,12 @@ def fetch_LMT(target,source,env):
     """ fetch last source files from repository """
 #     os.system( "rsync --exclude '*~' --exclude '*.o' --exclude '*.so' --exclude '*.os' -rauv -e ssh caignot@ssh.lmt.ens-cachan.fr:/ul/leclerc/prog/LMTpp/LMT ." )
 
-
+def problem_name( formulation, T, dimension ):
+    Tbis = T.replace( "<" , "_LessThan_" )
+    Tbis = Tbis.replace( ">" , "_GreaterThan_" )
+    Tbis = Tbis.replace( "," , "_Comma_" )
+    Tbis = Tbis.replace( ":" , "_Colon_" )
+    return 'Problem_'+formulation+'_'+Tbis+'_'+str(dimension)
 
 class MakePb:
     def get_fe_sets_and_dims(self):
@@ -126,18 +131,13 @@ class MakePb:
             output.write( '#define has_formulation_'+f_name+'\n' )
             output.write( '#endif\n' )
         
-        for T in self.types:
-            if T[:3]=='Pol' :
-                output.write( '#include "containers/polynomials.h"\n' )
-                break     
-        output.write( '#include "mesh_carac.h"\n' )
-        output.write( '#include "formulation/problem_ancestor.h"\n' )
+        for inc in self.includes:
+            output.write( '#include "'+inc+'"\n' )
         output.write( 'namespace LMT {\n\n' )
         output.write( 'template<class T,unsigned dim> class Problem_'+self.name+';\n\n' )
         for d in self.all_dims.keys():
-            cmpt = 0
             for T in self.types:
-                PN = 'Problem_'+self.name+'_type'+str(cmpt)+'_'+str(d)
+                PN = problem_name( self.name, T, d )
                 output.write( 'class '+PN+' : public ProblemAncestor<'+T+(T[-1:]=='>')*' '+'> {\n' )
                 output.write( 'public:\n' )
                 output.write( '    typedef Mesh<Mesh_carac_'+self.name+'<'+T+','+str(d)+'> > TM;\n' )
@@ -169,7 +169,6 @@ class MakePb:
                 output.write( '};\n' )
                 NPN = 'Problem_'+self.name+'<'+T+','+str(d)+'>'
                 output.write( 'template<> class '+NPN+' : public '+PN+' {\npublic:\n    '+NPN+'(TM &m,bool use_tim_davis=false):'+PN+'(m,use_tim_davis) {}\n};\n\n' )
-                cmpt += 1
         output.write( '} // namespace LMT\n' )
         output.write( '#endif // PROBLEM_'+self.name+'_H\n' )
 
@@ -193,7 +192,7 @@ class MakePbFE:
     
     def write_formulation_cpp_from_scons( self, target, source, env ):
         output = file( str(target[0]), 'w' )
-        PN = 'Problem_'+self.name+'_type'+self.typenumber+'_'+str(self.d)
+        PN = problem_name( self.name, self.T, self.d ) 
         
         output.write( '#include "problem.h"\n' )
         output.write( '#include "formulation_'+str(self.d)+'_'+self.T+'_'+self.f_name+'.h"\n' )
@@ -227,7 +226,8 @@ def make_pb( env,
              additional_fields = {},
              types = ['double'],
              dep_py = True,
-             name_der_vars = [] ):
+             name_der_vars = [],
+			 includes = ['mesh_carac.h','formulation/problem_ancestor.h'] ):
    #
    if len( formulations ) == 0:
         print "Attention, tu demandes de générer des fichiers de problème mais aucune formulation n'a été spécifiée. On peut utiliser d'autres fonctions pour faire des MeshCarac."
@@ -272,6 +272,7 @@ def make_pb( env,
    pb.formulations      = formulations
    pb.elements          = elements
    pb.name_der_vars     = name_der_vars
+   pb.includes          = includes
    fe_sets, all_dims, map_f = pb.get_fe_sets_and_dims()
    pb.fe_sets, pb.all_dims, pb.map_f = fe_sets, all_dims, map_f
 
@@ -283,7 +284,6 @@ def make_pb( env,
    
    all_cpp = []
    for d in all_dims.keys():
-      cmpt = 0
       for T in types:
           for f_name in map_f.keys():
             bn = 'formulation_%s_%s_%s.cpp' % (d,T,f_name)
@@ -293,7 +293,6 @@ def make_pb( env,
             pbc = MakePbFE()
             pbc.d = d
             pbc.T = T
-            pbc.typenumber = str(cmpt)
             pbc.name = name
             pbc.f_name = f_name
             pbc.fe_set = map_f[ f_name ]
@@ -302,7 +301,6 @@ def make_pb( env,
             all_cpp += env.Command( directory + bn, f_h, pbc.write_formulation_cpp_from_scons , TARGET = bn + '_opt' * opt +'_debug'*(1-opt) + '.o' )
             if pbc.use_asm():
                 all_cpp += [ f_asm ]
-          cmpt += 1
    return all_cpp
 
 

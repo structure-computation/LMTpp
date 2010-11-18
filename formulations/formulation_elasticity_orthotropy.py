@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 f_vol = Variable( interpolation='global', nb_dim=[dim], default_value='0.0,'*(dim-1)+'0.0', unit='N/m^3' )
 density = Variable( interpolation='global', default_value='1', unit='kg/m^3' )
 elastic_modulus_1 = Variable( interpolation='global', default_value='157e3', unit='N/mm^2')

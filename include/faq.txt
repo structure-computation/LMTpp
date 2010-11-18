@@ -33,6 +33,7 @@
     * \a #26 Mes produits matrice, matrice ou matrice, vecteurs sont lents.
     * \a #27 Mes produits de plusieurs matrices sont lents.
     * \a #28 Calculer le conditionnement d'une matrice.
+    * \a #29 Supprimer les var_inter dans les fonctions apply_on_elements_after_solve() générées en C++.
 
     = Réponses :
 
@@ -232,8 +233,20 @@
     
         On peut utiliser la fonction \a cond () qui prend en paramètre une matrice et la précision souhaitée. La méthode utilisée est celle consistant à calculer les itérés de vecteurs aléatoires pour déterminer la valeur absolue de la plus grande valeur propre et de la plus petite valeur propre. 
 
+    \anchor 29 
+    
+        Mais pourquoi y a-t-il ces var_inter[ i ] i = 0 .. dans mes call_after_solve() ?
+        Pour un élément non-linéaire comme le Quad certaines quantité comme le sigma pour ne pas le citer n'est pas constant sur l'élément et donc il dépend des variables d'interpolation de l'élément de référence. D'où les var-inter[ ] intempestifs.
+        
+        Pour les supprimer, il faut évaluer l'expression en un point de l'élément de référence. Dans tous les exemples du répertoire formulations, c'est le point ( 0.5, 0.5, ... ).
+        Par exemple, pour évaluer sigma, on écrirait dans apply_on_elements_after_solve( unk_subs ) :
+        \code Python  
+            my_subs = unk_subs
+            for vi in e.var_inter: my_subs[ vi ] = number( 0.5 )
+    
+            sigma = sigma.subs( EM( my_subs ) )
 
-
+        
 */
 
 

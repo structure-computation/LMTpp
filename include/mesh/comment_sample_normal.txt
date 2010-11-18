@@ -3,7 +3,7 @@
 
     Cette fonction calcule la normale à un élément quelconque : c'est donc un vecteur qui est de plus normalisé.
     
-    Remarque : pour les éléments non linéaires comme \a Triangle_10 cette normale est celle de l'élément linéaire correspondant ( e.g. \a Triangle pour \a Triangle_10 ).
+    Remarque : pour les éléments non linéaires comme \a Triangle_6 cette normale est celle de l'élément linéaire correspondant ( e.g. \a Triangle pour \a Triangle_6 ).
     
     \relates sample_tangent
 

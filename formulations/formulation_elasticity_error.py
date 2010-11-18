@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 sigma_h_grad = Variable( interpolation='elementary_mul_nb_nodes', default_value='0', nb_dim=[dim], unit='1' )
 sigma_n_phi = Variable( interpolation='elementary_mul_nb_nodes_of_each_children_elem', default_value='0', nb_dim=[dim], unit='1' )
 
