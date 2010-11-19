@@ -57,7 +57,7 @@ void write_ply( std::ostream &os, const TM &m ) {
     time( &rawtime );
     struct tm * timeinfo;
     timeinfo = localtime( &rawtime );
-    os << asctime( timeinfo ) ;
+    os << asctime( timeinfo );
     os << "element vertex " << m.skin.node_list.size() << std::endl;
     os << "property float x" << std::endl;
     os << "property float y" << std::endl;

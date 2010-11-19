@@ -240,13 +240,11 @@
         
         Pour les supprimer, il faut évaluer l'expression en un point de l'élément de référence. Dans tous les exemples du répertoire formulations, c'est le point ( 0.5, 0.5, ... ).
         Par exemple, pour évaluer sigma, on écrirait dans apply_on_elements_after_solve( unk_subs ) :
-        \code Python  
+        \code  
             my_subs = unk_subs
-            for vi in e.var_inter: my_subs[ vi ] = number( 0.5 )
-    
-            sigma = sigma.subs( EM( my_subs ) )
+            for vi in e.var_inter: my_subs[ vi ] = number( 0.5 )
+            sigma = sigma.subs( EM( my_subs ) )
 
-        
 */
 
 
