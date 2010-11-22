@@ -44,11 +44,11 @@ class Tests:
             if stat.S_ISDIR( os.stat( filename )[ stat.ST_MODE ] ):
                 self.find_and_exec( filename )
             elif filename[-4:] == ".cpp": 
-                local_res = os.system( self.command + filename + " > " + filename[:-4] + ".log 2> " + filename[:-4] + ".log_cerr" )
+                filename_log = filename[:-4] + ".log"
+                filename_log_cerr = filename[:-4] + ".log_cerr"
+                local_res = os.system( self.command + filename + " > " + filename_log + " 2> " + filename_log_cerr )
                 print filename, local_res
                 if (local_res == 0): # compilation réussie
-                    filename_log = filename[:-4] + ".log"
-                    filename_log_cerr = filename[:-4] + ".log_cerr"
                     entree = open( filename_log, 'r' )
                     tokens = entree.read().split()
                     nb_tokens = len ( tokens )
