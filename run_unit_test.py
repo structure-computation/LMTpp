@@ -82,11 +82,13 @@ class Tests:
     
 t = Tests( "report_test__LMTpp.html", "report unit test for LMT++", ['include/', '/usr/include/', '/usr/include/libxml2/'] )
 
-os.system( "git pull" )
+#os.system( "git pull" )
 t.run( "tests" )
 if t.res:
     print " Unit tests Succeeded :-)  so i do git pull at romanee"
-    os.system( "ssh pasquier@romanee;cd /u/multi/lmtpp;git pull" )
+    #os.system( "ssh pasquier@romanee;cd /u/multi/lmtpp;git pull" )
 else:
     print " Unit tests has failed :-( ... "
+
+sys.exit( t.res == 0 )
 
