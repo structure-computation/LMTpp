@@ -172,7 +172,10 @@ struct Echelle_Matlab {
             grey = min;
         if ( grey > max )
             grey = max;
-        int i = ( grey - min ) / (T)( max - min ) * ( nb_listColor - 1 ) ;
+        //int i = ( grey - min ) / (T)( max - min ) * ( nb_listColor - 1 ) + 0.5;
+        grey = ( grey - min ) / (T)( max - min ) * ( nb_listColor - 1 ) + 0.5;
+        int i = grey;
+//         int i = ( grey - min ) / (T)( max - min ) * ( nb_listColor - 1 ) + 0.5;
         if ( reversed )
             i = nb_listColor - i - 1;
         if ( i < 0 )
