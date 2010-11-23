@@ -29,7 +29,7 @@ class Tests:
     def __init__( self, namefile_html, title_web_page, list_dir_include = [] ):
         self.res = True
         self.html = file( namefile_html, "w" )
-        self.html.write('<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE html PUBLIC "-//W3C//DTDXHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">\n<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr">\n<head>\n<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=utf-8">\n<title>' + title_web_page + '</title>\n</head>\n<body text="#000000" bgcolor="#ffffff" link="#0000cc" vlink="#551a8b" >\n' )
+        self.html.write('<!DOCTYPE html PUBLIC "-//W3C//DTDXHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">\n<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr">\n<head>\n<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=utf-8">\n<title>' + title_web_page + '</title>\n</head>\n<body text="#000000" bgcolor="#ffffff" link="#0000cc" vlink="#551a8b" >\n' )
         self.icon = [ 'red.png', 'green.png' ] 
         self.command = 'metil_comp '
         for dir in list_dir_include:
@@ -80,7 +80,7 @@ class Tests:
         self.find_and_exec( directory )
         self.html.write('</table>\n<br>\n<br> Global Result '+ create_html_image( self.icon[ self.res ], str(self.res ))+'\n<br>' )
     
-t = Tests( "report_test__LMTpp.html", "report unit test for LMT++", ['include/', '/usr/include/', '/usr/include/libxml2/'] )
+t = Tests( "report_test__LMT++.html", "report unit test for LMT++", ['include/', '/usr/include/', '/usr/include/libxml2/'] )
 
 #os.system( "git pull" )
 t.run( "tests" )

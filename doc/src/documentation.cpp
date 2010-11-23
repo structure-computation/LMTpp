@@ -823,7 +823,17 @@ void Documentation::generate_index() {
     list_titre_of_webpage.push_back(stmp2);
     pageWeb<< "<td><a href=\"" << "webpage_"+stmp <<".html\"> " << stmp2 << " </a></td>" << std::endl; // CODAGE en DUR   -> pas bien
     pageWeb<< " </tr>"  << std::endl;
+    
+    pageWeb<< " <tr>"  << std::endl;
+    pageWeb<< "<td></td>" << std::endl;
+    pageWeb<< "<td></td>" << std::endl;
+    stmp = "../../report_test__" + name_software + ".html";
+//     cout << "#######################" << stmp << "#######################" << endl;
+    pageWeb<< "<td><a href=\"" << stmp << "\" > rapport des tests unitaires </a></td>" << std::endl; // CODAGE en DUR   -> pas bien
+    pageWeb<< " </tr>"  << std::endl;    
+    
     pageWeb<< " </table>"  << std::endl;
+    
     pageWeb<< "<hr/>" << std::endl;
     pageWeb<< "<form action=\"search.php\" method=\"get\">" << std::endl;
     pageWeb<< "        <table cellspacing=\"0\" cellpadding=\"0\" border=\"0\">" << std::endl;

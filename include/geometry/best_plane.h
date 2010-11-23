@@ -66,3 +66,5 @@ T best_plane( T &a, T &b, T &c, T &d, const Vec< Vec< T, s >, s2 > & list_points
 };
 
 #endif /// BEST_PLANE_H
+
+
