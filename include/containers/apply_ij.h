@@ -135,7 +135,43 @@ namespace LMTPRIVATE {
 /*!
 \generic_comment apply_ij
 
-    Cette fonction permet d'appliquer un opérateur op sur deux conteneurs en même temps. Plus précisement l'opérateur agit sur toutes les paires possibles : donc cela revient à faire deux boucles imbriquées.
+    Cette fonction permet d'appliquer un opérateur op sur deux conteneurs en même temps. Plus précisement l'opérateur agit sur toutes les paires possibles : donc cela revient à faire deux boucles imbriquées. Elle s'utilise comme la fonction \a apply . Voici un exemple de foncteur qui compare les centres des éléments respectifs à deux maillages et affiche l'indice des éléments dans le cas où ils sont presque confondus.
+    \code C/C++
+        struct PrintIndex {
+            template< class E, class E2 >
+            void operator()( E& e, unsigned i, E2 &e2, unsigned j ) const {
+                typedef typename E::Pvec Pvec;
+                typedef typename E2::Pvec Pvec2;                 
+                
+                Pvec  c  = center( e  );
+                Pvec2 c2 = center( e2 );
+                
+                if ( length( c - c2 ) < 1e-5 ) {
+                    PRINT( i );
+                    PRINT( j );
+                }
+            }
+        }; 
+     
+    Ce foncteur s'utiliserait ainsi :
+    \code C/C++
+        int maint() {
+        
+            typedef double T;
+            typedef Mesh< MeshCaracStd< 3, 3, 0, double, 1 > > TM; /// maillage 3D de Tetra
+        
+            TM m, m2;
+            
+            /// on crée des maillages 
+            make_rect( m , Tetra(), 0, 1, 10 );
+            make_rect( m2, Tetra(), 0, 1, 20 );
+        
+            apply_ij( m.elem_list, m2.elem_list, PrintIndex() ); 
+            
+            return 0;
+        
+        }
+    
 
  
     \relates Vec

@@ -26,6 +26,33 @@ namespace LMT {
 
 /*!
     Cette classe encapsule les fonctions de la librairie fftw \a http://www.fftw.org/ .
+    
+    Voici un exemple où on calcule la transformée de Fourier d'un vecteur puis la transformée de Fourier inverse. remarquez qu'on ne revient pas au vecteur initial. Il faut diviser par la longueur du vecteur pour s'y ramener.
+    \Code C/C++
+        #include <complex>
+        #include "containers/fft.h"
+        
+        using namespace LMT;
+        using namespace std;
+    
+        int main() {
+            FFT t;
+            
+            Vec< double > v;
+            Vec< complex< double > > vc, vc2;
+            
+            v.resize( 10 );
+            for( unsigned i = 0; i < v.size(); i++ )
+                v[ i ] = 1 + i;
+            
+            vc  = t.fft(  v );
+            vc2 = t.ffti( vc );
+            PRINT( v  );
+            PRINT( vc );
+        
+            return 0;
+        }
+        
 
     \relates Vec
     \friend raphael.pasquier@lmt.ens-cachan.fr
@@ -40,21 +67,25 @@ public:
         init = false;
     }
     ///
-    template<int s> Vec<std::complex<double>,s> fft(const Vec<double,s> &v) {
-        Vec<std::complex<double>,s> res; res.resize(v.size());
+    template<int s> 
+    Vec< std::complex< double >, s > fft( const Vec< double, s > &v ) {
+        Vec<std::complex<double>,s> res; res.resize( v.size() );
         const double *in = v.ptr();
-        fftw_complex *out = (fftw_complex *)res.ptr();
-        if ( init==false ) {
-            p = fftw_plan_dft_r2c_1d(v.size(), const_cast<double *>(in), out, FFTW_ESTIMATE);
-            fftw_execute(p);
+        fftw_complex *out = (fftw_complex *) res.ptr();
+        if ( init == false ) {
+            p = fftw_plan_dft_r2c_1d( v.size(), const_cast<double *>(in), out, FFTW_ESTIMATE );
+            fftw_execute( p );
         }
         else {
             fftw_execute_dft_r2c(p,const_cast<double *>(in),out);
         }
+        for( unsigned i = 1; i <= v.size() / 2; ++i ) 
+            res[ v.size() - i ] = std::conj( res[ i ] );
         return res;
     }
     ///
-    template<int s> Vec<std::complex<double>,s> fft(const Vec<std::complex<double>,s> &v) {
+    template<int s> 
+    Vec<std::complex<double>,s> fft(const Vec<std::complex<double>,s> &v) {
         Vec<std::complex<double>,s> res; res.resize(v.size());
         const fftw_complex *in = (const fftw_complex *)v.ptr();
         fftw_complex *out = (fftw_complex *)res.ptr();
@@ -68,7 +99,8 @@ public:
         return res;
     }
     
-    template<int s> Vec<std::complex<double>,s> ffti(const Vec<std::complex<double>,s> &v) {
+    template<int s> 
+    Vec< std::complex< double >, s > ffti( const Vec< std::complex< double >, s > &v ) {
         //Vec<std::complex<double>,s> res = fft( v );
         Vec<std::complex<double>,s> res; res.resize(v.size());
         const fftw_complex *in = (const fftw_complex *)v.ptr();

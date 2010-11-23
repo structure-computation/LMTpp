@@ -144,7 +144,7 @@ struct EchelleCouleurExemple {
     }
 };
 
-/** @see Sépare les valeurs positives ( en rouge ) des valeurs négatives ( en bleu )
+/*! @see Sépare les valeurs positives ( en rouge ) des valeurs négatives ( en bleu )
     Plus la couleur est saturée, plus la valeur est proche du max. Au contraire plus la couleur est désaturée, i.e. proche du blanc, plus la valeur est proche de zéro.
     On suppose que max >= 0 et min < 0.
 */
@@ -183,7 +183,7 @@ struct Echelle_Matlab {
         //int i = ( grey - min ) / (T)( max - min ) * ( nb_listColor - 1 ) + 0.5;
         grey = ( grey - min ) / (T)( max - min ) * ( nb_listColor - 1 ) + 0.4999;
         int i = grey;
-//         int i = ( grey - min ) / (T)( max - min ) * ( nb_listColor - 1 ) + 0.5;
+        // int i = ( grey - min ) / (T)( max - min ) * ( nb_listColor - 1 ) + 0.5;
         if ( reversed )
             i = nb_listColor - i - 1;
         if ( i < 0 )
@@ -1989,17 +1989,37 @@ T Echelle_Matlab<T>::listColor[ Echelle_Matlab<T>::nb_listColor ][ 3 ] = {
     { 1, 1, 1 }
 };
 
+/*!
+
+
+*/
 template<class T>
 struct EchelleCouleurBasic {
     EchelleCouleurBasic( T _gamma = (T)1 ) : gamma( _gamma ) {}
     Vec<T,3> operator()( T grey, T min = 0, T max = 1 ) const {
-        return pow( (grey - min) / ( max - min ), gamma );
+        return pow( ( grey - min ) / ( max - min ), gamma );
     }
     T gamma;
 };
 
 
-/** display_image( m, EchelleCouleurExemple(), ... ); */
+/*!
+    Objectif :
+        générer une image ( .jpg, .png, etc ) à partir d'une matrice.
+        
+    Paramètres :
+        * mat qui est une matrice
+        * grey_to_rgb sert à convertir les valeurs de la matrice en couleur. C'est une instance d'une classe ( nommée de façon générique Op). Les exemples disponibles sont \a EchelleCouleurBasic , \a EchelleCouleurPosNeg et \a EchelleCouleurExemple .
+        * name_file est le nom du fichier de l'image au format png ( sans l'extention ).
+        * disp_screen est un drapeau ( par défaut false ). S' il est mis à vrai, une fenêtre contenant l'image est ouverte.
+        * auto_grey_level_scaling est un autre drapeau. S' il est mis à faux, l'echelle est entre 0 et 1 sinon l'echelle va du minimum des valeurs de la matrice et le maximum des valeurs.     
+
+    Exemple d'utilisation de la fonction :
+    \code C/C++
+        display_image( m, EchelleCouleurExemple(), "esssi_0", false, true ); 
+ 
+
+*/
 template<class TM,class Op>
 void display_image(const TM &mat, const Op grey_to_rgb, const std::string &name_file="toto", bool disp_screen = false, bool auto_grey_level_scaling = false ) {
     typedef typename TM::T T;

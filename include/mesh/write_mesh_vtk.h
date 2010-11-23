@@ -125,19 +125,23 @@ struct Data_vtk_extract {
 
     unsigned nb_comp[nb_data+(nb_data==0)];
 };
-template<unsigned nb_params>
+template<unsigned nb_params_>
 struct GetDynamicSize {
     GetDynamicSize() {
-        for(unsigned i=0;i<nb_params;++i)
+        for(unsigned i=0;i<nb_params_;++i) {
             dynamic_size[i] = 0;
+            nb_comp[ i ] = 0;
+        }
     }
     template<class T> void operator()(unsigned n,const T &d) { }
     template<class T> void operator()(unsigned n,const Vec<T,-1> &d) {
         dynamic_size[n] = max( d.size(), dynamic_size[n] );
         nb_comp[n] = DM::NbComponents<T>::n;
     }
-    unsigned dynamic_size[nb_params+(nb_params==0)];
-    unsigned nb_comp[nb_params+(nb_params==0)];
+    
+    static const unsigned nb_params = nb_params_; 
+    unsigned dynamic_size[nb_params_+(nb_params_==0)];
+    unsigned nb_comp[nb_params_+(nb_params_==0)];
 };
 struct GetDynamicSizeOs {
     template<class T>

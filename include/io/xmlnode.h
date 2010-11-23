@@ -4,6 +4,7 @@
 #ifdef METIL_COMP_DIRECTIVE
 #pragma lib_name xml2
 #pragma cpp_path /usr/include/libxml2
+#pragma inc_path /usr/include/libxml2
 #endif
 
 #ifdef DONT_WANT_XML

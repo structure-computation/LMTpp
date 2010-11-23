@@ -3,11 +3,11 @@
 
     = Récupération
 
-        Pour installer la librairie LMT++, on récupère les sources dans le dépot git de l'utilisateur multi en faisant :
+        Pour installer la librairie LMT++, on récupère les sources dans le dépot git de l'utilisateur multi en faisant dans une console :
         \code 
             git clone git://gitosis.lmt.ens-cachan.fr/LMTpp.git
             
-        Pour ceux qui font de la corrélation d'image sur la plate-forme, if faut aussi installer le répertoire dic :
+        Pour ceux qui font de la corrélation d'images sur la plate-forme, if faut demander à Hugo Leclerc le droit d' installer le répertoire dic. Ensuite pour installer ce répertoire, faire en console :
         \code
             git clone git://gitosis.lmt.ens-cachan.fr/dic.git
 
