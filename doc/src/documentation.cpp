@@ -828,7 +828,6 @@ void Documentation::generate_index() {
     pageWeb<< "<td></td>" << std::endl;
     pageWeb<< "<td></td>" << std::endl;
     stmp = "../../report_test__" + name_software + ".html";
-//     cout << "#######################" << stmp << "#######################" << endl;
     pageWeb<< "<td><a href=\"" << stmp << "\" > rapport des tests unitaires </a></td>" << std::endl; // CODAGE en DUR   -> pas bien
     pageWeb<< " </tr>"  << std::endl;    
     
@@ -927,7 +926,7 @@ void Documentation::generate_file_css() {
     string stmp ;
 
     stmp = tree["root"] + "classic.css" ;
-    ofstream pageWeb( stmp.c_str() ,ios::out);
+    ofstream pageWeb( stmp.c_str() ,ios::out );
 
     pageWeb << std::endl;
 
@@ -980,11 +979,11 @@ void Documentation::generate_file_css() {
     pageWeb << std::endl;
     pageWeb << "ul.cellule li {\n	width: 100%;\n}\n" << std::endl;
     pageWeb << std::endl;
-    pageWeb << "div.code {\n	background-color: #fde1e7;\n	padding: 0px 85px;\n	width: 83%;\n}\n" << std::endl;
+    pageWeb << "div.code {\n	background-color: #84A8B1;#fde1e7;\n	padding: 0px 85px;\n	width: 83%;\n}\n" << std::endl;
     pageWeb << std::endl;
     pageWeb << "div.verbatim {\n	background-color: #c7dad7;\n	padding: 0px 85px;\n	width: 83%;\n}\n" << std::endl;
     pageWeb << std::endl;
-    pageWeb << "td.pair {\n    background-color: #eaeacf;#9ACBD4;\n}\n" << std::endl;
+    pageWeb << "td.pair {\n    background-color: #BDD2C9;#eaeacf;#9ACBD4;\n}\n" << std::endl;
     pageWeb << std::endl;
     pageWeb << "a:link {\n    text-decoration: none;\n}\n" << std::endl;
     pageWeb << "a:visited {\n    text-decoration: none;\n}\n" << std::endl;
