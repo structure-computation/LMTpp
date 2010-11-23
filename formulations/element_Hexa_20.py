@@ -102,6 +102,8 @@ interpolation["gauss"] = (1-(var_inter[0]-z2)/(z1-z2))     * (1-(var_inter[1]-z2
                          (1-((1-var_inter[0])-z2)/(z1-z2)) * (1-(var_inter[1]-z2)/(z1-z2))     * (1-((1-var_inter[2])-z2)/(z1-z2))* val[5]  + \
                          (1-((1-var_inter[0])-z2)/(z1-z2)) * (1-((1-var_inter[1])-z2)/(z1-z2)) * (1-((1-var_inter[2])-z2)/(z1-z2))* val[6]  + \
                          (1-(var_inter[0]-z2)/(z1-z2))     * (1-((1-var_inter[1])-z2)/(z1-z2)) * (1-((1-var_inter[2])-z2)/(z1-z2))* val[7]
+                         
+interpolation["gauss_2"] = interpolation["gauss"]
 
 a = 1.0/sqrt(3.0)
 Flat_Interpolation_gauss_points = [
