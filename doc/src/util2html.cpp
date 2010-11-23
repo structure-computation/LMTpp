@@ -17,7 +17,7 @@ void generate_header( Target* src, string& path_root, ofstream& of,string &titre
     // <html xmlns="http://www.w3.org/1999/xhtml">
 
     //of<<"<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>"<<std::endl;
-    of<<"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"<<std::endl;
+    //of<<"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"<<std::endl;
     of<<"<!DOCTYPE html"<<std::endl;
     of<<"   PUBLIC \"-//W3C//DTDXHTML 1.0 Strict//EN\" \"DTD/xhtml1-strict.dtd\">"<<std::endl;
     of<<"<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"fr\" lang=\"fr\">"<<std::endl;

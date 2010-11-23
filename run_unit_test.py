@@ -29,7 +29,7 @@ class Tests:
     def __init__( self, namefile_html, title_web_page, list_dir_include = [] ):
         self.res = True
         self.html = file( namefile_html, "w" )
-        self.html.write('<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE html PUBLIC "-//W3C//DTDXHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">\n<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr">\n<head>\n<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=utf-8">\n<title>' + title_web_page + '</title>\n</head>\n<body text="#000000" bgcolor="#ffffff" link="#0000cc" vlink="#551a8b" >\n' )
+        self.html.write('<!DOCTYPE html PUBLIC "-//W3C//DTDXHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">\n<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr">\n<head>\n<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=utf-8">\n<title>' + title_web_page + '</title>\n</head>\n<body text="#000000" bgcolor="#ffffff" link="#0000cc" vlink="#551a8b" >\n' )
         self.icon = [ 'red.png', 'green.png' ] 
         self.command = 'metil_comp '
         for dir in list_dir_include:
@@ -44,11 +44,11 @@ class Tests:
             if stat.S_ISDIR( os.stat( filename )[ stat.ST_MODE ] ):
                 self.find_and_exec( filename )
             elif filename[-4:] == ".cpp": 
-                local_res = os.system( self.command + filename + " > " + filename[:-4] + ".log 2> " + filename[:-4] + ".log_cerr" )
+                filename_log = filename[:-4] + ".log"
+                filename_log_cerr = filename[:-4] + ".log_cerr"
+                local_res = os.system( self.command + filename + " > " + filename_log + " 2> " + filename_log_cerr )
                 print filename, local_res
                 if (local_res == 0): # compilation réussie
-                    filename_log = filename[:-4] + ".log"
-                    filename_log_cerr = filename[:-4] + ".log_cerr"
                     entree = open( filename_log, 'r' )
                     tokens = entree.read().split()
                     nb_tokens = len ( tokens )
@@ -80,13 +80,15 @@ class Tests:
         self.find_and_exec( directory )
         self.html.write('</table>\n<br>\n<br> Global Result '+ create_html_image( self.icon[ self.res ], str(self.res ))+'\n<br>' )
     
-t = Tests( "report_test__LMTpp.html", "report unit test for LMT++", ['include/', '/usr/include/', '/usr/include/libxml2/'] )
+t = Tests( "report_test__LMT++.html", "report unit test for LMT++", ['include/', '/usr/include/', '/usr/include/libxml2/'] )
 
-os.system( "git pull" )
+#os.system( "git pull" )
 t.run( "tests" )
 if t.res:
     print " Unit tests Succeeded :-)  so i do git pull at romanee"
-    os.system( "ssh pasquier@romanee;cd /u/multi/lmtpp;git pull" )
+    #os.system( "ssh pasquier@romanee;cd /u/multi/lmtpp;git pull" )
 else:
     print " Unit tests has failed :-( ... "
+
+exit( t.res == 0 )
 

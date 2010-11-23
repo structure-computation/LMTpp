@@ -18,10 +18,43 @@ namespace LMT {
     Get eigen values and vector of a symetric matrix using lapack.
     m will be converted to a dense matrix (compatible with lapack).
     you will need to add gfortran and lapack in libraries.
+    eig_vec.row( i ) to get the i-th eigen vector.
 
     example:
-    \code
-        Mat<double,Sym<> > m( 10, 10 );
+    \code C/C++
+        typedef double T;
+
+        Mat< T, Sym<> > ms( 3, 3, 0. );
+        Vec<T> eig_value, v, r;
+        ms.diag() = 5.;
+        ms( 1, 0 ) = 2.; 
+        ms( 2, 0 ) = 1.;
+        ms( 2, 1 ) = -0.3;
+        
+        Mat<T> m( ms ), eigen_vector;
+        
+        PRINTN( m );
+        
+        get_eig_sym( m, eig_value, eigen_vector );
+        
+        PRINT( eig_value );
+        PRINTN( eigen_vector );
+        
+        v = eigen_vector.row( 0 );
+        PRINT( v );
+        r = m * v - eig_value[ 0 ] * v;
+        PRINT( r );
+    
+    
+    le vecteur r de l'exemple précédent est proche de zéro.
+    On aurait pu créer une matrice Mat<T,Sym<> > ms pour la définition puis la convertir en matrice dense en faisant par exemple :
+    \code C/C++
+        Mat<T> m( ms );
+    
+    et 
+    
+    \code C/C++
+        Mat<double, Sym<> > m( 10, 10 );
         m.diag() = range(10);
         m(4,2) = 1.0;
 
@@ -36,8 +69,6 @@ namespace LMT {
         m.set( 0.0 );
         m.diag() = eig_val;
         PRINTN( trans( eig_vec ) * m * eig_vec );
-
-    eig_vec.row( i ) to get the i-th eigen vector
 
     \friend raphael.pasquier@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr

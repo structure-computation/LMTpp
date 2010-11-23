@@ -823,7 +823,16 @@ void Documentation::generate_index() {
     list_titre_of_webpage.push_back(stmp2);
     pageWeb<< "<td><a href=\"" << "webpage_"+stmp <<".html\"> " << stmp2 << " </a></td>" << std::endl; // CODAGE en DUR   -> pas bien
     pageWeb<< " </tr>"  << std::endl;
+    
+    pageWeb<< " <tr>"  << std::endl;
+    pageWeb<< "<td></td>" << std::endl;
+    pageWeb<< "<td></td>" << std::endl;
+    stmp = "../../report_test__" + name_software + ".html";
+    pageWeb<< "<td><a href=\"" << stmp << "\" > rapport des tests unitaires </a></td>" << std::endl; // CODAGE en DUR   -> pas bien
+    pageWeb<< " </tr>"  << std::endl;    
+    
     pageWeb<< " </table>"  << std::endl;
+    
     pageWeb<< "<hr/>" << std::endl;
     pageWeb<< "<form action=\"search.php\" method=\"get\">" << std::endl;
     pageWeb<< "        <table cellspacing=\"0\" cellpadding=\"0\" border=\"0\">" << std::endl;
@@ -917,7 +926,7 @@ void Documentation::generate_file_css() {
     string stmp ;
 
     stmp = tree["root"] + "classic.css" ;
-    ofstream pageWeb( stmp.c_str() ,ios::out);
+    ofstream pageWeb( stmp.c_str() ,ios::out );
 
     pageWeb << std::endl;
 
@@ -970,11 +979,11 @@ void Documentation::generate_file_css() {
     pageWeb << std::endl;
     pageWeb << "ul.cellule li {\n	width: 100%;\n}\n" << std::endl;
     pageWeb << std::endl;
-    pageWeb << "div.code {\n	background-color: #fde1e7;\n	padding: 0px 85px;\n	width: 83%;\n}\n" << std::endl;
+    pageWeb << "div.code {\n	background-color: #84A8B1;#fde1e7;\n	padding: 0px 85px;\n	width: 83%;\n}\n" << std::endl;
     pageWeb << std::endl;
     pageWeb << "div.verbatim {\n	background-color: #c7dad7;\n	padding: 0px 85px;\n	width: 83%;\n}\n" << std::endl;
     pageWeb << std::endl;
-    pageWeb << "td.pair {\n    background-color: #eaeacf;#9ACBD4;\n}\n" << std::endl;
+    pageWeb << "td.pair {\n    background-color: #BDD2C9;#eaeacf;#9ACBD4;\n}\n" << std::endl;
     pageWeb << std::endl;
     pageWeb << "a:link {\n    text-decoration: none;\n}\n" << std::endl;
     pageWeb << "a:visited {\n    text-decoration: none;\n}\n" << std::endl;
