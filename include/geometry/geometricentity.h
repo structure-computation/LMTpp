@@ -26,7 +26,7 @@ public:
 };
 
 /*!
-    Cette classe sert à faire d ela CAO, par exemple coupe de sphère ou définir des surfaces paramétriques.
+    Cette classe sert à faire de la CAO, par exemple coupe de sphère ou définir des surfaces paramétriques.
 
     \keyword Graphisme/3D
     \friend raphael.pasquier@lmt.ens-cachan.fr
