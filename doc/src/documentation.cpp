@@ -828,7 +828,7 @@ void Documentation::generate_index() {
     pageWeb<< "<td></td>" << std::endl;
     pageWeb<< "<td></td>" << std::endl;
     stmp = "../../report_test__" + name_software + ".html";
-    pageWeb<< "<td><a href=\"" << stmp << "\" > rapport des tests unitaires </a></td>" << std::endl; // CODAGE en DUR   -> pas bien
+    pageWeb<< "<td><a href=\"" << stmp << "\" > Rapport des tests unitaires </a></td>" << std::endl; // CODAGE en DUR   -> pas bien
     pageWeb<< " </tr>"  << std::endl;    
     
     pageWeb<< " </table>"  << std::endl;

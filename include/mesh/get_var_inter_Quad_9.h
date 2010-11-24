@@ -7,7 +7,7 @@
 namespace LMT {
  
 template<class PosNodes,class Pvec,class TVI>
-bool get_var_inter_experimental(const Quad_9 &elem,const PosNodes &pos_nodes,const Pvec &pos,TVI &var_inter, typename Pvec::template SubType<0>::T tolerance = 1e-7 ) {
+bool get_var_inter_experimental(const Quad_9 &elem,const PosNodes &pos_nodes,const Pvec &pos,TVI &var_inter, typename Pvec::template SubType<0>::T tolerance = 1e-4 ) {
     typedef typename Pvec::template SubType<0>::T T;
     T U, V, eval, eval2, U2, V2;
     Vec< T, 9 > coeff_resultant_U;
@@ -488,7 +488,7 @@ bool get_var_inter_experimental(const Quad_9 &elem,const PosNodes &pos_nodes,con
     //std::cout << setprecision(16) << " coeff_resultant_U  " << std::endl;
     //for( unsigned i=0; i < coeff_resultant_U.size(); ++i ) std::cout << "(" << coeff_resultant_U[i] << ") * U**" << i << " + " ;
     //std::cout << std::endl;
-    sol_U = Pol<8,1,T>(coeff_resultant_U).real_roots( 1e-2 );
+    sol_U = Pol<8,1,T>(coeff_resultant_U).real_roots( /*1e-2*/ );
     //PRINT( sol_U );
     for( unsigned i=0; i < sol_U.size(); ++i ) {
         U = sol_U[i];
