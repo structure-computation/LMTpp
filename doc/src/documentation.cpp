@@ -704,7 +704,7 @@ void Documentation::generate_index() {
     //cout << " -------------->>>>>>>>>>>  CommentItemTutorial->reference() " << stmp << endl ;
     ofstream pageWeb( stmp.c_str() ,ios::out);
 
-    pageWeb<<"<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>"<<std::endl;
+    //pageWeb<<"<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>"<<std::endl;
     pageWeb<<"<!DOCTYPE html"<<std::endl;
     pageWeb<<"   PUBLIC \"-//W3C//DTDXHTML 1.0 Strict//EN\" \"DTD/xhtml1-strict.dtd\">"<<std::endl;
     pageWeb<<"<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"fr\" lang=\"fr\">"<<std::endl;
