@@ -131,7 +131,7 @@ bool get_var_inter_experimental(const Triangle_6 &elem,const PosNodes &pos_nodes
     //std::cout << setprecision(16) << " coeff_resultant_U  " << std::endl;
     //for( unsigned i=0; i < coeff_resultant_U.size(); ++i ) std::cout << "(" << coeff_resultant_U[i] << ") * U**" << i << " + " ;
     //std::cout << std::endl;
-    sol_U = Pol<4,1,T>(coeff_resultant_U).real_roots( 1e-2 );
+    sol_U = Pol<4,1,T>(coeff_resultant_U).real_roots( /*1e-2*/ );
     //PRINT( sol_U );
     for( unsigned i=0; i < sol_U.size(); ++i ) {
         U = sol_U[i];

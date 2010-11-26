@@ -1344,7 +1344,7 @@ class Pol {
         return res;
     }
 
-    Vec<T> real_roots( T tolerance = 16*std::numeric_limits<T>::epsilon() ) /**const*/{
+    Vec<T> real_roots( T tolerance = ldexp( std::numeric_limits<T>::epsilon(), 6 ) ) /**const*/{
         assert(nx==1);
         Vec<T> res;
         update_degrees(); /// PROVISOIRE : cela ne devrait pas être fait ici.
@@ -1361,11 +1361,14 @@ class Pol {
             T b=coefs[1]/coefs[2];
             T c=coefs[0]/coefs[2];
             T delta=b*b-4*c;
-            /// rappel : si P = aX^2+bX+c alors P(-b/(2a)) = - (b^2-4ac)/(4a) donc abs(a*delta) < 4*epsilon => racine double  
-            if ( std::abs(coefs[2] * delta) < tolerance )
-                res.push_back(-0.5*b);
+            //PRINT( delta );
+            //PRINT( std::abs( delta ) );
+            //PRINT( tolerance * 4 );
+            /// rappel : si P = aX^2+bX+c alors P(-b/(2a)) = - (b^2-4ac)/(4a) donc abs(delta) < 4*epsilon*abs(a) => racine double  
+            if ( std::abs( delta ) < tolerance * 4 )
+                res.push_back( -0.5 * b );
             else if (delta >= tolerance ) {
-                T rd = sqrt(delta);
+                T rd = sqrt( delta );
                 if (std::abs(b+rd)> 0.5)
                     res.push_back(-0.5*(b+rd));
                 else
@@ -1375,8 +1378,7 @@ class Pol {
                 else
                     res.push_back(-2*c/(b+rd));
             }
-        }
-        else if (taille==4) { /// degré 3
+        } else if (taille==4) { /// degré 3
             T a=coefs[2]/coefs[3];
             T b=coefs[1]/coefs[3];
             T c=coefs[0]/coefs[3];
@@ -1389,13 +1391,13 @@ class Pol {
                 res.push_back((sgn(u)*std::pow(std::abs(u),T(1)/T(3))+sgn(v)*std::pow(std::abs(v),T(1)/T(3))-a)/3.);
             }
             if (delta<0) {
-                C j(-0.5,sqrt(3.)/2.);
-                C v(-13.5*q,sqrt(-6.75*delta));
-                C u=std::pow(v,T(1)/T(3));
+                C j( -0.5, sqrt( 3. )/2. );
+                C v( -13.5 * q, sqrt( -6.75 * delta ) );
+                C u = std::pow( v, T(1) / T(3) );
                 res.push_back((2.*std::real(u)-a)/3.);
                 res.push_back((2.*std::real(j*u)-a)/3.);
                 res.push_back((2.*std::real(j*j*u)-a)/3.);
-                sort(res);
+                sort( res );
             }
         }
         else if (taille ==5) { /// degré = 4

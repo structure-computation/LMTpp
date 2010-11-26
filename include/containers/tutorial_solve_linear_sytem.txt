@@ -221,11 +221,15 @@
                 = Matrice symétrique
     
                     Pour de tels systèmes, il est possible d'utiliser la librairie de Timothy A Davis qui réalise une décomposition LDL ( valable seulement pour les matrices creuses ) ou réaliser une décomposition de Cholesky avec la fonction <strong> solve_using_chol_factorize() </strong> .
-                    Comme la décomposition LDL est dans la pratique plus robuste que la décomposition de Cholesky, on la présente en premier. Rappelons que la librairie de Timothy s'applique seulement aux matrices creuses.   
+                    Comme la décomposition LDL est dans la pratique plus robuste que la décomposition de Cholesky, on la présente en premier. 
+                    De plus la décomposition LDL s'applique à toutes les matrices symétriques.
+                    Rappelons que la librairie de Timothy s'applique surtout aux matrices creuses.  
                     
                     = Décomposition LDL
                     
                         La classe \a LDL_solver encapsule le code de Tim et mémorise les options de la résolution.
+                        REMARQUE TRES IMPORTANTE : la méthode <strong> get_factorization() </strong> EFFACE la matrice passée en paramètre avec les paramètres par défaut!
+                        
                         voici un exemple d'utilisation :
                         \code C/C++
                             #include <containers/mat.h>
@@ -270,15 +274,16 @@
                             
                         Les méthodes get_factorization() ont les arguments <strong> want_free </strong> , <strong> want_semi_morse </strong> et <strong> want_amd_order </strong> :
                             * <strong> want_free </strong> : s'il est mis à vrai (valeur par défaut), la méthode libère la mémoire de la matrice <strong> mat </strong> passée en argument sinon mat reste inchangée.
-                            * <strong> want_semi_morse </strong> : paramètre de l'algoritme de factorisation  ?????
-                            * <strong> want_amd_order </strong> : paramètre de l'algoritme de factorisation ?????
+                            * <strong> want_semi_morse </strong> : paramètre de l'algoritme de factorisation  ( TODO ) ?????
+                            * <strong> want_amd_order </strong> : paramètre de l'algoritme de factorisation ( TODO ) ?????
                         Ce sont elles qui effectuent la factorisation LDL.
                         Ensuite pour résoudre le système Ax = b, on appelle la méthode <strong> solve( b ) </strong> qui efface la valeur de b et la remplace par la solution A^(-1) * b.
                         
-                    = Décomposition de Cholesky
+                    = Décomposition de Cholesky avec le code de la plate-forme
                 
                         On utilise les fonctions <strong> chol_factorize() </strong> et <strong> solve_using_chol_factorize() </strong> qui respectivement décompose la matrice et résout un système linéaire.
                         IMPORTANT : il FAUT avoir DECOMPOSER la matrice avant d'utiliser <strong> solve_using_chol_factorize() </strong> !
+                        IMPORTANT : la matrice passée en paramètre de <strong> chol_factorize() </strong> est MODIFIEE !
                         Exemple :
                         \code C/C++
                             #include <containers/mat.h>
@@ -313,6 +318,131 @@
                                 
                                 return 0;
                             }
+                                
+                    = Décomposition de Cholesky avec la librairie CHOLMOD
+                    
+                        On se sert de la classe \a Mat<double,Sym<>,SparseCholMod,void> qui est une matrice particulière proposant les méthodes <strong> get_factorization() </strong> et <strong> solve() </strong> pour la résolution de systèmes linéaires.
+                        Elle encapsule les fonctions de la librairie CholMod de Timothy A Davis.
+                        Son utilisation standard est :
+                        \code C/C++
+                            Mat< T, Sym<>, SparseLine<> > A;
+                            Mat<double, Sym<>, SparseCholMod, void> A2( A );
+                    
+                            bool successful = A2.get_factorization();
+                            Vec<T> x = A2.solve( b );
+                    
+                        La matrice <strong> A </strong> sert surtout pour construire facilement une matrice creuse.
+                        La deuxième ligne permet de lier A dans A2.
+                        La méthode <strong> get_factorization() </strong> factorise ou du moins si elle n'y arrive pas elle renvoie faux.
+                        La méthode <strong> solve() </strong> résout à condition bien sûr que la factorisation se soit bien passée ;-)
+                        
+                        Voici un exemple de code qui rassemble les trois méthodes et fournit aussi un petit benchmark :
+                        Remarque : il faut absolument COMPILER le code avec la DIRECTIVE <strong> -DWITH_CHOLMOD </strong> et la librairie cholmod ( i.e. option <strong> -lcholmod </strong> .
+                         
+                        \code C/C++
+                            #include <time.h> /// fonction clock()
+
+                            #include <containers/mat.h>
+                            #include <util/solveLDL.h>
+                            #include <containers/matcholamd.h>
+                            
+                            using namespace std;
+                            using namespace LMT;
+                            
+                            
+                            int main() {
+                                typedef double T;          
+                                unsigned n = 5000;
+                                Vec<T> b, xth, x, x2, x3;
+                                clock_t t1, t2;
+                                double dt1, dt2, dt3;
+                            
+                                //srand ( time(NULL) );
+                            
+                                /// solution exacte
+                                xth.resize( n );
+                                for( unsigned i = 0; i < xth.size(); ++i ) xth[ i ] = rand()% 10 - 5;
+                                //PRINT( xth );
+                                
+                                Mat< T, Sym<>, SparseLine<> > A, A3;
+                                
+                                A.resize( n );
+                                
+                                for( unsigned i = 0; i < n; ++i ) 
+                                    for( unsigned j = 0; j <= i; ++j ) 
+                                    if ( ( rand() % 90 ) == 0 ) 
+                                        A( i, j ) = rand() % 40 - 20;
+                                A.diag() = 40 + 5 * n;
+                                //PRINTN( A );
+                                A3 = A;
+                                
+                                Mat<double, Sym<>, SparseCholMod, void> A2( A );
+                            
+                                /// on génére le vecteur b du système Ax = b
+                                b = A * xth;
+                                //PRINT( b );
+                                
+                                /// Cholesky de la plate-forme
+                                t1  = clock();
+                                chol_factorize( A3 ); 
+                                t2  = clock();
+                                dt1 = double( t2 - t1 ) / CLOCKS_PER_SEC;
+                                
+                                /// CholMod de Timothy
+                                t1  = clock(); 
+                                bool successful = A2.get_factorization();
+                                t2  = clock();  
+                                dt2 = double( t2 - t1 ) / CLOCKS_PER_SEC;
+                                PRINT( successful );
+                            
+                                /// LDL de Timothy
+                                LDL_solver ldl;
+                                t1  = clock();
+                                ldl.get_factorization( A, false, false, true );
+                                t2  = clock();  
+                                dt3 = double( t2 - t1 ) / CLOCKS_PER_SEC;
+                                
+                                solve_using_chol_factorize( A3, b, x );
+                                cout << "== Implementation de Cholesky dans la plate-forme" << endl;
+                                cout << "absolute error = " << max( abs( x - xth ) ) << endl;
+                                cout << "duration = " << dt1 << " seconds" << endl;
+                                                            
+                                x2 = A2.solve( b );
+                                cout << "== CholMod de Timothy" << endl;
+                                cout << "absolute error = " << max( abs( x2 - xth ) ) << endl;
+                                cout << "duration = " << dt2 << " seconds" << endl;
+                                                            
+                                x3 = b; 
+                                ldl.solve( x3 );
+                                cout << "== LDL de Timothy" << endl;
+                                cout << "absolute error = " << max( abs( x3 - xth ) ) << endl;
+                                cout << "duration = " << dt3 << " seconds" << endl;
+                                                        
+                                cout << endl;
+                                cout << " plate-forme / CholMod = " << dt1 / dt2 << endl;
+                                cout << " LDL / CholMod = " << dt3 / dt2 << endl;
+                                
+                                return 0;
+                            }
+                        
+                        Le résultat sur mon brave core2  à 2.66 GHz est :
+                        \verbatim     
+                            successful -> 1
+                            == Implementation de Cholesky dans la plate-forme
+                            absolute error = 3.90799e-14
+                            duration = 138.41 seconds
+                            == CholMod de Timothy
+                            absolute error = 1.11022e-14
+                            duration = 7.3 seconds
+                            == LDL de Timothy
+                            absolute error = 4.9738e-14
+                            duration = 94.79 seconds
+
+                            plate-forme / CholMod = 18.9603
+                            LDL / CholMod = 12.9849
+
+      
+                        Sur cet exemple, on constate que la stabilité numérique est semblable pour les trois méthodes. En terme de vitesse, CholMod sort du peloton.
                                 
             = Cas des matrices de grande dimension ~ 1000000 ou plus
 

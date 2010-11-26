@@ -85,7 +85,7 @@ t = Tests( "report_test__LMT++.html", "report unit test for LMT++", ['include/',
 #os.system( "git pull" )
 t.run( "tests" )
 if t.res:
-    print " Unit tests Succeeded :-)  so i do git pull at romanee"
+    print " Unit tests Succeeded :-)"
     #os.system( "ssh pasquier@romanee;cd /u/multi/lmtpp;git pull" )
 else:
     print " Unit tests has failed :-( ... "
