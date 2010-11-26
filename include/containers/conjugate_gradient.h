@@ -34,7 +34,8 @@ unsigned conjugate_gradient( const Precond &precond, const Matrix &matrix, const
         T delto = deltn;
         
         q = matrix * d;
-        T alpha = deltn / dot( d, q );
+        T dot_val = dot( d, q );
+        T alpha = deltn / ( dot_val + ( dot_val == 0 ) );
         solution += alpha * d;
         r -= alpha * q; // r = b - A * x;
         
