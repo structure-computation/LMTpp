@@ -331,13 +331,13 @@
                             bool successful = A2.get_factorization();
                             Vec<T> x = A2.solve( b );
                     
-                        La matrice <strong> A </strong> sert surtout pour construire facilement unematrice creuse.
+                        La matrice <strong> A </strong> sert surtout pour construire facilement une matrice creuse.
                         La deuxième ligne permet de lier A dans A2.
                         La méthode <strong> get_factorization() </strong> factorise ou du moins si elle n'y arrive pas elle renvoie faux.
                         La méthode <strong> solve() </strong> résout à condition bien sûr que la factorisation se soit bien passée ;-)
                         
                         Voici un exemple de code qui rassemble les trois méthodes et fournit aussi un petit benchmark :
-                        Remarque : il faut absolument COMPILER le code avec la DIRECTIVE <strong> -DWITH_CHOLMOD </strong> .
+                        Remarque : il faut absolument COMPILER le code avec la DIRECTIVE <strong> -DWITH_CHOLMOD </strong> et la librairie cholmod ( i.e. option <strong> -lcholmod </strong> .
                          
                         \code C/C++
                             #include <time.h> /// fonction clock()
@@ -352,7 +352,7 @@
                             
                             int main() {
                                 typedef double T;          
-                                unsigned n = 2000;
+                                unsigned n = 5000;
                                 Vec<T> b, xth, x, x2, x3;
                                 clock_t t1, t2;
                                 double dt1, dt2, dt3;
@@ -369,8 +369,8 @@
                                 A.resize( n );
                                 
                                 for( unsigned i = 0; i < n; ++i ) 
-                                    for( unsigned j = 0; j < n; ++j ) 
-                                    if ( ( rand() % 2 ) == 0 ) 
+                                    for( unsigned j = 0; j <= i; ++j ) 
+                                    if ( ( rand() % 90 ) == 0 ) 
                                         A( i, j ) = rand() % 40 - 20;
                                 A.diag() = 40 + 5 * n;
                                 //PRINTN( A );
@@ -420,8 +420,8 @@
                                                         
                                 cout << endl;
                                 cout << " plate-forme / CholMod = " << dt1 / dt2 << endl;
-                                cout << " LDL / CholMod = " << dt3 / dt2 << endl;  
-                                                            
+                                cout << " LDL / CholMod = " << dt3 / dt2 << endl;
+                                
                                 return 0;
                             }
                         
@@ -429,17 +429,18 @@
                         \verbatim     
                             successful -> 1
                             == Implementation de Cholesky dans la plate-forme
-                            absolute error = 2.4869e-14
-                            duration = 8.09 seconds
-                            == CholMod de Timothy
-                            absolute error = 1.06581e-14
-                            duration = 0.83 seconds
-                            == LDL de Timothy
                             absolute error = 3.90799e-14
-                            duration = 10.23 seconds
-                            
-                            plate-forme / CholMod = 9.74699
-                            LDL / CholMod = 12.3253
+                            duration = 138.41 seconds
+                            == CholMod de Timothy
+                            absolute error = 1.11022e-14
+                            duration = 7.3 seconds
+                            == LDL de Timothy
+                            absolute error = 4.9738e-14
+                            duration = 94.79 seconds
+
+                            plate-forme / CholMod = 18.9603
+                            LDL / CholMod = 12.9849
+
       
                         Sur cet exemple, on constate que la stabilité numérique est semblable pour les trois méthodes. En terme de vitesse, CholMod sort du peloton.
                                 
