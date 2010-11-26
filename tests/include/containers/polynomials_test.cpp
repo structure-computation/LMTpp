@@ -1,6 +1,7 @@
 #include "util/unit_test.h" /// pour la macro UNIT_TEST( )
 #include <complex>
 #include <iostream>
+#include <iomanip>
 #include <containers/polynomials.h>
 
 using namespace LMT;
@@ -12,13 +13,12 @@ int pol_degree_4_double_univariable_0() {
     
     Vec< C > sol = P.roots();
     std::cout << " racines => .120557492003962, -.870432417520779+.603404119273391*I, -18090561.2470167, -.870432417520779-.603404119273391*I" << std::endl;
-    std::cout << sol << std::endl;
+    std::cout << std::setprecision( 16 ) << sol << std::endl;
     bool r0 = ERROR_UNIT_TEST( sol[1] ,C( .120557492003962 ) ) < prec;
     bool r1 = ERROR_UNIT_TEST( sol[2] ,C( -.870432417520779, .603404119273391 ) ) < prec;
     bool r2 = ERROR_UNIT_TEST( sol[3] ,C( -.870432417520779,-.603404119273391 ) ) < prec;
     bool r3 = ERROR_UNIT_TEST( sol[0] ,C( -18090561.2470167 ) ) < prec;
-    
-    return not(r0) or not(r1) or not(r2) or not(r3);
+    return r0 and r1 and r2 and r3;
 };
 
 int main() {
