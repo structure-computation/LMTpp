@@ -7,18 +7,21 @@
 
 namespace LMT {
 
-//     9 ---------8
-//    /|         /|
-//   / |        / |
-//  /  |       /  |
-// 5---|6-----7   |
-// |   |      |   |
-// |   4------|-- 3
-// |  /       |  /
-// | /        | /
-// |/         |/
-// 0----1---- 2
+/*!
+    9 ---------8
+   /|         /|
+  / |        / |
+ /  |       /  |
+5---|6-----7   |
+|   |      |   |
+|   4------|-- 3
+|  /       |  /
+| /        | /
+|/         |/
+0----1---- 2
 
+    \keyword Maillage/El√©ment
+*/
 // --------------------------------------------------------------------------------------------------------
 struct PentaPrism {
     static const unsigned nb_var_inter = 3;
@@ -88,7 +91,7 @@ typename TNG::T measure( const Element<PentaPrism,TN,TNG,TD,NET> &e ) {
     typedef typename TNG::T P_T_pos;
     typename TNG::Pvec P0 = e.node(0)->pos, P1 = e.node(1)->pos, P2 = e.node(2)->pos, P3 = e.node(3)->pos;
     P_T_pos D0=0.12;
-   cout << " measureNon implÈmentÈ pour le pentaprism"<< endl;assert(0);
+   cout << " measure Non impl√©ment√©e pour le pentaprism"<< endl;assert(0);
  return D0;
 }
 
