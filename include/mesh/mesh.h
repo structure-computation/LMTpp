@@ -56,7 +56,7 @@ public:
     template<class NE,class BE=DefaultBehavior> struct TElem { typedef typename TElemList::template TElem<NE,BE>::TE TE; };
     /*!
     Type utilisé seulement pour add_element().
-    Il ne fait pas que transformer TE en TE*. lorsque l'utilisateur de add_element() souhaite ajouter un élément dont ne nom n'est pas dans le MeshCarac du maillage, add_element() ne renvoie pas un void* mais un ElementAncestor<TNode>* (mais la valeur reste NULL ).
+    Il ne fait pas que transformer TE en TE*. lorsque l'utilisateur de add_element() souhaite ajouter un élément dont ne nom n'est pas dans le MeshCarac du maillage, add_element() ne renvoie pas un void* mais un ElementAncestor<TNode>* ( mais la valeur du pointeur reste NULL ).
     */
     template<class NE,class BE=DefaultBehavior> struct TElemPtr { 
         typedef typename TElem<NE,BE>::TE TE_;
