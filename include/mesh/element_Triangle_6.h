@@ -103,6 +103,10 @@ inline const double *gauss_point_for_order(unsigned order, const Triangle_6 &ele
     return values + offset[order];
 }
 template<class TNode> void permutation_if_jac_neg(const Triangle_6 &elem,TNode **nodes) {
+
+    if ( nodes[0]->pos.size() != 2 )
+        return;
+
     typedef typename TNode::T T;
     T reg0=nodes[0]->pos[0]+nodes[2]->pos[0]; T reg1=nodes[0]->pos[1]+nodes[1]->pos[1]; T reg2=2*nodes[3]->pos[1]; T reg3=nodes[0]->pos[1]+nodes[2]->pos[1]; T reg4=2*nodes[3]->pos[0];
     T reg5=nodes[0]->pos[0]+nodes[1]->pos[0]; T reg6=2*nodes[4]->pos[0]; reg3=reg3-reg2; T reg7=2*nodes[4]->pos[1]; reg0=reg0-reg4;

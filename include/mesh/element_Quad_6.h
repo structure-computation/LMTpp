@@ -58,6 +58,10 @@ inline const double *gauss_point_for_order(unsigned order, const Quad_6 &elem) {
     return values + offset[order];
 }
 template<class TNode> void permutation_if_jac_neg(const Quad_6 &elem,TNode **nodes) {
+
+    if ( nodes[0]->pos.size() != 2 )
+        return;
+
     typedef typename TNode::T T;
     T reg0=0.5*nodes[1]->pos[1]; T reg1=0.5*nodes[0]->pos[1]; T reg2=0.5*nodes[0]->pos[0]; T reg3=0.5*nodes[1]->pos[0]; T reg4=0.5*nodes[3]->pos[1];
     reg0=reg0-reg1; T reg5=0.5*nodes[3]->pos[0]; reg3=reg3-reg2; T reg6=0.5*nodes[2]->pos[1]; reg4=reg0-reg4;
