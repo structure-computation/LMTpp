@@ -1,7 +1,10 @@
 #ifndef LMT_extrude_HEADER
 #define LMT_extrude_HEADER
 
+#include <map>
 #include "make_rect.h"
+#include "triangle.h"
+#include "quad.h"
 
 namespace LMT {
 
@@ -53,8 +56,7 @@ struct GetNormal {
         for( it = map_normal.begin(); it != map_normal.end(); it++ )
             PRINT( it->second );    
     }
-    
-    //Vec< Pvec > list_normal;
+
     MapPvec map_normal;
 };
 
@@ -127,6 +129,99 @@ struct Extruder {
     BestialNodeAdder<TM> ba;
 };
 
+/*!
+    Objectif :
+        Extruder un maillage surfacique défini dans le plan ou dans l'espace ou bien le maillage peau d'un maillage 3D.
+         
+    Paramètres :
+        * res est le maillage résultat
+        * m est le maillage que l'on veut extruder.
+        * thickness est l'épaisseur de l'extrusion
+        * nb_layer est le nombre d'éléments qui se superposeront dans le sens de l'extrusion
+          
+   Exemple de code :
+   \code C/C++
+        #include "mesh/meshcaracstd.h"
+        #include "mesh/mesh.h"
+        #include "mesh/read_msh.h"
+        
+        #include "mesh/displayparaview.h"
+        #include "mesh/extrude.h"
+        
+        using namespace LMT;
+        using namespace std;
+
+        int main(int argc,char **argv) {
+            typedef double T;
+            typedef Mesh< Mesh_carac_test_extrude<T,2> > TM_2D; /// maillage 2D
+            typedef Mesh< Mesh_carac_test_extrude<T,3> > TM_3D; /// maillage 3D
+            typedef Mesh< MeshCaracStd< 3, 2, 1, T  > > TM_s; /// avec des Quad dans l'espace
+            typedef Mesh< MeshCaracStd< 3, 2, 0  > > TM_s_2; /// avec des Triangle dans l'espace
+            typedef Mesh< MeshCaracStd< 3, 2, 0, T, 2  > > TM_s_3; /// avec des Triangle_6
+            typedef TM_3D::TNode TNode;
+            typedef TM_3D::Pvec Pvec;
+
+            Pvec mini = -1, maxi = 1;
+            TM_s m;
+            
+            /// création du maillage
+            make_rect( m, Quad(), mini, maxi, 20 );
+            
+            for( unsigned i = 0; i < m.node_list.size(); ++i ) {
+                T tmp = m.node_list[ i ].pos[ 0 ] * m.node_list[ i ].pos[ 0 ] + m.node_list[ i ].pos[ 1 ] * m.node_list[ i ].pos[ 1 ];
+                m.node_list[ i ].pos[ 2 ] = 1. - std::sin( tmp );    
+            }
+            
+            m.update_skin();
+            display_mesh( m );
+            
+            TM_3D res;
+        
+            extrude( res, m, 0.25, 1 );
+
+            display_mesh( res );
+        
+            return 0;
+        }
+
+    Pour générer Mesh_carac_test_extrude , vous aurez besoin des fichiers formulation_test_extrude.py :
+    \code Python
+        # -*- coding: utf-8 -*-
+
+        deter = Variable( interpolation='elementary', default_value='0.0', unit='' )
+        #interface_n = Variable( default_value='0.0', unit='' )
+        #interface = Variable( interpolation='elementary', default_value='0.0', unit='' )
+        #normal = Variable( nb_dim=[3], default_value='0.0', unit='' )
+        #dep  = Variable( default_value='0.0', nb_dim=[dim], unit='m' )
+        #ener = Variable( interpolation='elementary', default_value='0.0', unit='W/m^2/K' )
+        #numsst = Variable( interpolation='global', default_value='0.0', unit='' )
+        #attribut_mortel = Variable( T='Mat<double,Gen<>,SparseUMFPACK,void>', unit='Jojo' )
+        # T précise le type exact de l'attribut
+        
+        
+        #
+        def formulation():
+            return 0
+    
+    et MeshCarac_test_extrude.h.py :
+    \code Python
+        # -*- coding: utf-8 -*-
+        from LMT.formal_lf import *
+        
+        write_pb(
+            name = 'test_extrude',
+            formulations = ['test_extrude'],
+            #elements = [ 'Bar', 'Triangle', 'Tetra', 'Quad', 'Hexa', 'Wedge' ],
+            #elements = ['Triangle', 'Wedge' ],
+            #elements = ['Quad','Hexa'],
+            elements = ['Triangle','Triangle_6','Quad','Tetra','Hexa','Wedge'],
+        )
+
+
+
+
+    
+*/
 template < class TM_RES, class TM_SCR, class T >
 void extrude( TM_RES &res, const TM_SCR &m, T thickness, unsigned nb_layer = 1 ) {
     typedef typename TM_RES::MA::Pvec Pvec;
