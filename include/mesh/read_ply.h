@@ -150,7 +150,10 @@ void read_ply(TM &m,istream &is) {
     
 }
 
-/// put gid mesh in m
+/*!
+ put gid mesh in m
+\keyword Maillage/Lecture
+*/
 template<class TM>
 void read_ply(TM &m,const char *fic_name) {
   // open file

@@ -110,8 +110,9 @@ void read_mshadv(TM &mesh, std::istream &is) throw(std::runtime_error) {
 //     dp.add_mesh(mesh,"./tmp/paraviewcompletv2",Vec<string>(""));
 //     dp.exec();
 }
-
-/// put avs mesh castem in m
+/*!
+\keyword Maillage/Lecture
+*/
 template<class TM>
 void read_mshadv(TM &m,const std::string &fic_name) throw(std::runtime_error) {
     // ouverture du fichier

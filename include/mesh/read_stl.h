@@ -163,7 +163,9 @@ void read_stl(TM &m,std::istream &is) throw(std::runtime_error) {
 }
 
 
-/// put gid mesh in m
+/*!
+\keyword Maillage/Lecture
+*/
 template<class TM>
 void read_stl(TM &m,const std::string &fic_name) throw(std::runtime_error) {
     // open file

@@ -457,6 +457,21 @@ void extract_DataArray( std::map< std::string, DataArray > & v, const XmlNode& x
     }
 }
 
+/*!
+    Objectif:
+        Lire un fichier au format vtu pour construire un maillage "m". 
+        
+    Paramètres :
+        * m est un maillage de la plate-forme. Ces champs doivent correspondre à ceux du fichier vtu. Les champs globaux, nodaux et par éléments sont gérés. ATTENTION : Les champs au points de Gauss ne sont pas validés.
+        * filename est le nom du fichier.
+          
+    Exemple de code :
+    \code C/C++
+        read_vtu( m, "essai_0_0.vtu" );
+        
+    \keyword Maillage/Lecture
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+*/
 template<class TM>
 void read_vtu(TM &m, const char* filename ) {
     typedef typename TM::Pvec Pvec;
