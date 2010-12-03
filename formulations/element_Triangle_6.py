@@ -58,6 +58,10 @@ interpolation["nodal_3"] = (1-var_inter[0]-var_inter[1]) * val[0] + \
 
 interpolation["der_nodal"] = val[0]
 
+interpolation["gauss"] = val[0]
+
+interpolation["gauss_2"] = interpolation["gauss"]
+
 quality = 1
 
 # ---------------------------------------------------------------------------------

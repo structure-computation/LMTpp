@@ -81,10 +81,7 @@ public:
     }
 
     ///
-    template<class NE,class BE> typename TElemPtr<NE,BE>::TE add_element(const NE &ne,const BE &be,TNode **n) { 
-    
-    
-    return MA::add_element_(ne,be,n); }
+    template<class NE,class BE> typename TElemPtr<NE,BE>::TE add_element(const NE &ne,const BE &be,TNode **n) { return MA::add_element_(ne,be,n); }
     template<class NE,class BE> typename TElemPtr<NE,BE>::TE add_element(const NE &ne,const BE &be,TNode *n0) { TNode *n[] = {n0}; return add_element(ne,be,n); }
     template<class NE,class BE> typename TElemPtr<NE,BE>::TE add_element(const NE &ne,const BE &be,TNode *n0,TNode *n1) { TNode *n[] = {n0,n1}; return add_element(ne,be,n); }
     template<class NE,class BE> typename TElemPtr<NE,BE>::TE add_element(const NE &ne,const BE &be,TNode *n0,TNode *n1,TNode *n2) { TNode *n[] = {n0,n1,n2}; return add_element(ne,be,n); }

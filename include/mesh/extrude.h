@@ -139,8 +139,8 @@ struct Extruder {
         * thickness est l'épaisseur de l'extrusion
         * nb_layer est le nombre d'éléments qui se superposeront dans le sens de l'extrusion
           
-   Exemple de code :
-   \code C/C++
+    Exemple de code :
+    \code C/C++
         #include "mesh/meshcaracstd.h"
         #include "mesh/mesh.h"
         #include "mesh/read_msh.h"
@@ -184,6 +184,7 @@ struct Extruder {
             return 0;
         }
 
+
     Pour générer Mesh_carac_test_extrude , vous aurez besoin des fichiers formulation_test_extrude.py :
     \code Python
         # -*- coding: utf-8 -*-
@@ -216,11 +217,7 @@ struct Extruder {
             #elements = ['Quad','Hexa'],
             elements = ['Triangle','Triangle_6','Quad','Tetra','Hexa','Wedge'],
         )
-
-
-
-
-    
+ 
 */
 template < class TM_RES, class TM_SCR, class T >
 void extrude( TM_RES &res, const TM_SCR &m, T thickness, unsigned nb_layer = 1 ) {
