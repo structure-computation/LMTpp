@@ -3,6 +3,7 @@
 
 #ifdef METIL_COMP_DIRECTIVE
 #pragma cpp_path /usr/include/suitesparse/
+#pragma inc_path /usr/include/suitesparse/
 #pragma lib_name cholmod
 #endif
 
@@ -119,6 +120,9 @@ public:
             A = NULL;
             L = NULL;
         }
+    }
+    ///
+    void free() {
     }
     ///
     ~Mat() {
