@@ -68,7 +68,7 @@ interpolation["gauss_3"] = (var_inter[0]-b)*(var_inter[0]-c)/((a-b)*(a-c)) *  (v
                          #(var_inter[0]-a)*(var_inter[0]-c)/((b-a)*(b-c)) *  (var_inter[1]-a)*(var_inter[1]-b)/((c-a)*(c-b)) * (var_inter[2]-a)*(var_inter[2]-c)/((b-a)*(b-c)) * val[3] + \
                          #(var_inter[0]-a)*(var_inter[0]-c)/((b-a)*(b-c)) *  (var_inter[1]-a)*(var_inter[1]-c)/((b-a)*(b-c)) * (var_inter[2]-a)*(var_inter[2]-b)/((c-a)*(c-b)) * val[4]
 
-#interpolation["gauss"] = val[0]
+interpolation["gauss"] = val[0]
 
 quality = 1
 

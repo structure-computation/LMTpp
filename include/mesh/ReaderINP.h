@@ -133,6 +133,7 @@ std::string jump( std::ifstream& is, const char* descripteur[], std::string& lin
         map<string, Contact_Pair*> map_Conctact_Pair;
         map<string, Surface*> map_Surface;
 
+    \keyword Maillage/Lecture
 */
 template<class TM> 
 struct ReaderINP {

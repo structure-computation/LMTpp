@@ -66,11 +66,15 @@ public:
     typedef Vec<VecNodeList<TNode,skin> > TNodeList;
     typedef Vec<VecElemList<Carac,TNode,nvi_to_subs,skin> > TElemList;
     template<class NE,class BE=DefaultBehavior> struct TElem { typedef typename TElemList::template TElem<NE,BE>::TE TE; };
+    static const unsigned nvi = TElemList::nvi;
+    /*!
+    Type utilisé seulement pour add_element().
+    Il ne fait pas que transformer TE en TE*. lorsque l'utilisateur de add_element() souhaite ajouter un élément dont ne nom n'est pas dans le MeshCarac du maillage, add_element() ne renvoie pas un void* mais un ElementAncestor<TNode>* ( mais la valeur du pointeur reste NULL ).
+    */
     template<class NE,class BE=DefaultBehavior> struct TElemPtr { 
         typedef typename TElem<NE,BE>::TE TE_;
         typedef typename AlternativeOnType< AreSameType<void, TE_>::res, TE_, EA >::T* TE;
     };
-    static const unsigned nvi = TElemList::nvi;
     
     MeshAncestor() {
         date_last_connectivity_change = 1;
@@ -195,8 +199,9 @@ protected:
     ///
     template<class NE,class BE,unsigned num_index>
     typename TElemPtr<NE,BE>::TE add_element_(const NE &ne,const BE &be,TNode **n,const Number<num_index> &nn) {
+    //typename TElem<NE,BE>::TE *add_element_(const NE &ne,const BE &be,TNode **n,const Number<num_index> &nn) {
         typedef typename TElem<NE,BE>::TE TE;
-        typename TElemPtr<NE,BE>::TE res = elem_list.hp.new_elem(StructForType<TE>()); // template 
+        TE *res = elem_list.hp.new_elem(StructForType<TE>()); // template 
         for(unsigned i=0;i<NE::nb_nodes;++i) res->nodes[i] = n[i];
         res->number = cpt_elem[ TE::num_in_elem_list ]++;
         elem_list.push_back_dyn(TE::num_in_elem_list);
@@ -205,33 +210,16 @@ protected:
     ///
     template<class NE,class BE>
     typename TElemPtr<NE,BE>::TE add_element_(const NE &ne,const BE &be,TNode **n,const Number<IndexOfMagicValue::res> &nn) {
+    //typename TElem<NE,BE>::TE *add_element_(const NE &ne,const BE &be,TNode **n,const Number<IndexOfMagicValue::res> &nn) {
         std::cerr << NE::name() << " with behavior cannot be included in elem_list." << std::endl;
-        return ( typename TElemPtr<NE,BE>::TE )NULL;
+        return (typename TElemPtr<NE,BE>::TE )NULL;
     }
     ///
-    template<class NE,class BE> 
+    template<class NE,class BE>
     typename TElemPtr<NE,BE>::TE add_element_(const NE &ne,const BE &be,TNode **n) {
+//     typename TElem<NE,BE>::TE *add_element_(const NE &ne,const BE &be,TNode **n) {
         return add_element_(ne,be,n,LMT::Number<TElemList::template IndexOf<NE,BE>::res>());
     }
-//     template<class NE,class BE,unsigned num_index>
-//     typename TElem<NE,BE>::TE *add_element_(const NE &ne,const BE &be,TNode **n,const Number<num_index> &nn) {
-//         typedef typename TElem<NE,BE>::TE TE;
-//         TE *res = elem_list.hp.new_elem(StructForType<TE>()); // template 
-//         for(unsigned i=0;i<NE::nb_nodes;++i) res->nodes[i] = n[i];
-//         res->number = cpt_elem[ TE::num_in_elem_list ]++;
-//         elem_list.push_back_dyn(TE::num_in_elem_list);
-//         return res;
-//     }
-//     ///
-//     template<class NE,class BE>
-//     typename TElem<NE,BE>::TE *add_element_(const NE &ne,const BE &be,TNode **n,const Number<IndexOfMagicValue::res> &nn) {
-//         std::cerr << NE::name() << " with behavior cannot be included in elem_list." << std::endl;
-//         return (typename TElem<NE,BE>::TE *)NULL;
-//     }
-//     ///
-//     template<class NE,class BE> typename TElem<NE,BE>::TE *add_element_(const NE &ne,const BE &be,TNode **n) {
-//         return add_element_(ne,be,n,LMT::Number<TElemList::template IndexOf<NE,BE>::res>());
-//     }
     ///
     void clear_elements() {
         this->elem_list.free();

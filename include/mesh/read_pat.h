@@ -127,7 +127,10 @@ cout << " dans read_pat" <<endl;
   return;
 }
 
-/// put pat mesh from Moldflow Sotware in m
+/*!
+ put pat mesh from Moldflow Sotware in m
+\keyword Maillage/Lecture
+*/
 template<class TM>
 void read_pat(TM &m,const char *fic_name) {
   // open file

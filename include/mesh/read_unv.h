@@ -212,7 +212,10 @@ void read_unv(TM &m,std::istream &is) {
   }
 }
 
-/// put unv mesh in m
+/*!
+ put unv mesh in m
+\keyword Maillage/Lecture
+*/
 template<class TM>
 void read_unv(TM &m,const std::string &fic_name) throw(std::runtime_error) {
     // ouverture du fichier

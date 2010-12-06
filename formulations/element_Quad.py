@@ -37,6 +37,8 @@ interpolation["bubble"] = (1-var_inter[0]) * (1-var_inter[1]) * (1-ni) * val[0] 
 interpolation["der_nodal"] = val[0]
 interpolation["gauss"] = val[0] + val[1] + val[2] + val[3]
 
+interpolation["gauss_2"] = interpolation["gauss"]
+
 tmp_authorized_permutations = [
     [0,1,2,3],
 ]

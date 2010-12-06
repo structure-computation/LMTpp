@@ -66,6 +66,8 @@ for i in range( 1, 10 ):
 interpolation["der_nodal"] = val[0]
 interpolation["gauss"] = val[0] + val[1]
 
+interpolation["gauss_2"] = interpolation["gauss"]
+
 quality = 1
 
 # ---------------------------------------------------------------------------------

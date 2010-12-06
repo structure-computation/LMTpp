@@ -37,7 +37,7 @@ void read_geof(TM &mesh, std::istream &is) throw(std::runtime_error) {
     s >> dim1;
 
     if (dim1 != dim) {
-        cout << "Dimension du maillage à lire ("<<dim1<<") incompatible avec celle du maillage passé ("<<dim<<")" << endl;
+        cout << "Dimension du maillage ï¿½ lire ("<<dim1<<") incompatible avec celle du maillage passï¿½ ("<<dim<<")" << endl;
         assert(0);
     }
 
@@ -169,7 +169,10 @@ void read_geof(TM &mesh, std::istream &is) throw(std::runtime_error) {
 //     mesh.sub_mesh(Number<0>()).elem_list.change_hash_size( mesh, mesh.elem_list.size() );
 }
 
-/// put avs mesh castem in m
+/*!
+put avs mesh castem in m
+\keyword Maillage/Lecture
+*/
 template<class TM>
 void read_geof(TM &m,const std::string &fic_name) throw(std::runtime_error) {
     // ouverture du fichier

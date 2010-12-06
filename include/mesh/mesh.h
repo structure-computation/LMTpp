@@ -56,7 +56,7 @@ public:
     template<class NE,class BE=DefaultBehavior> struct TElem { typedef typename TElemList::template TElem<NE,BE>::TE TE; };
     /*!
     Type utilisé seulement pour add_element().
-    Il ne fait pas que transformer TE en TE*. lorsque l'utilisateur de add_element() souhaite ajouter un élément dont ne nom n'est pas dans le MeshCarac du maillage, add_element() ne renvoie pas un void* mais un ElementAncestor<TNode>* (mais la valeur reste NULL ).
+    Il ne fait pas que transformer TE en TE*. lorsque l'utilisateur de add_element() souhaite ajouter un élément dont ne nom n'est pas dans le MeshCarac du maillage, add_element() ne renvoie pas un void* mais un ElementAncestor<TNode>* ( mais la valeur du pointeur reste NULL ).
     */
     template<class NE,class BE=DefaultBehavior> struct TElemPtr { 
         typedef typename TElem<NE,BE>::TE TE_;
@@ -81,10 +81,7 @@ public:
     }
 
     ///
-    template<class NE,class BE> typename TElemPtr<NE,BE>::TE add_element(const NE &ne,const BE &be,TNode **n) { 
-    
-    
-    return MA::add_element_(ne,be,n); }
+    template<class NE,class BE> typename TElemPtr<NE,BE>::TE add_element(const NE &ne,const BE &be,TNode **n) { return MA::add_element_(ne,be,n); }
     template<class NE,class BE> typename TElemPtr<NE,BE>::TE add_element(const NE &ne,const BE &be,TNode *n0) { TNode *n[] = {n0}; return add_element(ne,be,n); }
     template<class NE,class BE> typename TElemPtr<NE,BE>::TE add_element(const NE &ne,const BE &be,TNode *n0,TNode *n1) { TNode *n[] = {n0,n1}; return add_element(ne,be,n); }
     template<class NE,class BE> typename TElemPtr<NE,BE>::TE add_element(const NE &ne,const BE &be,TNode *n0,TNode *n1,TNode *n2) { TNode *n[] = {n0,n1,n2}; return add_element(ne,be,n); }

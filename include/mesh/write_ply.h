@@ -83,11 +83,11 @@ void write_ply( std::ostream &os, const TM &m ) {
 
 /*!
     Objectif :
-        exporter la peau d'un maillage au format ply
+        Exporter la peau d'un maillage au format ply
         
     Paramètre :
-        filename est le nom du fichier ( e.g. example.ply )
-        m est un maillage 2D ou 3D. Si le maillage est 2D, il sera défini dans le plan xy.
+        * filename est le nom du fichier ( e.g. example.ply )
+        * m est un maillage 2D ou 3D. Si le maillage est 2D, il sera défini dans le plan xy.
         
     Remarque  : le format ply pourrait contenir toutes les propriétés du maillage.
     Remarque2 : le format binaire ne fut pas testé car blender ne le comprend pas. D'ailleurs le lecteur de blender ne connaît pas non plus les quad...

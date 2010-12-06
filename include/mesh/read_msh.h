@@ -198,6 +198,7 @@ void read_msh(TM &m,std::istream &is) throw(std::runtime_error) {
 /// put gid mesh in m
 /*!
 Attention: importe seulement les Bar() et les Triangle() 
+\keyword Maillage/Lecture
 */
 template<class TM>
 void read_msh(TM &m,const std::string &fic_name) throw(std::runtime_error) {
