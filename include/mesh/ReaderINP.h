@@ -15,6 +15,16 @@ void replace_char( std::string& str, char c, char subs) {
     }
 }
 
+/*!
+    lorsque une ligne d'un fichier texte DOS est lue, il reste le caractère CR Carriage Return ( code ASCII 13 ) qui gène la récupèration des nombres de la ligne. Il est donc nécessaire de le retirer. On supprime aussi les espaces pour une meilleure lecture.
+*/
+void normalize_end_line( std::string& str ) {
+    std::size_t pos = str.size() - 1;
+    while( ( pos >= 1 ) and ( ( str[ pos ] == 13 ) or ( str[ pos ] == ' ' ) ) ) pos--;
+    str.resize( pos + 1 );
+    //if ( str[ str.size() - 1 ] == 13 ) str.resize( str.size() - 1 );
+}
+
 /// retourne le nombre de caractères c à partir de la position start
 unsigned compter_caractere( const std::string& s, char c, int start = 0 ) {
 
@@ -53,11 +63,13 @@ std::string value( const std::string& str, const char* param1, const char* param
 
 std::string jump( std::ifstream& is, const char* descripteur) {
     std::string str,res;
-    while(true) {
+    while( true ) {
         str.clear();
         getline( is,str );
         if ( !is.good() )
             break;
+        normalize_end_line( str );
+        
         if ( str.find( descripteur ) == std::string::npos )
             res += str + "\n" ;
         else
@@ -79,6 +91,7 @@ std::string jump( std::ifstream& is, const char* descripteur[], std::string& lin
         getline( is , str );
         if ( !is.good() )
             break;
+        normalize_end_line( str );
         c = 0;
         while( true ) {
             if ( strlen( descripteur[ c ] ) == 0 )
@@ -133,7 +146,6 @@ std::string jump( std::ifstream& is, const char* descripteur[], std::string& lin
         map<string, Contact_Pair*> map_Conctact_Pair;
         map<string, Surface*> map_Surface;
 
-    \keyword Maillage/Lecture
 */
 template<class TM> 
 struct ReaderINP {
@@ -157,7 +169,7 @@ struct ReaderINP {
         STATUS_SURFACE              = 11
     } Status_ID;
     
-    /// double : nécessair et suffisant ; dimension déterminée à l'éxécution
+    /// double : nécessaire et suffisant ; la dimension est déterminée à l'éxécution
     /// cet objet ne sert qu' à enregistrer la position d'un noeud
     struct NodeInp {
         NodeInp() {}
@@ -171,6 +183,7 @@ struct ReaderINP {
                 std::cerr << "WARNING ReaderINP : error to convert the position of node." << std::endl;
             for( unsigned i = 0; i < ret.size(); ++i ) 
                 ret[ i ] = pos[ i ];
+            return ret;
         }
         
         template< class T, int _s >
@@ -184,7 +197,6 @@ struct ReaderINP {
         Vec<double> pos; 
     };
     
-    //typedef map<unsigned, TNode*> Map_num_node;
     typedef std::map<unsigned, NodeInp> Map_num_node;
     
      struct MatchElement_INP_LMTpp {
@@ -445,24 +457,29 @@ struct ReaderINP {
             NodeInp node;
 
             replace_char( str, ',', ' ' );
+            normalize_end_line( str );
             std::istringstream iss( str );
             if ( withCoordinate ) {
                 iss >> number;
                 /// lecture des coordonnées
-                while ( true ) {
+                while ( not( iss.eof() ) ) {
                     iss >> p;
+//                     if ( iss.eof() )
+//                         break;
                     node.pos.push_back( p );
-                    if ( iss.eof() )
-                        break;
                 }
                 
                 map_num_nodeInp[ number ] = node;
                 this->data.push_back( number );
             } else {
-                while( true ) {
+                //PRINT("+++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+                //std::cout << "<<<|" << str << "|>>>" << std::endl;
+                while( not( iss.eof() ) ) {
                     iss >> number;
-                    if ( iss.eof() )
-                        break;
+//                     PRINT( number );
+//                     if ( iss.eof() )
+//                         break;
+                    //PRINT( number );
                     this->data.push_back( number );
                 }
             }
@@ -520,10 +537,12 @@ struct ReaderINP {
             Vec<unsigned> vninp;
 
             replace_char( str, ',', ' ' );
+            normalize_end_line( str );
             std::istringstream s( str );
-            s >> number;
-            this->data.push_back( number );
+
             if ( type.size() ) {
+                s >> number;
+                this->data.push_back( number );
                 //vn.resize( nb_nodes );
                 vninp.resize( nb_nodes );
                 for ( unsigned i = 0; i < nb_nodes; i++ ) {
@@ -534,14 +553,11 @@ struct ReaderINP {
                 map_num_element[ number ] = MatchElement_INP_LMTpp( type.c_str(), NULL, vninp );
                 map_num_element[ number ].ptrEA = map_num_element[ number ].add_element_at( m, match_inode_inp_lmtpp, mapNode );
             } else {
-                while( true ) {
+                while( not( s.eof() ) ) {
                     s >> number;
+                    //PRINT( number );
                     this->data.push_back( number );
-                    if ( s.eof() )
-                        break;
                 }
-                if ( this->data.back() == this->data[ this->data.size()-2]) /// A REVOIR ...  PROBLEME
-                    this->data.pop_back();
             }
         }
         
@@ -678,6 +694,7 @@ struct ReaderINP {
                 getline( is, str );
                 if ( !is.good() )
                     break;
+                normalize_end_line( str );
                     
                 for( c = 0; c < nb_principale_keyword; ++c )
                     if ( str.find( list_principale_keyword[ c ]) != std::string::npos )
@@ -704,6 +721,7 @@ struct ReaderINP {
                         getline( is, str2 );
                         if ( !is.good() )
                             return ""; /// je ne sais pas trop quoi renvoyer...
+                        normalize_end_line( str );
                         str += str2;
                         material_property->setData( str );
                         break;
@@ -729,6 +747,7 @@ struct ReaderINP {
             unsigned c;
             
             getline( is, str ); /// lecture des deux surfaces écrits sous la forme nom1, nom2
+            normalize_end_line( str );
             char *pchar = strpbrk( str.c_str(), "," );
             int i;
             if ( pchar ) i = pchar - str.c_str(); else i = str.size();
@@ -741,6 +760,7 @@ struct ReaderINP {
                 getline( is, str );
                 if ( !is.good() )
                     break;
+                normalize_end_line( str );
                 for( c = 0; c < nb_keyword; ++c )
                     if ( str.find( list_keyword[ c ] ) != std::string::npos ) {
                         s_data += str + "\n"; /// pas super comme traitement ;-)
@@ -915,8 +935,10 @@ struct ReaderINP {
             if ( ( ctxte != STATUS_MATERIAL ) and ( ctxte != STATUS_CONTACT_PAIR ) ) { /// Material et Contact Pair sont vus comme des conteneurs donc ils parsent eux-même le fichier et leur parseur rend la prochaine ligne à lire 
                 str.clear();
                 getline( is, str );
+                normalize_end_line( str );
                 if ( !is.good() )
                     break;
+                normalize_end_line( str );
             }
             /// évaluation du contexte
             if ( str.size() == 0 )
@@ -954,9 +976,10 @@ struct ReaderINP {
                     n = pes->nb_nodes;
                     if ( ( n > 0 ) and ( compter_caractere( str, ',' ) < n ) ) {
                         str2.clear();
-                        getline ( is,str2 );
+                        getline ( is, str2 );
                         if ( !is.good() )
                             break;
+                        normalize_end_line( str );
                         str += str2;
                     }
                     pes->read( m, str, match_inode_inp_lmtpp, map_num_node, map_num_element );
@@ -968,6 +991,7 @@ struct ReaderINP {
                         getline ( is, str2 );
                         if ( !is.good() )
                             break;
+                        normalize_end_line( str );    
                         str += str2;
                     }
                     por->read( str );
