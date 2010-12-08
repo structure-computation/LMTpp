@@ -469,6 +469,8 @@ void extract_DataArray( std::map< std::string, DataArray > & v, const XmlNode& x
     \code C/C++
         read_vtu( m, "essai_0_0.vtu" );
         
+    WARNING : elle ne marche que pour les champs scalaires ou vectoriels donc pas les matrices symétriques et autres structures plus complexes.
+        
     \keyword Maillage/Lecture
     \friend raphael.pasquier@lmt.ens-cachan.fr
 */
