@@ -84,8 +84,10 @@ struct Elem_vtk_extract {
 
 template<unsigned nb_data,bool binary>
 struct Data_vtk_extract {
+
     template<class T>
     void operator()(unsigned i,T data) {
+        //std::cout << "### Data_vtk_extract.operator( scalar ) et i = "<< i << std::endl;
         if ( binary ) {
             os[i].write( (char *)&data, sizeof(T) );
             //os[i].write( " ", sizeof(char) );
@@ -96,8 +98,10 @@ struct Data_vtk_extract {
             os[i] << " ";
         }
     }
+    
     template<class T,int s>
     void operator()(unsigned i,Vec<T,s> data) {
+        //std::cout << "### Data_vtk_extract.operator( Vec ) et i = "<< i << std::endl;
         if ( binary ) {
             os[i].write( (char *)&data, sizeof(T)*data.size() );
             if ( data.size()==2 ) {
@@ -111,8 +115,10 @@ struct Data_vtk_extract {
             os[i] << " ";
         }
     }
+    
     template<class T>
-    void operator()(unsigned i,std::complex<T> data) {
+    void operator()( unsigned i, std::complex<T> data ) {
+        //std::cout << "### Data_vtk_extract.operator( complex ) et i = "<< i << std::endl;
         if ( binary ) {
             os[i].write( (char *)&data, sizeof(T)*2 );
             T v = 0;
@@ -121,6 +127,43 @@ struct Data_vtk_extract {
             os[i] << data << " 0 ";
         }
     }
+    
+    /*!
+        il aurait été tentant de copier en binaire le contenu du vecteur data.data mais pour des matrices de taille varaible, le contenu et la taille de data.data est optimisé pour les instructions SIMD et donc ne correspond pas forcément à ce qu'on peut penser comme stockage de données.
+    */
+    template<class T, int sr, int sc, class STO>
+    void operator()( unsigned i, Mat<T, Gen<sr, sc>, STO > data ) {
+        //std::cout << "### Data_vtk_extract.operator( Mat ) et i = "<< i << std::endl;
+        if ( binary ) {
+            T v;
+            for( unsigned ii = 0; ii < data.nb_rows(); ++ii )
+                for( unsigned j = 0; j < data.nb_cols(); ++j ) {
+                    v = data( ii, j );
+                    os[i].write( (char *)&v,  sizeof( T ) ); 
+                }
+        } else {
+            os[i] << data << " 0 ";
+        }
+    }
+    
+    /*!
+        il aurait été tentant de copier en binaire le contenu du vecteur data.data mais pour des matrices de taille varaible, le contenu et la taille de data.data est optimisé pour les instructions SIMD et donc ne correspond pas forcément à ce qu'on peut penser comme stockage de données.
+    */
+    template<class T, int s, class STO>
+    void operator()( unsigned i, Mat<T, Sym<s>, STO > data ) {
+        //std::cout << "### Data_vtk_extract.operator( Mat Sym ) et i = "<< i << std::endl;
+        if ( binary ) {
+            T v;
+            for( unsigned ii = 0; ii < data.nb_rows(); ++ii )
+                for( unsigned j = 0; j <= ii; ++j ) {
+                    v = data( ii, j );
+                    os[i].write( (char *)&v,  sizeof( T ) ); 
+                }
+        } else {
+            os[i] << data << " 0 ";
+        }
+    }
+    
     std::ostringstream os[nb_data+(nb_data==0)];
 
     unsigned nb_comp[nb_data+(nb_data==0)];
@@ -231,6 +274,7 @@ struct Data_vtk_extract_elem {
             mapd[names[i]].vtk_type = get_vtk_types.res[i];
         }
     }
+    
     template<class TE>
     void operator()(const TE &elem,const Vec<std::string> &display_fields=Vec<std::string>("all")) {
         for(typename Map::iterator iter=mapd.begin();iter!=mapd.end();++iter)
@@ -276,12 +320,13 @@ struct Data_vtk_extract_elem {
             }
         }
     }
+    
     template<class T,class ST,class OT>
     void operator()( unsigned i, const char *name, const Mat<T,ST,OT> &data) {
         operator()( i, name, data.data );
     }
     template<class T>
-    void operator()(unsigned i,const char *name,T data) {
+    void operator()(unsigned i, const char *name, T data ) {
         if ( binary )
             mapd[ name ].os += std::string( (char *)&data, (char *)&data + sizeof(T) );
         else
