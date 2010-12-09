@@ -83,19 +83,19 @@ struct SetFieldByName {
 //         operator() ( num, name, val.data );
 //     }
 
-    template<class T,int s, class STO>
-    void operator()( unsigned num, const char *name, Mat<T, Sym<s>, STO > &val ) {
+    template<class T,int s >
+    void operator()( unsigned num, const char *name, Mat<T, Sym<s>, Dense<Col> > &val ) {
         if ( name == field_name ) {
-            for( int i = 0; i < val.nb_rows(); ++i ) {
-                for( int j = 0; j <= i; ++j ) {
-                    val( i, j ) = T( data[ index_elt * nb_comp + ( i * ( i + 1 ) ) / 2 + j ] );
+            for( int j = 0; j < val.nb_cols(); ++j ) {
+                for( int i = 0; i <= j; ++i ) {
+                    val( i, j ) = T( data[ index_elt * nb_comp + ( j * ( j + 1 ) ) / 2 + i ] );
                 }
             }
         }
     }
      
-    template<class T, int sr, int sc, class STO>
-    void operator()( unsigned num,const char *name, Mat<T, Gen<sr, sc>, STO > &val ) {
+    template<class T, int sr, int sc>
+    void operator()( unsigned num,const char *name, Mat<T, Gen<sr, sc>, Dense<Col> > &val ) {
         if ( name == field_name ) {
            for( int i = 0; i < val.nb_rows(); ++i) {
                 for( int j = 0; j < val.nb_cols(); ++j) {
