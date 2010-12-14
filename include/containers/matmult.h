@@ -130,7 +130,14 @@ public:
     RetColConst col(unsigned i) const { return RetColConst(*this,i); }
     RetCol col(unsigned i) { return RetCol(*this,i); }
 
-
+    template< class STO, int sr, int sc >
+    operator Mat<T, Diag<sr, sc >, STO, void >() {
+         Mat<T, Diag<sr, sc >, STO, void > res;// = diag(); /// ne marche pas!
+         res.resize( nb_rows() );
+         for( int i = 0; i < nb_rows(); ++i )
+            res( i, i ) = operator()( i, i );
+         return res;
+    }
 
     const TM1 &m1;
     const TM2 &m2;
