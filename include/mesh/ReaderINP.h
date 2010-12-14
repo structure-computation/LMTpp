@@ -1386,6 +1386,28 @@ struct ReaderINP {
         return index.size();
     }
     
+    /*!
+        Objectif :
+            cette méthode retourne dans le vecteur "names" les noms des NodeSet .
+            
+        Paramètres :
+            * index est le tableau des noms des NodeSet,
+            
+        Retour :
+            nombre d'éléments du vecteur "names".
+            
+    */
+    unsigned get_name_of_node_set( Vec<std::string> &names ) {
+    
+        typename std::map< std::string, NodeSet* >::iterator it;
+
+        names.resize( 0 );
+        for( it = map_NodeSet.begin(); it != map_NodeSet.end(); ++it )
+            names.push_back( it->first );
+        
+        return names.size();
+    }
+    
     template<class TMESH>
     void create_mesh_by_material( TMESH &mesh, const std::string &nameMaterial ) {
         std::map< unsigned, unsigned > match_inode_inp_lmtpp;
@@ -1530,6 +1552,28 @@ struct ReaderINP {
         }
     }
     
+    /*!
+        Objectif :
+            cette méthode retourne dans le vecteur "names" les noms des Material .
+            
+        Paramètres :
+            * index est le tableau des noms des NodeSet,
+            
+        Retour :
+            nombre d'éléments du vecteur "names".
+            
+    */
+    unsigned get_name_of_material( Vec<std::string> &names ) {
+    
+        typename std::map< std::string, Material* >::iterator it;
+
+        names.resize( 0 );
+        for( it = map_Material.begin(); it != map_Material.end(); ++it )
+            names.push_back( it->first );
+        
+        return names.size();
+    }
+    
     void display_map_solid_section() {
 
         typename std::map< std::string, SolidSection* >::iterator it;
@@ -1574,6 +1618,28 @@ struct ReaderINP {
         }
     }
     
+    /*!
+        Objectif :
+            cette méthode retourne dans le vecteur "names" les noms des Surface .
+            
+        Paramètres :
+            * index est le tableau des noms des surfaces,
+            
+        Retour :
+            nombre d'éléments du vecteur "names".
+            
+    */
+    unsigned get_name_of_surface( Vec<std::string> &names ) {
+    
+        typename std::map< std::string, Surface* >::iterator it;
+
+        names.resize( 0 );
+        for( it = map_Surface.begin(); it != map_Surface.end(); ++it )
+            names.push_back( it->first );
+        
+        return names.size();
+    }
+    
     void display_map_boundary( bool withIndice = false ) {
 
         typename std::map< std::string, Boundary* >::iterator it;
@@ -1591,6 +1657,28 @@ struct ReaderINP {
                     std::cout << ">> it->second == NULL ..." << std::endl;
             }
         }
+    }
+    
+    /*!
+        Objectif :
+            cette méthode retourne dans le vecteur "names" les noms des Boundary .
+            
+        Paramètres :
+            * index est le tableau des noms des Boundary,
+            
+        Retour :
+            nombre d'éléments du vecteur "names".
+            
+    */
+    unsigned get_name_of_boundary( Vec<std::string> &names ) {
+    
+        typename std::map< std::string, Boundary* >::iterator it;
+
+        names.resize( 0 );
+        for( it = map_Boundary.begin(); it != map_Boundary.end(); ++it )
+            names.push_back( it->first );
+        
+        return names.size();
     }
     
     void display_map_transform( bool withData = false ) {
