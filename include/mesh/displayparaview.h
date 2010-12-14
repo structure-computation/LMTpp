@@ -45,7 +45,7 @@ public:
     ~DisplayParaview() {
     }
     
-    template<class TM> std::string add_mesh(const TM &m,const std::string &prefix="paraview",const Vec<std::string> &display_fields=Vec<std::string>("all"),double time_step=0) {
+    template<class TM> std::string add_mesh(const TM &m,const std::string &prefix="paraview",const Vec<std::string> &display_fields=Vec<std::string>("all"),double time_step=0 ) {
         std::string pvu_name = prefix;
         //if ( prefix.rfind(".vtu") != prefix.size() - 4 )
         pvu_name += "_" + to_string( time_step ) + "_" + to_string( pvu_files[time_step].size() ) + ".vtu";

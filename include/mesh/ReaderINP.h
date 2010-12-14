@@ -1,6 +1,7 @@
 #ifndef READER_INP_H
 #define READER_INP_H
 
+#include <assert.h>
 #include <map>
 #include <limits>
 
@@ -43,7 +44,7 @@ unsigned compter_caractere( const std::string& s, char c, int start = 0 ) {
 std::string value( const std::string& str, const char* param1, const char* param2, const char* descripteur = " ,\n" ) {
     std::string stmp;
     size_t pos, pos2;
-    char* pchar;
+    const char* pchar;
 
     if ( ( pos = str.find( param1 ) ) != std::string::npos ) {
         pos += strlen( param1 );
@@ -61,50 +62,35 @@ std::string value( const std::string& str, const char* param1, const char* param
     return stmp;
 }
 
-std::string jump( std::ifstream& is, const char* descripteur) {
-    std::string str,res;
+/*!
+    Objectif :
+        Cette fonction sert à sauter le corps d'un conteneur correspondant à un mot-clé de ABAQUS ( e.g. STEP ).
+    
+    Paramètres :
+        * is est le descripteur du fichier ABAQUS,
+        * next recevra la ligne qui contient la chaîne "descripteur",
+        * descripteur est la chaîne de caractères qui sert d'arrêt au saut. Par exemple si on veut s'arrêter à "*END STEP", on mettra cette chaîne.
+    Retour:
+        Elle renvoie vrai si la lecture s'est bien passée et faux sinon.
+*/
+bool jump( std::ifstream& is, std::string &next, const char* descripteur ) {
+    std::string str;
+    
+    next.clear();
     while( true ) {
         str.clear();
         getline( is,str );
         if ( !is.good() )
-            break;
+            return false;
         normalize_end_line( str );
         
-        if ( str.find( descripteur ) == std::string::npos )
-            res += str + "\n" ;
-        else
-            return res;
-    }
-    return res;
-}
-
-/*!
-  cette fonction récupère le texte juqu'à atteindre l'un des descripteurs de la liste descrpteur[] (le dernier de cette liste devant être de longueur nulle i.e. "").
-*/
-std::string jump( std::ifstream& is, const char* descripteur[], std::string& line ) {
-    std::string str,res;
-    int c;
-
-    line.clear();
-    while( true ) {
-        str.clear();
-        getline( is , str );
-        if ( !is.good() )
+        if ( str.find( descripteur ) != std::string::npos ) {
+            next = str;
             break;
-        normalize_end_line( str );
-        c = 0;
-        while( true ) {
-            if ( strlen( descripteur[ c ] ) == 0 )
-                break;
-            if ( str.find( descripteur[ c ] ) != std::string::npos ) {
-                line = str;
-                return res;
-            }
-            c++;
         }
-        res += str + "\n" ;
     }
-    return res;
+
+    return true;
 }
 
 /*!
@@ -145,6 +131,7 @@ std::string jump( std::ifstream& is, const char* descripteur[], std::string& lin
         map<string, Material*> map_Material;
         map<string, Contact_Pair*> map_Conctact_Pair;
         map<string, Surface*> map_Surface;
+        map<string, Boundary*> map_Boundary;
 
 */
 template<class TM> 
@@ -154,7 +141,9 @@ struct ReaderINP {
     typedef typename TM::TNode::T T;
     typedef typename TM::MA::EA EA;
     static const unsigned dim = TM::dim;
+    
     typedef enum {
+        STATUS_START                = -1,
         STATUS_IGNORED              = 0,
         STATUS_NODE                 = 1,
         STATUS_ELEMENT              = 2,
@@ -166,13 +155,16 @@ struct ReaderINP {
         STATUS_STEP                 = 8,
         STATUS_CONTACT_PAIR         = 9,
 //         STATUS_SURFACE_INTERACTION  = 10,
-        STATUS_SURFACE              = 11
+        STATUS_SURFACE              = 11,
+        STATUS_COMMENT              = 12,
+        STATUS_BOUNDARY             = 13,
+        STATUS_TRANSFORM            = 14
     } Status_ID;
     
     /// double : nécessaire et suffisant ; la dimension est déterminée à l'éxécution
     /// cet objet ne sert qu' à enregistrer la position d'un noeud
     struct NodeInp {
-        NodeInp() {}
+        NodeInp() : index_LMTpp( -1 ) {}
         NodeInp( const Vec<double> &posi ) : pos( posi ) {}
         
         /// malheureusement le conversion est doublée par un constructeur très générique...
@@ -194,7 +186,8 @@ struct ReaderINP {
                 v[ i ] = pos[ i ];
         }
         
-        Vec<double> pos; 
+        Vec<double> pos;
+        int index_LMTpp; /// index du noeud du maillage LMTpp construit par le constructeur de \a ReaderINP 
     };
     
     typedef std::map<unsigned, NodeInp> Map_num_node;
@@ -356,20 +349,16 @@ struct ReaderINP {
         std::string name; /// nom LMT++ de l'élément ( e.g. Triangle, Hexa )
         EA* ptrEA; /// pointeur sur l'élément du maillage entier
         //Vec<TNode*> list_node; /// la liste des noeuds de l'élément dans le maillage entier
-        Vec<unsigned> list_node; /// la value de l'entier correspond à l'entrée de Map_num_nodeInp de ReaderINP
+        Vec<unsigned> list_node; /// la valeur de l'entier correspondant à l'entrée de Map_num_nodeInp de ReaderINP
     };
 
     typedef std::map<unsigned, MatchElement_INP_LMTpp > Map_num_element;
-    //typedef map<int,EA*> Map_num_element;
-    //typedef map<int, void*> Map_num_element;
     
     /*!
     Ce code souhaite représenter la méthode de stockage des identifiants entiers des noeuds ou des éléments dans Abaqus.
     Dans le format Inp de Abaqus, un Elset ( ou un NSet ) peut contenir soit :
         * une liste d'indices toute simple soit, 
         * une liste de triplets d'entiers  start, end, step qui signifie que le Elset contient tous les indices de la forme start + i * step où i parcourt les entiers positifs ou nul tout en vérifiant start + i * step <= end ( attention le end est toujours compris pour un step égal à un ).    
-    
-    
     */
     template<class T = unsigned>
     struct ClusterList {
@@ -532,22 +521,24 @@ struct ReaderINP {
             }
         }
         
-        void read( TM &m, std::string& str, std::map< unsigned, unsigned > &match_inode_inp_lmtpp, Map_num_node& mapNode, Map_num_element& map_num_element ) {
+        void read( TM                             &m,
+                   std::string                    &str, 
+                   std::map< unsigned, unsigned > &match_inode_inp_lmtpp, 
+                   Map_num_node                   &mapNode, 
+                   Map_num_element                &map_num_element ) {
+                   
             unsigned number,number2;
             Vec<unsigned> vninp;
 
             replace_char( str, ',', ' ' );
-            normalize_end_line( str );
             std::istringstream s( str );
 
             if ( type.size() ) {
                 s >> number;
                 this->data.push_back( number );
-                //vn.resize( nb_nodes );
                 vninp.resize( nb_nodes );
                 for ( unsigned i = 0; i < nb_nodes; i++ ) {
                     s >> number2;
-                    //vn[ i ] = map_num_node[ number2 ];
                     vninp[ i ] = number2;
                 }
                 map_num_element[ number ] = MatchElement_INP_LMTpp( type.c_str(), NULL, vninp );
@@ -573,6 +564,43 @@ struct ReaderINP {
         std::string type;
     };
     
+    struct Boundary : public ClusterList<> {
+        
+        Boundary& operator=( const ClusterList<> &cl ) {
+            this->data = cl.data;
+            this->isGenerate = cl.isGenerate;
+            return *this;      
+        }
+        
+        void read( std::string& str ) {
+            //PRINT( str );
+            if ( isalpha( str[ 0 ] ) ) {
+                if ( not( name_nodeset.size() ) ) {
+                    size_t pos = str.find( ',' );
+                    name_nodeset = str.substr( 0, pos );
+                }
+                return;
+            }
+            this->isGenerate = false;
+            replace_char( str, ',', ' ' );
+            std::istringstream iss( str );
+            unsigned number;
+            iss >> number;
+            this->data.push_back( number );
+        }
+        
+        void display() const {
+            if ( name_nodeset.size() )
+                std::cout << "name of node set is " << name_nodeset << std::endl;
+            typename Boundary::iterator it;
+            for( it = this->begin(); it != this->end(); ++it )
+                std::cout << *it << " ";
+            std::cout << std::endl;
+        }
+        
+        std::string name_nodeset;
+    };
+    
     struct Orientation {
         Orientation( const std::string& str ) {
             std::string s;
@@ -589,20 +617,75 @@ struct ReaderINP {
             std::istringstream iss( str );
             if ( rectangular ) {
                 iss >> v1 >> v2;
-            } else {
+            } else
                 std::cerr << "WARNING ReaderINP : TODO Orientation::cylindrical " << std::endl;
-            }
+            
         }
         
         void setProperty( EA* ptrEA ) const {
-            ptrEA->set_field( std::string( "v1" ), v1 );
-            ptrEA->set_field( std::string( "v2" ), v2 );
+            if ( ptrEA ) {
+                ptrEA->set_field( std::string( "v1" ), v1 );
+                ptrEA->set_field( std::string( "v2" ), v2 );
+            } else
+                std::cerr << "WARNING ReaderINP::Orientation::setProperty() : ptrEA == NULL " << std::endl;
         }
         
-        /// A revoir l'utilisation de Pvec ????
-        Pvec v1, v2;
+        Vec<double, 3 > v1, v2;
         bool rectangular; /// system = rectangular or cylindrical
     };
+    
+    struct Transform {
+    
+        typedef enum {
+            COORDINATE_RECTANGULAR_CARTESIAN = 0,
+            COORDINATE_CYLINDRICAL           = 1,
+            COORDINATE_SPHERICAL             = 2
+        } TYPE_COORDINATE_ID;
+    
+        Transform( const std::string& str ) {
+            std::string s;
+
+            s = value( str, "TYPE=", "Type=" );
+            type_coordinate = COORDINATE_RECTANGULAR_CARTESIAN;
+            if ( s != "R" )
+                std::cerr << "WARNING ReaderINP::Transform : TODO coordinate cylindrical and spherical" << std::endl;
+        }
+        
+        void read( std::string& str ) { 
+            replace_char( str, ',', ' ' );
+            std::istringstream iss( str );
+            switch( type_coordinate ) {
+                case COORDINATE_RECTANGULAR_CARTESIAN : iss >> v1 >> v2; break;
+                case COORDINATE_CYLINDRICAL : case COORDINATE_SPHERICAL : 
+                    std::cerr << "WARNING ReaderINP::Transform.read() : TODO coordinate cylindrical and spherical" << std::endl;
+                    break;
+                default :
+                    std::cerr << "WARNING ReaderINP::Transform.read() : unknown coordinate" << std::endl;
+            }
+            A.col( 0 ) = v1;
+            A.col( 1 ) = v2;
+            A.col( 2 ) = vect_prod( v1, v2 );
+            
+        }
+        
+        void display() const {
+             switch( type_coordinate ) {
+                case COORDINATE_RECTANGULAR_CARTESIAN : std::cout << " rectangular Cartesian coordinate" << std::endl; break;
+                case COORDINATE_CYLINDRICAL           : std::cout << " cylindrical coordinate" << std::endl; break;
+                case COORDINATE_SPHERICAL             : std::cout << " spherical coordinate" << std::endl; break;
+                default :
+                    std::cerr << "WARNING ReaderINP::Transform.display() : unknown coordinate" << std::endl;
+            }
+            std::cout << " v1 = " << v1 << std::endl;
+            std::cout << " v2 = " << v2 << std::endl;
+            std::cout << " matrix of transformation = " << std::endl;
+            PRINTN( A );
+        }
+        
+        Vec<double, 3 > v1, v2;
+        Mat< double, Gen<3,3> > A;
+        TYPE_COORDINATE_ID type_coordinate;
+    };    
     
     struct Material_property {
         virtual void display() const {}
@@ -673,6 +756,7 @@ struct ReaderINP {
             OPTION_IGNORED       = 0,
             OPTION_DENSITY       = 1,
             OPTION_ELASTIC       = 2,
+            OPTION_COMMENTED     = 3
         } Option_material_ID;
         Material() { material_property = NULL; density = 0.;}
         ~Material() { if ( material_property ) delete material_property ; }
@@ -684,27 +768,37 @@ struct ReaderINP {
             else
                 std::cout << " WARNING ReaderINP : not property..." << std::endl;
         }
-        std::string parse( std::ifstream& is ) {
-            std::string str,str2;
+        std::string parse( std::ifstream& is, std::string &lastCommentMaterial ) {
+            std::string str,str2, lastComment;
             unsigned c;
             Option_material_ID ctxte = OPTION_IGNORED;
 
             while( true ) {
                 str.clear();
                 getline( is, str );
+                normalize_end_line( str );
                 if ( !is.good() )
                     break;
-                normalize_end_line( str );
                     
                 for( c = 0; c < nb_principale_keyword; ++c )
-                    if ( str.find( list_principale_keyword[ c ]) != std::string::npos )
+                    if ( str.find( list_principale_keyword[ c ] ) != std::string::npos ) {
+                        lastCommentMaterial = lastComment;
                         return str;
+                    }
                 if ( str.size() == 0 )
                     continue;
                     
                 if (str[ 0 ] == '*') {
-                    if (str[ 1 ] == '*') { ctxte = OPTION_IGNORED; continue; }/// c'est un commentaire
-                    if ((str.find ( "DENSITY", 1 ) == 1) or (str.find ( "Density", 1 ) == 1)) { ctxte = OPTION_DENSITY; continue; }
+                    if (str[ 1 ] == '*') { 
+                        ctxte = OPTION_COMMENTED;
+                        if ( str.size() > 3 )
+                            lastComment = str.substr( 3 );
+                        continue;
+                    }/// c'est un commentaire
+                    if ((str.find ( "DENSITY", 1 ) == 1) or (str.find ( "Density", 1 ) == 1)) { 
+                        ctxte = OPTION_DENSITY;
+                        continue;
+                    }
                     if ((str.find ( "ELASTIC", 1 ) == 1) or (str.find ( "Elastic", 1 ) == 1)) { 
                         ctxte = OPTION_ELASTIC; 
                         material_property = new Elastic_property( value( str, "TYPE=", "type=", ",\n" ) );
@@ -725,10 +819,11 @@ struct ReaderINP {
                         str += str2;
                         material_property->setData( str );
                         break;
-                    case OPTION_IGNORED : break;
+                    case OPTION_IGNORED : case OPTION_COMMENTED : break;
                 }
             }
-            return "";
+            lastCommentMaterial = lastComment;
+            return ""; /// sortie anormale
         }
         
         double density;
@@ -868,6 +963,49 @@ struct ReaderINP {
             }
     }
     
+    /*!
+        Malheureusement la définition de certains bords dépend d'un NodeSet qui est défini après lui d'où la création de cette méthode.
+    
+    */
+    void update_Boundary() {
+        typename std::map< std::string, Boundary* >::iterator it;
+    
+        for( it = map_Boundary.begin(); it != map_Boundary.end(); it++ )
+            if ( ( it->second ) and ( it->second->name_nodeset.size() ) ) {
+                /// 
+                typename std::map< std::string, NodeSet* >::iterator it2 = map_NodeSet.find( it->second->name_nodeset );
+                if ( it2 != map_NodeSet.end() ) {
+                    *(it->second) = *(it2->second);
+                } else  
+                    std::cerr << "Error ReaderINP : impossible to find the NodeSet " << it->second->name_nodeset << " of Boundary " << it->first << std::endl;
+            }
+    }
+    
+    /*!
+        Application des tansformations aux ensembles de noeuds correspondants.
+        WARNING : cette méthode ne peut s'appliquer qu'au maillage principal créé par le constructeur car on va modifier la position de ses noeuds.
+        De plus il faut que les "index_LMTpp" soient mis à jour avant son utilisation.
+    */
+    void update_Transform( TM &m ) {
+        typename std::map< std::string, Transform* >::iterator it;
+    
+        for( it = map_Transform.begin(); it != map_Transform.end(); it++ )
+            if ( it->second ) {
+                /// 
+                typename std::map< std::string, NodeSet* >::iterator it2 = map_NodeSet.find( it->first );
+                if ( it2 != map_NodeSet.end() ) {
+                    typename NodeSet::iterator it3;
+                    for( it3 = it2->second->begin(); it3 != it2->second->end(); ++it3 ) {
+                        unsigned i_inp   = *it3;
+                        unsigned i_lmtpp = map_num_node[ *it3 ].index_LMTpp;
+                        map_num_node[ i_inp ].pos = it->second->A * map_num_node[ i_inp ].pos;
+                        m.node_list[ i_lmtpp ].pos = map_num_node[ i_inp ].pos;
+                    }
+                } else  
+                    std::cerr << "Error ReaderINP : impossible to find the NodeSet " << it->first << " of transform " << it->first << std::endl;
+            }
+    }
+    
     ReaderINP() {}
     
     ReaderINP( TM &m, const char* filename) { parse( m, filename ); }
@@ -893,12 +1031,21 @@ struct ReaderINP {
         
         typename std::map< std::string, Surface*>::iterator it7;
         for( it7 = map_Surface.begin(); it7 != map_Surface.end(); it7++) delete it7->second;
+    
+        typename std::map< std::string, Boundary*>::iterator it8;
+        for( it8 = map_Boundary.begin(); it8 != map_Boundary.end(); it8++) delete it8->second;
+    
+        typename std::map< std::string, Transform*>::iterator it9;
+        for( it9 = map_Transform.begin(); it9 != map_Transform.end(); it9++) delete it9->second;
     }
     
     static Status_ID setStatus( const std::string& str ) {
-        if (str[1] == '*')                                                              { return STATUS_IGNORED; }/// c'est un commentaire
-        if ((str.find ("Node",1) == 1) or (str.find ("NODE",1 ) == 1) )                 { return STATUS_NODE; }
-        if ((str.find ("Element",1) == 1) or (str.find ("ELEMENT",1) == 1))             { return STATUS_ELEMENT; }
+        if (str[1] == '*')                                                              { return STATUS_COMMENT; }/// c'est un commentaire
+        if ((str.find ("NODE PRINT",1) == 1))                                           { return STATUS_IGNORED; }
+        if ((str.find ("NODE OUTPUT",1) == 1))                                          { return STATUS_IGNORED; }
+        if ((str.find ("ELEMENT OUTPUT",1) == 1))                                       { return STATUS_IGNORED; }
+        if ((str.find ("NODE",1) == 1) or (str.find ("Node",1 ) == 1) )                 { return STATUS_NODE; }
+        if ((str.find ("ELEMENT",1) == 1) or (str.find ("Element",1) == 1))             { return STATUS_ELEMENT; }
         if ((str.find ("NSET",1) == 1) or (str.find ("Nset",1) == 1))                   { return STATUS_NSET; }
         if ((str.find ("ELSET",1) == 1)  or (str.find ("Elset",1) == 1))                { return STATUS_ELSET; }
         if ((str.find ("ORIENTATION",1) == 1) or (str.find ("Orientation",1) == 1))     { return STATUS_ORIENTATION; }
@@ -907,15 +1054,19 @@ struct ReaderINP {
         if ((str.find ("STEP",1) == 1) or (str.find ("Step",1) == 1))                   { return STATUS_STEP; }
         if ((str.find ("CONTACT PAIR",1) == 1) or (str.find ("Contact Pair",1) == 1))   { return STATUS_CONTACT_PAIR; }
         if ((str.find ("SURFACE",1) == 1) or (str.find ("Surface",1) == 1))             { return STATUS_SURFACE; }
+        if ((str.find ("BOUNDARY",1) == 1) or (str.find ("Boundary",1) == 1))           { return STATUS_BOUNDARY; }
+        if ((str.find ("TRANSFORM",1) == 1) or (str.find ("Transform",1) == 1))         { return STATUS_TRANSFORM; }
         std::cerr << "WARNING ReaderINP : ignored option = " << value( str, "*", "*", ",\n") << std::endl;
         return STATUS_IGNORED; /// option non traitée
     }
-    
+
+  /// il est nécessaire de contrôler la construction de maillage par une instance de \a ReaderINP : cad UNE SEULE instance doit être créée.
+  private :
     void parse( TM &m, const char* filename ) {
-        std::string str, str2, name;
-        std::map< unsigned, unsigned > match_inode_inp_lmtpp;
+        std::string str, str2, name, lastComment = "unknown_boundary";
+        std::map< unsigned, unsigned > match_inode_inp_lmtpp; /// correspondance entre les index INP et ceux des noeuds du maillage LMTpp
         unsigned n;
-        Status_ID ctxte = STATUS_IGNORED;
+        Status_ID ctxte = STATUS_START;
         NodeSet* pns = NULL;
         ElementSet* pes = NULL;
         Orientation* por = NULL;
@@ -923,38 +1074,46 @@ struct ReaderINP {
         Material* pma = NULL;
         ContactPair* pcp = NULL;
         Surface* ps = NULL;
+        Boundary* pb = NULL;
+        Transform* pt = NULL;
+        bool loop = true;
 
         str.reserve( 2048 );
         str2.reserve( 2048 );
-        // ouverture du fichier
+        
+        /// ouverture du fichier
         std::ifstream is( filename );
         if ( ! is.is_open() )
             throw std::runtime_error( "opening of file INP has failed." );
-        // état de l'automate
-        while ( true ) {
-            if ( ( ctxte != STATUS_MATERIAL ) and ( ctxte != STATUS_CONTACT_PAIR ) ) { /// Material et Contact Pair sont vus comme des conteneurs donc ils parsent eux-même le fichier et leur parseur rend la prochaine ligne à lire 
+        /// état de l'automate
+        while ( loop ) {
+
+            if ( ( ctxte != STATUS_MATERIAL ) and ( ctxte != STATUS_CONTACT_PAIR ) and ( ctxte != STATUS_IGNORED ) ) { 
+                /// Material et Contact Pair sont vus comme des conteneurs donc ils parsent eux-même le fichier et leur parseur rend la prochaine ligne à lire 
                 str.clear();
                 getline( is, str );
                 normalize_end_line( str );
                 if ( !is.good() )
                     break;
-                normalize_end_line( str );
             }
             /// évaluation du contexte
             if ( str.size() == 0 )
                 continue;
+            //std::cout << "--|" << str << "|--" << std::endl;
             if ( str[ 0 ] == '*' ) {
                 ctxte = setStatus( str );
                 switch( ctxte ) {
+                    case STATUS_START         : break;
+                    case STATUS_COMMENT       : if ( str.size() > 3 ) lastComment = str.substr( 3 ); break;
                     case STATUS_NODE          : pns  = map_NodeSet[ internal_name[ 0 ] ] = new NodeSet(); break;
                     case STATUS_ELEMENT       : pes  = map_ElementSet[ value( str, "ELSET=","elset=" ) ] = new ElementSet( str ); break;
                     case STATUS_NSET          : pns  = map_NodeSet[ value( str, "NSET=","nset=" ) ] = new NodeSet( str ); break;
                     case STATUS_ELSET         : pes  = map_ElementSet[ value( str, "ELSET=", "elset=" ) ] = new ElementSet( str ); break;
                     case STATUS_ORIENTATION   : por  = map_Orientation[ value( str, "NAME=", "name=" ) ] = new Orientation( str ); break;
                     case STATUS_SOLID_SECTION : pss  = map_SolidSection[ value( str, "ELSET=", "elset=" ) ] = new SolidSection( str ); break;
-                    case STATUS_STEP          : str2 = jump( is, "*END STEP" ); break; /// STEP est aussi un "conteneur".
+                    case STATUS_STEP          : break; /// STEP est aussi un "conteneur". TODO
                     case STATUS_MATERIAL      : pma  = map_Material[ value( str, "NAME=", "name=" ) ] = new Material() ; 
-                                                str  = pma->parse( is );
+                                                str  = pma->parse( is, lastComment );
                                                 //pma->display();
                                                 break;
                     case STATUS_CONTACT_PAIR  : pcp  = map_ConctactPair[ value( str, "INTERACTION=", "Interaction=" ) ] = new ContactPair();
@@ -962,15 +1121,18 @@ struct ReaderINP {
                                                 //pcp->display();
                                                 break;
                     case STATUS_SURFACE       : ps = map_Surface[ value( str, "NAME=", "Name=" ) ] = new Surface( str ); break;
-                    case STATUS_IGNORED       : ; //std::cerr << "WARNING ReaderINP : STATUS_IGNORED line " << str << std::endl;  
+                    case STATUS_BOUNDARY      : pb = map_Boundary[ lastComment ] = new Boundary(); break;
+                    case STATUS_TRANSFORM     : pt = map_Transform[ value( str, "NSET=", "nset=" ) ] = new Transform( str ); break;
+                    case STATUS_IGNORED       : loop = jump( is, str, "*" ); /*std::cout << "line --|" << str << "|--" << std::endl;*/ break;  
                 }
-                continue;
+                continue; /// on revient au début de la boucle.
             }
+            
             /// utilisation du contexte
             switch( ctxte ) {
-                case STATUS_NODE : case STATUS_NSET : 
-                    pns->read( m, str, map_num_node );
-                    continue;
+                case STATUS_COMMENT : continue;
+                case STATUS_START   : continue;
+                case STATUS_NODE    : case STATUS_NSET : pns->read( m, str, map_num_node ); continue;
                 case STATUS_ELEMENT : case STATUS_ELSET :
                     /// malheureusement l'info de *ELEMENT est parfois mise sur deux lignes...
                     n = pes->nb_nodes;
@@ -996,15 +1158,31 @@ struct ReaderINP {
                     }
                     por->read( str );
                     continue;
+                case STATUS_TRANSFORM :
+                    pt->read( str );
+                    continue;
                 case STATUS_SURFACE :
                     ps->read( str );
                     continue;
-                case STATUS_IGNORED : case STATUS_SOLID_SECTION : case STATUS_MATERIAL : case STATUS_STEP : case STATUS_CONTACT_PAIR : break;
+                case STATUS_BOUNDARY :
+                    pb->read( str );
+                    continue;
+                case STATUS_IGNORED : case STATUS_SOLID_SECTION : case STATUS_MATERIAL : case STATUS_STEP : case STATUS_CONTACT_PAIR : continue;
             }
         }
+        
         is.close();
         update_solidSection();
+        update_Boundary();
+        /// initialisation des index_LMTpp, les index des noeuds du maillage principal "m".
+        std::map< unsigned, unsigned >::iterator it;
+        for( it = match_inode_inp_lmtpp.begin(); it != match_inode_inp_lmtpp.end(); ++it )  
+            map_num_node[ it->first ].index_LMTpp = it->second;
+        /// on applique les transformations aux noeuds de "m" ainsi qu'aux noeuds NodeInp.
+        update_Transform( m );
     }
+    
+  public : 
     
     template<class _TNODE> 
     struct EgalityPos {
@@ -1014,6 +1192,7 @@ struct ReaderINP {
      
     template<class TMESH>
     void create_mesh_by_elset( TMESH &mesh, const std::string &nameElSet ) {
+    
         std::map< unsigned, unsigned > match_inode_inp_lmtpp;
         typename std::map< std::string, ElementSet*>::iterator it;
 
@@ -1124,9 +1303,87 @@ struct ReaderINP {
                 return index.size();
             }
         } else {
-            std::cerr << "WARNING ReaderINP : you use get_index_node_of_surface() with un unknown name " << nameSurface << std::endl;
+            std::cerr << "WARNING ReaderINP : you use get_index_node_of_surface() with unknown name " << nameSurface << std::endl;
             return 0;
         }
+    }
+    
+    /*!
+        Objectif :
+            cette méthode retourne dans le vecteur "index" les indices des noeuds du maillage "m" généré par le constructeur appartenant au bord nommé "nameBoundary".
+            
+        Paramètres :
+            * index est le tableau des indices des noeuds du bord "nameBoundary",
+            * nameBoundary est le nom du bord.
+            
+        Retour :
+            nombre d'éléments du vecteur "index".
+    */
+    unsigned get_index_node_of_boundary( Vec<unsigned> &index, const std::string& nameBoundary ) {
+    
+        typename std::map< std::string, Boundary* >::iterator it;
+        int i;
+        
+        it = map_Boundary.find( nameBoundary );
+        index.resize( 0 );
+        
+        if ( it != map_Boundary.end() ) {
+            typename Boundary::iterator it2;
+            for( it2 = it->second->begin(); it2 != it->second->end(); ++it2 ) {
+                i = map_num_node[ *it2 ].index_LMTpp;
+                if ( i >= 0 )
+                    index.push_back( i );
+                else {   
+                    std::cerr << "WARNING ReaderINP.get_index_node_of_boundary() : negative index" << std::endl;
+                    //assert( 0 );
+                }
+            }
+        
+        } else {
+            std::cerr << "WARNING ReaderINP : you use get_index_node_of_boundary() with unknown name " << nameBoundary << std::endl;
+        }
+        
+        return index.size();
+    }
+    
+    /*!
+        Objectif :
+            cette méthode retourne dans le vecteur "index" les indices des noeuds du maillage "m" généré par le constructeur appartenant au NodeSet nommé "nameNodeSet".
+            
+        Paramètres :
+            * index est le tableau des indices des noeuds du NodeSet,
+            * nameNodeSet est le nom du bord.
+            
+        Retour :
+            nombre d'éléments du vecteur "index".
+            
+        Rq : il faut que index_LMTpp soit bien initialisé.
+    */
+    unsigned get_index_node_of_node_set( Vec<unsigned> &index, const std::string& nameNodeSet ) {
+    
+        typename std::map< std::string, NodeSet* >::iterator it;
+        int i;
+        
+        it = map_NodeSet.find( nameNodeSet );
+        index.resize( 0 );
+        
+        if ( it != map_NodeSet.end() ) {
+            typename NodeSet::iterator it2;
+            for( it2 = it->second->begin(); it2 != it->second->end(); ++it2 ) {
+                i = map_num_node[ *it2 ].index_LMTpp;
+                if ( i >= 0 )
+                    index.push_back( i );
+                else {   
+                    std::cerr << "WARNING ReaderINP.get_index_node_of_node_set() : negative index" << std::endl;
+                    //assert( 0 );
+                }
+            }
+        
+        } else {
+            std::cerr << "WARNING ReaderINP : you use get_index_node_of_node_set() with unknown name " << nameNodeSet << std::endl;
+        }
+        
+        return index.size();
     }
     
     template<class TMESH>
@@ -1172,8 +1429,6 @@ struct ReaderINP {
             } else
                 std::cerr << ">> it->second == NULL ..." << std::endl;
         }
-
-        /// remove_doubles(mesh.node_list,egalityPos);/// problème avec remove_double
     }
     
     void display_map_element_set( bool withElement = false) {
@@ -1236,7 +1491,6 @@ struct ReaderINP {
     
     void display_node() {
 
-        //typename map< unsigned,TNode*>::iterator it;
         typename Map_num_node::iterator it;
 
         std::cout << "****************************************************" << std::endl;
@@ -1301,7 +1555,7 @@ struct ReaderINP {
         }
     }
     
-    void display_map_Surface( bool withIndice = false ) {
+    void display_map_surface( bool withIndice = false ) {
 
         typename std::map< std::string, Surface* >::iterator it;
 
@@ -1320,6 +1574,44 @@ struct ReaderINP {
         }
     }
     
+    void display_map_boundary( bool withIndice = false ) {
+
+        typename std::map< std::string, Boundary* >::iterator it;
+
+        std::cout << "****************************************************" << std::endl;
+        std::cout << "*                   Boundary                        *" << std::endl;
+        std::cout << "****************************************************" << std::endl;
+        
+        for( it = map_Boundary.begin(); it != map_Boundary.end(); it++) {
+            std::cout << "name is " <<  it->first << std::endl;
+            if ( withIndice ) {
+                if ( it->second )
+                    it->second->display();
+                else
+                    std::cout << ">> it->second == NULL ..." << std::endl;
+            }
+        }
+    }
+    
+    void display_map_transform( bool withData = false ) {
+
+        typename std::map< std::string, Transform* >::iterator it;
+
+        std::cout << "****************************************************" << std::endl;
+        std::cout << "*                   Transform                      *" << std::endl;
+        std::cout << "****************************************************" << std::endl;
+        
+        for( it = map_Transform.begin(); it != map_Transform.end(); it++) {
+            std::cout << "name is " <<  it->first << std::endl;
+            if ( withData ) {
+                if ( it->second )
+                    it->second->display();
+                else
+                    std::cout << ">> it->second == NULL ..." << std::endl;
+            }
+        }
+    }
+    
     /// attributs :
     std::map< std::string, NodeSet*> map_NodeSet;
     std::map< std::string, ElementSet*> map_ElementSet;
@@ -1328,13 +1620,13 @@ struct ReaderINP {
     std::map< std::string, Material*> map_Material;
     std::map< std::string, ContactPair*> map_ConctactPair;
     std::map< std::string, Surface*> map_Surface;
-    // correspondance between number in file -> ref in mesh
-    //Map_num_node    map_num_node;
+    std::map< std::string, Boundary*> map_Boundary;
+    std::map< std::string, Transform*> map_Transform;
     Map_num_node map_num_node;
     Map_num_element map_num_element;
 
     static const char* internal_name[ 2 ];
-    static const unsigned nb_principale_keyword = 26;
+    static const unsigned nb_principale_keyword = 38;
     static const char* list_principale_keyword[ nb_principale_keyword ];
 };
 
@@ -1358,14 +1650,26 @@ const char* ReaderINP<TM>::list_principale_keyword[ ReaderINP<TM>::nb_principale
     "SURFACE",   /// 10
     "CONTACT PAIR",
     "STEP",
+    "STATIC",
+    "CLOAD",
+    "DLOAD",
+    "TEMPERATURE",
+    "NODE PRINT",
+    "EL PRINT",
+    "MODAL PRINT",
+    "ENERGY PRINT", ///20
+    "PRINT",
+    "ELEMENT OUTPUT",
+    "OUTPUT",
     "END STEP",
+    "TRANSFORM",
     "Material",
     "Node",
     "Element",
     "Nset",
-    "Elset",
-    "Orientation",
-    "Solid Section",   /// 20
+    "Elset",            /// 30
+    "Orientation",       
+    "Solid Section",
     "Boundary",
     "Amplitude",
     "Surface",
