@@ -20,10 +20,10 @@ void replace_char( std::string& str, char c, char subs) {
     lorsque une ligne d'un fichier texte DOS est lue, il reste le caractère CR Carriage Return ( code ASCII 13 ) qui gène la récupèration des nombres de la ligne. Il est donc nécessaire de le retirer. On supprime aussi les espaces pour une meilleure lecture.
 */
 void normalize_end_line( std::string& str ) {
-    std::size_t pos = str.size() - 1;
+    size_t pos = str.size() - 1;
     while( ( pos >= 1 ) and ( ( str[ pos ] == 13 ) or ( str[ pos ] == ' ' ) ) ) pos--;
     str.resize( pos + 1 );
-    //if ( str[ str.size() - 1 ] == 13 ) str.resize( str.size() - 1 );
+    //std::cout << "--|" << str << "|--" << std::endl;
 }
 
 /// retourne le nombre de caractères c à partir de la position start
@@ -100,6 +100,7 @@ bool jump( std::ifstream& is, std::string &next, const char* descripteur ) {
         C3D8I   <=> Hexa
         C3D8    <=> Hexa
         C3D4    <=> Tetra
+        C3D10   <=> Tetra_10
         S3R     <=> Triangle
         S3      <=> Triangle
         S4R     <=> Quad
@@ -113,7 +114,7 @@ bool jump( std::ifstream& is, std::string &next, const char* descripteur ) {
         C3D6    <=> Prism
         ROTARYI <=> NodalElement
         MASS    <=> NodalElement
-   Pour en ajouter, il faut le faire dans la méthode MatchElement_INP_LMTpp::add_element_at(), et le constructeur de ElementSet.
+   Pour en ajouter, il faut le faire dans la méthode MatchElement_INP_LMTpp.add_element_at(), et le constructeur de ElementSet.
 
     doc interne
     
@@ -132,7 +133,7 @@ bool jump( std::ifstream& is, std::string &next, const char* descripteur ) {
         map<string, Contact_Pair*> map_Conctact_Pair;
         map<string, Surface*> map_Surface;
         map<string, Boundary*> map_Boundary;
-
+        map<string, Transform*> map_Boundary;
 */
 template<class TM> 
 struct ReaderINP {
@@ -241,6 +242,10 @@ struct ReaderINP {
             if ( name == "Quad") {
                 permutation_if_jac_neg ( Quad(), vnlocal.ptr() );
                 return mesh.add_element( Quad(),DefaultBehavior(), vnlocal.ptr() );
+            }
+            if ( name == "Tetra_10") {
+                permutation_if_jac_neg ( Tetra_10(), vnlocal.ptr() );
+                return mesh.add_element( Tetra_10(),DefaultBehavior(), vnlocal.ptr() );
             }
             if ( name == "Bar")
                 return mesh.add_element( Bar(),DefaultBehavior(), vnlocal.ptr() );
@@ -360,18 +365,105 @@ struct ReaderINP {
         * une liste d'indices toute simple soit, 
         * une liste de triplets d'entiers  start, end, step qui signifie que le Elset contient tous les indices de la forme start + i * step où i parcourt les entiers positifs ou nul tout en vérifiant start + i * step <= end ( attention le end est toujours compris pour un step égal à un ).    
     */
-    template<class T = unsigned>
+    template<class _TI, class _TDATA>
     struct ClusterList {
+        typedef _TI TI;
+        typedef _TDATA TDATA;
+        
         struct iterator {
-            unsigned i, h;
+            TI i, h;
+            const ClusterList *p;
+            unsigned index_data;
+            
+            iterator( const ClusterList* pa = NULL ) : i( 0 ), h( 0 ), p( pa ), index_data( 0 ) {}
+            
+            void operator++() {            
+                if ( p->isGenerate ) {
+                    TI id = p->ci[ 3 * i ] + ( h + 1 ) * p->ci[ 3 * i + 2 ];
+                    if ( id <= p->ci[ 3 * i + 1 ] )
+                        ++h;
+                    else {
+                        ++i; h = 0;
+                    }
+                } else {
+                    ++i;
+                }
+                index_data++;
+            }
+            
+            TI operator*() const {
+                if ( p->isGenerate )
+                    return p->ci[ 3 * i ] + h * p->ci[ 3 * i + 2 ];  
+                else
+                    return p->ci[ i ];            
+            }
+            
+            bool operator!=( const iterator &it ) const {
+                return ( it.p != p ) or ( it.i != i ) or ( it.h != h );  
+            }
+            
+            void display() const {
+                std::cout << "p = " << p << " i = " << i << " h = " << h << std::endl;
+            }
+            
+            TDATA get_data() const { return p->data[ index_data ]; }
+            
+            void get_data( TDATA &d ) { d = p->data[ index_data ]; }
+        };
+        
+        iterator begin() const {
+            iterator iter( this );
+            iter.i = 0;
+            iter.h = 0; 
+            iter.index_data  = 0;
+            return iter;
+        }
+    
+        iterator end() const {
+            iterator iter( this );
+            if ( isGenerate )
+                iter.i = ci.size() / 3;
+                
+            else
+                iter.i = ci.size();
+            return iter;
+        }
+        
+        unsigned nb_elements() const {
+            unsigned sum = 0;
+            if ( isGenerate ) {
+                for( unsigned i = 0; i < ci.size(); i += 3 ) {
+                    sum += ( 1 + ci[ i + 1 ] - ci[ i ]) / ci[ i + 2 ];
+                }
+                return sum ; 
+            } else {
+                return ci.size();
+            }
+        }
+       
+        TDATA get_data() const { return data[ index ]; }
+        void get_data( TDATA &d ) { d = data[ index ]; }
+        
+        
+        bool isGenerate;
+        Vec<TI> ci;
+        Vec<TDATA> data;
+    };
+    
+    template<class _TI>
+    struct ClusterList<_TI, void> {
+        typedef _TI TI;
+        
+        struct iterator {
+            TI i, h;
             const ClusterList *p;
             
             iterator( const ClusterList* pa = NULL ) : i( 0 ), h( 0 ), p( pa ) {}
             
             void operator++() {            
                 if ( p->isGenerate ) {
-                    unsigned id = p->data[ 3 * i ] + ( h + 1 ) * p->data[ 3 * i + 2 ];
-                    if ( id <= p->data[ 3 * i + 1 ] )
+                    TI id = p->ci[ 3 * i ] + ( h + 1 ) * p->ci[ 3 * i + 2 ];
+                    if ( id <= p->ci[ 3 * i + 1 ] )
                         ++h;
                     else {
                         ++i; h = 0;
@@ -381,11 +473,11 @@ struct ReaderINP {
                 }
             }
             
-            unsigned operator*() const {
+            TI operator*() const {
                 if ( p->isGenerate )
-                    return p->data[ 3 * i ] + h * p->data[ 3 * i + 2 ];  
+                    return p->ci[ 3 * i ] + h * p->ci[ 3 * i + 2 ];  
                 else
-                    return p->data[ i ];            
+                    return p->ci[ i ];            
             }
             
             bool operator!=( const iterator &it ) const {
@@ -407,30 +499,31 @@ struct ReaderINP {
         iterator end() const {
             iterator iter( this );
             if ( isGenerate )
-                iter.i = data.size() / 3;
+                iter.i = ci.size() / 3;
                 
             else
-                iter.i = data.size();
+                iter.i = ci.size();
             return iter;
         }
         
         unsigned nb_elements() const {
             unsigned sum = 0;
             if ( isGenerate ) {
-                for( unsigned i = 0; i < data.size(); i += 3 ) {
-                    sum += ( 1 + data[ i + 1 ] - data[ i ]) / data[ i + 2 ];
+                for( unsigned i = 0; i < ci.size(); i += 3 ) {
+                    sum += ( 1 + ci[ i + 1 ] - ci[ i ]) / ci[ i + 2 ];
                 }
                 return sum ; 
             } else {
-                return data.size();
+                return ci.size();
             }
         }
         
         bool isGenerate;
-        Vec<T> data;
+        Vec<TI> ci;
     };
+    
 
-    struct NodeSet : public ClusterList<> {
+    struct NodeSet : public ClusterList<unsigned, void> {
         NodeSet() { this->isGenerate = false; withCoordinate = true;}
         NodeSet( const std::string& str ) {
             if ((str.find("GENERATE") != std::string::npos) or (str.find("generate") != std::string::npos))
@@ -459,7 +552,7 @@ struct ReaderINP {
                 }
                 
                 map_num_nodeInp[ number ] = node;
-                this->data.push_back( number );
+                this->ci.push_back( number );
             } else {
                 //PRINT("+++++++++++++++++++++++++++++++++++++++++++++++++++++++");
                 //std::cout << "<<<|" << str << "|>>>" << std::endl;
@@ -469,7 +562,7 @@ struct ReaderINP {
 //                     if ( iss.eof() )
 //                         break;
                     //PRINT( number );
-                    this->data.push_back( number );
+                    this->ci.push_back( number );
                 }
             }
         }
@@ -486,7 +579,7 @@ struct ReaderINP {
         bool withCoordinate;
     };
     
-    struct ElementSet : public ClusterList<> {
+    struct ElementSet : public ClusterList<unsigned, void> {
         ElementSet( const std::string& str ) {
             if ((str.find( "GENERATE" ) != std::string::npos) or (str.find( "generate" ) != std::string::npos))
                 this->isGenerate = true;
@@ -495,12 +588,13 @@ struct ReaderINP {
  
             type = value( str, "TYPE=", "type=" );
             /// ref : liste des éléments Abaqus http://muscadet.lmt.ens-cachan.fr:2080/v6.7/books/usb/default.htm
-            /// page : Output Variable and Element Indexes.Abaqus/Standard ElementSet Index
+            /// page : Output Variable and Element Indexes/Standard ElementSet Index
             if ( type.size() ) {
                 if ( type == "C3D8R"   ) { type = "Hexa"; nb_nodes = 8; return; }
                 if ( type == "C3D8I"   ) { type = "Hexa"; nb_nodes = 8; return; }
                 if ( type == "C3D8"    ) { type = "Hexa"; nb_nodes = 8; return; }
                 if ( type == "C3D4"    ) { type = "Tetra"; nb_nodes = 4; return; }
+                if ( type == "C3D10"   ) { type = "Tetra_10"; nb_nodes = 10; return; }
                 if ( type == "S3R"     ) { type = "Triangle"; nb_nodes = 3; return; }
                 if ( type == "S3"      ) { type = "Triangle"; nb_nodes = 3; return; }
                 if ( type == "S4R"     ) { type = "Quad"; nb_nodes = 4; return; }
@@ -535,7 +629,7 @@ struct ReaderINP {
 
             if ( type.size() ) {
                 s >> number;
-                this->data.push_back( number );
+                this->ci.push_back( number );
                 vninp.resize( nb_nodes );
                 for ( unsigned i = 0; i < nb_nodes; i++ ) {
                     s >> number2;
@@ -547,7 +641,7 @@ struct ReaderINP {
                 while( not( s.eof() ) ) {
                     s >> number;
                     //PRINT( number );
-                    this->data.push_back( number );
+                    this->ci.push_back( number );
                 }
             }
         }
@@ -564,17 +658,35 @@ struct ReaderINP {
         std::string type;
     };
     
-    struct Boundary : public ClusterList<> {
+    struct ConstraintBoundary {
+        typedef enum {
+            TYPE_CONSTRAINT_UNKNOWN = -1,
+            TYPE_CONSTRAINT_NORMAL  = 0,
+            TYPE_CONSTRAINT_SYMETRIC = 1,
+            TYPE_CONSTRAINT_ANTISYMETRIC = 2
+        } TYPE_CONSTRAINT_ID;
         
-        Boundary& operator=( const ClusterList<> &cl ) {
-            this->data = cl.data;
+        ConstraintBoundary() : value( 0 ) { 
+            is_constraint.set( false ); 
+            type.set( TYPE_CONSTRAINT_NORMAL );
+        }
+          
+        Vec<bool, 3> is_constraint;
+        Vec<TYPE_CONSTRAINT_ID, 3> type;
+        double value;
+    };
+    
+    struct Boundary : public ClusterList<unsigned, ConstraintBoundary> {
+        
+        Boundary& operator=( const ClusterList<unsigned, void> &cl ) {
+            this->ci = cl.ci;
             this->isGenerate = cl.isGenerate;
             return *this;      
         }
         
         void read( std::string& str ) {
             //PRINT( str );
-            if ( isalpha( str[ 0 ] ) ) {
+            if ( not( isdigit( str[ 0 ] ) ) ) {
                 if ( not( name_nodeset.size() ) ) {
                     size_t pos = str.find( ',' );
                     name_nodeset = str.substr( 0, pos );
@@ -586,7 +698,7 @@ struct ReaderINP {
             std::istringstream iss( str );
             unsigned number;
             iss >> number;
-            this->data.push_back( number );
+            this->ci.push_back( number );
         }
         
         void display() const {
@@ -688,6 +800,7 @@ struct ReaderINP {
     };    
     
     struct Material_property {
+        virtual ~Material_property() {}
         virtual void display() const {}
         virtual void setData( std::string& str ) {
             std::cerr << "WARNING ReaderINP : hum... you use Material_property::setData() " << std::endl;
@@ -759,7 +872,7 @@ struct ReaderINP {
             OPTION_COMMENTED     = 3
         } Option_material_ID;
         Material() { material_property = NULL; density = 0.;}
-        ~Material() { if ( material_property ) delete material_property ; }
+        ~Material() { delete material_property; }
         void display() { 
             std::cout << " density =" << density << std::endl;
             std::cout << " property = " << std::endl;
@@ -1040,22 +1153,22 @@ struct ReaderINP {
     }
     
     static Status_ID setStatus( const std::string& str ) {
-        if (str[1] == '*')                                                              { return STATUS_COMMENT; }/// c'est un commentaire
-        if ((str.find ("NODE PRINT",1) == 1))                                           { return STATUS_IGNORED; }
-        if ((str.find ("NODE OUTPUT",1) == 1))                                          { return STATUS_IGNORED; }
-        if ((str.find ("ELEMENT OUTPUT",1) == 1))                                       { return STATUS_IGNORED; }
-        if ((str.find ("NODE",1) == 1) or (str.find ("Node",1 ) == 1) )                 { return STATUS_NODE; }
-        if ((str.find ("ELEMENT",1) == 1) or (str.find ("Element",1) == 1))             { return STATUS_ELEMENT; }
-        if ((str.find ("NSET",1) == 1) or (str.find ("Nset",1) == 1))                   { return STATUS_NSET; }
-        if ((str.find ("ELSET",1) == 1)  or (str.find ("Elset",1) == 1))                { return STATUS_ELSET; }
-        if ((str.find ("ORIENTATION",1) == 1) or (str.find ("Orientation",1) == 1))     { return STATUS_ORIENTATION; }
-        if ((str.find ("SOLID SECTION",1) == 1) or (str.find ("Solid Section",1) == 1)) { return STATUS_SOLID_SECTION; }
-        if ((str.find ("MATERIAL",1) == 1) or (str.find ("Material",1) == 1))           { return STATUS_MATERIAL; }
-        if ((str.find ("STEP",1) == 1) or (str.find ("Step",1) == 1))                   { return STATUS_STEP; }
-        if ((str.find ("CONTACT PAIR",1) == 1) or (str.find ("Contact Pair",1) == 1))   { return STATUS_CONTACT_PAIR; }
-        if ((str.find ("SURFACE",1) == 1) or (str.find ("Surface",1) == 1))             { return STATUS_SURFACE; }
-        if ((str.find ("BOUNDARY",1) == 1) or (str.find ("Boundary",1) == 1))           { return STATUS_BOUNDARY; }
-        if ((str.find ("TRANSFORM",1) == 1) or (str.find ("Transform",1) == 1))         { return STATUS_TRANSFORM; }
+        if (str[1] == '*')                                                                 { return STATUS_COMMENT; }/// c'est un commentaire
+        if ((str.find ("NODE PRINT",1) == 1))                                              { return STATUS_IGNORED; }
+        if ((str.find ("NODE OUTPUT",1) == 1) or (str.find ("Node Output",1 ) == 1))       { return STATUS_IGNORED; }
+        if ((str.find ("ELEMENT OUTPUT",1) == 1) or (str.find ("Element Output",1 ) == 1)) { return STATUS_IGNORED; }
+        if ((str.find ("NODE",1) == 1) or (str.find ("Node",1 ) == 1) )                    { return STATUS_NODE; }
+        if ((str.find ("ELEMENT",1) == 1) or (str.find ("Element",1) == 1))                { return STATUS_ELEMENT; }
+        if ((str.find ("NSET",1) == 1) or (str.find ("Nset",1) == 1))                      { return STATUS_NSET; }
+        if ((str.find ("ELSET",1) == 1)  or (str.find ("Elset",1) == 1))                   { return STATUS_ELSET; }
+        if ((str.find ("ORIENTATION",1) == 1) or (str.find ("Orientation",1) == 1))        { return STATUS_ORIENTATION; }
+        if ((str.find ("SOLID SECTION",1) == 1) or (str.find ("Solid Section",1) == 1))    { return STATUS_SOLID_SECTION; }
+        if ((str.find ("MATERIAL",1) == 1) or (str.find ("Material",1) == 1))              { return STATUS_MATERIAL; }
+        if ((str.find ("STEP",1) == 1) or (str.find ("Step",1) == 1))                      { return STATUS_STEP; }
+        if ((str.find ("CONTACT PAIR",1) == 1) or (str.find ("Contact Pair",1) == 1))      { return STATUS_CONTACT_PAIR; }
+        if ((str.find ("SURFACE",1) == 1) or (str.find ("Surface",1) == 1))                { return STATUS_SURFACE; }
+        if ((str.find ("BOUNDARY",1) == 1) or (str.find ("Boundary",1) == 1))              { return STATUS_BOUNDARY; }
+        if ((str.find ("TRANSFORM",1) == 1) or (str.find ("Transform",1) == 1))            { return STATUS_TRANSFORM; }
         std::cerr << "WARNING ReaderINP : ignored option = " << value( str, "*", "*", ",\n") << std::endl;
         return STATUS_IGNORED; /// option non traitée
     }
@@ -1092,14 +1205,14 @@ struct ReaderINP {
                 /// Material et Contact Pair sont vus comme des conteneurs donc ils parsent eux-même le fichier et leur parseur rend la prochaine ligne à lire 
                 str.clear();
                 getline( is, str );
-                normalize_end_line( str );
                 if ( !is.good() )
                     break;
+                normalize_end_line( str );
+                //PRINT( ctxte );
             }
             /// évaluation du contexte
             if ( str.size() == 0 )
                 continue;
-            //std::cout << "--|" << str << "|--" << std::endl;
             if ( str[ 0 ] == '*' ) {
                 ctxte = setStatus( str );
                 switch( ctxte ) {
@@ -1121,7 +1234,19 @@ struct ReaderINP {
                                                 //pcp->display();
                                                 break;
                     case STATUS_SURFACE       : ps = map_Surface[ value( str, "NAME=", "Name=" ) ] = new Surface( str ); break;
-                    case STATUS_BOUNDARY      : pb = map_Boundary[ lastComment ] = new Boundary(); break;
+                    case STATUS_BOUNDARY      : 
+                                                { std::string nameBoundary;
+                                                  size_t p = lastComment.find( "Name" );
+                                                  if ( p != std::string::npos ) {
+                                                      size_t p2 = lastComment.find( 0x20, p + 6 );
+                                                      if ( p2 != std::string::npos )
+                                                          nameBoundary = lastComment.substr( p + 6, p2 - p );
+                                                      else
+                                                          nameBoundary = lastComment.substr( p + 6 );   
+                                                  } else 
+                                                      nameBoundary = lastComment;
+                                                  pb = map_Boundary[ nameBoundary ] = new Boundary(); 
+                                                } break;
                     case STATUS_TRANSFORM     : pt = map_Transform[ value( str, "NSET=", "nset=" ) ] = new Transform( str ); break;
                     case STATUS_IGNORED       : loop = jump( is, str, "*" ); /*std::cout << "line --|" << str << "|--" << std::endl;*/ break;  
                 }
