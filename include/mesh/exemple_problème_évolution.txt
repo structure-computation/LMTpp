@@ -1,0 +1,153 @@
+/*!
+\example Exemple de problème d'évolution, l'équation de la chaleur
+
+    = Introduction
+    
+        Dans cet exemple, on montrera comment résoudre l'équation de la chaleur dans une plaque rectangulaire avec une source de chaleur variant dans le temps et avec une condition de Dirichlet sur tous les bords.
+        le code est télechargeable [[include/mesh/exemple_probleme_thermique_temporel.tar.gz|ici]] .
+        
+        
+    = Définition de la formulation
+    
+        on commence par créer un fichier Python nommé formulation_difftherm_normalise.py contenant la formulation faible du problème. Nous rappelons qu'il existe de nombreuses formulations dans le répertoire LMTpp/formulation. Nous avons préféré créer la notre qui est très simple.
+        \code Python
+            # -*- coding: utf-8 -*-
+            temperature = Variable( unknown=True, nb_der=1, default_value='0.0', unit='K' )
+            Q = Variable( default_value='0.0', unit='K/s' )
+            
+            left_time_integration  = 0
+            right_time_integration = 1
+            
+            
+            #
+            def formulation():
+            t,te = temperature.expr, temperature.test
+            
+            return ( dot( grad(t), grad(te) ) + ( t.diff(time) - Q.expr ) * te ) * dV
+
+        Vous aurez probablement reconnu l'éqation de la chaleur 
+        \latex
+            $$
+            x       
+            $$
+        sous sa formulation faible :
+        \latex 
+            $$
+            x
+            $$
+
+        Le point important est de mettre <strong> nb_der </strong> au moins égal à 1 car c'est une équation de degré 1 en temps.
+        
+        Ensuite on donne le contenu du fichier SConstruct :
+        \code Python
+            from LMT import *
+            
+            env = Environment(
+                CPPPATH = [ '#LMT/include', "/usr/include/qt4", "/usr/include/qt4/QtGui", "/usr/include/qt4/QtCore" ],
+                LIBS = [ 'pthread', 'QtCore','QtGui', 'fftw3', 'cholmod' ],
+                CPPFLAGS = cppflags( ['xml2-config'] ) + " -O3 -ffast-math",
+                LINKFLAGS = linkflags( ['xml2-config'] ) ,
+                AS = 'yasm -f Elf32 -g Dwarf2'
+            )
+            make_dep_py(env)
+            
+            env.BuildDir( 'build/LMT', 'LMT/include', duplicate=0 )
+            libs = SConscript( 'LMT/include/SConscript', exports='env', build_dir='build/LMT' )
+            
+            # --------------------------------------------------------------------------------------------------
+            
+            pb_libs = make_pb(
+                env,
+                0,
+                name = 'thermique_temporel',
+                formulations = ['difftherm_normalise'],
+                elements = [ 'Triangle', 'Quad' ],
+                dep_py = 1,
+                #use_asm = True,
+                #options = { 'behavior_simplification' : 'plane strain' },
+            )
+            
+            env.Program( "main", ["main.cpp"] + pb_libs + libs, build_dir='build/LMT' )
+
+        La liste des formulations, <strong> formulations </strong> contient que le nom de notre formulation <strong> difftherm_normalise </strong> .
+        Et le nom du problème sera <strong> Problem_thermique_temporel </strong> .
+        
+        
+
+
+    = Calcul approché de la solution par éléments finis
+    
+        Donnons le code :
+        \code C/C++ 
+            #include "build/problem_thermique_temporel/problem.h"
+            #include "mesh/make_rect.h"
+            
+            using namespace LMT;
+            
+            template< class T, class POS>
+            T bulle( POS p, POS p_maxi ) {
+                return (T) p[ 0 ] * p[ 1 ] * ( p_maxi[ 0 ] - p[ 0 ] ) * ( p_maxi[ 1 ] - p[ 1 ] ); 
+            }
+            
+            int main(int argc, const char* argv[ ] ) {
+                typedef double T;
+                static const unsigned dim = 2;
+                
+                typedef Problem_thermique_temporel< T, dim > PB;
+                typedef PB::TM TM;
+                typedef TM::Pvec Pvec;
+            
+                T step_time = 1e-3;
+                Pvec pos_maxi( 4, 1 );
+                unsigned nb_pas_temps = 2000;
+                unsigned k_elem = 10;
+            
+            
+                
+                TM m;
+                make_rect( m, Triangle(), 0, pos_maxi, k_elem * ( pos_maxi + 1 ) );
+                
+                PB pb( m, true );
+            
+                for(unsigned i = 0; i < m.node_list.size(); ++i ) {
+                    if ( ( m.node_list[ i ].pos[ 0 ] < 1e-6 )  or 
+                        ( m.node_list[ i ].pos[ 0 ] > pos_maxi[ 0 ] - 1e-6 ) or 
+                        ( m.node_list[ i ].pos[ 1 ] < 1e-6 ) or 
+                        ( m.node_list[ i ].pos[ 1 ] > pos_maxi[ 1 ] - 1e-6 ) ) {
+                        pb.formulation_difftherm_normalise->add_constraint( "node_list[" + to_string(i) + "].temperature", 1e5 );
+                    } else {
+                        m.node_list[ i ].temperature = bulle<T>( m.node_list[ i ].pos, pos_maxi );
+                    }
+                }
+                
+                pb.formulation_difftherm_normalise->set_initial_time_step( step_time );
+                pb.formulation_difftherm_normalise->assume_constant_matrix = true;
+                pb.formulation_difftherm_normalise->non_linear_iterative_criterium = 0.01; 
+                
+                DisplayParaview dp;
+                dp.add_mesh( m, "tmp/res", Vec<std::string>("all"), 0 );
+                
+                for( unsigned j = 0; j < nb_pas_temps; ++j ) {
+                    pb.formulation_difftherm_normalise->solve();
+                    dp.add_mesh( m, "tmp/res", Vec<std::string>("all"), j + 1 );
+                    for(unsigned i = 0; i < m.node_list.size(); ++i ) {
+                        T t = j * step_time;
+                        m.node_list[ i ].Q = 5e2 * ( 0.15 + sin( 30 * t * m.node_list[ i ].pos[0] / pos_maxi[0] ) ) * ( 0.15 + sin( 10* t * m.node_list[ i ].pos[1] / pos_maxi[1] ) ) * bulle<T>( m.node_list[ i ].pos, pos_maxi );
+                    }
+                }
+            
+                dp.exec();
+                
+                return 0;
+            }  
+       
+       
+       
+
+    \relates Comment résoudre un problème éléments finis de façon générale
+    \relates Exemple de formulation
+    \keyword Equation d'évolution
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+*/
+

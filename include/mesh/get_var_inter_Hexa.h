@@ -76,13 +76,15 @@ bool get_var_inter_experimental(const Hexa &elem,const PosNodes &pos_nodes,const
     
 
     }
-    if (solve_quasi_linear_polynomial_system_3X( coeff_poly, sol_poly, tolerance ) )
+    PRINT( coeff_poly[ 0 ] ); PRINT( coeff_poly[ 1 ] ); PRINT( coeff_poly[ 2 ] );
+    if ( solve_quasi_linear_polynomial_system_3X( coeff_poly, sol_poly, tolerance ) ) {
+        PRINT( sol_poly );
         for( unsigned i=0; i< sol_poly.size(); ++i) 
             if ( var_inter_is_inside( Hexa(), sol_poly[i], tolerance ) ) {
                 var_inter += sol_poly[i];
                 return true;
             }
-
+    }
     {
 
     T R_0 = pos_nodes[6][1]; T R_1 = pos_nodes[2][1]; T R_2 = (-1.0)*R_1; T R_3 = pos_nodes[7][1];
@@ -1504,17 +1506,17 @@ bool get_var_inter_experimental(const Hexa &elem,const PosNodes &pos_nodes,const
             R_118 = R_34+R_118; coeff_resultant_U[0] = R_118; 
 
         }
-    //PRINT( i_pivot );
-    //PRINT( coeff_resultant_U );
-    //std::cout << scientific << " coeff_resultant_U  " << std::endl;
-    //std::cout << setprecision(16) << " coeff_resultant_U  " << std::endl;
-    //for( unsigned i=0; i < coeff_resultant_U.size(); ++i ) std::cout << "(" << coeff_resultant_U[i] << ") * U**" << i << " + " ;
-    //std::cout << std::endl;
+    PRINT( i_pivot );
+    PRINT( coeff_resultant_U );
+    std::cout << scientific << " coeff_resultant_U  " << std::endl;
+    std::cout << setprecision(16) << " coeff_resultant_U  " << std::endl;
+    for( unsigned i=0; i < coeff_resultant_U.size(); ++i ) std::cout << "(" << coeff_resultant_U[i] << ") * U**" << i << " + " ;
+    std::cout << std::endl;
     sol_U = Pol<8,1,T>(coeff_resultant_U).real_roots( /*1e-2*/ /*ldexp( std::numeric_limits<T>::epsilon() , 5 )*/ );
-    //PRINT( sol_U );
-    //Vec< std::complex<T> > croot;
-    //croot = Pol<8,1,T>(coeff_resultant_U).roots();
-    //PRINT( croot );
+    PRINT( sol_U );
+    Vec< std::complex<T> > croot;
+    croot = Pol<8,1,T>(coeff_resultant_U).roots();
+    PRINT( croot );
     for( unsigned i=0; i < sol_U.size(); ++i ) {
         U = sol_U[i];
         if ((U >= -0.01) and (U <= 1.01)) {

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-temperature = Variable( unknown=True, nb_der=0, default_value='0.0', unit='K' )
+temperature = Variable( unknown=True, nb_der=1, default_value='0.0', unit='K' )
 Q = Variable( default_value='0.0', unit='K/s' )
 Qs = Variable( interpolation='nodal', default_value='0.0', unit='K/s' )
 

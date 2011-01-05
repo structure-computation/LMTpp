@@ -69,7 +69,7 @@ Vec<complex<T> > root_of_second_degree_equation(complex<T> a1, complex<T> a2, T 
 
 /*!
     provisoire.
-    retourne les racines de l'éqation x^2+a_1 x + a_2 = 0 où a1 et a2 sont des nombres complexes.
+    retourne les racines de l'éqation x^2+a_1 x + a_2 = 0 où a1 et a2 sont des nombres réels.
  */
 template <class T>
 Vec<complex<T> > root_of_second_degree_equation( T a1, T a2, T tolerance = 16*std::numeric_limits<T>::epsilon()) {
@@ -1099,7 +1099,7 @@ class Pol {
         return (c+e)/2;
     }
 
-    T newton(const T &d, bool& notFound, int imax = 100) const{
+    T newton(const T &d, bool& notFound, int imax = 100) const {
         assert(nx==1);
         T a=d;
         T b=d-1;
@@ -1235,7 +1235,7 @@ class Pol {
     void update_degrees() {
         assert(nx==1);
         int taille = degree; /** VERSION ORIGINALE : int taille = dim ??? */; 
-        while ((abs(coefs[taille])<16*numeric_limits<T>::epsilon()) and (taille>=0))
+        while ( ( taille >= 0 ) and ( abs( coefs[ taille ] ) < 16 * numeric_limits<T>::epsilon() ) )
             taille--;
         degrees[0] = taille;
         /** TODO : les opérations + - += -= *  etc / peuvent modifier le degré  */   
@@ -1385,12 +1385,12 @@ class Pol {
             T p = b - std::pow(a,2)/3.;
             T q = std::pow(a,3)/13.5 - a*b/3 + c;
             T delta = 4.*std::pow(p,T(3))+27.*std::pow(q,T(2));
-            if (delta>=0) {
+            if ( delta >= 0 ) {
                 T u=(-13.5*q+sqrt(6.75*delta));
                 T v=(-13.5*q-sqrt(6.75*delta));
                 res.push_back((sgn(u)*std::pow(std::abs(u),T(1)/T(3))+sgn(v)*std::pow(std::abs(v),T(1)/T(3))-a)/3.);
             }
-            if (delta<0) {
+            if ( delta < 0 ) {
                 C j( -0.5, sqrt( 3. )/2. );
                 C v( -13.5 * q, sqrt( -6.75 * delta ) );
                 C u = std::pow( v, T(1) / T(3) );
@@ -1400,7 +1400,7 @@ class Pol {
                 sort( res );
             }
         }
-        else if (taille ==5) { /// degré = 4
+        else if ( taille == 5 ) { /// degré = 4
             Vec<C> solutions_complexes = roots();
             T racine;
             bool notFound;
@@ -1416,17 +1416,21 @@ class Pol {
             } else {
             //if (coefs[0]!=0) {
                 Vec<C> solutions_complexes = roots();
-                T racine;
+                //PRINT( solutions_complexes );
+                for( int i = 0; i < solutions_complexes.size(); ++i )
+                    if ( is_real( solutions_complexes[i], tolerance ) )
+                        res.push_back( solutions_complexes[i].real() );
+/*                T racine;
                 bool notFound;
-                for( int i=0;i<solutions_complexes.size();++i)
-                    if ( is_real( solutions_complexes[i], tolerance )) {
+                for( int i = 0; i < solutions_complexes.size(); ++i )
+                    if ( is_real( solutions_complexes[i], tolerance ) ) {
                         racine = newton( solutions_complexes[i].real(), notFound );
-                        //PRINT( notFound );
-                        if (notFound)
-                            res.push_back( solutions_complexes[i].real());
+                        PRINT( notFound ); PRINT( racine );
+                        if ( notFound )
+                            res.push_back( solutions_complexes[i].real() );
                         else
                             res.push_back( racine );
-                    }     
+                    } */    
             /*if (abs(coefs[0]) > 16*numeric_limits<T>::epsilon()) {
                 Vec<Pol<nd,nx,T> > Sturm(*this,derivative());
                 while (Sturm[Sturm.size()-1].coefficients().size()>1)

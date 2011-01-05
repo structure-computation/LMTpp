@@ -153,7 +153,7 @@ public:
             umfpack_di_free_numeric( &Numeric );
     }
     #endif
-    ///
+    /// met à zéro tous les éléments de la matrice
     void clear() { Ax.set( 0.0 ); }
 
     ///
@@ -169,6 +169,8 @@ public:
         umfpack_di_free_symbolic(&Symbolic);
         return true;
     }
+    
+    /// elle libère la mémoire.
     bool free_factorization() {
         if ( Numeric ){
              umfpack_di_free_numeric (&Numeric) ;
