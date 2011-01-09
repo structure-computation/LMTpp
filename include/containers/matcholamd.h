@@ -123,6 +123,7 @@ public:
     }
     ///
     void free() {
+        free_data();
     }
     ///
     ~Mat() {

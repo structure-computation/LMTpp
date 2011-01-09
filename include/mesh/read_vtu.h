@@ -59,17 +59,52 @@ struct SetFieldByName {
     //     template<class T>
     //     void operator()(unsigned num,const char *name,T &val) const {
     //     }
+
     template<class T,int s>
-    void operator()(unsigned num,const char *name,Vec<T,s> &val) {
-        if ( name == field_name )
-            for( int i =0; i< s; ++i)
-                val[i] = T(data[index_elt*nb_comp+i]);
+    void operator()( unsigned num, const char *name, Vec<T,s> &val ) {
+        if ( name == field_name ) {
+            //std::cout << "======== vecteur a " << nb_comp << " composantes et s = "<< s << std::endl;
+            for( int i = 0; i < s; ++i)
+                val[ i ] = T( data[ index_elt * nb_comp + i ] );
+        }
     }
+    
     template<class T>
-    void operator()(unsigned num,const char *name,T &val) {
-            if (name == field_name)
-                val = T(data[index_elt]); /// nb_comp == 1
+    void operator()( unsigned num, const char *name, T &val ) {
+        if ( name == field_name ) {
+            //std::cout << "======== scalaire a " << nb_comp << " composantes"<< std::endl;
+            val = T( data[ index_elt ] ); /// nb_comp == 1
+        }
     }
+   
+//     template<class T, class Structure, class O, class OP>
+//     void operator()( unsigned num, const char *name, Mat<T, Structure, O, OP > &val ) {
+//         PRINT( name ); PRINT( nb_comp );
+//         operator() ( num, name, val.data );
+//     }
+
+    template<class T,int s >
+    void operator()( unsigned num, const char *name, Mat<T, Sym<s>, Dense<Col> > &val ) {
+        if ( name == field_name ) {
+            for( int j = 0; j < val.nb_cols(); ++j ) {
+                for( int i = 0; i <= j; ++i ) {
+                    val( i, j ) = T( data[ index_elt * nb_comp + ( j * ( j + 1 ) ) / 2 + i ] );
+                }
+            }
+        }
+    }
+     
+    template<class T, int sr, int sc>
+    void operator()( unsigned num,const char *name, Mat<T, Gen<sr, sc>, Dense<Col> > &val ) {
+        if ( name == field_name ) {
+           for( int i = 0; i < val.nb_rows(); ++i) {
+                for( int j = 0; j < val.nb_cols(); ++j) {
+                    val( i, j ) = T( data[ index_elt * nb_comp + i * val.nb_cols() + j ] );
+                }
+            }
+        }
+    }
+    
     unsigned index_elt;
     std::string field_name;
     int nb_comp;
@@ -294,7 +329,7 @@ struct DataArray {
     }
     
     /*!
-        ATTENTION : nb_val est le nombre de valeurs à extraire. Si les données sont au format ascii, il est facultatif. Par contre il est obligatoire pour les format binary et append. 
+        ATTENTION : nb_val est le nombre de valeurs à extraire. Si les données sont au format ascii, il est facultatif. Par contre il est obligatoire pour les formats binary et append. 
     */
     template <class T>
     bool extract_content(Vec<T>& v,  unsigned nb_val=0 ) {
@@ -308,7 +343,7 @@ struct DataArray {
             std::cerr << " warning : types of VTK file and mesh are different. VTK.type = " << type << " and GetVtkType<T>::res() = " << GetVtkType<T>::res() << ". Extraction may be has failures." << std::endl;
         }
         if (format == 0) {
-            std::cerr << " unknow format : failure to extract datas of " << name << std::endl;
+            std::cerr << " error: unknow format : failure to extract datas of " << name << std::endl;
             return false;
         } else if (format == 1) { /// format ascii
                     std::istringstream is( content );
@@ -340,7 +375,7 @@ struct DataArray {
                     v.push_back( d );
                 }
             }
-        } else if (format == 3) { /// format "tas"
+        } else if (format == 3) { /// format "tas" ou "append"
             if ((ptr_append == NULL) or (ptr_offsets == NULL)) {
                 std::cerr << " error : ptr_append == NULL or ptr_offsets == NULL " << std::endl;
                 return false;   
@@ -352,41 +387,37 @@ struct DataArray {
             }   
             nb_decoded = decode( *ptr_append, offset, len , exdata );
             if ( nb_decoded < 8) {
-                std::cerr << " error : problem to decode. number of decoded bytes = " << nb_decoded << std::endl;
+                std::cerr << " error : problem to decode. Number of decoded bytes = " << nb_decoded << std::endl;
                 return false;              
             }
             /// i suppose that it's on litteleEndian
             memcpy((void*) &size_encoded, (const void*) (exdata.c_str()), 4 );
-            /// heuristique
-            delay = 4;
-//             if (size_encoded <= nb_decoded + 4 ) 
-//                 delay = 4;
-//             else 
-//                 delay = 8;
-    
+            //PRINT( size_encoded );
+            delay = 4;   
             size_encoded = size_val * nb_val + delay;
-            //PRINT( nb_decoded ); PRINT( size_encoded );
-            if ((size_val) and (nb_decoded >= size_encoded)) {
+            //PRINT( nb_decoded ); PRINT( size_encoded ); PRINT( size_val ); PRINT( nb_val );
+            if ( ( size_val ) and ( nb_decoded >= size_encoded ) ) {
                 T d;
                     /**
                         Pourquoi delay ?
                         Les premiers octets décodés contiennent la taille en octet des données encodés. Seulement suivant le type de système d'exploitation ou CPU, cette taille peut être codée sur 4 ou 8 octets.
                         Comment savoir sur quelque système le fichier a-t-il été généré ?
                     */
-                for (int i= delay; i< size_encoded; i += size_val ) { 
+                for ( int i = delay; i < size_encoded; i += size_val ) { 
                     memcpy((void*) &d, (const void*) (exdata.c_str()+i), size_val );
-                        //PRINT( d ) ;
+                    //PRINT( d );
                     v.push_back( d );
                 }
             }
         } else 
-            std::cerr << " unknow format : failure to extract datas of " << name << std::endl;
+            std::cerr << "error : unknow format; failure to extract datas of " << name << std::endl;
             
         if (v.size() == nb_val)
             return true;
         else
             return false;
     }    
+    
     void print( std::ostream& os ) const {
         os << " name = " << name << " type = " << type << " format = " << format << " numberOfComponents = " << numberOfComponents << " offset = " << offset << " content = ||]" << content << "[||";   
 
@@ -468,6 +499,8 @@ void extract_DataArray( std::map< std::string, DataArray > & v, const XmlNode& x
     Exemple de code :
     \code C/C++
         read_vtu( m, "essai_0_0.vtu" );
+        
+    WARNING : elle ne marche que pour les champs scalaires ou vectoriels donc pas les matrices symétriques et autres structures plus complexes.
         
     \keyword Maillage/Lecture
     \friend raphael.pasquier@lmt.ens-cachan.fr
@@ -582,21 +615,23 @@ void read_vtu(TM &m, const char* filename ) {
     
     /// assignation des attributs des noeuds du maillage
     for ( it = pointdatas.begin(); it != pointdatas.end(); ++it) {
-        //PRINT( it->first ); std::cout << "---------------" << std::endl;
+        //std::cout << "---------------" << std::endl;
+        //PRINT( it->first ); PRINT( it->second.numberOfComponents );
         SetFieldByName<float> setfield_float( it->first, it->second.numberOfComponents );
         SetFieldByName<double> setfield_double ( it->first, it->second.numberOfComponents );
-        unsigned taille_data = nb_nodes*it->second.numberOfComponents;
+        unsigned taille_data = nb_nodes * it->second.numberOfComponents;
         //PRINT( taille_data );
         //PRINT( m.node_list.size() ); PRINT( setfield.data.size() ); PRINT( setfield.nb_comp ); PRINT( setfield.data );
         if (it->second.type == "Float32") {
             it->second.extract_content( setfield_float.data, taille_data );
-            for( unsigned i=0; i< m.node_list.size(); ++i ) {
+            for( unsigned i = 0; i< m.node_list.size(); ++i ) {
                 setfield_float.index_elt = i;
                 DM::apply_with_names( m.node_list[i], setfield_float );
             }
         } else {
             it->second.extract_content( setfield_double.data, taille_data );
-            for( unsigned i=0; i< m.node_list.size(); ++i ) {
+            //PRINT( setfield_double.data );
+            for( unsigned i = 0; i < m.node_list.size(); ++i ) {
                 setfield_double.index_elt = i;
                 DM::apply_with_names( m.node_list[i], setfield_double );
             }
