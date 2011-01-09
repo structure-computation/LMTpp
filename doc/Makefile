@@ -1,6 +1,6 @@
 all:
 	#cd ../include/codegen; scons
-	cd src; make -j4
+	cd src; make -j1
 	cd ..; doc/src/main . c++ doc
 
 clean:
