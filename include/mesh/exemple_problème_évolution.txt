@@ -28,15 +28,22 @@
         Vous aurez probablement reconnu l'éqation de la chaleur 
         \latex
             $$
-            x       
+            \frac{\partial T}{\partial t} - \Delta T  = Q     
             $$
         sous sa formulation faible :
         \latex 
             $$
-            x
+            \int_{\Omega} \overrightarrow{\nabla}(T) \cdot \overrightarrow{\nabla}(v) + \int_{\Omega} \frac{\partial T}{\partial t} \, v \, dx  = \int_{\Omega} Q \, v \, dx \;\;\;\;\; \forall v \in H^1_0(\Omega)             
             $$
 
-        Le point important est de mettre <strong> nb_der </strong> au moins égal à 1 car c'est une équation de degré 1 en temps.
+        Le point <strong> important </strong> est de mettre <strong> nb_der </strong> au moins égal à 1 car c'est une équation de degré 1 en temps.
+
+        Remarque : la condition aux limites
+        \latex
+            $$
+            u(x, t ) = 0  \;\; sur   \;\;   ( x, t )  \in \partial Omega \times [ 0; T ]  
+            $$
+        apparaîtra dans le code C++.
         
         Ensuite on donne le contenu du fichier SConstruct :
         \code Python
@@ -114,6 +121,7 @@
                         ( m.node_list[ i ].pos[ 0 ] > pos_maxi[ 0 ] - 1e-6 ) or 
                         ( m.node_list[ i ].pos[ 1 ] < 1e-6 ) or 
                         ( m.node_list[ i ].pos[ 1 ] > pos_maxi[ 1 ] - 1e-6 ) ) {
+                        m.node_list[ i ].temperature = 0;
                         pb.formulation_difftherm_normalise->add_constraint( "node_list[" + to_string(i) + "].temperature", 1e5 );
                     } else {
                         m.node_list[ i ].temperature = bulle<T>( m.node_list[ i ].pos, pos_maxi );
@@ -141,7 +149,21 @@
                 return 0;
             }  
        
-       
+       Ce code a pour ojectif de résoudre l'équation de la chaleur sur le rectangle [0;4]x[0;1] avec condition de Dirichlet ( i.e. l'inconnue est nulle sur le bord ) et source de chaleur variable en espace et en temps. On peut imposer des contraintes différentes aux bords, constantes ou variables en espace. Il faut <strong> ABSOLUMENT </strong> que la température initiale vérifie ces contraintes.
+        
+       * Le premier <strong> #include </strong> incorpore toutes les définitions créées par les précédents fichiers Python.
+       * Le deuxième contient la fonction \a make_rect () qui sert à faire des maillages de rectangles ou de pavés.
+       * Le premier <strong> typedef </strong> définit un synonyme du type C++ de notre problème.
+       * Le deuxième crée un synonyme du type de maillage de notre problème ( i.e. un maillage 2D de \a Triangle ou de \a Quad ).
+       * Le dernier fournit un synonyme du type vecteur pour repérer un point ( i.e. Vec< double, 2 > pour un point du plan ).
+       * on définit ensuite la fonction <strong> bulle() </strong> qui s'annule sur le bord de [0;p_maxi[0]] x [0;p_maxi[1]].
+       * Puis on déclare quelques varaibles step_time, pos_maxi, nb_pas_temps, et k_elem. pos_maxi contient les dimensions du rectangle et k_elem est un coefficient multiplicateur pour faire varier le nombre de \a Triangle pour chaque dimension.
+       * On déclare puis on crée un maillage m et un problème pb qui contiendra nos contraintes.
+       * La boucle <strong> for </strong> qui vient sert à préciser les contraintes aux bords et la température initiale.
+       * Après on initialise des paramètres pour la résolution du poblème.
+       * Puis on déclare un objet de type \a DisplayParaview pour stocker les différents champs dans des fichiers .vtu de paraview. On commence d'ailleurs par ajouter un premier maillage qui contient notre température initiale.
+       * La deuxième boucle <strong> for </strong> fait farier le temps et à chaque pas on résout le problème et on modifie la valeur de la source de chaleur. Bien sûr on n'oublie pas d'enregistrer le résultat dans dp.
+       * Enfin on lance dp.exec() pour exécuter paraview sur notre liste de maillages.
        
 
     \relates Comment résoudre un problème éléments finis de façon générale
