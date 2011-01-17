@@ -8,8 +8,8 @@
  
 namespace LMT {
     
-inline unsigned ind_2( unsigned i) { unsigned t = i*(i+1); return t/2; } 
-inline unsigned ind_3( unsigned i) { unsigned t = i*(i+1)*(i+2); return t/6; } 
+inline unsigned ind_2( unsigned i ) { unsigned t = i*(i+1); return t/2; } 
+inline unsigned ind_3( unsigned i ) { unsigned t = i*(i+1)*(i+2); return t/6; } 
 
 void display_poly_2X( unsigned N );    
     

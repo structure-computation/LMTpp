@@ -956,7 +956,7 @@ struct ReaderINP {
             
             getline( is, str ); /// lecture des deux surfaces écrits sous la forme nom1, nom2
             normalize_end_line( str );
-            char *pchar = strpbrk( str.c_str(), "," );
+            const char *pchar = strpbrk( str.c_str(), "," );
             int i;
             if ( pchar ) i = pchar - str.c_str(); else i = str.size();
             s_surface_1 = str.substr( 0, i );

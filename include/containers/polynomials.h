@@ -207,7 +207,7 @@ complex<T> laguerre( const Vec<T,s>& a, int m, complex<T>& x0, bool& rootFound, 
     m est donc le degré.
     Si tout ce passe bien, la fonction renvoie zéro avec les racines dans root sinon elle renvoie une valeur non nul et la liste root vide.
     
-    Rem : la valeur non nulle est le retour de la fonction DGEEV de LaPack sauf sans le cas où la valeur absolue du terme dominant est inférieure à l'epsilon du type T. 
+    Rem : la valeur non nulle est le retour de la fonction DGEEV de LaPack sauf le cas où la valeur absolue du terme dominant est inférieure à l'epsilon du type T. 
 */
 template <class T, int s>
 int ret_roots_by_companion_matrix( const Vec<T,s>& a, int m, Vec< complex<T> >& root) {
