@@ -1,6 +1,7 @@
 #ifndef READ_AVS_H
 #define READ_AVS_H
 
+#include "mesh/mesh.h"
 #include "mesh/hexa.h"
 #include "mesh/triangle_6.h"
 #include "mesh/tetra.h"
