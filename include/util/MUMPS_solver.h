@@ -8,7 +8,7 @@
 using namespace LMT;
 
 /*!
-    Cette classe encapsule la décomposition LDL? d'une matrice symétrique ou la décomposition LU d'une matrice carré quelconque à l'aide de la librairie [http://graal.ens-lyon.fr/MUMPS/|mumps] .
+    Cette classe encapsule la décomposition LDL? d'une matrice symétrique ou la décomposition LU d'une matrice carré quelconque à l'aide de la librairie [[http://graal.ens-lyon.fr/MUMPS/|mumps]] .
     On l'utilise comme \a LDL_solver :
     \code C/C++
         Mat< double, Sym<>, SparseLine<> > A;
@@ -19,14 +19,14 @@ using namespace LMT;
         mumps.get_factorization( A ); // on effectue la factorisation et le résultat est stocké dans mumps
         
         /// résolution de l'équation A x = b1 
-        ldl.solve( b1 ); /// b1 contient maintenant la solution
+        mumps.solve( b1 ); /// b1 contient maintenant la solution
         
-        ldl.solve( b2 ); /// b2 contient maintenant la solution
+        mumps.solve( b2 ); /// b2 contient maintenant la solution
          
     Pour la seconde résolution, on a bien-sûr réutilisé la factorisation. 
         
     Pour se servir de cette classe, le plus délicat est la compilation et surtout l'édition des liens.
-    Si vous avez installé la librairie mumps avec un paquet (ce qui est recommandé ) et si vous utilisez [http://www.open-mpi.org/|openmpi] comme implémentation de MPI, votre fichier SConstruct sera par exemple : 
+    Si vous avez installé la librairie mumps avec un paquet (ce qui est recommandé ) et si vous utilisez [[http://www.open-mpi.org/|openmpi]] comme implémentation de MPI, votre fichier SConstruct sera par exemple : 
     
     \code Python
         from LMT import *
@@ -48,7 +48,7 @@ using namespace LMT;
     Vérifiez vos chemins openmpi : /usr/lib/openmpi/include et /usr/lib/openmpi/lib/libmpi_cxx.so
     et que vous avez bien les librairies /usr/lib/libdmumps.so et /usr/lib/libmumps_common.so
     
-    Remarque : pour l'instant la classe ne gère pas le calcul sur plusieurs noeuds.
+    REMARQUE : pour l'instant la classe ne gère pas le calcul sur plusieurs noeuds.
         
     
     \friend raphael.pasquier@lmt.ens-cachan.fr

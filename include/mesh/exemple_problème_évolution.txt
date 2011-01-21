@@ -41,7 +41,7 @@
         Remarque : la condition aux limites
         \latex
             $$
-            u(x, t ) = 0  \;\; sur   \;\;   ( x, t )  \in \partial Omega \times [ 0; T ]  
+            u(x, t ) = 0  \;\; sur   \;\;   ( x, t )  \in \partial \Omega \times [ 0; T ]  
             $$
         apparaîtra dans le code C++.
         
