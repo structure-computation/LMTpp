@@ -4,6 +4,12 @@
 #include <assert.h>
 #include <map>
 #include <limits>
+#include <iostream>
+
+#include <mesh/hexa.h>
+#include <mesh/tetra.h>
+#include <mesh/tetra_10.h>
+
 
 namespace LMT {
 
@@ -133,7 +139,7 @@ bool jump( std::ifstream& is, std::string &next, const char* descripteur ) {
         map<string, Contact_Pair*> map_Conctact_Pair;
         map<string, Surface*> map_Surface;
         map<string, Boundary*> map_Boundary;
-        map<string, Transform*> map_Boundary;
+        map<string, Transform*> map_Transform;
 */
 template<class TM> 
 struct ReaderINP {

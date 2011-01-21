@@ -136,7 +136,7 @@ int load_image( std::string file, Mat &m, int ceil_size = 1, int border_size = 0
 //     system(s2.str().c_str());
 // }
 
-/** @see display_image */
+/*! @see display_image */
 template<class T>
 struct EchelleCouleurExemple {
     Vec<T,3> operator()( T grey ) const {
