@@ -365,6 +365,13 @@ T var_inter_insideness( const Tetra &e, const TV &var_inter ) {
     return min( min( min( var_inter[0], var_inter[1] ), var_inter[2] ), 1 - var_inter[0] - var_inter[1] - var_inter[2] );
 }
 
+// template<class PosNodes, class Pvec>
+// bool is_inside_linear( const Tetra &elem, const PosNodes &pos_nodes, const Pvec &pos ) {
+//     // return true; /// TODO
+//     
+//     get_var_inter_linear( elem, pos_nodes, pos, var_inter);
+// }
+
 };
 
 

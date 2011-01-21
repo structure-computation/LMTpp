@@ -190,7 +190,7 @@ public:
     ScalarType max_diag;
     Vec<unsigned> id;/// indice pour les variables
 
-    virtual void *get_mesh() = 0; /// recupere le maillage associee a une formulation (mais pas avec le bin type)
+    virtual void *get_mesh() = 0; /// recupere le maillage associee a une formulation (mais pas avec le bon type)
 };
 
 }

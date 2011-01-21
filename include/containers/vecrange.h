@@ -53,7 +53,7 @@ private:
 /*!
 \generic_comment static_range
 
-    Cette fonction renvoie un vecteur dont les indices varient dans un intervalle suivant un pas constant (éventuellement différent de 1). Contrairement à  range la taille est fixée à la compilation.
+    Cette fonction renvoie un vecteur dont les indices varient dans un intervalle suivant un pas constant (éventuellement différent de 1). Contrairement à range la taille est fixée à la compilation.
     Exemple typique :
     \code C/C++
         Vec<int,10> v = static_range(10) ; // v contient 0, 1, 2, ..., 9

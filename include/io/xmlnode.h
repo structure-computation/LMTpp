@@ -15,11 +15,7 @@ public:
     bool has_attribute( const char *t ) const { return false; }
     template<class T> void get_attribute( const char *t, T &val ) const;
 };
-
-#else
-// WITH XML
-
-
+#else // -> WITH XML
 
 #include <sstream>
 #include <libxml/tree.h>

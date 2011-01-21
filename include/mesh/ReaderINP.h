@@ -4,6 +4,13 @@
 #include <assert.h>
 #include <map>
 #include <limits>
+#include <iostream>
+#include <stdexecpt>
+
+#include <mesh/hexa.h>
+#include <mesh/tetra.h>
+#include <mesh/tetra_10.h>
+
 
 namespace LMT {
 
@@ -94,6 +101,15 @@ bool jump( std::ifstream& is, std::string &next, const char* descripteur ) {
 }
 
 /*!
+    Objectif :
+        récupèrer le maximum d'information d'un fichier INP ( ABAQUS ).
+         
+    Utilisation :
+        \code C/C++
+            TM mesh;
+            ReaderINP<TM> readerINP( mesh, "file.inp" );
+            display_mesh( mesh );
+
 
     Actuellement le lecteur INP ne connaît que les types : 
         C3D8R   <=> Hexa
@@ -133,7 +149,7 @@ bool jump( std::ifstream& is, std::string &next, const char* descripteur ) {
         map<string, Contact_Pair*> map_Conctact_Pair;
         map<string, Surface*> map_Surface;
         map<string, Boundary*> map_Boundary;
-        map<string, Transform*> map_Boundary;
+        map<string, Transform*> map_Transform;
 */
 template<class TM> 
 struct ReaderINP {
@@ -956,7 +972,7 @@ struct ReaderINP {
             
             getline( is, str ); /// lecture des deux surfaces écrits sous la forme nom1, nom2
             normalize_end_line( str );
-            char *pchar = strpbrk( str.c_str(), "," );
+            const char *pchar = strpbrk( str.c_str(), "," );
             int i;
             if ( pchar ) i = pchar - str.c_str(); else i = str.size();
             s_surface_1 = str.substr( 0, i );
