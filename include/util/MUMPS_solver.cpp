@@ -17,10 +17,10 @@ MUMPS_solver::MUMPS_solver() {
 
 MUMPS_solver::~MUMPS_solver() {
     if ( MPI_is_initialized ) {
-        ierr = MPI_Finalize();
-        //std::cerr << "MPI_Finalize() = " << ierr << std::endl;
         id.job = job_end;
         dmumps_c( &id ); /** Terminate instance */
+        ierr = MPI_Finalize();
+        //std::cerr << "MPI_Finalize() = " << ierr << std::endl;
     }
 }
 

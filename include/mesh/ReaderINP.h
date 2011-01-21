@@ -5,6 +5,7 @@
 #include <map>
 #include <limits>
 #include <iostream>
+#include <stdexecpt>
 
 #include <mesh/hexa.h>
 #include <mesh/tetra.h>
@@ -100,6 +101,15 @@ bool jump( std::ifstream& is, std::string &next, const char* descripteur ) {
 }
 
 /*!
+    Objectif :
+        récupèrer le maximum d'information d'un fichier INP ( ABAQUS ).
+         
+    Utilisation :
+        \code C/C++
+            TM mesh;
+            ReaderINP<TM> readerINP( mesh, "file.inp" );
+            display_mesh( mesh );
+
 
     Actuellement le lecteur INP ne connaît que les types : 
         C3D8R   <=> Hexa
