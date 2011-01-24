@@ -1,7 +1,9 @@
 #ifndef LMTPP_MUMPS_SOLVER_H
 #define LMTPP_MUMPS_SOLVER_H
 
+#ifdef WITH_MUMPS
 #include "dmumps_c.h"
+#endif
 
 #include "containers/mat.h"
 
@@ -69,6 +71,7 @@ struct MUMPS_solver {
     /// ...
     template<class TM> 
     void get_factorization( const TM &mat ) { assert(0); /*! TODO */ }
+    #ifdef WITH_MUMPS
     /// ...
     template<int s>
     void solve( Vec<double, s> &b ) {
@@ -80,11 +83,13 @@ struct MUMPS_solver {
             dmumps_c( &id );
         }
     }
-
+    #endif
     void free();
 
     /// attributs:
+    #ifdef WITH_MUMPS
     DMUMPS_STRUC_C id;
+    #endif
     int myid, ierr; /// MPI
     bool MPI_is_initialized;
 
@@ -98,6 +103,7 @@ struct MUMPS_solver {
     
     template<class STR>
     void load_matrix( const Mat<double, STR, SparseLine<> > &mat ) {
+        #ifdef WITH_MUMPS
         id.n = mat.nb_rows();
         for( int i = 0; i < mat.nb_rows(); ++i )
             id.nz += mat.data[ i ].indices.size();
@@ -111,6 +117,7 @@ struct MUMPS_solver {
                 id.a[ index ] = mat.data[ i ].data[ j ];
             }    
         }
+        #endif
     }    
 
     static const int job_init = -1;
