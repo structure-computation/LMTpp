@@ -7,7 +7,7 @@
 #include<vector>
 #include<string>
 
-using namespace std ;
+using namespace std;
 
 //#include "visitorcommentitem_is_extuge.h"
 
@@ -24,58 +24,54 @@ using namespace std ;
 #include "target.h"
 #include "token.h"
 
-OpGet_listKeyword :: ~OpGet_listKeyword() {
-/*
-    int i,n ;
+OpGet_listKeyword::~OpGet_listKeyword() { }
 
-    n = list_keyword.size() ;
-    for(i=0;i<n;i++)
-        delete list_keyword[i] ;
-*/
-}
+void OpGet_listKeyword::operator()( PageComment* page ) {
 
-void OpGet_listKeyword :: operator()( PageComment* page ) {
-
-    VisitorCommentItem_getKeyword_of_ExTuGe visi ;
-    VisitorBloc_getListKeyword viso ;
-    int i,n,j,m,t,S ;
+    VisitorCommentItem_getKeyword_of_ExTuGe visi;
+    VisitorBloc_getListKeyword viso;
+    int i,n,j,m,t,S;
 
     ///  on parcourt tous les commentaires à la recherche de keyword dans les exemples, les tutoriels et les commentaires génériques
 
-    n = page->listComment.size() ;
-    for(i=0;i<n;i++) {
-        m = page->listComment[i]->items.size() ;
-        for(j=0;j<m;j++) {
-            visi.init() ;
-            page->listComment[i]->items[j]->execute_function( &visi ) ;
+    n = page->listComment.size();
+    for( i = 0; i < n ; i++ ) {
+        m = page->listComment[i]->items.size();
+        for( j = 0; j < m; j++ ) {
+            visi.init();
+            page->listComment[i]->items[j]->execute_function( &visi );
 
-            if (visi.isExtuge >0) {
-                S = visi.listNameKeyword.size() ;
-                for(t=0;t<S;t++) {
-                    switch(visi.isExtuge) {
-                            case 1 : // exemple
-                                    list_keyword[visi.listNameKeyword[t]].list_example.push_back( page->listComment[i]->items[j] ) ;
-                                    break ;
-                            case 2 : // tutoriel
-                                    list_keyword[visi.listNameKeyword[t]].list_tutorial.push_back( page->listComment[i]->items[j] ) ;
-                                    break ;
-                            case 3 : // commentaire générique
-                                    ///list_keyword[visi.listNameKeyword[t]].list_generic_comment.push_back( page->listComment[i]->items[j] ) ;
+            if ( visi.isExtuge > 0 ) {
+                S = visi.listNameKeyword.size();
+                for( t = 0; t < S; t++ ) {
+                    switch( visi.isExtuge ) {
+                            case 1 : /// exemple
+                                    list_keyword[visi.listNameKeyword[t]].list_example.push_back( page->listComment[i]->items[j] );
+                                    break;
+                            case 2 : /// tutoriel
+                                    list_keyword[visi.listNameKeyword[t]].list_tutorial.push_back( page->listComment[i]->items[j] );
+                                    break;
+                            case 3 : /// commentaire générique
+                                    //list_keyword[visi.listNameKeyword[t]].list_generic_comment.push_back( page->listComment[i]->items[j] );
                                     if (page->listComment[i]->items[j]->ancestor != NULL) {
                                         if (page->listComment[i]->items[j]->ancestor->of_class_or_struct())
-                                            list_keyword[visi.listNameKeyword[t]].list_class_struct.push_back( page->listComment[i]->items[j] ) ;
+                                            list_keyword[visi.listNameKeyword[t]].list_class_struct.push_back( page->listComment[i]->items[j] );
                                         if (page->listComment[i]->items[j]->ancestor->of_function())
-                                            list_keyword[visi.listNameKeyword[t]].list_function.push_back( page->listComment[i]->items[j] ) ;
+                                            list_keyword[visi.listNameKeyword[t]].list_function.push_back( page->listComment[i]->items[j] );
                                         if (page->listComment[i]->items[j]->ancestor->of_example())
-                                            list_keyword[visi.listNameKeyword[t]].list_example.push_back( page->listComment[i]->items[j] ) ;
+                                            list_keyword[visi.listNameKeyword[t]].list_example.push_back( page->listComment[i]->items[j] );
                                         if (page->listComment[i]->items[j]->ancestor->of_tutorial())
-                                            list_keyword[visi.listNameKeyword[t]].list_tutorial.push_back( page->listComment[i]->items[j] ) ;
+                                            list_keyword[visi.listNameKeyword[t]].list_tutorial.push_back( page->listComment[i]->items[j] );
                                     } else {
-                                        cerr << "<><><><><> ATTENTION : ancestor == NULL !" << endl ;
-                                        cerr << *(page->listComment[i]->items[j]) << endl ;
-                                        cerr << "<><><><><>" << endl ;
+                                        cerr << "<><><><><> ATTENTION : ancestor == NULL !" << endl;
+                                        cerr << *(page->listComment[i]->items[j]) << endl;
+                                        cerr << "<><><><><>" << endl;
                                     }
-                                    break ;
+                                    break;
+                            case 4 : /// webpage
+                                list_keyword[visi.listNameKeyword[t]].list_webpage.push_back( page->listComment[i]->items[j] );
+                                break;
+                            default : cerr << "<><><><><> ATTENTION : visi.isExtuge = " << visi.isExtuge << endl;
                     }
                 }
             }
@@ -84,18 +80,18 @@ void OpGet_listKeyword :: operator()( PageComment* page ) {
 
 
     /// Ensuite on cherche les mot-clés dans les commentaires de classes, et de fonctions en excluant les commentaires génériques.
-    n = page->code.list_subType_function.size() ;
+    n = page->code.list_subType_function.size();
     for(i=0;i<n;i++) {
-        viso.init() ;
-        page->code.list_subType_function[i]->exec( &viso ) ;
+        viso.init();
+        page->code.list_subType_function[i]->exec( &viso );
         
-        m = viso.listkeyword_of_class_struct.size() ;
+        m = viso.listkeyword_of_class_struct.size();
         for(j=0;j<m;j++) {
-            list_keyword[viso.listkeyword_of_class_struct[j]].list_class_struct.push_back( page->code.list_subType_function[i] ) ;
+            list_keyword[viso.listkeyword_of_class_struct[j]].list_class_struct.push_back( page->code.list_subType_function[i] );
         }
-        m = viso.listkeyword_of_function.size() ;
+        m = viso.listkeyword_of_function.size();
         for(j=0;j<m;j++) {
-            list_keyword[viso.listkeyword_of_function[j]].list_function.push_back( page->code.list_subType_function[i] ) ;
+            list_keyword[viso.listkeyword_of_function[j]].list_function.push_back( page->code.list_subType_function[i] );
         }
     }
 

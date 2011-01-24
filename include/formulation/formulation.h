@@ -1718,7 +1718,7 @@ public:
         apply( m->elem_list, UpdateVarElem(), *this, vectors_);
         carac.set_global_unknowns(m,*this,vectors_,*indice_glob);
     }
-    /**
+    /*!
      * update variable at time t_n + partial_ts
      */
     virtual void update_variables(ScalarType partial_ts) {
@@ -1727,7 +1727,7 @@ public:
         apply( m->elem_list, UpdateVarElem(), *this, partial_ts );
         carac.set_global_unknowns(m,*this,vectors,*indice_glob,partial_ts);
     }
-    /**
+    /*!
      * fill vectors[x] using dern_unknown
      */
     virtual void get_initial_conditions() {
@@ -1746,7 +1746,7 @@ public:
         carac.get_global_initial_conditions(m,*this,vectors_,*indice_glob);
         initial_condition_initialized = true;
     }
-    /**
+    /*!
      * add a constraint which will be added to system during assembly
      * @param txt constraint in analytic form. Example : "node[0].temperature + time**2 - 10"
      * @param penalty_value constraint will be * by max(abs(diag))*penalty_value

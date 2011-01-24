@@ -9,8 +9,8 @@ using namespace std ;
 
 
 
-void CommentItem :: display( std::ostream &os ) {
+void CommentItem::display( std::ostream &os ) {
 
- os << " zut!" << endl ;
+    os << " zut!" << endl;
 }
 

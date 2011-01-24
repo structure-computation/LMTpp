@@ -1,0 +1,10 @@
+/*!
+\webpage integration_en_temps Remarques sur l'intégration en temps sur la plate-forme
+
+    
+    \keyword Remarque/Intégration en temps
+
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+
+*/

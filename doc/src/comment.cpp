@@ -83,7 +83,7 @@ Comment::~Comment() {
 void Comment::add_tutorial_example_genericComment_webpage_image( ListTarget* ptr_lt  ) {
 
     int n,i;
-    VisitorCommentItem_listTarget visi( ptr_lt ) ;
+    VisitorCommentItem_listTarget visi( ptr_lt );
 
     n = items.size();
     for(i=0;i<n;i++)

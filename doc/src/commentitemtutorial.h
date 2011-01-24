@@ -21,7 +21,7 @@ struct CommentItemTutorial : public CommentItem /*, public Target*/ {
     //void addTabulation_String( int t,string& s ) ;
     virtual ~CommentItemTutorial() ;
 
-    // méthode virtuelle de target
+    /// méthode virtuelle de target
     virtual bool of_tutorial() { return true; }
 
     //string reference ;
