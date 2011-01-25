@@ -70,7 +70,7 @@ struct MUMPS_solver {
 
     /// ...
     template<class TM> 
-    void get_factorization( const TM &mat ) { assert(0); /*! TODO */ }
+    void get_factorization( const TM &mat, bool want_free = true ) { assert(0); /*! TODO */ }
     #ifdef WITH_MUMPS
     /// ...
     template<int s>
