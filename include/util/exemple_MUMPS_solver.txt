@@ -1,7 +1,7 @@
 /*!
 \example Exemple d'utilisation de la classe MUMPS_solver
 
-    La classe \a MUMPs_solver est une interface de la librairie [[http://graal.ens-lyon.fr/MUMPS/|mumps]] qui permet de résoudre des systèmes linéaires creux ( symmétrique ou non ) avec raffinement et calcul du résidu, sur un ou plusieurs noeuds. Elle peut aussi calculer le complément de Shur d'une sous-matrice, et le noyau dans le cas d'une matrice non inversible.
+    La classe \a MUMPS_solver est une interface de la librairie [[http://graal.ens-lyon.fr/MUMPS/|mumps]] qui permet de résoudre des systèmes linéaires creux ( symmétrique ou non ) avec raffinement et calcul du résidu, sur un ou plusieurs noeuds. Elle peut aussi calculer le complément de Shur d'une sous-matrice, et le noyau dans le cas d'une matrice non inversible.
     
     Pour cet exemple, on résoudra un simple problème d'évolution en temps, l'équation de la chaleur sur une plaque rectangulaire, avec ce solveur MUMPS. On impose des condistions de Dirichlet sur tous les côtés et on introduit une source de chaleur variable dans l'espce et le temps pour augmenter les variations de la température.
     La partie spécifique au solver est documenté dans le code à l'intérieur de la boucle for "temporelle".
@@ -157,13 +157,15 @@
         
         env.Program( "main", ["main.cpp"] + pb_libs + libs + [ "/usr/lib/openmpi/lib/libmpi_cxx.so" ] , build_dir='build/LMT' ) 
          
-     Et d'un fichier Makefile
-     \code 
+    Et d'un fichier Makefile
+    \code 
         all: codegen
             scons
             ./main
         codegen:
             cd LMT/include/codegen; scons
+            
+    \relates MUMPS_solver
             
     \keyword Mathématiques/Algèbre linéaire/Décomposition de matrices
     
