@@ -1,0 +1,66 @@
+import "ConstitutiveLaw.met"
+
+class PlastEndo inherits ConstitutiveLaw
+    # E_0 ~= Parameter[ unit = "pressure", temperature_dependance = #~PieceWiseLinear( 5  )~# ]
+    # E_c ~= Parameter[ unit = "pressure", temperature_dependance = #~PieceWiseLinear( 5 )~# ]
+    E       := Parameter( unit = "pressure" )
+    nu      := Parameter()
+    sigma_Y := Parameter( unit = "pressure" )
+    R_inf   := Parameter( unit = "pressure" )
+    b       := Parameter()
+    C_1     := Parameter( unit = "pressure" )
+    gamma_1 := Parameter()
+    dilat   := Parameter( unit = "temperature^-1" )
+    T_ref   := Parameter( unit = "temperature" )
+    S       := Parameter( unit = "energy^-1" )
+    s       := Parameter()
+    C_cal   := Parameter( unit = "" )
+    T_cal   := Parameter( unit = "temperature" )
+    density := Parameter( unit = "mass/volume" )
+    w_D     := Parameter( unit = "energy" )
+
+    epsilon_p, -sigma := Var( nb_dim = [3,3], sym = true, max = 1e4 `MPa` )
+    r, R              := Var()
+    alpha_1, X        := Var( nb_dim = [3,3], sym = true )
+    D, -Y             := Var( nb_dim = [3,3], sym = true, min = 0, max = 1 )
+
+    epsilon_e     := AuxVar( nb_dim = [3,3], sym = true )
+    epsilon_theta := AuxVar( nb_dim = [3,3], sym = true )
+    p_cum         := AuxVar( min = 0 )
+    sigma_tild    := AuxVar( nb_dim = [3,3], sym = true )
+    w_s           := AuxVar( unit = "energy" )
+    w_max         := AuxVar( unit = "energy" )
+
+    def helmholtz
+        K := E / ( 1 - 2 * nu )
+        helmholtz_1 := 1 / 2 * hooke_iso( E, nu ) : ( epsilon - epsilon_p ) : 
+            ( epsilon - epsilon_p )
+        helmholtz_2 := 3 * K * dilat * ( temperature - T_ref ) * tr( epsilon - epsilon_p )
+        helmholtz_3 := integration( R_inf * ( 1 - exp( - b * r ) ), r )
+        helmholtz_4 := 1 / 3 * C_1 * alpha_1 : alpha_1
+        helmholtz_5 := density * C_cal / 2 / T_cal * ( temperature - T_ref ) ^ 2 # pour thermo-méca
+        
+        return helmholtz_1 + helmholtz_2 + helmholtz_3 + helmholtz_4 + helmholtz_5
+    
+    def fluxes
+        f := von_mises( sigma_tild - X ) - R - sigma_Y
+        
+        FX_1 := 3 * gamma_1 * X : X / ( 4 * C_1 )
+        FD := ( S / ( s + 1 ) / ( 1 - D ) * ( Y / S ) ^ ( s + 1 ) ) * heaviside( w_s - w_D )
+        F := f + FX_1 + FD
+        
+        return Flux( yield = f, dissipation_potential = F )
+        
+    def aux_post
+        helmholtz_3 := integration( R_inf * ( 1 - exp( - b * r ) ), r )
+        helmholtz_4 := 1 / 3 * C_1 * alpha_1 : alpha_1
+        return [
+            epsilon_e = epsilon - epsilon_p
+            epsilon_theta = dilat * ( temperature - T_ref ) * Id
+            p_cum.diff(time) = sqrt( 2 / 3 * epsilon_p.diff(time) : epsilon_p.diff(time) )
+            w_s.diff(time) = helmholtz_3 + helmholtz_4
+            w_max = max( w_max, w_s )
+        ]
+
+make_test_const_law( PlastEndo() )
+# make_abaqus_umat( "abaqus/umat_test", PlastEndo() )

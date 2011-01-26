@@ -1,0 +1,442 @@
+
+## @see ConstitutiveLaw ##
+class ConstitutiveLaw_V_Obj_Ancestor
+    behavior_law := InternalVariable()
+    name := ""
+    tex_name := ""
+    
+    def init( behavior_law, name, tex_name, time_symbol )
+        self.behavior_law.init_using_var( behavior_law )
+        self.name.init( name )
+        self.tex_name.init( tex_name )
+        self.init_val( name, tex_name, time_symbol )
+    
+    def subs( from, to ) pertinence 20
+        return data.subs( from, to )
+
+## @see ConstitutiveLaw ##
+class ConstitutiveLaw_V_Obj[ nb_dim, nb_der, sym ] when nb_dim.size == 0 inherits ConstitutiveLaw_V_Obj_Ancestor
+    data := Op()
+    der_data := Vec[ Op, nb_der+1 ]()
+    
+    def init_val( name, tex_name, time_symbol )
+        der_data[0].init( symbol( name, tex_name ) )
+        for d in 1 .. nb_der+1
+            der_data[d].init( symbol( name+"_der_"+d, "\\"+"d"*d+"ot{$tex_name}" ) )
+        #
+        data.init( der_data[0] )
+        for d in 1 .. nb_der+1
+            data += der_data[d] * pow( time_symbol, d )
+    
+    def symbols_for_der( n )
+        return [ der_data[n] ]
+    
+    def get_nb_values
+        return 1
+    
+    def subs( a, b ) pertinence 10
+        res := Op()
+        for d in 0 .. nb_der+1
+            res += der_data[d].subs( a, b ) * pow( time_symbol, d )
+        return res
+
+## @see ConstitutiveLaw ##
+class ConstitutiveLaw_V_Obj[ nb_dim, nb_der, sym ] inherits ConstitutiveLaw_V_Obj_Ancestor
+    static const TE := Tensor[Op,nb_dim]
+    data := TE()
+    der_data := Vec[ TE, nb_der+1 ]()
+    
+    def init_val( name, tex_name, time_symbol )
+        der_data.init()
+        der_data[0].init()
+        for ind, v in der_data[0]
+            if sym==false or ind[0]>=ind[1]
+                v.init( symbol( name+"[$(join(ind,","))]", "{$tex_name}_{$(join(ind," "))}" ) )
+        if sym
+            for ind, v in der_data[0]
+                if ind[0]<ind[1]
+                    v.init( der_data[0][ind[1],ind[0]] )
+        
+        for d in 1 .. nb_der+1
+            der_data[d].init()
+            for ind, v in der_data[d]
+                if sym==false or ind[0]>=ind[1]
+                    v.init( symbol( name+"_der_$d[$(join(ind,","))]", "\\"+"d"*d+"ot{{$tex_name}_{$(join(ind," "))}}" ) )
+            if sym
+                for ind, v in der_data[d]
+                    if ind[0]<ind[1]
+                        v.init( der_data[d][ind[1],ind[0]] )
+        #
+        data.init( der_data[0] )
+        for d in 1 .. nb_der+1
+            data += der_data[d] * pow( time_symbol, d )
+    
+    def symbols_for_der( n )
+        if sym
+            res := Vec[Op]()
+            for r in 0 .. nb_dim[0]
+                for c in 0 .. r+1
+                    res.push_back( der_data[n][r,c] )
+            return res
+        return der_data[n].values
+
+    def get_nb_values
+        return data.values.size
+
+## @see ConstitutiveLaw ##
+class ConstitutiveLaw_Parameter[ unit, nb_dim = [], tex_name = "", sym = false ]
+    property is_a_ConstitutiveLaw_Parameter, is_a_ConstitutiveLaw_var
+
+    val := ConstitutiveLaw_V_Obj[ nb_dim, 0, sym ]()
+    
+    def init( behavior_law, name, time_symbol )
+        val.init( behavior_law, name, tex_name + name * ( tex_name.size == 0 ), time_symbol )
+        
+    def conversion_to( op ) when op.type == Op
+        op.init( val.data )
+
+    def write_to_stream( stream )
+        stream << val.data
+        
+    def diff( t )
+        return val.data.diff( t )
+    
+    def symbols_for_der( n )
+        return val.symbols_for_der( n )
+    
+    def subs( a, b )
+        return val.subs( a, b )
+
+##  ##
+class ConstitutiveLaw_Variable[ unit, nb_dim = [], tex_name = "", nb_der = 0, precision = 1e-6, sym = false ]
+    property is_a_ConstitutiveLaw_Variable, is_a_ConstitutiveLaw_var
+    
+    val := ConstitutiveLaw_V_Obj[ nb_dim, nb_der, sym ]()
+    
+    def init( behavior_law, name, time_symbol )
+        val.init( behavior_law, name, tex_name + name * ( tex_name.size == 0 ), time_symbol )
+        
+    def diff( t )
+        return val.data.diff( t )
+    
+    def symbols_for_der( n )
+        return val.symbols_for_der( n )
+    
+    def get_precision_vec
+        return VecCst[ precision ]( size = val.nb_values )
+    
+    def subs( a, b ) pertinence 10
+        return val.subs( a, b )
+        
+def add( a, b ) when a.is_a_ConstitutiveLaw_var pertinence 21 return a.val.data + b
+def add( a, b ) when b.is_a_ConstitutiveLaw_var pertinence 20 return a + b.val.data
+def sub( a, b ) when a.is_a_ConstitutiveLaw_var pertinence 21 return a.val.data - b
+def sub( a, b ) when b.is_a_ConstitutiveLaw_var pertinence 20 return a - b.val.data
+def mul( a, b ) when a.is_a_ConstitutiveLaw_var pertinence 21 return a.val.data * b
+def mul( a, b ) when b.is_a_ConstitutiveLaw_var pertinence 20 return a * b.val.data
+def div( a, b ) when a.is_a_ConstitutiveLaw_var pertinence 21 return a.val.data / b
+def div( a, b ) when b.is_a_ConstitutiveLaw_var pertinence 20 return a / b.val.data
+def pow( a, b ) when a.is_a_ConstitutiveLaw_var pertinence 21 return a.val.data ** b
+def pow( a, b ) when b.is_a_ConstitutiveLaw_var pertinence 20 return a ** b.val.data
+def doubledot( a, b ) when a.is_a_ConstitutiveLaw_var pertinence 21 return a.val.data : b
+def doubledot( a, b ) when b.is_a_ConstitutiveLaw_var pertinence 20 return a : b.val.data
+
+class ConstitutiveLaw_VariableRelation
+    eqs := Vec[Op]()
+    yield := Op()
+    want_min := false
+    def init( eqs, yield = 1 )
+        self.eqs.init()
+        self.yield.init( yield )
+        if eqs.tensor_order
+            self.want_min.init( false )
+            for e in eqs
+                if e.tensor_order > 0
+                    for es in e.values
+                        self.eqs.push_back( es )
+                else
+                    self.eqs.push_back( e )
+        else
+            self.want_min.init( true )
+            self.eqs.push_back( eqs )
+
+##
+    Base class used to define behavior laws
+##
+class ConstitutiveLaw
+    static const Parameter := ConstitutiveLaw_Parameter
+    static const Variable := ConstitutiveLaw_Variable
+    static const VR := ConstitutiveLaw_VariableRelation
+    static const mat_sym_to_vec_indices := [ (0,0,0), (1,1,1), (2,2,2), (0,1,3), (0,2,4), (1,2,5) ]
+    
+    parameters := VarArgs()
+    variables  := VarArgs()
+    
+    time             := Op()
+    time_step        := Op()
+    free_ener        := Op()
+    epsilon_beg      ~= Tensor[ Op, [3,3] ]
+    epsilon_diff_t   ~= Tensor[ Op, [3,3] ]
+    epsilon          ~= Tensor[ Op, [3,3] ]
+    sigma            ~= Tensor[ Op, [3,3] ]
+    Id               ~= Tensor[ Op, [3,3] ]
+    sigma_symbols    ~= Vec[ Op ]
+    yield            := Op()
+    
+    def init
+        init_variables_and_parameters()
+
+    def destroy
+        for p in parameters  p.destroy()
+        for v in variables   v.destroy()
+        
+    def init_variables_and_parameters
+        Id.init( function = x => (x[0]==x[1]) )
+
+        # parameters and variables
+        parameters.init()
+        variables.init()
+        time.init( symbol("time","\\tau") )
+        time_step.init( symbol("time_step","\\Delta\\tau") )
+        yield.init( 0 )
+        for name, val in AttributeExplorer( self )
+            if val.is_a_ConstitutiveLaw_Parameter
+                val.init( self, name, time )
+                parameters.push_unnamed( val )
+            if val.is_a_ConstitutiveLaw_Variable
+                val.init( self, name, time )
+                variables.push_unnamed( val )
+                
+        # generic symbols
+        epsilon_beg.init()
+        epsilon_diff_t.init()
+        sigma.init()
+        sigma_symbols.init()
+        for i, j, c in mat_sym_to_vec_indices
+            epsilon_beg[i,j].init( symbol( "epsilon_beg[$i,$j]", "\\varepsilon_{$i $j}" ) )
+            epsilon_diff_t[i,j].init( symbol( "epsilon_diff_t[$i,$j]", "\\dot{\\varepsilon}_{$i $j}" ) )
+            ss := symbol( "sigma[$i,$j]", "\\sigma_{$i $j}" )
+            sigma[i,j].init( 0 )
+            sigma[i,j].init( ss )
+            sigma_symbols.push_back( ss )
+            if i != j
+                epsilon_beg[j,i].init( epsilon_beg[i,j] )
+                epsilon_diff_t[j,i].init( epsilon_diff_t[i,j] )
+                sigma[j,i].init( sigma[i,j] )
+        epsilon.init( epsilon_beg + time * epsilon_diff_t )
+        
+    def get_attr( str )
+        for v in variables
+            if v.force == str
+                return v.val_f
+        assert( 0, "There's no symbol named $str in current behavior law." )
+  
+    def sigma_val pertinence 0
+        return 0
+    
+    def sigma_rel pertinence 0
+        return 0
+
+    def sigma_hooke_iso( eps, young, poisson )
+        return young / ( 1 + poisson ) * ( eps + poisson / ( 1 - 2 * poisson ) * trace(eps) * Id )
+
+    def epsilon_hooke_iso( sig, young, poisson )
+        return ( ( 1 + poisson ) * sig - poisson * trace(sig) * Id ) / young
+        
+    def hooke_iso( E, nu )
+        e := Tensor[ Op, [3,3] ]( function = x => symbol("e_{$x}") )
+        s := sigma_hooke_iso( e, E, nu )
+        # -> sigma.diff( epsilon )
+        H := Tensor[ Op, [3,3,3,3] ]( function = x => 0 )
+        for ind_s, val_s in s
+            for ind_e, val_e in e
+                H[ ind_s +++ ind_e ] = val_s.diff(val_e)
+        return H
+    
+    def variable_relations pertinence -1
+        return []
+        
+    
+
+##
+    bl must be a ConstitutiveLaw
+##
+def write_abaqus_umat( f, bl, explicit = false )
+    # Property list
+    f <<< "// Properties"
+    cpt := 0
+    for p in bl.parameters
+        for s in p.symbols_for_der(0)
+            f <<< "// props[$(cpt++)] => $s"
+    f <<< ""
+    
+    # Variable list
+    f <<< "// Variables"
+    cpt = 0
+    for p in bl.variables
+        for s in p.symbols_for_der(0)
+            f <<< "// statev[$(cpt++)] => $s"
+        
+    # umat function
+    f <<< "
+#include <math.h>
+#include <stdio.h>
+
+typedef long int integer;
+typedef double doublereal;
+typedef short ftnlen;
+static double heaviside( double a ) { return a >= 0; }
+static double rsqrt( double a ) { return 1 / sqrt( a ); }
+static double eqz( double a ) { return a == 0; }
+
+extern \"C\" int umat_(doublereal *stress, doublereal *statev, doublereal *ddsdde, doublereal *sse, doublereal *spd,
+                     doublereal *scd, doublereal *rpl, doublereal *ddsddt,
+                     doublereal *drplde, doublereal *drpldt, doublereal *stran, doublereal *dstran,
+                     doublereal *time, doublereal *dtime, doublereal *temp, doublereal *dtemp, doublereal *predef, 
+                     doublereal *dpred, char *cmname, integer *ndi, integer *nshr, integer *ntens, integer *nstatv,
+                     doublereal *props, integer *nprops, doublereal *coords, doublereal *drot,
+                     doublereal *pnewdt, doublereal *celent, doublereal *dfgrd0, doublereal *dfgrd1, integer *noel,
+                     integer *npt, integer *layer, integer *kspt, integer *kstep, integer *kinc, 
+                     ftnlen cmname_len ) {"
+    
+    # ----------------
+    # SUBSTITUTION LISTS FOR ABAQUS SYMBOLS
+    ind := bl.mat_sym_to_vec_indices
+    abaqus_beg_time  := symbol("(*time)")
+    abaqus_time_step := symbol("(*dtime)")
+    dstran_symbols := Vec[Op]()
+    #
+    bl_to_umat_symbols := Map[Op,Op]()
+    umat_var_to_umat_var_at_beg := Map[Op,Op]()
+    
+    bl_to_umat_symbols[ bl.time_step ] = abaqus_time_step
+    for i, j, cpt in ind
+        # epsilon_beg
+        bl_to_umat_symbols[ bl.epsilon_beg[i,j] ] = symbol( "stran[$cpt]" ) / ( 1 + (i!=j) )
+        # 
+        ds := symbol( "dstran[$cpt]" )
+        dstran_symbols.push_back( ds )
+        # epsilon_diff_t
+        bl_to_umat_symbols[ bl.epsilon_diff_t[i,j] ] = ds / abaqus_time_step / ( 1 + (i!=j) ) 
+        
+    # props
+    cpt = 0
+    for p in bl.parameters
+        for s in p.symbols_for_der( 0 )
+            bl_to_umat_symbols[ s ] = symbol("props[$(cpt++)]")
+    
+    # statev
+    variable_symbols := Vec[Op]()
+    variable_precisions := Vec[Float64]()
+    variable_initialisation := Vec[String]()
+    variable_update := ""
+    cpt = 0
+    for p in bl.variables
+        if p.nb_der == 0
+            for s in p.symbols_for_der( 0 )
+                variable_update += "statev[$cpt] = statev_unk[$cpt]; "
+                n := symbol("statev[$(cpt++)]")
+                bl_to_umat_symbols[ s ] = n
+                variable_symbols.push_back( n )
+                variable_initialisation.push_back( n )
+        else
+            assert( p.nb_der <= 1, "TODO -> p.nb_der > 1" )
+            cpt_2 := cpt
+            for s in p.symbols_for_der( 0 )
+                bl_to_umat_symbols[ s ] = symbol("statev[$(cpt++)]")
+            for s in p.symbols_for_der( 1 )
+                variable_update += "statev[$cpt_2] += (*dtime) * statev_der[$cpt_2]; "
+                n := symbol("statev_der[$(cpt_2++)]")
+                bl_to_umat_symbols[ s ] = n
+                variable_symbols.push_back( n )
+                variable_initialisation.push_back( "0" )
+                #
+                umat_var_to_umat_var_at_beg[ n ] = 0
+        for pr in p.precision_vec
+            variable_precisions.push_back( pr )
+            
+    # ----------------
+    # sigma calculation
+    si := bl.sigma_val()
+    if si.tensor_order == 2 # explicit case (sigma = something)
+        # -> we have an explicit description of sigma
+        bl.sigma = si 
+        relations := bl.variable_relations() # we can call it since we have bl.sigma
+        #
+        bl.sigma = bl.sigma.subs( bl_to_umat_symbols.keys, bl_to_umat_symbols.values )
+        if variable_symbols.size
+            f <<< "    double statev_der[] = { $(join(variable_initialisation,",")) };"
+        for r in relations #r = r.subs( bl_to_umat_symbols.keys, bl_to_umat_symbols.values )
+            if not assumed( r.yield > 0 )
+                # calculation of yield function using estimation of sigma
+                f <<< "    { // yield_estimation"
+                yield_estimation := r.yield.subs( bl_to_umat_symbols.keys, bl_to_umat_symbols.values )
+                yield_estimation = yield_estimation.subs( umat_var_to_umat_var_at_beg.keys, umat_var_to_umat_var_at_beg.values )
+                yield_estimation = yield_estimation.subs( bl.time, abaqus_time_step )
+                cw := CodeWriter( T = "double" )
+                # cw.add( "vm", von_mises(bl.epsilon).subs( bl_to_umat_symbols.keys, bl_to_umat_symbols.values ).subs(bl.time,abaqus_time_step), __print__ )
+                cw.add( "yield_estimation", yield_estimation, init )
+                f <<< cw.to_string( nb_spaces = 8 )
+                # -> no variable update, meaning that we only have to output stress and ddsdde
+                f <<< "        if ( yield_estimation > 0 ) { // internal variable update ?"
+            else # we do not have to evaluate yield
+                f <<< "    // always in yield surface; internal variable update"
+            R := Vec[ Op ]()
+            eqs := r.eqs.subs( bl_to_umat_symbols.keys, bl_to_umat_symbols.values )
+            new_statev_symbols := code_writer_nl_eqs_or_min( eqs.subs( bl.time, 0.5 * abaqus_time_step ), 
+                    unknowns = variable_symbols, output = f, symbol_base_name = "statev_der", R = R, precision = variable_precisions,
+                    nb_spaces = 12, declare_out = false )
+            bl.sigma = bl.sigma.subs( variable_symbols, new_statev_symbols )
+
+
+            # end of yield test
+            if not assumed( r.yield > 0 )
+                f <<< "        }"
+                f <<< "    }"
+            
+        # followed by evaluation of stress and ddsdde
+        f <<< "    // stress and ddsdde evaluation"
+        cw := CodeWriter( T = "double" )
+        for i_sig, j_sig, c_sig in ind
+            sig_ij_beg := bl.sigma[i_sig,j_sig].subs( bl.time,                0 )
+            sig_ij_end := bl.sigma[i_sig,j_sig].subs( bl.time, abaqus_time_step )
+            delta_sig_ij := sig_ij_end - sig_ij_beg
+            for c_eps in 0 .. 6
+                # derivation
+                val := delta_sig_ij.diff( dstran_symbols[c_eps] )
+                cw.add( "ddsdde[$(c_sig*6+c_eps)]", val, reassign )
+            cw.add( "stress[$c_sig]", sig_ij_end, reassign )
+        f <<< cw.to_string()
+        
+        # 
+        f << "    " <<< variable_update
+        
+    else # implicit case ( sigma minimizes f( sigma, something) )
+        sr := bl.sigma_rel().subs( bl_to_umat_symbols.keys, bl_to_umat_symbols.values ).subs( bl.time, abaqus_time_step )
+        R := Vec[ Op ]()
+        new_sigma_symbols := code_writer_nl_eqs_or_min( eqs = sr, 
+                unknowns = bl.sigma_symbols, output = f, symbol_base_name = "sigma_nl", R = R )
+        # ddsdde; stress 
+        cw := CodeWriter( T = "double" )
+        for i_sig, j_sig, c_sig in ind
+            for c_eps in 0 .. 6
+                # derivation
+                val := R[c_sig].diff( Pi[c_eps] )
+                cw.add( "ddsdde[$(c_sig*6+c_eps)]", val, reassign )
+            cw.add( "stress[$c_sig]", new_sigma_symbols[c_sig], reassign )
+        f <<< cw.to_string()
+        
+    # end umat function
+    f <<< "}"
+    
+
+def make_abaqus_umat( file_name, bl )
+    write_abaqus_umat( File( file_name+".cpp", "w" ), bl )
+    return system( "g++ -c $file_name.cpp -o $file_name.o" )
+
+
+
+def diff_von_mises( sigma )
+    tmp := Tensor[Op,sigma.s]( function = x => symbol("t"+join(x,"")) )
+    res := von_mises( tmp ).diff( tmp )
+    return res.subs( tmp, sigma )

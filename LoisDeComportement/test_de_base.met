@@ -1,0 +1,74 @@
+import "ConstitutiveLaw.met"
+
+class PlasticityIsotrope inherits ConstitutiveLaw
+    E       ~= Parameter[ unit = "Pa" ]
+    nu      ~= Parameter[ unit = "1", tex_name = "\\nu" ]
+    sigma_0 ~= Parameter[ unit = "1", tex_name = "\\sigma_0" ]
+    R_inf   ~= Parameter[ unit = "1" ]
+    b       ~= Parameter[ unit = "1", tex_name = "\\sigma_0" ]
+    gamma_1 ~= Parameter[ unit = "1", tex_name = "\\gamma_1" ]
+    # gamma_2 ~= Parameter[ unit = "1", tex_name = "\\gamma_2" ]
+    # gamma_3 ~= Parameter[ unit = "1", tex_name = "\\gamma_3" ]
+    C_1     ~= Parameter[ unit = "1" ]
+    # C_2     ~= Parameter[ unit = "1" ]
+    # C_3     ~= Parameter[ unit = "1" ]
+
+    epsilon_p ~= Variable[ unit = "1", nb_der = 1, nb_dim = [3,3], sym = true, tex_name = "\\epsilon_p" ]
+    R         ~= Variable[ unit = "1", nb_der = 1 ]
+    X_1       ~= Variable[ unit = "1", nb_der = 1, nb_dim = [3,3], sym = true ]
+    # X_2       ~= Variable[ unit = "1", nb_der = 1, nb_dim = [3,3], sym = true ]
+    # X_3       ~= Variable[ unit = "1", nb_der = 1, nb_dim = [3,3], sym = true ]
+    
+    # d         ~= Variable[ unit = "1", non_local = "ply" ]
+
+    def sigma_val
+        # epsilon.diff(time).display_tex()
+        H := hooke_iso( E, nu )
+        return ( epsilon - epsilon_p ) : H # sigma_hooke_iso( epsilon - epsilon_p, E, nu )
+        
+    def variable_relations
+        #
+        p := sqrt( 2 / 3 * epsilon_p : epsilon_p )
+        #
+        return [
+            VR( [
+                R.diff(time)         - R_inf / b * ( 1 - R / R_inf ) * p.diff(time)
+                ( X_1.diff(time)       - ( 2 / 3 * C_1 * epsilon_p.diff(time) - gamma_1 * p.diff(time) * X_1 ) ).lower_and_diag_values
+                ( epsilon_p.diff(time) - 3 / 2 * diff_von_mises( sigma ) ).lower_and_diag_values
+            ], yield = von_mises(sigma-X_1) - sigma_0 )
+        ]
+        
+# class PlasticityIsotrope inherits ConstitutiveLaw
+    # E       ~= Parameter[ unit = "Pa" ]
+    # nu      ~= Parameter[ unit = "1", tex_name = "\\nu" ]
+    # sigma_0 ~= Parameter[ unit = "1", tex_name = "\\sigma_0" ]
+    # R_inf   ~= Parameter[ unit = "1" ]
+    # b       ~= Parameter[ unit = "1", tex_name = "\\sigma_0" ]
+    # gamma_1 ~= Parameter[ unit = "1", tex_name = "\\gamma_1" ]
+    # # gamma_2 ~= Parameter[ unit = "1", tex_name = "\\gamma_2" ]
+    # # gamma_3 ~= Parameter[ unit = "1", tex_name = "\\gamma_3" ]
+    # C_1     ~= Parameter[ unit = "1" ]
+    # # C_2     ~= Parameter[ unit = "1" ]
+    # # C_3     ~= Parameter[ unit = "1" ]
+
+    # epsilon_p ~= Variable[ unit = "1", nb_der = 1, nb_dim = [3,3], sym = true, tex_name = "\\epsilon_p" ]
+    # R         ~= Variable[ unit = "1", nb_der = 1 ]
+    # X_1       ~= Variable[ unit = "1", nb_der = 1, nb_dim = [3,3], sym = true ]
+    # # X_2       ~= Variable[ unit = "1", nb_der = 1, nb_dim = [3,3], sym = true ]
+    # # X_3       ~= Variable[ unit = "1", nb_der = 1, nb_dim = [3,3], sym = true ]
+    
+    # # d         ~= Variable[ unit = "1", non_local = "ply" ]
+
+    # def relations
+        # helmotz = 
+        # pseudo_potential.push_back(
+        # )
+        
+
+make_abaqus_umat( "umat_test", PlasticityIsotrope() )
+
+
+
+
+
+
