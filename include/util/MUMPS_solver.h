@@ -37,7 +37,7 @@ using namespace LMT;
         env = Environment(
             LIBS = [ 'pthread', 'blas' , 'dmumps' , 'mumps_common' ],
             CPPPATH = [ '#LMT/include' , '/usr/lib/openmpi/include' , '/usr/include/suitesparse'  ],
-            CPPFLAGS = cppflags( ['xml2-config'] ) + " -O3 -g " ,
+            CPPFLAGS = cppflags( ['xml2-config'] ) + " -O3 -g " + " -DWITH_MUMPS " ,
             LINKFLAGS = linkflags( ['xml2-config'] ),
         )
         make_dep_py(env)
@@ -47,8 +47,9 @@ using namespace LMT;
         
         env.Program( "main", ["main.cpp" ] + libs + [ "/usr/lib/openmpi/lib/libmpi_cxx.so" ] , build_dir='build/LMT' )
         
-    Vérifiez vos chemins openmpi : /usr/lib/openmpi/include et /usr/lib/openmpi/lib/libmpi_cxx.so
-    et que vous avez bien les librairies /usr/lib/libdmumps.so et /usr/lib/libmumps_common.so
+    * Vérifiez vos chemins openmpi : /usr/lib/openmpi/include et /usr/lib/openmpi/lib/libmpi_cxx.so
+    * et que vous avez bien les librairies /usr/lib/libdmumps.so et /usr/lib/libmumps_common.so
+    * Il faut aussi l'option de compilation -DWITH_MUMPS .
     
     REMARQUE : pour l'instant la classe ne gère pas le calcul sur plusieurs noeuds.
         
