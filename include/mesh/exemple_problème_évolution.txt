@@ -41,7 +41,7 @@
         Remarque : la condition aux limites
         \latex
             $$
-            u(x, t ) = 0  \;\; sur   \;\;   ( x, t )  \in \partial Omega \times [ 0; T ]  
+            u(x, t ) = 0  \;\; sur   \;\;   ( x, t )  \in \partial \Omega \times [ 0; T ]  
             $$
         apparaîtra dans le code C++.
         
@@ -168,7 +168,7 @@
 
     \relates Comment résoudre un problème éléments finis de façon générale
     \relates Exemple de formulation
-    \keyword Equation d'évolution
+    \keyword Maillage/Equation d'évolution
     \friend hugo.leclerc@lmt.ens-cachan.fr
     \friend raphael.pasquier@lmt.ens-cachan.fr
 */

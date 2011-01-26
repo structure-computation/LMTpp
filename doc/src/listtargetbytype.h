@@ -6,19 +6,20 @@
 #include<fstream>
 #include<vector>
 
-using namespace std ;
+using namespace std;
 
 #include "target.h"
 #include "token.h"
 
 struct ListTargetByType {
 
-    vector<Target*> list_example ;
-    vector<Target*> list_tutorial ;
-    //vector<Target*> list_generic_comment ;
-    vector<Target*> list_class_struct ;
-    vector<Target*> list_function ;
-} ;
+    vector<Target*> list_example;
+    vector<Target*> list_tutorial;
+    //vector<Target*> list_generic_comment;
+    vector<Target*> list_class_struct;
+    vector<Target*> list_function;
+    vector<Target*> list_webpage;
+};
 
 
 #endif

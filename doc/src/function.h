@@ -6,7 +6,7 @@
 #include<fstream>
 #include<vector>
 
-using namespace std ;
+using namespace std;
 
 #include "tagcomment.h"
 #include "visitorbloc.h"
@@ -18,25 +18,25 @@ enum TypeFunctionID {
     TYPE_FUNCTION_OPERATOR_ID = 3,
     TYPE_FUNCTION_METHOD_ID = 4,
     TYPE_FUNCTION_FUNCTION_ID = 5,
-} ;
+};
 
 
 
 struct Function : public Bloc {
     Function( ) { }
-    ~Function() ;
-    virtual void display( std::ostream &os ) ;
-    virtual void exec( VisitorBloc *v ) { v->exec( this ) ;  }
-    //void apply_on_related_to( const std::string &s, Op *op ) ;
+    ~Function();
+    virtual void display( std::ostream &os );
+    virtual void exec( VisitorBloc *v ) { v->exec( this );  }
+    //void apply_on_related_to( const std::string &s, Op *op );
 
     /// méthode virtuelle de target
     virtual bool of_function() { return true; }
 
-    string listAttribut ; // static, const, ...
-    ListParameter listParameter ;
-    Names returnType ;
-    //string referencement ;
-} ;
+    string listAttribut; // static, const, ...
+    ListParameter listParameter;
+    Names returnType;
+    //string referencement;
+};
 
 
 #endif

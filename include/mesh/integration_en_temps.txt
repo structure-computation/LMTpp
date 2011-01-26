@@ -1,0 +1,57 @@
+/*!
+\webpage integration_en_temps Remarques sur l'intégration en temps sur la plate-forme
+    \latex 
+        Quel est l'algorithme utilisé pour intégrer en temps dans les équations aux dérivées partielles ?
+        Nous allons le décrire dans le cadre des équations différentielles ordianaires puis nous l'appliquerons aux équations aux dérivées partielles.  
+
+        Considérons le problème général suivant :
+        
+        \section Cas des équations différentielles ordianaires
+        
+        Considérons le problème général suivant :
+        Déterminer une fonction vectorielle de $[t_0 ; t_0 + T ]$ dans $R^I$ ( où $t_0$ est un nombre réel, $T$ un réel positif, $I$ un entier positif ) vérifiant pour tout $t$ dans $[t_0 ; t_0 + T ]$ l'équation différentielle ordinaire $(C)$ : 
+        $$
+        f( t, y(t), y'(t), y''(t), \ldots, y^{(N)}(t) ) = 0
+        $$
+        et 
+        $$
+        y( t_0 ) = y_0 , y'( t_0 ) = y'_0, \ldots, y^{(N-1)}(t_0) = y^{(N-1)}_0
+        $$
+        Cad un problème de Cauchy.
+        On supposera que $f$ est suffisamment régulière.
+            
+        Dans le cas où on a l'existence et l'unicité, ce qu'on supposera aussi, on souhaite connaître une approximation de $y$ en un nombre fini de dates $t_0$, $t_1$, ..., $t_I = t_0 + T$ telles que $t_0 < t_1 < \ldots < t_I = t_0 + T$.
+            
+        Décrivons la méthode.
+        
+        C'est une méthode à $K$ pas où $K$ est pris plus grand que $N$ l'ordre de l'équation différentielle.
+        Supposons que l'on connaisse une approximation $y_{n}$ de $y( t_{n} )$, $y_{n-1}$ de $y( t_{n-1} )$, ..., une approximation $y_{n-K+1}$ de $y( t_{n-K+1} )$. On cherche à obtenir une approximation de $y( t_{n+1} )$.
+        
+        Soit $t \to \bar{y}( t )$ un polynôme qui interpole en les points $(t_n;y_{n})$, $(t_{n-1};y_{n-1})$, ..., $(t_{n-K+1};y_{n-K+1})$ ainsi qu'au point $(t_{n+1};y_{n+1})$ où $y_{n+1}$ est indéterminée (soit $K+1$ points au total). Il est de degré $ <= K$.
+        La fonction $\bar{y}$ est une approximation de $y$ sur l'intervalle $[t_{n-K+1};t_n]$ et même sur $[t_{n-K+1};t_{n+1}]$ si on prend un $y_{n+1}$ proche de $y(t_{n+1})$.
+        Remplacons $y$ par $\bar{y}$ dans l'équation différentielle, on a :
+        $ f( t, \bar{y}(t), \bar{y}'(t), \bar{y}''(t), \ldots, \bar{y}^{(N)}(t) ) \approx 0 $.
+        
+        Imposons 
+        $$
+            \int_{t_n + \alpha \times ( t_{n+1} - t_n ) }^{ t_n + \beta \times ( t_{n+1} - t_n ) }  f( t, \bar{y}(t), \bar{y}'(t), \bar{y}''(t), \ldots, \bar{y}^{(N)}(t) ) dt  = 0
+        $$
+        On obtient une équation $(E)$ en l'inconnue $y_{n+1}$ ($\alpha$ et $\beta$ jouant le rôle de paramètres de la méthode).
+        
+        Dans le cas où $f$ est affine cad $f(t,x_0,x_1, \ldots, x_N ) = g(t) + a_0 x_0 + a_1 x_1 + \ldots + a_N x_N$ où les $a_i$ sont des constantes, l'équation $(E)$ est linéaire donc facile à résoudre. Or ce cas est très fréquent comme on le verra plus tard.
+        
+        
+        On trouve donc $y_{n+1}$ en résolvant $(E)$ puis on répète le processus depuis le début.
+        
+        En remarque, le choix d'une interpolation polynomiale n'est pas imposée et peut être substituée par un autre type d'interpolation ou d'approximation si on a des informations sur les solutions de l'équation différentielle $(C)$.
+        De plus on peut montrer que pour $K=2$, $\alpha=-\sqrt{2}$ et $\beta=\sqrt{2}$, on retrouve le schéma de Newmark pour un problème d'ordre 2.
+            
+             
+             
+    
+    \keyword Remarque
+
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+
+*/
