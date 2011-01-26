@@ -57,6 +57,8 @@ using namespace LMT;
     \friend raphael.pasquier@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
 */
+#ifdef WITH_MUMPS
+
 struct MUMPS_solver {
     typedef double T;
 
@@ -64,16 +66,12 @@ struct MUMPS_solver {
 
     ~MUMPS_solver();
 
-    /// after that, data in mat won't be used anymore.
+    /// factorise la matrice passée en paramètre et libère sa mémoire si want_free == true.
     void get_factorization( Mat<double, Sym<>, SparseLine<> > &mat, bool want_free = true, bool is_definite_positive = false );
-    /// after that, data in mat won't be used anymore.
     void get_factorization( Mat<double, Gen<>, SparseLine<> > &mat, bool want_free = true );
-
-    /// ...
     template<class TM> 
-    void get_factorization( const TM &mat, bool want_free = true ) { assert(0); /*! TODO */ }
-    #ifdef WITH_MUMPS
-    /// ...
+    void get_factorization( const TM &mat, bool want_free = true ) { assert(0); /*! TODO */ } /// cas général
+    /// résout le sytème de second membre b et renvoie le résultat dans b
     template<int s>
     void solve( Vec<double, s> &b ) {
     
@@ -84,13 +82,10 @@ struct MUMPS_solver {
             dmumps_c( &id );
         }
     }
-    #endif
     void free();
 
     /// attributs:
-    #ifdef WITH_MUMPS
     DMUMPS_STRUC_C id;
-    #endif
     int myid, ierr; /// MPI
     bool MPI_is_initialized;
 
@@ -104,7 +99,6 @@ struct MUMPS_solver {
     
     template<class STR>
     void load_matrix( const Mat<double, STR, SparseLine<> > &mat ) {
-        #ifdef WITH_MUMPS
         id.n = mat.nb_rows();
         for( int i = 0; i < mat.nb_rows(); ++i )
             id.nz += mat.data[ i ].indices.size();
@@ -118,7 +112,6 @@ struct MUMPS_solver {
                 id.a[ index ] = mat.data[ i ].data[ j ];
             }    
         }
-        #endif
     }    
 
     static const int job_init = -1;
@@ -128,7 +121,7 @@ struct MUMPS_solver {
     static const int job_solve = 3;
     static const int use_comm_word = -987654;
 };
-
+#endif /// WITH_MUMPS
 
 #endif // LMTPP_MUMPS_SOLVER_H
 

@@ -117,21 +117,4 @@ void MUMPS_solver::get_factorization( Mat<double, Gen<>, SparseLine<> > &mat, bo
     }
 }
 
-#else
-
-#include "MUMPS_solver.h"
-
-MUMPS_solver::MUMPS_solver() { }
-
-MUMPS_solver::~MUMPS_solver() {}
-
-void MUMPS_solver::free() {}
-
-void MUMPS_solver::init_MPI( int argc, char* argv[] ) {}
-
-void MUMPS_solver::get_factorization( Mat<double, Sym<>, SparseLine<> > &mat, bool want_free, bool is_definite_positive ) {}
-
-void MUMPS_solver::get_factorization( Mat<double, Gen<>, SparseLine<> > &mat, bool want_free ) {}
-
 #endif
-
