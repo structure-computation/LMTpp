@@ -101,7 +101,7 @@ T var_inter_insideness( const Quad_42 &e, const TV &var_inter ) {
     param :
         Quad : le type d'élément
         pos_nodes : le position des sommets dans le plan. Il faut que le Quad ne soit pas "croisé".
-        po : la position du point dans le plan
+        pos : la position du point dans le plan
 
 */
 template< class PosNodes, class Pvec > 
