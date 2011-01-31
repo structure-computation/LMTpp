@@ -3,19 +3,19 @@
 #include<fstream>
 #include<vector>
 
-using namespace std ;
+using namespace std;
 
 #include "commentitemkeyword.h"
 
 
 
-void CommentItemKeyword :: addParameter( string& s )
+void CommentItemKeyword::addParameter( string& s )
 {
- parametres += s ;
+ parametres += s;
 }
 
-void CommentItemKeyword :: display( std::ostream &os )
+void CommentItemKeyword::display( std::ostream &os )
 {
- os << " name of CommentItemKeyword =" << name.name << endl ;
- os << " parametres = ]" << parametres << "[" << endl ;
+ os << " name of CommentItemKeyword =" << name.name << endl;
+ os << " parametres = ]" << parametres << "[" << endl;
 }

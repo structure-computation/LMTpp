@@ -6,7 +6,7 @@
 #include<fstream>
 #include<vector>
 
-using namespace std ;
+using namespace std;
 
 #include "names.h"
 
@@ -15,16 +15,16 @@ using namespace std ;
 struct Link {
     Link( ) { }
     ~Link() {} 
-    //void apply_on_related_to( const std::string &s, Op *op ) ;
-    //friend std::ostream &operator<<( std::ostream &os, const Comment &c ) ;
+    //void apply_on_related_to( const std::string &s, Op *op );
+    //friend std::ostream &operator<<( std::ostream &os, const Comment &c );
 
-    //string findKeyword( int*t,int* posistion,int* positionAfter, string& s) ; 
+    //string findKeyword( int*t,int* posistion,int* positionAfter, string& s); 
 
 
-    Names name ;
-    string path ;
-    string name_file ;
-} ;
+    Names name;
+    string path;
+    string name_file;
+};
 
 
 #endif

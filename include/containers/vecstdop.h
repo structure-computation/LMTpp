@@ -322,17 +322,20 @@ inline typename TypePromote<Multiplies,typename Vec<T1,2,V1>::template SubType<0
 }
 #endif
 
-/*! \f$ \sqrt{ \sum_i c_i^2 } \f$
- \relates Vec
+/*! 
+    \latex
+        $ \sqrt{ \sum_i c_i^2 } $
+    \relates Vec
  */
 template<class T,int s>
 inline typename FloatType<typename TypeReduction<Multiplies,Vec<T,s> >::T>::T length(const Vec<T,s> &c) {
     return sqrt(dot(c,c));
 }
 
-/*! \latex 
-        $ \sqrt{ \sum_i (c_i-d_i)^2 } \f$
- \relates Vec
+/*! 
+    \latex 
+        $ \sqrt{ \sum_i (c_i-d_i)^2 } $
+    \relates Vec
  */
 template<class T,int s>
 inline typename FloatType<typename TypeReduction<Multiplies,Vec<T,s> >::T>::T distance(const Vec<T,s> &c, const Vec<T,s> &d) {
@@ -340,24 +343,30 @@ inline typename FloatType<typename TypeReduction<Multiplies,Vec<T,s> >::T>::T di
     return length(tmp);
 }
 
-/*! \f$ \sum_i c_i^2 \f$
-        \relates Vec
+/*!    
+    \latex 
+        $ \sqrt{ \sum_i c_i^2 } $
+    \relates Vec
  */
 template<class T,int s>
 inline typename TypeReduction<Multiplies,Vec<T,s> >::T norm_2_p2(const Vec<T,s> &c) {
     return dot(c,c);
 }
 
-/*! \f$ \sqrt{ \sum_i c_i^2 } \f$
-        \relates Vec
+/*!
+    \latex 
+        $ \sqrt{ \sum_i c_i^2 } $
+    \relates Vec
  */
 template<class T,int s>
 inline typename FloatType<typename TypeReduction<Multiplies,Vec<T,s> >::T>::T norm_2(const Vec<T,s> &c) {
     return sqrt(norm_2_p2(c));
 }
 
-/*! \f$ \sqrt{ \sum_i c_i^2 + ad } \f$
-        \relates Vec
+/*! 
+    \latex 
+        $ \sqrt{ \sum_i c_i^2 + ad } $
+    \relates Vec
  */
 template<class T,int s>
 inline typename FloatType<typename TypeReduction<Multiplies,Vec<T,s> >::T>::T norm_2( const Vec<T,s> &c, T ad ) {
@@ -431,12 +440,14 @@ template<class Pvec,class TD> DistBetweenVecInfEq<Pvec,TD> dist_between_vec_inf_
     return res;
 }
 
-/*! \f$ \sqrt{\sum_i c_i^2 + a } \f$
- \relates Vec
+/*! 
+    \latex 
+        $ \sqrt{ \sum_i c_i^2 + ad } $
+    \relates Vec
  */
 template<class T,int s>
-inline typename TypeReduction<Multiplies,Vec<T,s> >::T length(const Vec<T,s> &c,T add) {
-    return sqrt(dot(c,c)+add);
+inline typename TypeReduction<Multiplies,Vec<T,s> >::T length(const Vec<T,s> &c,T ad ) {
+    return sqrt(dot(c,c)+ad);
 }
 /*!
  \relates Vec
@@ -446,7 +457,9 @@ inline Vec<typename TypeReduction<Multiplies,Vec<T,s> >::T,s> normalized(const V
     return c / ( length(c) + (length(c)==0));
 }
 
-/*! Only for 2D vec. get p rotated by \f$ \frac{\Pi}{2} \f$
+/*! Only for 2D vec. get p rotated by 
+    \latex
+        $ \frac{\Pi}{2} $
 Rotaion de 90 ° dans le sens direct.
  \relates Vec
  */

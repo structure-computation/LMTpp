@@ -5,7 +5,7 @@
 #include <map>
 #include <limits>
 #include <iostream>
-#include <stdexecpt>
+#include <stdexcept>
 
 #include <mesh/hexa.h>
 #include <mesh/tetra.h>

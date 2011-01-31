@@ -6,10 +6,10 @@
 #include<fstream>
 #include<vector>
 
-using namespace std ;
+using namespace std;
 
 #include "tagcomment.h"
-//struct Names ;
+//struct Names;
 #include "names.h"
 
 /*
@@ -22,14 +22,14 @@ struct Parameter : public TagComment {
     Parameter( ) { }
     ~Parameter() {} 
     void clear() { listAttribut.clear();nameVariable.clear();defaultType.clear();type.clear(); } 
-    friend std::ostream &operator<<( std::ostream &os, Parameter& p ) ;
+    friend std::ostream &operator<<( std::ostream &os, Parameter& p );
     
-    string listAttribut ;
-    Names type ;
-    string nameVariable ;
+    string listAttribut;
+    Names type;
+    string nameVariable;
     string op; /// op peut valoir soit rien soit = soit := soit ...
-    string defaultType ;
-} ;
+    string defaultType;
+};
 
 
 #endif

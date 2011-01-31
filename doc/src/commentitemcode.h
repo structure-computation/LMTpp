@@ -6,24 +6,24 @@
 #include<fstream>
 #include<vector>
 
-using namespace std ;
+using namespace std;
 
-//struct CommentItem ;
+//struct CommentItem;
 #include "commentitem.h"
 #include "visitorcommentitem.h"
 
 struct CommentItemCode : public CommentItem { 
-    CommentItemCode( string& langue) ;
-    virtual void print( std::ostream &os ) const { /*os << txt << endl ;*/ }
-    virtual void display( std::ostream &os ) ;
-    virtual void execute_function( VisitorCommentItem *v ) { v->function_at_CommentItemCode( this ) ;  }
-    void addTabulation_String( int t,string& s ) ;
+    CommentItemCode( string& langue);
+    virtual void print( std::ostream &os ) const { /*os << txt << endl;*/ }
+    virtual void display( std::ostream &os );
+    virtual void execute_function( VisitorCommentItem *v ) { v->function_at_CommentItemCode( this );  }
+    void addTabulation_String( int t,string& s );
 
-    virtual ~CommentItemCode() {} ;
+    virtual ~CommentItemCode() {};
 
-    string language ;
-    vector<string> txt ;
-    vector<int> tabulation ;
+    string language;
+    vector<string> txt;
+    vector<int> tabulation;
 };
 
 #endif

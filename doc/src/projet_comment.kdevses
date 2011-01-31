@@ -1,13 +1,16 @@
 <?xml version = '1.0' encoding = 'UTF-8'?>
 <!DOCTYPE KDevPrjSession>
 <KDevPrjSession>
- <DocsAndViews NumberOfDocuments="2" >
-  <Doc0 NumberOfViews="1" URL="file:///home/pasquier/LMTpp-test/doc/src/documentation.cpp" >
-   <View0 Encoding="UTF-8" line="981" Type="Source" />
+ <DocsAndViews NumberOfDocuments="3" >
+  <Doc0 NumberOfViews="1" URL="file:///home/pasquier/LMTpp-test/doc/src/main.cpp" >
+   <View0 Encoding="UTF-8" line="107" Type="Source" />
   </Doc0>
-  <Doc1 NumberOfViews="1" URL="file:///home/pasquier/LMTpp-test/doc/src/documentation.h" >
-   <View0 Encoding="UTF-8" line="68" Type="Source" />
+  <Doc1 NumberOfViews="1" URL="file:///home/pasquier/LMTpp-test/doc/src/visitorcommentitem_tohtml.cpp" >
+   <View0 Encoding="UTF-8" line="308" Type="Source" />
   </Doc1>
+  <Doc2 NumberOfViews="1" URL="file:///home/pasquier/LMTpp-test/doc/src/util2html.cpp" >
+   <View0 Encoding="UTF-8" line="243" Type="Source" />
+  </Doc2>
  </DocsAndViews>
  <pluginList>
   <kdevdebugger>

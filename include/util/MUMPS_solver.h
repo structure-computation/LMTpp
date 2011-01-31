@@ -1,7 +1,9 @@
 #ifndef LMTPP_MUMPS_SOLVER_H
 #define LMTPP_MUMPS_SOLVER_H
 
+#ifdef WITH_MUMPS
 #include "dmumps_c.h"
+#endif
 
 #include "containers/mat.h"
 
@@ -35,7 +37,7 @@ using namespace LMT;
         env = Environment(
             LIBS = [ 'pthread', 'blas' , 'dmumps' , 'mumps_common' ],
             CPPPATH = [ '#LMT/include' , '/usr/lib/openmpi/include' , '/usr/include/suitesparse'  ],
-            CPPFLAGS = cppflags( ['xml2-config'] ) + " -O3 -g " ,
+            CPPFLAGS = cppflags( ['xml2-config'] ) + " -O3 -g " + " -DWITH_MUMPS " ,
             LINKFLAGS = linkflags( ['xml2-config'] ),
         )
         make_dep_py(env)
@@ -45,8 +47,9 @@ using namespace LMT;
         
         env.Program( "main", ["main.cpp" ] + libs + [ "/usr/lib/openmpi/lib/libmpi_cxx.so" ] , build_dir='build/LMT' )
         
-    Vérifiez vos chemins openmpi : /usr/lib/openmpi/include et /usr/lib/openmpi/lib/libmpi_cxx.so
-    et que vous avez bien les librairies /usr/lib/libdmumps.so et /usr/lib/libmumps_common.so
+    * Vérifiez vos chemins openmpi : /usr/lib/openmpi/include et /usr/lib/openmpi/lib/libmpi_cxx.so
+    * et que vous avez bien les librairies /usr/lib/libdmumps.so et /usr/lib/libmumps_common.so
+    * Il faut aussi l'option de compilation -DWITH_MUMPS .
     
     REMARQUE : pour l'instant la classe ne gère pas le calcul sur plusieurs noeuds.
         
@@ -54,6 +57,8 @@ using namespace LMT;
     \friend raphael.pasquier@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
 */
+#ifdef WITH_MUMPS
+
 struct MUMPS_solver {
     typedef double T;
 
@@ -61,15 +66,12 @@ struct MUMPS_solver {
 
     ~MUMPS_solver();
 
-    /// after that, data in mat won't be used anymore.
+    /// factorise la matrice passée en paramètre et libère sa mémoire si want_free == true.
     void get_factorization( Mat<double, Sym<>, SparseLine<> > &mat, bool want_free = true, bool is_definite_positive = false );
-    /// after that, data in mat won't be used anymore.
     void get_factorization( Mat<double, Gen<>, SparseLine<> > &mat, bool want_free = true );
-
-    /// ...
     template<class TM> 
-    void get_factorization( const TM &mat ) { assert(0); /*! TODO */ }
-    /// ...
+    void get_factorization( const TM &mat, bool want_free = true ) { assert(0); /*! TODO */ } /// cas général
+    /// résout le sytème de second membre b et renvoie le résultat dans b
     template<int s>
     void solve( Vec<double, s> &b ) {
     
@@ -80,7 +82,6 @@ struct MUMPS_solver {
             dmumps_c( &id );
         }
     }
-
     void free();
 
     /// attributs:
@@ -120,7 +121,7 @@ struct MUMPS_solver {
     static const int job_solve = 3;
     static const int use_comm_word = -987654;
 };
-
+#endif /// WITH_MUMPS
 
 #endif // LMTPP_MUMPS_SOLVER_H
 

@@ -1,3 +1,6 @@
+
+#ifdef WITH_MUMPS
+
 #include "mpi.h"
 
 #include "MUMPS_solver.h"
@@ -114,4 +117,4 @@ void MUMPS_solver::get_factorization( Mat<double, Gen<>, SparseLine<> > &mat, bo
     }
 }
 
-
+#endif

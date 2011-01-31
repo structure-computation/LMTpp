@@ -3,65 +3,77 @@
 #include <vector>
 
 
-using namespace std ;
+using namespace std;
 #include "op.h"
 #include "visitorcommentitem_getkeyword_of_extuge.h"
 #include "commentitemkeyword.h"
 #include "commentitemexample.h"
 #include "commentitemtutorial.h"
 #include "commentitemgenericcomment.h"
+#include "commentitemwebpage.h"
 #include "comment.h"
 
 
-void VisitorCommentItem_getKeyword_of_ExTuGe :: function_at_CommentItemKeyword( CommentItemKeyword* c ) {
+void VisitorCommentItem_getKeyword_of_ExTuGe::function_at_CommentItemKeyword( CommentItemKeyword* c ) {
 
-    //cerr << " io " << endl ;
+    //cerr << " io " << endl;
     if (c->name.name == "keyword") {
-        listNameKeyword.push_back(c->parametres) ;
+        listNameKeyword.push_back(c->parametres);
     }
 }
 
-void VisitorCommentItem_getKeyword_of_ExTuGe :: function_at_CommentItemExample( CommentItemExample* c ) {
+void VisitorCommentItem_getKeyword_of_ExTuGe::function_at_CommentItemExample( CommentItemExample* c ) {
 
-    int i,n ;
-    VisitorCommentItem_getKeyword_of_ExTuGe visi ;
+    int i, n;
+    VisitorCommentItem_getKeyword_of_ExTuGe visi;
 
-    isExtuge = 1 ;
-    n = c->items.size() ;
-    visi.init() ;
-    for(i=0;i<n;i++)
-        c->items[i]->execute_function( &visi ) ;
+    isExtuge = 1;
+    n = c->items.size();
+    visi.init();
+    for( i = 0; i < n; i++ )
+        c->items[i]->execute_function( &visi );
 
-    listNameKeyword = visi.listNameKeyword ;
+    listNameKeyword = visi.listNameKeyword;
 }
 
-void VisitorCommentItem_getKeyword_of_ExTuGe :: function_at_CommentItemTutorial( CommentItemTutorial* c ) {
+void VisitorCommentItem_getKeyword_of_ExTuGe::function_at_CommentItemTutorial( CommentItemTutorial* c ) {
 
-    int i,n ;
-    VisitorCommentItem_getKeyword_of_ExTuGe visi ;
+    int i, n;
+    VisitorCommentItem_getKeyword_of_ExTuGe visi;
 
-    isExtuge = 2 ;
-    n = c->items.size() ;
-    visi.init() ;
-    for(i=0;i<n;i++)
-        c->items[i]->execute_function( &visi ) ;
-    listNameKeyword = visi.listNameKeyword ;
+    isExtuge = 2;
+    n = c->items.size();
+    visi.init();
+    for( i = 0; i < n; i++ )
+        c->items[i]->execute_function( &visi );
+    listNameKeyword = visi.listNameKeyword;
 }
 
-void VisitorCommentItem_getKeyword_of_ExTuGe :: function_at_CommentItemGenericComment( CommentItemGenericComment* c ) {
+void VisitorCommentItem_getKeyword_of_ExTuGe::function_at_CommentItemGenericComment( CommentItemGenericComment* c ) {
 
-    int i,n ;
-    VisitorCommentItem_getKeyword_of_ExTuGe visi ;
+    int i, n;
+    VisitorCommentItem_getKeyword_of_ExTuGe visi;
 
-    isExtuge = 3 ;
-    n = c->items.size() ;
-    visi.init() ;
-    for(i=0;i<n;i++)
-        c->items[i]->execute_function( &visi ) ;
-    listNameKeyword = visi.listNameKeyword ;
+    isExtuge = 3;
+    n = c->items.size();
+    visi.init();
+    for( i = 0; i < n; i++ )
+        c->items[i]->execute_function( &visi );
+    listNameKeyword = visi.listNameKeyword;
 }
 
+void VisitorCommentItem_getKeyword_of_ExTuGe::function_at_CommentItemWebPage( CommentItemWebPage* c ) {
 
+    int i, n;
+    VisitorCommentItem_getKeyword_of_ExTuGe visi;
+
+    isExtuge = 4;
+    n = c->items.size();
+    visi.init();
+    for( i = 0; i < n; i++ )
+        c->items[i]->execute_function( &visi );
+    listNameKeyword = visi.listNameKeyword;
+}
 
 
 

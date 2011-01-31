@@ -3,7 +3,7 @@
 #include <vector>
 
 
-using namespace std ;
+using namespace std;
 #include "token.h"
 #include "op.h"
 #include "names.h"
