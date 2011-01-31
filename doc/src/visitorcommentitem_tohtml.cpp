@@ -271,15 +271,50 @@ void VisitorCommentItem_toHTML :: function_at_CommentItemLaTex( CommentItemLaTex
     // code pour créer l'image du source LaTex
     //cout << "IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII" << c->reference() << endl;
     ofstream texfile( c->reference().c_str() );
-    texfile << "\\documentclass{article}\n";
-    texfile << "\\usepackage[latin1]{inputenc}\n";
-    texfile << "\\usepackage{graphicx}\n";
-    texfile << "\\usepackage{amsmath}\n";
-    texfile << "\\begin{document}\n";
-    texfile << "\\pagestyle{empty}\n";
-    //texfile << "$$" << tex_data << "$$\n";
+    texfile << "\\documentclass[11pt,a4paper]{article}" << std::endl;
+    texfile << "%***mise en page***" << std::endl;
+    texfile << "\\setlength{\\textwidth}{17cm} \\setlength{\\textheight}{25cm}" << std::endl;
+    texfile << "\\setlength{\\oddsidemargin}{-5.5mm}" << std::endl;
+    texfile << "\\setlength{\\evensidemargin}{0pt} \\setlength{\\marginparwidth}{1cm}" << std::endl;
+    texfile << "\\setlength{\\headheight}{13pt} \\setlength{\\topmargin}{-30pt}" << std::endl;
+    texfile << "\\setlength{\\footskip}{26pt} \\setlength{\\headsep}{13pt}" << std::endl;
+    texfile << std::endl;
+    texfile << "%***package***" << std::endl;
+    texfile << "\\usepackage{amsmath,amscd,amssymb}" << std::endl;
+    texfile << "\\pagestyle{empty}" << std::endl;
+    texfile << "\\usepackage[T1]{fontenc}" << std::endl;
+    texfile << "\\usepackage{graphics}" << std::endl;
+    texfile << "\\usepackage{epic}" << std::endl;
+    texfile << std::endl;
+    texfile << "\\usepackage[french]{babel}" << std::endl;
+    texfile << "\\usepackage[utf8]{inputenc}" << std::endl;
+    texfile << std::endl;
+    texfile << "%*** Environnement ***" << std::endl;
+    texfile << "\\newtheorem{myth}{Théorème}" << std::endl;
+    texfile << "\\newtheorem{myprop}{Proposition}" << std::endl;
+    texfile << "\\newtheorem{mylem}{Lemme}" << std::endl;
+    texfile << "\\newtheorem{mycoro}{Corollaire}" << std::endl;
+    texfile << std::endl;
+    texfile << "%*** Macros ***" << std::endl;
+    texfile << "\\newcommand{\\ineg}{\\leqslant}" << std::endl;
+    texfile << "\\newcommand{\\sueg}{\\geqslant}" << std::endl;
+    texfile << "\\newcommand{\\cqfd}{\\begin{flushright} $\\blacksquare$ \\end{flushright} }" << std::endl;
+    texfile << "\\newcommand{\\Rp}{ [ \\, 0 \\, ; \\, +\\infty \\, [}" << std::endl;
+    texfile << "\\newcommand{\\Rpe}{ ] \\, 0 \\, ; \\, +\\infty \\, [}" << std::endl;
+    texfile << "\\newcommand{\\R}{ \\mathbb{R}  }" << std::endl;
+    texfile << std::endl;
+    texfile << "\\begin{document}" << std::endl;
+    texfile << "\\pagestyle{empty}" << std::endl;
+    
+    /// ancien en-tête
+//     texfile << "\\documentclass{article}\n";
+//     texfile << "\\usepackage[latin1]{inputenc}\n";
+//     texfile << "\\usepackage{graphicx}\n";
+//     texfile << "\\usepackage{amsmath}\n";
+//     texfile << "\\begin{document}\n";
+//     texfile << "\\pagestyle{empty}\n";
     texfile << c->txt << std::endl;
-    texfile << "\\end{document}\n";
+    texfile << "\\end{document}" << std::endl;
     texfile.close();
     ostringstream command;
     stmp = c->reference();
@@ -288,11 +323,12 @@ void VisitorCommentItem_toHTML :: function_at_CommentItemLaTex( CommentItemLaTex
     //ss << c->id;
     //stmp = c->name.name + "_" + ss.str();
     stmp = directory( stmp );
-    command  << "latex -output-directory " << stmp << " -interaction=batchmode " << c->reference() <<  " && dvips -O0in,11in -E -o "
-            << stmp2 << ".eps " << stmp2 << ".dvi && convert -antialias -density 128 " << stmp2 << ".eps " 
+    //command  << "latex -output-directory " << stmp << " -interaction=batchmode " << c->reference() <<  " && dvips -O0in,11in -E -o "
+    command  << "latex -output-directory " << stmp << " -interaction=batchmode " << c->reference() <<  " && dvips -O0in,11in -o "
+            << stmp2 << ".eps " << stmp2 << ".dvi && convert -antialias -append -density 128 " << stmp2 << ".eps " 
             << stmp2 << ".png && rm ";
     const char *ext[] = {".tex",".dvi",".eps",".aux",".log"};
-    for(unsigned i=1;i<5;++i) command << " " << stmp2 << ext[i];
+    for(unsigned i = 1; i < 5; ++i ) command << " " << stmp2 << ext[i];
     //cout << " IIIIIIIIIIIIIIIIIIIIIIIIII command =|" << command.str() << "|===" << endl;
     system( command.str().c_str() );
     c->suffix_reference = "png";

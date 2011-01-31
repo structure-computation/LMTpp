@@ -102,6 +102,14 @@ int main(int argc, char* argv[]) {
 
     //docProject.listTarget.write_listPrincipalName("list_nom_generique.txt");
     
+    cout << endl; cout << endl; cout << endl;
+    cout << "****************************************" << endl;
+    cout << "*                                      *" << endl;
+    cout << "*   The documentation is generated     *" << endl;
+    cout << "*                                      *" << endl;
+    cout << "****************************************" << endl;
+    cout << endl;
+    
     return 0;
 }
 

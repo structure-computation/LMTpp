@@ -365,12 +365,48 @@ T var_inter_insideness( const Tetra &e, const TV &var_inter ) {
     return min( min( min( var_inter[0], var_inter[1] ), var_inter[2] ), 1 - var_inter[0] - var_inter[1] - var_inter[2] );
 }
 
-// template<class PosNodes, class Pvec>
-// bool is_inside_linear( const Tetra &elem, const PosNodes &pos_nodes, const Pvec &pos ) {
-//     // return true; /// TODO
-//     
-//     get_var_inter_linear( elem, pos_nodes, pos, var_inter);
-// }
+/*!
+    objectif :
+        la fonction renvoie vrai si pos est dans le tétraèdre et faux sinon.
+        
+    paramètre :
+        Tetra : le type d'élément
+        pos_nodes : le position des sommets dans l'espace
+        pos : la position du point dans l'espace
+
+*/
+template<class PosNodes, class Pvec>
+bool is_inside_linear( const Tetra &elem, const PosNodes &pos_nodes, const Pvec &pos ) {
+
+    typedef typename Pvec::template SubType<0>::T T;
+
+    #define COEF_A( i, j, k ) ( - pos_nodes[i][1] * pos_nodes[j][2] + pos_nodes[i][1] * pos_nodes[k][2] + pos_nodes[i][2] * pos_nodes[j][1] - pos_nodes[i][2] * pos_nodes[k][1] - pos_nodes[j][1] * pos_nodes[k][2] + pos_nodes[j][2] * pos_nodes[k][1] )
+    
+    #define COEF_B( i, j, k ) ( pos_nodes[i][0] * pos_nodes[j][2] - pos_nodes[i][0] * pos_nodes[k][2] - pos_nodes[i][2] * pos_nodes[j][0] + pos_nodes[i][2] * pos_nodes[k][0] + pos_nodes[j][0] * pos_nodes[k][2] - pos_nodes[j][2] * pos_nodes[k][0] )
+    
+    #define COEF_C( i, j, k ) ( - pos_nodes[i][0] * pos_nodes[j][1] + pos_nodes[i][0] * pos_nodes[k][1] + pos_nodes[i][1] * pos_nodes[j][0] - pos_nodes[i][1] * pos_nodes[k][0] - pos_nodes[j][0] * pos_nodes[k][1] + pos_nodes[j][1] * pos_nodes[k][0] )
+    
+    #define COEF_D( i, j, k ) ( pos_nodes[i][0] * pos_nodes[j][1] * pos_nodes[k][2] - pos_nodes[i][0] * pos_nodes[j][2] * pos_nodes[k][1] - pos_nodes[i][1] * pos_nodes[j][0] * pos_nodes[k][2] + pos_nodes[i][1] * pos_nodes[j][2] * pos_nodes[k][0] + pos_nodes[i][2] * pos_nodes[j][0] * pos_nodes[k][1] - pos_nodes[i][2] * pos_nodes[j][1] * pos_nodes[k][0] )
+
+    /// plan 0 2 1
+    T det1 = COEF_A( 0, 2, 1 ) * pos[ 0 ] + COEF_B( 0, 2, 1 ) * pos[ 1 ] + COEF_C( 0, 2, 1 ) * pos[ 2 ] + COEF_D( 0, 2, 1 );
+    /// plan 0 1 3  
+    T det2 = COEF_A( 0, 1, 3 ) * pos[ 0 ] + COEF_B( 0, 1, 3 ) * pos[ 1 ] + COEF_C( 0, 1, 3 ) * pos[ 2 ] + COEF_D( 0, 1, 3 );
+    if ( ( det1 * det2 < 0 ) ) return false;
+    /// plan 0 3 2
+    T det3 = COEF_A( 0, 3, 2 ) * pos[ 0 ] + COEF_B( 0, 3, 2 ) * pos[ 1 ] + COEF_C( 0, 3, 2 ) * pos[ 2 ] + COEF_D( 0, 3, 2 );
+    if ( ( det1 * det3 < 0 ) ) return false;
+    /// plan 1 2 3
+    T det4 = COEF_A( 1, 2, 3 ) * pos[ 0 ] + COEF_B( 1, 2, 3 ) * pos[ 1 ] + COEF_C( 1, 2, 3 ) * pos[ 2 ] + COEF_D( 1, 2, 3 ); 
+    if ( ( det1 * det4 < 0 ) ) return false;
+
+    #undef COEF_A
+    #undef COEF_B
+    #undef COEF_C
+    #undef COEF_D
+    
+    return true;
+}
 
 };
 
