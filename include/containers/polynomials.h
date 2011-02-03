@@ -11,11 +11,8 @@
 #include <string.h> /// memset
 using namespace std;
 
-
 #include "vec.h"
 #include "algo.h"
-
-
 
 #include "pol_dimension.h"
 #include "pol_tables.h"
