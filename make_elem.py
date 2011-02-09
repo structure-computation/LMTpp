@@ -157,7 +157,7 @@ def print_barycenter( name_elem, dim ):
       
     cw = Write_code('T')
     for i in range( e.dim ):
-        res = e.analytical_integration( pos[ i ] ) / e.analytical_integration( 1 )
+        res = e.integration( pos[ i ], e.degree ) / e.integration( 1, e.degree )
         # print res
         cw.add( res, 'res[' + str( i ) + ']', Write_code.Set )
     print cw.to_string()
@@ -172,7 +172,6 @@ e = Element( name_file, 3 )
 nameHEADER = 'LMT_' + re.sub( '[/.]','_', name_file ).upper()
 print '#ifndef '+nameHEADER
 print '#define '+nameHEADER
-print '#include "node.h"'
 print 'namespace LMT {'
 
 print_gauss_point_for_order(e)

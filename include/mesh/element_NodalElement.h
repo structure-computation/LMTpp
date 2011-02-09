@@ -1,6 +1,5 @@
 #ifndef LMT_NODALELEMENT
 #define LMT_NODALELEMENT
-#include "node.h"
 namespace LMT {
 inline const double *gauss_point_for_order(unsigned order, const NodalElement &elem) { /// order -> degre du polynome a integrer exactement
     static const unsigned offset[] = { 0, 2, 4, 6, 8, 10, 12, 14, 16, 18, }; // fonction de lordre du poly
@@ -165,14 +164,14 @@ Vec<T,1> barycenter( const Element<NodalElement,TN,Node<1,T,TNodalStaticData>,TD
 template<class TN,class T,class TNodalStaticData,class TD,unsigned NET>
 Vec<T,2> barycenter( const Element<NodalElement,TN,Node<2,T,TNodalStaticData>,TD,NET> &elem ) {
     Vec<T,2> res;
-    res[0]=elem.pos(0)[0]; res[1]=elem.pos(0)[1];
+    res[1]=elem.pos(0)[1]; res[0]=elem.pos(0)[0];
 
     return res;
 }
 template<class TN,class T,class TNodalStaticData,class TD,unsigned NET>
 Vec<T,3> barycenter( const Element<NodalElement,TN,Node<3,T,TNodalStaticData>,TD,NET> &elem ) {
     Vec<T,3> res;
-    res[2]=elem.pos(0)[2]; res[0]=elem.pos(0)[0]; res[1]=elem.pos(0)[1];
+    res[1]=elem.pos(0)[1]; res[0]=elem.pos(0)[0]; res[2]=elem.pos(0)[2];
 
     return res;
 }
