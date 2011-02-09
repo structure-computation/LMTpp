@@ -172,6 +172,7 @@ e = Element( name_file, 3 )
 nameHEADER = 'LMT_' + re.sub( '[/.]','_', name_file ).upper()
 print '#ifndef '+nameHEADER
 print '#define '+nameHEADER
+print '#include "node.h"'
 print 'namespace LMT {'
 
 print_gauss_point_for_order(e)

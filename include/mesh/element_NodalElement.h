@@ -1,5 +1,6 @@
 #ifndef LMT_NODALELEMENT
 #define LMT_NODALELEMENT
+#include "node.h"
 namespace LMT {
 inline const double *gauss_point_for_order(unsigned order, const NodalElement &elem) { /// order -> degre du polynome a integrer exactement
     static const unsigned offset[] = { 0, 2, 4, 6, 8, 10, 12, 14, 16, 18, }; // fonction de lordre du poly
