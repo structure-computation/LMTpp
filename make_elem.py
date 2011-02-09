@@ -144,6 +144,26 @@ def print_det_jac( e ):
     print cw.to_string()
     
     print '}'
+    
+# ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+def print_barycenter( name_elem, dim ):
+    e = Element( name_file, dim )
+    
+    print 'template<class TN,class T,class TNodalStaticData,class TD,unsigned NET>'
+    print 'Vec<T,' + str( dim ) + '> barycenter( const Element<' + e.name + ',TN,Node<' + str( dim ) + ',T,TNodalStaticData>,TD,NET> &elem ) {'
+    print '    Vec<T,' + str( dim ) + '> res;'
+
+    pos = e.pos()
+      
+    cw = Write_code('T')
+    for i in range( e.dim ):
+        res = e.analytical_integration( pos[ i ] ) / e.analytical_integration( 1 )
+        # print res
+        cw.add( res, 'res[' + str( i ) + ']', Write_code.Set )
+    print cw.to_string()
+    
+    print '    return res;'
+    print '}'
 
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
 name_file = sys.argv[1]
@@ -159,10 +179,12 @@ print_perm_if(e)
 for non_linear in [False,True]:
     print_get_var_inter(e,name_file,non_linear)
     
-print_interpolations(e)
-print_shape_functions(e)
-print_authorized_permutations(e)
-print_det_jac(e)
+print_interpolations( e )
+print_shape_functions( e )
+print_authorized_permutations( e )
+print_det_jac( e )
+for d in range( e.nb_var_inter, 4 ):
+    print_barycenter( name_file, d )
 
 print '}'
 print '#endif // '+nameHEADER
