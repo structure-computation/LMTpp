@@ -1,5 +1,6 @@
 #ifndef LMT_BAR_3
 #define LMT_BAR_3
+#include "node.h"
 namespace LMT {
 inline const double *gauss_point_for_order(unsigned order, const Bar_3 &elem) { /// order -> degre du polynome a integrer exactement
     static const unsigned offset[] = { 0, 5, 10, 15, 20, 27, 34, 41, 48, 55, }; // fonction de lordre du poly

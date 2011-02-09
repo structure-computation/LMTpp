@@ -1,5 +1,6 @@
 #ifndef LMT_TETRA
 #define LMT_TETRA
+#include "node.h"
 namespace LMT {
 inline const double *gauss_point_for_order(unsigned order, const Tetra &elem) { /// order -> degre du polynome a integrer exactement
     static const unsigned offset[] = { 0, 5, 10, 27, 48, 109, 170, 231, 292, 353, }; // fonction de lordre du poly
@@ -151,25 +152,25 @@ typedef typename Pvec::template SubType<0>::T T;
 }
 template<class PosNodes,class Pvec,class TVI> void get_var_inter(const Tetra &elem,const PosNodes &pos_nodes,const Pvec &pos,TVI &var_inter) {
 typedef typename Pvec::template SubType<0>::T T;
-    T reg0=1-var_inter[0]; T reg1=pos_nodes[3][2]-pos_nodes[0][2]; T reg2=pos_nodes[2][2]-pos_nodes[0][2]; T reg3=pos_nodes[2][1]-pos_nodes[0][1]; T reg4=pos_nodes[3][1]-pos_nodes[0][1];
-    T reg5=pos_nodes[2][0]-pos_nodes[0][0]; T reg6=pos_nodes[3][0]-pos_nodes[0][0]; reg0=reg0-var_inter[1]; T reg7=reg3*reg1; T reg8=reg6*reg2;
-    T reg9=reg4*reg2; T reg10=reg5*reg1; reg0=reg0-var_inter[2]; reg8=reg10-reg8; T reg11=reg0*pos_nodes[0][1];
-    T reg12=var_inter[0]*pos_nodes[1][1]; T reg13=pos_nodes[1][1]-pos_nodes[0][1]; T reg14=var_inter[0]*pos_nodes[1][0]; T reg15=reg5*reg4; reg9=reg7-reg9;
-    T reg16=pos_nodes[1][0]-pos_nodes[0][0]; T reg17=reg0*pos_nodes[0][0]; T reg18=reg6*reg3; T reg19=reg16*reg9; T reg20=reg13*reg8;
-    reg18=reg15-reg18; T reg21=reg0*pos_nodes[0][2]; T reg22=var_inter[0]*pos_nodes[1][2]; T reg23=pos_nodes[1][2]-pos_nodes[0][2]; T reg24=pos_nodes[2][0]*var_inter[1];
-    reg11=reg12+reg11; reg12=pos_nodes[2][1]*var_inter[1]; reg17=reg14+reg17; reg14=reg13*reg1; reg19=reg20-reg19;
-    reg20=reg23*reg18; T reg25=reg16*reg1; T reg26=reg6*reg23; T reg27=reg16*reg2; reg17=reg24+reg17;
-    reg24=pos_nodes[3][0]*var_inter[2]; reg11=reg12+reg11; reg12=pos_nodes[3][1]*var_inter[2]; T reg28=reg5*reg23; T reg29=pos_nodes[2][2]*var_inter[1];
-    reg21=reg22+reg21; reg22=reg3*reg23; T reg30=reg13*reg2; T reg31=reg4*reg23; reg22=reg30-reg22;
-    reg28=reg27-reg28; T reg32=reg16*reg4; reg20=reg19-reg20; reg31=reg14-reg31; reg19=reg6*reg13;
-    T reg33=reg16*reg3; T reg34=reg5*reg13; reg26=reg25-reg26; T reg35=pos_nodes[3][2]*var_inter[2]; reg24=reg17+reg24;
-    reg21=reg29+reg21; reg12=reg11+reg12; reg8=reg8/reg20; reg19=reg32-reg19; reg26=reg26/reg20;
-    reg28=reg28/reg20; reg24=pos[0]-reg24; reg34=reg33-reg34; reg12=pos[1]-reg12; reg22=reg22/reg20;
-    reg31=reg31/reg20; reg35=reg21+reg35; reg9=reg9/reg20; reg8=reg8*reg12; reg31=reg24*reg31;
-    reg26=reg26*reg12; reg22=reg24*reg22; reg28=reg12*reg28; reg9=reg24*reg9; reg34=reg34/reg20;
-    reg19=reg19/reg20; reg20=reg18/reg20; reg35=pos[2]-reg35; reg20=reg35*reg20; reg9=reg8-reg9;
-    reg19=reg35*reg19; reg26=reg31-reg26; reg34=reg35*reg34; reg22=reg28-reg22; var_inter[0]+=reg9-reg20;
-    var_inter[1]+=reg19+reg26; var_inter[2]+=reg22-reg34;
+    T reg0=1-var_inter[0]; reg0=reg0-var_inter[1]; T reg1=pos_nodes[2][0]-pos_nodes[0][0]; T reg2=pos_nodes[3][2]-pos_nodes[0][2]; T reg3=pos_nodes[2][2]-pos_nodes[0][2];
+    T reg4=pos_nodes[3][1]-pos_nodes[0][1]; T reg5=pos_nodes[2][1]-pos_nodes[0][1]; T reg6=pos_nodes[3][0]-pos_nodes[0][0]; T reg7=reg6*reg3; T reg8=reg1*reg2;
+    T reg9=reg4*reg3; T reg10=reg5*reg2; reg0=reg0-var_inter[2]; T reg11=reg0*pos_nodes[0][0]; T reg12=var_inter[0]*pos_nodes[1][0];
+    T reg13=pos_nodes[1][0]-pos_nodes[0][0]; T reg14=reg1*reg4; reg9=reg10-reg9; reg7=reg8-reg7; T reg15=reg0*pos_nodes[0][1];
+    T reg16=var_inter[0]*pos_nodes[1][1]; T reg17=pos_nodes[1][1]-pos_nodes[0][1]; T reg18=reg6*reg5; T reg19=reg17*reg7; T reg20=pos_nodes[1][2]-pos_nodes[0][2];
+    T reg21=pos_nodes[2][0]*var_inter[1]; reg18=reg14-reg18; T reg22=reg13*reg9; T reg23=pos_nodes[2][1]*var_inter[1]; reg16=reg15+reg16;
+    reg15=pos_nodes[1][2]*var_inter[0]; reg12=reg11+reg12; reg11=reg0*pos_nodes[0][2]; T reg24=reg13*reg2; T reg25=reg4*reg20;
+    T reg26=reg17*reg3; T reg27=reg5*reg20; T reg28=reg17*reg2; T reg29=reg20*reg18; T reg30=reg1*reg20;
+    reg22=reg19-reg22; reg19=pos_nodes[3][1]*var_inter[2]; reg23=reg16+reg23; reg15=reg11+reg15; reg11=reg6*reg20;
+    reg16=pos_nodes[2][2]*var_inter[1]; reg21=reg12+reg21; reg12=reg13*reg3; T reg31=pos_nodes[3][0]*var_inter[2]; reg29=reg22-reg29;
+    reg31=reg21+reg31; reg25=reg28-reg25; reg27=reg26-reg27; reg30=reg12-reg30; reg21=reg13*reg4;
+    reg22=reg6*reg17; T reg32=reg13*reg5; T reg33=reg1*reg17; reg11=reg24-reg11; T reg34=pos_nodes[3][2]*var_inter[2];
+    reg16=reg15+reg16; reg19=reg23+reg19; reg31=pos[0]-reg31; reg25=reg25/reg29; reg34=reg16+reg34;
+    reg27=reg27/reg29; reg19=pos[1]-reg19; reg33=reg32-reg33; reg11=reg11/reg29; reg30=reg30/reg29;
+    reg7=reg7/reg29; reg22=reg21-reg22; reg9=reg9/reg29; reg7=reg7*reg19; reg25=reg31*reg25;
+    reg11=reg11*reg19; reg27=reg31*reg27; reg30=reg19*reg30; reg9=reg31*reg9; reg33=reg33/reg29;
+    reg22=reg22/reg29; reg29=reg18/reg29; reg34=pos[2]-reg34; reg29=reg34*reg29; reg9=reg7-reg9;
+    reg22=reg34*reg22; reg11=reg25-reg11; reg33=reg34*reg33; reg27=reg30-reg27; var_inter[0]+=reg9-reg29;
+    var_inter[1]+=reg22+reg11; var_inter[2]+=reg27-reg33;
 
 }
 template<> struct ElemVarInterFromPosNonLinear<Tetra> { static const bool res = 0; };
@@ -327,27 +328,27 @@ template<> struct AuthorizedPerm<Tetra> {
 template<class TN,class TNG,class TD,unsigned NET,class TVI>
 typename TNG::T get_det_jac( const Element<Tetra,TN,TNG,TD,NET> &elem, const TVI &var_inter ) {
     typedef typename TNG::T T;
-    T reg0=elem.pos(2)[1]-elem.pos(0)[1]; T reg1=elem.pos(2)[2]-elem.pos(0)[2]; T reg2=elem.pos(3)[2]-elem.pos(0)[2]; T reg3=elem.pos(1)[1]-elem.pos(0)[1]; T reg4=elem.pos(1)[2]-elem.pos(0)[2];
-    T reg5=elem.pos(3)[1]-elem.pos(0)[1]; T reg6=reg5*reg4; T reg7=reg5*reg1; T reg8=reg0*reg2; T reg9=reg3*reg2;
-    T reg10=elem.pos(2)[0]-elem.pos(0)[0]; reg6=reg9-reg6; reg7=reg8-reg7; reg8=reg0*reg4; reg9=reg3*reg1;
-    T reg11=elem.pos(1)[0]-elem.pos(0)[0]; reg8=reg9-reg8; reg9=reg11*reg7; T reg12=reg10*reg6; T reg13=elem.pos(3)[0]-elem.pos(0)[0];
-    T reg14=reg13*reg8; reg12=reg9-reg12; reg12=reg14+reg12; return reg12;
+    T reg0=elem.pos(3)[2]-elem.pos(0)[2]; T reg1=elem.pos(3)[1]-elem.pos(0)[1]; T reg2=elem.pos(2)[2]-elem.pos(0)[2]; T reg3=elem.pos(1)[1]-elem.pos(0)[1]; T reg4=elem.pos(1)[2]-elem.pos(0)[2];
+    T reg5=elem.pos(2)[1]-elem.pos(0)[1]; T reg6=reg1*reg2; T reg7=reg0*reg3; T reg8=reg0*reg5; T reg9=reg1*reg4;
+    T reg10=reg2*reg3; T reg11=elem.pos(1)[0]-elem.pos(0)[0]; reg6=reg8-reg6; reg8=elem.pos(2)[0]-elem.pos(0)[0]; reg9=reg7-reg9;
+    reg7=reg4*reg5; reg7=reg10-reg7; reg10=reg8*reg9; T reg12=reg6*reg11; T reg13=elem.pos(3)[0]-elem.pos(0)[0];
+    reg10=reg12-reg10; reg12=reg13*reg7; reg12=reg10+reg12; return reg12;
 
 }
 template<class TN,class T,class TNodalStaticData,class TD,unsigned NET>
 Vec<T,3> barycenter( const Element<Tetra,TN,Node<3,T,TNodalStaticData>,TD,NET> &elem ) {
     Vec<T,3> res;
-    T reg0=elem.pos(2)[1]-elem.pos(0)[1]; T reg1=elem.pos(2)[2]-elem.pos(0)[2]; T reg2=elem.pos(1)[2]-elem.pos(0)[2]; T reg3=elem.pos(1)[1]-elem.pos(0)[1]; T reg4=elem.pos(3)[1]-elem.pos(0)[1];
-    T reg5=elem.pos(3)[2]-elem.pos(0)[2]; T reg6=reg0*reg5; T reg7=reg3*reg5; T reg8=reg1*reg4; T reg9=reg2*reg4;
-    T reg10=0.25*elem.pos(1)[1]; T reg11=0.25*elem.pos(0)[1]; T reg12=0.25*elem.pos(1)[2]; T reg13=0.25*elem.pos(0)[2]; T reg14=0.25*elem.pos(1)[0];
-    T reg15=0.25*elem.pos(0)[0]; T reg16=reg2*reg0; T reg17=reg3*reg1; T reg18=elem.pos(2)[0]-elem.pos(0)[0]; T reg19=elem.pos(1)[0]-elem.pos(0)[0];
-    reg8=reg6-reg8; reg9=reg7-reg9; reg6=0.25*elem.pos(2)[2]; reg16=reg17-reg16; reg13=reg12+reg13;
-    reg7=reg18*reg9; reg12=reg19*reg8; reg14=reg15+reg14; reg15=0.25*elem.pos(2)[0]; reg17=0.25*elem.pos(2)[1];
-    reg11=reg10+reg11; reg10=elem.pos(3)[0]-elem.pos(0)[0]; reg6=reg13+reg6; reg13=0.25*elem.pos(3)[2]; T reg20=0.25*elem.pos(3)[1];
-    reg17=reg11+reg17; reg11=0.25*elem.pos(3)[0]; reg15=reg14+reg15; reg14=reg10*reg16; reg7=reg12-reg7;
-    reg11=reg15+reg11; reg20=reg17+reg20; reg13=reg6+reg13; reg14=reg7+reg14; reg13=reg14*reg13;
-    reg11=reg14*reg11; reg20=reg14*reg20; reg13=0.16666666666666665741*reg13; reg11=0.16666666666666665741*reg11; reg20=0.16666666666666665741*reg20;
-    reg6=0.16666666666666665741*reg14; res[2]=reg13/reg6; res[0]=reg11/reg6; res[1]=reg20/reg6;
+    T reg0=elem.pos(3)[2]-elem.pos(0)[2]; T reg1=elem.pos(3)[1]-elem.pos(0)[1]; T reg2=elem.pos(1)[1]-elem.pos(0)[1]; T reg3=elem.pos(1)[2]-elem.pos(0)[2]; T reg4=elem.pos(2)[2]-elem.pos(0)[2];
+    T reg5=elem.pos(2)[1]-elem.pos(0)[1]; T reg6=reg4*reg1; T reg7=reg2*reg0; T reg8=reg5*reg0; T reg9=reg3*reg1;
+    T reg10=0.25*elem.pos(0)[1]; T reg11=0.25*elem.pos(1)[1]; T reg12=0.25*elem.pos(1)[0]; T reg13=0.25*elem.pos(0)[0]; T reg14=0.25*elem.pos(0)[2];
+    T reg15=0.25*elem.pos(1)[2]; T reg16=reg3*reg5; T reg17=reg2*reg4; reg9=reg7-reg9; reg7=elem.pos(2)[0]-elem.pos(0)[0];
+    reg6=reg8-reg6; reg8=elem.pos(1)[0]-elem.pos(0)[0]; T reg18=0.25*elem.pos(2)[1]; T reg19=elem.pos(3)[0]-elem.pos(0)[0]; reg11=reg10+reg11;
+    reg10=0.25*elem.pos(2)[2]; T reg20=0.25*elem.pos(2)[0]; reg12=reg13+reg12; reg13=reg8*reg6; reg16=reg17-reg16;
+    reg17=reg7*reg9; reg15=reg14+reg15; reg14=0.25*elem.pos(3)[2]; reg11=reg18+reg11; reg15=reg10+reg15;
+    reg10=0.25*elem.pos(3)[1]; reg18=0.25*elem.pos(3)[0]; reg20=reg12+reg20; reg12=reg19*reg16; reg17=reg13-reg17;
+    reg18=reg20+reg18; reg11=reg10+reg11; reg15=reg14+reg15; reg12=reg17+reg12; reg15=reg12*reg15;
+    reg18=reg12*reg18; reg11=reg12*reg11; reg15=0.16666666666666665741*reg15; reg18=0.16666666666666665741*reg18; reg11=0.16666666666666665741*reg11;
+    reg10=0.16666666666666665741*reg12; res[2]=reg15/reg10; res[0]=reg18/reg10; res[1]=reg11/reg10;
 
     return res;
 }

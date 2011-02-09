@@ -1,5 +1,6 @@
 #ifndef LMT_BAR
 #define LMT_BAR
+#include "node.h"
 namespace LMT {
 inline const double *gauss_point_for_order(unsigned order, const Bar &elem) { /// order -> degre du polynome a integrer exactement
     static const unsigned offset[] = { 0, 3, 6, 11, 16, 23, 30, 39, 48, 59, }; // fonction de lordre du poly
@@ -63,7 +64,7 @@ typedef typename Pvec::template SubType<0>::T T;
 }
 template<class PosNodes,class Pvec,class TVI> void get_var_inter(const Bar &elem,const PosNodes &pos_nodes,const Pvec &pos,TVI &var_inter) {
 typedef typename Pvec::template SubType<0>::T T;
-    T reg0=1-var_inter[0]; T reg1=pos_nodes[0][0]*reg0; T reg2=pos_nodes[1][0]*var_inter[0]; T reg3=pos_nodes[1][0]-pos_nodes[0][0]; reg2=reg1+reg2;
+    T reg0=1-var_inter[0]; T reg1=pos_nodes[0][0]*reg0; T reg2=var_inter[0]*pos_nodes[1][0]; T reg3=pos_nodes[1][0]-pos_nodes[0][0]; reg2=reg1+reg2;
     reg2=pos[0]-reg2; reg1=1.0/reg3; reg1=reg2*reg1; var_inter[0]+=reg1;
 
 }
@@ -179,16 +180,16 @@ template<class TN,class TNG,class TD,unsigned NET,class TVI>
 typename TNG::T get_det_jac( const Element<Bar,TN,TNG,TD,NET> &elem, const TVI &var_inter ) {
     typedef typename TNG::T T;
     T reg0=elem.pos(1)[0]-elem.pos(0)[0]; T reg1=elem.pos(1)[1]-elem.pos(0)[1]; T reg2=elem.pos(1)[2]-elem.pos(0)[2]; T reg3=pow(reg0,2); T reg4=pow(reg1,2);
-    T reg5=pow(reg2,2); reg3=reg4+reg3; reg5=reg3+reg5; reg5=pow(reg5,0.5); reg3=reg1/reg5;
-    reg4=reg0/reg5; reg1=reg3*reg1; reg4=reg0*reg4; reg5=reg2/reg5; reg5=reg2*reg5;
-    reg1=reg4+reg1; reg5=reg1+reg5; return reg5;
+    reg3=reg4+reg3; reg4=pow(reg2,2); reg3=reg4+reg3; reg3=pow(reg3,0.5); reg4=reg0/reg3;
+    T reg5=reg1/reg3; reg3=reg2/reg3; reg0=reg4*reg0; reg1=reg5*reg1; reg2=reg3*reg2;
+    reg0=reg1+reg0; reg0=reg2+reg0; return reg0;
 
 }
 template<class TN,class T,class TNodalStaticData,class TD,unsigned NET>
 Vec<T,1> barycenter( const Element<Bar,TN,Node<1,T,TNodalStaticData>,TD,NET> &elem ) {
     Vec<T,1> res;
-    T reg0=0.5*elem.pos(1)[0]; T reg1=0.5*elem.pos(0)[0]; reg1=reg0+reg1; reg0=elem.pos(1)[0]-elem.pos(0)[0]; reg1=reg1*reg0;
-    res[0]=reg1/reg0;
+    T reg0=0.5*elem.pos(1)[0]; T reg1=0.5*elem.pos(0)[0]; T reg2=elem.pos(1)[0]-elem.pos(0)[0]; reg1=reg0+reg1; reg1=reg2*reg1;
+    res[0]=reg1/reg2;
 
     return res;
 }
@@ -196,23 +197,23 @@ template<class TN,class T,class TNodalStaticData,class TD,unsigned NET>
 Vec<T,2> barycenter( const Element<Bar,TN,Node<2,T,TNodalStaticData>,TD,NET> &elem ) {
     Vec<T,2> res;
     T reg0=elem.pos(1)[0]-elem.pos(0)[0]; T reg1=elem.pos(1)[1]-elem.pos(0)[1]; T reg2=pow(reg0,2); T reg3=pow(reg1,2); reg3=reg2+reg3;
-    reg3=pow(reg3,0.5); reg2=reg1/reg3; reg3=reg0/reg3; T reg4=0.5*elem.pos(0)[1]; T reg5=0.5*elem.pos(1)[1];
-    T reg6=0.5*elem.pos(0)[0]; T reg7=0.5*elem.pos(1)[0]; reg2=reg1*reg2; reg3=reg0*reg3; reg6=reg7+reg6;
-    reg2=reg3+reg2; reg4=reg5+reg4; reg6=reg2*reg6; reg4=reg2*reg4; res[0]=reg6/reg2;
-    res[1]=reg4/reg2;
+    reg3=pow(reg3,0.5); reg2=reg0/reg3; reg3=reg1/reg3; reg2=reg0*reg2; reg3=reg1*reg3;
+    reg0=0.5*elem.pos(1)[0]; reg1=0.5*elem.pos(0)[0]; T reg4=0.5*elem.pos(1)[1]; T reg5=0.5*elem.pos(0)[1]; reg3=reg2+reg3;
+    reg1=reg0+reg1; reg5=reg4+reg5; reg1=reg3*reg1; reg5=reg3*reg5; res[0]=reg1/reg3;
+    res[1]=reg5/reg3;
 
     return res;
 }
 template<class TN,class T,class TNodalStaticData,class TD,unsigned NET>
 Vec<T,3> barycenter( const Element<Bar,TN,Node<3,T,TNodalStaticData>,TD,NET> &elem ) {
     Vec<T,3> res;
-    T reg0=elem.pos(1)[1]-elem.pos(0)[1]; T reg1=elem.pos(1)[0]-elem.pos(0)[0]; T reg2=pow(reg0,2); T reg3=pow(reg1,2); T reg4=elem.pos(1)[2]-elem.pos(0)[2];
-    reg2=reg3+reg2; reg3=pow(reg4,2); reg3=reg2+reg3; reg3=pow(reg3,0.5); reg2=reg1/reg3;
-    T reg5=reg0/reg3; reg5=reg0*reg5; reg2=reg1*reg2; reg3=reg4/reg3; reg0=0.5*elem.pos(1)[1];
-    reg5=reg2+reg5; reg3=reg4*reg3; reg1=0.5*elem.pos(1)[0]; reg2=0.5*elem.pos(0)[0]; reg4=0.5*elem.pos(1)[2];
-    T reg6=0.5*elem.pos(0)[1]; T reg7=0.5*elem.pos(0)[2]; reg3=reg5+reg3; reg4=reg7+reg4; reg2=reg1+reg2;
-    reg6=reg0+reg6; reg4=reg3*reg4; reg6=reg3*reg6; reg2=reg3*reg2; res[2]=reg4/reg3;
-    res[0]=reg2/reg3; res[1]=reg6/reg3;
+    T reg0=elem.pos(1)[0]-elem.pos(0)[0]; T reg1=elem.pos(1)[1]-elem.pos(0)[1]; T reg2=elem.pos(1)[2]-elem.pos(0)[2]; T reg3=pow(reg1,2); T reg4=pow(reg0,2);
+    reg3=reg4+reg3; reg4=pow(reg2,2); reg4=reg3+reg4; reg4=pow(reg4,0.5); reg3=reg0/reg4;
+    T reg5=reg1/reg4; reg4=reg2/reg4; reg3=reg0*reg3; reg5=reg1*reg5; reg0=0.5*elem.pos(1)[2];
+    reg1=0.5*elem.pos(0)[2]; T reg6=0.5*elem.pos(0)[1]; T reg7=0.5*elem.pos(1)[1]; T reg8=0.5*elem.pos(0)[0]; T reg9=0.5*elem.pos(1)[0];
+    reg2=reg4*reg2; reg5=reg3+reg5; reg8=reg9+reg8; reg2=reg5+reg2; reg6=reg7+reg6;
+    reg0=reg1+reg0; reg8=reg2*reg8; reg6=reg2*reg6; reg0=reg2*reg0; res[0]=reg8/reg2;
+    res[1]=reg6/reg2; res[2]=reg0/reg2;
 
     return res;
 }
