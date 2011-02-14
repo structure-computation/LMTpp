@@ -66,6 +66,8 @@ struct MUMPS_solver {
 
     ~MUMPS_solver();
 
+    bool already_factorized;
+    
     /// factorise la matrice passée en paramètre et libère sa mémoire si want_free == true.
     void get_factorization( Mat<double, Sym<>, SparseLine<> > &mat, bool want_free = true, bool is_definite_positive = false );
     void get_factorization( Mat<double, Gen<>, SparseLine<> > &mat, bool want_free = true );

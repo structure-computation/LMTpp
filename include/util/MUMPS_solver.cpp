@@ -16,6 +16,7 @@ MUMPS_solver::MUMPS_solver() {
     id.a   = NULL; /// valeur des éléments non nuls 
     id.rhs = NULL; /// valeur des éléments non nuls du vecteur second membre
     myid = -1;
+    already_factorized = false;
 }
 
 MUMPS_solver::~MUMPS_solver() {
@@ -49,6 +50,9 @@ void MUMPS_solver::init_MPI( int argc, char* argv[] ) {
 }
 
 void MUMPS_solver::get_factorization( Mat<double, Sym<>, SparseLine<> > &mat, bool want_free, bool is_definite_positive ) {
+//     PRINT(already_factorized);
+    if ( already_factorized ) return;
+    else already_factorized = true;
     
     init_MPI();
     
@@ -85,6 +89,8 @@ void MUMPS_solver::get_factorization( Mat<double, Sym<>, SparseLine<> > &mat, bo
 }
 
 void MUMPS_solver::get_factorization( Mat<double, Gen<>, SparseLine<> > &mat, bool want_free ) {
+    if ( already_factorized ) return;
+    else already_factorized = true;
 
     init_MPI();
     

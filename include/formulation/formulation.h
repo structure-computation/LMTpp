@@ -20,6 +20,7 @@
 #include "sollicitation.h"
 #include "util/symamd.h"
 #include "util/solveLDL.h"
+#include "util/MUMPS_solver.h"
 #include "formulation/formulation_ancestor.h"
 #include "containers/matcholamd.h"
 #include "containers/matumfpack.h"
@@ -34,7 +35,7 @@ struct LocalOperator {
     void update_variables(TM *m){ };
 };
 
-/** To be redefined for each new for,ulations */
+/** To be redefined for each new formulations */
 template<class TF>
 void read_material_to_mesh_( const XmlNode &n, TF &f ) {}
 
@@ -127,6 +128,11 @@ public:
     virtual unsigned get_nb_vectors(){ return nb_vectors; }
 
 private:
+#if LDL
+    LDL_solver solver;
+#elif WITH_MUMPS
+    MUMPS_solver solver;
+#endif
     template<unsigned nm,unsigned n,unsigned tne> struct MatCaracElem {
         typedef typename TM::TElemList::template SubType<n>::T TE;
         typedef CaracFormulationForElement<NameFormulation,TE,NameVariant,ScalarType> CFE;
@@ -808,19 +814,20 @@ public:
     }
     ///
     bool solve_system_(AbsScalarType iterative_criterium, const Number<1> &n_wont_add_nz, const Number<0> &sym) {
-        //matrices(Number<0>()).get_factorization();
         #if LDL
-        //          std::cout << "Resolution LDL " << std::endl;
+        solver.get_factorization(matrices(Number<0>()),false);
         vectors[0] = sollicitation;
-        LDL_solver l;
-        l.get_factorization(matrices(Number<0>()),false);
-        l.solve( vectors[0] );
+        solver.solve( vectors[0] );
         #elif WITH_CHOLMOD
-      	if ( not matrices(Number<0>()).get_factorization() ) {
+        if ( not matrices(Number<0>()).get_factorization() ) {
             std::cout << "Bing. Inversion error" << std::endl;
             return false;
         }
         vectors[0] = matrices(Number<0>()).solve( sollicitation );
+        #elif WITH_MUMPS
+        solver.get_factorization(matrices(Number<0>()));
+        vectors[0] = sollicitation;
+        solver.solve( vectors[0] );
         #else
       	try {
             //             std::cout << "Resolution autre " << std::endl;
@@ -837,6 +844,10 @@ public:
             return false;
         }
         vectors[0] = matrices(Number<0>()).solve( sollicitation );
+        #elif WITH_MUMPS
+        solver.get_factorization(matrices(Number<0>()));
+        vectors[0] = sollicitation;
+        solver.solve( vectors[0] );
         #else
         if ( iterative_criterium ) {
             Mat<ScalarType,Sym<>,SparseLine<> > mm = matrices(Number<0>());
@@ -875,10 +886,9 @@ public:
                 //if ( MatCarac<0>::symm and matrices(Number<0>()).nb_rows() > 1000000 ) {
                 #if LDL
                    std::cout << "solveur LDL" << std::endl;
-                   LDL_solver ls;
-                   ls.get_factorization( matrices(Number<0>()), false );
+                   solver.get_factorization( matrices(Number<0>()), false );
                    vectors[0] = sollicitation;
-                   ls.solve( vectors[0] );
+                   solver.solve( vectors[0] );
                 #else
                 //}
                 //else
@@ -1149,10 +1159,9 @@ private:
         #endif
         #else
         std::cout << "solveur LDL dans solve_system_using_factorization_matrix" << std::endl;
-        LDL_solver ls;
-        ls.get_factorization( matrices(Number<0>()), false );
+        solver.get_factorization( matrices(Number<0>()), false );
         vectors[0] = sollicitation;
-        ls.solve( vectors[0] );
+        solver.solve( vectors[0] );
         #endif
     }
     void solve_system_using_factorization_matrix(const Number<1> &sym) {
@@ -1162,10 +1171,9 @@ private:
         #endif
         #else
         std::cout << "solveur LDL dans solve_system_using_factorization_matrix" << std::endl;
-        LDL_solver ls;
-        ls.get_factorization( matrices(Number<0>()), false );
+        solver.get_factorization( matrices(Number<0>()), false );
         vectors[0] = sollicitation;
-        ls.solve( vectors[0] );
+        solver.solve( vectors[0] );
         #endif
     }
 

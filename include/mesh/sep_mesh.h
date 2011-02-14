@@ -10,7 +10,7 @@ struct SepMesh {
     SepMesh( TM &m ) {
         created_nodes.resize( m.node_list.size(), 0 );
     }
-    
+
     template<class TE0,class TL1,class TL2>
     void operator()( TE0 &e0, TM &m, const TL1 &ls_crack, const TL2 &ls_front ) {
         if ( ls_crack( center( e0 ) ) >= 0 )
@@ -33,7 +33,7 @@ struct SepMesh {
             }
         }
     }
-    
+
     template<class TE0,class TL1 >
     void operator()( TE0 &e0, TM &m, const TL1 &ls_crack ) {
         if ( ls_crack( center( e0 ) ) >= 0 )
@@ -56,7 +56,7 @@ struct SepMesh {
             }
         }
     }
-    
+
     Vec<typename TM::TNode *> created_nodes;
 };
 
