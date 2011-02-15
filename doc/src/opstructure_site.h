@@ -3,6 +3,7 @@
 
 #include <map>
 #include <string>
+#include <sys/stat.h>
 
 //#include "pagecomment.h"
 #include "op.h"

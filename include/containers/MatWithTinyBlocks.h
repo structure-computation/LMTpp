@@ -271,6 +271,8 @@ struct MatWithTinyBlocks<T,Sym<3> > {
     void add( ST row, ST col, T v_0_0, T v_0_1, T v_0_2, T v_1_0, T v_1_1, T v_1_2, T v_2_0, T v_2_1, T v_2_2 ) {
         assert( row % n == 0 );
         assert( col % n == 0 );
+	if ( col > row ) 
+	    return add( col, row, v_0_0, v_1_0, v_2_0, v_0_1, v_1_1, v_2_1, v_0_2, v_1_2, v_2_2 );
         if ( row / n == col / n ) {
             DB &d = diags[ row / n ];
             
