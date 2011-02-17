@@ -12,7 +12,7 @@ Elle prend comme arguments:
     la dimension du probleme
 On suppose que tous les ddl sont interpoles avec les memes fonctions de forme
 
-\relates Maillage/Elément
+\keyword Maillage/Elément
 */
 template<class TE, class TMA>
 void create_mass_matrix(const TE &e, TMA &mass_mat, const unsigned &dim){
