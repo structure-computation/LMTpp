@@ -1,5 +1,16 @@
-// Fonction pour calculer la matrice des masses elementaires pour un element
-// On suppose que tous les ddl sont interpoles avec les memes fonctions de forme
+/*! 
+
+\author Federica Daghia <daghia@lmt.ens-cachan.fr>
+
+Fonction pour calculer la matrice des masses elementaires pour un element
+Elle prend comme arguments:
+	l'element (const),
+	la matrice des masses (attention - elle est reinitialisee a zero au debut),
+	la dimension du probleme
+On suppose que tous les ddl sont interpoles avec les memes fonctions de forme
+
+\relates Maillage/Elément
+*/
 
 using namespace LMT;
 
