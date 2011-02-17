@@ -2,7 +2,6 @@
 using namespace LMT;
 
 /*! 
-
 \author Federica Daghia <daghia@lmt.ens-cachan.fr>
 
 Fonction pour calculer la matrice des masses elementaires pour un element
@@ -38,7 +37,10 @@ void create_mass_matrix(const TE &e, TMA &mass_mat, const unsigned &dim){
 	double det_jac;
 	for (unsigned i=0; poids > 0; i++){
 		poids = pg[step*i];
-		Vec<double, dimr> p(pg[step*i+1], pg[step*i+2], pg[step*i+3]); // pas generale - peut etre oui car pas plus que 3 dims
+		Vec<double, dimr> p;
+		for (unsigned j=0; j < dimr; j++){
+			p[j] = pg[step*i+j+1]; 	
+		};
 		Vec<double, Name::nb_nodes> res;
 		Mat<double> res1 (1,4,0.);
 		get_shape_functions(Name(), p, res);
