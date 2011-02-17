@@ -1,19 +1,19 @@
+
+using namespace LMT;
+
 /*! 
 
 \author Federica Daghia <daghia@lmt.ens-cachan.fr>
 
 Fonction pour calculer la matrice des masses elementaires pour un element
 Elle prend comme arguments:
-	l'element (const),
-	la matrice des masses (attention - elle est reinitialisee a zero au debut),
-	la dimension du probleme
+    l'element (const),
+    la matrice des masses (attention - elle est reinitialisee a zero au debut),
+    la dimension du probleme
 On suppose que tous les ddl sont interpoles avec les memes fonctions de forme
 
 \relates Maillage/Elément
 */
-
-using namespace LMT;
-
 template<class TE, class TMA>
 void create_mass_matrix(const TE &e, TMA &mass_mat, const unsigned &dim){
 	// generalisation pour le type d'element
