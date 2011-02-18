@@ -605,21 +605,6 @@ public:
     template<class TST,int s2> Vec<SubVec<Vec,Vec<TST,s2>,false,false>,s2> operator[](Vec<TST,s2> &v2) { return Vec<SubVec<Vec,Vec<TST,s2>,false,false>,s2>(*this,v2); }
     template<class TST,int s2> Vec<SubVec<Vec,Vec<TST,s2>,true ,false>,s2> operator[](Vec<TST,s2> &v2) const { return Vec<SubVec<Vec,Vec<TST,s2>,true ,false>,s2>(*this,v2); }
     
-    template<class Hdf,class TS>
-    void write_to( Hdf &hdf, const TS &name ) {
-        Vec<int,1> s( size() );
-        hdf.write( name, ptr(), s );
-    }
-
-    template<class Hdf,class TS>
-    void read_from( const Hdf &hdf, const TS &name ) {
-        // size
-        Vec<int,1> s;
-        hdf.read_size( name, s );
-        resize( s[ 0 ] );
-        // data
-        hdf.read_data( name, ptr(), s, s );
-    }
 
     template<class T2> bool contains( const T2 &v ) const {
         for( unsigned i=0; i<size(); ++i )
@@ -630,7 +615,7 @@ public:
     
     template<class T2 > 
     unsigned find( const T2 &v ) const {
-        for( unsigned i = 0; i < size(); ++i )
+        for( unsigned i=0; i<size(); ++i )
             if ( val[i] == v )
                 return i;
         return size();
@@ -638,7 +623,7 @@ public:
 
     template<class T2, class Cmp > 
     unsigned find( const T2 &v, Cmp cmp ) const {
-        for( unsigned i = 0; i < size(); ++i )
+        for( unsigned i=0; i<size(); ++i )
             if ( cmp( val[i], v ) )
                 return i;
         return size();

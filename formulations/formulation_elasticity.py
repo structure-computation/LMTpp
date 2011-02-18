@@ -12,7 +12,6 @@ tr_epsilon = Variable( interpolation='der_nodal', default_value='0', unit='1' )
 
 f_nodal = Variable( nb_dim=[dim], nb_der=0, default_value='0.0,'*(dim-1)+'0.0', unit='N' )
 
-
 # --------------------------------------------------------------------------------------------------------------------------------
 def formulation():
     sigma = mat_sym_to_vec_col( options['behavior_law']( formulation_instance ) )
