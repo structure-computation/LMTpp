@@ -1,10 +1,11 @@
 /*! 
 \generic_comment gauss_point_for_order
 
-    Cette fonction retourne suivant l'ordre et l'élément passé en paramètre un pointeur constant sur un tableau de double (type const double*) contenant à la suite le poids puis les coordonnées des points de Gauss ( p,u,v,p,u,v,...).
+    Cette fonction retourne suivant l'ordre et l'élément passé en paramètre un pointeur constant sur un tableau de double (type const double*) contenant à la suite le poids puis les coordonnées des points de Gauss ( p,u,v,p,u,v,...) ( p désigne le poids et u, v sont les corrdonées du point de Gauss dans l'espace de référence.
+    IMPORTANT: pour connaître la fin de la liste des points de Gauss pour un ordre donné, on met par convention un poids nul, ce qui donne en 2D par exemple  (p1, u1, v1, p2, u2, v2, ..., pN, uN, vN, 0, ... ) où N est le nombre de points de Gauss.
 
     Exemple d'utilisation :
-    Supposons que nous voulions travailler avec les points de Gauss d'un Hexa à l'ordre 2. On ferait :
+    Supposons que nous voulions connaître la valeur des fonctions de forme aux points de Gauss d'un Hexa à l'ordre 2. On ferait :
     \code C/C++
         #include <mesh/mesh.h>
         #include <mesh/hexa.h>
@@ -22,31 +23,23 @@
             static const int dim  = Hexa::nb_var_inter;
             static const int step = 1 + dim;
 
+            int nb_point_Gauss = 0;
+
             /// Affichage des valeurs des fonctions de forme phi_i pour les noeuds de Gauss
-            for(int i=0;i<Hexa::nb_nodes;i++) {
-                Vec<double,dim> p(pg[step*i+1],pg[step*i+2],pg[step*i+3]);
-                //PRINT(p);
+            for( int i = 0; pg[step*i] > 0 ; i++, nb_point_Gauss++ ) {
+                Vec<double,dim> p( pg[step*i+1], pg[step*i+2], pg[step*i+3] );
+                PRINT(p);
                 Vec<double,Hexa::nb_nodes> res;
-                get_shape_functions(Hexa(),p,res);
+                get_shape_functions( Hexa(), p, res );
                 PRINT(res);
             }
-
-            /// calcul de la somme sum_i(poids_i * phi_i(x)) pour un x quelconque dans l'espace de référence
-
-            Vec<double,dim> p(1,0,0);
-                //PRINT(p);
-            Vec<double,Hexa::nb_nodes> res;
-            Vec<double,Hexa::nb_nodes> poids;
-            for(int i=0;i<Hexa::nb_nodes;i++)
-                poids[i] = pg[step*i];
-            get_shape_functions(Hexa(),p,res);
-            PRINT(res);
-            PRINT(poids);
-            PRINT(dot(poids,res));
 
             return 0 ;
         }
 
+    Le vecteur <strong> res </strong> contient la valeur des <strong> Hexa::nb_nodes </strong> fonctions de forme au point de Gauss <strong> p </strong>  .
+    On en profite pour calculer le nombre de points de Gauss à l'aide de la variable <strong> nb_point_Gauss </strong> pour un usage futur.
+    
 
     \keyword Maillage/Elément/Opération
     \friend raphael.pasquier@lmt.ens-cachan.fr
