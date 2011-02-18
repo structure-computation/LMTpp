@@ -119,7 +119,7 @@ void read_gid(TM &m,std::istream &is) throw(std::runtime_error) {
 
 /*!
  put gid mesh in m
-\keyword Maillage/Lecture
+\keyword Maillage/Import
 */
 template<class TM>
 void read_gid(TM &m,const std::string &fic_name) throw(std::runtime_error) {

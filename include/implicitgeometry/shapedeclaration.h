@@ -29,7 +29,7 @@ public:
 
 /*!
     Cette classe sert à définir des surfaces implicites pour les intersections entre surfaces.
-    \keyword Graphisme/3D
+    \keyword Visualisation/3D
     \friend hugo.leclerc@lmt.ens-cachan.fr
  */
 template<unsigned dim,class T=double>

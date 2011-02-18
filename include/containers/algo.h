@@ -119,7 +119,7 @@ Structure interne à la LMT++
     \relates Vec
     \relates apply
     \relates apply_wi
-    \keyword Algorithme/Trier
+    \keyword Fonctionalité/Trier
     \friend hugo.leclerc@lmt.ens-cachan.fr
     \friend raphael.pasquier@lmt.ens-cachan.fr
 */
@@ -182,7 +182,7 @@ namespace ALGOPRIVATE {
     \relates Vec
     \relates apply
     \relates apply_wi
-    \keyword Algorithme/Trier
+    \keyword Fonctionalité/Trier
     \friend hugo.leclerc@lmt.ens-cachan.fr
     \friend raphael.pasquier@lmt.ens-cachan.fr
 */
@@ -248,7 +248,7 @@ namespace ALGOPRIVATE {
     \relates Vec
     \relates apply
     \relates apply_wi
-    \keyword Algorithme/Transformer
+    \keyword Fonctionalité/Transformer
     \friend hugo.leclerc@lmt.ens-cachan.fr
     \friend raphael.pasquier@lmt.ens-cachan.fr
 */
@@ -342,7 +342,7 @@ struct MinMax {
 
     \relates Vec
     \relates apply
-    \keyword Algorithme/Extraire
+    \keyword Fonctionalité/Extraire
     \friend hugo.leclerc@lmt.ens-cachan.fr
     \friend raphael.pasquier@lmt.ens-cachan.fr
 */
@@ -428,8 +428,8 @@ struct FillIntersectionPtr {
     \relates Vec
     \relates apply
     \relates intersection_ptr_full
-    \keyword Algorithme/Extraire
-    \keyword Algorithme/Mesh
+    \keyword Fonctionalité/Extraire
+    \keyword Fonctionalité/Mesh
     \friend hugo.leclerc@lmt.ens-cachan.fr
     \friend raphael.pasquier@lmt.ens-cachan.fr
 
@@ -467,8 +467,8 @@ template<class TL1,class TL2> typename IntersectionCarac<TL1,TL2>::T intersectio
     \relates Vec
     \relates apply
     \relates intersection_ptr
-    \keyword Algorithme/Extraire
-    \keyword Algorithme/Mesh
+    \keyword Fonctionalité/Extraire
+    \keyword Fonctionalité/Mesh
     \friend hugo.leclerc@lmt.ens-cachan.fr
     \friend raphael.pasquier@lmt.ens-cachan.fr
 
@@ -544,8 +544,8 @@ namespace ALGOPRIVATE {
     \relates Vec
     \relates apply
     \relates min_element
-    \keyword Algorithme/Extraire
-    \keyword Algorithme/Mesh
+    \keyword Fonctionalité/Extraire
+    \keyword Fonctionalité/Mesh
     \friend hugo.leclerc@lmt.ens-cachan.fr
     \friend raphael.pasquier@lmt.ens-cachan.fr
 */
@@ -560,8 +560,8 @@ namespace ALGOPRIVATE {
     \relates Vec
     \relates apply
     \relates min_element
-    \keyword Algorithme/Extraire
-    \keyword Algorithme/Mesh
+    \keyword Fonctionalité/Extraire
+    \keyword Fonctionalité/Mesh
     \friend hugo.leclerc@lmt.ens-cachan.fr
     \friend raphael.pasquier@lmt.ens-cachan.fr
 */
@@ -673,7 +673,7 @@ template<class TL> typename TypeReduction<Plus,TL>::T min_element(const TL &l) {
     \relates apply
     \relates Vec
 
-    \keyword Algorithme/Extraire
+    \keyword Fonctionalité/Extraire
     \friend hugo.leclerc@lmt.ens-cachan.fr
     \friend raphael.pasquier@lmt.ens-cachan.fr 
  */

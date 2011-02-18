@@ -26,7 +26,7 @@ namespace LMT {
     \\author Camille Gouttebroze
     \\friend hugo.leclerc@lmt.ens-cachan.fr
     \\friend camille.gouttebroze@lmt.ens-cachan.fr
-    \\keyword Graphisme/2D
+    \\keyword Visualisation/2D
 */
 class GnuPlot {
 public:

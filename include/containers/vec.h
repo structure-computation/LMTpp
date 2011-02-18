@@ -123,7 +123,8 @@ namespace LMT {
         = Divers
             Vous pouvez aussi Consulter aussi la FAQ du wiki \a http://intranet/mediawiki/index.php/Vecteurs#id2442799
 
-    \keyword Algorithme/Conteneur
+    \keyword Fonctionalité/Conteneur
+    \keyword Vecteur
     \friend raphael.pasquier@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
     \keyword Mathématiques/Algèbre linéaire

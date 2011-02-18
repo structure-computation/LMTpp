@@ -108,7 +108,7 @@ int load_image( std::string file, Mat &m, int ceil_size = 1, int border_size = 0
     \friend raphael.pasquier@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
     \keyword Mathématiques/Algèbre linéaire/Opération   
-    \keyword Algorithme/Affichage  
+    \keyword Fonctionalité/Affichage  
 */
 // template<class T,class Str,class Sto,class IO>
 //         void display_image(const Mat<T,Str,Sto,IO> &mat, const std::string &name_file="toto", bool disp_screen = false, bool auto_grey_level_scaling = false, const std::string &format_file=".png" ) {
