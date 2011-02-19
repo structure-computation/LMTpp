@@ -13,7 +13,7 @@
             = ajout,réduction
             = libération
 
-    \keyword Algorithme/Conteneur
+    \keyword Fonctionalité/Conteneur
 
     \friend pasquier@lmt.ens-cachan.fr
     \friend leclerc@lmt.ens-cachan.fr

@@ -26,7 +26,7 @@ namespace LMT {
 
     A FAIRE : apply_wi a d'autres syntaxes utilisées en interne. J'en parlerai plus tard.
 
-    \\keyword Algorithme/Transformer
+    \\keyword Fonctionalité/Transformer
     \\friend raphael.pasquier@lmt.ens-cachan.fr
     \\friend hugo.leclerc@lmt.ens-cachan.fr
     \\author Hugo Leclerc
@@ -47,7 +47,7 @@ namespace LMT {
     \\relates apply
     \\relates find
     \\relates Vec
-    \\keyword Algorithme/Transformer
+    \\keyword Fonctionalité/Transformer
     \\friend hugo.leclerc@lmt.ens-cachan.fr
     \\friend raphel.pasquier@lmt.ens-cachan.fr
 */
@@ -62,7 +62,7 @@ namespace LMT {
 
     <strong> Remarque : L'opérateur doit renvoyer un booléen.</strong>
     Remarque : la fonction find() arrête sa recherche dès qu'elle a trouvé un élément qui convient.
-    \\keyword Algorithme/Extraire
+    \\keyword Fonctionalité/Extraire
     \\relates Vec 
     \\friend hugo.leclerc@lmt.ens-cachan.fr
     \\friend rapahel.pasquier@lmt.ens-cachan.fr
@@ -78,7 +78,7 @@ namespace LMT {
          
     Elle permet d'appliquer l'opérateur sur les indices de l'intervalle [début;fin[ (<strong> Attention : fin n'est pas compris </strong>).
 
-    \\keyword Algorithme/Transformer
+    \\keyword Fonctionalité/Transformer
     \\relates Vec 
     \\friend hugo.leclerc@lmt.ens-cachan.fr
     \\friend rapahel.pasquier@lmt.ens-cachan.fr
@@ -116,7 +116,7 @@ namespace LMT {
           _1 représente l'élément courant et _2 le premier paramètre i.e. 100.
         * l'opérateur parenthèse, operator(), doit retourner un booléen.
 
-    \\keyword Algorithme/Transformer
+    \\keyword Fonctionalité/Transformer
     \\relates Vec 
     \\relates apply
     \\friend hugo.leclerc@lmt.ens-cachan.fr
@@ -168,7 +168,7 @@ namespace LMT {
     
     <strong> Remarque importante : la fonction ne marche pas avec les vecteurs hétérogènes (à moins que le type des éléments dérivent d'un type ancêtre).</strong>
 
-    \\keyword Algorithme/Extraire
+    \\keyword Fonctionalité/Extraire
     \\relates Vec 
     \\relates apply
     \\friend hugo.leclerc@lmt.ens-cachan.fr

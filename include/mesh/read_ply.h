@@ -152,7 +152,7 @@ void read_ply(TM &m,istream &is) {
 
 /*!
  put gid mesh in m
-\keyword Maillage/Lecture
+\keyword Maillage/Import
 */
 template<class TM>
 void read_ply(TM &m,const char *fic_name) {

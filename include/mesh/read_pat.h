@@ -129,7 +129,7 @@ cout << " dans read_pat" <<endl;
 
 /*!
  put pat mesh from Moldflow Sotware in m
-\keyword Maillage/Lecture
+\keyword Maillage/Import
 */
 template<class TM>
 void read_pat(TM &m,const char *fic_name) {

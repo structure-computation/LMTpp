@@ -22,7 +22,7 @@ namespace LMT {
     By default, simple function
 
     \friend hugo.leclerc@lmt.ens-cachan.fr
-    \keyword Algorithme
+    \keyword Fonctionalité
     \author Leclerc
 */
 template<class Op,class O2=void,class O3=void,class O4=void,class O5=void>

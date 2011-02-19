@@ -22,7 +22,7 @@ namespace LMT {
     goal : display data on one line (to be redefined for matrices, ...)
 
     \relates line_input
-    \keyword entrées sorties
+    \keyword Entrées sorties
 */
 template<class T>
 std::ostream &line_output( std::ostream &s, const T &v ) {
@@ -35,7 +35,7 @@ std::ostream &line_output( std::ostream &s, const T &v ) {
     goal : get data from one line (to be redefined for matrices, ...)
 
     \relates line_output
-    \keyword entrées sorties
+    \keyword Entrées sorties
 */
 template<class T>
 std::istream &line_input( std::istream &s, T &v ) {

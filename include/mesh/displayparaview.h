@@ -312,6 +312,10 @@ private:
  
     \relates DisplayParaview
     \keyword Maillage/Affichage
+    \keyword Visualisation/3D
+    \keyword Visualisation/2D
+    
+    \relates Exemple de création d'un maillage et utilisation de la fonction interpolation()
      
     \author Hugal
  
@@ -350,6 +354,7 @@ int display( const MeshAncestor<Carac,nvi_to_subs,skin> &m, std::string pvsm_fil
     A commenter
 
     \keyword Sous-structure/Affichage
+    
 
 
     \author Hugal

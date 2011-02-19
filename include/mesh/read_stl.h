@@ -164,7 +164,7 @@ void read_stl(TM &m,std::istream &is) throw(std::runtime_error) {
 
 
 /*!
-\keyword Maillage/Lecture
+\keyword Maillage/Import
 */
 template<class TM>
 void read_stl(TM &m,const std::string &fic_name) throw(std::runtime_error) {
