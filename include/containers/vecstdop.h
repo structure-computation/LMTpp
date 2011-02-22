@@ -118,6 +118,7 @@ template<class Op,class T> struct VecReductionOp<Op,T,1,false> {
 
 /*!
   \relates Vec
+  \keyword Vecteur
   \todo apply_nz if reduction of type...
 */
 template<class TT,int s,class Op>
@@ -142,6 +143,7 @@ inline typename TypeReduction<Op,Vec<TT,s> >::T reduction_w_wo_simd(const Vec<TT
 
 /*! Reduction of all elements
   \relates Vec
+  \keyword Vecteur
   typename Op::template ReturnType<typename Vec<TT,s>::T,typename Vec<TT,s>::T>::T
 */
 template<class TT,int s,class Op>
@@ -151,6 +153,7 @@ inline typename TypeReduction<Op,Vec<TT,s> >::T reduction(const Vec<TT,s> &v,con
 
 /*! Sum of all elements
   \relates Vec
+  \keyword Vecteur
 */
 template<class TT,int s>
 inline typename TypeReduction<Plus,Vec<TT,s> >::T sum(const Vec<TT,s> &v) {
@@ -159,6 +162,7 @@ inline typename TypeReduction<Plus,Vec<TT,s> >::T sum(const Vec<TT,s> &v) {
 
 /*! Product of all elements
   \relates Vec
+  \keyword Vecteur
 */
 template<class TT,int s>
 inline typename TypeReduction<Multiplies,Vec<TT,s> >::T product(const Vec<TT,s> &v) {
@@ -167,6 +171,7 @@ inline typename TypeReduction<Multiplies,Vec<TT,s> >::T product(const Vec<TT,s> 
 
 /*! Mean of all elements
   \relates Vec
+  \keyword Vecteur
 */
 template<class TT,int s>
 inline typename TypeReduction<Plus,Vec<TT,s> >::T mean(const Vec<TT,s> &v) {
@@ -174,13 +179,16 @@ inline typename TypeReduction<Plus,Vec<TT,s> >::T mean(const Vec<TT,s> &v) {
 }
 
 /*!
-
+  \keyword Vecteur
 */
 template<class TT,int s>
 inline typename TypeReduction<Plus,Vec<TT,s> >::T variance( const Vec<TT,s> &v ) {
     return mean( generate( v, cst_vec( mean( v ), v.size() ), ( _1 - _2 ) * ( _1 - _2 ) ) );
 }
 
+/*!
+  \keyword Vecteur
+*/
 template<class TT,int s>
 inline typename TypeReduction<Plus,Vec<TT,s> >::T standard_deviation(const Vec<TT,s> &v) {
     return sqrt( variance( v ) );
@@ -189,6 +197,7 @@ inline typename TypeReduction<Plus,Vec<TT,s> >::T standard_deviation(const Vec<T
 
 /*! Scalar product. Generic form
   \relates Vec
+  \keyword Vecteur
  */
 template<class T1,int s1,class IO1,class T2,int s2,class IO2>
 inline typename TypePromote<Multiplies,typename Vec<T1,s1,IO1>::template SubType<0>::T,typename Vec<T2,s2,IO2>::template SubType<0>::T>::T
@@ -197,8 +206,9 @@ dot(const Vec<T1,s1,IO1> &p1,const Vec<T2,s2,IO2> &p2) {
 //     DEBUGASSERT(( Vec<T2,s2,IO2>::nb_sub_type == 1 ));
     return sum(p1 * p2);
 }
-/*! Scalar product of two tiny vectors with different sizes. Use min(d1,d2)
+/*! Scalar product of two tiny vectors with different sizes. Uses min(d1,d2)
   \relates Vec
+  \keyword Vecteur
  */
 template<class T1,int s1,class IO1,class T2,int s2,class IO2>
 inline typename TypePromote<Multiplies,typename Vec<T1,s1,IO1>::template SubType<0>::T,typename Vec<T2,s2,IO2>::template SubType<0>::T>::T
@@ -211,7 +221,8 @@ dot_md(const Vec<T1,s1,IO1> &p1,const Vec<T2,s2,IO2> &p2) {
 
 
 /*! min_[x in c} x
- \relates Vec
+  \relates Vec
+  \keyword Vecteur
  */
 template<class T,int s>
 inline typename TypeReduction<Min,Vec<T,s> >::T min(const Vec<T,s> &c) {
@@ -220,6 +231,7 @@ inline typename TypeReduction<Min,Vec<T,s> >::T min(const Vec<T,s> &c) {
 }
 /*! max_[x in c} x
  \relates Vec
+  \keyword Vecteur
  */
 template<class T,int s>
 inline typename TypeReduction<Max,Vec<T,s> >::T max(const Vec<T,s> &c) {
@@ -229,6 +241,7 @@ inline typename TypeReduction<Max,Vec<T,s> >::T max(const Vec<T,s> &c) {
 
 /** index_of_max
  \relates Vec
+  \keyword Vecteur
  */
 template<class TV,class Op>
 inline unsigned index_of_max( const TV &c, const Op &op ) {
@@ -263,6 +276,7 @@ inline unsigned index_of_min( const TV &c, const Op &op ) {
 
 /** index_of_max
  \relates Vec
+  \keyword Vecteur
  */
 template<class TV>
 inline unsigned index_of_min( const TV &c ) {
@@ -271,6 +285,7 @@ inline unsigned index_of_min( const TV &c ) {
 
 /*! true if all v verify v==true
  \relates Vec
+  \keyword Vecteur
  */
 template<class T,int s,class TO>
 inline bool all(const Vec<T,s,TO> &c) {
@@ -278,6 +293,7 @@ inline bool all(const Vec<T,s,TO> &c) {
 }
 /*! true if at least one v verify v==true
  \relates Vec
+  \keyword Vecteur
  */
 template<class T,int s>
 inline bool at_least_one(const Vec<T,s> &c) {
@@ -300,6 +316,7 @@ inline double vect_prod(const Vec<double,2> &p1,const Vec<double,2> &p2) {
 }
 #else
 /*! vectorial product 3D case (return a vector).
+  \keyword Vecteur
  \relates Vec
  */
 template<class T1,typename V1,class T2,typename V2>
@@ -314,6 +331,7 @@ inline Vec<typename TypePromote<Multiplies,typename Vec<T1,3,V1>::template SubTy
 }
 
 /*! vectorial product 2D case (return a scalar). \warning in the 3D case, vect_prod return a vector
+  \keyword Vecteur
  \relates Vec
  */
 template<class T1,typename V1,class T2,typename V2>
@@ -326,6 +344,7 @@ inline typename TypePromote<Multiplies,typename Vec<T1,2,V1>::template SubType<0
     \latex
         $ \sqrt{ \sum_i c_i^2 } $
     \relates Vec
+  \keyword Vecteur
  */
 template<class T,int s>
 inline typename FloatType<typename TypeReduction<Multiplies,Vec<T,s> >::T>::T length(const Vec<T,s> &c) {
@@ -336,6 +355,7 @@ inline typename FloatType<typename TypeReduction<Multiplies,Vec<T,s> >::T>::T le
     \latex 
         $ \sqrt{ \sum_i (c_i-d_i)^2 } $
     \relates Vec
+  \keyword Vecteur
  */
 template<class T,int s>
 inline typename FloatType<typename TypeReduction<Multiplies,Vec<T,s> >::T>::T distance(const Vec<T,s> &c, const Vec<T,s> &d) {
@@ -347,6 +367,7 @@ inline typename FloatType<typename TypeReduction<Multiplies,Vec<T,s> >::T>::T di
     \latex 
         $ \sqrt{ \sum_i c_i^2 } $
     \relates Vec
+  \keyword Vecteur
  */
 template<class T,int s>
 inline typename TypeReduction<Multiplies,Vec<T,s> >::T norm_2_p2(const Vec<T,s> &c) {
@@ -367,6 +388,7 @@ inline typename FloatType<typename TypeReduction<Multiplies,Vec<T,s> >::T>::T no
     \latex 
         $ \sqrt{ \sum_i c_i^2 + ad } $
     \relates Vec
+  \keyword Vecteur
  */
 template<class T,int s>
 inline typename FloatType<typename TypeReduction<Multiplies,Vec<T,s> >::T>::T norm_2( const Vec<T,s> &c, T ad ) {
@@ -375,6 +397,7 @@ inline typename FloatType<typename TypeReduction<Multiplies,Vec<T,s> >::T>::T no
 
 /*! 
         \relates Vec
+  \keyword Vecteur
  */
 template<class T,int s>
 inline typename TypePromote<Abs,typename TypeReduction<Multiplies,Vec<T,s> >::T>::T norm_inf(const Vec<T,s> &c) {
@@ -383,6 +406,7 @@ inline typename TypePromote<Abs,typename TypeReduction<Multiplies,Vec<T,s> >::T>
 
 /*! 
         \relates Vec
+  \keyword Vecteur
  */
 template<class T,int s>
 inline typename TypePromote<Abs,typename TypeReduction<Multiplies,Vec<T,s> >::T>::T norm_1(const Vec<T,s> &c) {
@@ -444,13 +468,16 @@ template<class Pvec,class TD> DistBetweenVecInfEq<Pvec,TD> dist_between_vec_inf_
     \latex 
         $ \sqrt{ \sum_i c_i^2 + ad } $
     \relates Vec
+  \keyword Vecteur
  */
 template<class T,int s>
 inline typename TypeReduction<Multiplies,Vec<T,s> >::T length(const Vec<T,s> &c,T ad ) {
     return sqrt(dot(c,c)+ad);
 }
+
 /*!
  \relates Vec
+  \keyword Vecteur
  */
 template<class T,int s>
 inline Vec<typename TypeReduction<Multiplies,Vec<T,s> >::T,s> normalized(const Vec<T,s> &c) {
@@ -462,6 +489,7 @@ inline Vec<typename TypeReduction<Multiplies,Vec<T,s> >::T,s> normalized(const V
         $ \frac{\Pi}{2} $
 Rotaion de 90 ° dans le sens direct.
  \relates Vec
+  \keyword Vecteur
  */
 template<class T>
 inline Vec<typename Vec<T,2>::template SubType<0>::T,2> ortho(const Vec<T,2> &p) {
@@ -470,12 +498,14 @@ inline Vec<typename Vec<T,2>::template SubType<0>::T,2> ortho(const Vec<T,2> &p)
 
 /*! find a vector orthonormal to p. In 2D, it's trivial but in 3D, we start from random vectors
  \relates Vec
+  \keyword Vecteur
  */
 template<class T>
 inline Vec<typename Vec<T,2>::template SubType<0>::T,2> find_orthonormal(const Vec<T,2> &p) { return ortho(p) / length(p); }
 
 /*! find a vector orthonormal to p. In 2D, it's trivial but in 3D, we start from random vectors
  \relates Vec
+  \keyword Vecteur
  */
 template<class TO,int s>
 inline Vec<typename Vec<TO,s>::template SubType<0>::T,s> find_orthonormal(Vec<TO,s> p) {
@@ -501,6 +531,7 @@ inline Vec<typename Vec<TO,s>::template SubType<0>::T,s> find_orthonormal(Vec<TO
 
 /*!
  \relates Vec
+  \keyword Vecteur
  */
 template<class T1,class T2,class T3,int s>
 Vec<typename Vec<T1,s>::template SubType<0>::T,s> getCenterOfCircumCircle(const Vec<T1,s> &P0,const Vec<T2,s> &P1,const Vec<T3,s> &P2) {
@@ -521,6 +552,7 @@ Vec<typename Vec<T1,s>::template SubType<0>::T,s> getCenterOfCircumCircle(const 
 }
 /*!
  \relates Vec
+  \keyword Vecteur
  */
 template<class T1,class T2,class T3,class T4,int s>
 Vec<typename Vec<T1,s>::template SubType<0>::T,s> getCenterOfCircumSphere(const Vec<T1,s> &P0,const Vec<T2,s> &P1,const Vec<T3,s> &P2,const Vec<T4,s> &P3) {

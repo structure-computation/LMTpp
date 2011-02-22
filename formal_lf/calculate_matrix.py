@@ -1,4 +1,4 @@
-from LMT.include.codegen import *
+from include.codegen import *
 import sys
 
 def calculate_matrix( expr, unknown_symbols, unknown_test_symbols, subs={}, allow_surtension_coefficient=False, assume_non_linear=False, test=True, premul_KUn_in_sollicitation=False, use_subs_instead_of_diff = False ):

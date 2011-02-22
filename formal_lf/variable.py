@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import extrapolation, sys
-from LMT.include.codegen import *
+from include.codegen import *
 
 class Variable:
   """ Class to manage Variables (unknowns or not, nodal, elementary or global) """

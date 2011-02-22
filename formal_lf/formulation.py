@@ -3,7 +3,7 @@ from variable import *
 from interpolation import *
 from calculate_matrix import *
 from contact import *
-from LMT.include.codegen import *
+from include.codegen import *
 import os,sys,string
 import extrapolation
 from element import *
