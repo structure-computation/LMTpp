@@ -6,9 +6,9 @@ using namespace LMT;
 
 Fonction pour calculer la matrice des masses elementaires pour un element
 Elle prend comme arguments:
-    l'element (const),
-    la matrice des masses (attention - elle est reinitialisee a zero au debut),
-    la dimension du probleme
+    * l'element (const),
+    * la matrice des masses (attention - elle est reinitialisee a zero au debut),
+    * la dimension du probleme
 On suppose que tous les ddl sont interpoles avec les memes fonctions de forme
 
 \keyword Maillage/Elément

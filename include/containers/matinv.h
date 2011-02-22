@@ -69,9 +69,17 @@ public:
 };
 
 /*! \relates Mat
-    Return an Inv<> object with factorization matrix
-    \friend raphael.pasquier@lmt.ens-cachan.fr
-    \friend hugo.leclerc@lmt.ens-cachan.fr
+    Retourne un objet pour inverser un système
+    
+    L'utilisation standard, c'est "inv( M ) * V" qui est équivalent à M \ V en matlab
+    
+    Attention, l'opérateur inv n'est pas défini pour toutes les matrices. En l'occurrence Mat<T,Sym<> > n'est pas géré actuellement.
+    
+    Dans ce cas, on peut par exemple faire
+    \code
+        Mat<T,Sym<>,SparseLine<> > tmp( M );
+        inv( tmp ) * V;
+    
 */
 template<class T,class Str,class Sto,class IO>
 Inv<T,Str,Sto,IO> inv(const Mat<T,Str,Sto,IO> &m) throw(SolveException) {
@@ -80,8 +88,6 @@ Inv<T,Str,Sto,IO> inv(const Mat<T,Str,Sto,IO> &m) throw(SolveException) {
 
 /*!
 
-    \friend raphael.pasquier@lmt.ens-cachan.fr
-    \friend hugo.leclerc@lmt.ens-cachan.fr
 */
 template<class T1,class Str,class Sto,class IO,class T2,int s2,class IO2>
 typename TypePromote< Divides, typename Vec<T2,s2,IO2>::template SubType<0>::T,typename Mat<T1,Str,Sto,IO>::T>::T
@@ -89,8 +95,6 @@ typename TypePromote< Divides, typename Vec<T2,s2,IO2>::template SubType<0>::T,t
 
 /*!
 
-    \friend raphael.pasquier@lmt.ens-cachan.fr
-    \friend hugo.leclerc@lmt.ens-cachan.fr
 */
 template<class T,class Str,class Sto,class IO,class AltT,class TT2,int s2>
 Vec<typename TypePromote<Multiplies,AltT,typename Vec<TT2,s2>::template SubType<0>::T>::T> operator*(const Inv<T,Str,Sto,IO,AltT> &i, const Vec<TT2,s2> &b) throw(SolveException) {
