@@ -5,6 +5,7 @@ Import('env')
 lib = env.Library('LMT_util', [
     'solveLDL.cpp',
     'MUMPS_solver.cpp',
+    'MKL_direct_solver.cpp',
     'solveLDL_semimorse.cpp',
     'symrcm.cpp',
     'symamd.cpp',

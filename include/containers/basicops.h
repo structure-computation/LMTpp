@@ -219,7 +219,7 @@ template<class T> int sgn(const T &val) { return ( val>0 ? 1 : -1 ); }
 
     \relates abs_indication
     \keyword Mathématiques/Fonctions classiques
-    \keyword Algorithme/Extraire
+    \keyword Fonctionalité/Extraire
     \friend raphael.pasquier@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
 */
@@ -497,7 +497,7 @@ template<class T1,class T2> void swap(T1 &v1,T2 &v2) {
 /*!
     Example : apply( vec, Display(), std::cout );
     Example : apply( vec, Display(), std::cout, ' ' );
-    \keyword Algorithme/Affichage
+    \keyword Fonctionalité/Affichage
     \relates Vec
     \relates apply
 */
@@ -525,7 +525,7 @@ struct DisplayWithIndex {
 /*!
     Example : apply( vec, LineOutput(), std::cout );
     Example : apply( vec, LineOutput(), std::cout, ' ' );
-    \keyword Algorithme/Affichage
+    \keyword Fonctionalité/Affichage
     \relates Vec
     \relates apply
 */
@@ -579,7 +579,7 @@ struct DoNothing {
 /*!
     L'argument de bool_vec() doit être un vecteur de types scalaires ou bouléens. Elle renvoie vrai si tous les éléments sont non nuls ou vrais et faux sinon.
     \keyword Utilitaires
-    \keyword Algorithme/Extraire
+    \keyword Fonctionalité/Extraire
 */
 template<class TV> bool bool_vec(const TV &v){
    bool res=1;

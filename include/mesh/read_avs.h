@@ -484,7 +484,7 @@ void read_avs(TM &mesh, std::istream &is) throw(std::runtime_error) {
 
 /*!
  put avs mesh castem in m
-\keyword Maillage/Lecture
+\keyword Maillage/Import
 */
 template<class TM>
 void read_avs(TM &m,const std::string &fic_name) throw(std::runtime_error) {

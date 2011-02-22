@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
+
 sigma_h_grad = Variable( interpolation='elementary_mul_nb_nodes', default_value='0', nb_dim=[dim], unit='1' )
 sigma_n_phi = Variable( interpolation='elementary_mul_nb_nodes_of_each_children_elem', default_value='0', nb_dim=[dim], unit='1' )
 
 sigma_chapeau = Variable( interpolation='P+3', default_value='0', nb_dim=[dim*(dim+1)/2], unit='N/m^3' )
 
-execfile( 'LMT/formulations/formulation_elasticity.py' )
+execfile( './LMT/formulations/formulation_elasticity.py' )
+#from LMT.formulations.formulation_elasticity.py import *
+#def formulation():
+    #return 0
 
 def apply_on_elements_after_solve(unk_subs): # return a string
     #cw = Write_code('T')

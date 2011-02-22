@@ -404,23 +404,6 @@ public:
     template<class T2>
     void set( const T2 &v ) { for(unsigned i=0;i<size();++i) operator[]( i ) = v; }
 
-    template<class Hdf,class TS>
-    void write_to( Hdf &hdf, const TS &name ) {
-        Vec<int,1> s( size() );
-        hdf.write( name, ptr(), s );
-    }
-
-    template<class Hdf,class TS>
-    void read_from( const Hdf &hdf, const TS &name ) {
-        // size
-        Vec<int,1> s;
-        hdf.read_size( name, s );
-        resize( s[ 0 ] );
-        // data
-        hdf.read_data( name, ptr(), s, s );
-    }
-
-
     #ifdef MATLAB_MEX_FILE
         explicit Vec(const mxArray *variable) throw(std::runtime_error) {
             if ( mxIsEmpty(variable) ) {
