@@ -5,7 +5,7 @@
 
 #include "MUMPS_solver.h"
 
-#define ICNTL(I) icntl[(I)-1] /*! macro s.t. indices match documentation */
+// #define ICNTL(I) icntl[(I)-1] /*! macro s.t. indices match documentation */
 
 MUMPS_solver::MUMPS_solver() {
     MPI_is_initialized = false;
