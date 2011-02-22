@@ -102,7 +102,6 @@ struct MKL_direct_solver {
         get_factorization_general();
         if ( want_free )
             mat.free();
-        PRINT( mtype );
     }
     
     /// résout le sytème de second membre b et renvoie le résultat dans b
@@ -163,8 +162,8 @@ struct MKL_direct_solver {
     
     template<int sr, int sc>
     void load_matrix( const Mat<double, Gen<sr,sc>, SparseLine<Col> > &mat ) {
-    
-        mtype == 11;  /// matrice quelconque réelle
+ 
+        mtype = 11;  /// matrice quelconque réelle
 //         PRINT( "matrice quelconque réelle" );
         n = mat.nb_rows();
         unsigned nz = 0;
@@ -199,7 +198,7 @@ struct MKL_direct_solver {
 //         for( int i = 0; i < nz; ++i )
 //             std::cout << a[ i ] << " ";
 //         std::cout << std::endl;
-        
+//         std::cout << " mtype = " << mtype << std::endl;    
     }    
     
     template<int s>

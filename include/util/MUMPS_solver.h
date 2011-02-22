@@ -7,6 +7,8 @@
 
 #include "containers/mat.h"
 
+#define ICNTL(I) icntl[(I)-1] /*! macro s.t. indices match documentation */
+
 using namespace LMT;
 
 /*!
@@ -73,7 +75,9 @@ struct MUMPS_solver {
     void get_factorization( const TM &mat, bool want_free = true ) { assert(0); /*! TODO */ } /// cas général
     /// résout le sytème de second membre b et renvoie le résultat dans b
     template<int s>
-    void solve( Vec<double, s> &b ) {
+    void solve( Vec<double, s> &b, int numbers_of_iterative_refinement = 2 ) {
+    
+        id.ICNTL( 10 ) =  numbers_of_iterative_refinement;
     
         if ( myid == 0 ) {
             id.rhs = b.ptr();
