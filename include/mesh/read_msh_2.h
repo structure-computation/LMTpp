@@ -306,7 +306,7 @@ void read_msh_2( TM &m,const std::string &fic_name, unsigned nvi = 0 ) throw ( s
 put gid mesh in m
 Attention: importe seulement les Bar(), les Triangle(), les Quad(), les Hexa(), les Tetra() et les Wedge(). 
 
-\keyword Maillage/Lecture
+\keyword Maillage/Import
 */
 template<class TM,class VarTag>
 void read_msh_2( TM &m,const std::string &fic_name, unsigned nvi, const VarTag &vt  ) throw ( std::runtime_error ) {

@@ -1,5 +1,6 @@
 #ifndef LMT_LINK
 #define LMT_LINK
+#include "node.h"
 namespace LMT {
 inline const double *gauss_point_for_order(unsigned order, const Link &elem) { /// order -> degre du polynome a integrer exactement
     static const unsigned offset[] = { 0, 3, 6, 9, 12, 15, 18, 21, 24, 27, }; // fonction de lordre du poly
@@ -44,7 +45,7 @@ typedef typename Pvec::template SubType<0>::T T;
 template<class PosNodes,class Pvec,class TVI> void get_var_inter(const Link &elem,const PosNodes &pos_nodes,const Pvec &pos,TVI &var_inter) {
 typedef typename Pvec::template SubType<0>::T T;
     T reg0=1-var_inter[0]; T reg1=pos_nodes[0][0]*reg0; T reg2=pos_nodes[1][0]*var_inter[0]; T reg3=pos_nodes[1][0]-pos_nodes[0][0]; reg2=reg1+reg2;
-    reg2=pos[0]-reg2; reg1=1.0/reg3; reg1=reg2*reg1; var_inter[0]+=reg1;
+    reg1=1.0/reg3; reg2=pos[0]-reg2; reg1=reg1*reg2; var_inter[0]+=reg1;
 
 }
 template<> struct ElemVarInterFromPosNonLinear<Link> { static const bool res = 0; };
@@ -80,11 +81,11 @@ template<class TVI,class TVAL,class T> void get_interp(const Link &ne,const Glob
     res=val[0];
 
 }
-#ifndef STRUCT_Gauss
-#define STRUCT_Gauss
-struct Gauss {};
-#endif // STRUCT_Gauss
-template<class TVI,class TVAL,class T> void get_interp(const Link &ne,const Gauss &n,const TVI &var_inter,const TVAL &val,T &res) {
+#ifndef STRUCT_Gauss_0
+#define STRUCT_Gauss_0
+struct Gauss_0 {};
+#endif // STRUCT_Gauss_0
+template<class TVI,class TVAL,class T> void get_interp(const Link &ne,const Gauss_0 &n,const TVI &var_inter,const TVAL &val,T &res) {
     res=val[0];
 
 }
@@ -109,9 +110,9 @@ template<class TVI,class TVAL,class T> void get_interp(const Link &ne,const Elem
 struct Bubble {};
 #endif // STRUCT_Bubble
 template<class TVI,class TVAL,class T> void get_interp(const Link &ne,const Bubble &n,const TVI &var_inter,const TVAL &val,T &res) {
-    T reg0=1-var_inter[0]; T reg1=var_inter[0]*reg0; reg1=4*reg1; T reg2=1-reg1; T reg3=var_inter[0]*reg2;
-    reg2=reg0*reg2; reg2=val[0]*reg2; reg3=val[1]*reg3; reg3=reg2+reg3; reg1=val[2]*reg1;
-    res=reg3+reg1;
+    T reg0=1-var_inter[0]; T reg1=var_inter[0]*reg0; reg1=4*reg1; T reg2=1-reg1; T reg3=reg0*reg2;
+    reg2=var_inter[0]*reg2; reg3=val[0]*reg3; reg2=val[1]*reg2; reg2=reg3+reg2; reg1=val[2]*reg1;
+    res=reg2+reg1;
 
 }
 #ifndef STRUCT_Skin_elementary
@@ -139,5 +140,41 @@ template<> struct AuthorizedPerm<Link> {
     }
 };
 
+template<class TN,class TNG,class TD,unsigned NET,class TVI>
+typename TNG::T get_det_jac( const Element<Link,TN,TNG,TD,NET> &elem, const TVI &var_inter ) {
+    typedef typename TNG::T T;
+    T reg0=elem.pos(1)[0]-elem.pos(0)[0]; T reg1=elem.pos(1)[1]-elem.pos(0)[1]; T reg2=pow(reg1,2); T reg3=pow(reg0,2); T reg4=elem.pos(1)[2]-elem.pos(0)[2];
+    T reg5=pow(reg4,2); reg2=reg3+reg2; reg5=reg2+reg5; reg5=pow(reg5,0.5); reg2=reg0/reg5;
+    reg3=reg1/reg5; reg1=reg3*reg1; reg2=reg0*reg2; reg5=reg4/reg5; reg4=reg5*reg4;
+    reg1=reg2+reg1; reg4=reg1+reg4; return reg4;
+
+}
+template<class TN,class T,class TNodalStaticData,class TD,unsigned NET>
+Vec<T,1> barycenter( const Element<Link,TN,Node<1,T,TNodalStaticData>,TD,NET> &elem ) {
+    Vec<T,1> res;
+    T reg0=elem.pos(1)[0]-elem.pos(0)[0]; T reg1=elem.pos(0)[0]*reg0; res[0]=reg1/reg0;
+
+    return res;
+}
+template<class TN,class T,class TNodalStaticData,class TD,unsigned NET>
+Vec<T,2> barycenter( const Element<Link,TN,Node<2,T,TNodalStaticData>,TD,NET> &elem ) {
+    Vec<T,2> res;
+    T reg0=elem.pos(1)[1]-elem.pos(0)[1]; T reg1=elem.pos(1)[0]-elem.pos(0)[0]; T reg2=pow(reg1,2); T reg3=pow(reg0,2); reg3=reg2+reg3;
+    reg3=pow(reg3,0.5); reg2=reg1/reg3; reg3=reg0/reg3; reg3=reg0*reg3; reg2=reg1*reg2;
+    reg3=reg2+reg3; reg0=reg3*elem.pos(0)[0]; reg1=reg3*elem.pos(0)[1]; res[1]=reg1/reg3; res[0]=reg0/reg3;
+
+    return res;
+}
+template<class TN,class T,class TNodalStaticData,class TD,unsigned NET>
+Vec<T,3> barycenter( const Element<Link,TN,Node<3,T,TNodalStaticData>,TD,NET> &elem ) {
+    Vec<T,3> res;
+    T reg0=elem.pos(1)[1]-elem.pos(0)[1]; T reg1=elem.pos(1)[0]-elem.pos(0)[0]; T reg2=elem.pos(1)[2]-elem.pos(0)[2]; T reg3=pow(reg1,2); T reg4=pow(reg0,2);
+    reg4=reg3+reg4; reg3=pow(reg2,2); reg3=reg4+reg3; reg3=pow(reg3,0.5); reg4=reg0/reg3;
+    T reg5=reg1/reg3; reg3=reg2/reg3; reg5=reg1*reg5; reg4=reg0*reg4; reg4=reg5+reg4;
+    reg3=reg2*reg3; reg3=reg4+reg3; reg0=elem.pos(0)[0]*reg3; reg1=elem.pos(0)[1]*reg3; reg2=elem.pos(0)[2]*reg3;
+    res[0]=reg0/reg3; res[1]=reg1/reg3; res[2]=reg2/reg3;
+
+    return res;
+}
 }
 #endif // LMT_LINK

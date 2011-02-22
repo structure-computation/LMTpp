@@ -13,8 +13,6 @@ dep_sv = Variable( nb_dim=[dim], default_value='0.0', unit='m' )
 
 temperature = Variable( default_value='0.0', unit='K' )
 
-proute = Variable( interpolation='gauss', nb_dim=[3,3], default_value='0', unit='K' )
-
 sigma = Variable( interpolation='der_nodal', default_value='0', nb_dim=[dim*(dim+1)/2], unit='N/m^2' )
 epsilon = Variable( interpolation='der_nodal', default_value='0', nb_dim=[dim*(dim+1)/2], unit='1' )
 tr_epsilon = Variable( interpolation='der_nodal', default_value='0', unit='1' )
@@ -37,7 +35,6 @@ dep_imp_coef_0 = Variable( default_value='0', unit='1' )
 
 #neig_pointer = Variable( interpolation='elementary', T='Vec<EA *,2>', default_value='',  unit='', dont_use_caracdm = True )
 
-pouet = Variable( interpolation='elementary', default_value='0', unit='1' )
 #assume_symmetric_matrix = False
 
 integration_totale = False

@@ -44,10 +44,18 @@ public:
 
     virtual bool solve( AbsScalarType iterative_criterium=AbsScalarType(0), bool disp_timing=false ) = 0; ///  The all-in-one procedure -> allocate if necessary, assemble, solve, update_variables, call_after_solve
     virtual bool solve_and_get_derivatives( Vec<Vec<ScalarType> > &der ) = 0;  /// get value and derivative respective to "der_var" defined in SConsruct or in python
-    virtual void allocate_matrices() = 0; ///
+    virtual void allocate_matrices() = 0; /// alloue les matrices
+    /*!
+        Objectif : 
+            cette fonction est utilisée dans le cas d'un problème qui dépend du temps. Elle gère la correspondance d'un vecteur de solutions au problème et l'ordre temporel. Plus précisément la taille de ce vecteur est la valeur nb_der, i.e. le nombre de pas de la méthode de résolution en temps ( qui doit être au moins égal au plus grand ordre de dérivation en temps des équations aux dérivées partielles ).
+            la méthode s'assure que la dernière solution calculée est à l'indice 0, la précédente à l'indice 1, etc... Et dès qu'une nouvelle solution est calculée (à la date suivante ), les vecteurs sont décalés de sorte que l'indice 0 corresponde à cette nouvelle solution.
+    */
     virtual void shift(int nb=1) = 0;
     virtual void unshift(int nb=1) = 0;
     virtual unsigned update_connectivity() = 0;
+    /*!
+        assemble les matrices et le second membre suivant les valeurs des paramètres assemble_mat et assemble_vec.
+    */
     virtual void assemble(bool assemble_mat=true,bool assemble_vec=true) = 0;
     virtual bool solve_system(AbsScalarType iterative_criterium=AbsScalarType(0),bool disp_timing=false) = 0;
     virtual Vec<ScalarType> get_nodal_forces() = 0;

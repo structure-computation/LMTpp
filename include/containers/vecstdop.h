@@ -177,8 +177,8 @@ inline typename TypeReduction<Plus,Vec<TT,s> >::T mean(const Vec<TT,s> &v) {
 
 */
 template<class TT,int s>
-inline typename TypeReduction<Plus,Vec<TT,s> >::T variance(const Vec<TT,s> &v) {
-    return mean( ( v - mean(v) ) * ( v - mean(v) ) );
+inline typename TypeReduction<Plus,Vec<TT,s> >::T variance( const Vec<TT,s> &v ) {
+    return mean( generate( v, cst_vec( mean( v ), v.size() ), ( _1 - _2 ) * ( _1 - _2 ) ) );
 }
 
 template<class TT,int s>

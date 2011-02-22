@@ -267,7 +267,8 @@ template<class MATOP> struct IsMatOp { typedef void T; };
 
         <strong> SIMD alignement for Row on Lower and Col on Upper </strong>
 
-    \keyword Algorithme/Conteneur
+    \keyword Fonctionalité/Conteneur
+    \keyword Matrice
     \friend raphael.pasquier@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
     \keyword Mathématiques/Algèbre linéaire
@@ -539,7 +540,7 @@ Mat<TV,Diag<s> > diag(const Vec<TV,s> &vec) {
     C'est donc plus représentatif que le résultat de la fonction \a display_image .
 
     \keyword Utilitaires
-    \keyword Algorithme/Affichage
+    \keyword Fonctionalité/Affichage
     \friend raphael.pasquier@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
     \keyword Mathématiques/Algèbre linéaire/Opération  

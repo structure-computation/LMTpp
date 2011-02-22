@@ -194,7 +194,7 @@ class Element:
       res,coord_res = ExMatrix(self.nb_var_inter,self.nb_var_inter), []
       if self.nb_var_inter==self.dim:
         for j in range(self.nb_var_inter):
-          cr,rr = [],[]
+          cr = []
           for i in range(self.dim):
             res[j,i] = coord[i].diff(self.var_inter[j]) # j,i
             cr.append(number(i==j))

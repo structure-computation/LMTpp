@@ -111,7 +111,7 @@ void read_mshadv(TM &mesh, std::istream &is) throw(std::runtime_error) {
 //     dp.exec();
 }
 /*!
-\keyword Maillage/Lecture
+\keyword Maillage/Import
 */
 template<class TM>
 void read_mshadv(TM &m,const std::string &fic_name) throw(std::runtime_error) {

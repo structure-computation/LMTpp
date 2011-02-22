@@ -144,6 +144,26 @@ def print_det_jac( e ):
     print cw.to_string()
     
     print '}'
+    
+# ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+def print_barycenter( name_elem, dim ):
+    e = Element( name_file, dim )
+    
+    print 'template<class TN,class T,class TNodalStaticData,class TD,unsigned NET>'
+    print 'Vec<T,' + str( dim ) + '> barycenter( const Element<' + e.name + ',TN,Node<' + str( dim ) + ',T,TNodalStaticData>,TD,NET> &elem ) {'
+    print '    Vec<T,' + str( dim ) + '> res;'
+
+    pos = e.pos()
+      
+    cw = Write_code('T')
+    for i in range( e.dim ):
+        res = e.integration( pos[ i ], e.degree ) / e.integration( 1, e.degree )
+        # print res
+        cw.add( res, 'res[' + str( i ) + ']', Write_code.Set )
+    print cw.to_string()
+    
+    print '    return res;'
+    print '}'
 
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
 name_file = sys.argv[1]
@@ -152,6 +172,7 @@ e = Element( name_file, 3 )
 nameHEADER = 'LMT_' + re.sub( '[/.]','_', name_file ).upper()
 print '#ifndef '+nameHEADER
 print '#define '+nameHEADER
+print '#include "node.h"'
 print 'namespace LMT {'
 
 print_gauss_point_for_order(e)
@@ -159,10 +180,12 @@ print_perm_if(e)
 for non_linear in [False,True]:
     print_get_var_inter(e,name_file,non_linear)
     
-print_interpolations(e)
-print_shape_functions(e)
-print_authorized_permutations(e)
-print_det_jac(e)
+print_interpolations( e )
+print_shape_functions( e )
+print_authorized_permutations( e )
+print_det_jac( e )
+for d in range( e.nb_var_inter, 4 ):
+    print_barycenter( name_file, d )
 
 print '}'
 print '#endif // '+nameHEADER

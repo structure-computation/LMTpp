@@ -30,7 +30,7 @@ namespace LMT {
 /*!
     Cette fonction lit un fichier ABAQUS puis construit le maillage m.
     <strong> ATTENTION </strong> : pour l'instant on ne traite que les noeuds et les éléments de type C3D4.
-    \keyword Maillage/Lecture
+    \keyword Maillage/Import
 */
 template<class TM> void read_inp( TM &m, const std::string &fic_name ) {
     typedef typename TM::Tpos T;

@@ -1,5 +1,6 @@
 #ifndef LMT_NODALELEMENT
 #define LMT_NODALELEMENT
+#include "node.h"
 namespace LMT {
 inline const double *gauss_point_for_order(unsigned order, const NodalElement &elem) { /// order -> degre du polynome a integrer exactement
     static const unsigned offset[] = { 0, 2, 4, 6, 8, 10, 12, 14, 16, 18, }; // fonction de lordre du poly
@@ -77,11 +78,11 @@ template<class TVI,class TVAL,class T> void get_interp(const NodalElement &ne,co
     res=val[0];
 
 }
-#ifndef STRUCT_Gauss
-#define STRUCT_Gauss
-struct Gauss {};
-#endif // STRUCT_Gauss
-template<class TVI,class TVAL,class T> void get_interp(const NodalElement &ne,const Gauss &n,const TVI &var_inter,const TVAL &val,T &res) {
+#ifndef STRUCT_Gauss_0
+#define STRUCT_Gauss_0
+struct Gauss_0 {};
+#endif // STRUCT_Gauss_0
+template<class TVI,class TVAL,class T> void get_interp(const NodalElement &ne,const Gauss_0 &n,const TVI &var_inter,const TVAL &val,T &res) {
     res=val[0];
 
 }
@@ -142,5 +143,38 @@ template<> struct AuthorizedPerm<NodalElement> {
     }
 };
 
+template<class TN,class TNG,class TD,unsigned NET,class TVI>
+typename TNG::T get_det_jac( const Element<NodalElement,TN,TNG,TD,NET> &elem, const TVI &var_inter ) {
+    typedef typename TNG::T T;
+    return 1;
+
+}
+template<class TN,class T,class TNodalStaticData,class TD,unsigned NET>
+Vec<T,0> barycenter( const Element<NodalElement,TN,Node<0,T,TNodalStaticData>,TD,NET> &elem ) {
+    Vec<T,0> res;
+
+    return res;
+}
+template<class TN,class T,class TNodalStaticData,class TD,unsigned NET>
+Vec<T,1> barycenter( const Element<NodalElement,TN,Node<1,T,TNodalStaticData>,TD,NET> &elem ) {
+    Vec<T,1> res;
+    res[0]=elem.pos(0)[0];
+
+    return res;
+}
+template<class TN,class T,class TNodalStaticData,class TD,unsigned NET>
+Vec<T,2> barycenter( const Element<NodalElement,TN,Node<2,T,TNodalStaticData>,TD,NET> &elem ) {
+    Vec<T,2> res;
+    res[1]=elem.pos(0)[1]; res[0]=elem.pos(0)[0];
+
+    return res;
+}
+template<class TN,class T,class TNodalStaticData,class TD,unsigned NET>
+Vec<T,3> barycenter( const Element<NodalElement,TN,Node<3,T,TNodalStaticData>,TD,NET> &elem ) {
+    Vec<T,3> res;
+    res[1]=elem.pos(0)[1]; res[0]=elem.pos(0)[0]; res[2]=elem.pos(0)[2];
+
+    return res;
+}
 }
 #endif // LMT_NODALELEMENT

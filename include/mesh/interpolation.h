@@ -1,6 +1,8 @@
 #ifndef MESH_INTERPOLATION_H
 #define MESH_INTERPOLATION_H
 
+#include "mesh.h"
+
 namespace LMT {
 
 /*!

@@ -4,9 +4,10 @@
 #include <map>
 
 //pour les appels systèmes
-#include<sys/types.h>
-#include<fcntl.h>
-#include<unistd.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 using namespace std ;
 

@@ -14,6 +14,9 @@ void display_gl_elem( const TE &elem ) {
     // -> nothing
 }
 
+/*!
+\keyword Visualisation/3D
+*/
 template<class TN,class TNG,class TD,unsigned NET>
 void display_gl_elem( const Element<Triangle,TN,TNG,TD,NET> &elem ) {
     glBegin( GL_TRIANGLES );
@@ -32,6 +35,10 @@ void display_gl_elem( const Element<Triangle,TN,TNG,TD,NET> &elem ) {
     glEnd();
 }
 
+/*!
+
+\keyword Visualisation/3D
+*/
 template<class TN,class TNG,class TD,unsigned NET>
 void display_gl_elem( const Element<Quad,TN,TNG,TD,NET> &elem ) {
     glBegin( GL_QUADS );
@@ -61,7 +68,9 @@ void display_gl_elem( const Element<Quad,TN,TNG,TD,NET> &elem ) {
     glEnd();
 }
 
-///
+/*!
+\keyword Visualisation/3D
+*/
 struct DisplayGL {
     template<class TE> void operator()( const TE &elem ) const { display_gl_elem( elem ); }
 };

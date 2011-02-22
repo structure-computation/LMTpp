@@ -94,6 +94,16 @@
 
             Outre ceux précédemment cités, on trouve des mots clés pour le formatage du texte:
 
+            * Pour associer l'élément commenté à un <strong> mot-clé de recherche </strong> , avec le mot-clé keyword :
+                \verbatim
+                    / *!
+                    sinus est une fontion trigonométrique définie sur R tout entier.
+                    \keyword Mathématiques/Fonction élémentaire/Trigonométrie
+                    * /
+                    double sin(double x) { ... }
+                    
+                Ce classement par thème est très important.
+                
             * pour les <strong> sections </strong> avec le symbole =. Exemple :
                 \verbatim
                     = section 1
@@ -105,6 +115,10 @@
                     * item 1
                     * item 2
                         * sous-item 2.1
+            * Pour faire un <strong> lien bi-directionnel </strong> en fin de page avec le mot-clé relates :
+                \verbatim
+                    \relates thème/sousthème
+                    \relates autrethème
             * Pour les <strong> tableaux </strong> avec le symbole & et le mot clé table. Par exemple :
                 \verbatim
                     \table titre
@@ -132,9 +146,6 @@
                 \verbatim
                     \a #titi
                     \anchor titi
-            * Pour faire un <strong> lien bi-directionnel </strong> en fin de page avec le mot-clé relates :
-                \verbatim
-                    \relates Vec
             * Pour un <strong> texte au format LaTeX </strong> avec le mot clé latex. Exemple :
                 \verbatim
                     \latex
@@ -142,13 +153,6 @@
             * Pour un <strong> courte description </strong> avec le mot clé brief. Exemple :
                 \verbatim 
                     \brief Vec est un conteneur générique pour stocker un vecteur
-            * Pour associer l'élément commenté à un <strong> mot-clé de recherche </strong> , avec le mot-clé keyword :
-                \verbatim
-                    / *!
-                    sinus est une fontion trigonométrique définie sur R tout entier.
-                    \keyword Mathématiques/Fonction élémentaire/Trigonométrie
-                    * /
-                    double sin(double x) { ... }
             * Pour signaler un <strong> ami </strong> pouvant vous aider, avec le mot-clé friend :
                 \verbatim 
                     \friend hugo.leclerc@lmt.ens-cachan.fr

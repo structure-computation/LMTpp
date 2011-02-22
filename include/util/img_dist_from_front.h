@@ -4,7 +4,7 @@
 namespace LMT {
 
 /*!
-    \keyword Traitement_dimages
+    \keyword Traitement d'images
     
 */
 template<class TM>
