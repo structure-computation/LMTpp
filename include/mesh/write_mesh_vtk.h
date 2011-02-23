@@ -105,7 +105,7 @@ struct Data_vtk_extract {
         if ( binary ) {
             os[i].write( (char *)&data, sizeof(T)*data.size() );
             if ( data.size()==2 ) {
-                T v = 0;
+                T v(0);
                 os[i].write( (char *)&v,  sizeof(T) );
             }
         } else {
@@ -115,7 +115,7 @@ struct Data_vtk_extract {
             os[i] << " ";
         }
     }
-    
+
     template<class T>
     void operator()( unsigned i, std::complex<T> data ) {
         //std::cout << "### Data_vtk_extract.operator( complex ) et i = "<< i << std::endl;
