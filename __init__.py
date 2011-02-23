@@ -92,7 +92,7 @@ def problem_name( formulation, T, dimension ):
 class MakePb:
     def get_fe_sets_and_dims(self):
         """ return fe_sets and all_dims """
-        import formal_lf
+        import LMT.formal_lf
         fe_sets = []
         all_dims = {}
         for e_name, e_file in zip( self.elements, self.e_files ):
