@@ -36,17 +36,7 @@ struct MKL_direct_solver {
     MKL_direct_solver();
 
     ~MKL_direct_solver() {
-        int nrhs, maxfct, mnum, phase, error, msglvl;
-        
-        maxfct = 1; /** Maximum number of numerical factorizations. */
-        mnum = 1; /** Which factorization to use. */
-        msglvl = 0; /** No print statistical information in file */
-        error = 0; /** Initialize error flag */
-        nrhs = 1; /** number of right hand side */
-        
         free();
-        phase = -1; /** Release internal memory. */
-        PARDISO( pt, &maxfct, &mnum, &mtype, &phase, &n, &ddum, ia, ja, &idum, &nrhs, iparm, &msglvl, &ddum, &ddum, &error );
     }
 
     void get_factorization_general() {
@@ -124,7 +114,6 @@ struct MKL_direct_solver {
         }
         phase = 33;
         iparm[7] = numbers_of_iterative_refinement; /** Max numbers of iterative refinement steps. */
-        //iparm[5] = 1; /** la solution est stockée dans b mais on a quand même besoin de x */
 
         PARDISO( pt, &maxfct, &mnum, &mtype, &phase, &n, a, ia, ja, &idum, &nrhs, iparm, &msglvl, b.ptr(), x, &error );
         if ( error ) {
@@ -142,6 +131,17 @@ struct MKL_direct_solver {
             delete[] ia;
             delete[] a;
             n = 0;
+            
+            int nrhs, maxfct, mnum, phase, error, msglvl;
+            
+            maxfct = 1; /** Maximum number of numerical factorizations. */
+            mnum = 1; /** Which factorization to use. */
+            msglvl = 0; /** No print statistical information in file */
+            error = 0; /** Initialize error flag */
+            nrhs = 1; /** number of right hand side */
+    
+            phase = -1; /** Release internal memory. */
+            PARDISO( pt, &maxfct, &mnum, &mtype, &phase, &n, &ddum, ia, ja, &idum, &nrhs, iparm, &msglvl, &ddum, &ddum, &error );
         }
     }
 

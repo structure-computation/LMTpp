@@ -1,5 +1,5 @@
 """ quelques outils pour les fluides """
-from include.codegen import *
+from LMT.include.codegen import *
 import math
 
 # #equations d'euler

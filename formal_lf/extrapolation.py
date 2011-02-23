@@ -1,4 +1,4 @@
-from include.codegen import *
+from LMT.include.codegen import *
 
 #
 time = symbol("time","t")

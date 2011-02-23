@@ -1,5 +1,5 @@
 """ quelques outils pour faciliter le travail sur les formulations """
-from include.codegen import *
+from LMT.include.codegen import *
 import math
 
 #simplification du comportement

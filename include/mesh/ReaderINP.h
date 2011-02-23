@@ -176,6 +176,7 @@ struct ReaderINP {
         STATUS_COMMENT              = 12,
         STATUS_BOUNDARY             = 13,
         STATUS_TRANSFORM            = 14
+        //STATUS_PART                 = 15
     } Status_ID;
     
     /// double : nécessaire et suffisant ; la dimension est déterminée à l'éxécution
@@ -887,6 +888,7 @@ struct ReaderINP {
             OPTION_ELASTIC       = 2,
             OPTION_COMMENTED     = 3
         } Option_material_ID;
+        
         Material() { material_property = NULL; density = 0.;}
         ~Material() { delete material_property; }
         void display() { 
@@ -1135,9 +1137,20 @@ struct ReaderINP {
             }
     }
     
+//     struct Part {
+//         Part( const std::string &name ) {
+//         
+//         }
+//         
+//         void parse( std::ifstream& is ) {
+//         
+//         }
+//     
+//     };
+    
     ReaderINP() {}
     
-    ReaderINP( TM &m, const char* filename) { parse( m, filename ); }
+    ReaderINP( TM &m, const char* filename ) { parse( m, filename ); }
     
     ~ReaderINP() {
         typename std::map< std::string, ElementSet*>::iterator it;
@@ -1166,6 +1179,9 @@ struct ReaderINP {
     
         typename std::map< std::string, Transform*>::iterator it9;
         for( it9 = map_Transform.begin(); it9 != map_Transform.end(); it9++) delete it9->second;
+    
+//         typename std::map< std::string, Part*>::iterator it10;
+//         for( it10 = map_Part.begin(); it10 != map_Part.end(); it10++) delete it10->second;
     }
     
     static Status_ID setStatus( const std::string& str ) {
@@ -1173,6 +1189,7 @@ struct ReaderINP {
         if ((str.find ("NODE PRINT",1) == 1))                                              { return STATUS_IGNORED; }
         if ((str.find ("NODE OUTPUT",1) == 1) or (str.find ("Node Output",1 ) == 1))       { return STATUS_IGNORED; }
         if ((str.find ("ELEMENT OUTPUT",1) == 1) or (str.find ("Element Output",1 ) == 1)) { return STATUS_IGNORED; }
+        //if ((str.find ("PART",1) == 1) or (str.find ("Part",1 ) == 1))                     { return STATUS_PART; }
         if ((str.find ("NODE",1) == 1) or (str.find ("Node",1 ) == 1) )                    { return STATUS_NODE; }
         if ((str.find ("ELEMENT",1) == 1) or (str.find ("Element",1) == 1))                { return STATUS_ELEMENT; }
         if ((str.find ("NSET",1) == 1) or (str.find ("Nset",1) == 1))                      { return STATUS_NSET; }
@@ -1842,6 +1859,7 @@ struct ReaderINP {
     }
     
     /// attributs :
+    //std::map< std::string, Part*> map_NodeSet;
     std::map< std::string, NodeSet*> map_NodeSet;
     std::map< std::string, ElementSet*> map_ElementSet;
     std::map< std::string, Orientation*> map_Orientation;
@@ -1855,7 +1873,7 @@ struct ReaderINP {
     Map_num_element map_num_element;
 
     static const char* internal_name[ 2 ];
-    static const unsigned nb_principale_keyword = 38;
+    static const unsigned nb_principale_keyword = 38; /// 39 avec Part
     static const char* list_principale_keyword[ nb_principale_keyword ];
 };
 
@@ -1867,6 +1885,7 @@ const char* ReaderINP<TM>::internal_name[2] = {
 
 template<class TM> 
 const char* ReaderINP<TM>::list_principale_keyword[ ReaderINP<TM>::nb_principale_keyword ] = {
+    //"PART",
     "MATERIAL",
     "NODE",
     "ELEMENT",
@@ -1875,8 +1894,8 @@ const char* ReaderINP<TM>::list_principale_keyword[ ReaderINP<TM>::nb_principale
     "ORIENTATION",
     "SOLID SECTION",
     "BOUNDARY",
-    "AMPLITUDE",
-    "SURFACE",   /// 10
+    "AMPLITUDE",   /// 10
+    "SURFACE",
     "CONTACT PAIR",
     "STEP",
     "STATIC",
@@ -1885,8 +1904,8 @@ const char* ReaderINP<TM>::list_principale_keyword[ ReaderINP<TM>::nb_principale
     "TEMPERATURE",
     "NODE PRINT",
     "EL PRINT",
-    "MODAL PRINT",
-    "ENERGY PRINT", ///20
+    "MODAL PRINT", /// 20
+    "ENERGY PRINT",
     "PRINT",
     "ELEMENT OUTPUT",
     "OUTPUT",
@@ -1895,8 +1914,8 @@ const char* ReaderINP<TM>::list_principale_keyword[ ReaderINP<TM>::nb_principale
     "Material",
     "Node",
     "Element",
-    "Nset",
-    "Elset",            /// 30
+    "Nset",  /// 30
+    "Elset",
     "Orientation",       
     "Solid Section",
     "Boundary",
