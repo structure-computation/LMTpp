@@ -684,13 +684,13 @@ public:
     /// ...
     virtual void assemble(bool assemble_mat=true,bool assemble_vec=true) {
         // assemble_mat
-        std::cout << "assemble_mat -> " << time_of_day_in_sec() << std::endl;        
+//         std::cout << "assemble_mat -> " << time_of_day_in_sec() << std::endl;
         assemble_clean_mat(assemble_mat,assemble_vec);
         // constraints
-        std::cout << "assemble_con -> " << time_of_day_in_sec() << std::endl;
+//         std::cout << "assemble_con -> " << time_of_day_in_sec() << std::endl;
         assemble_constraints(assemble_mat,assemble_vec);
         // sollicitations
-        std::cout << "assemble_sol -> " << time_of_day_in_sec() << std::endl;
+//         std::cout << "assemble_sol -> " << time_of_day_in_sec() << std::endl;
         assemble_sollicitations(assemble_mat,assemble_vec);
 
         if ( user_want_pierre_precond )
@@ -818,20 +818,24 @@ public:
     ///
     bool solve_system_(AbsScalarType iterative_criterium, const Number<1> &n_wont_add_nz, const Number<0> &sym) {
         #if LDL
+        PRINT("LDL");
         solver.get_factorization(matrices(Number<0>()),false);
         vectors[0] = sollicitation;
         solver.solve( vectors[0] );
         #elif WITH_CHOLMOD
+        PRINT("CHOLMOD");
         if ( not matrices(Number<0>()).get_factorization() ) {
             std::cout << "Bing. Inversion error" << std::endl;
             return false;
         }
         vectors[0] = matrices(Number<0>()).solve( sollicitation );
         #elif WITH_MUMPS
+        PRINT("MUMPS");
         solver.get_factorization(matrices(Number<0>()));
         vectors[0] = sollicitation;
         solver.solve( vectors[0] );
         #else
+        PRINT("LMT");
       	try {
             //             std::cout << "Resolution autre " << std::endl;
             vectors[0] = inv(matrices(Number<0>())) * sollicitation;
@@ -842,16 +846,19 @@ public:
     ///
     bool solve_system_(AbsScalarType iterative_criterium, const Number<1> &n_wont_add_nz, const Number<1> &sym) {
         #if WITH_CHOLMOD
+        PRINT("CHOLMOD");
         if ( not matrices(Number<0>()).get_factorization() ) {
             std::cout << "Bing. Inversion error" << std::endl;
             return false;
         }
         vectors[0] = matrices(Number<0>()).solve( sollicitation );
         #elif WITH_MUMPS
+        PRINT("MUMPS");
         solver.get_factorization(matrices(Number<0>()));
         vectors[0] = sollicitation;
         solver.solve( vectors[0] );
         #else
+        PRINT("LMT");
         if ( iterative_criterium ) {
             Mat<ScalarType,Sym<>,SparseLine<> > mm = matrices(Number<0>());
             incomplete_chol_factorize( mm );
@@ -874,6 +881,7 @@ public:
             //    ls.solve( vectors[0] );
             //}
             //else
+                PRINT("LMT");
                 vectors[0] = inv(matrices(Number<0>())) * sollicitation;
         } catch(const SolveException &e) { std::cerr << "system not inversible" << std::endl; return false; }
         return true;
@@ -886,16 +894,14 @@ public:
                 solve_using_incomplete_chol_factorize( mm, matrices(Number<0>()), sollicitation, vectors[0], iterative_criterium );
             }
             else {
-                //if ( MatCarac<0>::symm and matrices(Number<0>()).nb_rows() > 1000000 ) {
                 #if LDL
-                   std::cout << "solveur LDL" << std::endl;
-                   solver.get_factorization( matrices(Number<0>()), false );
-                   vectors[0] = sollicitation;
-                   solver.solve( vectors[0] );
+                std::cout << "solveur LDL" << std::endl;
+                solver.get_factorization( matrices(Number<0>()), false );
+                vectors[0] = sollicitation;
+                solver.solve( vectors[0] );
                 #else
-                //}
-                //else
-                    vectors[0] = inv(matrices(Number<0>())) * sollicitation;
+                PRINT("LMT");
+                vectors[0] = inv(matrices(Number<0>())) * sollicitation;
                 #endif
             }
             //PRINT( vectors[0] );
@@ -1798,6 +1804,7 @@ public:
     virtual Vec<ScalarType> &get_result(unsigned num=0) { return vectors[num]; }
 
     virtual unsigned nb_constraints() const { return constraints.size(); }
+    virtual void erase_constraints() { constraints.resize(0); }
     virtual void erase_constraints_from(unsigned number) { constraints.resize(number); }
 
     virtual unsigned get_indice_noda(unsigned num_node) const { return (*indice_noda)[num_node]; }
