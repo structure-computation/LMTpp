@@ -698,16 +698,16 @@ public:
     }
 
     ///
-    virtual void assemble_clean_mat(Mat<ScalarType,Sym<>,SparseLine<> > &K, Vec<ScalarType> &F, Vec<Vec<ScalarType> > &vectors_, bool assemble_mat=true,bool assemble_vec=true) {
+    virtual void assemble_clean_mat( Mat<ScalarType,Sym<>,SparseLine<> > &K, Vec<ScalarType> &F, Vec<Vec<ScalarType> > &vectors_, bool assemble_mat = true, bool assemble_vec = true ) {
         if ( not initial_condition_initialized ) { // old_vectors
-            get_initial_conditions(vectors_);
+            get_initial_conditions( vectors_ );
         }
-//        std::cerr << "nb_processors : " << nb_processors << std::endl;
-        //m->update_skin();
-        assert(nb_global_unknowns==0 /* add_global_matrix not yet implemeted */);
+        // std::cerr << "nb_processors : " << nb_processors << std::endl;
+        // m->update_skin();
+        assert( nb_global_unknowns == 0 /* add_global_matrix not yet implemeted */ );
         if ( assemble_mat ) {
             if ( assemble_vec ) {
-                AssembleNode<true,true > toto2;
+                AssembleNode<true,true> toto2;
                 toto2.vectors = &vectors_;
                 apply( m->node_list, toto2, *this, K, F ); // nodal
                 AssembleElem<true,true > toto;
@@ -806,14 +806,14 @@ public:
         }
     }
     ///
-    virtual void assemble(Mat<ScalarType,Sym<>,SparseLine<> > &K, Vec<ScalarType> &F,Vec<Vec<ScalarType> > &vectors_, bool assemble_mat=true, bool assemble_vec=true) {
+    virtual void assemble( Mat<ScalarType,Sym<>,SparseLine<> > &K, Vec<ScalarType> &F, Vec<Vec<ScalarType> > &vectors_, bool assemble_mat = true, bool assemble_vec = true ) {
         // assemble_mat
-        assemble_clean_mat(K, F, vectors_, assemble_mat, assemble_vec);
+        assemble_clean_mat( K, F, vectors_, assemble_mat, assemble_vec );
         // constraints
-        ScalarType M = max(abs(K.diag()));
-        assemble_constraints(K, F, vectors_,  M, assemble_mat, assemble_vec);
+        ScalarType M = max( abs( K.diag() ) );
+        assemble_constraints( K, F, vectors_,  M, assemble_mat, assemble_vec );
         // sollicitations
-        assemble_sollicitations(K, F, vectors_,  assemble_mat, assemble_vec);
+        assemble_sollicitations( K, F, vectors_,  assemble_mat, assemble_vec );
     }
     ///
     bool solve_system_(AbsScalarType iterative_criterium, const Number<1> &n_wont_add_nz, const Number<0> &sym) {

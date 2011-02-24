@@ -3,6 +3,12 @@
 
 #ifdef WITH_MKL
 
+#ifdef METIL_COMP_DIRECTIVE
+
+#pragma inc_path /opt/intel/Compiler/11.1/064/mkl/include/
+
+#endif
+
 #include <cmath>
 #include "mkl_pardiso.h"
 #include "mkl_types.h"
@@ -36,17 +42,7 @@ struct MKL_direct_solver {
     MKL_direct_solver();
 
     ~MKL_direct_solver() {
-        int nrhs, maxfct, mnum, phase, error, msglvl;
-        
-        maxfct = 1; /** Maximum number of numerical factorizations. */
-        mnum = 1; /** Which factorization to use. */
-        msglvl = 0; /** No print statistical information in file */
-        error = 0; /** Initialize error flag */
-        nrhs = 1; /** number of right hand side */
-        
         free();
-        phase = -1; /** Release internal memory. */
-        PARDISO( pt, &maxfct, &mnum, &mtype, &phase, &n, &ddum, ia, ja, &idum, &nrhs, iparm, &msglvl, &ddum, &ddum, &error );
     }
 
     void get_factorization_general() {
@@ -106,8 +102,8 @@ struct MKL_direct_solver {
     
     /// résout le sytème de second membre b et renvoie le résultat dans b
     template<int s>
-    void solve( Vec<double, s> &b, int numbers_of_iterative_refinement = 2 ) {
-        double *x;
+    Vec<double> solve( const Vec<double, s> &b, int numbers_of_iterative_refinement = 2 ) {
+        Vec<double> x;
         int nrhs, maxfct, mnum, phase, error, msglvl;;
         
         maxfct = 1; /** Maximum number of numerical factorizations. */
@@ -117,23 +113,21 @@ struct MKL_direct_solver {
         nrhs = 1; /** number of right hand side */
         
         if ( n )
-            x = new double[ n ];
+            x.resize( n );
         else {
             std::cerr << "\nERROR during solution" << std::endl;
-            return;
+            return x;
         }
         phase = 33;
         iparm[7] = numbers_of_iterative_refinement; /** Max numbers of iterative refinement steps. */
-        //iparm[5] = 1; /** la solution est stockée dans b mais on a quand même besoin de x */
 
-        PARDISO( pt, &maxfct, &mnum, &mtype, &phase, &n, a, ia, ja, &idum, &nrhs, iparm, &msglvl, b.ptr(), x, &error );
+        PARDISO( pt, &maxfct, &mnum, &mtype, &phase, &n, a, ia, ja, &idum, &nrhs, iparm, &msglvl, const_cast<double*>( b.ptr() ), x.ptr(), &error );
         if ( error ) {
             std::cerr << "\nERROR during solution: " << error << std::endl;
-            delete[] x;
-            return;
+            return x;
         }
         
-        delete[] x;
+        return x;
     }
     
     void free() {
@@ -142,6 +136,17 @@ struct MKL_direct_solver {
             delete[] ia;
             delete[] a;
             n = 0;
+            
+            int nrhs, maxfct, mnum, phase, error, msglvl;
+            
+            maxfct = 1; /** Maximum number of numerical factorizations. */
+            mnum = 1; /** Which factorization to use. */
+            msglvl = 0; /** No print statistical information in file */
+            error = 0; /** Initialize error flag */
+            nrhs = 1; /** number of right hand side */
+    
+            phase = -1; /** Release internal memory. */
+            PARDISO( pt, &maxfct, &mnum, &mtype, &phase, &n, &ddum, ia, ja, &idum, &nrhs, iparm, &msglvl, &ddum, &ddum, &error );
         }
     }
 
@@ -174,17 +179,17 @@ struct MKL_direct_solver {
         a  = new double[ nz ];
         for( int i = 0, index = 0; i < n; ++i ) {
             for( int j = 0; j < mat.data[ i ].indices.size(); ++j, index++ ) {
-                ja[ index ] = mat.data[ i ].indices[ j ];
+                ja[ index ] = mat.data[ i ].indices[ j ] + 1; /// + 1 -> convention Fortran
                 a[ index ] = mat.data[ i ].data[ j ];
             }    
         }
         
         for( int i = 0, inz = 0; i < n; ++i ) {
-            ia[ i ] = inz;
+            ia[ i ] = inz + 1; /// + 1 -> convention Fortran
             inz += mat.data[ i ].indices.size();
         }
         
-        ia[ n ] = nz;
+        ia[ n ] = nz + 1; /// + 1 -> convention Fortran
         
 //         std::cout << " ia = " ;
 //         for( int i = 0; i <= n; ++i )
@@ -203,7 +208,7 @@ struct MKL_direct_solver {
     
     template<int s>
     void load_matrix( const Mat<double, Sym<s,true>, SparseLine<Col> > &mat ) {
-        mtype == -2;
+        mtype = -2;
         n = mat.nb_rows();
         
         Vec<int> add_zero_in_diag;
@@ -228,22 +233,22 @@ struct MKL_direct_solver {
             for( int j = 0; j < mat.data[ i ].indices.size(); ++j, index++ ) {
                 unsigned p = add_zero_in_diag.find( i );
                 if ( p < add_zero_in_diag.size() ) {
-                    ja[ index ] = i;
+                    ja[ index ] = i + 1; /// + 1 -> convention Fortran
                     a[  index ] = 0;
                     add_zero_in_diag.erase_elem_nb( p );
                 } else {
-                    ja[ index ] = mat.data[ i ].indices[ j ];
+                    ja[ index ] = mat.data[ i ].indices[ j ] + 1; /// + 1 -> convention Fortran
                     a[ index ] = mat.data[ i ].data[ j ];
                 }
             }    
         }
         
         for( int i = 0, inz = 0; i < n; ++i ) {
-            ia[ i ] = inz;
+            ia[ i ] = inz + 1; /// + 1 -> convention Fortran
             inz += mat.data[ i ].indices.size();
         }
         
-        ia[ n ] = nz;
+        ia[ n ] = nz + 1; /// + 1 -> convention Fortran
         
 //         std::cout << " ia = " ;
 //         for( int i = 0; i <= n; ++i )
@@ -263,7 +268,7 @@ struct MKL_direct_solver {
     template<int s>
     void load_matrix( const Mat<double, Sym<s,false>, SparseLine<Col> > &mat ) {
         
-        mtype == -2;
+        mtype = -2;
         n = mat.nb_rows();        
         Vec<int> offsets, add_zero_in_diag; 
         offsets.resize( n, 0 );
@@ -292,8 +297,8 @@ struct MKL_direct_solver {
 
         ia = new int[ n + 1 ];
         for( int i = 0; i < n; ++i )
-            ia[ i ] = offsets[ i ];
-        ia[ n ] = acc;
+            ia[ i ] = offsets[ i ] + 1;
+        ia[ n ] = acc + 1; /// + 1 -> convention Fortran
         
         ja = new int[ acc ];
         a  = new double[ acc ];
@@ -302,13 +307,13 @@ struct MKL_direct_solver {
             int d = add_zero_in_diag.find( i );
             if ( d  < add_zero_in_diag.size() ) {
                 int pos = offsets[ i ]++;
-                ja[ pos ] = i;
+                ja[ pos ] = i + 1; /// + 1 -> convention Fortran
                 a[ pos ] = 0;
                 add_zero_in_diag.erase_elem_nb( d );            
             }
             for( int j = 0; j < mat.data[ i ].indices.size(); ++j ) {
                 int pos = offsets[ mat.data[ i ].indices[ j ] ]++;
-                ja[ pos ] = i;
+                ja[ pos ] = i + 1; /// + 1 -> convention Fortran
                 a[ pos ] = mat.data[ i ].data[ j ];
             }
         }

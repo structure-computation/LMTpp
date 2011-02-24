@@ -77,16 +77,20 @@ struct MUMPS_solver {
     void get_factorization( const TM &mat, bool want_free = true ) { assert(0); /*! TODO */ } /// cas général
     /// résout le sytème de second membre b et renvoie le résultat dans b
     template<int s>
-    void solve( Vec<double, s> &b, int numbers_of_iterative_refinement = 2 ) {
+    Vec<double> solve( const Vec<double, s> &b, int numbers_of_iterative_refinement = 2 ) {
     
+        Vec<double> x;
         id.ICNTL( 10 ) =  numbers_of_iterative_refinement;
     
         if ( myid == 0 ) {
-            id.rhs = b.ptr();
+            x = b;
+            id.rhs = x.ptr();
             
             id.job = job_solve;
             dmumps_c( &id );
         }
+        
+        return x;
     }
     void free();
 
@@ -101,6 +105,11 @@ struct MUMPS_solver {
     template<class TM>
     void load_matrix( const TM &mat ) {
         assert( 0 );
+    }
+    
+    void print_id() const {
+        for( int i = 1; i <= 40; ++i )
+            std::cout << "id.ICNTL( " << i << " ) = " << id.ICNTL( i ) << std::endl;
     }
     
     template<class STR>

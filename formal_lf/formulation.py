@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from variable import *
+from LMT.formal_lf.variable import *
 from interpolation import *
 from calculate_matrix import *
 from contact import *
