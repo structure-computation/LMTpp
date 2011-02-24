@@ -3,6 +3,12 @@
 
 #ifdef WITH_MKL
 
+#ifdef METIL_COMP_DIRECTIVE
+
+#pragma inc_path /opt/intel/Compiler/11.1/064/mkl/include/
+
+#endif
+
 #include <cmath>
 #include "mkl_pardiso.h"
 #include "mkl_types.h"
@@ -203,7 +209,7 @@ struct MKL_direct_solver {
     
     template<int s>
     void load_matrix( const Mat<double, Sym<s,true>, SparseLine<Col> > &mat ) {
-        mtype == -2;
+        mtype = -2;
         n = mat.nb_rows();
         
         Vec<int> add_zero_in_diag;
@@ -263,7 +269,7 @@ struct MKL_direct_solver {
     template<int s>
     void load_matrix( const Mat<double, Sym<s,false>, SparseLine<Col> > &mat ) {
         
-        mtype == -2;
+        mtype = -2;
         n = mat.nb_rows();        
         Vec<int> offsets, add_zero_in_diag; 
         offsets.resize( n, 0 );
