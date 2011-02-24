@@ -161,6 +161,7 @@ public:
     virtual void clean_mats() = 0; /// 0 in all matrices
     virtual void free_matrices() = 0;///free all matrices 
     virtual unsigned nb_constraints() const = 0;
+    virtual void erase_constraints() = 0;
     virtual void erase_constraints_from(unsigned number) = 0;
 
     virtual unsigned get_nb_nodal_unknowns() const = 0;
