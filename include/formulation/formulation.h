@@ -678,13 +678,13 @@ public:
     /// ...
     virtual void assemble(bool assemble_mat=true,bool assemble_vec=true) {
         // assemble_mat
-        std::cout << "assemble_mat -> " << time_of_day_in_sec() << std::endl;        
+        //std::cout << "assemble_mat -> " << time_of_day_in_sec() << std::endl;        
         assemble_clean_mat(assemble_mat,assemble_vec);
         // constraints
-        std::cout << "assemble_con -> " << time_of_day_in_sec() << std::endl;
+        //std::cout << "assemble_con -> " << time_of_day_in_sec() << std::endl;
         assemble_constraints(assemble_mat,assemble_vec);
         // sollicitations
-        std::cout << "assemble_sol -> " << time_of_day_in_sec() << std::endl;
+        //std::cout << "assemble_sol -> " << time_of_day_in_sec() << std::endl;
         assemble_sollicitations(assemble_mat,assemble_vec);
 
         if ( user_want_pierre_precond )
