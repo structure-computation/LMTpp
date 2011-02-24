@@ -20,6 +20,7 @@
 #include "sollicitation.h"
 #include "util/symamd.h"
 #include "util/solveLDL.h"
+#include "util/MUMPS_solver.h"
 #include "formulation/formulation_ancestor.h"
 #include "containers/matcholamd.h"
 #include "containers/matumfpack.h"
@@ -818,6 +819,10 @@ public:
         LDL_solver l;
         l.get_factorization(matrices(Number<0>()),false);
         l.solve( vectors[0] );
+        #elif WITH_MUMPS
+        MUMPS_solver solver;
+        solver.get_factorization( matrices( Number<0>() ) );
+        vectors[ 0 ] = solver.solve( sollicitation );
         #elif WITH_CHOLMOD
       	if ( not matrices(Number<0>()).get_factorization() ) {
             std::cout << "Bing. Inversion error" << std::endl;
@@ -882,6 +887,10 @@ public:
                    ls.get_factorization( matrices(Number<0>()), false );
                    vectors[0] = sollicitation;
                    ls.solve( vectors[0] );
+                #elif WITH_MUMPS
+                   MUMPS_solver solver;
+                   solver.get_factorization( matrices( Number<0>() ), false );
+                   vectors[ 0 ] = solver.solve( sollicitation );
                 #else
                 //}
                 //else
