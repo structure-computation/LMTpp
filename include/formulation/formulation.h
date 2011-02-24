@@ -820,6 +820,7 @@ public:
         l.get_factorization(matrices(Number<0>()),false);
         l.solve( vectors[0] );
         #elif WITH_MUMPS
+        std::cout << " Solver MUMPS" << std::endl;
         MUMPS_solver solver;
         solver.get_factorization( matrices( Number<0>() ) );
         vectors[ 0 ] = solver.solve( sollicitation );
@@ -888,6 +889,7 @@ public:
                    vectors[0] = sollicitation;
                    ls.solve( vectors[0] );
                 #elif WITH_MUMPS
+                   std::cout << "solveur MUMPS" << std::endl;
                    MUMPS_solver solver;
                    solver.get_factorization( matrices( Number<0>() ), false );
                    vectors[ 0 ] = solver.solve( sollicitation );
