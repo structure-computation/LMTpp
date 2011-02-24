@@ -102,8 +102,8 @@ struct MKL_direct_solver {
     
     /// résout le sytème de second membre b et renvoie le résultat dans b
     template<int s>
-    void solve( Vec<double, s> &b, int numbers_of_iterative_refinement = 2 ) {
-        double *x;
+    Vec<double> solve( const Vec<double, s> &b, int numbers_of_iterative_refinement = 2 ) {
+        Vec<double> x;
         int nrhs, maxfct, mnum, phase, error, msglvl;;
         
         maxfct = 1; /** Maximum number of numerical factorizations. */
@@ -113,22 +113,21 @@ struct MKL_direct_solver {
         nrhs = 1; /** number of right hand side */
         
         if ( n )
-            x = new double[ n ];
+            x.resize( n );
         else {
             std::cerr << "\nERROR during solution" << std::endl;
-            return;
+            return x;
         }
         phase = 33;
         iparm[7] = numbers_of_iterative_refinement; /** Max numbers of iterative refinement steps. */
 
-        PARDISO( pt, &maxfct, &mnum, &mtype, &phase, &n, a, ia, ja, &idum, &nrhs, iparm, &msglvl, b.ptr(), x, &error );
+        PARDISO( pt, &maxfct, &mnum, &mtype, &phase, &n, a, ia, ja, &idum, &nrhs, iparm, &msglvl, const_cast<double*>( b.ptr() ), x.ptr(), &error );
         if ( error ) {
             std::cerr << "\nERROR during solution: " << error << std::endl;
-            delete[] x;
-            return;
+            return x;
         }
         
-        delete[] x;
+        return x;
     }
     
     void free() {
@@ -180,17 +179,17 @@ struct MKL_direct_solver {
         a  = new double[ nz ];
         for( int i = 0, index = 0; i < n; ++i ) {
             for( int j = 0; j < mat.data[ i ].indices.size(); ++j, index++ ) {
-                ja[ index ] = mat.data[ i ].indices[ j ];
+                ja[ index ] = mat.data[ i ].indices[ j ] + 1; /// + 1 -> convention Fortran
                 a[ index ] = mat.data[ i ].data[ j ];
             }    
         }
         
         for( int i = 0, inz = 0; i < n; ++i ) {
-            ia[ i ] = inz;
+            ia[ i ] = inz + 1; /// + 1 -> convention Fortran
             inz += mat.data[ i ].indices.size();
         }
         
-        ia[ n ] = nz;
+        ia[ n ] = nz + 1; /// + 1 -> convention Fortran
         
 //         std::cout << " ia = " ;
 //         for( int i = 0; i <= n; ++i )
@@ -234,22 +233,22 @@ struct MKL_direct_solver {
             for( int j = 0; j < mat.data[ i ].indices.size(); ++j, index++ ) {
                 unsigned p = add_zero_in_diag.find( i );
                 if ( p < add_zero_in_diag.size() ) {
-                    ja[ index ] = i;
+                    ja[ index ] = i + 1; /// + 1 -> convention Fortran
                     a[  index ] = 0;
                     add_zero_in_diag.erase_elem_nb( p );
                 } else {
-                    ja[ index ] = mat.data[ i ].indices[ j ];
+                    ja[ index ] = mat.data[ i ].indices[ j ] + 1; /// + 1 -> convention Fortran
                     a[ index ] = mat.data[ i ].data[ j ];
                 }
             }    
         }
         
         for( int i = 0, inz = 0; i < n; ++i ) {
-            ia[ i ] = inz;
+            ia[ i ] = inz + 1; /// + 1 -> convention Fortran
             inz += mat.data[ i ].indices.size();
         }
         
-        ia[ n ] = nz;
+        ia[ n ] = nz + 1; /// + 1 -> convention Fortran
         
 //         std::cout << " ia = " ;
 //         for( int i = 0; i <= n; ++i )
@@ -298,8 +297,8 @@ struct MKL_direct_solver {
 
         ia = new int[ n + 1 ];
         for( int i = 0; i < n; ++i )
-            ia[ i ] = offsets[ i ];
-        ia[ n ] = acc;
+            ia[ i ] = offsets[ i ] + 1;
+        ia[ n ] = acc + 1; /// + 1 -> convention Fortran
         
         ja = new int[ acc ];
         a  = new double[ acc ];
@@ -308,13 +307,13 @@ struct MKL_direct_solver {
             int d = add_zero_in_diag.find( i );
             if ( d  < add_zero_in_diag.size() ) {
                 int pos = offsets[ i ]++;
-                ja[ pos ] = i;
+                ja[ pos ] = i + 1; /// + 1 -> convention Fortran
                 a[ pos ] = 0;
                 add_zero_in_diag.erase_elem_nb( d );            
             }
             for( int j = 0; j < mat.data[ i ].indices.size(); ++j ) {
                 int pos = offsets[ mat.data[ i ].indices[ j ] ]++;
-                ja[ pos ] = i;
+                ja[ pos ] = i + 1; /// + 1 -> convention Fortran
                 a[ pos ] = mat.data[ i ].data[ j ];
             }
         }
