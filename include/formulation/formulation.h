@@ -1790,6 +1790,7 @@ public:
     virtual Vec<ScalarType> &get_result(unsigned num=0) { return vectors[num]; }
 
     virtual unsigned nb_constraints() const { return constraints.size(); }
+    virtual void erase_constraints() { constraints.resize( 0 ); }
     virtual void erase_constraints_from(unsigned number) { constraints.resize(number); }
 
     virtual unsigned get_indice_noda(unsigned num_node) const { return (*indice_noda)[num_node]; }
