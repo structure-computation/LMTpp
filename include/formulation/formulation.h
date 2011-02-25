@@ -831,7 +831,7 @@ public:
         vectors[0] = matrices(Number<0>()).solve( sollicitation );
         #elif WITH_MUMPS
         PRINT("MUMPS");
-        solver.get_factorization( matrices(Number<0>()), false );
+        solver.get_factorization( matrices(Number<0>()), false, true );
         vectors[0] = solver.solve( sollicitation );
         #else
         PRINT("LMT");
@@ -853,7 +853,7 @@ public:
         vectors[0] = matrices(Number<0>()).solve( sollicitation );
         #elif WITH_MUMPS
         PRINT("MUMPS");
-        solver.get_factorization( matrices( Number<0>() ), false );
+        solver.get_factorization( matrices( Number<0>() ), false, true );
         vectors[0] = solver.solve( sollicitation );
         #else
         PRINT("LMT");
