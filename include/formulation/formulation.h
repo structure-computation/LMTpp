@@ -831,7 +831,7 @@ public:
         vectors[0] = matrices(Number<0>()).solve( sollicitation );
         #elif WITH_MUMPS
         PRINT("MUMPS");
-        solver.get_factorization(matrices(Number<0>()));
+        solver.get_factorization( matrices(Number<0>()), false );
         vectors[0] = solver.solve( sollicitation );
         #else
         PRINT("LMT");
@@ -853,7 +853,7 @@ public:
         vectors[0] = matrices(Number<0>()).solve( sollicitation );
         #elif WITH_MUMPS
         PRINT("MUMPS");
-        solver.get_factorization(matrices(Number<0>()));
+        solver.get_factorization( matrices( Number<0>() ), false );
         vectors[0] = solver.solve( sollicitation );
         #else
         PRINT("LMT");
@@ -952,9 +952,9 @@ public:
         //
         unsigned nb_iterations = 0;
         while ( true ) {
-            PRINT( __LINE__ );
+            //PRINT( __LINE__ );
             assemble();
-            PRINT( __LINE__ );
+            //PRINT( __LINE__ );
             if ( solve_system(iterative_criterium,disp_timing) == false )
                 return false;
 
