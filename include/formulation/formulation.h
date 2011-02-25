@@ -832,8 +832,7 @@ public:
         #elif WITH_MUMPS
         PRINT("MUMPS");
         solver.get_factorization(matrices(Number<0>()));
-        vectors[0] = sollicitation;
-        solver.solve( vectors[0] );
+        vectors[0] = solver.solve( sollicitation );
         #else
         PRINT("LMT");
       	try {
@@ -855,8 +854,7 @@ public:
         #elif WITH_MUMPS
         PRINT("MUMPS");
         solver.get_factorization(matrices(Number<0>()));
-        vectors[0] = sollicitation;
-        solver.solve( vectors[0] );
+        vectors[0] = solver.solve( sollicitation );
         #else
         PRINT("LMT");
         if ( iterative_criterium ) {
