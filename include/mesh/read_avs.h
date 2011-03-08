@@ -104,6 +104,13 @@ struct Totito_ELEM {
             Vec<Vec<Vec<double> > > data;
 };
 
+/*!
+référence sur le format UCD : 
+    http://people.sc.fsu.edu/~jburkardt/data/ucd/ucd.html
+    http://people.sc.fsu.edu/~jburkardt/html/ucd_format.html
+
+Rem : L'élément \a Tetra_10 n'est pas spécifié dans le format.
+*/
 template<class TM>
 void read_avs(TM &mesh, std::istream &is) throw(std::runtime_error) {
 
@@ -229,7 +236,7 @@ void read_avs(TM &mesh, std::istream &is) throw(std::runtime_error) {
         } else if (type_elem=="tet") {
             EA *ne;
             Vec<TNode *> vn;
-            /// lecture de l'indice des neouds
+            /// lecture de l'indice des noeuds
             while ( not( s.eof() ) ) {
                 s >> number;
                 vn.push_back( map_num_node[ number ] );
