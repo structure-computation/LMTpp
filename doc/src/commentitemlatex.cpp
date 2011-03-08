@@ -10,24 +10,26 @@ using namespace std;
 #include "visitorcommentitem.h"
 #include "token.h"
 
-CommentItemLaTex::CommentItemLaTex( ) {
+CommentItemLaTex::CommentItemLaTex( string& option ) {
 
     name.name = "image_latex_";
     name.principalName = "image_LaTex";
     suffix_reference = "tex";
+    multipage = option;
+    cout << "CommentItemLaTex::multipage = |" << option << "|--" << endl;
 }
 
 void CommentItemLaTex::addTxt(string& s,int end,int start ) {
 
-    txt += s.substr(start,end-start);
+    txt += s.substr( start, end - start );
     //cerr << " txt = |" << txt << "| somme = " << somme(txt) << endl;
-    name.name += somme(txt);
+    name.name += somme( txt );
 }
 
 void CommentItemLaTex::addTxt(const char* s,int size ) {
 
     txt.append(s,size);
-    name.name += somme(txt);
+    name.name += somme( txt );
 }
 
 void CommentItemLaTex::display( std::ostream &os ) {

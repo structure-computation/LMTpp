@@ -14,8 +14,8 @@ using namespace std;
 #include "visitorcommentitem.h"
 //#include "target.h"
 
-struct CommentItemLaTex : public CommentItem /*, public Target*/ { 
-    CommentItemLaTex();
+struct CommentItemLaTex : public CommentItem { 
+    CommentItemLaTex( string& option );
     virtual void print( std::ostream &os ) const { /*os << txt << endl;*/ }
     virtual void display( std::ostream &os );
     virtual void execute_function( VisitorCommentItem *v ) { v->function_at_CommentItemLaTex( this );  }
@@ -24,7 +24,7 @@ struct CommentItemLaTex : public CommentItem /*, public Target*/ {
 
     virtual ~CommentItemLaTex();
 
-    //string reference;
+    string multipage;
     string txt;
 };
 

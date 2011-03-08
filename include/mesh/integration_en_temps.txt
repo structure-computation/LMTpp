@@ -1,6 +1,6 @@
 /*!
 \webpage integration_en_temps Remarques sur l'intégration en temps sur la plate-forme
-    \latex 
+    \latex multipage
         Quel est l'algorithme utilisé pour intégrer en temps les équations aux dérivées partielles ?
         
         Nous allons le décrire dans le cadre des équations différentielles ordinaires puis nous l'appliquerons aux équations aux dérivées partielles linéaires.  
