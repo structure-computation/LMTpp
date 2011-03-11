@@ -551,13 +551,17 @@ public:
             clean_mats();
             if ( assemble_vec ) {
                 add_global_matrix( *this, matrices(Number<0>()), sollicitation, vectors, Number<MatCarac<0>::symm>(), Number<true>(), Number<true>(), *indice_glob ); // global
-                apply( m->node_list, AssembleNode<true,true >(), *indice_noda, *this ); // nodal
-                apply( m->elem_list, AssembleElem<true,true >(), *indice_noda, indice_elem, *this ); // element (and skin elements)
+                //apply( m->node_list, AssembleNode<true,true >(), *indice_noda, *this ); // nodal
+                //apply( m->elem_list, AssembleElem<true,true >(), *indice_noda, indice_elem, *this ); // element (and skin elements)
+                apply_mt( m->node_list, this->nb_threads_assemble_matrix, AssembleNode<true,true >(), *indice_noda, *this ); // nodal
+                apply_mt( m->elem_list, this->nb_threads_assemble_matrix, AssembleElem<true,true >(), *indice_noda, indice_elem, *this ); // element (and skin elements)
             }
             else {
                 add_global_matrix( *this, matrices(Number<0>()), sollicitation, vectors, Number<MatCarac<0>::symm>(), Number<true>(), Number<false>(), *indice_glob ); // global
-                apply( m->node_list, AssembleNode<true,false>(), *indice_noda, *this ); // nodal
-                apply( m->elem_list, AssembleElem<true,false>(), *indice_noda, indice_elem, *this); // element (and skin elements)
+                //apply( m->node_list, AssembleNode<true,false>(), *indice_noda, *this ); // nodal
+                //apply( m->elem_list, AssembleElem<true,false>(), *indice_noda, indice_elem, *this); // element (and skin elements)
+                apply_mt( m->node_list, this->nb_threads_assemble_matrix, AssembleNode<true,false>(), *indice_noda, *this ); // nodal
+                apply_mt( m->elem_list, this->nb_threads_assemble_matrix, AssembleElem<true,false>(), *indice_noda, indice_elem, *this); // element (and skin elements)
             }
         }
         else {

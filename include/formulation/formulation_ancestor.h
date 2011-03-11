@@ -1,6 +1,8 @@
 #ifndef FORMULATION_ANCESTOR_H
 #define FORMULATION_ANCESTOR_H
 
+#include <pthread.h>
+
 #include "containers/mat.h"
 #include "io/xmlnode.h"
 
@@ -10,7 +12,7 @@ struct SparseUMFPACK;
 struct SparseCholMod;
 
 
-/**
+/*!
     T est le type de scalaire sur lequel travailler
  */
 template<class ScalarType=double>
@@ -36,6 +38,8 @@ public:
         want_amd = false ;
         levenberg_marquadt = AbsScalarType(0);
         max_diag = ScalarType(0);
+        pthread_mutex_init( &mutex_assemble_matrix, NULL );
+        nb_threads_assemble_matrix = 4;
     }
     virtual ~FormulationAncestor() {}
 
@@ -198,6 +202,8 @@ public:
     AbsScalarType levenberg_marquadt; /// K += levenberg_marquadt * max( abs( K ) ) * Id; 0 by default
     ScalarType max_diag;
     Vec<unsigned> id;/// indice pour les variables
+    unsigned  nb_threads_assemble_matrix;
+    pthread_mutex_t mutex_assemble_matrix;
 
     virtual void *get_mesh() = 0; /// recupere le maillage associee a une formulation (mais pas avec le bon type)
 };

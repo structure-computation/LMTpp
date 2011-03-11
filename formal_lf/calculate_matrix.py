@@ -63,10 +63,20 @@ def write_matrix( f, M, V, symmetric, indices, offsets, assemble_mat, assemble_v
     if assemble_mat:
       for j in range(i*symmetric,M.nb_cols()):
         if M[i,j]:
-          cw.add( M[i,j], 'matrix(indices['+str(indices[i])+']+'+str(offsets[i])+',indices['+str(indices[j])+']+'+str(offsets[j])+')', Write_code.Add )
+          cw.add( M[i,j], 'tmp_'+str(i)+'_'+str(j), Write_code.Declare )
     if assemble_vec:
       if V[i]:
         cw.add( V[i], 'sollicitation[indices['+str(indices[i])+']+'+str(offsets[i])+']', Write_code.Add )
+  
+  res_cpp = cw.to_string()
+  if assemble_mat:
+    res_cpp += '    pthread_mutex_lock( &( f.mutex_assemble_matrix ) );\n'
+    for i in range(M.nb_rows()):
+      for j in range(i*symmetric,M.nb_cols()):
+        if M[i,j]:
+          res_cpp += '    matrix(indices['+str(indices[i])+']+'+str(offsets[i])+',indices['+str(indices[j])+']+'+str(offsets[j])+') += tmp_'+str(i)+'_'+str(j)+";\n"
+    res_cpp += '    pthread_mutex_unlock( &( f.mutex_assemble_matrix ) );\n'
+  
   if use_asm:
     f.write( cw.asm_caller( asm_fname ) )
     #
@@ -74,7 +84,7 @@ def write_matrix( f, M, V, symmetric, indices, offsets, assemble_mat, assemble_v
     asmout.write( '%s:\n' % asm_fname )
     asmout.write( cw.to_asm() )
   else:
-    f.write( cw.to_string() )
+    f.write( res_cpp )
 
 def solve_iteration( residual, unknown_symbols, unknown_test_symbols, subs={}, allow_surtension_coefficient=False, assume_non_linear=False, dont_want_to_add_KUn=False, use_subs_instead_of_diff = False ):
     MV = calculate_matrix( residual, unknown_symbols, unknown_test_symbols, subs, allow_surtension_coefficient, assume_non_linear, dont_want_to_add_KUn, use_subs_instead_of_diff = self.use_subs_instead_of_diff )
