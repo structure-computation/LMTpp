@@ -315,18 +315,18 @@ void Documentation::generate_webpage_list( vector<Target*>& v, const string& nam
     pageWeb << "<p class=\"resume\">" << std::endl;
 
     /// on génère le tableau 
-    nb_col = 5;
+    nb_col = 3;
     n = v.size();
     if (n>0) {
         pageWeb << "<table cellspacing=\"2\">" << std::endl;
-        for(i=0;i<n;i+=nb_col) {
-            if( ((i/nb_col) % 2) == 0)
+        for( i = 0; i < n; i+= nb_col) {
+            if( ((i / nb_col ) % 2 ) == 0)
                 genre_first_cell = true;
             else
                 genre_first_cell = false;
             pageWeb << "<tr>" << std::endl;
             m = min(i+nb_col,n);
-            for(j=i;j<m;j++) {
+            for( j = i ; j < m; j++ ) {
                 stmp = v[j]->name.principalName;
                 stmp2 = linkHTML( pt->reference(), v[j]->reference(),stmp );
                 if (genre_first_cell)
@@ -940,12 +940,7 @@ void Documentation::generate_file_css() {
     stmp = tree["root"] + "classic.css";
     ofstream pageWeb( stmp.c_str() ,ios::out );
 
-    pageWeb << std::endl;
-
-//     pageWeb << "ul {" << std::endl;
-//     pageWeb << "\tlist-style-image: url(Kurodai-icon.gif);"  << std::endl;
-//     pageWeb << "}"  << std::endl;
-    pageWeb << std::endl;
+    pageWeb << std::endl << std::endl;
     pageWeb << "ul.navigation{"  << std::endl;
     pageWeb << "\tlist-style-image: url(Kurodai-icon.gif);"  << std::endl;
     pageWeb << "\tlist-style-type: none;"  << std::endl;
@@ -991,7 +986,8 @@ void Documentation::generate_file_css() {
     pageWeb << std::endl;
     pageWeb << "ul.cellule li {\n	width: 100%;\n}\n" << std::endl;
     pageWeb << std::endl;
-    pageWeb << "div.code {\n	background-color: #84A8B1;#fde1e7;\n	padding: 0px 85px;\n	width: 83%;\n}\n" << std::endl;
+    pageWeb << "div.code {\n    background-color: #84A8B1;#fde1e7;\n    padding: 0px 85px;\n}\n" << std::endl;
+    //pageWeb << "div.code {\n	background-color: #84A8B1;#fde1e7;\n	padding: 0px 85px;\n	width: 83%;\n}\n" << std::endl;
     pageWeb << std::endl;
     pageWeb << "div.verbatim {\n	background-color: #c7dad7;\n	padding: 0px 85px;\n	width: 83%;\n}\n" << std::endl;
     pageWeb << std::endl;
