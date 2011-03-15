@@ -1,34 +1,40 @@
 <?xml version = '1.0' encoding = 'UTF-8'?>
 <!DOCTYPE KDevPrjSession>
 <KDevPrjSession>
- <DocsAndViews NumberOfDocuments="9" >
+ <DocsAndViews NumberOfDocuments="11" >
   <Doc0 NumberOfViews="1" URL="file:///home/pasquier/LMTpp-test/doc/src/main.cpp" >
    <View0 Encoding="UTF-8" Type="Source" />
   </Doc0>
   <Doc1 NumberOfViews="1" URL="file:///home/pasquier/LMTpp-test/doc/src/visitorcommentitem_tohtml.cpp" >
-   <View0 Encoding="UTF-8" line="328" Type="Source" />
+   <View0 Encoding="UTF-8" Type="Source" />
   </Doc1>
   <Doc2 NumberOfViews="1" URL="file:///home/pasquier/LMTpp-test/doc/src/commentitemlatex.h" >
-   <View0 Encoding="UTF-8" line="16" Type="Source" />
+   <View0 Encoding="UTF-8" Type="Source" />
   </Doc2>
   <Doc3 NumberOfViews="1" URL="file:///home/pasquier/LMTpp-test/doc/src/commentitemlatex.cpp" >
-   <View0 Encoding="UTF-8" line="25" Type="Source" />
+   <View0 Encoding="UTF-8" Type="Source" />
   </Doc3>
   <Doc4 NumberOfViews="1" URL="file:///home/pasquier/LMTpp-test/doc/src/commentitem.h" >
-   <View0 Encoding="UTF-8" line="0" Type="Source" />
+   <View0 Encoding="UTF-8" Type="Source" />
   </Doc4>
   <Doc5 NumberOfViews="1" URL="file:///home/pasquier/LMTpp-test/doc/src/commentitem.cpp" >
-   <View0 Encoding="UTF-8" line="0" Type="Source" />
+   <View0 Encoding="UTF-8" Type="Source" />
   </Doc5>
   <Doc6 NumberOfViews="1" URL="file:///home/pasquier/LMTpp-test/doc/src/target.h" >
-   <View0 Encoding="UTF-8" line="47" Type="Source" />
+   <View0 Encoding="UTF-8" Type="Source" />
   </Doc6>
   <Doc7 NumberOfViews="1" URL="file:///home/pasquier/LMTpp-test/doc/src/comment.cpp" >
-   <View0 Encoding="UTF-8" line="529" Type="Source" />
+   <View0 Encoding="UTF-8" Type="Source" />
   </Doc7>
   <Doc8 NumberOfViews="1" URL="file:///home/pasquier/LMTpp-test/doc/src/commentitemtable.cpp" >
    <View0 Encoding="UTF-8" line="10" Type="Source" />
   </Doc8>
+  <Doc9 NumberOfViews="1" URL="file:///home/pasquier/LMTpp-test/doc/src/documentation.cpp" >
+   <View0 Encoding="UTF-8" line="342" Type="Source" />
+  </Doc9>
+  <Doc10 NumberOfViews="1" URL="file:///home/pasquier/LMTpp-test/doc/src/util2html.cpp" >
+   <View0 Encoding="UTF-8" line="75" Type="Source" />
+  </Doc10>
  </DocsAndViews>
  <pluginList>
   <kdevdebugger>
