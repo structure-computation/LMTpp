@@ -92,6 +92,8 @@ def problem_name( formulation, T, dimension ):
 class MakePb:
     def get_fe_sets_and_dims(self):
         """ return fe_sets and all_dims """
+        sys.path.append( os.getcwd() + '/LMT' )
+        sys.path.append( os.getcwd() + '/LMTpp' )
         import formal_lf
         fe_sets = []
         all_dims = {}

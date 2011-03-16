@@ -3,6 +3,8 @@
 
 #include "mat.h"
 #ifdef WITH_UMFPACK
+#pragma inc_path /usr/include/suitesparse/
+#pragma lib_name umfpack
 extern "C" {
 #include <umfpack.h>
 }

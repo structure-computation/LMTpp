@@ -239,6 +239,7 @@ void construct_matrix( Mat<T0,Str0,Sto0> &res,
     }
 }
 */
+
 /// conversion de A * B * C
 template<class T0,class Str0,class Sto0,class M0, class M1,  class Str1,class Sto1, class M2, class Str2,class Sto2>
 void construct_matrix( Mat<T0,Str0,Sto0> &res, const Mat< MatMultMat< Mat< MatMultMat< M0, M1 >,Str1,Sto1 >, M2 >, Str2, Sto2 > &src ) {

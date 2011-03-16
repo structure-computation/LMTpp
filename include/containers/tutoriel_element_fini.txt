@@ -72,7 +72,7 @@
             * Ce paramètre , nommé  <strong> T </strong> , est le type des scalaires (le type par défaut est double).
             * Le booléen, bommé <strong> use_asm </strong> a False pour valeur par défaut. S'il es positionné à False, le code assembleur est généré par g++ sinon la plate-forme génère elle-même le code assembleur pour gagner du temps sur le temps de compilation et l'espace mémoire.
             * Enfin le dernier paramètre est <strong> name_der_var </strong>. C'est une liste de nom de variable dont on souhaite pouvoir calculer la dérivée par rapport à un ou plusieurs paramètres. 
-                REMARQUE IMPORTANTE sur l'utilisation de <strong> name_der_var </strong> . Les variables peuvent être de type scalare mais aussi vectorielle. Dans ce cas, si on a par exemple <strong> name_der_var </strong> = ['dep','E'] où dep est un vecteur à trois composantes et E un scalaire, l'accès à la première composante de dep se fera avec l'entier 0, l'accès à la seconde par l'entier 1, et l'accès à E par l'entier 3. Ainsi l'appel de la méthode assemble_vector_der_val( int ) appliquée à E sera assemble_vector_der_val( 3 ).
+                REMARQUE IMPORTANTE sur l'utilisation de <strong> name_der_var </strong> . Les variables peuvent être de type scalaire mais aussi vectorielle. Dans ce cas, si on a par exemple <strong> name_der_var </strong> = ['dep','E'] où dep est un vecteur à trois composantes et E un scalaire, l'accès à la première composante de dep se fera avec l'entier 0, l'accès à la seconde par l'entier 1, et l'accès à E par l'entier 3. Ainsi l'appel de la méthode assemble_vector_der_val( int ) appliquée à E sera assemble_vector_der_val( 3 ).
 
 
             REMARQUE : tous les paramètres de la fonction make_pb() n'ont pas été expliqué. Certains (qui n'apparaissent pas sur l'exemple) ont des valeurs par défauts suffisantes pour la majorité des problèmes. Pour plus de détails, consulter son code dans le fichier __init__.py.
@@ -81,6 +81,7 @@
 
         On peut définir un problème sous la forme d'un problème variationnel (avec des fonctions tests) ou sous la forme d'un problème de minimisation ( i.e. minimiser l'énergie). 
         Ce fichier va contenir la formulation du problème avec ses variables, les équations, ... 
+        De façon générale, le but ici est de travailler sur des formules et non sur des flots de contrôle (if, boucles). Si vous faites un if en python, il ne sera exécuté qu'une fois pour la compilation mais il n'y aura pas de tests à l'exécution. Si vous avez des flags, utilisez par exemple energie = flag_1 * energie_1 + ... Cf. éventuellement heaviside_if en python qui génère des if dans le code final.
         Commençons par un premier exemple de fichier.
  
            = Exemple 1

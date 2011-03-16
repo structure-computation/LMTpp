@@ -18,10 +18,6 @@
 #include <set>
 #include "read_ex_error.h"
 
-#ifdef METIL_COMP_DIRECTIVE
-#pragma src_file ex.cpp
-#endif
-
 namespace Codegen {
 
 class Op;
@@ -207,6 +203,18 @@ Ex abs(const Ex &a);
 Ex heavyside(const Ex &a);  
 Ex heavyside_if(const Ex &a);  
 inline Ex heaviside(const Ex &a) { return heavyside( a ); }
+/*!
+\generic_comment heaviside_if
+
+    La fonction heaviside_if sert à générer du code avec des if.
+
+    Par exemple, expr = heaviside_if( truc ) * f() + 10 va générer
+    \code
+        tmp = 10;
+        if ( truc >= 0 )
+            tmp += f();
+
+*/
 inline Ex heaviside_if(const Ex &a) { return heavyside_if( a ); }
 Ex eqz(const Ex &a);        
 Ex sin(const Ex &a);        

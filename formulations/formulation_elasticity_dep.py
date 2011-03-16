@@ -49,7 +49,7 @@ def formulation():
     H = hooke_isotrope( E, poisson_ratio.expr, dim, options['behavior_simplification'] )[0]
     sigma = mul( H, epsilon )
     
-    res = density.expr * dot( dep.expr.diff(time).diff(time) - f_vol.expr - proute.expr[1,1], dep.test )
+    res = density.expr * dot( dep.expr.diff(time).diff(time) - f_vol.expr, dep.test )
     res += trace_sym_col( sigma, epstest )
     
     dmp = dep_imp_coef_0.expr * dot( dep.expr

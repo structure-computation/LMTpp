@@ -1,0 +1,16 @@
+doc/src
+include/amd
+include/auto
+include/codegen
+include/containers
+include/formulation
+include/geometry
+include/implicitgeometry
+include/io
+include/LDL
+include/mesh
+include/meshless
+include/sst
+include/std_formulations
+include/tvrc
+include/util

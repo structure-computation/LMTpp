@@ -20,16 +20,16 @@ inline bool is_num(char c) { return type_char(c) == TYPE_CHAR_number; }
 inline bool is_letter(char c) { return type_char(c) == TYPE_CHAR_letter; }
 inline bool is_operator(char c) { return type_char(c) == TYPE_CHAR_operator; }
 
-Lexer::Lexer(const char *txt, const char *provenance_, ErrorList *error_list_ ) : provenance(provenance_), error_list(error_list_) {
+Lexer::Lexer( const char *txt, const char *provenance_, ErrorList *error_list_ ) : provenance( provenance_ ? provenance_ : "inline" ), error_list( error_list_ ) {
     if ( not txt ) {
         first_tok.next = NULL;
         return;
     }
     s = txt + 1;
     //
-    for(unsigned i=0;i<NB_OPERATORS+16;++i) {
-        first_of_type[i] = NULL;
-        last_of_type[i] = NULL;
+    for(unsigned i = 0; i < NB_OPERATORS + 16; ++i ) {
+        first_of_type[ i ] = NULL;
+        last_of_type [ i ] = NULL;
     }
     first_tok.type = Lexem::CR;
     unsigned oe = error_list->data.size();
