@@ -1,6 +1,19 @@
 
 #ifdef WITH_MKL
 
+#ifdef METIL_COMP_DIRECTIVE
+
+#pragma lib_path /opt/intel/Compiler/11.1/064/lib/intel64/lib
+#pragma lib_path /opt/intel/Compiler/11.1/064/mkl/lib/em64t
+#pragma lib_path /opt/intel/Compiler/11.1/064/lib/intel64/
+#pragma lib_name mkl_intel_lp64
+#pragma lib_name mkl_intel_thread
+#pragma lib_name mkl_core
+#pragma lib_name iomp5
+#pragma lnk_flag /usr/lib/libpthread_nonshared.a
+
+#endif
+
 #include "MKL_direct_solver.h"
 
 MKL_direct_solver::MKL_direct_solver() {
@@ -13,7 +26,7 @@ MKL_direct_solver::MKL_direct_solver() {
     iparm[1] = 2; /** Fill-in reordering from METIS */
     iparm[3] = 0; /** No iterative-direct algorithm */
     iparm[4] = 0; /** No user fill-in reducing permutation */
-    iparm[5] = 1; /** Write solution into b */
+    //iparm[5] = 1; /** Write solution into b */
     iparm[7] = 2; /** Max numbers of iterative refinement steps */
     iparm[9] = 13; /** Perturb the pivot elements with 1E-13 */
     iparm[10] = 1; /** Use nonsymmetric permutation and scaling MPS */
@@ -22,7 +35,7 @@ MKL_direct_solver::MKL_direct_solver() {
     iparm[17] = -1; /** Output: Number of nonzeros in the factor LU */
     iparm[18] = -1; /** Output: Mflops for LU factorization */
     iparm[19] = 0; /** Output: Numbers of CG Iterations */
-    iparm[34] = 1; /** PARDISO use C-style indexing for ia and ja arrays */
+    //iparm[34] = 1; /** PARDISO use C-style indexing for ia and ja arrays */
     /** -------------------------------------------------------------------- */
     /** .. Initialize the internal solver memory pointer. This is only */
     /** necessary for the FIRST call of the PARDISO solver. */

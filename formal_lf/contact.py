@@ -1,4 +1,4 @@
-from include.codegen import *
+from LMT.include.codegen import *
 
 class CD_IS:
   """Contact data with implicit shape """

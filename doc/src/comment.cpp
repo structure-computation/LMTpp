@@ -71,11 +71,9 @@ struct LangRefFunction : public LangRef {
 ;
 
 Comment::~Comment() {
-    int i,l;
 
-    l = items.size();
-    for(i=0;i<l;i++) 
-        delete items[i];
+    for( int i = 0; i < items.size(); i++ ) 
+        delete items[ i ];
 }
 
 
@@ -245,14 +243,16 @@ void Comment::parse( vector<CommentItem*>& listItems, const char* s, int size ) 
             case 0 : case 1 : case 2 : case 5 : case 8 : case 9 : case 10 : case 11 : case 12 : case 13 : case 14 : case 18 :
                 ptr_CommentItemKeyword = new CommentItemKeyword( keyword[j] );
                 listItems.push_back( ptr_CommentItemKeyword );   //addCommentItem( ptr_CommentItemKeyword );
-                token.assign(s+pos2,next-pos2);//token = file.substr(pos2,next-pos2 );
+                token.assign( s + pos2, next - pos2 );//token = file.substr(pos2,next-pos2 );
                 cut_space( token );
                 ptr_CommentItemKeyword->addParameter( token );
                 //cout << " plout " << endl;
                 start = next + 1; /// + 1 pour sauter le \n
                 break;
             case 3 :    /// pour un commentaire au format LaTex
-                ptr_CommentItemLaTex = new CommentItemLaTex();
+                //token.assign( s + pos2, next - pos2 ); // récupération du header
+                //cut_space( token );
+                ptr_CommentItemLaTex = new CommentItemLaTex( token );
                 ptr_CommentItemLaTex->source_file = source_file;
                 listItems.push_back( ptr_CommentItemLaTex );  //addCommentItem( ptr_CommentItemCode );
                 decalage_ref = pos - start - 1;// pos contient la position de \latex, start celle du début de ligne
@@ -260,16 +260,16 @@ void Comment::parse( vector<CommentItem*>& listItems, const char* s, int size ) 
                 start_tuto_example = start;
                 while (start<size)  {
                     if (!chercher_motif( s,"\n",&next,size,start )) next = size;
-                    c = indentation( &pos2,s,start ); 
+                    c = indentation( &pos2, s, start ); 
                     if ((c != LINE_VACUUM) && (c <= decalage_ref)) break; // problème potentiel --- pour distinguer la fin d'un code
                 //ptr_CommentItemLaTex->addTxt( file,next,pos2);
                     start = next + 1; // + 1 pour sauter le \n
                 }
-                ptr_CommentItemLaTex->addTxt( s+start_tuto_example,start-start_tuto_example);
+                ptr_CommentItemLaTex->addTxt( s + start_tuto_example, start - start_tuto_example );
                 break;
 
             case 4 : /// pour un commentaire du type generic_comment
-                token.assign(s+pos2,next-pos2);//token = file.substr(pos2,next-pos2 ); // récupération de l'éventuelle référence
+                token.assign( s + pos2, next - pos2 );//token = file.substr(pos2,next-pos2 ); // récupération de l'éventuelle référence
                 cut_space( token );
                 ptr_CommentItemGenericComment = new CommentItemGenericComment( token );
                 ptr_CommentItemGenericComment->source_file = source_file;
@@ -284,20 +284,20 @@ void Comment::parse( vector<CommentItem*>& listItems, const char* s, int size ) 
                     start = next + 1; // + 1 pour sauter le \n
             //cout << " ~~~~~~~~~~~~" << endl;
                 }
-                parse( ptr_CommentItemGenericComment->items,s+start_tuto_example,start-start_tuto_example );
+                parse( ptr_CommentItemGenericComment->items, s + start_tuto_example, start - start_tuto_example );
                 break;
 
             case 6 : case 7 : /// on a le début d'un exemple ou d'un tutoriel
                 /// on détermine les lignes qui correspondent à l'exemple via l'indentation
                 decalage_ref = pos - start - 1;// pos contient la position de \example, start celle du début de ligne
-                token.assign(s+pos2,next-pos2 ); // on enregistre la référence ou le titre de l'exemple ou du tutoriel
+                token.assign( s + pos2, next -pos2 ); // on enregistre la référence ou le titre de l'exemple ou du tutoriel
                 cut_space( token );
                 start = next + 1; // on passe à la ligne suivante 
                 start_tuto_example = start;
                 while (start<size)  {
-                    if (!chercher_motif( s,"\n",&next,size,start )) next = size;
-                    c = indentation( &pos2,s,start ); // pos contient la position de \code, start celle du début de ligne
-                    if ((c != LINE_VACUUM) && (c <= decalage_ref)) break; // problème potentiel --- pour distinguer la fin d'un exemple ou d'un tutoriel
+                    if (!chercher_motif( s, "\n", &next, size, start ) ) next = size;
+                    c = indentation( &pos2, s, start ); // pos contient la position de \code, start celle du début de ligne
+                    if ( (c != LINE_VACUUM ) && ( c <= decalage_ref ) ) break; // problème potentiel --- pour distinguer la fin d'un exemple ou d'un tutoriel
                     start = next + 1; // + 1 pour sauter le \n
                     //cout << " ~~~~~~~~~~~~" << endl;
                 }
@@ -362,7 +362,7 @@ void Comment::parse( vector<CommentItem*>& listItems, const char* s, int size ) 
                 }
                 break;
             case 16 : /// pour un tableau
-                token.assign(s+pos2,next-pos2 ); // récupération du header
+                token.assign( s + pos2, next - pos2 ); // récupération du header
                 cut_space( token );
                 ptr_CommentItemTable = new CommentItemTable( token );
                 listItems.push_back( ptr_CommentItemTable ); // addCommentItem( ptr_CommentItemTable );
@@ -518,53 +518,53 @@ void Comment::parse( vector<CommentItem*>& listItems, string& file,int end, int 
             case 0 : case 1 : case 2 : case 5 : case 8 : case 9 : case 10 : case 11 : case 12 : case 13 : case 14 : case 18 :
                 ptr_CommentItemKeyword = new CommentItemKeyword( keyword[j] );
                 listItems.push_back( ptr_CommentItemKeyword );   //addCommentItem( ptr_CommentItemKeyword );
-                token = file.substr(pos2,next-pos2 );
+                token = file.substr( pos2, next - pos2 );
                 cut_space( token );
                 ptr_CommentItemKeyword->addParameter( token );
                 //cout << " plout " << endl;
-                start = next + 1; // + 1 pour sauter le \n
+                start = next + 1; /// + 1 pour sauter le \n
                 break;
 
-            case 3 :    // pour un commentaire au format LaTex
-                //token = file.substr(pos2,next-pos2 ); // récupération du langage
-                //cut_space( token );
-                ptr_CommentItemLaTex = new CommentItemLaTex();
+            case 3 :    /// pour un commentaire au format LaTex
+                token = file.substr( pos2, next - pos2 ); /// récupération de l'éventuelle option
+                cut_space( token );
+                ptr_CommentItemLaTex = new CommentItemLaTex( token );
                 ptr_CommentItemLaTex->source_file = source_file;
                 listItems.push_back( ptr_CommentItemLaTex );  //addCommentItem( ptr_CommentItemCode );
-                decalage_ref = pos - start - 1;// pos contient la position de \latex, start celle du début de ligne
-                start = next + 1; // on passe à la ligne suivante 
+                decalage_ref = pos - start - 1; /// pos contient la position de \latex, start celle du début de ligne
+                start = next + 1; /// on passe à la ligne suivante 
                 start_tuto_example = start;
-                while (start<end)  {
-                    if (!chercher_motif( file,"\n",&next,end,start )) next = end;
-                    c = indentation( &pos2,file,start ); 
-                    if ((c != LINE_VACUUM) && (c <= decalage_ref)) break; // problème potentiel --- pour distinguer la fin d'un code
+                while ( start < end ) {
+                    if (!chercher_motif( file, "\n", &next, end, start ) ) next = end;
+                    c = indentation( &pos2, file, start ); 
+                    if ( ( c != LINE_VACUUM ) && ( c <= decalage_ref ) ) break; // problème potentiel --- pour distinguer la fin d'un code
                     //ptr_CommentItemLaTex->addTxt( file,next,pos2);
                     start = next + 1; // + 1 pour sauter le \n
                 }
-                ptr_CommentItemLaTex->addTxt( file,start,start_tuto_example);
+                ptr_CommentItemLaTex->addTxt( file, start, start_tuto_example );
                 break;
 
             case 4 : // pour un commentaire du type generic_comment
-                token = file.substr(pos2,next-pos2 ); // récupération de l'éventuelle référence
+                token = file.substr( pos2, next - pos2 ); // récupération de l'éventuelle référence
                 cut_space( token );
                 ptr_CommentItemGenericComment = new CommentItemGenericComment( token );
                 ptr_CommentItemGenericComment->source_file = source_file;
                 listItems.push_back( ptr_CommentItemGenericComment ); //addCommentItem( ptr_CommentItemGenericComment );
                 decalage_ref = pos - start - 1;
-                start = next + 1; // on passe à la ligne suivante 
+                start = next + 1; /// on passe à la ligne suivante 
                 start_tuto_example = start;
-                while (start<end)  {
+                while ( start < end ) {
                     if (!chercher_motif( file,"\n",&next,end,start )) next = end;
                     c = indentation( &pos2,file,start ); // pos contient la position de \code, start celle du début de ligne
                     if ((c != LINE_VACUUM) && (c <= decalage_ref)) break; // problème potentiel --- pour distinguer la fin d'un exemple ou d'un tutoriel
                     start = next + 1; // + 1 pour sauter le \n
                     //cout << " ~~~~~~~~~~~~" << endl;
                 }
-                parse( ptr_CommentItemGenericComment->items,file,start,start_tuto_example );
+                parse( ptr_CommentItemGenericComment->items, file, start, start_tuto_example );
                 break;
 
-            case 6 : case 7 : // on a le début d'un exemple ou d'un tutoriel
-                // on détermine les lignes qui correspondent à l'exemple via l'indentation
+            case 6 : case 7 : /// on a le début d'un exemple ou d'un tutoriel
+                /// on détermine les lignes qui correspondent à l'exemple via l'indentation
                 decalage_ref = pos - start - 1;// pos contient la position de \example, start celle du début de ligne
                 token = file.substr(pos2,next-pos2 ); // on enregistre la référence ou le titre de l'exemple ou du tutoriel
                 cut_space( token );

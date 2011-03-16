@@ -11,6 +11,7 @@
         * \a Global est utilisée lorsque la fonction est constante sur tout le maillage. Dans ce cas, le tableau val ne contient qu'une seule valeur.
         * \a Nodal est utilisée quand la fonction est définie par ses valeurs sur les noeuds de l'élément. val doit contenir autant de valeurs qu'il y a de noeuds à lélément.
         * \a Elementary sert lorsque la fonction est constante sur l'élément. val ne contient donc qu'une seule valeur.
+        * \a Gauss est utile si on connait la valeur de la fonction aux points de Gauss et que l'on souhaite interpoler la fonction sur d'autres points que ceux de Gauss. Comme le nombre de points de Gauss varie en fonction de l'ordre, il peut y avoir plusieurs versions comme \a Gauss_0 , \a Gauss_1 , etc... En pratique l'interpolation n'est pas toujours pertinente.  
     * le troisième paramètre var_inter contient les coordonnées dans l'espace de référence du point dont on veut calculer l'interpolation.
     * le quatrième paramètre, val, est le tableau des valeurs d'interpolations. Pour être plus précis notons :
         \latex 

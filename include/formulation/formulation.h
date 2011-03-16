@@ -20,6 +20,7 @@
 #include "sollicitation.h"
 #include "util/symamd.h"
 #include "util/solveLDL.h"
+#include "util/MUMPS_solver.h"
 #include "formulation/formulation_ancestor.h"
 #include "containers/matcholamd.h"
 #include "containers/matumfpack.h"
@@ -34,7 +35,7 @@ struct LocalOperator {
     void update_variables(TM *m){ };
 };
 
-/** To be redefined for each new for,ulations */
+/** To be redefined for each new formulations */
 template<class TF>
 void read_material_to_mesh_( const XmlNode &n, TF &f ) {}
 
@@ -127,6 +128,11 @@ public:
     virtual unsigned get_nb_vectors(){ return nb_vectors; }
 
 private:
+#if LDL
+    LDL_solver solver;
+#elif WITH_MUMPS
+    MUMPS_solver solver;
+#endif
     template<unsigned nm,unsigned n,unsigned tne> struct MatCaracElem {
         typedef typename TM::TElemList::template SubType<n>::T TE;
         typedef CaracFormulationForElement<NameFormulation,TE,NameVariant,ScalarType> CFE;
@@ -545,13 +551,17 @@ public:
             clean_mats();
             if ( assemble_vec ) {
                 add_global_matrix( *this, matrices(Number<0>()), sollicitation, vectors, Number<MatCarac<0>::symm>(), Number<true>(), Number<true>(), *indice_glob ); // global
-                apply( m->node_list, AssembleNode<true,true >(), *indice_noda, *this ); // nodal
-                apply( m->elem_list, AssembleElem<true,true >(), *indice_noda, indice_elem, *this ); // element (and skin elements)
+                //apply( m->node_list, AssembleNode<true,true >(), *indice_noda, *this ); // nodal
+                //apply( m->elem_list, AssembleElem<true,true >(), *indice_noda, indice_elem, *this ); // element (and skin elements)
+                apply_mt( m->node_list, this->nb_threads_assemble_matrix, AssembleNode<true,true >(), *indice_noda, *this ); // nodal
+                apply_mt( m->elem_list, this->nb_threads_assemble_matrix, AssembleElem<true,true >(), *indice_noda, indice_elem, *this ); // element (and skin elements)
             }
             else {
                 add_global_matrix( *this, matrices(Number<0>()), sollicitation, vectors, Number<MatCarac<0>::symm>(), Number<true>(), Number<false>(), *indice_glob ); // global
-                apply( m->node_list, AssembleNode<true,false>(), *indice_noda, *this ); // nodal
-                apply( m->elem_list, AssembleElem<true,false>(), *indice_noda, indice_elem, *this); // element (and skin elements)
+                //apply( m->node_list, AssembleNode<true,false>(), *indice_noda, *this ); // nodal
+                //apply( m->elem_list, AssembleElem<true,false>(), *indice_noda, indice_elem, *this); // element (and skin elements)
+                apply_mt( m->node_list, this->nb_threads_assemble_matrix, AssembleNode<true,false>(), *indice_noda, *this ); // nodal
+                apply_mt( m->elem_list, this->nb_threads_assemble_matrix, AssembleElem<true,false>(), *indice_noda, indice_elem, *this); // element (and skin elements)
             }
         }
         else {
@@ -678,13 +688,13 @@ public:
     /// ...
     virtual void assemble(bool assemble_mat=true,bool assemble_vec=true) {
         // assemble_mat
-        std::cout << "assemble_mat -> " << time_of_day_in_sec() << std::endl;        
+//         std::cout << "assemble_mat -> " << time_of_day_in_sec() << std::endl;
         assemble_clean_mat(assemble_mat,assemble_vec);
         // constraints
-        std::cout << "assemble_con -> " << time_of_day_in_sec() << std::endl;
+//         std::cout << "assemble_con -> " << time_of_day_in_sec() << std::endl;
         assemble_constraints(assemble_mat,assemble_vec);
         // sollicitations
-        std::cout << "assemble_sol -> " << time_of_day_in_sec() << std::endl;
+//         std::cout << "assemble_sol -> " << time_of_day_in_sec() << std::endl;
         assemble_sollicitations(assemble_mat,assemble_vec);
 
         if ( user_want_pierre_precond )
@@ -811,20 +821,24 @@ public:
     }
     ///
     bool solve_system_(AbsScalarType iterative_criterium, const Number<1> &n_wont_add_nz, const Number<0> &sym) {
-        //matrices(Number<0>()).get_factorization();
         #if LDL
-        //          std::cout << "Resolution LDL " << std::endl;
+        PRINT("LDL");
+        solver.get_factorization(matrices(Number<0>()),false);
         vectors[0] = sollicitation;
-        LDL_solver l;
-        l.get_factorization(matrices(Number<0>()),false);
-        l.solve( vectors[0] );
+        solver.solve( vectors[0] );
         #elif WITH_CHOLMOD
-      	if ( not matrices(Number<0>()).get_factorization() ) {
+        PRINT("CHOLMOD");
+        if ( not matrices(Number<0>()).get_factorization() ) {
             std::cout << "Bing. Inversion error" << std::endl;
             return false;
         }
         vectors[0] = matrices(Number<0>()).solve( sollicitation );
+        #elif WITH_MUMPS
+        PRINT("MUMPS");
+        solver.get_factorization( matrices(Number<0>()), false, true );
+        vectors[0] = solver.solve( sollicitation );
         #else
+        PRINT("LMT");
       	try {
             //             std::cout << "Resolution autre " << std::endl;
             vectors[0] = inv(matrices(Number<0>())) * sollicitation;
@@ -835,12 +849,18 @@ public:
     ///
     bool solve_system_(AbsScalarType iterative_criterium, const Number<1> &n_wont_add_nz, const Number<1> &sym) {
         #if WITH_CHOLMOD
+        PRINT("CHOLMOD");
         if ( not matrices(Number<0>()).get_factorization() ) {
             std::cout << "Bing. Inversion error" << std::endl;
             return false;
         }
         vectors[0] = matrices(Number<0>()).solve( sollicitation );
+        #elif WITH_MUMPS
+        PRINT("MUMPS");
+        solver.get_factorization( matrices( Number<0>() ), false, true );
+        vectors[0] = solver.solve( sollicitation );
         #else
+        PRINT("LMT");
         if ( iterative_criterium ) {
             Mat<ScalarType,Sym<>,SparseLine<> > mm = matrices(Number<0>());
             incomplete_chol_factorize( mm );
@@ -863,6 +883,7 @@ public:
             //    ls.solve( vectors[0] );
             //}
             //else
+                PRINT("LMT");
                 vectors[0] = inv(matrices(Number<0>())) * sollicitation;
         } catch(const SolveException &e) { std::cerr << "system not inversible" << std::endl; return false; }
         return true;
@@ -875,17 +896,14 @@ public:
                 solve_using_incomplete_chol_factorize( mm, matrices(Number<0>()), sollicitation, vectors[0], iterative_criterium );
             }
             else {
-                //if ( MatCarac<0>::symm and matrices(Number<0>()).nb_rows() > 1000000 ) {
                 #if LDL
-                   std::cout << "solveur LDL" << std::endl;
-                   LDL_solver ls;
-                   ls.get_factorization( matrices(Number<0>()), false );
-                   vectors[0] = sollicitation;
-                   ls.solve( vectors[0] );
+                std::cout << "solveur LDL" << std::endl;
+                solver.get_factorization( matrices(Number<0>()), false );
+                vectors[0] = sollicitation;
+                solver.solve( vectors[0] );
                 #else
-                //}
-                //else
-                    vectors[0] = inv(matrices(Number<0>())) * sollicitation;
+                PRINT("LMT");
+                vectors[0] = inv(matrices(Number<0>())) * sollicitation;
                 #endif
             }
             //PRINT( vectors[0] );
@@ -938,9 +956,9 @@ public:
         //
         unsigned nb_iterations = 0;
         while ( true ) {
-            PRINT( __LINE__ );
+            //PRINT( __LINE__ );
             assemble();
-            PRINT( __LINE__ );
+            //PRINT( __LINE__ );
             if ( solve_system(iterative_criterium,disp_timing) == false )
                 return false;
 
@@ -1154,10 +1172,9 @@ private:
         #endif
         #else
         std::cout << "solveur LDL dans solve_system_using_factorization_matrix" << std::endl;
-        LDL_solver ls;
-        ls.get_factorization( matrices(Number<0>()), false );
+        solver.get_factorization( matrices(Number<0>()), false );
         vectors[0] = sollicitation;
-        ls.solve( vectors[0] );
+        solver.solve( vectors[0] );
         #endif
     }
     void solve_system_using_factorization_matrix(const Number<1> &sym) {
@@ -1167,10 +1184,9 @@ private:
         #endif
         #else
         std::cout << "solveur LDL dans solve_system_using_factorization_matrix" << std::endl;
-        LDL_solver ls;
-        ls.get_factorization( matrices(Number<0>()), false );
+        solver.get_factorization( matrices(Number<0>()), false );
         vectors[0] = sollicitation;
-        ls.solve( vectors[0] );
+        solver.solve( vectors[0] );
         #endif
     }
 
@@ -1365,10 +1381,20 @@ public:
         }
 
     }
-    //
+    virtual void call_after_solve(unsigned nb_thread) {
+        if (vectors_assembly== NULL){
+            if ( not allocated )
+                allocate_matrices();
+            apply_mt( m->elem_list, nb_thread, CallAfterSolve(), *this, vectors );
+        } else {
+            apply_mt( m->elem_list, nb_thread, CallAfterSolve(), *this, *vectors_assembly );
+        }
+
+    }
     virtual void call_after_solve(Vec<Vec<ScalarType> > &vectors_) {
         apply( m->elem_list, CallAfterSolve(), *this, vectors_);
     }
+    
     virtual void call_after_solve_2() {
         if (vectors_assembly== NULL){
             if ( not allocated )
@@ -1376,6 +1402,15 @@ public:
             apply( m->elem_list, CallAfterSolve_2(), *this, vectors );
         } else {
             apply( m->elem_list, CallAfterSolve_2(), *this, *vectors_assembly );
+        }
+    }
+    virtual void call_after_solve_2(unsigned nb_thread) {
+        if (vectors_assembly== NULL){
+            if ( not allocated )
+                allocate_matrices();
+            apply_mt( m->elem_list, nb_thread, CallAfterSolve_2(), *this, vectors );
+        } else {
+            apply_mt( m->elem_list, nb_thread, CallAfterSolve_2(), *this, *vectors_assembly );
         }
     }
     virtual void call_after_solve_2(Vec<Vec<ScalarType> > &vectors_)  {
@@ -1390,7 +1425,15 @@ public:
         } else {
             apply( m->elem_list, CallAfterSolve_3(), *this, *vectors_assembly );
         }
-
+    }
+    virtual void call_after_solve_3(unsigned nb_thread) {
+        if (vectors_assembly== NULL){
+            if ( not allocated )
+                allocate_matrices();
+            apply_mt( m->elem_list, nb_thread, CallAfterSolve_3(), *this, vectors );
+        } else {
+            apply_mt( m->elem_list, nb_thread, CallAfterSolve_3(), *this, *vectors_assembly );
+        }
     }
     virtual void call_after_solve_3(Vec<Vec<ScalarType> > &vectors_)  {
         apply( m->elem_list, CallAfterSolve_3(), *this, vectors_ );
@@ -1405,7 +1448,15 @@ public:
             apply( m->elem_list, CallAfterSolve_4(), *this, *vectors_assembly );
         }
     }
-
+    virtual void call_after_solve_4(unsigned nb_thread) {
+        if (vectors_assembly== NULL){
+            if ( not allocated )
+                allocate_matrices();
+            apply_mt( m->elem_list, nb_thread, CallAfterSolve_4(), *this, vectors );
+        } else {
+            apply_mt( m->elem_list, nb_thread, CallAfterSolve_4(), *this, *vectors_assembly );
+        }
+    }
     virtual void call_after_solve_4(Vec<Vec<ScalarType> > &vectors_)  {
         apply( m->elem_list, CallAfterSolve_4(), *this, vectors_ );
     }
@@ -1417,6 +1468,15 @@ public:
             apply( m->elem_list, CallAfterSolve_5(), *this, vectors );
         } else {
             apply( m->elem_list, CallAfterSolve_5(), *this, *vectors_assembly );
+        }
+    }
+    virtual void call_after_solve_5(unsigned nb_thread) {
+        if (vectors_assembly== NULL){
+            if ( not allocated )
+                allocate_matrices();
+            apply_mt( m->elem_list, nb_thread, CallAfterSolve_5(), *this, vectors );
+        } else {
+            apply_mt( m->elem_list, nb_thread, CallAfterSolve_5(), *this, *vectors_assembly );
         }
     }
     virtual void call_after_solve_5(Vec<Vec<ScalarType> > &vectors_)  {
@@ -1431,6 +1491,15 @@ public:
             apply( m->elem_list, CallAfterSolve_6(), *this, *vectors_assembly );
         }
     }
+    virtual void call_after_solve_6(unsigned nb_thread) {
+        if (vectors_assembly== NULL){
+            if ( not allocated )
+                allocate_matrices();
+            apply_mt( m->elem_list, nb_thread, CallAfterSolve_6(), *this, vectors );
+        } else {
+            apply_mt( m->elem_list, nb_thread, CallAfterSolve_6(), *this, *vectors_assembly );
+        }
+    }
     virtual void call_after_solve_6(Vec<Vec<ScalarType> > &vectors_)  {
         apply( m->elem_list, CallAfterSolve_6(), *this, vectors_ );
     }
@@ -1441,6 +1510,15 @@ public:
             apply( m->elem_list, CallAfterSolve_7(), *this, vectors );
         } else {
             apply( m->elem_list, CallAfterSolve_7(), *this, *vectors_assembly );
+        }
+    }
+    virtual void call_after_solve_7(unsigned nb_thread) {
+        if (vectors_assembly== NULL){
+            if ( not allocated )
+                allocate_matrices();
+            apply_mt( m->elem_list, nb_thread, CallAfterSolve_7(), *this, vectors );
+        } else {
+            apply_mt( m->elem_list, nb_thread, CallAfterSolve_7(), *this, *vectors_assembly );
         }
     }
     virtual void call_after_solve_7(Vec<Vec<ScalarType> > &vectors_)  {
@@ -1455,6 +1533,15 @@ public:
             apply( m->elem_list, CallAfterSolve_8(), *this, *vectors_assembly );
         }
     }
+    virtual void call_after_solve_8(unsigned nb_thread) {
+        if (vectors_assembly== NULL){
+            if ( not allocated )
+                allocate_matrices();
+            apply_mt( m->elem_list, nb_thread, CallAfterSolve_8(), *this, vectors );
+        } else {
+            apply_mt( m->elem_list, nb_thread, CallAfterSolve_8(), *this, *vectors_assembly );
+        }
+    }
     virtual void call_after_solve_8(Vec<Vec<ScalarType> > &vectors_)  {
         apply( m->elem_list, CallAfterSolve_8(), *this, vectors_ );
     }
@@ -1465,6 +1552,15 @@ public:
             apply( m->elem_list, CallAfterSolve_9(), *this, vectors );
         } else {
             apply( m->elem_list, CallAfterSolve_9(), *this, *vectors_assembly );
+        }
+    }
+    virtual void call_after_solve_9(unsigned nb_thread) {
+        if (vectors_assembly== NULL){
+            if ( not allocated )
+                allocate_matrices();
+            apply_mt( m->elem_list, nb_thread, CallAfterSolve_9(), *this, vectors );
+        } else {
+            apply_mt( m->elem_list, nb_thread, CallAfterSolve_9(), *this, *vectors_assembly );
         }
     }
     virtual void call_after_solve_9(Vec<Vec<ScalarType> > &vectors_)  {
@@ -1479,6 +1575,15 @@ public:
             apply( m->elem_list, CallAfterSolve_10(), *this, *vectors_assembly );
         }
     }
+    virtual void call_after_solve_10(unsigned nb_thread) {
+        if (vectors_assembly== NULL){
+            if ( not allocated )
+                allocate_matrices();
+            apply_mt( m->elem_list, nb_thread, CallAfterSolve_10(), *this, vectors );
+        } else {
+            apply_mt( m->elem_list, nb_thread, CallAfterSolve_10(), *this, *vectors_assembly );
+        }
+    }
     virtual void call_after_solve_10(Vec<Vec<ScalarType> > &vectors_)  {
         apply( m->elem_list, CallAfterSolve_10(), *this, vectors_ );
     }
@@ -1489,6 +1594,15 @@ public:
             apply( m->elem_list, CallAfterSolve_11(), *this, vectors );
         } else {
             apply( m->elem_list, CallAfterSolve_11(), *this, *vectors_assembly );
+        }
+    }
+    virtual void call_after_solve_11(unsigned nb_thread) {
+        if (vectors_assembly== NULL){
+            if ( not allocated )
+                allocate_matrices();
+            apply_mt( m->elem_list, nb_thread, CallAfterSolve_11(), *this, vectors );
+        } else {
+            apply_mt( m->elem_list, nb_thread, CallAfterSolve_11(), *this, *vectors_assembly );
         }
     }
     virtual void call_after_solve_11(Vec<Vec<ScalarType> > &vectors_)  {
@@ -1503,6 +1617,15 @@ public:
             apply( m->elem_list, CallAfterSolve_12(), *this, *vectors_assembly );
         }
     }
+    virtual void call_after_solve_12(unsigned nb_thread) {
+        if (vectors_assembly== NULL){
+            if ( not allocated )
+                allocate_matrices();
+            apply_mt( m->elem_list, nb_thread, CallAfterSolve_12(), *this, vectors );
+        } else {
+            apply_mt( m->elem_list, nb_thread, CallAfterSolve_12(), *this, *vectors_assembly );
+        }
+    }
     virtual void call_after_solve_12(Vec<Vec<ScalarType> > &vectors_)  {
         apply( m->elem_list, CallAfterSolve_12(), *this, vectors_ );
     }
@@ -1513,6 +1636,15 @@ public:
             apply( m->elem_list, CallAfterSolve_13(), *this, vectors );
         } else {
             apply( m->elem_list, CallAfterSolve_13(), *this, *vectors_assembly );
+        }
+    }
+    virtual void call_after_solve_13(unsigned nb_thread) {
+        if (vectors_assembly== NULL){
+            if ( not allocated )
+                allocate_matrices();
+            apply_mt( m->elem_list, nb_thread, CallAfterSolve_13(), *this, vectors );
+        } else {
+            apply_mt( m->elem_list, nb_thread, CallAfterSolve_13(), *this, *vectors_assembly );
         }
     }
     virtual void call_after_solve_13(Vec<Vec<ScalarType> > &vectors_)  {
@@ -1527,6 +1659,15 @@ public:
             apply( m->elem_list, CallAfterSolve_14(), *this, *vectors_assembly );
         }
     }
+    virtual void call_after_solve_14(unsigned nb_thread) {
+        if (vectors_assembly== NULL){
+            if ( not allocated )
+                allocate_matrices();
+            apply_mt( m->elem_list, nb_thread, CallAfterSolve_14(), *this, vectors );
+        } else {
+            apply_mt( m->elem_list, nb_thread, CallAfterSolve_14(), *this, *vectors_assembly );
+        }
+    }
     virtual void call_after_solve_14(Vec<Vec<ScalarType> > &vectors_)  {
         apply( m->elem_list, CallAfterSolve_14(), *this, vectors_ );
     }
@@ -1537,6 +1678,15 @@ public:
             apply( m->elem_list, CallAfterSolve_15(), *this, vectors );
         } else {
             apply( m->elem_list, CallAfterSolve_15(), *this, *vectors_assembly );
+        }
+    }
+    virtual void call_after_solve_15(unsigned nb_thread) {
+        if (vectors_assembly== NULL){
+            if ( not allocated )
+                allocate_matrices();
+            apply_mt( m->elem_list, nb_thread, CallAfterSolve_15(), *this, vectors );
+        } else {
+            apply_mt( m->elem_list, nb_thread, CallAfterSolve_15(), *this, *vectors_assembly );
         }
     }
     virtual void call_after_solve_15(Vec<Vec<ScalarType> > &vectors_)  {
@@ -1790,6 +1940,7 @@ public:
     virtual Vec<ScalarType> &get_result(unsigned num=0) { return vectors[num]; }
 
     virtual unsigned nb_constraints() const { return constraints.size(); }
+    virtual void erase_constraints() { constraints.resize(0); }
     virtual void erase_constraints_from(unsigned number) { constraints.resize(number); }
 
     virtual unsigned get_indice_noda(unsigned num_node) const { return (*indice_noda)[num_node]; }

@@ -5,6 +5,7 @@
 #include "mesh/hexa.h"
 #include "mesh/triangle_6.h"
 #include "mesh/tetra.h"
+#include "mesh/tetra_10.h"
 #include "mesh/wedge.h"
 #include <stdexcept>
 #include <map>
@@ -103,6 +104,13 @@ struct Totito_ELEM {
             Vec<Vec<Vec<double> > > data;
 };
 
+/*!
+référence sur le format UCD : 
+    http://people.sc.fsu.edu/~jburkardt/data/ucd/ucd.html
+    http://people.sc.fsu.edu/~jburkardt/html/ucd_format.html
+
+Rem : L'élément \a Tetra_10 n'est pas spécifié dans le format.
+*/
 template<class TM>
 void read_avs(TM &mesh, std::istream &is) throw(std::runtime_error) {
 
@@ -226,20 +234,42 @@ void read_avs(TM &mesh, std::istream &is) throw(std::runtime_error) {
             if(nbelem_data) mesh.elem_list.synchronize_dyn(&dd);
             if(nbelem_data) mesh.elem_list.get_data(dd, *ne) = nb;
         } else if (type_elem=="tet") {
-            nnode_elem=4;
+            EA *ne;
             Vec<TNode *> vn;
-            vn.resize(nnode_elem);
-            for(int i=0;i<nnode_elem;i++) {
+            /// lecture de l'indice des noeuds
+            while ( not( s.eof() ) ) {
                 s >> number;
-                vn[i] = map_num_node[number];
+                vn.push_back( map_num_node[ number ] );
             }
-            permutation_if_jac_neg(Tetra(),vn.ptr());
+            
+            switch( vn.size() ) {
+                case 4 : { /// Tetra
+                    permutation_if_jac_neg( Tetra(), vn.ptr() );
+                    ne = reinterpret_cast<EA *>( mesh.add_element( Tetra(), DefaultBehavior(), &vn[0] ) );
+                    break;
+                }
+                case 10 : { /// Tetra_10
+                    Vec<TNode *> vn2 = vn;
+                    vn[ 2 ] = vn2[ 9 ];
+                    vn[ 3 ] = vn2[ 5 ];
+                    vn[ 4 ] = vn2[ 7 ];
+                    vn[ 5 ] = vn2[ 3 ];
+                    vn[ 6 ] = vn2[ 2 ];
+                    vn[ 7 ] = vn2[ 4 ];
+                    vn[ 8 ] = vn2[ 6 ];
+                    vn[ 9 ] = vn2[ 8 ];       
+                    permutation_if_jac_neg( Tetra_10(), vn.ptr() );
+                    ne = reinterpret_cast<EA *>( mesh.add_element( Tetra_10(), DefaultBehavior(), &vn[0] ) );                
+                    break;
+                }
+                default : throw std::runtime_error( "Unknown tet element..." );
+            }
             //typename TM::template TElem<Tetra,DefaultBehavior>::TE *ne = mesh.add_element(Tetra(),DefaultBehavior(),&vn[0]);
-            typename TM::EA *ne = reinterpret_cast<typename TM::EA *>(mesh.add_element(Tetra(),DefaultBehavior(),&vn[0]));
             ne->group = number2;
-            if(nbelem_data) mesh.elem_list.synchronize_dyn(&dd);
-            if(nbelem_data) mesh.elem_list.get_data(dd, *ne) = nb;
-
+            if( nbelem_data ) { 
+                mesh.elem_list.synchronize_dyn( &dd );
+                mesh.elem_list.get_data(dd, *ne) = nb;
+            }
         } else if (type_elem=="cub8" or type_elem=="hex") {
             nnode_elem=8;
             Vec<TNode *> vn;

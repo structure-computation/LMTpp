@@ -1,6 +1,8 @@
 #ifndef CONSTRUCT_MATRIX_H
 #define CONSTRUCT_MATRIX_H
 
+#include <string.h>
+
 #include "mat.h"
 
 namespace LMT {
@@ -20,7 +22,7 @@ namespace Private {
 } // namespace Private
     
 /**
- * Opérateur générique. Aucune optimisation
+ * Opérateur générique pour la conversion de matrices. Aucune optimisation
 */
 template<class T0,class Str0,class Sto0,class T1,class Str1,class Sto1>
 void construct_matrix( Mat<T0,Str0,Sto0> &res, const Mat<T1,Str1,Sto1> &src ) {
@@ -29,6 +31,7 @@ void construct_matrix( Mat<T0,Str0,Sto0> &res, const Mat<T1,Str1,Sto1> &src ) {
     Str0::apply( Private::CopyConstructMat(), res, src );
 }
 
+/// conversion Mat< SparseLine > en Mat< Dense >
 template<class T0,class Str0,class Orientation0,class T1,class Str1>
 void construct_matrix( Mat<T0,Str0,Dense<Orientation0>,void> &res, const Mat<T1,Str1,SparseLine<Col>,void> &src ) {
     res.resize( src.nb_rows(), src.nb_cols() );
@@ -41,11 +44,52 @@ void construct_matrix( Mat<T0,Str0,Dense<Orientation0>,void> &res, const Mat<T1,
 //             res( r, src.data[ r ].indices[ i ] ) = src.data[ r ].data[ i ];
 }
 
+/// conversion Mat< Str1, SparseLine > en Mat< Str0, SparseLine > très générale. Il y en aura une autre plus spécifique
 template<class T0,class Str0,class O0,class T1,class Str1,class O1>
 void construct_matrix( Mat<T0,Str0,SparseLine<O0>,void> &res, const Mat<T1,Str1,SparseLine<O1>,void> &src ) {
     res.resize( src.nb_rows(), src.nb_cols() );
     //PRINT( " conversion Mat< Str0, SparseLine<Col> >" );
     Str1::apply_sparse_line( Private::CopyConstructMatWithValidPosition(), res, src );
+}
+
+/// conversion Mat< Gen, SparseLine > en Mat< Sym, SparseLine >  plus optimisé
+template<class T0, int size, class T1 >
+void construct_matrix( Mat<T0,Gen<size>, SparseLine<>,void> &res, const Mat<T1,Sym<size>,SparseLine<>,void> &src ) {
+    
+    if ( size < 0 )
+        res.resize( src.nb_rows(), src.nb_cols() );
+    //PRINT( "~~~~~~~~~~~~~ conversion Mat<T1,Sym<size>,SparseLine<>,void>" );
+    
+    int *offsets = new int[ src.nb_rows() ]; 
+    memset( offsets, 0, src.nb_rows() * sizeof( int ) );
+    
+    for( unsigned r = 0; r < src.nb_rows(); ++r )
+        for( unsigned c = 0; c < src.data[ r ].indices.size(); ++c )
+            if ( src.data[ r ].indices[ c ] != r )
+                ++offsets[ src.data[ r ].indices[ c ] ];
+
+    for( unsigned r = 0; r < src.nb_rows(); ++r ) {
+        int s = src.data[ r ].indices.size() + offsets[ r ];
+        res.data[ r ].indices.resize( s );
+        res.data[ r ].data.resize( s );
+        offsets[ r ] = src.data[ r ].indices.size();
+        for( unsigned c = 0; c < src.data[ r ].indices.size(); ++c ) {
+            res.data[ r ].indices[ c ] = src.data[ r ].indices[ c ];
+            res.data[ r ].data[ c ] = src.data[ r ].data[ c ];
+        }
+    }
+    
+    for( unsigned r = 0; r < src.nb_rows(); ++r )
+        for( unsigned c = 0; c < src.data[ r ].indices.size(); ++c ) 
+            if ( src.data[ r ].indices[ c ] != r ) {
+                unsigned c2 = offsets[ src.data[ r ].indices[ c ] ];
+                unsigned r2 = src.data[ r ].indices[ c ];
+                res.data[ r2 ].indices[ c2 ] = r;
+                res.data[ r2 ].data[ c2 ] = src.data[ r ].data[ c ];
+                offsets[ src.data[ r ].indices[ c ] ]++;
+            }
+
+    delete[] offsets;
 }
 
 template<class T0,class Str,class O,class T1>

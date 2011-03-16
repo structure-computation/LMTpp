@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from formal_lf.variable import Variable
-from include.codegen import *
+from LMT.formal_lf.variable import Variable
+from LMT.include.codegen import *
 import os, math, sys, string
 
 class Element:

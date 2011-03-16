@@ -14,7 +14,7 @@ using namespace std;
 #include "visitorcommentitem.h"
 //#include "target.h"
 
-struct CommentItemExample : public CommentItem /*, public Target*/ { 
+struct CommentItemExample : public CommentItem { 
     CommentItemExample( string& ref);
     virtual void print( std::ostream &os ) const { /*os << txt << endl;*/ }
     virtual void display( std::ostream &os );
@@ -25,7 +25,6 @@ struct CommentItemExample : public CommentItem /*, public Target*/ {
     // méthode virtuelle de target
     virtual bool of_example() { return true; }
 
-    //string reference;
     std::vector<CommentItem*> items;
 };
 

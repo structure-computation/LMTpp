@@ -349,6 +349,9 @@ Pour les fichiers du genre
  6 7 8
 
 \keyword Mathématiques/Algèbre linéaire/Opération
+\keyword Matrice/Opération
+\keyword Matrice/Import
+
 */
 template<class T,class Structure,class Storage,class OP>
 void read_ascii_mat_file( Mat<T,Structure,Storage,OP> &mat, std::istream &f ) {

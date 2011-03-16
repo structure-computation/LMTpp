@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-from variable import *
+from LMT.formal_lf.variable import *
 from interpolation import *
 from calculate_matrix import *
 from contact import *
-from include.codegen import *
+from LMT.include.codegen import *
 import os,sys,string
 import extrapolation
 from element import *

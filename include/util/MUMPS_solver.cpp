@@ -16,6 +16,24 @@ MUMPS_solver::MUMPS_solver() {
     id.a   = NULL; /// valeur des éléments non nuls 
     id.rhs = NULL; /// valeur des éléments non nuls du vecteur second membre
     myid = -1;
+    already_factorized = false;
+//     for( int i = 1; i <= 40; ++i )
+//         id.ICNTL( i ) = 0;
+        
+    ///id.ICNTL( 1 ) = -1; /*! No outputs */
+    ///id.ICNTL( 2 ) = -1; /*! No outputs */
+    ///id.ICNTL( 3 ) = -1; /*! No outputs */
+    ///id.ICNTL( 4 ) = -1;  /*! No outputs */
+    ///id.ICNTL( 5 ) = 0;  /*! matrix is given in assembled format */
+    ///id.ICNTL( 6 ) = 7; /*! automatic permuting and/or scaling the matrix */
+    ///id.ICNTL( 7 ) = 7; /*! automatic choise of pivot */
+    ///id.ICNTL( 8 ) = 77; /*! scaling strategy */
+    ///id.ICNTL( 9 ) = 1; /*! solve Ax = b */
+    ///id.ICNTL( 10 ) = 2; /*! maximum number of steps of iterative refinement */
+    ///id.ICNTL( 11 ) = 0; /*! statistics */
+    ///id.ICNTL( 12 ) = 0; /*! strategy of ordering */
+    ///id.ICNTL( 13 ) = 0; /*! using ScaLAPACK */ 
+    ///id.ICNTL( 14 ) = 20; /*!  % increase in the estimated working space */ 
 }
 
 MUMPS_solver::~MUMPS_solver() {
@@ -49,6 +67,9 @@ void MUMPS_solver::init_MPI( int argc, char* argv[] ) {
 }
 
 void MUMPS_solver::get_factorization( Mat<double, Sym<>, SparseLine<> > &mat, bool want_free, bool is_definite_positive ) {
+//     PRINT(already_factorized);
+    if ( already_factorized ) return;
+    else already_factorized = true;
     
     init_MPI();
     
@@ -62,16 +83,16 @@ void MUMPS_solver::get_factorization( Mat<double, Sym<>, SparseLine<> > &mat, bo
     id.comm_fortran = use_comm_word; /// communicator de MPI
     id.job = job_init;
     dmumps_c( &id );    
+    id.ICNTL( 1 ) = -1; /*! No outputs */
+    id.ICNTL( 2 ) = -1; /*! No outputs */
+    id.ICNTL( 3 ) = -1; /*! No outputs */
+    id.ICNTL( 4 ) = -1;  /*! No outputs */
+    
     /*! Define the problem on the host */
     if ( myid == 0 ) {
         free();
         /// construction des données nécessaires à la factorisation (excepté a qui peut ne pas être nécessaire )
-        load_matrix( mat );
-        /*! No outputs */
-        id.ICNTL( 1 ) = -1;
-        id.ICNTL( 2 ) = -1;
-        id.ICNTL( 3 ) = -1;
-        id.ICNTL( 4 ) =  0;     
+        load_matrix( mat );   
     
         id.job = job_analyse;
         dmumps_c( &id );
@@ -85,6 +106,8 @@ void MUMPS_solver::get_factorization( Mat<double, Sym<>, SparseLine<> > &mat, bo
 }
 
 void MUMPS_solver::get_factorization( Mat<double, Gen<>, SparseLine<> > &mat, bool want_free ) {
+    if ( already_factorized ) return;
+    else already_factorized = true;
 
     init_MPI();
     
@@ -94,16 +117,15 @@ void MUMPS_solver::get_factorization( Mat<double, Gen<>, SparseLine<> > &mat, bo
     id.comm_fortran = use_comm_word; /// communicator de MPI 
     id.job = job_init;
     dmumps_c( &id );
+    id.ICNTL( 1 ) = -1; /*! No outputs */
+    id.ICNTL( 2 ) = -1; /*! No outputs */
+    id.ICNTL( 3 ) = -1; /*! No outputs */
+    id.ICNTL( 4 ) = -1;  /*! No outputs */
     /*! Define the problem on the host */
     if ( myid == 0 ) {
         free();
         /// construction des données nécessaires à la factorisation (excepté a qui peut ne pas être nécessaire )
         load_matrix( mat );
-        /*! No outputs */
-        id.ICNTL( 1 ) = -1;
-        id.ICNTL( 2 ) = -1;
-        id.ICNTL( 3 ) = -1;
-        id.ICNTL( 4 ) =  0;     
     
         id.job = job_analyse;
         dmumps_c( &id );

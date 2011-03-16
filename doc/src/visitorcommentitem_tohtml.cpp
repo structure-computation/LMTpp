@@ -318,14 +318,18 @@ void VisitorCommentItem_toHTML :: function_at_CommentItemLaTex( CommentItemLaTex
     texfile.close();
     ostringstream command;
     stmp = c->reference();
-    stmp2 = enleve_suffix(stmp );
+    stmp2 = enleve_suffix( stmp );
     //ss.str("");
     //ss << c->id;
     //stmp = c->name.name + "_" + ss.str();
     stmp = directory( stmp );
-    //command  << "latex -output-directory " << stmp << " -interaction=batchmode " << c->reference() <<  " && dvips -O0in,11in -E -o "
-    command  << "latex -output-directory " << stmp << " -interaction=batchmode " << c->reference() <<  " && dvips -O0in,11in -o "
-            << stmp2 << ".eps " << stmp2 << ".dvi && convert -antialias -append -density 128 " << stmp2 << ".eps " 
+    if ( c->multipage == "multipage" )
+        command  << "latex -output-directory " << stmp << " -interaction=batchmode " << c->reference() <<  " && dvips -o ";
+    else
+        command  << "latex -output-directory " << stmp << " -interaction=batchmode " << c->reference() <<  " && dvips -O0in,11in -E -o ";
+    
+    //command  << "latex -output-directory " << stmp << " -interaction=batchmode " << c->reference() <<  " && dvips -O0in,11in -o ";
+    command << stmp2 << ".eps " << stmp2 << ".dvi && convert -antialias -append -density 128 " << stmp2 << ".eps " 
             << stmp2 << ".png && rm ";
     const char *ext[] = {".tex",".dvi",".eps",".aux",".log"};
     for(unsigned i = 1; i < 5; ++i ) command << " " << stmp2 << ext[i];

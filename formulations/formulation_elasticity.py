@@ -22,4 +22,3 @@ def formulation():
     for i in range(dim,epstest.size()): res += 2 * sigma[i] * epstest[i]
   
     return res * dV + dot( f_nodal.expr, dep.test ) * dN
-
