@@ -27,6 +27,8 @@ class Formulation:
     def IS_contact_formulation(): return number(0)
     def elem_contact_formulation(ve): return number(0)
     def apply_on_elements_after_solve(unk_subs): return Write_code('T')
+    def form_ord( x ):
+        return 2 * x - 2
     
     self.ind = {
       "Variable" : Variable,
@@ -59,7 +61,7 @@ class Formulation:
       "matrix_will_be_definite_positive" : True,
       "Interpolations" : std_interpolations,
       "order_integration" : -1, # utilisé uniquement si integration_total = false
-      "formulation_order" : ( lambda x: 2 * x - 2 ), # utilisé uniquement si integration_total = false
+      #"formulation_order" : form_ord, # utilisé uniquement si integration_total = false
       "IS_contact_formulation" : IS_contact_formulation,
       "elem_contact_formulation" : elem_contact_formulation,
       'hooke_isotrope_th' : hooke_isotrope_th,
@@ -80,6 +82,7 @@ class Formulation:
       'apply_on_elements_after_solve_14' : apply_on_elements_after_solve,
       'apply_on_elements_after_solve_15' : apply_on_elements_after_solve,
       'options' : options,
+      'formulation' : self,
       'gauss_points' : [],
       'user_headers' : [],
     }
@@ -93,6 +96,10 @@ class Formulation:
       setattr( self, n, i )
     self.num_func_write_matrix = 0
     self.beg_absolute_time = symbol( 'f.time' )
+    
+    if not ( "formulation_order" in  self.ind ):
+        setattr( self, "formulation_order", form_ord )
+    
 
   def get_variables(self):
     res = {}

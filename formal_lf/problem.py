@@ -33,11 +33,11 @@ class Problem:
             if f.dim==dim:
                for namevar,var in f.__dict__.items():
                   if isinstance(var,Variable):
-                     if namevar in all_vars: all_vars[namevar].join(var)
-                     else:                   all_vars[namevar] = var
+                    if namevar in all_vars: all_vars[namevar].join(var)
+                    else:                   all_vars[namevar] = var
                   if isinstance(var,ISVariable):
-                     if namevar in all_is_vars: all_is_vars[namevar].join(var)
-                     else:                      all_is_vars[namevar] = var
+                    if namevar in all_is_vars: all_is_vars[namevar].join(var)
+                    else:                      all_is_vars[namevar] = var
         # additional_fields
         for namevar,var in self.additional_fields.items():
             if namevar in all_vars:
@@ -222,6 +222,9 @@ class Problem:
             if e.dim == dim:
                 elements[0].append( e )
         find_sub_elems_rec(elements,0)
+        #print >> sys.stderr, e.name
+        #print >> sys.stderr, std_interpolations[ "gauss" ]( e ).nb_elementary
+
         for nvi, el in elements.items():
             cpt = 0
             for e in el:
@@ -257,6 +260,10 @@ class Problem:
             e = Element(ne,dim,self.incpaths)
             for nf in self.formulations:
                 f = Formulation(nf,dim,0,self.incpaths,options=self.options)
+                print >> sys.stderr, e.name, "f.formulation_order( 666 )", f.formulation_order( 666 )
+                f.set_variable_expressions( e )
+                
+                print >> sys.stderr, e.name, "nb_gauss_points =", e.nb_gauss_points
                 fe_sets.append( (f, e) )
         return fe_sets, all_dims
 

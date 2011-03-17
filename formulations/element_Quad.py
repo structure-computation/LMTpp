@@ -37,6 +37,7 @@ interpolation["bubble"] = (1-var_inter[0]) * (1-var_inter[1]) * (1-ni) * val[0] 
 interpolation["der_nodal"] = val[0]
 interpolation["gauss"] = val[0] + val[1] + val[2] + val[3]
 
+interpolation["gauss_1"] = val[0]
 interpolation["gauss_2"] = interpolation["gauss"]
 
 tmp_authorized_permutations = [
@@ -60,11 +61,11 @@ def pos_using_local_coordinates(coords):
   return v * coords[0] + positions[0]
 
 # ---------------------------------------------------------------------------------
-# gauss_points[2] = [
-#   ( 1.0/3.0, { var_inter[0] : (1.0+sqrt(2.0/3.0))/2.0, var_inter[1] : 0.0 } ),
-#   ( 1.0/3.0, { var_inter[0] : (1.0-sqrt(1.0/6.0))/2.0, var_inter[1] : (1.0+sqrt(1.0/2.0))/2.0 } ),
-#   ( 1.0/3.0, { var_inter[0] : (1.0-sqrt(1.0/6.0))/2.0, var_inter[1] : (1.0-sqrt(1.0/2.0))/2.0 } ),
-# ]
+#gauss_points[2] = [
+  #( 1.0/3.0, { var_inter[0] : (1.0+sqrt(2.0/3.0))/2.0, var_inter[1] : 0.0 } ),
+  #( 1.0/3.0, { var_inter[0] : (1.0-sqrt(1.0/6.0))/2.0, var_inter[1] : (1.0+sqrt(1.0/2.0))/2.0 } ),
+  #( 1.0/3.0, { var_inter[0] : (1.0-sqrt(1.0/6.0))/2.0, var_inter[1] : (1.0-sqrt(1.0/2.0))/2.0 } ),
+#]
 
 gauss_points[3] = [
   ( 1.0/4.0, { var_inter[0] : (1.0+sqrt(1.0/3.0))/2.0, var_inter[1] : (1+sqrt(1.0/3.0))/2.0 } ),
