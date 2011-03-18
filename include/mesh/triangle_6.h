@@ -99,7 +99,7 @@ template<class TN,class TNG,class TD,unsigned NET>
 typename TNG::Pvec center(const Element<Triangle_6,TN,TNG,TD,NET> &e) {
     typename TNG::Pvec res = 0.0;
     for(unsigned i=0;i<3;++i)
-        res += e.node(i)->pos;
+        res += e.pos(i);
     return res / 3;
 }
 

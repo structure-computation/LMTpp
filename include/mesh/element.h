@@ -249,6 +249,7 @@ typename TNode::Pvec center(const Element<NameElem,NameBehavior,TNode,TData,num_
 
 /*!
     Cette fonction retourne l'isobarycentre des noeuds de l'élément.
+    Elle est moins rapide, à priori, que la spécialisation center( const Element< ... > & ) car elle utilise des méthodes virtelles
 
     \friend raphael.pasquier@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr

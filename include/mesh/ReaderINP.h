@@ -7,9 +7,12 @@
 #include <iostream>
 #include <stdexcept>
 
-#include <mesh/hexa.h>
-#include <mesh/tetra.h>
-#include <mesh/tetra_10.h>
+#include "mesh.h"
+#include "hexa.h"
+#include "tetra.h"
+#include "tetra_10.h"
+#include "triangle.h"
+#include "triangle_6.h"
 
 
 namespace LMT {
@@ -100,6 +103,87 @@ bool jump( std::ifstream& is, std::string &next, const char* descripteur ) {
     return true;
 }
 
+typedef enum {
+    ELEMENT_LMT_UNDETERMINED = -2,
+    ELEMENT_LMT_UNKNOWN = -1,
+    ELEMENT_LMT_NODAL_ELEMENT = 0,
+    ELEMENT_LMT_BAR = 1,
+    ELEMENT_LMT_TRIANGLE = 2,
+    ELEMENT_LMT_QUAD = 3,
+    ELEMENT_LMT_TETRA = 4,
+    ELEMENT_LMT_HEXA = 5,
+    ELEMENT_LMT_PRISM = 6,
+    ELEMENT_LMT_TETRA_10 = 7,
+    ELEMENT_LMT_TRIANGLE_6 = 8
+} Element_LMT_ID;
+
+const char* name_element_LMT( Element_LMT_ID iel ) {
+    switch( iel ) {
+        case ELEMENT_LMT_UNDETERMINED : return "undetermined element";
+        case ELEMENT_LMT_UNKNOWN : return "unknown element";
+        case ELEMENT_LMT_NODAL_ELEMENT : return "NodalElement";
+        case ELEMENT_LMT_BAR : return "Bar";
+        case ELEMENT_LMT_TRIANGLE : return "Triangle";
+        case ELEMENT_LMT_QUAD : return "Quad";
+        case ELEMENT_LMT_TETRA : return "Tetra";
+        case ELEMENT_LMT_HEXA : return "Hexa";
+        case ELEMENT_LMT_PRISM : return "Prism";
+        case ELEMENT_LMT_TETRA_10 : return "Tetra_10";
+        case ELEMENT_LMT_TRIANGLE_6 : return "Triangle_6";
+        default : return "element TODO";        
+    }
+}
+
+template <class NE >
+struct El_LMT {
+    static const Element_LMT_ID res = ELEMENT_LMT_UNDETERMINED;
+};
+
+template<>
+struct El_LMT<Tetra_10> {
+    static const Element_LMT_ID res = ELEMENT_LMT_TETRA_10;
+};
+
+template<>
+struct El_LMT<Triangle_6> {
+    static const Element_LMT_ID res = ELEMENT_LMT_TRIANGLE_6;
+};
+
+template<>
+struct El_LMT<Tetra> {
+    static const Element_LMT_ID res = ELEMENT_LMT_TETRA;
+};
+
+template<>
+struct El_LMT<Hexa> {
+    static const Element_LMT_ID res = ELEMENT_LMT_HEXA;
+};
+
+
+template<class EA, class Pvec >
+struct CmpEl {
+
+    template<class TE, class TOL >
+    void operator() ( TE &e , TOL tol ) {
+        if ( El_LMT<typename TE::NameElem>::res == element_LMT ) {
+        
+            if ( ea )
+                return;
+
+            if ( length( c - center( e ) ) < tol )
+                ea = &e;
+            
+        } else {
+            std::cerr << "Error CmpEl() : bad match between LMT element and ABAQUS element" << std::endl;
+        }
+    }
+
+    Pvec c;
+    Element_LMT_ID element_LMT;
+    EA* ea;
+};
+
+
 /*!
     Objectif :
         récupèrer le maximum d'information d'un fichier INP ( ABAQUS ).
@@ -154,6 +238,7 @@ bool jump( std::ifstream& is, std::string &next, const char* descripteur ) {
 template<class TM> 
 struct ReaderINP {
     typedef typename TM::Pvec Pvec;
+    typedef Vec<double, 3 > PvecInp;
     typedef typename TM::TNode TNode;
     typedef typename TM::TNode::T T;
     typedef typename TM::MA::EA EA;
@@ -179,7 +264,8 @@ struct ReaderINP {
         //STATUS_PART                 = 15
     } Status_ID;
     
-    /// double : nécessaire et suffisant ; la dimension est déterminée à l'éxécution
+   
+    /// double : nécessaire et suffisant ;
     /// cet objet ne sert qu' à enregistrer la position d'un noeud
     struct NodeInp {
         NodeInp() : index_LMTpp( -1 ) {}
@@ -204,7 +290,7 @@ struct ReaderINP {
                 v[ i ] = pos[ i ];
         }
         
-        Vec<double> pos;
+        PvecInp pos; /// un maillage ABAQUS est toujours défini dans l'espace
         int index_LMTpp; /// index du noeud du maillage LMTpp construit par le constructeur de \a ReaderINP 
     };
     
@@ -212,7 +298,7 @@ struct ReaderINP {
     
      struct MatchElement_INP_LMTpp {
         MatchElement_INP_LMTpp() : ptrEA( NULL ) { }
-        MatchElement_INP_LMTpp( const char* n, EA* p, Vec<unsigned> &lnode ) : name( n ), ptrEA( p ), list_node( lnode ) {}
+        MatchElement_INP_LMTpp( Element_LMT_ID id_el, EA* p, Vec<unsigned> &lnode ) : element_LMT( id_el ), ptrEA( p ), list_node( lnode ) {}
 
         /*!
             Cette méthode ajoute à "mesh" l'élément concerné. 
@@ -244,42 +330,52 @@ struct ReaderINP {
                 }
             }
 
-            if ( name == "Tetra" ) {
-                permutation_if_jac_neg ( Tetra(), vnlocal.ptr() );
-                return mesh.add_element( Tetra(), DefaultBehavior(), vnlocal.ptr() );
+            switch( element_LMT ) {
+                case ELEMENT_LMT_TETRA :
+                    permutation_if_jac_neg ( Tetra(), vnlocal.ptr() );
+                    return mesh.add_element( Tetra(), DefaultBehavior(), vnlocal.ptr() );  
+                                  
+                case ELEMENT_LMT_HEXA :
+                    permutation_if_jac_neg ( Hexa(), vnlocal.ptr() );
+                    return mesh.add_element( Hexa(), DefaultBehavior(), vnlocal.ptr() );     
+                               
+                case ELEMENT_LMT_TRIANGLE :
+                    permutation_if_jac_neg ( Triangle(), vnlocal.ptr() );
+                    return mesh.add_element( Triangle(),DefaultBehavior(), vnlocal.ptr() );  
+                              
+                case ELEMENT_LMT_QUAD :
+                    permutation_if_jac_neg ( Quad(), vnlocal.ptr() );
+                    return mesh.add_element( Quad(),DefaultBehavior(), vnlocal.ptr() );                
+                
+                case ELEMENT_LMT_TETRA_10 :
+                    permutation_if_jac_neg ( Tetra_10(), vnlocal.ptr() );
+                    return mesh.add_element( Tetra_10(),DefaultBehavior(), vnlocal.ptr() );
+                
+                case ELEMENT_LMT_BAR :
+                    return mesh.add_element( Bar(),DefaultBehavior(), vnlocal.ptr() );
+                    
+                case ELEMENT_LMT_NODAL_ELEMENT :
+                    return mesh.add_element( NodalElement(),DefaultBehavior(), vnlocal.ptr() ); 
+                    
+                default :
+                    std::cerr << "WARNING ReaderINP : the element does not append by MatchElement_INP_LMTpp. TODO" << std::endl; 
+                    return NULL;
             }
-            if ( name == "Hexa") {
-                permutation_if_jac_neg ( Hexa(), vnlocal.ptr() );
-                return mesh.add_element( Hexa(), DefaultBehavior(), vnlocal.ptr() );
-            }
-            if ( name == "Triangle") {
-                permutation_if_jac_neg ( Triangle(), vnlocal.ptr() );
-                return mesh.add_element( Triangle(),DefaultBehavior(), vnlocal.ptr() );
-            }
-            if ( name == "Quad") {
-                permutation_if_jac_neg ( Quad(), vnlocal.ptr() );
-                return mesh.add_element( Quad(),DefaultBehavior(), vnlocal.ptr() );
-            }
-            if ( name == "Tetra_10") {
-                permutation_if_jac_neg ( Tetra_10(), vnlocal.ptr() );
-                return mesh.add_element( Tetra_10(),DefaultBehavior(), vnlocal.ptr() );
-            }
-            if ( name == "Bar")
-                return mesh.add_element( Bar(),DefaultBehavior(), vnlocal.ptr() );
-            if ( name == "NodalElement")
-                return mesh.add_element( NodalElement(),DefaultBehavior(), vnlocal.ptr() ); 
-            std::cerr << "WARNING ReaderINP : the element " << name << " does not append by MatchElement_INP_LMTpp. TODO" << std::endl; 
-            return NULL;
         }
         
         /*!
             cette méthode retourne dans "index" la liste des indices INP des noeuds de la surface d' identifiant idFace de l'élément courant. 
-        
+            Référence ABAQUS :
+                2.3.2 Defining element-based surfaces
+                    paragraphe : Creating surface facets by specifying solid, continuum shell, and cohesive element faces
+                22.1.4 Three-dimensional solid element library
+                
+                
         */
-        void get_index_node_of_surface( Vec<unsigned> &index, unsigned idFace ) const {
+        /*Element_LMT_ID get_index_node_of_facet( Vec<unsigned> &index, unsigned idFace ) const {
          
             index.resize( 0 );
-            if ( name == "Hexa") {
+            if ( element_LMT == ELEMENT_LMT_HEXA ) {
                 switch( idFace ) {
                     case 1 : 
                         index.resize( 4 );
@@ -287,48 +383,211 @@ struct ReaderINP {
                         index[ 1 ] = list_node[ 1 ];
                         index[ 2 ] = list_node[ 2 ];
                         index[ 3 ] = list_node[ 3 ];
-                        return;
+                        return ELEMENT_LMT_QUAD;
                     case 2 : 
                         index.resize( 4 );
                         index[ 0 ] = list_node[ 4 ];
                         index[ 1 ] = list_node[ 5 ];
                         index[ 2 ] = list_node[ 6 ];
                         index[ 3 ] = list_node[ 7 ];
-                        return;
+                        return ELEMENT_LMT_QUAD;
                     case 3 : 
                         index.resize( 4 );
                         index[ 0 ] = list_node[ 0 ];
                         index[ 1 ] = list_node[ 1 ];
                         index[ 2 ] = list_node[ 5 ];
                         index[ 3 ] = list_node[ 4 ];
-                        return;
+                        return ELEMENT_LMT_QUAD;
                     case 4 :
                         index.resize( 4 );
                         index[ 0 ] = list_node[ 1 ];
                         index[ 1 ] = list_node[ 2 ];
                         index[ 2 ] = list_node[ 6 ];
                         index[ 3 ] = list_node[ 5 ];
-                        return;
+                        return ELEMENT_LMT_QUAD;
                     case 5 : 
                         index.resize( 4 );
                         index[ 0 ] = list_node[ 2 ];
                         index[ 1 ] = list_node[ 3 ];
                         index[ 2 ] = list_node[ 7 ];
                         index[ 3 ] = list_node[ 6 ];
-                        return;
+                        return ELEMENT_LMT_QUAD;
                     case 6 :
                         index.resize( 4 );
                         index[ 0 ] = list_node[ 0 ];
                         index[ 1 ] = list_node[ 3 ];
                         index[ 2 ] = list_node[ 7 ];
                         index[ 3 ] = list_node[ 4 ]; 
-                        return;
+                        return ELEMENT_LMT_QUAD;
                     default : 
                         std::cerr << "WARNING ReaderINP : bad id face of Hexa" << std::endl;
-                        return;                        
+                        return ELEMENT_LMT_UNDETERMINED;                        
                 }
             }
-            std::cerr << "WARNING ReaderINP : the surface element of type " << name << " is not unknown by MatchElement_INP_LMTpp. TODO" << std::endl;
+            
+            if ( element_LMT == ELEMENT_LMT_TETRA_10 ) {
+                switch( idFace ) {
+                    case 1 :
+                        index.resize( 6 );
+                        index[ 0 ] = list_node[ 0 ];
+                        index[ 1 ] = list_node[ 1 ];
+                        index[ 2 ] = list_node[ 2 ];
+                        index[ 3 ] = list_node[ 4 ];
+                        index[ 4 ] = list_node[ 5 ];
+                        index[ 5 ] = list_node[ 6 ];
+                        return ELEMENT_LMT_TRIANGLE_6;
+                    case 2 :
+                        index.resize( 6 );
+                        index[ 0 ] = list_node[ 0 ];
+                        index[ 1 ] = list_node[ 1 ];
+                        index[ 2 ] = list_node[ 3 ];
+                        index[ 3 ] = list_node[ 4 ];
+                        index[ 4 ] = list_node[ 8 ];
+                        index[ 5 ] = list_node[ 7 ];
+                        return ELEMENT_LMT_TRIANGLE_6;
+                    case 3 :
+                        index.resize( 6 );
+                        index[ 0 ] = list_node[ 1 ];
+                        index[ 1 ] = list_node[ 2 ];
+                        index[ 2 ] = list_node[ 3 ];
+                        index[ 3 ] = list_node[ 5 ];
+                        index[ 4 ] = list_node[ 9 ];
+                        index[ 5 ] = list_node[ 8 ];
+                        return ELEMENT_LMT_TRIANGLE_6;
+                    case 4 :
+                        index.resize( 6 );
+                        index[ 0 ] = list_node[ 0 ];
+                        index[ 1 ] = list_node[ 2 ];
+                        index[ 2 ] = list_node[ 3 ];
+                        index[ 3 ] = list_node[ 6 ];
+                        index[ 4 ] = list_node[ 9 ];
+                        index[ 5 ] = list_node[ 7 ];
+                        return ELEMENT_LMT_TRIANGLE_6;
+                    default:
+                        std::cerr << "WARNING ReaderINP : bad id face of Hexa" << std::endl;
+                        return ELEMENT_LMT_UNDETERMINED;    
+                }            
+            }
+            
+            std::cerr << "WARNING ReaderINP : the surface element is unknown by MatchElement_INP_LMTpp. TODO" << std::endl;
+            return ELEMENT_LMT_UNDETERMINED;
+        }*/
+        
+        MatchElement_INP_LMTpp get_facet( unsigned idFace ) const {
+        
+            MatchElement_INP_LMTpp res;
+
+            if ( element_LMT == ELEMENT_LMT_HEXA ) {
+                switch( idFace ) {
+                    case 1 : 
+                        res.list_node.resize( 4 );
+                        res.list_node[ 0 ] = list_node[ 0 ];
+                        res.list_node[ 1 ] = list_node[ 1 ];
+                        res.list_node[ 2 ] = list_node[ 2 ];
+                        res.list_node[ 3 ] = list_node[ 3 ];
+                        res.element_LMT = ELEMENT_LMT_QUAD;
+                        break;
+                    case 2 : 
+                        res.list_node.resize( 4 );
+                        res.list_node[ 0 ] = list_node[ 4 ];
+                        res.list_node[ 1 ] = list_node[ 5 ];
+                        res.list_node[ 2 ] = list_node[ 6 ];
+                        res.list_node[ 3 ] = list_node[ 7 ];
+                        res.element_LMT = ELEMENT_LMT_QUAD;
+                        break;
+                    case 3 : 
+                        res.list_node.resize( 4 );
+                        res.list_node[ 0 ] = list_node[ 0 ];
+                        res.list_node[ 1 ] = list_node[ 1 ];
+                        res.list_node[ 2 ] = list_node[ 5 ];
+                        res.list_node[ 3 ] = list_node[ 4 ];
+                        res.element_LMT = ELEMENT_LMT_QUAD;
+                        break;
+                    case 4 :
+                        res.list_node.resize( 4 );
+                        res.list_node[ 0 ] = list_node[ 1 ];
+                        res.list_node[ 1 ] = list_node[ 2 ];
+                        res.list_node[ 2 ] = list_node[ 6 ];
+                        res.list_node[ 3 ] = list_node[ 5 ];
+                        res.element_LMT = ELEMENT_LMT_QUAD;
+                        break;
+                    case 5 : 
+                        res.list_node.resize( 4 );
+                        res.list_node[ 0 ] = list_node[ 2 ];
+                        res.list_node[ 1 ] = list_node[ 3 ];
+                        res.list_node[ 2 ] = list_node[ 7 ];
+                        res.list_node[ 3 ] = list_node[ 6 ];
+                        res.element_LMT = ELEMENT_LMT_QUAD;
+                        break;
+                    case 6 :
+                        res.list_node.resize( 4 );
+                        res.list_node[ 0 ] = list_node[ 0 ];
+                        res.list_node[ 1 ] = list_node[ 3 ];
+                        res.list_node[ 2 ] = list_node[ 7 ];
+                        res.list_node[ 3 ] = list_node[ 4 ]; 
+                        res.element_LMT = ELEMENT_LMT_QUAD;
+                        break;
+                    default : 
+                        std::cerr << "WARNING ReaderINP : bad id face of Hexa" << std::endl;
+                        res.element_LMT = ELEMENT_LMT_UNDETERMINED;                        
+                }
+                
+                return res;
+            }
+            
+            if ( element_LMT == ELEMENT_LMT_TETRA_10 ) {
+                switch( idFace ) {
+                    case 1 :
+                        res.list_node.resize( 6 );
+                        res.list_node[ 0 ] = list_node[ 0 ];
+                        res.list_node[ 1 ] = list_node[ 1 ];
+                        res.list_node[ 2 ] = list_node[ 2 ];
+                        res.list_node[ 3 ] = list_node[ 4 ];
+                        res.list_node[ 4 ] = list_node[ 5 ];
+                        res.list_node[ 5 ] = list_node[ 6 ];
+                        res.element_LMT = ELEMENT_LMT_TRIANGLE_6;
+                        break;
+                    case 2 :
+                        res.list_node.resize( 6 );
+                        res.list_node[ 0 ] = list_node[ 0 ];
+                        res.list_node[ 1 ] = list_node[ 1 ];
+                        res.list_node[ 2 ] = list_node[ 3 ];
+                        res.list_node[ 3 ] = list_node[ 4 ];
+                        res.list_node[ 4 ] = list_node[ 8 ];
+                        res.list_node[ 5 ] = list_node[ 7 ];
+                        res.element_LMT = ELEMENT_LMT_TRIANGLE_6;
+                        break;
+                    case 3 :
+                        res.list_node.resize( 6 );
+                        res.list_node[ 0 ] = list_node[ 1 ];
+                        res.list_node[ 1 ] = list_node[ 2 ];
+                        res.list_node[ 2 ] = list_node[ 3 ];
+                        res.list_node[ 3 ] = list_node[ 5 ];
+                        res.list_node[ 4 ] = list_node[ 9 ];
+                        res.list_node[ 5 ] = list_node[ 8 ];
+                        res.element_LMT = ELEMENT_LMT_TRIANGLE_6;
+                        break;
+                    case 4 :
+                        res.list_node.resize( 6 );
+                        res.list_node[ 0 ] = list_node[ 0 ];
+                        res.list_node[ 1 ] = list_node[ 2 ];
+                        res.list_node[ 2 ] = list_node[ 3 ];
+                        res.list_node[ 3 ] = list_node[ 6 ];
+                        res.list_node[ 4 ] = list_node[ 9 ];
+                        res.list_node[ 5 ] = list_node[ 7 ];
+                        res.element_LMT = ELEMENT_LMT_TRIANGLE_6;
+                        break;
+                    default:
+                        std::cerr << "WARNING ReaderINP : bad id face of Hexa" << std::endl;
+                        res.element_LMT = ELEMENT_LMT_UNDETERMINED;    
+                }
+                            
+                return res;
+            }
+            
+            std::cerr << "WARNING ReaderINP : the surface element is unknown by MatchElement_INP_LMTpp. TODO" << std::endl;
+            res.element_LMT = ELEMENT_LMT_UNDETERMINED;
+            return res;
         }
         
         template<class TMESH>
@@ -336,45 +595,63 @@ struct ReaderINP {
             typedef typename TMESH::TNode TNodeLocal;
             typedef typename TMESH::Pvec PvecLocal;
             Vec< TNodeLocal* > vnlocal;
-            Vec<unsigned> index;
             PvecLocal v;
             typename std::map< unsigned, unsigned >::iterator it;
             
-            get_index_node_of_surface( index, idFace );
+            MatchElement_INP_LMTpp e = get_facet( idFace );
             
-            if ( name == "Hexa") {
-                if ( index.size() == 4 ) {
-                    
-                    vnlocal.resize( 4 );
-                    for( unsigned j = 0; j < index.size(); ++j ) {                    
-                        it = match_inode_inp_lmtpp.find( index[ j ] );  /// le noeud est-il déjà dans le "mesh" ?
-                        if ( it != match_inode_inp_lmtpp.end() ) {
-                            vnlocal[ j ] = &mesh.node_list[ it->second ];    
-                        } else {
-                            mapNode[ index[ j ] ].copy_to( v );
-                            vnlocal[ j ] = mesh.add_node( v );
-                            match_inode_inp_lmtpp[ index[ j ] ] = match_inode_inp_lmtpp.size() - 1; 
-                        }
-                    }
-//                     for( unsigned i = 0; i < index.size(); ++i ) {
-//                         mapNode[ index[ i ] ].copy_to( v );
-//                         vnlocal[ i ] = mesh.add_node( v );
-//                     }
-                    permutation_if_jac_neg ( Quad(), vnlocal.ptr() );
-                    mesh.add_element( Quad(), DefaultBehavior(), vnlocal.ptr() );
-                    return;
+            if ( e.element_LMT < 0 ) {
+                std::cerr << "Error ReaderINP : MatchElement_INP_LMTpp.add_surface_element_at() bugs" << std::endl;
+                return; 
+            }
+            
+            vnlocal.resize( e.list_node.size() );
+            for( unsigned j = 0; j < e.list_node.size(); ++j ) {
+                      
+                it = match_inode_inp_lmtpp.find( e.list_node[ j ] );  /// le noeud est-il déjà dans le "mesh" ?
+                if ( it != match_inode_inp_lmtpp.end() ) {
+                    vnlocal[ j ] = &mesh.node_list[ it->second ];    
+                } else {
+                    mapNode[ e.list_node[ j ] ].copy_to( v );
+                    vnlocal[ j ] = mesh.add_node( v );
+                    match_inode_inp_lmtpp[ e.list_node[ j ] ] = match_inode_inp_lmtpp.size() - 1; 
                 }
             }
-            std::cerr << "WARNING ReaderINP : the surface element of type " << name << " does not append by MatchElement_INP_LMTpp. TODO" << std::endl; 
+            
+            if ( element_LMT == ELEMENT_LMT_HEXA ) {
+                //permutation_if_jac_neg ( Quad(), vnlocal.ptr() );
+                mesh.add_element( Quad(), DefaultBehavior(), vnlocal.ptr() );
+                return;
+            }
+            
+            if ( element_LMT == ELEMENT_LMT_TETRA_10 ) {
+                /// permutation_if_jac_neg() pose problème
+                //permutation_if_jac_neg ( Triangle_6(), vnlocal.ptr() );
+                mesh.add_element( Triangle_6(), DefaultBehavior(), vnlocal.ptr() );
+                return;
+            }
+            
+            std::cerr << "WARNING ReaderINP : the surface element does not append by MatchElement_INP_LMTpp. TODO" << std::endl;
         }
         
-        std::string name; /// nom LMT++ de l'élément ( e.g. Triangle, Hexa )
+        Element_LMT_ID element_LMT; /// nom LMT++ de l'élément ( e.g. Triangle, Hexa )
         EA* ptrEA; /// pointeur sur l'élément du maillage entier
-        //Vec<TNode*> list_node; /// la liste des noeuds de l'élément dans le maillage entier
-        Vec<unsigned> list_node; /// la valeur de l'entier correspondant à l'entrée de Map_num_nodeInp de ReaderINP
+        Vec<unsigned> list_node; /// la valeur de l'entier correspondant à l'entrée de Map_num_nodeInp de ReaderINP : i.e. l'index du noeud dans le fichier INP
     };
 
     typedef std::map<unsigned, MatchElement_INP_LMTpp > Map_num_element;
+    
+    PvecInp center( const MatchElement_INP_LMTpp &e ) {
+        PvecInp c = 0;
+        
+        if ( e.element_LMT != ELEMENT_LMT_TRIANGLE_6 ) {
+            for( unsigned i = 0; i < e.list_node.size(); ++i )
+                c += map_num_node[ e.list_node[ i ] ].pos;
+            return c / ( e.list_node.size() + ( e.list_node.size() == 0 ) );
+        } else {
+            return ( map_num_node[ e.list_node[ 0 ] ].pos + map_num_node[ e.list_node[ 1 ] ].pos + map_num_node[ e.list_node[ 2 ] ].pos ) / 3;
+        }
+    }
     
     /*!
     Ce code souhaite représenter la méthode de stockage des identifiants entiers des noeuds ou des éléments dans Abaqus.
@@ -561,13 +838,21 @@ struct ReaderINP {
             if ( withCoordinate ) {
                 iss >> number;
                 /// lecture des coordonnées
+                unsigned cpt = 0;
                 while ( not( iss.eof() ) ) {
                     iss >> p;
 //                     if ( iss.eof() )
 //                         break;
-                    node.pos.push_back( p );
+                    if ( cpt < 3 )
+                        node.pos[ cpt ] = p;
+                    else
+                        std::cerr << "Error ReaderINP : dimension too large" << std::endl;
+                    cpt++;
                 }
                 
+                if ( cpt < 3 )
+                    std::cerr << "Error ReaderINP : bad dimension" << std::endl;
+                    
                 map_num_nodeInp[ number ] = node;
                 this->ci.push_back( number );
             } else {
@@ -603,32 +888,33 @@ struct ReaderINP {
             else
                 this->isGenerate = false;
  
-            type = value( str, "TYPE=", "type=" );
+            element_INP = value( str, "TYPE=", "type=" );
+            element_LMT = ELEMENT_LMT_UNDETERMINED;
+            nb_nodes = 0;
+            //PRINT( element_INP );
+            //PRINT( this->isGenerate );
             /// ref : liste des éléments Abaqus http://muscadet.lmt.ens-cachan.fr:2080/v6.7/books/usb/default.htm
             /// page : Output Variable and Element Indexes/Standard ElementSet Index
-            if ( type.size() ) {
-                if ( type == "C3D8R"   ) { type = "Hexa"; nb_nodes = 8; return; }
-                if ( type == "C3D8I"   ) { type = "Hexa"; nb_nodes = 8; return; }
-                if ( type == "C3D8"    ) { type = "Hexa"; nb_nodes = 8; return; }
-                if ( type == "C3D4"    ) { type = "Tetra"; nb_nodes = 4; return; }
-                if ( type == "C3D10"   ) { type = "Tetra_10"; nb_nodes = 10; return; }
-                if ( type == "S3R"     ) { type = "Triangle"; nb_nodes = 3; return; }
-                if ( type == "S3"      ) { type = "Triangle"; nb_nodes = 3; return; }
-                if ( type == "S4R"     ) { type = "Quad"; nb_nodes = 4; return; }
-                if ( type == "R3D4"    ) { type = "Quad"; nb_nodes = 4; return; } /// dans R^3
-                if ( type == "M3D4"    ) { type = "Quad"; nb_nodes = 4; return; } /// dans R^3
-                if ( type == "R3D3"    ) { type = "Triangle"; nb_nodes = 3; return; } /// dans R^3
-                if ( type == "B31"     ) { type = "Bar"; nb_nodes = 2; return; } /// dans R^3
-                if ( type == "SpringA" ) { type = "Bar"; nb_nodes = 2; return; }
-                if ( type == "SPRING1" ) { type = "Bar"; nb_nodes = 2; return; } /// à vérifier sur un exemple  
-                if ( type == "CONN3D2" ) { type = "Bar"; nb_nodes = 2; return; } 
-                if ( type == "C3D6"    ) { type = "Prism"; nb_nodes = 6; return; }
-                if ( type == "ROTARYI" ) { type = "NodalElement"; nb_nodes = 1; return; }
-                if ( type == "MASS"    ) { type = "NodalElement"; nb_nodes = 1; return; }
-            } else {
-                nb_nodes = 0;
-//                 if ( not ( isGenerate ) )
-//                     std::std::cerr << "Error: the type of element \""<< type << "\" is unknown in \"" << str << "\"."<< std::std::endl;
+            if ( element_INP.size() ) {
+                if ( element_INP == "C3D8R"   ) { element_LMT = ELEMENT_LMT_HEXA; nb_nodes = 8; return; }
+                if ( element_INP == "C3D8I"   ) { element_LMT = ELEMENT_LMT_HEXA; nb_nodes = 8; return; }
+                if ( element_INP == "C3D8"    ) { element_LMT = ELEMENT_LMT_HEXA; nb_nodes = 8; return; }
+                if ( element_INP == "C3D4"    ) { element_LMT = ELEMENT_LMT_TETRA; nb_nodes = 4; return; }
+                if ( element_INP == "C3D10"   ) { element_LMT = ELEMENT_LMT_TETRA_10; nb_nodes = 10; return; }
+                if ( element_INP == "S3R"     ) { element_LMT = ELEMENT_LMT_TRIANGLE; nb_nodes = 3; return; }
+                if ( element_INP == "S3"      ) { element_LMT = ELEMENT_LMT_TRIANGLE; nb_nodes = 3; return; }
+                if ( element_INP == "S4R"     ) { element_LMT = ELEMENT_LMT_QUAD; nb_nodes = 4; return; }
+                if ( element_INP == "R3D4"    ) { element_LMT = ELEMENT_LMT_QUAD; nb_nodes = 4; return; } /// dans R^3
+                if ( element_INP == "M3D4"    ) { element_LMT = ELEMENT_LMT_QUAD; nb_nodes = 4; return; } /// dans R^3
+                if ( element_INP == "R3D3"    ) { element_LMT = ELEMENT_LMT_TRIANGLE; nb_nodes = 3; return; } /// dans R^3
+                if ( element_INP == "B31"     ) { element_LMT = ELEMENT_LMT_BAR; nb_nodes = 2; return; } /// dans R^3
+                if ( element_INP == "SpringA" ) { element_LMT = ELEMENT_LMT_BAR; nb_nodes = 2; return; }
+                if ( element_INP == "SPRING1" ) { element_LMT = ELEMENT_LMT_BAR; nb_nodes = 2; return; } /// à vérifier sur un exemple  
+                if ( element_INP == "CONN3D2" ) { element_LMT = ELEMENT_LMT_BAR; nb_nodes = 2; return; } 
+                if ( element_INP == "C3D6"    ) { element_LMT = ELEMENT_LMT_PRISM; nb_nodes = 6; return; }
+                if ( element_INP == "ROTARYI" ) { element_LMT = ELEMENT_LMT_NODAL_ELEMENT; nb_nodes = 1; return; }
+                if ( element_INP == "MASS"    ) { element_LMT = ELEMENT_LMT_NODAL_ELEMENT; nb_nodes = 1; return; }
+                element_LMT = ELEMENT_LMT_UNKNOWN;
             }
         }
         
@@ -644,27 +930,37 @@ struct ReaderINP {
             replace_char( str, ',', ' ' );
             std::istringstream s( str );
 
-            if ( type.size() ) {
-                s >> number;
-                this->ci.push_back( number );
-                vninp.resize( nb_nodes );
-                for ( unsigned i = 0; i < nb_nodes; i++ ) {
-                    s >> number2;
-                    vninp[ i ] = number2;
-                }
-                map_num_element[ number ] = MatchElement_INP_LMTpp( type.c_str(), NULL, vninp );
-                map_num_element[ number ].ptrEA = map_num_element[ number ].add_element_at( m, match_inode_inp_lmtpp, mapNode );
-            } else {
+            if ( this->isGenerate ) {
                 while( not( s.eof() ) ) {
                     s >> number;
                     //PRINT( number );
                     this->ci.push_back( number );
+                }            
+            } else {
+                if ( element_LMT >= 0 ) {
+                    s >> number;
+                    this->ci.push_back( number );
+                    vninp.resize( nb_nodes );
+                    for ( unsigned i = 0; i < nb_nodes; i++ ) {
+                        s >> number2;
+                        vninp[ i ] = number2;
+                    }
+                    map_num_element[ number ] = MatchElement_INP_LMTpp( element_LMT, NULL, vninp );
+                    map_num_element[ number ].ptrEA = map_num_element[ number ].add_element_at( m, match_inode_inp_lmtpp, mapNode );
+                    //map_num_element[ number ] = MatchElement_INP_LMTpp( element_LMT, std::numeric_limits<unsigned>::max(), vninp );
+                } else {
+                    while( not( s.eof() ) ) {
+                        s >> number;
+                        //PRINT( number );
+                        this->ci.push_back( number );
+                    }
                 }
             }
         }
         
         void display() const {
-            std::cout << " NOMBRE D'ELEMENTS = " << this->nb_elements() << std::endl;
+            std::cout << " nombre d'elements = " << this->nb_elements() << std::endl;
+            std::cout << " type d'element = " << name_element_LMT( element_LMT ) << std::endl;
             typename ElementSet::iterator it;
             for( it = this->begin(); it != this->end(); ++it )
                 std::cout << *it << " ";
@@ -672,7 +968,8 @@ struct ReaderINP {
         }
         
         unsigned nb_nodes;
-        std::string type;
+        std::string element_INP;
+        Element_LMT_ID element_LMT;
     };
     
     struct ConstraintBoundary {
@@ -703,7 +1000,8 @@ struct ReaderINP {
         
         void read( std::string& str ) {
             //PRINT( str );
-            if ( not( isdigit( str[ 0 ] ) ) ) {
+            char c = str[ 0 ];
+            if ( not( isdigit( c ) ) and ( c != ' ' ) ) {
                 if ( not( name_nodeset.size() ) ) {
                     size_t pos = str.find( ',' );
                     name_nodeset = str.substr( 0, pos );
@@ -1009,14 +1307,24 @@ struct ReaderINP {
         static const char* list_keyword[ nb_keyword ];
     };
     
+    /*!
+    Ce type sert à représenter une surface INP ( qui sont toutes des polyèdres ).
+    Elle est définie par des noeuds ou bien des éléments volumiques avec un identifiant de face
+    
+    Référence ABAQUS :
+        2.3.2 Defining element-based surfaces
+        2.3.3 Defining node-based surfaces
+    
+    */
     struct Surface {
         Surface( const std::string &str ) {
-            std::string s_type = value( str, "TYPE=", "Type=" ); 
+            std::string s_type = value( str, "TYPE=", "type=" ); 
             if ( ( s_type == "ELEMENT" ) or ( s_type == "Element" ) )
                 type = 0;
             else 
                 type = 1; /// Node
         }
+        
         void display() const {
             if ( type == 0 ) { 
                 std::cout << "this type is ELEMENT" << std::endl; 
@@ -1033,6 +1341,14 @@ struct ReaderINP {
             unsigned number;
             unsigned p;
             
+            char c = str[ 0 ];
+            if ( not( isdigit( c ) ) and ( c != ' ' ) ) { /// nom d'elset
+                size_t pos = str.find( ',' );
+                name_elset.push_back( str.substr( 0, pos ) );
+                id_face_of_elset.push_back( str[ pos + 3 ] - '0' );
+                return;
+            }
+            
             replace_char( str, ',', ' ' );
             std::istringstream iss( str );
             iss >> number;
@@ -1046,11 +1362,44 @@ struct ReaderINP {
                     std::cerr << "WARNING ReaderINP : ID face of Surface is unknown" << std::endl;
                     id_face.push_back( 0 );        
                 }
+            }   
+        }
+        
+        void get_index_element_and_id_face( Vec<unsigned> &ind, Vec<unsigned> &idFace, const std::map< std::string, ElementSet*> &map_elset ) const {
+            if ( type == 1 ) {
+                std::cerr << "WARNING ReaderINP : get_index_element_and_id_face() has bad type" << std::endl;
+                ind.resize( 0 );
+                idFace.resize( 0 );
+                return;  
+            }
+            
+            ind = indice;
+            idFace = id_face;
+            
+            for( unsigned i = 0; i < name_elset.size(); ++i ) {
+                typename std::map< std::string, ElementSet* >::const_iterator it;
+                 
+                it = map_elset.find( name_elset[ i ] ); 
+
+                if ( it != map_elset.end() ) {
+                    unsigned old_size = ind.size();
+                    //std::cout << it->first << " nb = " << it->second->nb_elements() << std::endl;
+                    ind.resize( ind.size() + it->second->nb_elements() );
+                    idFace.resize( idFace.size() + it->second->nb_elements() );
+                    typename ElementSet::iterator itel;
+                    for( itel = it->second->begin(); itel != it->second->end(); ++itel, ++old_size ) {
+                        ind[ old_size ] = *itel;
+                        idFace[ old_size ] = id_face_of_elset[ i ];
+                    }
+                } else
+                    std::cerr << "WARNING ReaderINP : get_index_element_and_id_face() unknown elset name" << std::endl;
             }
         }
 
-        Vec<unsigned> indice; /// la value correspond à l'entrée dans la Map_num_node ou Map_num_nodeInp ou encore Map_num_element.
+        Vec<unsigned> indice; /// la value correspond à l'entrée dans la Map_num_nodeInp ou encore Map_num_element : i.e. indice INP.
         Vec<unsigned> id_face; /// la valeur correspond à l'identifiant de face de Abaqus
+        Vec<std::string> name_elset;
+        Vec<unsigned> id_face_of_elset;
         unsigned type; /// 0 <=> ELEMENT, 1 <=> NODE
     };
     
@@ -1110,6 +1459,24 @@ struct ReaderINP {
                 } else  
                     std::cerr << "Error ReaderINP : impossible to find the NodeSet " << it->second->name_nodeset << " of Boundary " << it->first << std::endl;
             }
+    }
+    
+    /*!
+        Cette méthode sert à définir le type d'élément des Elset.
+    
+    */
+    void update_Elset() {
+        typename std::map< std::string, ElementSet* >::iterator it;
+    
+        for( it = map_ElementSet.begin(); it != map_ElementSet.end(); it++ )
+            if ( ( it->second ) and ( it->second->nb_elements() ) ) {
+                ///  
+                if ( it->second->element_LMT < 0 ) {
+                    typename ElementSet::iterator itel = it->second->begin();
+                    it->second->element_LMT = map_num_element[ *itel ].element_LMT;
+                }
+            } else 
+                std::cerr << "Error ReaderINP.update_Elset() : ElementSet vacuum" << std::endl;
     }
     
     /*!
@@ -1185,23 +1552,24 @@ struct ReaderINP {
     }
     
     static Status_ID setStatus( const std::string& str ) {
-        if (str[1] == '*')                                                                 { return STATUS_COMMENT; }/// c'est un commentaire
-        if ((str.find ("NODE PRINT",1) == 1))                                              { return STATUS_IGNORED; }
-        if ((str.find ("NODE OUTPUT",1) == 1) or (str.find ("Node Output",1 ) == 1))       { return STATUS_IGNORED; }
-        if ((str.find ("ELEMENT OUTPUT",1) == 1) or (str.find ("Element Output",1 ) == 1)) { return STATUS_IGNORED; }
-        //if ((str.find ("PART",1) == 1) or (str.find ("Part",1 ) == 1))                     { return STATUS_PART; }
-        if ((str.find ("NODE",1) == 1) or (str.find ("Node",1 ) == 1) )                    { return STATUS_NODE; }
-        if ((str.find ("ELEMENT",1) == 1) or (str.find ("Element",1) == 1))                { return STATUS_ELEMENT; }
-        if ((str.find ("NSET",1) == 1) or (str.find ("Nset",1) == 1))                      { return STATUS_NSET; }
-        if ((str.find ("ELSET",1) == 1)  or (str.find ("Elset",1) == 1))                   { return STATUS_ELSET; }
-        if ((str.find ("ORIENTATION",1) == 1) or (str.find ("Orientation",1) == 1))        { return STATUS_ORIENTATION; }
-        if ((str.find ("SOLID SECTION",1) == 1) or (str.find ("Solid Section",1) == 1))    { return STATUS_SOLID_SECTION; }
-        if ((str.find ("MATERIAL",1) == 1) or (str.find ("Material",1) == 1))              { return STATUS_MATERIAL; }
-        if ((str.find ("STEP",1) == 1) or (str.find ("Step",1) == 1))                      { return STATUS_STEP; }
-        if ((str.find ("CONTACT PAIR",1) == 1) or (str.find ("Contact Pair",1) == 1))      { return STATUS_CONTACT_PAIR; }
-        if ((str.find ("SURFACE",1) == 1) or (str.find ("Surface",1) == 1))                { return STATUS_SURFACE; }
-        if ((str.find ("BOUNDARY",1) == 1) or (str.find ("Boundary",1) == 1))              { return STATUS_BOUNDARY; }
-        if ((str.find ("TRANSFORM",1) == 1) or (str.find ("Transform",1) == 1))            { return STATUS_TRANSFORM; }
+        if (str[1] == '*')                                                                      { return STATUS_COMMENT; }/// c'est un commentaire
+        if ((str.find ("NODE PRINT,",1) == 1) or (str.find ("Node Print,",1) == 1))             { return STATUS_IGNORED; }
+        if ((str.find ("NODE OUTPUT,",1) == 1) or (str.find ("Node Output,",1 ) == 1))          { return STATUS_IGNORED; }
+        if ((str.find ("NODE FILE,",1) == 1) or (str.find ("Node File,",1 ) == 1))              { return STATUS_IGNORED; }
+        if ((str.find ("ELEMENT OUTPUT,",1) == 1) or (str.find ("Element Output,",1 ) == 1))    { return STATUS_IGNORED; }
+        //if ((str.find ("PART",1) == 1) or (str.find ("Part",1 ) == 1))                        { return STATUS_PART; }
+        if (((str.find ("NODE",1) == 1) or (str.find ("Node",1 ) == 1)) and (str.size() == 5 )) { return STATUS_NODE; }
+        if ((str.find ("ELEMENT,",1) == 1) or (str.find ("Element,",1) == 1))                   { return STATUS_ELEMENT; }
+        if ((str.find ("NSET,",1) == 1) or (str.find ("Nset,",1) == 1))                         { return STATUS_NSET; }
+        if ((str.find ("ELSET,",1) == 1)  or (str.find ("Elset,",1) == 1))                      { return STATUS_ELSET; }
+        if ((str.find ("ORIENTATION,",1) == 1) or (str.find ("Orientation,",1) == 1))           { return STATUS_ORIENTATION; }
+        if ((str.find ("SOLID SECTION,",1) == 1) or (str.find ("Solid Section,",1) == 1))       { return STATUS_SOLID_SECTION; }
+        if ((str.find ("MATERIAL,",1) == 1) or (str.find ("Material,",1) == 1))                 { return STATUS_MATERIAL; }
+        if ((str.find ("STEP,",1) == 1) or (str.find ("Step,",1) == 1))                         { return STATUS_STEP; }
+        if ((str.find ("CONTACT PAIR,",1) == 1) or (str.find ("Contact Pair,",1) == 1))         { return STATUS_CONTACT_PAIR; }
+        if ((str.find ("SURFACE,",1) == 1) or (str.find ("Surface,",1) == 1))                   { return STATUS_SURFACE; }
+        if ((str.find ("BOUNDARY,",1) == 1) or (str.find ("Boundary,",1) == 1))                 { return STATUS_BOUNDARY; }
+        if ((str.find ("TRANSFORM,",1) == 1) or (str.find ("Transform,",1) == 1))               { return STATUS_TRANSFORM; }
         std::cerr << "WARNING ReaderINP : ignored option = " << value( str, "*", "*", ",\n") << std::endl;
         return STATUS_IGNORED; /// option non traitée
     }
@@ -1252,7 +1620,12 @@ struct ReaderINP {
                     case STATUS_START         : break;
                     case STATUS_COMMENT       : if ( str.size() > 3 ) lastComment = str.substr( 3 ); break;
                     case STATUS_NODE          : pns  = map_NodeSet[ internal_name[ 0 ] ] = new NodeSet(); break;
-                    case STATUS_ELEMENT       : pes  = map_ElementSet[ value( str, "ELSET=","elset=" ) ] = new ElementSet( str ); break;
+                    case STATUS_ELEMENT       : str2 = value( str, "ELSET=", "elset=" );
+                                                if ( str2.size() )  
+                                                    pes  = map_ElementSet[ str2 ] = new ElementSet( str );
+                                                else
+                                                    pes  = map_ElementSet[ internal_name[ 1 ] ] = new ElementSet( str );
+                                                break;
                     case STATUS_NSET          : pns  = map_NodeSet[ value( str, "NSET=","nset=" ) ] = new NodeSet( str ); break;
                     case STATUS_ELSET         : pes  = map_ElementSet[ value( str, "ELSET=", "elset=" ) ] = new ElementSet( str ); break;
                     case STATUS_ORIENTATION   : por  = map_Orientation[ value( str, "NAME=", "name=" ) ] = new Orientation( str ); break;
@@ -1262,14 +1635,14 @@ struct ReaderINP {
                                                 str  = pma->parse( is, lastComment );
                                                 //pma->display();
                                                 break;
-                    case STATUS_CONTACT_PAIR  : pcp  = map_ConctactPair[ value( str, "INTERACTION=", "Interaction=" ) ] = new ContactPair();
+                    case STATUS_CONTACT_PAIR  : pcp  = map_ConctactPair[ value( str, "INTERACTION=", "interaction=" ) ] = new ContactPair();
                                                 str  = pcp->parse( is );
                                                 //pcp->display();
                                                 break;
-                    case STATUS_SURFACE       : ps = map_Surface[ value( str, "NAME=", "Name=" ) ] = new Surface( str ); break;
+                    case STATUS_SURFACE       : ps = map_Surface[ value( str, "NAME=", "name=" ) ] = new Surface( str ); break;
                     case STATUS_BOUNDARY      : 
                                                 { std::string nameBoundary;
-                                                  size_t p = lastComment.find( "Name" );
+                                                  size_t p = lastComment.find( "name" );
                                                   if ( p != std::string::npos ) {
                                                       size_t p2 = lastComment.find( 0x20, p + 6 );
                                                       if ( p2 != std::string::npos )
@@ -1330,6 +1703,7 @@ struct ReaderINP {
         }
         
         is.close();
+        update_Elset();
         update_solidSection();
         update_Boundary();
         /// initialisation des index_LMTpp, les index des noeuds du maillage principal "m".
@@ -1338,6 +1712,8 @@ struct ReaderINP {
             map_num_node[ it->first ].index_LMTpp = it->second;
         /// on applique les transformations aux noeuds de "m" ainsi qu'aux noeuds NodeInp.
         update_Transform( m );
+        /// mise à jour de la peau du maillage 
+        m.update_skin();
     }
     
   public : 
@@ -1362,24 +1738,84 @@ struct ReaderINP {
                 map_num_element[ *itel ].add_element_at( mesh, match_inode_inp_lmtpp, map_num_node );
             }
         } else 
-            std::cerr << "WARNING ReaderINP : you wish to create a mesh by unknown ElSet " << nameElSet << " ." << std::endl; 
+            std::cerr << "WARNING ReaderINP : you wish to create a mesh by unknown ElSet " << nameElSet << std::endl; 
     }
     
     template<class TMESH>
     void create_mesh_by_surface( TMESH &mesh, const std::string &nameSurface ) {
-        typename std::map< std::string, Surface* >::iterator it;
+        typename std::map< std::string, Surface* >::const_iterator it;
         std::map< unsigned, unsigned > match_inode_inp_lmtpp;
         
         it = map_Surface.find( nameSurface );
         if ( it != map_Surface.end() ) {
-            Surface* surf = it->second;
-            if ( surf->type == 0 ) { /// ELEMENTS
-                for( unsigned i = 0; i < surf->indice.size(); ++i )
-                    map_num_element[ surf->indice[ i ] ].add_surface_element_at( mesh, match_inode_inp_lmtpp, map_num_node, surf->id_face[ i ] );
+            if ( it->second->type == 0 ) { /// ELEMENTS-SURFACE
+                Vec<unsigned> indice;
+                Vec<unsigned> idFace;
+                it->second->get_index_element_and_id_face( indice, idFace, map_ElementSet );
+                for( unsigned i = 0; i < indice.size(); ++i )
+                    map_num_element[ indice[ i ] ].add_surface_element_at( mesh, match_inode_inp_lmtpp, map_num_node, idFace[ i ] );
+            
+            
             } else
                 std::cerr << "WARNING ReaderINP : does not create surface defined by node : TODO" << std::endl;
         } else {
             std::cerr << "WARNING ReaderINP : you use create_mesh_by_surface() with un unknown name " << nameSurface << std::endl;
+        }
+    }
+    
+    /*!
+    Cette méthode place dans index les indices des noeuds du maillage "mesh" qui appartiennent à la surface nommé "nameSurface".
+    Elle retourne le nombre de ces indices.
+    Deux points sont considérés comme confondus si leur distance euclidienne est inféieure à "tol".
+    Par défaut la tolérance "tol" est à 10^-4.
+    */
+    template<class TMESH >
+    unsigned get_element_skin_of_surface( Vec<typename TMESH::TSkin::EA* > &list_el, 
+                                          TMESH &mesh, 
+                                          const std::string &nameSurface, 
+                                          typename TMESH::TNode::T tol = 1e-4 ) {
+        
+        typedef typename TMESH::Pvec PvecLocal;
+        PvecLocal po;
+        typename std::map< std::string, Surface* >::iterator it;
+        
+        it = map_Surface.find( nameSurface );
+        list_el.resize( 0 );
+        
+        if ( it != map_Surface.end() ) {
+            mesh.update_skin();
+            if ( it->second->type == 0 ) { /// ELEMENT-SURFACE
+            
+                Vec<unsigned> indicel;
+                Vec<unsigned> idFace;
+                it->second->get_index_element_and_id_face( indicel, idFace, map_ElementSet );            
+            
+                /// pour chaque facette, on cherche une facette de mesh de même centre
+                CmpEl< typename TMESH::TSkin::EA, PvecInp > cmpel;
+                
+                for( unsigned i = 0; i < indicel.size(); ++i ) {
+                
+                    MatchElement_INP_LMTpp el_inp = map_num_element[ indicel[ i ] ].get_facet( idFace[ i ] );
+                    if ( el_inp.element_LMT < 0 )
+                        continue; /// roblème
+                        
+                    cmpel.element_LMT = el_inp.element_LMT;
+                    cmpel.c = center( el_inp );
+                    cmpel.ea = NULL; /// initialisation
+                    apply( mesh.skin.elem_list, cmpel, tol );
+                    if ( cmpel.ea ) 
+                        list_el.push_back( cmpel.ea );
+                    else 
+                        ;//PRINT( "pas trouve" );
+                }
+                return list_el.size();
+            } else { /// NODAL-SURFACE
+                std::cerr << "WARNING ReaderINP.get_element_skin_of_surface() : nodal surface ???? " << std::endl;
+                return 0;
+            }
+        } else {
+            std::cerr << "WARNING ReaderINP.get_element_skin_of_surface() : unknown name " << nameSurface << std::endl;
+            return 0;
         }
     }
     
@@ -1620,7 +2056,7 @@ struct ReaderINP {
         std::cout << "****************************************************" << std::endl;
         
         for( it = map_ElementSet.begin(); it != map_ElementSet.end(); it++) {
-            std::cout << "name is " <<  it->first << std::endl;
+            std::cout << "name is \"" <<  it->first << "\"" << std::endl;
             if ( withElement ) {
                 if ( it->second )
                     it->second->display();
@@ -1766,7 +2202,7 @@ struct ReaderINP {
         std::cout << "****************************************************" << std::endl;
         
         for( it = map_Surface.begin(); it != map_Surface.end(); it++) {
-            std::cout << "name is " <<  it->first << std::endl;
+            std::cout << "name is \"" <<  it->first << "\"" << std::endl;
             if ( withIndice ) {
                 if ( it->second )
                     it->second->display();
