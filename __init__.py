@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import re,os,stat,string,time,sys
-# pouet
+
+sys.path.append( os.getcwd() + '/LMT' )
+sys.path.append( os.getcwd() + '/LMTpp' )
+import formal_lf
+
 def get_files(cd,r):
     """ find recursively files in subdirectories """
     nl = os.listdir(cd)
@@ -13,8 +17,6 @@ def get_files(cd,r):
         if stat.S_ISDIR(os.stat(ed)[stat.ST_MODE]): res += get_files(ed,r)
         elif r.match(e): res += [ed]
     return res
-# pouet
-# pouet
 
 def make_dep_py(env):
     """ ....py -> .h """
@@ -92,9 +94,6 @@ def problem_name( formulation, T, dimension ):
 class MakePb:
     def get_fe_sets_and_dims(self):
         """ return fe_sets and all_dims """
-        sys.path.append( os.getcwd() + '/LMT' )
-        sys.path.append( os.getcwd() + '/LMTpp' )
-        import formal_lf
         fe_sets = []
         all_dims = {}
         for e_name, e_file in zip( self.elements, self.e_files ):
@@ -117,7 +116,7 @@ class MakePb:
         return fe_sets, all_dims, map_f
     
     def write_mesh_carac( self, target, source, env ):
-        import formal_lf
+        # import formal_lf
         self.incpaths += ['LMT/formulations']
         pb = formal_lf.Problem( self.name,self.formulations,self.elements,self.dim_policy,self.incpaths,self.options,self.additional_fields )
         fe_sets, all_dims = pb.get_fe_sets_and_dims()

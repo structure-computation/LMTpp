@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from LMT.formal_lf.variable import Variable
+from variable import *
 from LMT.include.codegen import *
 import os, math, sys, string
 
@@ -26,7 +26,7 @@ class Element:
         "gauss_points" : {},
         "children_nb_if_sub_integration" : [],
         "children" : [],
-        "var_inter" : [symbol('var_inter['+str(i)+']','\eta_{'+str(i)+'}') for i in range(5)],
+        "var_inter" : [symbol('var_inter['+str(i)+']','\\eta_{'+str(i)+'}') for i in range(5)],
         "val" : val,
         "interpolation" : {'global':val[0],'gauss_0':val[0],'Flat_Interpolation':val[0],'elementary':val[0],'skin_elementary':val[0],\
             'elementary_mul_nb_nodes':val[0],'elementary_mul_nb_nodes_of_each_children_elem':val[0]},

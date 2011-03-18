@@ -822,23 +822,23 @@ public:
     ///
     bool solve_system_(AbsScalarType iterative_criterium, const Number<1> &n_wont_add_nz, const Number<0> &sym) {
         #if LDL
-        PRINT("LDL");
+        // PRINT("LDL");
         solver.get_factorization(matrices(Number<0>()),false);
         vectors[0] = sollicitation;
         solver.solve( vectors[0] );
         #elif WITH_CHOLMOD
-        PRINT("CHOLMOD");
+        // PRINT("CHOLMOD");
         if ( not matrices(Number<0>()).get_factorization() ) {
             std::cout << "Bing. Inversion error" << std::endl;
             return false;
         }
         vectors[0] = matrices(Number<0>()).solve( sollicitation );
         #elif WITH_MUMPS
-        PRINT("MUMPS");
+        // PRINT("MUMPS");
         solver.get_factorization( matrices(Number<0>()), false, true );
         vectors[0] = solver.solve( sollicitation );
         #else
-        PRINT("LMT");
+        // PRINT("LMT");
       	try {
             //             std::cout << "Resolution autre " << std::endl;
             vectors[0] = inv(matrices(Number<0>())) * sollicitation;
@@ -849,18 +849,18 @@ public:
     ///
     bool solve_system_(AbsScalarType iterative_criterium, const Number<1> &n_wont_add_nz, const Number<1> &sym) {
         #if WITH_CHOLMOD
-        PRINT("CHOLMOD");
+        //PRINT("CHOLMOD");
         if ( not matrices(Number<0>()).get_factorization() ) {
             std::cout << "Bing. Inversion error" << std::endl;
             return false;
         }
         vectors[0] = matrices(Number<0>()).solve( sollicitation );
         #elif WITH_MUMPS
-        PRINT("MUMPS");
+        //PRINT("MUMPS");
         solver.get_factorization( matrices( Number<0>() ), false, true );
         vectors[0] = solver.solve( sollicitation );
         #else
-        PRINT("LMT");
+        //PRINT("LMT");
         if ( iterative_criterium ) {
             Mat<ScalarType,Sym<>,SparseLine<> > mm = matrices(Number<0>());
             incomplete_chol_factorize( mm );
@@ -883,8 +883,8 @@ public:
             //    ls.solve( vectors[0] );
             //}
             //else
-                PRINT("LMT");
-                vectors[0] = inv(matrices(Number<0>())) * sollicitation;
+            // PRINT("LMT");
+            vectors[0] = inv(matrices(Number<0>())) * sollicitation;
         } catch(const SolveException &e) { std::cerr << "system not inversible" << std::endl; return false; }
         return true;
     }
@@ -902,7 +902,7 @@ public:
                 vectors[0] = sollicitation;
                 solver.solve( vectors[0] );
                 #else
-                PRINT("LMT");
+                // PRINT("LMT");
                 vectors[0] = inv(matrices(Number<0>())) * sollicitation;
                 #endif
             }

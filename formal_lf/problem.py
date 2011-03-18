@@ -260,7 +260,6 @@ class Problem:
             e = Element(ne,dim,self.incpaths)
             for nf in self.formulations:
                 f = Formulation(nf,dim,0,self.incpaths,options=self.options)
-                print >> sys.stderr, e.name, "f.formulation_order( 666 )", f.formulation_order( 666 )
                 f.set_variable_expressions( e )
                 
                 print >> sys.stderr, e.name, "nb_gauss_points =", e.nb_gauss_points
@@ -303,17 +302,18 @@ class Problem:
         output.write( '#ifndef PROBLEM_' + ifndef + '\n' )
         output.write( '#define PROBLEM_' + ifndef + '\n' )
         output.write( '\n' )
-        output.write( '#include "formulation/formulation.h"\n' )
-        for f, e in fe_sets:
-            output.write( '#include "mesh/' + e.name + '.h"\n' )
-        output.write( '\n' )
+        # output.write( '#include "formulation/formulation.h"\n' )
+        #for f, e in fe_sets:
+            #output.write( '#include "mesh/' + e.name + '.h"\n' )
+        #output.write( '\n' )
 
+        # mesh carac
+        self.write_all_mesh_carac( output, fe_sets, all_dims )
+        
         # formulations
         for f, e in fe_sets:
             f.write( e, output, name_der_vars = name_der_vars )
 
-        # mesh carac
-        self.write_all_mesh_carac( output, fe_sets, all_dims )
         output.write( '\n' )
 
         output.write( '\n' )

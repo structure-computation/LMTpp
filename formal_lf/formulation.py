@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-from LMT.formal_lf.variable import *
+from variable import *
 from interpolation import *
 from calculate_matrix import *
 from contact import *
-from LMT.include.codegen import *
+from include.codegen import *
 import os,sys,string
-import extrapolation
+#import extrapolation
 from element import *
 from material_help import *
 from fluid_help import *
@@ -147,7 +147,7 @@ class Formulation:
       if var.unknown and skin==var.skin_var:
         nb_unknowns = getattr(self.Interpolations[var.interpolation](e),'nb_'+t)
         for i in range(nb_unknowns):
-          def pd2(d,cpt_vec):
+          def pd2( cw, d, cpt_vec ):
             if partial_ts:
               s = { extrapolation.time : sym_partial_ts }
             else:
@@ -161,10 +161,10 @@ class Formulation:
               ex = ex.diff( extrapolation.time )
           if len(var.nb_dim):
             for d in range(var.nb_dim[0]):
-              pd2(d,cpt_vec)
+              pd2( cw, d, cpt_vec )
               cpt_vec += 1
           else:
-            pd2(-1,cpt_vec)
+            pd2( cw, -1, cpt_vec )
             cpt_vec += 1
     f.write( cw.to_string() )
       

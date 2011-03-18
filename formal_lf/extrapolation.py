@@ -1,8 +1,10 @@
 from LMT.include.codegen import *
+import sys
 
 #
 time = symbol("time","t")
 system_time = symbol("syst_time","t_s")
+#print >> sys.stderr, "symbols"
 
 symbols = []
 time_steps = []
