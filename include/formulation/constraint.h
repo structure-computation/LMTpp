@@ -32,6 +32,7 @@ public:
         unsigned num;  /// num of node or element
         unsigned num_in_vec;  /// in case of the unknown is a vector or formulation contain several unknowns
         Codegen::Ex val; /// coeff
+        Codegen::Ex sym; /// symbol
         unsigned num_in_fmat(const TF &f) const {
             if ( type_var==-2 ) {
                 return (*f.indice_glob) + num_in_vec;
@@ -46,15 +47,20 @@ public:
     };
     
     Constraint():res(0.0) { }
-    Constraint(const std::string &txt,const T &_penalty_value,const TF &f) {
+    Constraint( const std::string &txt_, const T &_penalty_value, const TF &f ) {
         penalty_value = _penalty_value;
+
+        std::string txt;
+        for( int i = 0; i < txt_.size(); ++i )
+           if ( txt_[ i ] != ' ' )
+               txt += txt_[ i ];
 
         using namespace Codegen;
         try {
             symbols.clear();
             Ex ex = read_ex( txt, symbols );
             for(unsigned i=0;i<symbols.size();++i) {
-                std::string str = symbols[i].to_string();
+                std::string str = symbols[ i ].to_string();
                 Vec<std::string> split = tokenize( str, '.' );
                 
                 std::string name_unk_ns = split[split.size()-1];
@@ -63,6 +69,7 @@ public:
                 
                 if ( f.carac.is_unknown( name_unk ) ) {
                     Coeff c;
+                    c.sym = symbols[ i ];
                     if ( split.size()==0 ) c.type_var = -2;
                     else if ( split[0][0]=='n' ) {
                         c.type_var = -1;

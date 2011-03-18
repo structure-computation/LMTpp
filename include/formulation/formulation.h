@@ -517,7 +517,17 @@ public:
 
         return in;
     }
+
     ///
+    Codegen::Ex::MapExNum val_sub_sym( const Constraint<Formulation> &sc, const Codegen::Ex::SetEx &sub_symbols ) const {
+        using namespace Codegen;
+        Ex::MapExNum res = val_sub_sym( sub_symbols );
+        for( int i = 0; i < sc.coeffs.size(); ++i ) {
+            int p = sc.coeffs[ i ].num_in_fmat( *this );
+            res[ sc.coeffs[ i ].sym ] = vectors[ 0 ][ p ];
+        }
+        return res;
+    }
     Codegen::Ex::MapExNum val_sub_sym( const Codegen::Ex::SetEx &sub_symbols ) const {
         using namespace Codegen;
         Ex::MapExNum res;
@@ -584,9 +594,9 @@ public:
             LinearizedConstraint &lc = linearized_constraints[nc];
             // calculation of res
             using namespace Codegen;
-            Ex res = constraints[nc].res;
+            Ex res = constraints[ nc ].res;
             Ex::SetEx sub_symbols; res.get_sub_symbols(sub_symbols);
-            Codegen::Ex::MapExNum vss = val_sub_sym(sub_symbols);
+            Codegen::Ex::MapExNum vss = val_sub_sym( constraints[ nc ], sub_symbols );
             lc.val = (ScalarType)res.subs_numerical( vss );
             // calculation of coeffs
             lc.coeffs.resize( constraints[nc].coeffs.size() );
@@ -595,7 +605,7 @@ public:
                 lc.coeffs[j].num_in_vec = constraints[nc].coeffs[j].num_in_fmat(*this);
                 Ex coeff = constraints[nc].coeffs[j].val;
                 Ex::SetEx sub_symbols; res.get_sub_symbols(sub_symbols);
-                Codegen::Ex::MapExNum vss = val_sub_sym(sub_symbols);
+                Codegen::Ex::MapExNum vss = val_sub_sym( constraints[ nc ], sub_symbols );
                 lc.coeffs[j].val = (ScalarType)coeff.subs_numerical( vss );
             }
         }
@@ -615,10 +625,10 @@ public:
             for(unsigned i=0;i<constraints.size();++i) {
                 // calculation of res
                 using namespace Codegen;
-                Ex res = constraints[i].res;
+                Ex res = constraints[ i ].res;
                 Ex::SetEx sub_symbols;
                 res.get_sub_symbols(sub_symbols);
-                Codegen::Ex::MapExNum vss = val_sub_sym(sub_symbols);
+                Codegen::Ex::MapExNum vss = val_sub_sym( constraints[ i ], sub_symbols );
                 ScalarType ress = (ScalarType)res.subs_numerical( vss );
                 // calculation of coeffs
                 Vec<ScalarType> coeffs; coeffs.resize( constraints[i].coeffs.size() );
@@ -628,7 +638,7 @@ public:
                     Ex coeff = constraints[i].coeffs[j].val;
                     Ex::SetEx sub_symbols;
                     res.get_sub_symbols(sub_symbols);
-                    Codegen::Ex::MapExNum vss = val_sub_sym(sub_symbols);
+                    Codegen::Ex::MapExNum vss = val_sub_sym( constraints[ i ], sub_symbols );
                     coeffs[j] = (ScalarType)coeff.subs_numerical( vss );
                 }
                 // add to vec and mat
@@ -676,7 +686,7 @@ public:
                 Ex res = sollicitations[i].val;
                 Ex::SetEx sub_symbols;
                 res.get_sub_symbols(sub_symbols);
-                Codegen::Ex::MapExNum vss = val_sub_sym(sub_symbols);
+                Codegen::Ex::MapExNum vss = val_sub_sym( sub_symbols );
                 ScalarType ress = (ScalarType)res.subs_numerical( vss );
                 // add to vec and mat
                 unsigned num_in_fmat = sollicitations[i].num_in_fmat(*this);
@@ -756,10 +766,10 @@ public:
             for(unsigned i=0;i<constraints.size();++i) {
                 // calculation of res
                 using namespace Codegen;
-                Ex res = constraints[i].res;
+                Ex res = constraints[ i ].res;
                 Ex::SetEx sub_symbols;
                 res.get_sub_symbols(sub_symbols);
-                Codegen::Ex::MapExNum vss = val_sub_sym(sub_symbols);
+                Codegen::Ex::MapExNum vss = val_sub_sym( constraints[ i ], sub_symbols );
                 ScalarType ress = (ScalarType)res.subs_numerical( vss );
                 // calculation of coeffs
                 Vec<ScalarType> coeffs; coeffs.resize( constraints[i].coeffs.size() );
@@ -769,7 +779,7 @@ public:
                     Ex coeff = constraints[i].coeffs[j].val;
                     Ex::SetEx sub_symbols;
                     res.get_sub_symbols(sub_symbols);
-                    Codegen::Ex::MapExNum vss = val_sub_sym(sub_symbols);
+                    Codegen::Ex::MapExNum vss = val_sub_sym( constraints[ i ], sub_symbols );
                     coeffs[j] = (ScalarType)coeff.subs_numerical( vss );
                 }
                 // add to vec and mat
@@ -799,7 +809,7 @@ public:
                 Ex res = sollicitations[i].val;
                 Ex::SetEx sub_symbols;
                 res.get_sub_symbols(sub_symbols);
-                Codegen::Ex::MapExNum vss = val_sub_sym(sub_symbols);
+                Codegen::Ex::MapExNum vss = val_sub_sym( sub_symbols );
                 ScalarType ress = (ScalarType)res.subs_numerical( vss );
                 // add to vec and mat
                 unsigned num_in_fmat = sollicitations[i].num_in_fmat(*this);
