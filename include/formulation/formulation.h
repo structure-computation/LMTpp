@@ -1003,8 +1003,21 @@ public:
         return true;
     }
 
-    /// assumes that operator inv() si available for matrices(Number<0>()) and system is linear symmetric
-    virtual bool solve_and_get_derivatives( Vec<Vec<ScalarType> > &der ) {
+    //    ///
+    //    template<class SD>
+    //    void add_delta_derivatives( const Vec<ScalarType> &d, const ST &sd ) {
+    //        for( int s = 0, c = 0; s < sd.nb_steps(); ++s ) {
+    //            sd.add_delta_derivatives( *m, s );
+    //            for( unsigned i = 0; i < nb_der_var; ++i, ++c ) {
+    //                assemble_vector_der_var( i );
+    //                der[ c ] = I * sollicitation;
+    //            }
+    //        }
+    //    }
+
+    /// SD stands for "step derivative". SD can be for example StdStepDer...
+    template<class SD>
+    bool solve_and_get_derivatives( Vec<Vec<ScalarType> > &der, const SD &sd, bool der_in_base_node_ordering = false ) {
         assert( this->non_linear_iterative_criterium == 0 );
         assert( MatCarac<0>::symm );
         //
@@ -1018,14 +1031,44 @@ public:
         update_variables();
         call_after_solve();
 
-        der.resize( nb_der_var );
-        for(unsigned i=0;i<nb_der_var;++i) {
-            assemble_vector_der_var( i );
-            der[ i ] = I * sollicitation;
+        Vec<Vec<ScalarType> > tmp;
+        tmp.resize( nb_der_var * sd.nb_steps() );
+        for( int s = 0, c = 0; s < sd.nb_steps(); ++s ) {
+            sd( *m, s );
+            for( unsigned i = 0; i < nb_der_var; ++i, ++c ) {
+                assemble_vector_der_var( i );
+                tmp[ c ] = I * sollicitation;
+            }
         }
+
+        // der
+        if ( der_in_base_node_ordering ) {
+            der.resize( tmp.size() );
+            for( int i = 0; i < der.size(); ++i ) {
+                der[ i ].resize( m->dim * m->node_list.size() );
+                for( int j = 0; j < m->node_list.size(); ++j )
+                    for( int d = 0; d < m->dim; ++d )
+                        der[ i ][ j * m->dim + d ] = tmp[ i ][ get_indice_noda( j ) + d ];
+            }
+        } else
+            der = tmp;
 
         return true;
     }
+
+    /// @see solve_and_get_derivatives
+    struct StdStepDer {
+        int nb_steps() const { return 1; }
+        void operator()( TM &m, int num ) const {}
+    };
+
+    /// assumes that operator inv() si available for matrices(Number<0>()) and system is linear symmetric
+    /// der_in_base_node_ordering = true if user wants something like indice_node = range( nb_nodes ) * dim
+    virtual bool solve_and_get_derivatives( Vec<Vec<ScalarType> > &der, bool der_in_base_node_ordering = false ) {
+        return solve_and_get_derivatives( der, StdStepDer(), der_in_base_node_ordering );
+    }
+
+
 
     virtual void get_precond() { get_precond( Number<MatCarac<0>::symm>() ); }
     virtual void solve_system_using_precond(AbsScalarType iterative_criterium) { solve_system_using_precond( iterative_criterium, Number<MatCarac<0>::symm>() ); }

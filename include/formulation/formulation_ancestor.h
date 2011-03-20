@@ -47,7 +47,7 @@ public:
     virtual void set_mesh( void *m ) = 0; ///
 
     virtual bool solve( AbsScalarType iterative_criterium=AbsScalarType(0), bool disp_timing=false ) = 0; ///  The all-in-one procedure -> allocate if necessary, assemble, solve, update_variables, call_after_solve
-    virtual bool solve_and_get_derivatives( Vec<Vec<ScalarType> > &der ) = 0;  /// get value and derivative respective to "der_var" defined in SConsruct or in python
+    virtual bool solve_and_get_derivatives( Vec<Vec<ScalarType> > &der, bool der_in_base_node_ordering = false ) = 0;  /// get value and derivative respective to "der_var" defined in SConsruct or in python
     virtual void allocate_matrices() = 0; /// alloue les matrices
     /*!
         Objectif : 
