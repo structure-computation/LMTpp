@@ -1,0 +1,11 @@
+/*! 
+\generic_comment barycenter
+
+    Cette fonction retourne l'isobarycentre de d'élément vu comme un objet matériel de densité constante. Elle ne renvoie donc pas la même chose que \a center sauf pour les éléments linéaires comme \a Triangle , \a Tetra .
+    
+
+    \keyword Maillage/Elément/Opération
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \relates Element 
+*/
