@@ -102,14 +102,16 @@ namespace LMTPRIVATE {
 };
 
 /*!
-    Cette fonction divise les barres (segments) du maillage suivant l'opérateur op.
+    Cette fonction divise les barres (segments) d'un maillage 1, 2 ou 3D suivant l'opérateur op.
+
+    Ça veut dire, que ça divise les éléments Tetra, Hexa, etc... qui contiennent ces barres.
+
     L'opérateur op peut soit renvoyer  un booléen soit un double. Il prend aussi forcément un élément de type barre en paramètre. 
     C'est-à-dire qu'il est au moins de la forme :
     \code C/C++
         struct MyOp {
-            
-            template<class NB,class TN,class TD,unsigned nl> 
-            RET operator()(Element<Bar,NB,TN,TD,nl> &e) const {
+            template<class TE
+            RET operator()( TE &e ) const { // e un 1 var_inter (Bar, ...)
                   /// votre code 
             }
         };
@@ -121,6 +123,16 @@ namespace LMTPRIVATE {
     \keyword Maillage/Elément/Opération
 
     subdivide each element bar e contained in mesh or sub_meshes such as op(e)==true (true means subdivision). Subdivide parents
+
+
+    Voici un exemple pour diviser un maillage jusqu'à obtenir une taille max donnée
+
+    \code C/C++
+        read_msh_2( ... );
+        while ( refinement_if_length_sup( m, max_length ) );
+
+
+
 */
 template<class TM,class Op>
 bool refinement(TM &m,Op &op) {
