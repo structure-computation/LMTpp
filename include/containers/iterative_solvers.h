@@ -16,6 +16,9 @@ namespace LMT {
         incomplete_chol_factorize( K );
         int max_iter = 300;
         unsigned status = conjugate_gradient( new_SolveUsingCholFactorize( K ), f.matrices( Number<0>() ), f.sollicitation, f.vectors[ 0 ], ConvergenceCriteriumNormInfDelta<double>( 1e-5 ) ,max_iter );
+        
+    \keyword Matrice/Solver
+    \keyword Mathématiques/Algèbre linéaire/Système
 */
 template<class Precond,class Matrix,class TV,class TV_SOLUTION,class CritOperator>
 unsigned conjugate_gradient( const Precond &precond, const Matrix &matrix, const TV &sollicitation, TV_SOLUTION &solution, const CritOperator &crit_op, int &max_iter ) {
@@ -76,6 +79,9 @@ unsigned conjugate_gradient( const Precond &precond, const Matrix &matrix, const
         
         voir http://en.wikipedia.org/wiki/Biconjugate_gradient_stabilized_method
         http://www.netlib.org/templates/cpp/bicgstab.h
+        
+    \keyword Matrice/Solver
+    \keyword Mathématiques/Algèbre linéaire/Système
 */
 template<class Precond,class Matrix,class TV,class TV_SOLUTION,class CritOperator>
 unsigned PreBiCGSTAB( const Precond &precond, const Matrix &matrix, const TV &sollicitation, TV_SOLUTION &solution, const CritOperator &crit_op , int &max_iter ) {
@@ -189,6 +195,9 @@ unsigned PreBiCGSTAB( const Precond &precond, const Matrix &matrix, const TV &so
     max_iter  --  the number of iterations performed before the
                 tolerance was reached
         tol  --  the residual after the final iteration
+        
+    \keyword Matrice/Solver
+    \keyword Mathématiques/Algèbre linéaire/Système
 */
 
  
@@ -210,6 +219,11 @@ Update(Vector &x, int k, Matrix &h, Vector &s, VectorVector v)
     x += v[j] * y[j];
 }
 
+/*!
+    \keyword Matrice/Solver
+    \keyword Mathématiques/Algèbre linéaire/Système
+
+*/
 template<class Precond,class Matrix,class TV,class TV_SOLUTION>                                                         
 unsigned GMRES( const Precond &precond, const Matrix &matrix, const TV &sollicitation, TV_SOLUTION &solution, double &tol , int &max_iter, int m=0) {
     typedef typename TypeReduction<Plus,TV_SOLUTION>::T T;
@@ -296,6 +310,11 @@ unsigned GMRES( const Precond &precond, const Matrix &matrix, const TV &sollicit
     return 1;
 }
 
+/*!
+
+    doc ?
+
+*/
 template<class Real> 
 void GeneratePlaneRotation(Real &dx,const Real &dy, Real &cs, Real &sn)
 {
@@ -327,6 +346,9 @@ void ApplyPlaneRotation(Real &dx, Real &dy, const Real &cs,const  Real &sn)
 
 /*!
     preconditionneur
+    
+    \keyword Matrice/Solver
+    \keyword Mathématiques/Algèbre linéaire/Système
 */
 template<class TK>
 struct SolveUsingCholFactorize {
@@ -341,7 +363,11 @@ struct SolveUsingCholFactorize {
     const TK &K;
 };
 
-/**
+/*!
+    préconditionneur
+
+    \keyword Matrice/Solver
+    \keyword Mathématiques/Algèbre linéaire/Système
 */
 template<class TK>
 struct SolveUsingCholMod {
@@ -354,8 +380,11 @@ struct SolveUsingCholMod {
     mutable TK &K;
 };
 
-/**
+/*!
     preconditionneur SSOR (General)
+
+    \keyword Matrice/Solver
+    \keyword Mathématiques/Algèbre linéaire/Système
 */
 
 template<class T,class Structure,class Storage>
@@ -391,8 +420,11 @@ struct SolveUsingSSOR {
     mutable Mat<T,Structure,Storage> &K;
 };
 
-/**
+/*!
     preconditionneur SSOR (Specialisation type sparse)
+     
+    \keyword Matrice/Solver
+    \keyword Mathématiques/Algèbre linéaire/Système
 */
 template<class T>
 struct SolveUsingSSOR<T,Sym<>,SparseLine<> > {
@@ -433,8 +465,11 @@ struct SolveUsingSSOR<T,Sym<>,SparseLine<> > {
     mutable Mat<T,Sym<>,SparseLine<> > &K;
 };
 
-/**
+/*!
     preconditionneur Jacobi
+
+    \keyword Matrice/Solver
+    \keyword Mathématiques/Algèbre linéaire/Système
 */
 template<class TK>
 struct SolveUsingJacobi {
@@ -452,8 +487,11 @@ struct SolveUsingJacobi {
     mutable TK &K;
 };
 
-/*
+/*!
 pour les systemes couplés
+
+    \keyword Matrice/Solver
+    \keyword Mathématiques/Algèbre linéaire/Système
 */
 template<class TK>
 struct SolveUsingCholModSystemWithSameK {
@@ -474,6 +512,12 @@ struct SolveUsingCholModSystemWithSameK {
     mutable TK &K;
 };
 
+/*!
+    doc ?
+
+    \keyword Matrice/Solver
+    \keyword Mathématiques/Algèbre linéaire/Système
+*/
 template<class TK>
 struct GrosseMatriceParPetitBout {
     GrosseMatriceParPetitBout( TK &k11 , TK &k12 , TK &k21 , TK &k22 ) : K11( k11 ) , K12( k12) , K21( k21 ) , K22( k22 ) {}
@@ -499,8 +543,11 @@ struct GrosseMatriceParPetitBout {
 };
 
 
-/*
+/*!
 criteres d'arret
+
+    \keyword Matrice/Solver
+    \keyword Mathématiques/Algèbre linéaire/Système
 */
 template<class T>
 struct ConvergenceCriteriumNormInfDelta {
@@ -516,6 +563,12 @@ struct ConvergenceCriteriumNormInfDelta {
     T crit;
 };
 
+/*!
+    critère d'arrêt
+    
+    \keyword Matrice/Solver
+    \keyword Mathématiques/Algèbre linéaire/Système
+*/
 template<class T>
 struct ConvergenceCriteriumNormInfResidual {
     static const bool needs_delta_x = true;
@@ -530,32 +583,66 @@ struct ConvergenceCriteriumNormInfResidual {
     T crit;
 };
 
+/*!
+    crée un préconditionneur
+    
+    \keyword Matrice/Solver
+    \keyword Mathématiques/Algèbre linéaire/Système
+*/
 template<class TK>
 SolveUsingCholFactorize<TK> new_SolveUsingCholFactorize( const TK &k ) {
     return k;
 }
 
+/*!
+    crée un préconditionneur
+    
+    \keyword Matrice/Solver
+    \keyword Mathématiques/Algèbre linéaire/Système
+*/
 template<class TK>
 SolveUsingCholMod<TK> new_SolveUsingCholMod( TK &k ) {
     return k;
 }
 
+/*!
+    crée un préconditionneur
+    
+    \keyword Matrice/Solver
+    \keyword Mathématiques/Algèbre linéaire/Système
+*/
 template<class T,class Structure,class Storage>
 SolveUsingSSOR<T,Structure,Storage> new_SolveUsingSSOR( Mat<T,Structure,Storage> &k ) {
     return k;
 }
 
+/*!
+    crée un préconditionneur
+    
+    \keyword Matrice/Solver
+    \keyword Mathématiques/Algèbre linéaire/Système
+*/
 template<class TK>
 SolveUsingJacobi<TK> new_SolveUsingJacobi( TK &k ) {
     return k;
 }
 
-/// pour la resolution de systeme HX + BX' = F , HX' + B'X = F' 
+/*!
+pour la resolution de systeme HX + BX' = F , HX' + B'X = F' 
+
+    \keyword Matrice/Solver
+    \keyword Mathématiques/Algèbre linéaire/Système
+*/
 template<class TK>
 SolveUsingCholModSystemWithSameK<TK> new_SolveUsingCholModSystemWithSameK( TK &k ) {
     return k;
 }
 
+/*!
+     
+    \keyword Matrice/Solver
+    \keyword Mathématiques/Algèbre linéaire/Système
+*/
 template<class TK>
 GrosseMatriceParPetitBout<TK> new_GrosseMatriceParPetitBout( TK &k11,TK &k12,TK &k21,TK &k22 ) {
     GrosseMatriceParPetitBout<TK> res(k11,k12,k21,k22);

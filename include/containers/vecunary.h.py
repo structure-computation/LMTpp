@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import string
 lst = [
     'conj' ,
@@ -23,7 +24,10 @@ lst = [
 print 'namespace LMT {'
 for i in lst:
     I = string.capitalize(i)
-    print '/** \\relates Vec */'
+    print '/*!'
+    print '    \\relates Vec'
+    print '    \\keyword Mathématiques/Fonction'
+    print '*/'
     print 'template<class T,int s>'
     print 'Vec<VecOp<'+I+',1,Vec<T,s>,true>,s> '+i+'(const Vec<T,s> &v) { return v; }'
  
