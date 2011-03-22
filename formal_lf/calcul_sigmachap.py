@@ -1,5 +1,5 @@
 """ calcul de sigmachap dans le cas de differentes formulations """
-from LMT.include.codegen import *
+from include.codegen import *
 from material_help import *
 import math
 

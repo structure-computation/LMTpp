@@ -25,13 +25,10 @@ using namespace LMT;
         
     Pour se servir de cette classe, le plus délicat est la compilation et surtout l'édition des liens.
     
-    * Il faut aussi l'option de compilation -DWITH_MUMPS .
+    * Il faut aussi l'option de compilation -DWITH_MKL .
     
     REMARQUE : pour l'instant la classe ne gère pas le calcul sur plusieurs noeuds.
         
-    
-    \friend raphael.pasquier@lmt.ens-cachan.fr
-    \friend hugo.leclerc@lmt.ens-cachan.fr
 */
 
 #ifdef WITH_MKL

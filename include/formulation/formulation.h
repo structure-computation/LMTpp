@@ -1026,8 +1026,14 @@ public:
         assemble();
 
         //
+        #if WITH_CHOLMOD
+        Mat<double,Sym<>,SparseCholMod> I( matrices(Number<0>()) );
+        I.get_factorization();
+        vectors[ 0 ] = I.solve( sollicitation );
+        #else
         Inv<ScalarType,Sym<>,SparseLine<> > I( matrices(Number<0>()) );
         vectors[ 0 ] = I * sollicitation;
+        #endif
         update_variables();
         call_after_solve();
 
@@ -1037,7 +1043,11 @@ public:
             sd( *m, s );
             for( unsigned i = 0; i < nb_der_var; ++i, ++c ) {
                 assemble_vector_der_var( i );
+                #if WITH_CHOLMOD
+                tmp[ c ] = I.solve( sollicitation );
+                #else
                 tmp[ c ] = I * sollicitation;
+                #endif
             }
         }
 

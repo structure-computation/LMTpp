@@ -4,7 +4,7 @@
 import os
 import math
 import sys
-from LMT.include.codegen import *
+from include.codegen import *
 
 # Spin() : renvoie la matrice de spin (3*3,antisymetrique) d'un vecteur axial de rotation(3)
 

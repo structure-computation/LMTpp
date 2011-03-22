@@ -1,4 +1,4 @@
-from LMT.include.codegen import *
+from include.codegen import *
 import sys
 
 #

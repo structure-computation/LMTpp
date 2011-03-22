@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from variable import *
-from LMT.include.codegen import *
+from include.codegen import *
 import os, math, sys, string
 
 class Element:

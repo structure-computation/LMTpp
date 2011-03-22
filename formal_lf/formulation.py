@@ -97,8 +97,10 @@ class Formulation:
     self.num_func_write_matrix = 0
     self.beg_absolute_time = symbol( 'f.time' )
     
+    #print >> sys.stderr, self.formulation_order( 666 )    
     if not ( "formulation_order" in  self.ind ):
         setattr( self, "formulation_order", form_ord )
+    #print >> sys.stderr, self.formulation_order( 666 )
     
 
   def get_variables(self):
