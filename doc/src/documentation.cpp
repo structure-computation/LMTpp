@@ -986,8 +986,8 @@ void Documentation::generate_file_css() {
     pageWeb << std::endl;
     pageWeb << "ul.cellule li {\n	width: 100%;\n}\n" << std::endl;
     pageWeb << std::endl;
-    pageWeb << "div.code {\n    background-color: #84A8B1;#fde1e7;\n    padding: 0px 85px;\n}\n" << std::endl;
-    //pageWeb << "div.code {\n	background-color: #84A8B1;#fde1e7;\n	padding: 0px 85px;\n	width: 83%;\n}\n" << std::endl;
+    //pageWeb << "div.code {\n    background-color: #84A8B1;#fde1e7;\n    padding: 0px 85px;\n}\n" << std::endl;
+    pageWeb << "div.code {\n	background-color: #84A8B1;#fde1e7;\n	padding: 0px 85px;\n	width: 400%;\n}\n" << std::endl;
     pageWeb << std::endl;
     pageWeb << "div.verbatim {\n	background-color: #c7dad7;\n	padding: 0px 85px;\n	width: 83%;\n}\n" << std::endl;
     pageWeb << std::endl;
