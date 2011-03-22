@@ -21,7 +21,11 @@
 
 namespace LMT {
 
-/// enlève les caractères de la liste l dans la chaîne s
+/*!
+enlève les caractères de la liste l dans la chaîne s
+
+\keyword Utilitaires
+*/
 void cut_char( std::string& s, const char* l) {
     int i = 0;
     while ( i < s.size() )

@@ -103,6 +103,9 @@ namespace LMTPRIVATE {
 };
 /*!
     Add delaunay points to mesh already constitued
+    
+    \keyword Fonctionalité/Mesh
+    \keyword Maillage/Opération
 */
 template<unsigned nvi,class TM,class Pvec>
 void add_delaunay_points(TM &m,const Vec<Pvec> &new_points) {
