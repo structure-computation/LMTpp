@@ -28,7 +28,7 @@ class Formulation:
     def elem_contact_formulation(ve): return number(0)
     def apply_on_elements_after_solve(unk_subs): return Write_code('T')
     def form_ord( x ):
-        return 2 * x - 2
+        return 2 * x.degree - 2
     
     self.ind = {
       "Variable" : Variable,
@@ -118,7 +118,7 @@ class Formulation:
     return res
       
   def set_variable_expressions( self, e ):
-    e.order_integration = self.formulation_order( e.degree )
+    e.order_integration = self.formulation_order( e )
     k = min( filter( lambda x : x >= e.order_integration, e.gauss_points.keys() ) )
     self.gauss_points = e.gauss_points[ k ]
     e.nb_gauss_points = len( self.gauss_points )
@@ -522,7 +522,7 @@ class Formulation:
 
     order_integration = self.order_integration
     if order_integration < 0:
-        order_integration = 2 * ( e.degree - 1 )
+        order_integration = self.formulation_order( e )
 
     # surfacic part
     dS_part = form.diff(dS)
