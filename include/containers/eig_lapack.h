@@ -25,24 +25,24 @@ namespace LMT {
         typedef double T;
 
         Mat< T, Sym<> > ms( 3, 3, 0. );
-        Vec<T> eig_value, v, r;
+        Vec<T> eig_values, v, r;
         ms.diag() = 5.;
         ms( 1, 0 ) = 2.; 
         ms( 2, 0 ) = 1.;
         ms( 2, 1 ) = -0.3;
         
-        Mat<T> m( ms ), eigen_vector;
+        Mat<T> m( ms ), eigen_vectors;
         
         PRINTN( m );
         
-        get_eig_sym( m, eig_value, eigen_vector );
+        get_eig_sym( m, eig_values, eigen_vectors );
         
-        PRINT( eig_value );
-        PRINTN( eigen_vector );
+        PRINT( eig_values );
+        PRINTN( eigen_vectors );
         
-        v = eigen_vector.row( 0 );
+        v = eigen_vectors.row( 0 );
         PRINT( v );
-        r = m * v - eig_value[ 0 ] * v;
+        r = m * v - eig_values[ 0 ] * v;
         PRINT( r );
     
     
@@ -70,9 +70,6 @@ namespace LMT {
         m.diag() = eig_val;
         PRINTN( trans( eig_vec ) * m * eig_vec );
 
-    \friend raphael.pasquier@lmt.ens-cachan.fr
-    \friend hugo.leclerc@lmt.ens-cachan.fr
-
     \keyword Mathématiques/Algèbre linéaire/Vecteurs et valeurs propres
 
     \author Hugo Leclerc
@@ -98,6 +95,19 @@ void get_eig_sym( const TM &m, Vec<double> &eig_val, Mat<double> &eig_vec ) {
     for(int i=0,c=0;i<n;++i)
         for(int j=0;j<n;++j,++c)
             eig_vec( i, j ) = A[ c ];
+}
+
+template<class TM,class T>
+Vec<T> solve_using_eig_val( const TM &m, const Vec<T> &v, T rm_eig_if_inf_rel = 1e-5 ) {
+    Vec<T> eig_val;
+    Mat<T> eig_vec;
+    get_eig_sym( m, eig_val, eig_vec );
+    // PRINT( eig_val );
+
+    Vec<T> valid = ( abs( eig_val ) > rm_eig_if_inf_rel * norm_inf( eig_val ) );
+    Mat<T, Sym<>, SparseLine<> > t( m.nb_rows() );
+    t.diag() = valid / ( eig_val + 1 - valid );
+    return trans( eig_vec ) * Vec<T>( t * Vec<T>( eig_vec * v ) );
 }
 
 }

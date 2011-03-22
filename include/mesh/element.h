@@ -312,10 +312,8 @@ struct DistBetweenElemCenter {
     Trouve les variables d'interpolation correspondant à la position pos.
     On suppose que var_inter n'est pas initialisé.
 
-    \friend raphael.pasquier@lmt.ens-cachan.fr
-    \friend hugo.leclerc@lmt.ens-cachan.fr
   */
-template<class TE,class Pvec,class TVI> void get_var_inter(const TE &elem,const Pvec &pos,TVI &var_inter,typename TE::T criterium) {
+template<class TE,class Pvec,class TVI> void get_var_inter( const TE &elem,const Pvec &pos,TVI &var_inter,typename TE::T criterium ) {
     Vec<Vec<typename TE::T,TE::dim>,TE::nb_nodes> pos_nodes;
     for(unsigned i=0;i<TE::nb_nodes;++i)
         pos_nodes[i] = elem.pos(i);
