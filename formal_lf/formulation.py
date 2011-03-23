@@ -28,7 +28,7 @@ class Formulation:
     def elem_contact_formulation(ve): return number(0)
     def apply_on_elements_after_solve(unk_subs): return Write_code('T')
     def form_ord( x ):
-        print "Ordre d'integration calcule a partir du degre de l'element"
+        # print "Ordre d'integration calcule a partir du degre de l'element"
         return 2 * x.degree - 2
     
     self.ind = {
