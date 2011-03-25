@@ -35,7 +35,8 @@ public:
         assume_skin_not_needed = false;
         max_non_linear_iteration = 50;
         premul_KUn_in_sollicitation = ScalarType(1);
-        want_amd = false ;
+        want_amd = false;
+        want_rcm = false;
         levenberg_marquadt = AbsScalarType(0);
         max_diag = ScalarType(0);
         pthread_mutex_init( &mutex_assemble_matrix, NULL );
@@ -214,7 +215,7 @@ public:
     bool assume_skin_not_needed;
     unsigned max_non_linear_iteration;
     ScalarType premul_KUn_in_sollicitation;
-    bool want_amd;
+    bool want_amd, want_rcm;
     AbsScalarType levenberg_marquadt; /// K += levenberg_marquadt * max( abs( K ) ) * Id; 0 by default
     ScalarType max_diag;
     Vec<unsigned> id;/// indice pour les variables

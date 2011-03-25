@@ -309,9 +309,9 @@ def dev( sigma ):
     return res
 
 # ne fonctionne qu'en 3D
-def von_mises( sigma ):
+def von_mises( sigma, e = 0 ):
     d = dev( sigma )
-    return sqrt( 3.0/2.0 * trace_sym_col(d,d) )
+    return sqrt( 3.0/2.0 * trace_sym_col(d,d) + e )
 
 # jac
 def calc_jac_ext( coord, var_inter ):

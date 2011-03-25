@@ -13,7 +13,7 @@ namespace LMT {
         unsigned cpt_iter = conjugate_gradient( new_SolveUsingCholFactorize( K ), f.matrices( Number<0>() ), f.sollicitation, f.vectors[ 0 ], ConvergenceCriteriumNormInfDelta<double>( 1e-5 ) );
 */
 template<class Precond,class Matrix,class TV,class TV_SOLUTION,class CritOperator>
-unsigned conjugate_gradient( const Precond &precond, const Matrix &matrix, const TV &sollicitation, TV_SOLUTION &solution, const CritOperator &crit_op ) {
+unsigned conjugate_gradient( const Precond &precond, const Matrix &matrix, const TV &sollicitation, TV_SOLUTION &solution, const CritOperator &crit_op, bool disp_alpha = false ) {
     typedef typename TypeReduction<Plus,TV_SOLUTION>::T T;
     if ( solution.size() <= matrix.nb_rows() )
         solution.resize( matrix.nb_rows(), T(0) );
@@ -39,7 +39,8 @@ unsigned conjugate_gradient( const Precond &precond, const Matrix &matrix, const
         solution += alpha * d;
         r -= alpha * q; // r = b - A * x;
         
-        // PRINT( alpha );
+        if ( disp_alpha )
+            PRINT( alpha );
         
         if ( crit_op( alpha * d, r ) )
             return cpt;

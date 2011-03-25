@@ -19,6 +19,7 @@
 #include "constraint.h"
 #include "sollicitation.h"
 #include "util/symamd.h"
+#include "util/symrcm.h"
 #include "util/solveLDL.h"
 #include "util/MUMPS_solver.h"
 #include "formulation/formulation_ancestor.h"
@@ -289,6 +290,11 @@ public:
             assert( nb_unk_elem==0 ); // not managed
             *indice_noda = symamd( *m ) * nnu;
         }
+        if ( this->want_rcm ) {
+            assert( (*indice_glob)==0 ); // not managed
+            assert( nb_unk_elem==0 ); // not managed
+            *indice_noda = symrcm( *m ) * nnu;
+        }
         return size;
     }
     //
@@ -348,6 +354,11 @@ public:
             assert( (*indice_glob)==0 ); // not managed
             assert( nb_unk_elem==0 ); // not managed
             *indice_noda = symamd( *m ) * nnu;
+        }
+        if ( this->want_rcm ) {
+            assert( (*indice_glob)==0 ); // not managed
+            assert( nb_unk_elem==0 ); // not managed
+            *indice_noda = symrcm( *m ) * nnu;
         }
 
         // matrice allocation
@@ -993,6 +1004,7 @@ public:
                 if ( converged )
                     break;
             }
+            PRINT( norm_inf( old_vec - vectors[0] ) );
 
             if ( nb_iterations++ >= this->max_non_linear_iteration )
                 throw SolveException();
@@ -2046,6 +2058,8 @@ public:
         enrichissements.push_back(enr_field);
         Neighbor_table.push_back(table_of_neig);
     }
+
+    TMAT0 &mat() { return matrices( Number<0>() ); }
 
     TM *m;
     Carac carac;
