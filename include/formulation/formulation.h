@@ -728,18 +728,22 @@ public:
             if ( assemble_vec ) {
                 AssembleNode<true,true> toto2;
                 toto2.vectors = &vectors_;
-                apply( m->node_list, toto2, *this, K, F ); // nodal
+                //apply( m->node_list, toto2, *this, K, F ); // nodal
+                apply_mt( m->node_list, this->nb_threads_assemble_matrix, toto2, *this, K, F ); // nodal
                 AssembleElem<true,true > toto;
                 toto.vectors = &vectors_;
-                apply( m->elem_list, toto, *this, K, F ); // element (and skin elements)
+                //apply( m->elem_list, toto, *this, K, F ); // element (and skin elements)
+                apply_mt( m->elem_list, this->nb_threads_assemble_matrix, toto, *this, K, F ); // element (and skin elements)
             }
             else{
                 AssembleNode<true,false > toto2;
                 toto2.vectors = &vectors_;
-                apply( m->node_list, toto2, *this, K, F ); // nodal
+                //apply( m->node_list, toto2, *this, K, F ); // nodal
+                apply_mt( m->node_list, this->nb_threads_assemble_matrix, toto2, *this, K, F ); // nodal
                 AssembleElem<true,false > toto;
                 toto.vectors = &vectors_;
-                apply( m->elem_list, toto, *this, K, F ); // element (and skin elements)
+                //apply( m->elem_list, toto, *this, K, F ); // element (and skin elements)
+                apply_mt( m->elem_list, this->nb_threads_assemble_matrix, toto, *this, K, F ); // element (and skin elements)
             }
         }
         else {
