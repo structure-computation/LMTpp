@@ -937,21 +937,21 @@ struct ReaderINP {
                 
             } else {
                 if ( strcmp( str.c_str() + deb, "XSYMM" ) == 0 ) {
-                    bn.set_constraint( 1 );
+                    bn.set_constraint( 0 );
+                    bn.set_constraint( 4 );
                     bn.set_constraint( 5 );
-                    bn.set_constraint( 6 );
                     return;
                 }
                 if ( strcmp( str.c_str() + deb, "YSYMM" ) == 0 ) {
-                    bn.set_constraint( 2 );
-                    bn.set_constraint( 4 );
-                    bn.set_constraint( 6 );
+                    bn.set_constraint( 1 );
+                    bn.set_constraint( 3 );
+                    bn.set_constraint( 5 );
                     return;
                 }                
                 if ( strcmp( str.c_str() + deb, "ZSYMM" ) == 0 ) {
+                    bn.set_constraint( 2 );
                     bn.set_constraint( 3 );
                     bn.set_constraint( 4 );
-                    bn.set_constraint( 5 );
                     return;
                 }
                 if ( strcmp( str.c_str() + deb, "ENCASTRE" ) == 0 ) {
@@ -960,13 +960,31 @@ struct ReaderINP {
                     bn.set_constraint( 3 );
                     bn.set_constraint( 4 );
                     bn.set_constraint( 5 );
-                    bn.set_constraint( 6 );
+                    bn.set_constraint( 0 );
                     return;
                 }
                 if ( strcmp( str.c_str() + deb, "PINNED" ) == 0 ) {
+                    bn.set_constraint( 0 );
+                    bn.set_constraint( 1 );
+                    bn.set_constraint( 2 );
+                    return;
+                }
+                if ( strcmp( str.c_str() + deb, "XASYMM" ) == 0 ) {
                     bn.set_constraint( 1 );
                     bn.set_constraint( 2 );
                     bn.set_constraint( 3 );
+                    return;
+                }
+                if ( strcmp( str.c_str() + deb, "YASYMM" ) == 0 ) {
+                    bn.set_constraint( 0 );
+                    bn.set_constraint( 2 );
+                    bn.set_constraint( 4 );
+                    return;
+                }                
+                if ( strcmp( str.c_str() + deb, "ZASYMM" ) == 0 ) {
+                    bn.set_constraint( 0 );
+                    bn.set_constraint( 1 );
+                    bn.set_constraint( 5 );
                     return;
                 }
             }
@@ -1983,6 +2001,65 @@ struct ReaderINP {
                             bnode_list.push_back( bn );
                         } else {   
                             std::cerr << "WARNING ReaderINP.get_node_of_boundary() : negative index" << std::endl;
+                            //assert( 0 );
+                        }                    
+                    }    
+                } else
+                    std::cerr << "WARNING ReaderINP.get_node_of_boundary() : unknown NodeSet" << std::endl;
+            }
+        
+        } else {
+            std::cerr << "WARNING ReaderINP : you use get_node_of_boundary() with unknown name " << nameBoundary << std::endl;
+        }
+        
+        return bnode_list.size();
+    }
+    
+    template< class Ca, unsigned ma, class TTOL>
+    unsigned get_node_of_boundary( Vec< BNode<> > &bnode_list, Mesh<Ca,ma> &m, const std::string & nameBoundary, TTOL tol ) {
+    
+        typename std::map< std::string, Boundary* >::iterator it;
+        PvecInp p;
+        unsigned j;
+        
+        it = map_Boundary.find( nameBoundary );
+        bnode_list.resize( 0 );
+        
+        if ( it != map_Boundary.end() ) {
+            Boundary* bord = it->second;
+            for( unsigned i = 0; i < bord->list_bnode.size(); ++i ) {
+                p = map_num_node[ bord->list_bnode[ i ].info ].pos;
+                /// on recherche dans le maillage m s'il existe un noeud à la même position 
+                for( j = 0; j < m.node_list.size(); ++j ) 
+                    if ( length( p - m.node_list[ j ].pos ) < tol )
+                        break;
+                if ( j < m.node_list.size() ) {
+                    BNode<> bn = bord->list_bnode[ i ];
+                    bn.info = j; /// on met à jour l'index avec celui du maillage LMTpp
+                    bnode_list.push_back( bn );
+                } else {
+                    std::cerr << "WARNING ReaderINP.get_node_of_boundary() : unfound node at position " << p << std::endl;
+                }
+            }
+            
+            for( unsigned i = 0; i < bord->list_bnodeset.size(); ++i ) {
+                typename std::map< std::string, NodeSet* >::iterator it2 = map_NodeSet.find( bord->list_bnodeset[ i ].info   );
+                if ( it2 != map_NodeSet.end() ) {
+                    typename NodeSet::iterator it3;
+                    for( it3 = it2->second->begin(); it3 != it2->second->end(); ++it3 ) {
+                        p = map_num_node[ *it3 ].pos;
+                        /// on recherche dans le maillage m s'il existe un noeud à la même position
+                        for( j = 0; j < m.node_list.size(); ++j ) 
+                            if ( length( p - m.node_list[ j ].pos ) < tol )
+                                break;                        
+                        if ( j < m.node_list.size() ) {
+                            BNode<> bn;
+                            bn._constraint = bord->list_bnodeset[ i ]._constraint;
+                            bn.value = bord->list_bnodeset[ i ].value;
+                            bn.info = j; /// on met à jour l'index avec celui du maillage LMTpp
+                            bnode_list.push_back( bn );
+                        } else {   
+                            std::cerr << "WARNING ReaderINP.get_node_of_boundary() : unfound node at position " << p << std::endl;
                             //assert( 0 );
                         }                    
                     }    
