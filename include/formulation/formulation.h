@@ -35,7 +35,7 @@ struct LocalOperator {
     void update_variables(TM *m){ };
 };
 
-/** To be redefined for each new formulations */
+/*! To be redefined for each new formulations */
 template<class TF>
 void read_material_to_mesh_( const XmlNode &n, TF &f ) {}
 
@@ -76,13 +76,18 @@ public:
     };
 };
 
-/**
+/*!
     Pour le choix du solveur : wont_add_nz=false implique utilisation des solveurs internes.
         wont_add_nz=true implique utilisation de LDL, sauf si "-DWITH_CHOLMOD -DWITH_UMFPACK" sont dans les directives de compilation est à 1 auquel cas on utilise CholMod ou UMFPACK (non symétrique)
 
     Mais qu'est-ce qu'une directive de compilation ?
         cf. CPPFLAGS dans vasoSConstuction
 
+    \relates Comment résoudre un problème éléments finis de façon générale
+    \relates Exemple de problème d'évolution, l'équation de la chaleur
+    \relates Exemple de formulation
+
+    \keyword Formulation
 */
 template<class TM_,class NameFormulation_,class NameVariant_=DefaultBehavior,class ScalarType_=typename TM_::Tpos,bool wont_add_nz=false>
 class Formulation : public FormulationAncestor<ScalarType_> {
