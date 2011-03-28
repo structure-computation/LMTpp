@@ -187,7 +187,7 @@ struct LevelSetRemoveNeg {
     const PhiExtract &ed;
 };
 
-/**
+/*!
 
 */
 template<class TM,class PhiExtract>
