@@ -43,8 +43,10 @@ def mat_sym_to_vec_col(m):
 
 def vec_col_to_mat_sym(v):
    res = []
-   if v.size()==3:
-      res=matrix([[v[0],v[2]],[v[2],v[1]]])
+   if v.size()==1:
+      res=matrix([ [v[0]] ])
+   elif v.size()==3:
+      res=matrix([ [v[0],v[2]] , [v[2],v[1]] ])
    elif v.size()==6:
       res=matrix([ [v[0],v[3],v[4]] , [v[3],v[1],v[5]] , [v[4],v[5],v[2]] ])
    return res
