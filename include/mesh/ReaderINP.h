@@ -13,7 +13,7 @@
 #include "tetra_10.h"
 #include "triangle.h"
 #include "triangle_6.h"
-
+#include "../io/lineoutput.h" /// normalize_end_line()
 
 namespace LMT {
 
@@ -29,12 +29,11 @@ void replace_char( std::string& str, char c, char subs) {
 /*!
     lorsque une ligne d'un fichier texte DOS est lue, il reste le caractère CR Carriage Return ( code ASCII 13 ) qui gène la récupèration des nombres de la ligne. Il est donc nécessaire de le retirer. On supprime aussi les espaces pour une meilleure lecture.
 */
-void normalize_end_line( std::string& str ) {
-    size_t pos = str.size() - 1;
-    while( ( pos >= 1 ) and ( ( str[ pos ] == 13 ) or ( str[ pos ] == ' ' ) ) ) pos--;
-    str.resize( pos + 1 );
-    //std::cout << "--|" << str << "|--" << std::endl;
-}
+// void normalize_end_line( std::string& str ) {
+//     size_t pos = str.size() - 1;
+//     while( ( pos >= 1 ) and ( ( str[ pos ] == 13 ) or ( str[ pos ] == ' ' ) ) ) pos--;
+//     str.resize( pos + 1 );
+// }
 
 /// retourne le nombre de caractères c à partir de la position start
 unsigned compter_caractere( const std::string& s, char c, int start = 0 ) {
