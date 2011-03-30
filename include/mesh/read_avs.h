@@ -7,6 +7,7 @@
 #include "mesh/tetra.h"
 #include "mesh/tetra_10.h"
 #include "mesh/wedge.h"
+#include "io/normalize_end_line.h"
 #include <stdexcept>
 #include <map>
 using namespace std;

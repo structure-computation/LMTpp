@@ -91,15 +91,6 @@ std::istream &line_input( std::istream &s, std::complex<T> &v ) {
     return s;
 }
 
-/*!
-    lorsque une ligne d'un fichier texte DOS est lue, il reste le caractère CR Carriage Return ( code ASCII 13 ) qui gène la récupèration des nombres de la ligne. Il est donc nécessaire de le retirer. On supprime aussi les espaces pour une meilleure lecture.
-*/
-void normalize_end_line( std::string& str ) {
-    size_t pos = str.size() - 1;
-    while( ( pos >= 1 ) and ( ( str[ pos ] == 13 ) or ( str[ pos ] == ' ' ) ) ) pos--;
-    str.resize( pos + 1 );
-}
-
 };
 
 #endif // LMT_lineoutput_HEADER
