@@ -28,6 +28,7 @@ class Formulation:
     def elem_contact_formulation(ve): return number(0)
     def apply_on_elements_after_solve(unk_subs): return Write_code('T')
     def form_ord( x ):
+        # print "Ordre d'integration calcule a partir du degre de l'element"
         return 2 * x.degree - 2
     
     self.ind = {
@@ -82,12 +83,11 @@ class Formulation:
       'apply_on_elements_after_solve_14' : apply_on_elements_after_solve,
       'apply_on_elements_after_solve_15' : apply_on_elements_after_solve,
       'options' : options,
-      'formulation' : self,
       'gauss_points' : [],
       'user_headers' : [],
     }
     execfile( name_file, globals(), self.ind )
-
+    
     self.name = name_form
     self.name_file = name_file
     self.incpaths = incpaths
@@ -97,7 +97,7 @@ class Formulation:
     self.num_func_write_matrix = 0
     self.beg_absolute_time = symbol( 'f.time' )
     
-    #print >> sys.stderr, self.formulation_order( 666 )    
+    #print >> sys.stderr, self.formulation_order( 666 )
     if not ( "formulation_order" in  self.ind ):
         setattr( self, "formulation_order", form_ord )
     #print >> sys.stderr, self.formulation_order( 666 )
@@ -468,6 +468,7 @@ class Formulation:
       ('green_lagrange',e.green_lagrange),
       ('green_lagrange_col',e.green_lagrange_col),
       ('options', self.options),
+      ('formulation_order', self.formulation_order),
       ('gauss_points', self.gauss_points),
       ('cur_f', self),
     ]

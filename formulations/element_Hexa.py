@@ -80,6 +80,7 @@ interpolation["nodal"] =  (1-var_inter[0]) * (1-var_inter[1]) * (1-var_inter[2])
 
 quality = 1
 interpolation["der_nodal"] = val[0]
+interpolation["gauss_1"] = val[0]
 
 z1=(1+(1.0/sqrt(3.0)))/2;
 z2=(1-(1.0/sqrt(3.0)))/2;

@@ -21,6 +21,7 @@
 #include "units.h"
 #include <libxml/xmlmemory.h>
 #include <libxml/parser.h>
+#include <libxml/xmlversion.h>
 
 namespace LMT {
 
@@ -73,6 +74,7 @@ XmlNode &XmlNode::operator=(const XmlNode &XmlNode) {
 
 ///
 void XmlNode::parse_file(const char *file) throw (IoException) {
+#if LIBXML_VERSION < 20708
     xmlDocPtr tmp_doc = xmlParseFile(file);
     if ( tmp_doc == NULL )
         throw( IoException( "error parsing XML file "+std::string(file)+"." ));
@@ -81,7 +83,28 @@ void XmlNode::parse_file(const char *file) throw (IoException) {
         xmlFreeDoc( tmp_doc );
         throw( IoException( "XML file "+std::string(file)+" is empty." ));
     }
-
+#else
+    /** create a parser context */
+    xmlParserCtxtPtr ctxt = xmlNewParserCtxt();
+    if ( ctxt == NULL )
+        throw( IoException( "Failed to allocate parser context\n" ) );
+    /** parse the file, option deactivating limits */
+    xmlDocPtr tmp_doc = xmlCtxtReadFile( ctxt, file, NULL, XML_PARSE_HUGE );
+    /** check if parsing suceeded */
+    if ( tmp_doc == NULL ) {
+        xmlFreeParserCtxt( ctxt );
+        throw( IoException( "error parsing XML file " + std::string(file) + "." ) );
+    }
+    node = xmlDocGetRootElement( tmp_doc );
+    if ( node == NULL ) {
+        xmlFreeDoc( tmp_doc );
+        xmlFreeParserCtxt( ctxt );
+        throw( IoException( "XML file "+std::string(file)+" is empty." ));
+    }
+    /** free up the parser context */
+    xmlFreeParserCtxt(ctxt);
+#endif
+    
     if ( doc )
         --(*doc);
     doc = new Xml_doc_with_counter( tmp_doc );
@@ -89,6 +112,7 @@ void XmlNode::parse_file(const char *file) throw (IoException) {
 
 ///
 void XmlNode::parse_text(const char *text) throw (IoException) {
+#if LIBXML_VERSION < 20708
     xmlDocPtr tmp_doc = xmlParseDoc((xmlChar *)text);
     if ( tmp_doc == NULL )
         throw( IoException( "error parsing XML text "+std::string((const char *)text)+"." ));
@@ -97,7 +121,27 @@ void XmlNode::parse_text(const char *text) throw (IoException) {
         xmlFreeDoc( tmp_doc );
         throw( IoException( "XML text "+std::string((const char *)text)+" is empty." ));
     }
-
+#else
+    /** create a parser context */
+    xmlParserCtxtPtr ctxt = xmlNewParserCtxt();
+    if ( ctxt == NULL )
+        throw( IoException( "Failed to allocate parser context\n" ) );
+    /** parse the file, option deactivating limits */
+    xmlDocPtr tmp_doc = xmlCtxtReadDoc( ctxt, (xmlChar *) text, NULL, NULL, XML_PARSE_HUGE );
+    /** check if parsing suceeded */
+    if ( tmp_doc == NULL ) {
+        xmlFreeParserCtxt( ctxt );
+        throw( IoException( "error parsing XML text." ) );
+    }
+    node = xmlDocGetRootElement( tmp_doc );
+    if ( node == NULL ) {
+        xmlFreeDoc( tmp_doc );
+        xmlFreeParserCtxt( ctxt );
+        throw( IoException( "XML Node is empty." ));
+    }
+    /** free up the parser context */
+    xmlFreeParserCtxt(ctxt);
+#endif
     if ( doc )
         --(*doc);
     doc = new Xml_doc_with_counter( tmp_doc );

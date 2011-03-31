@@ -91,7 +91,6 @@ std::istream &line_input( std::istream &s, std::complex<T> &v ) {
     return s;
 }
 
-
 };
 
 #endif // LMT_lineoutput_HEADER
