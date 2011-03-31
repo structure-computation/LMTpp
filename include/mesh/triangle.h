@@ -82,6 +82,15 @@ void intersection(const Element<Triangle,TN,TNG,TD,NET> &e,Pvec P1,Pvec P2,T &nu
     else  // exterior
         dist_ext = min(min(fabs(dist0),fabs(dist1)),fabs(dist2));
 }
+
+
+template<class PV>
+typename PV::T sample_normal( Triangle, const PV &pos ) {
+    Pvec res = vect_prod( Pvec( pos[ 1 ] - pos[ 0 ] ), Pvec( pos[ 2 ] - pos[ 0 ] ) );
+    return res / length( res );
+}
+
+
 template<class TN,class TNG,class TD,unsigned NET>
 typename TNG::Pvec sample_normal(const Element<Triangle,TN,TNG,TD,NET> &e) {
     DEBUGASSERT( (TNG::dim==3) );

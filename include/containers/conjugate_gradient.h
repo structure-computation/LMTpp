@@ -74,8 +74,8 @@ struct SolveUsingCholFactorize {
 /*
 */
 template<class TK>
-struct SolveUsingCholMod {
-    SolveUsingCholMod( TK &k ) : K( k ) {}
+struct SolveUsingDotSolve {
+    SolveUsingDotSolve( TK &k ) : K( k ) {}
     typedef double MatrixScalarType;
     template<class TV>
     Vec<typename TypePromote<Multiplies,MatrixScalarType,TV>::T> operator*( const Vec<TV> &v ) const {
@@ -105,7 +105,7 @@ SolveUsingCholFactorize<TK> new_SolveUsingCholFactorize( const TK &k ) {
 }
 
 template<class TK>
-SolveUsingCholMod<TK> new_SolveUsingCholMod( TK &k ) {
+SolveUsingDotSolve<TK> new_SolveUsingDotSolve( TK &k ) {
     return k;
 }
 // new_SolveUsingInverseMatrix

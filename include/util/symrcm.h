@@ -28,7 +28,7 @@ double symrcm_cost(const Vec<Vec<unsigned> > &indices,const Vec<unsigned> &perm)
 Vec<unsigned> symrcm(const Vec<Vec<unsigned> > &indices_);
 
 template<class TM>
-Vec<unsigned> symamd( const TM &m ) {
+Vec<unsigned> symrcm( const TM &m ) {
     Vec<Vec<unsigned> > ind;
     get_link_for_ordering( ind, m );
     return symrcm( ind );

@@ -928,7 +928,7 @@ struct MatWithTinyBlocks<T,Gen<3> > {
                     rows[ r ].add( n*c, 0, 0, 0, 0, 0, 0, 0, 0, 0 );
         }
     }
-    
+
 };
 
 ///
