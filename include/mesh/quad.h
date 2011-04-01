@@ -215,7 +215,7 @@ typename TNG::T measure( const Element<Quad,TN,TNG,TD,NET> &e ) {
 
 template<class PV>
 typename PV::T sample_normal( Quad, const PV &pos ) {
-    Pvec res = vect_prod( Pvec( pos[ 1 ] - pos[ 0 ] ), Pvec( pos[ 2 ] - pos[ 0 ] ) );
+    typename PV::T res = vect_prod( Pvec( pos[ 1 ] - pos[ 0 ] ), Pvec( pos[ 2 ] - pos[ 0 ] ) );
     return res / length( res );
 }
 

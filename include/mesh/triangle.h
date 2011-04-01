@@ -86,7 +86,7 @@ void intersection(const Element<Triangle,TN,TNG,TD,NET> &e,Pvec P1,Pvec P2,T &nu
 
 template<class PV>
 typename PV::T sample_normal( Triangle, const PV &pos ) {
-    Pvec res = vect_prod( Pvec( pos[ 1 ] - pos[ 0 ] ), Pvec( pos[ 2 ] - pos[ 0 ] ) );
+    typename PV::T res = vect_prod( Pvec( pos[ 1 ] - pos[ 0 ] ), Pvec( pos[ 2 ] - pos[ 0 ] ) );
     return res / length( res );
 }
 
