@@ -35,6 +35,7 @@ MKL_direct_solver::MKL_direct_solver() {
     iparm[17] = -1; /** Output: Number of nonzeros in the factor LU */
     iparm[18] = -1; /** Output: Mflops for LU factorization */
     iparm[19] = 0; /** Output: Numbers of CG Iterations */
+    /// le flag 34 ne marche pas pour toutes les versions de MKL :-(
     //iparm[34] = 1; /** PARDISO use C-style indexing for ia and ja arrays */
     /** -------------------------------------------------------------------- */
     /** .. Initialize the internal solver memory pointer. This is only */
