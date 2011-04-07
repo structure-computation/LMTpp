@@ -107,6 +107,13 @@ namespace LMTPRIVATE {
     Ça veut dire, que ça divise les éléments Tetra, Hexa, etc... qui contiennent ces barres.
 
     L'opérateur op peut soit renvoyer  un booléen soit un double. Il prend aussi forcément un élément de type barre en paramètre. 
+    
+    Si c'est 0 -> on ne coupe pas
+    
+    Si c'est 1 (=true) -> on coupe au milieu
+    
+    Si c'est dans ] 0, 1 [ il coupe par de façon proportionnelle ( 0 -> vers le noeud 0, 1 -> vers le noeud 1).
+        
     C'est-à-dire qu'il est au moins de la forme :
     \code C/C++
         struct MyOp {
