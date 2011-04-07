@@ -7,7 +7,7 @@
 #pragma lib_path /opt/intel/Compiler/11.1/064/mkl/lib/em64t
 #pragma lib_path /opt/intel/Compiler/11.1/064/lib/intel64/
 #pragma lib_name mkl_intel_lp64
-#pragma lib_name mkl_intel_thread
+#pragma lib_name mkl_gnu_thread
 #pragma lib_name mkl_core
 #pragma lib_name iomp5
 #pragma lnk_flag /usr/lib/libpthread_nonshared.a
@@ -37,6 +37,7 @@ MKL_direct_solver::MKL_direct_solver() {
     iparm[19] = 0; /** Output: Numbers of CG Iterations */
     /// le flag 34 ne marche pas pour toutes les versions de MKL :-(
     //iparm[34] = 1; /** PARDISO use C-style indexing for ia and ja arrays */
+//    iparm[59] = 1; /** out of core*/
     /** -------------------------------------------------------------------- */
     /** .. Initialize the internal solver memory pointer. This is only */
     /** necessary for the FIRST call of the PARDISO solver. */

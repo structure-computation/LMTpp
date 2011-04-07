@@ -14,6 +14,7 @@
 #include "triangle.h"
 #include "triangle_6.h"
 #include "../io/lineoutput.h" /// normalize_end_line()
+#include "../io/normalize_end_line.h" /// normalize_end_line()
 
 namespace LMT {
 

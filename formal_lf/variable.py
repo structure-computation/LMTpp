@@ -60,7 +60,7 @@ class Variable:
         #sys.stderr.write( interpolation )
         #sys.stderr.write( t )
         for id_ in range(self.id_dependant):
-          vec_access += '[f.id['+str(id_)+']]'
+          vec_access += '[f.id['+str(self.id_dependant-id_-1)+']]'
         if in_vec:
             vec_access += '['+str( num_t )+']'
         if len(self.nb_dim) == 1:
@@ -127,6 +127,7 @@ class Variable:
         if self.sym:
           for i in range(self.nb_dim[0]):
             self.expr[i,i] = self.get_scalar_expr(self.name,interpolation,element,[i,i],self.symbols)
+            self.sub_expr.append( self.expr[i,i] )
             for j in range(i+1,self.nb_dim[1]):
                 self.expr[i,j] = self.get_scalar_expr(self.name,interpolation,element,[i,j],self.symbols)
                 self.expr[j,i] = self.expr[i,j]

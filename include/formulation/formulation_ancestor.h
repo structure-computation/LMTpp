@@ -49,7 +49,7 @@ public:
 
     virtual bool solve( AbsScalarType iterative_criterium=AbsScalarType(0), bool disp_timing=false ) = 0; ///  The all-in-one procedure -> allocate if necessary, assemble, solve, update_variables, call_after_solve
     virtual bool solve_and_get_derivatives( Vec<Vec<ScalarType> > &der, bool der_in_base_node_ordering = false ) = 0;  /// get value and derivative respective to "der_var" defined in SConsruct or in python
-    virtual void allocate_matrices() = 0; /// alloue les matrices
+    virtual void allocate_matrices(bool allocate_mat=true,bool allocate_vec=true) = 0; /// alloue les matrices
     /*!
         Objectif : 
             cette fonction est utilisée dans le cas d'un problème qui dépend du temps. Elle gère la correspondance d'un vecteur de solutions au problème et l'ordre temporel. Plus précisément la taille de ce vecteur est la valeur nb_der, i.e. le nombre de pas de la méthode de résolution en temps ( qui doit être au moins égal au plus grand ordre de dérivation en temps des équations aux dérivées partielles ).
