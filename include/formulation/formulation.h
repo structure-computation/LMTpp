@@ -262,6 +262,7 @@ public:
      */
     virtual unsigned update_connectivity() {
         mat_has_been_allocated_with_symamd = this->want_amd;
+        mat_has_been_allocated_with_symrcm = this->want_rcm;
 
         unsigned size = 0;
         // global unknowns
@@ -311,11 +312,12 @@ public:
             vectors[i].free();
     }
     //
-    virtual void allocate_matrices() {
+    virtual void allocate_matrices(bool allocate_mat=true,bool allocate_vec=true) {
         if ( allocated )
             return;
         allocated = true;
         mat_has_been_allocated_with_symamd = this->want_amd;
+        mat_has_been_allocated_with_symrcm = this->want_rcm;
 
         unsigned size = 0;
         // global unknowns
@@ -367,7 +369,8 @@ public:
         }
 
         // matrice allocation
-        matrices.apply( ResizeMat(), size, *this );
+        if(allocate_mat)
+            matrices.apply( ResizeMat(), size, *this );
 
     }
     virtual void shift(int nb=1) {
@@ -2087,7 +2090,7 @@ public:
     Vec<Constraint<Formulation> > constraints;
     Vec<Sollicitation<Formulation> > sollicitations;
 
-    bool mat_def_pos_if_sym, initial_condition_initialized, user_want_pierre_precond, mat_has_been_allocated_with_symamd;
+    bool mat_def_pos_if_sym, initial_condition_initialized, user_want_pierre_precond, mat_has_been_allocated_with_symamd, mat_has_been_allocated_with_symrcm;
     bool allocated;
     Vec<unsigned>* indice_elem;
     Vec<unsigned>* indice_noda;
