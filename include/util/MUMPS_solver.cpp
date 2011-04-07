@@ -1,5 +1,14 @@
 
 #ifdef WITH_MUMPS
+#ifdef METIL_COMP_DIRECTIVE
+#pragma inc_path /usr/lib/openmpi/include
+#pragma lib_name pthread
+#pragma lib_name blas
+#pragma lib_name dmumps
+#pragma lib_name mumps_common
+#pragma lnk_flag /usr/lib/openmpi/lib/libmpi_cxx.so
+
+#endif
 
 #include "mpi.h"
 
