@@ -9,6 +9,8 @@
 
 #endif
 
+#include "MKL_common.h"
+
 #include <cmath>
 #include "mkl_pardiso.h"
 #include "mkl_types.h"
@@ -79,7 +81,7 @@ struct MKL_direct_solver {
     template<int sr, bool stored_in_upper_part_ >
     void get_factorization( Mat<double, Sym< sr, stored_in_upper_part_>, SparseLine<> > &mat, bool want_free = true, bool is_positive_definite = false ) {
         free();
-        load_matrix( mat );
+        mtype = MKL_load_matrix( &ia, &ja, &a, n, mat );
         if ( is_positive_definite )
             mtype = 2;
         get_factorization_general();
@@ -91,7 +93,7 @@ struct MKL_direct_solver {
     template<int sr, int sc>
     void get_factorization( Mat<double, Gen<sr,sc>, SparseLine<> > &mat, bool want_free = true ) {
         free();
-        load_matrix( mat );
+        mtype = MKL_load_matrix( &ia, &ja, &a, n, mat );
         get_factorization_general();
         if ( want_free )
             mat.free();
@@ -154,183 +156,6 @@ struct MKL_direct_solver {
     double *a;
     double ddum; /** Double dummy */
     int idum; /** Integer dummy. */
-    
-  //private:
-    
-    template<class TM>
-    void load_matrix( const TM &mat ) {
-        assert( 0 );
-    }
-    
-    template<int sr, int sc>
-    void load_matrix( const Mat<double, Gen<sr,sc>, SparseLine<Col> > &mat ) {
- 
-        mtype = 11;  /// matrice quelconque réelle
-//         PRINT( "matrice quelconque réelle" );
-        n = mat.nb_rows();
-        unsigned nz = 0;
-        for( int i = 0; i < n; ++i )
-            nz += mat.data[ i ].indices.size();
-        ia = new int[ n + 1 ];
-        ja = new int[ nz ];
-        a  = new double[ nz ];
-        for( int i = 0, index = 0; i < n; ++i ) {
-            for( int j = 0; j < mat.data[ i ].indices.size(); ++j, index++ ) {
-                ja[ index ] = mat.data[ i ].indices[ j ] + 1; /// + 1 -> convention Fortran
-                a[ index ] = mat.data[ i ].data[ j ];
-            }    
-        }
-        
-        for( int i = 0, inz = 0; i < n; ++i ) {
-            ia[ i ] = inz + 1; /// + 1 -> convention Fortran
-            inz += mat.data[ i ].indices.size();
-        }
-        
-        ia[ n ] = nz + 1; /// + 1 -> convention Fortran
-        
-//         std::cout << " ia = " ;
-//         for( int i = 0; i <= n; ++i )
-//             std::cout << ia[ i ] << " ";
-//         std::cout << std::endl;
-//         std::cout << " ja = " ;
-//         for( int i = 0; i < nz; ++i )
-//             std::cout << ja[ i ] << " ";
-//         std::cout << std::endl;
-//         std::cout << " a = " ;
-//         for( int i = 0; i < nz; ++i )
-//             std::cout << a[ i ] << " ";
-//         std::cout << std::endl;
-//         std::cout << " mtype = " << mtype << std::endl;    
-    }    
-    
-    template<int s>
-    void load_matrix( const Mat<double, Sym<s,true>, SparseLine<Col> > &mat ) {
-        mtype = -2;
-        n = mat.nb_rows();
-        
-        Vec<int> add_zero_in_diag;
-        unsigned nz = 0;
-        for( int i = 0; i < n; ++i ) {
-            nz += mat.data[ i ].indices.size();
-            if ( mat.data[ i ].indices.size() ) {
-                if ( mat.data[ i ].indices[ 0 ] != i ) {
-                    add_zero_in_diag.push_back( i );
-                    nz++;
-                }
-            } else {
-                add_zero_in_diag.push_back( i );
-                nz++;            
-            }
-        }
-        
-        ia = new int[ n + 1 ];
-        ja = new int[ nz ];
-        a  = new double[ nz ];
-        for( int i = 0, index = 0; i < n; ++i ) {
-            for( int j = 0; j < mat.data[ i ].indices.size(); ++j, index++ ) {
-                unsigned p = add_zero_in_diag.find( i );
-                if ( p < add_zero_in_diag.size() ) {
-                    ja[ index ] = i + 1; /// + 1 -> convention Fortran
-                    a[  index ] = 0;
-                    add_zero_in_diag.erase_elem_nb( p );
-                } else {
-                    ja[ index ] = mat.data[ i ].indices[ j ] + 1; /// + 1 -> convention Fortran
-                    a[ index ] = mat.data[ i ].data[ j ];
-                }
-            }    
-        }
-        
-        for( int i = 0, inz = 0; i < n; ++i ) {
-            ia[ i ] = inz + 1; /// + 1 -> convention Fortran
-            inz += mat.data[ i ].indices.size();
-        }
-        
-        ia[ n ] = nz + 1; /// + 1 -> convention Fortran
-        
-//         std::cout << " ia = " ;
-//         for( int i = 0; i <= n; ++i )
-//             std::cout << ia[ i ] << " ";
-//         std::cout << std::endl;
-//         std::cout << " ja = " ;
-//         for( int i = 0; i < nz; ++i )
-//             std::cout << ja[ i ] << " ";
-//         std::cout << std::endl;
-//         std::cout << " a = " ;
-//         for( int i = 0; i < nz; ++i )
-//             std::cout << a[ i ] << " ";
-//         std::cout << std::endl;
-    }
-
-    /// Mat<TT,Sym<sr,0>,SparseLine<Col>,void>
-    template<int s>
-    void load_matrix( const Mat<double, Sym<s,false>, SparseLine<Col> > &mat ) {
-        
-        mtype = -2;
-        n = mat.nb_rows();        
-        Vec<int> offsets, add_zero_in_diag; 
-        offsets.resize( n, 0 );
-        
-        for( int i = 0; i < n; ++i ) {
-            for( int j = 0; j < mat.data[ i ].indices.size(); ++j )
-                ++offsets[ mat.data[ i ].indices[ j ] ];
-            
-            if ( mat.data[ i ].indices.size() ) {    
-                if ( mat.data[ i ].indices.back() != i ) {
-                    ++offsets[ i ];
-                    add_zero_in_diag.push_back( i );
-                }
-            } else {
-                ++offsets[ i ];
-                add_zero_in_diag.push_back( i );
-            }
-        }
-        
-        int acc = 0;
-        for( int i = 0; i < offsets.size(); ++i ) {
-            int val = offsets[ i ];
-            offsets[ i ] = acc;
-            acc += val;
-        }
-
-        ia = new int[ n + 1 ];
-        for( int i = 0; i < n; ++i )
-            ia[ i ] = offsets[ i ] + 1;
-        ia[ n ] = acc + 1; /// + 1 -> convention Fortran
-        
-        ja = new int[ acc ];
-        a  = new double[ acc ];
-            
-        for( int i = 0; i < offsets.size(); ++i ) {
-            int d = add_zero_in_diag.find( i );
-            if ( d  < add_zero_in_diag.size() ) {
-                int pos = offsets[ i ]++;
-                ja[ pos ] = i + 1; /// + 1 -> convention Fortran
-                a[ pos ] = 0;
-                add_zero_in_diag.erase_elem_nb( d );            
-            }
-            for( int j = 0; j < mat.data[ i ].indices.size(); ++j ) {
-                int pos = offsets[ mat.data[ i ].indices[ j ] ]++;
-                ja[ pos ] = i + 1; /// + 1 -> convention Fortran
-                a[ pos ] = mat.data[ i ].data[ j ];
-            }
-        }
-    
-//         PRINT( offsets );
-//         
-//         std::cout << " ia = " ;
-//         for( int i = 0; i <= n; ++i )
-//             std::cout << ia[ i ] << " ";
-//         std::cout << std::endl;
-//         std::cout << " ja = " ;
-//         for( int i = 0; i < acc; ++i )
-//             std::cout << ja[ i ] << " ";
-//         std::cout << std::endl;
-//         std::cout << " a = " ;
-//         for( int i = 0; i < acc; ++i )
-//             std::cout << a[ i ] << " ";
-//         std::cout << std::endl;
-    }
-
 };
 #endif /// ifdef WITH_MKL
 

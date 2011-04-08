@@ -493,7 +493,7 @@ pour les systemes couplés
     \keyword Matrice/Solver
     \keyword Mathématiques/Algèbre linéaire/Système
 */
-template<class TK>
+template<class TK, class TCholMod, class TUMFPACK>
 struct SolveUsingCholModSystemWithSameK {
     SolveUsingCholModSystemWithSameK( TCholMod &kc , TUMFPACK &ku  ) : KCholMod( kc ) , KUMFPACK( ku )  {
         use_cholmod = true;
@@ -703,10 +703,10 @@ pour la resolution de systeme HX + BX' = F , HX' + B'X = F'
     \keyword Matrice/Solver
     \keyword Mathématiques/Algèbre linéaire/Système
 */
-template<class TK>
-SolveUsingCholModSystemWithSameK<TK> new_SolveUsingCholModSystemWithSameK( TK &k ) {
-    return k;
-}
+// template<class TK>
+// SolveUsingCholModSystemWithSameK<TK> new_SolveUsingCholModSystemWithSameK( TK &k ) {
+//     return k;
+// }
 
 /*!
      
