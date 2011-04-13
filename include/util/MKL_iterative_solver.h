@@ -125,7 +125,7 @@ struct MKL_iterative_solver {
         ipar[4] = max_iter;
         ipar[8] = 1; /// test d'arrêt interne à MKL en position "on"
         ipar[9] = 0; /// pas de test d'arrêt de l'utilisateur
-        dpar[0] = 1e-5;
+        dpar[0] = 1e-5; /// precision relative
         /**---------------------------------------------------------------------------*/
         /** Check the correctness and consistency of the newly set parameters         */
         /**---------------------------------------------------------------------------*/
@@ -176,11 +176,10 @@ struct MKL_iterative_solver {
     }
     
     /// résout le sytème de second membre b et renvoie le résultat dans b
-//     template<int s, class TPreCond, class CritOperator>
-//     unsigned solve( TPreCond &precond, const Vec<double, s> &b, Vec<double> &x, const CritOperator &crit_op, unsigned max_iter ) {
-//         
-//         return 0;
-//     }
+    template<int s, class TPreCond, class CritOperator>
+    unsigned solve( const TPreCond &precond, const Vec<double, s> &b, Vec<double, s> &x, const CritOperator &crit_op, unsigned max_iter ) {
+
+    }
     
     //template<class TPreCond >
     //void set_precondioner( MKL_precondioner p, const TPreCond &prec ) { }

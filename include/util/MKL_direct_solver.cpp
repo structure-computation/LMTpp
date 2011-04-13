@@ -45,7 +45,6 @@ MKL_direct_solver::MKL_direct_solver() {
     for ( unsigned i = 0; i < 64; i++ )
         pt[i] = 0;
 
-    n = 0;
 }
 
 #endif

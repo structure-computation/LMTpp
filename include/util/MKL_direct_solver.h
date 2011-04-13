@@ -58,7 +58,7 @@ struct MKL_direct_solver {
         /** all memory that is necessary for the factorization. */
         /** -------------------------------------------------------------------- */
         phase = 11;
-        PARDISO( pt, &maxfct, &mnum, &mtype, &phase, &n, a, ia, ja, &idum, &nrhs, iparm, &msglvl, &ddum, &ddum, &error);
+        PARDISO( pt, &maxfct, &mnum, &mtype, &phase, &m.n, m.a, m.ia, m.ja, &idum, &nrhs, iparm, &msglvl, &ddum, &ddum, &error);
         if ( error ) {
             std::cerr << "\nERROR during symbolic factorization: " <<  error << std::endl;
             free();
@@ -69,9 +69,9 @@ struct MKL_direct_solver {
         /** .. Numerical factorization. */
         /** -------------------------------------------------------------------- */
         phase = 22;
-        PARDISO( pt, &maxfct, &mnum, &mtype, &phase, &n, a, ia, ja, &idum, &nrhs, iparm, &msglvl, &ddum, &ddum, &error );
+        PARDISO( pt, &maxfct, &mnum, &mtype, &phase, &m.n, m.a, m.ia, m.ja, &idum, &nrhs, iparm, &msglvl, &ddum, &ddum, &error );
         if ( error ) {
-            std::cerr << "\nERROR during numerical factorization: %d" << error << std::endl;
+            std::cerr << "\nERROR during numerical factorization: " << error << std::endl;
             free();
             return;
         }
@@ -81,7 +81,7 @@ struct MKL_direct_solver {
     template<int sr, bool stored_in_upper_part_ >
     void get_factorization( Mat<double, Sym< sr, stored_in_upper_part_>, SparseLine<> > &mat, bool want_free = true, bool is_positive_definite = false ) {
         free();
-        mtype = MKL_load_matrix( &ia, &ja, &a, n, mat );
+        mtype = m.init( mat );
         if ( is_positive_definite )
             mtype = 2;
         get_factorization_general();
@@ -93,7 +93,7 @@ struct MKL_direct_solver {
     template<int sr, int sc>
     void get_factorization( Mat<double, Gen<sr,sc>, SparseLine<> > &mat, bool want_free = true ) {
         free();
-        mtype = MKL_load_matrix( &ia, &ja, &a, n, mat );
+        mtype = m.init( mat );
         get_factorization_general();
         if ( want_free )
             mat.free();
@@ -111,8 +111,8 @@ struct MKL_direct_solver {
         error = 0; /** Initialize error flag */
         nrhs = 1; /** number of right hand side */
         
-        if ( n )
-            x.resize( n );
+        if ( m.n )
+            x.resize( m.n );
         else {
             std::cerr << "\nERROR during solution" << std::endl;
             return x;
@@ -120,7 +120,7 @@ struct MKL_direct_solver {
         phase = 33;
         iparm[7] = numbers_of_iterative_refinement; /** Max numbers of iterative refinement steps. */
 
-        PARDISO( pt, &maxfct, &mnum, &mtype, &phase, &n, a, ia, ja, &idum, &nrhs, iparm, &msglvl, const_cast<double*>( b.ptr() ), x.ptr(), &error );
+        PARDISO( pt, &maxfct, &mnum, &mtype, &phase, &m.n, m.a, m.ia, m.ja, &idum, &nrhs, iparm, &msglvl, const_cast<double*>( b.ptr() ), x.ptr(), &error );
         if ( error ) {
             std::cerr << "\nERROR during solution: " << error << std::endl;
             return x;
@@ -130,11 +130,8 @@ struct MKL_direct_solver {
     }
     
     void free() {
-        if ( n ) {
-            delete[] ja;
-            delete[] ia;
-            delete[] a;
-            n = 0;
+        if ( m.n ) {
+            m.free();
             
             int nrhs, maxfct, mnum, phase, error, msglvl;
             
@@ -145,13 +142,14 @@ struct MKL_direct_solver {
             nrhs = 1; /** number of right hand side */
     
             phase = -1; /** Release internal memory. */
-            PARDISO( pt, &maxfct, &mnum, &mtype, &phase, &n, &ddum, ia, ja, &idum, &nrhs, iparm, &msglvl, &ddum, &ddum, &error );
+            PARDISO( pt, &maxfct, &mnum, &mtype, &phase, &m.n, &ddum, m.ia, m.ja, &idum, &nrhs, iparm, &msglvl, &ddum, &ddum, &error );
         }
     }
 
     /// attributs:   ///
     int iparm[64];
-    int mtype, n, *ia, *ja;
+    MKL_CSR_matrix m;
+    int mtype;
     void *pt[64];
     double *a;
     double ddum; /** Double dummy */
