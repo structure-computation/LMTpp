@@ -259,7 +259,7 @@ struct MKL_iterative_solver {
         
         while( true ) {
             dcg( &m.n, x.ptr(), const_cast<double*>( b.ptr() ), &rci_request, ipar, dpar, tmp );
-            PRINT( rci_request );
+            //PRINT( rci_request );
             switch( rci_request ) {
                 case 0 :
                     return get_internal_solution( x.ptr(), const_cast<double*>( b.ptr() ), tmp );
