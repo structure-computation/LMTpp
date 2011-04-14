@@ -275,7 +275,6 @@ struct Local_refinement {
 
     T l_min, k;
     Pvec c; /// centre
-    unsigned id;
 };
 
 };
