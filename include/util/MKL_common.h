@@ -10,8 +10,12 @@
 #endif
 
 #include <cmath>
-#include "mkl_pardiso.h"
 #include "mkl_types.h"
+
+#include "mkl_rci.h"
+#include "mkl_blas.h"
+#include "mkl_spblas.h"
+#include "mkl_service.h"
 
 #endif
 
@@ -262,7 +266,7 @@ struct MKL_CSR_matrix {
     
     /// applique la matrice vue comme un conditionneur
     /// par défaut je ne fais rien
-    virtual void apply_as_conditioner( const MKL_CSR_matrix &m, double *x, double *y ) const {}
+    virtual void apply_as_conditioner( double *x, double *y ) const {}
     
     void free() {
         if ( n ) {
@@ -323,16 +327,23 @@ struct MKL_Jacobi_matrix : public MKL_CSR_matrix {
     template<class TM>
     MKL_Jacobi_matrix( const TM &mat ) { init( mat ); }
     
-    virtual void apply_as_conditioner( const MKL_CSR_matrix &m, double *x, double *y ) const {
+    virtual void apply_as_conditioner( double *x, double *y ) const {
         for( int i = 0; i < n; ++i )
             y[ i ] = a[ i ] * x[ i ];
     }
 };
 
-struct MKL_incomplete_Cholesky_matrix : public MKL_CSR_matrix {
+struct MKL_incomplete_chol_matrix : public MKL_CSR_matrix {
 
-    virtual void apply_as_conditioner( const MKL_CSR_matrix &m, double *x, double *y ) const {
-            /// TODO
+    template<class TM>
+    MKL_incomplete_chol_matrix( const TM &mat ) {
+        MKL_CSR_matrix::init( mat ); 
+        //std::cout << " constructeur de MKL_incomplete_chol_matrix et n = " << n << std::endl;
+    }
+
+    virtual void apply_as_conditioner( double *x, double *y ) const {
+        char tr = 'u'; /// upper storage
+        mkl_dcsrsymv( &tr, const_cast<int*>( &n ), a, ia, ja, x, y ); /// perform y <- Sx where S is symetric
     }
 };
 
