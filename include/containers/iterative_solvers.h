@@ -645,7 +645,7 @@ struct ConvergenceCriteriumNormInfResidual {
     static const bool residual = false;
     ConvergenceCriteriumNormInfResidual( T v ) : crit( v ) {}
     template<class TV0,class TV1> bool operator()( const TV0 &delta_x, const TV1 &residual ) const {
-        for(unsigned i=0;i<delta_x.size();++i)
+        for(unsigned i=0;i<residual.size();++i)
             if ( abs(residual[i]) > crit )
                 return false;
         return true;

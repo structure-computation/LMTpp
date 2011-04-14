@@ -42,6 +42,47 @@ enum MKL_preconditioner {
     //LMTpp_preconditioner = 100
 };
 
+/*!
+    Cette classe encapsule l'implémentation du gradient conjugué de la librairie MKL.
+    On l'utilise par exemple ainsi :
+    \code C/C++
+        int main( int argc, char* argv[] ) {
+        
+            Mat<double, Sym<>, SparseLine<> > m( 3, 3 );
+            m(0,0) = 1; m(0,1) = 2; m(0,2) = -3;
+                        m(1,1) = 5; m(1,2) = -7;
+                                    m(2,2) = 13;
+            Vec<double, 3> s( 0., 0.1, 0.1 ), s_expexted( 11, 2, 4 );
+            Vec<double, 3> b(3,4,5);
+        
+            MKL_iterative_solver solver( m, false );
+
+            solver.set_preconditioner( MKL_incomplete_chol_preconditioner, m );
+
+            unsigned nb_iter = solver.solve( b, s, MKL_norm_inf_residual_stopping( 1e-10 ), 100 );
+        
+            PRINT( nb_iter );
+            PRINT( s );
+        
+            return 0;
+        }
+    
+    le paramètre <strong> false </strong> du constructeur de \a MKL_iterative_solver permet de ne pas effacer la matrice <strong> m </strong> .
+    Car on s'en sert ensuite pour générer le pré-conditionneur Cholesky incomplet à la ligne suivante via la méthode <strong> set_preconditioner() </strong> .
+    Il y a un autre pré-conditionneur :
+    * MKL_Jacobi_preconditioner
+    Par défaut aucun pré-conditionneur n'est utilisé (i.e. si la méthode set_preconditioner() n'est pas utilisée ).
+    
+    Enfin on résout le système via la méthode <strong> solve() </strong> .
+    Ces paramètres sont :
+    * <strong> b </strong> le second membre du système.
+    * <strong> s </strong> la valeur initiale puis une "meilleure" approximation de la solution comme retour.
+    * le critère d'arrêt. Il y a différents choix possibles :
+        * norm2( residu ) < 1e-5 ( critère par défaut ),
+        * si le paramètre est un double de nom epsilon, alors le test est norm2( residu ) < epsilon, 
+        * si le paramètre est de type \a MKL_norm_inf_residual_stopping ( 1e-10 ) alors le test est max( residu[ i ] ) < 1e-10,
+
+*/
 struct MKL_iterative_solver {
 
     template< class TM>
@@ -117,6 +158,63 @@ struct MKL_iterative_solver {
         }    
     }
     
+    /// comportement par défaut
+    template<class CritOperator>
+    void set_stopping_test( const CritOperator &s ) {
+        ipar[8] = 1; /// test d'arrêt interne à MKL activé
+        ipar[9] = 0; /// pas de test d'arrêt de l'utilisateur
+           
+        dpar[0] = 1e-5; /// precision relative    
+    }
+    
+    void set_stopping_test( const double &s ) {
+        ipar[8] = 1; /// test d'arrêt interne à MKL activé
+        ipar[9] = 0; /// test d'arrêt de l'utilisateur inactivé
+           
+        dpar[ 1 ] = s; /// precision absolue    
+    }
+    
+    void set_stopping_test( const MKL_norm2_residual_stopping &s ) {
+        ipar[8] = 0; /// test d'arrêt interne à MKL inactivé
+        ipar[9] = 1; /// test d'arrêt de l'utilisateur activé
+     
+        dpar[ 1 ] = s.eps; /// precision absolue    
+    }
+    
+    void set_stopping_test( const MKL_norm_inf_residual_stopping &s ) {
+        ipar[8] = 0; /// test d'arrêt interne à MKL inactivé
+        ipar[9] = 1; /// test d'arrêt de l'utilisateur activé
+     
+        dpar[ 1 ] = s.eps; /// precision absolue    
+    }
+
+    /// comportement par défaut
+    template<class CritOperator>
+    bool apply_stopping_test( const CritOperator &s, double *x, double *b ) { return true; }
+    
+    bool apply_stopping_test( const double &s, double *x, double *b ) {
+        return dpar[ 4 ] < dpar[ 1 ];
+    }
+    
+    bool apply_stopping_test( const MKL_norm2_residual_stopping &s, double *x, double *b ) {
+        return dpar[ 4 ] < dpar[ 1 ];
+    }
+    
+    bool apply_stopping_test( const MKL_norm_inf_residual_stopping &s, double *x, double *b ) {
+        /// calcul du résidu 
+        double *temp = new double[ m.n ];
+        char tr = 'u'; /// upper storage
+        mkl_dcsrsymv( &tr, &m.n, m.a, m.ia, m.ja, x, temp );  /// temp = A x
+        double a = -1;
+        int incr = 1;
+        daxpy( &m.n, &a, b, &incr, temp, &incr ); /// temp = temp + (-1) * b 
+        double norminf = 0;
+        for( int i = 0; i < m.n; ++i ) 
+            norminf = std::max( norminf, std::abs( temp[ i ] ) );
+        delete[] temp;
+        return norminf < dpar[1];
+    }
+        
     /// résout le sytème de second membre b et renvoie le résultat dans b
     template<int s, class CritOperator>
     unsigned solve( const Vec<double, s> &b, Vec<double, s> &x, const CritOperator &crit_op, unsigned max_iter ) {
@@ -144,12 +242,12 @@ struct MKL_iterative_solver {
         }
 
         ipar[4] = max_iter;
-        ipar[8] = 1; /// test d'arrêt interne à MKL activé
-        ipar[9] = 0; /// pas de test d'arrêt de l'utilisateur
+
+        set_stopping_test( crit_op );
+
         if ( m_cond )
             ipar[ 10 ] = 1; /// pré-conditionneur activé
             
-        dpar[0] = 1e-5; /// precision relative
         /**---------------------------------------------------------------------------*/
         /** Check the correctness and consistency of the newly set parameters         */
         /**---------------------------------------------------------------------------*/
@@ -170,14 +268,8 @@ struct MKL_iterative_solver {
                     char tr = 'u';
                     mkl_dcsrsymv( &tr, &m.n, m.a, m.ia, m.ja, tmp, &tmp[m.n] );
                 } break;
-                case 2 : { /// calcul du résidu 
-                    char tr = 'u'; /// upper storage
-                    mkl_dcsrsymv( &tr, &m.n, m.a, m.ia, m.ja, x.ptr(), temp );  /// temp = A x
-                    double a = -1;
-                    int incr = 1;
-                    daxpy( &m.n, &a, const_cast<double*>( b.ptr() ), &incr, temp, &incr ); /// temp = temp + (-1) * b 
-                    double euclidean_norm = dnrm2( &m.n, temp, &incr );
-                    if ( euclidean_norm < dpar[1] )
+                case 2 : { 
+                    if ( apply_stopping_test( crit_op, x.ptr(), const_cast<double*>( b.ptr() ) ) )
                         return get_internal_solution( x.ptr(), const_cast<double*>( b.ptr() ), tmp, temp );
                 } break;
                 case 3 : { /// applique le pré-conditionneur à tmp[2n:3n-1], le résidu courant,  et retourne le résultat dans tmp[3n:4n-1]

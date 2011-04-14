@@ -20,6 +20,7 @@
 #endif
 
 #include "containers/mat.h"
+#include "containers/matinvsparse.h"
 
 #ifdef WITH_MKL
 
@@ -337,27 +338,40 @@ struct MKL_incomplete_chol_matrix : public MKL_CSR_matrix {
 
     template<class TM>
     MKL_incomplete_chol_matrix( const TM &mat ) {
-        MKL_CSR_matrix::init( mat );
-        tmp = new double[ n ]; 
+        TM K = mat;
+        incomplete_chol_factorize( K );
+        MKL_CSR_matrix::init( K );
+        sol = new double[ n ]; 
         //std::cout << " constructeur de MKL_incomplete_chol_matrix et n = " << n << std::endl;
     }
     
     virtual ~MKL_incomplete_chol_matrix() {
-        delete[] tmp;
+        delete[] sol;
     }
 
     virtual void apply_as_conditioner( double *x, double *y ) const {
         //char tr = 'u'; /// upper storage
         //mkl_dcsrsymv( &tr, const_cast<int*>( &n ), a, ia, ja, x, y ); /// perform y <- Sx where S is symetric
-        char uplo = 'u';
-        char transa = 't';
-        char diag = 'n';
-        mkl_dcsrtrsv( &uplo, &transa, &diag, const_cast<int*>( &n ), a, ia, ja, x, tmp );
-        transa = 'n';
-        mkl_dcsrtrsv( &uplo, &transa, &diag, const_cast<int*>( &n ), a, ia, ja, tmp, y );
+        char uplo = 'u'; /// upper
+        char transa = 't'; /// A^T x = b 
+        char diag = 'n'; /// diagonal is not unit
+        /// performs solving triangular system
+        mkl_dcsrtrsv( &uplo, &transa, &diag, const_cast<int*>( &n ), a, ia, ja, x, sol );
+        transa = 'n'; /// A x = b 
+        mkl_dcsrtrsv( &uplo, &transa, &diag, const_cast<int*>( &n ), a, ia, ja, sol, y );
     }
     
-    double *tmp;
+    double *sol;
+};
+
+struct MKL_norm2_residual_stopping {
+    MKL_norm2_residual_stopping( double epsilon ) : eps( epsilon ) {}
+    double eps;
+};
+
+struct MKL_norm_inf_residual_stopping {
+    MKL_norm_inf_residual_stopping( double epsilon ) : eps( epsilon ) {}
+    double eps;
 };
 
 };
