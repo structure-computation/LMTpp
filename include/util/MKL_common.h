@@ -299,8 +299,8 @@ struct MKL_Jacobi_matrix : public MKL_CSR_matrix {
     int init( const TM &mat ) {
          
         n  = mat.nb_rows();
-        PRINT( n );
-        PRINT( mat );
+//         PRINT( n );
+//         PRINT( mat );
         a  = new double[ n ];
         for( int i = 0; i < n; ++i ) { 
             double t = mat( i, i );
