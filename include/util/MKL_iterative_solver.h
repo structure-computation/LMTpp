@@ -82,6 +82,8 @@ enum MKL_preconditioner {
         * si le paramètre est un double de nom epsilon, alors le test est norm2( residu ) < epsilon, 
         * si le paramètre est de type \a MKL_norm_inf_residual_stopping ( 1e-10 ) alors le test est max( residu[ i ] ) < 1e-10,
 
+    Elle retourne le nombre d'itérations effectuées.
+    
 */
 struct MKL_iterative_solver {
 

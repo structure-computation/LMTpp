@@ -259,6 +259,24 @@ struct LevelSetImageRefinement {
     const TIMG &ls_front;
 };
 
+template < class T, class Pvec>
+struct Local_refinement {
+    Raffine_a( T length_min, T _k, Pvec _c ) : l_min( length_min ), k( _k ), c( _c ), id( 1 ) {}
+
+    template<class TE> 
+    bool operator()( TE &e ) const {
+        T l = length( e.node( 1 )->pos - e.node( 0 )->pos );
+        T v = length( center( e ) - c ) * k + l_min;
+        if ( l > v ) 
+            return true;
+        else
+            return false;
+    }
+
+    T l_min, k;
+    Pvec c; /// centre
+    unsigned id;
+};
 
 };
 
