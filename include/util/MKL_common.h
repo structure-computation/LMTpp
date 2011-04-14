@@ -36,7 +36,7 @@ struct MKL_CSR_matrix {
             matdes[ i ] = '\0';
     }
     
-    ~MKL_CSR_matrix() {
+    virtual ~MKL_CSR_matrix() {
         free();
     }
     
@@ -337,14 +337,27 @@ struct MKL_incomplete_chol_matrix : public MKL_CSR_matrix {
 
     template<class TM>
     MKL_incomplete_chol_matrix( const TM &mat ) {
-        MKL_CSR_matrix::init( mat ); 
+        MKL_CSR_matrix::init( mat );
+        tmp = new double[ n ]; 
         //std::cout << " constructeur de MKL_incomplete_chol_matrix et n = " << n << std::endl;
+    }
+    
+    virtual ~MKL_incomplete_chol_matrix() {
+        delete[] tmp;
     }
 
     virtual void apply_as_conditioner( double *x, double *y ) const {
-        char tr = 'u'; /// upper storage
-        mkl_dcsrsymv( &tr, const_cast<int*>( &n ), a, ia, ja, x, y ); /// perform y <- Sx where S is symetric
+        //char tr = 'u'; /// upper storage
+        //mkl_dcsrsymv( &tr, const_cast<int*>( &n ), a, ia, ja, x, y ); /// perform y <- Sx where S is symetric
+        char uplo = 'u';
+        char transa = 't';
+        char diag = 'n';
+        mkl_dcsrtrsv( &uplo, &transa, &diag, const_cast<int*>( &n ), a, ia, ja, x, tmp );
+        transa = 'n';
+        mkl_dcsrtrsv( &uplo, &transa, &diag, const_cast<int*>( &n ), a, ia, ja, tmp, y );
     }
+    
+    double *tmp;
 };
 
 };
