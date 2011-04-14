@@ -231,12 +231,11 @@ struct MKL_iterative_solver {
         /// tmp[n:2n-1] est le produit de la matrice et de la direction courante
         /// tmp[2n:3n-1] est le résidu courant
         /// tmp[3n:4n-1] contient l'inverse du pré-conditionneur appliqué au résidu courant ( voir page 2547 de la doc de la MKL )  
-        double *temp = new double[ m.n ];
         
         /// initialisation du solver pour matrice symétrique définie positive
         dcg_init( &m.n, x.ptr(), const_cast<double*>( b.ptr() ), &rci_request, ipar, dpar, tmp );
         if ( rci_request ) {
-            free_internal_buffer( tmp, temp );
+            free_internal_buffer( tmp );
             std::cerr << "Error MKL_iterative_solver.solve() : bad initialization"<< std::endl;
             return 0;
         }
@@ -253,7 +252,7 @@ struct MKL_iterative_solver {
         /**---------------------------------------------------------------------------*/
         dcg_check( &m.n, x.ptr(), const_cast<double*>( b.ptr() ), &rci_request, ipar, dpar, tmp );
         if ( rci_request ) {
-            free_internal_buffer( tmp, temp );
+            free_internal_buffer( tmp );
             std::cerr << "Error MKL_iterative_solver.solve() : bad correctness of parameters of solver"<< std::endl;
             return 0;        
         }
@@ -263,15 +262,15 @@ struct MKL_iterative_solver {
             PRINT( rci_request );
             switch( rci_request ) {
                 case 0 :
-                    return get_internal_solution( x.ptr(), const_cast<double*>( b.ptr() ), tmp, temp );
+                    return get_internal_solution( x.ptr(), const_cast<double*>( b.ptr() ), tmp );
                 case 1 : { /// compute the vector A*tmp[0] and put the result in vector tmp[n]
                     char tr = 'u';
                     mkl_dcsrsymv( &tr, &m.n, m.a, m.ia, m.ja, tmp, &tmp[m.n] );
                 } break;
-                case 2 : { 
+                case 2 :
                     if ( apply_stopping_test( crit_op, x.ptr(), const_cast<double*>( b.ptr() ) ) )
-                        return get_internal_solution( x.ptr(), const_cast<double*>( b.ptr() ), tmp, temp );
-                } break;
+                        return get_internal_solution( x.ptr(), const_cast<double*>( b.ptr() ), tmp );
+                break;
                 case 3 : { /// applique le pré-conditionneur à tmp[2n:3n-1], le résidu courant,  et retourne le résultat dans tmp[3n:4n-1]
                     if ( m_cond )
                         m_cond->apply_as_conditioner( tmp + ( 2 * m.n ), tmp + ( 3 * m.n ) );
@@ -279,13 +278,13 @@ struct MKL_iterative_solver {
                         std::cerr << "WARNING : Mkl_iterative_solver.solve() : you want to apply a preconditioner but it's not defined" << std::endl;
                 } break;
                 default :
-                    free_internal_buffer( tmp, temp );
+                    free_internal_buffer( tmp );
                     std::cerr << "Error MKL_iterative_solver.solve() : dcg() bugs..."<< std::endl;
                     return 0; 
             }
         }
         
-        free_internal_buffer( tmp, temp );
+        free_internal_buffer( tmp );
         return 0;
     }
     
@@ -295,17 +294,16 @@ struct MKL_iterative_solver {
 // 
 //     }
     
-    void free_internal_buffer( double *b, double *b2 ) {
+    void free_internal_buffer( double *b ) {
         delete[] b;
-        delete[] b2;
         MKL_FreeBuffers();    
     }
     
-    unsigned get_internal_solution( double *b, double *x, double *tempon, double *tempon2 ) {
+    unsigned get_internal_solution( double *b, double *x, double *tempon ) {
         int itercount, rci_request;
         
         dcg_get( &m.n, x, b, &rci_request, ipar, dpar, tempon, &itercount );
-        free_internal_buffer( tempon, tempon2 );
+        free_internal_buffer( tempon );
         return (unsigned) itercount;
     }
     
