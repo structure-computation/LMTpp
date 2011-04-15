@@ -12,6 +12,8 @@
 #ifndef LMT_matinvsparse_HEADER
 #define LMT_matinvsparse_HEADER
 
+#include <string.h>
+
 #include "boolean.h"
 #include "vec.h"
 #include "mat.h"
@@ -233,7 +235,8 @@ template<class T> void incomplete_chol_factorize( Mat<T,Sym<>,SparseLine<> > &m 
 }
 
 /// version du Golub page 535
-template<class T> void incomplete_chol_factorize_bis( Mat<T,Sym<>,SparseLine<> > &m ) {
+template<class T> 
+void incomplete_chol_factorize_bis( Mat<T,Sym<>,SparseLine<> > &m ) {
 
     T ipivot, t;
     Vec<T> current_row; current_row.resize( m.nb_rows() - 1 );
@@ -250,7 +253,7 @@ template<class T> void incomplete_chol_factorize_bis( Mat<T,Sym<>,SparseLine<> >
         for( unsigned i = line + 1; i < m.nb_rows(); ++i ) {
             unsigned icol = 0;
             while ( ( icol < m.data[ i ].indices.size() ) and ( m.data[ i ].indices[ icol ] < line ) ) icol++;
-            /// on ne peut pas avoir de ligne nulle à partir de line en théorie...
+            /// on ne peut pas avoir que des zéros à partir de line sur la ligne line en théorie...
             if ( m.data[ i ].indices[ icol ] == line ) {
                 t = m.data[ i ].data[ icol ] * ipivot;
                 current_row[ i - line - 1 ] = t;
@@ -260,14 +263,110 @@ template<class T> void incomplete_chol_factorize_bis( Mat<T,Sym<>,SparseLine<> >
         }
         
         for( unsigned i = line + 1; i < m.nb_rows(); ++i ) {
+            t = current_row[ i - line - 1 ];
             for( unsigned icol = 0; icol < m.data[ i ].indices.size(); ++icol ) {
                 unsigned j = m.data[ i ].indices[ icol ];
                 if ( j > line ) 
-                    m.data[ i ].data[ icol ] -= current_row[ i - line - 1 ] * current_row[ j - line - 1 ];
+                    m.data[ i ].data[ icol ] -= t * current_row[ j - line - 1 ];
             }
         }
     }
 }
+
+/*!
+ \internal
+*/
+template<class TV,class TM>
+struct PICF {
+    unsigned i, line;
+     TV *cr;
+     TM *m;
+};
+
+/*!
+ \internal
+*/
+template<class TV,class TM>
+void *apply_incomplete_chol_factorize( void *params ) {
+
+    PICF<TV,TM> &picf ( *static_cast< PICF<TV,TM> *>( params ) );
+    typedef typename TV::template SubType<0,0>::T T;
+
+    T t = (*picf.cr)[ picf.i - picf.line - 1 ];
+
+    for( unsigned icol = 0; icol < picf.m->data[ picf.i ].indices.size(); ++icol ) {
+        unsigned j = picf.m->data[ picf.i ].indices[ icol ];
+        if ( j > picf.line ) 
+            picf.m->data[ picf.i ].data[ icol ] -= t * (*picf.cr)[ j - picf.line - 1 ];
+    }
+
+    return (void *)NULL;
+}
+
+// template<class T> 
+// void incomplete_chol_factorize_bis( Mat<T,Sym<>,SparseLine<> > &m, unsigned nb_threads = 2 ) {
+// 
+//     typedef Vec<T> TV;
+//     typedef Mat<T,Sym<>,SparseLine<> > TM; 
+//     
+//     T ipivot, t;
+//     TV current_row; current_row.resize( m.nb_rows() - 1 );
+// 
+//     PICF< TV, TM > *picf = new PICF< TV, TM >[ nb_threads ];
+//     for( unsigned th = 0; th < nb_threads; ++th ) {
+//         picf[ th ].m  = &m;
+//         picf[ th ].cr = &current_row;
+//     }
+//     
+//     pthread_t *tid = new pthread_t[ nb_threads ];
+//     
+//     pthread_attr_t pthread_attr;
+//     pthread_attr_init( &pthread_attr ); 
+// 
+//     for( unsigned line = 0; line < m.nb_rows(); ++line ) {
+//     
+//         if ( m.data[line].indices.back() == line ) {
+//             t = sqrt( m.data[line].data.back() );
+//             ipivot = (T)1 / t;
+//             m.data[line].data.back() = t;
+//         } else
+//             ipivot = 1e5; /// problème : pivot nulle !
+//         
+//         for( unsigned i = line + 1; i < m.nb_rows(); ++i ) {
+//             unsigned icol = 0;
+//             while ( ( icol < m.data[ i ].indices.size() ) and ( m.data[ i ].indices[ icol ] < line ) ) icol++;
+//             /// on ne peut pas avoir que des zéros à partir de line sur la ligne line en théorie...
+//             if ( m.data[ i ].indices[ icol ] == line ) {
+//                 t = m.data[ i ].data[ icol ] * ipivot;
+//                 current_row[ i - line - 1 ] = t;
+//                 m.data[ i ].data[ icol ] = t;                
+//             } else 
+//                 current_row[ i - line - 1 ] = (T)0;    
+//         }
+//         
+//         for( unsigned th = 0; th < nb_threads; ++th )
+//             picf[ th ].line = line;
+//         
+//         for( unsigned i = line + 1; i < m.nb_rows(); i += nb_threads ) {
+//             unsigned ith = min( i + nb_threads, m.nb_rows() ) - i;
+//             
+//             memset( (void*) tid, 0, nb_threads * sizeof( pthread_t ) );
+//             
+//             for( unsigned th = 0; th < ith; ++th ) {
+//                 picf[ th ].i = i + th;
+//                 pthread_create( &tid[ th ], &pthread_attr, apply_incomplete_chol_factorize< TV, TM >, static_cast<void *> ( picf + th ) );
+//                 std::cout << "line = " << line << " i = " << i << " th = " << th << " tid = " << tid[ th ] << std::endl;
+//             }
+// 
+//             for(unsigned th = 0; th < ith; ++th )
+//                 pthread_join( tid[ th ], (void **)picf );
+// 
+//         }
+//     }
+//     
+//     delete [] tid;
+//     delete [] picf;
+// }
 
 /*!
     m is assumed to be factorized

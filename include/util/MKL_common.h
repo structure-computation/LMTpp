@@ -339,12 +339,11 @@ struct MKL_incomplete_chol_matrix : public MKL_CSR_matrix {
     template<class TM>
     MKL_incomplete_chol_matrix( const TM &mat ) {
         TM K = mat;
-        PRINTN( K );
+        //PRINTN( K );
         incomplete_chol_factorize_bis( K );
-        PRINTN( K );
+        //PRINTN( K );
         MKL_CSR_matrix::init( K );
         sol = new double[ n ]; 
-        //std::cout << " constructeur de MKL_incomplete_chol_matrix et n = " << n << std::endl;
     }
     
     virtual ~MKL_incomplete_chol_matrix() {
