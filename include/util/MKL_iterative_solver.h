@@ -52,7 +52,8 @@ enum MKL_preconditioner {
     MKL_unknown_preconditioner = -1,
     MKL_no_preconditioner = 0,
     MKL_Jacobi_preconditioner  = 1,
-    MKL_incomplete_chol_preconditioner = 2
+    MKL_incomplete_chol_preconditioner = 2,
+    MKL_SSOR_preconditioner = 3
     //LMTpp_preconditioner = 100
 };
 
@@ -167,6 +168,11 @@ struct MKL_iterative_solver {
                 ipar[ 10 ] = 1;
                 delete m_cond;
                 m_cond = new MKL_incomplete_chol_matrix( precond );
+                break;
+            case MKL_SSOR_preconditioner :
+                ipar[ 10 ] = 1;
+                delete m_cond;
+                m_cond = new MKL_SSOR_matrix( precond, m );
                 break;
             default:
                 ipar[ 10 ] = 0; /// pas de pré-conditionneur

@@ -365,6 +365,64 @@ struct MKL_incomplete_chol_matrix : public MKL_CSR_matrix {
     double *sol;
 };
 
+struct MKL_SSOR_matrix : public MKL_CSR_matrix {
+
+    template<class TM>
+    int init( const TM &mat ) {
+         
+        n  = mat.nb_rows();
+//         PRINT( n );
+//         PRINT( mat );
+        a   = new double[ n ];
+        sol = new double[ n ];
+        for( int i = 0; i < n; ++i ) 
+            a[ i ] = mat( i, i );
+        ia = NULL;
+        ja = NULL;
+        is_one_based_indexing = true;
+        matdes[ 0 ] = 'd'; /// diagonal
+        matdes[ 1 ] = 'u'; /// upper
+        matdes[ 2 ] = 'n'; /// non unit
+        if ( is_one_based_indexing ) 
+            matdes[ 3 ] = 'f'; /// fortran
+        else
+            matdes[ 3 ] = 'c'; /// c
+         
+         return get_mtype();
+    }
+
+    template<class TM>
+    MKL_SSOR_matrix( const TM &mat, MKL_CSR_matrix &m ) {
+        init( mat );
+        
+        m = &m; 
+    }
+    
+    virtual ~MKL_SSOR_matrix() { 
+        delete [] a;
+        delete [] sol;
+    }
+
+    virtual void apply_as_conditioner( double *x, double *y ) const {
+    
+        char uplo = 'u'; /// upper
+        char transa = 't'; /// A^T x = b 
+        char diag = 'n'; /// diagonal is not unit
+        /// performs solving triangular system
+        //mkl_dcsrsymsv( &uplo, &transa, &diag, &(m->n), m->a, m->ia, m->ja, x, sol );
+        
+        for( int i = 0; i < n; ++i )
+            sol[ i ] = a[ i ] * sol[ i ];
+        
+        transa = 'n'; /// A x = b 
+        //mkl_dcsrsymsv( &uplo, &transa, &diag, &(m->n), m->a, m->ia, m->ja, sol, y );
+    }
+    
+    MKL_CSR_matrix *m;
+    double *sol;
+};
+
+
 struct MKL_norm2_residual_stopping {
     MKL_norm2_residual_stopping( double epsilon ) : eps( epsilon ) {}
     double eps;
