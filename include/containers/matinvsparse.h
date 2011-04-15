@@ -232,6 +232,43 @@ template<class T> void incomplete_chol_factorize( Mat<T,Sym<>,SparseLine<> > &m 
     }
 }
 
+/// version du Golub page 535
+template<class T> void incomplete_chol_factorize_bis( Mat<T,Sym<>,SparseLine<> > &m ) {
+
+    T ipivot, t;
+    Vec<T> current_row; current_row.resize( m.nb_rows() - 1 );
+
+    for( unsigned line = 0; line < m.nb_rows(); ++line ) {
+    
+        if ( m.data[line].indices.back() == line ) {
+            t = sqrt( m.data[line].data.back() );
+            ipivot = (T)1 / t;
+            m.data[line].data.back() = t;
+        } else
+            ipivot = 1e5; /// problème : pivot nulle !
+        
+        for( unsigned i = line + 1; i < m.nb_rows(); ++i ) {
+            unsigned icol = 0;
+            while ( ( icol < m.data[ i ].indices.size() ) and ( m.data[ i ].indices[ icol ] < line ) ) icol++;
+            /// on ne peut pas avoir de ligne nulle à partir de line en théorie...
+            if ( m.data[ i ].indices[ icol ] == line ) {
+                t = m.data[ i ].data[ icol ] * ipivot;
+                current_row[ i - line - 1 ] = t;
+                m.data[ i ].data[ icol ] = t;                
+            } else 
+                current_row[ i - line - 1 ] = (T)0;    
+        }
+        
+        for( unsigned i = line + 1; i < m.nb_rows(); ++i ) {
+            for( unsigned icol = 0; icol < m.data[ i ].indices.size(); ++icol ) {
+                unsigned j = m.data[ i ].indices[ icol ];
+                if ( j > line ) 
+                    m.data[ i ].data[ icol ] -= current_row[ i - line - 1 ] * current_row[ j - line - 1 ];
+            }
+        }
+    }
+}
+
 /*!
     m is assumed to be factorized
     sol sontient le second membre et res contiendra la solution.
@@ -296,14 +333,18 @@ template<class T,int s,int s2> void solve_using_chol_factorize( const Mat<T,Herm
     }
 }
 
-template<class T,int s2> int solve_using_incomplete_chol_factorize( const Mat<T,Sym<>,SparseLine<> > &mp, const Mat<T,Sym<>,SparseLine<> > &A, const Vec<T> &b, Vec<T,s2> &x, double crit = 1e-4, bool disp_r = true ) {
+template<class T,int s2> 
+int solve_using_incomplete_chol_factorize( const Mat<T,Sym<>,SparseLine<> > &mp, const Mat<T,Sym<>,SparseLine<> > &A, const Vec<T> &b, Vec<T,s2> &x, double crit = 1e-4, bool disp_r = true ) {
     if ( x.size() <= A.nb_rows() )
         x.resize( A.nb_rows(), T(0) );
     //
     Vec<T> r, d, q, s;
 
     r = b - A * x;
-    for(unsigned i=0;;++i) { if ( i==r.size() ) return 0; if ( abs(r[i]) > crit ) break; }
+    for(unsigned i=0;;++i) { 
+        if ( i==r.size() ) return 0; 
+        if ( abs(r[i]) > crit ) break;
+    }
     solve_using_chol_factorize( mp, r, d );
 
 

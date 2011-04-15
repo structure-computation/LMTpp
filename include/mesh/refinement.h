@@ -261,7 +261,7 @@ struct LevelSetImageRefinement {
 
 template < class T, class Pvec>
 struct Local_refinement {
-    Raffine_a( T length_min, T _k, Pvec _c ) : l_min( length_min ), k( _k ), c( _c ), id( 1 ) {}
+    Local_refinement( T length_min, T _k, Pvec _c ) : l_min( length_min ), k( _k ), c( _c ) {}
 
     template<class TE> 
     bool operator()( TE &e ) const {
