@@ -236,7 +236,7 @@ template<class T> void incomplete_chol_factorize( Mat<T,Sym<>,SparseLine<> > &m 
 template<class T> void incomplete_chol_factorize_bis( Mat<T,Sym<>,SparseLine<> > &m ) {
 
     T ipivot, t;
-    Vec<T> current_row( m.nb_rows() - 1 );
+    Vec<T> current_row; current_row.resize( m.nb_rows() - 1 );
 
     for( unsigned line = 0; line < m.nb_rows(); ++line ) {
     
