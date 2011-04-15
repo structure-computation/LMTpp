@@ -305,7 +305,7 @@ struct MKL_Jacobi_matrix : public MKL_CSR_matrix {
         for( int i = 0; i < n; ++i ) { 
             double t = mat( i, i );
             if ( t ) 
-                a[ i ] = 1 / t;
+                a[ i ] = 1. / t;
             else {
                 a[ i ] = 0;
                 std::cerr << "WARNING MKL_Jacobi_matrix.init() : element " << i << " of diagonal is zero." << std::endl;
