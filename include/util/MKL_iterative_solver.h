@@ -318,7 +318,7 @@ struct MKL_iterative_solver {
     
     void free_internal_buffer( double *b ) {
         delete[] b;
-        MKL_FreeBuffers();    
+        mkl_free_buffers();//MKL_FreeBuffers();    
     }
     
     unsigned get_internal_solution( double *b, double *x, double *tempon ) {
@@ -333,7 +333,6 @@ struct MKL_iterative_solver {
     int ipar[128];
     double dpar[128];
     int mtype;
-    //MKL_preconditioner precond_id;
     MKL_CSR_matrix m, *m_cond;
 };
 
