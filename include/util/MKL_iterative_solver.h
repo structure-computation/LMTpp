@@ -134,6 +134,7 @@ struct MKL_iterative_solver {
     ~MKL_iterative_solver() {
         free();
         delete m_cond;
+        mkl_free_buffers();
     }
 
     /// permet de libérer la mémoire avant la destruction de l'objet
@@ -318,7 +319,7 @@ struct MKL_iterative_solver {
     
     void free_internal_buffer( double *b ) {
         delete[] b;
-        mkl_free_buffers();//MKL_FreeBuffers();    
+        //mkl_free_buffers();
     }
     
     unsigned get_internal_solution( double *b, double *x, double *tempon ) {
