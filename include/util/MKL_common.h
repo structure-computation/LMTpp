@@ -371,10 +371,8 @@ struct MKL_SSOR_matrix : public MKL_CSR_matrix {
     int init( const TM &mat ) {
          
         n  = mat.nb_rows();
-//         PRINT( n );
-//         PRINT( mat );
         a   = new double[ n ];
-        sol = new double[ n ];
+        sol = new double[ n ]; /// solution intermédiaire lors de la descente-remontée
         for( int i = 0; i < n; ++i ) 
             a[ i ] = mat( i, i );
         ia = NULL;
@@ -392,33 +390,36 @@ struct MKL_SSOR_matrix : public MKL_CSR_matrix {
     }
 
     template<class TM>
-    MKL_SSOR_matrix( const TM &mat, MKL_CSR_matrix &m ) {
+    MKL_SSOR_matrix( const TM &mat, MKL_CSR_matrix &m_0 ) {
         init( mat );
         
-        m = &m; 
+        m = &m_0; 
     }
     
-    virtual ~MKL_SSOR_matrix() { 
-        delete [] a;
+    virtual ~MKL_SSOR_matrix() {
         delete [] sol;
     }
 
     virtual void apply_as_conditioner( double *x, double *y ) const {
     
-        char uplo = 'u'; /// upper
-        char transa = 't'; /// A^T x = b 
-        char diag = 'n'; /// diagonal is not unit
+        char transa = 't'; /// solve the transposed system A^T x = y
+        char matdescra[ 6 ];
+        matdescra[ 0 ] = 't'; /// triangular system
+        matdescra[ 1 ] = 'u'; /// upper
+        matdescra[ 2 ] = 'n'; /// diagonale normale de la matrice
+        double alpha = 1;
         /// performs solving triangular system
-        //mkl_dcsrsymsv( &uplo, &transa, &diag, &(m->n), m->a, m->ia, m->ja, x, sol );
+        mkl_dcsrsv( &transa, &(m->n), &alpha, matdescra, m->a, m->ja, m->ia, ( m->ia ) + 1, x, sol );
         
         for( int i = 0; i < n; ++i )
             sol[ i ] = a[ i ] * sol[ i ];
         
         transa = 'n'; /// A x = b 
-        //mkl_dcsrsymsv( &uplo, &transa, &diag, &(m->n), m->a, m->ia, m->ja, sol, y );
+        /// performs solving triangular system
+        mkl_dcsrsv( &transa, &(m->n), &alpha, matdescra, m->a, m->ja, m->ia, ( m->ia ) + 1, sol, y );        
     }
     
-    MKL_CSR_matrix *m;
+    MKL_CSR_matrix *m; /// matrice du système
     double *sol;
 };
 

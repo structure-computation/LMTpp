@@ -134,6 +134,7 @@ struct MKL_iterative_solver {
     ~MKL_iterative_solver() {
         free();
         delete m_cond;
+        mkl_free_buffers();
     }
 
     /// permet de libérer la mémoire avant la destruction de l'objet
@@ -257,7 +258,7 @@ struct MKL_iterative_solver {
         /// initialisation du solver pour matrice symétrique définie positive
         dcg_init( &m.n, x.ptr(), const_cast<double*>( b.ptr() ), &rci_request, ipar, dpar, tmp );
         if ( rci_request ) {
-            free_internal_buffer( tmp );
+            delete [] tmp; //free_internal_buffer( tmp );
             std::cerr << "Error MKL_iterative_solver.solve() : bad initialization"<< std::endl;
             return 0;
         }
@@ -274,7 +275,7 @@ struct MKL_iterative_solver {
         /**---------------------------------------------------------------------------*/
         dcg_check( &m.n, x.ptr(), const_cast<double*>( b.ptr() ), &rci_request, ipar, dpar, tmp );
         if ( rci_request ) {
-            free_internal_buffer( tmp );
+            delete [] tmp; //free_internal_buffer( tmp );
             std::cerr << "Error MKL_iterative_solver.solve() : bad correctness of parameters of solver"<< std::endl;
             return 0;        
         }
@@ -284,14 +285,14 @@ struct MKL_iterative_solver {
             //PRINT( rci_request );
             switch( rci_request ) {
                 case 0 :
-                    return get_internal_solution( x.ptr(), const_cast<double*>( b.ptr() ), tmp );
+                    return get_internal_solution( x.ptr(), const_cast<double*>( b.ptr() ) , tmp );
                 case 1 : { /// compute the vector A*tmp[0] and put the result in vector tmp[n]
                     char tr = 'u';
                     mkl_dcsrsymv( &tr, &m.n, m.a, m.ia, m.ja, tmp, &tmp[m.n] );
                 } break;
                 case 2 :
                     if ( apply_stopping_test( crit_op, x.ptr(), const_cast<double*>( b.ptr() ) ) )
-                        return get_internal_solution( x.ptr(), const_cast<double*>( b.ptr() ), tmp );
+                        return get_internal_solution( x.ptr(), const_cast<double*>( b.ptr() ) , tmp );
                 break;
                 case 3 : { /// applique le pré-conditionneur à tmp[2n:3n-1], le résidu courant,  et retourne le résultat dans tmp[3n:4n-1]
                     if ( m_cond )
@@ -300,32 +301,25 @@ struct MKL_iterative_solver {
                         std::cerr << "WARNING : Mkl_iterative_solver.solve() : you want to apply a preconditioner but it's not defined" << std::endl;
                 } break;
                 default :
-                    free_internal_buffer( tmp );
+                    delete [] tmp; //free_internal_buffer( tmp );
                     std::cerr << "Error MKL_iterative_solver.solve() : dcg() bugs..."<< std::endl;
                     return 0; 
             }
         }
         
-        free_internal_buffer( tmp );
+        delete [] tmp; //free_internal_buffer( tmp );
         return 0;
     }
     
-    /// résout le sytème de second membre b et renvoie le résultat dans b
-//     template<int s, class TPreCond, class CritOperator>
-//     unsigned solve( const TPreCond &precond, const Vec<double, s> &b, Vec<double, s> &x, const CritOperator &crit_op, unsigned max_iter ) {
-// 
+//     void free_internal_buffer( double *b ) {
+//         delete[] b;
 //     }
     
-    void free_internal_buffer( double *b ) {
-        delete[] b;
-        MKL_FreeBuffers();    
-    }
-    
-    unsigned get_internal_solution( double *b, double *x, double *tempon ) {
+    unsigned get_internal_solution( double *b, double *x , double *tempon ) {
         int itercount, rci_request;
         
         dcg_get( &m.n, x, b, &rci_request, ipar, dpar, tempon, &itercount );
-        free_internal_buffer( tempon );
+        delete [] tempon; //free_internal_buffer( tempon );
         return (unsigned) itercount;
     }
     
@@ -333,7 +327,6 @@ struct MKL_iterative_solver {
     int ipar[128];
     double dpar[128];
     int mtype;
-    //MKL_preconditioner precond_id;
     MKL_CSR_matrix m, *m_cond;
 };
 

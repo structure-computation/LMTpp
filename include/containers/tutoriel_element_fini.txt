@@ -2,33 +2,94 @@
 \tutorial Comment résoudre un problème éléments finis de façon générale
 
     La librairie LMT++ permet de résoudre des équations aux dérivées partielles ou ordinaires. La résolution se fait en deux temps. Premièrement on exprime ses équations dans un fichier .py avec le langage Python. Puis on écrit le code de résolution des équations en C++. Bien sûr le C++ est préféré à Python pour des raisons de performance. 
-    Quand on lance la compilation du code C++, un système caché et transparent se charge de générer toutes les classes C++ représentant vos équations à partir du fichier Python avant la compilation de votre code.
+    Quand on lance la compilation du code C++, un système transparent se charge de générer toutes les classes C++ représentant vos équations à partir du fichier Python avant la compilation de votre code.
     
-    Jusqu' à récemment la gestion de tout ce processus de génération et de compilation était géré par [[http://www.scons.org/|scons]] , un logiciel de gestion de projet écrit en Python, très flexible, qui permettait le lancement de la génération de code C++. scons a la même fonction que <strong> make </strong> . Il avait besoin d'un fichier <strong> SConstruct </strong> qui est l'équivalent du célèbre <strong> Makefile </strong> de <strong> make </strong> . On avait quand même besoin aussi d'un fichier <strong> Makefile </strong> pour lancer tout cela car <strong> kdevelop </strong> , l' IDE de développement souvent utilisé au centre de calcul, ne connaît pas scons.
+    Jusqu' à récemment la gestion de tout ce processus de génération et de compilation était géré par [[http://www.scons.org/|scons]] , un logiciel de gestion de projet écrit en Python, très flexible, qui permet le lancement de la génération de code C++. scons a la même fonction que <strong> make </strong> . Il avait besoin d'un fichier <strong> SConstruct </strong> qui est l'équivalent du célèbre <strong> Makefile </strong> de <strong> make </strong> . On avait quand même besoin aussi d'un fichier <strong> Makefile </strong> pour lancer tout cela car <strong> kdevelop </strong> , l' IDE de développement souvent utilisé au centre de calcul, ne connaît pas scons.
     Maintenant un gestionnaire de projet écrit par Hugo, <strong> metil_comp </strong> , s'occupe de tout le travail à la place de scons. Il n' y a plus besoin de fichier SConstruct ou Makefile ( sauf bien sûr si on utilise kdevelop pour compiler son projet ).
         
-    Dans ce tutoriel, on fera usage de metil_comp et on laissera à la fin les explications pour scons pour ceux qui ont déjà commencé leur projet avant l'arrivée de metil_comp.
+    Dans ce tutoriel, on fera usage de metil_comp et on laissera à la fin les explications pour scons pour ceux qui l'utilisent.
      
-    Il existe dans la librairie LMT++ un grand nombre de problèmes et d'équations aux dérivées partielles déjà exprimées en Python ( souvent dans une formulation faible ).
+    Il existe dans la librairie LMT++ un grand nombre de problèmes et d'équations aux dérivées partielles déjà exprimées en Python ( souvent sous forme d' une formulation faible ).
     On les trouve dans le répertoire formulations/ . Il se peut que votre problème soit donc déjà traduit en Python ou du moins ces exemples pourront vous servir à écrire votre propre traduction.
      
     Le premier paragraphe sera un tutoriel pour un exemple complet dans le cas où la formulation en Python est déjà faite.
-    Ensuite le second paragraphe expliquera comment créer sa formulation Python. 
+    Ensuite le second paragraphe expliquera comment créer sa propre formulation Python. 
      
     = Exemple complet avec une formulation de la plate forme.
     
-        On choisit l'équation de la chaleur (fichier formulations/formulation_difftherm.py ) . Remarque importante : toutes les formulations commencent par "formulation_" .
+        On choisit l'équation élastique iso (fichier formulations/formulation_elasticity_iso.py ) . Remarque importante : toutes les formulations commencent par "formulation_" .
          
         Créez un répertoire. Dedans créz un lien symbolique vers la librairie LMT++ en faisant comme cela :
         \code 
             ln -s /home/dupont/LMTpp LMTpp
             
-        où vous remplacerez le chemin <strong> /home/dupont/ </strong> par celui de votre clone de la LMT++.
-        On peut aussi utiliser la LMTpp-test.
+        \code 
+            ln -s /home/dupont/LMTpp-test LMTpp
+        si vous souhaitez utiliser la version la plus récente.    
+        
+        Le chemin <strong> /home/dupont/ </strong> sera remplacé par votre propre chemin ( e.g. /usrtmp/dupont/ ).
          
         Puis on crée son fichier C++, nommé <strong> main.cpp </strong> :
         \code C/C++
-             
+            #include "formulation.elasticity_iso.Triangle,Quad,Tetra,Hexa.h"
+            #include "mesh/make_rect.h"
+            
+            using namespace LMT;
+            
+            int main( int argc, const char* argv[] ) {
+            
+                typedef double T;
+                static const unsigned dim = 2;
+                
+                typedef Mesh<Mesh_carac_elasticity_iso< T, dim> > TM;
+                typedef TM::Pvec Pvec;
+                typedef Formulation<TM,elasticity_iso> TF;
+                
+                TM m;
+                T lx = 10, ly = 1;
+                make_rect( m, Triangle(), 0, Pvec( lx, ly ), Pvec( 21, 5 ) );
+                
+                for(unsigned i = 0; i < m.node_list.size(); ++i )
+                    m.node_list[ i ].dep[ 0 ] = 1;
+                
+                TF f( m );
+                
+                T epsi = 1e-6;
+                for(unsigned i = 0; i < m.node_list.size(); ++i )
+                    if ( ( m.node_list[ i ].pos[ 0 ] < epsi ) or ( m.node_list[ i ].pos[ 0 ] > lx - epsi ) ) {
+                        for( int d = 0; d < dim; ++d )
+                            f.add_constraint( "sin( node[" + to_string( i ) + "].dep[" + to_string( d ) + "] ) - " + to_string( 0.1 * m.node_list[ i ].pos[ 0 ] * ( d == 0 ) ), 1e5 );
+                    }
+                    
+                
+                f.solve();
+                display( m );
+                
+                return 0;
+            }             
+        
+        Et un fichier Makefile si vous utilisez make via kdevelop :
+        \code
+            all: 
+                metil_comp -g -I./LMT/include main.cpp
+    
+        Rappelons qu'entre le début de ligne et le texte "metil_comp -g -I./LMT/include main.cpp", il faut une tabulation et pas des espaces.
+        
+        Expliquons en détail le code source:
+        
+        Le premier #include est très important et le texte entre les doubles quotes doit respecter une syntaxe car il sera interprêté par metil_comp.
+        Voici sa forme générale :
+        \verbatim
+            #include "formulation.F.E1[,Ei].h"
+        
+        * <strong> F </strong> sera le nom de la formulation,
+        * <strong> E1 </strong> un nom d'éléments ( e.g. \a Triangle , \a Tetra , \a Wedge ).
+        Il peut y avoir plusieurs noms d'éléments, séparés par une <strong> virgule </strong> . Si on travaille dans le plan et l'espace, on mettra les éléments de chaque dimension nécessaires.
+        
+        Le deuxième #include sert à incorporer la fonction \a make_rect () qui sert à construire des maillages sur un rectangle en 2D ou une brique en 3D.
+        
+        Ensuite <strong> using namespace LMT; </strong> incorpore l'espace de nom LMT donc on pourra utiliser tous les déclarations de la LMT sans les précéder de <strong> LMT:: </strong> ( e.g. LMT::make_rect() est moins lisible que make_rect() ).
+        
         
     
     = Ecrire sa formulation
