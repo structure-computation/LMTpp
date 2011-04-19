@@ -197,81 +197,166 @@ template<class T,class TS> void get_Cholesky( Mat<T,TS,SparseLine<> > &m, Mat<T,
 // }
 
 /// ancienne version de incomplete_chol_factorize
-template<class T> void incomplete_chol_factorize( Mat<T,Sym<>,SparseLine<> > &m ) {
-    for(unsigned line=0;line<m.nb_rows();++line) {
-        for(unsigned ind=0;ind<m.data[line].indices.size()-1;++ind) {
-            // m_ij != 0
-            unsigned col = m.data[line].indices[ind];
-            m.data[line].data[ind] = ( m.data[line].data[ind] - dot_chol_factorize( m.data[col], m.data[line] ) ) * m.data[col].data.back();
-            // m_ij == 0
-            unsigned ie = min( m.data[line].indices[ind+1], col+2 );
-            while ( ++col < ie ) {
-                T v = dot_chol_factorize( m.data[col], m.data[line] );
-                if ( boolean_( v ) ) {
-                    unsigned os = m.data[line].indices.size();
-                    m.data[line].indices.resize( os+1 );
-                    m.data[line].data.resize( os+1 );
-                    ++ind;
-                    for(unsigned k=os;k>ind;--k) {
-                        m.data[line].indices[k] = m.data[line].indices[k-1];
-                        m.data[line].data[k] = m.data[line].data[k-1];
+template<class T> void incomplete_chol_factorize( Mat<T,Sym<>,SparseLine<> > &m, bool simplified = true ) {
+
+    if ( simplified ) {
+
+        for(unsigned line=0;line<m.nb_rows();++line) {
+            for(unsigned ind=0;ind<m.data[line].indices.size()-1;++ind) {
+                /// m_ij != 0
+                unsigned col = m.data[line].indices[ind];
+                m.data[line].data[ind] = ( m.data[line].data[ind] - dot_chol_factorize( m.data[col], m.data[line] ) ) * m.data[col].data.back();
+                /// m_ij == 0
+                unsigned ie = min( m.data[line].indices[ind+1], col+2 );
+                while ( ++col < ie ) {
+                    T v = dot_chol_factorize( m.data[col], m.data[line] );
+                    if ( boolean_( v ) ) {
+                        unsigned os = m.data[line].indices.size();
+                        m.data[line].indices.resize( os+1 );
+                        m.data[line].data.resize( os+1 );
+                        ++ind;
+                        for(unsigned k=os;k>ind;--k) {
+                            m.data[line].indices[k] = m.data[line].indices[k-1];
+                            m.data[line].data[k] = m.data[line].data[k-1];
+                        }
+                        m.data[line].data[ind] = - v * m.data[col].data.back();
+                        m.data[line].indices[ind] = col;
                     }
-                    m.data[line].data[ind] = - v * m.data[col].data.back();
-                    m.data[line].indices[ind] = col;
+                }
+    
+    
+            }
+            //on diag
+            //#ifdef DO_NOT_SQRT_DIAG_CHOL
+            //   m.data[line].data.back() = m.data[line].data.back() - norm_2_p2( m.data[line].data.begin(), m.data[line].data.size()-1 );
+            //#else
+            T d = m.data[line].data.back() - norm_2_p2( m.data[line].data.begin(), m.data[line].data.size()-1 );
+            // assert( d > 0 );
+            m.data[line].data.back() = T(1) / sqrt( abs( d ) + ( d == T(0) ) );
+            //#endif
+        }
+    } else {
+    
+        Vec<T> front_jcol;
+        T pivot, ipivot;
+        
+        front_jcol.resize( m.nb_rows(), 0 );
+    
+        for(unsigned line = 0; line < m.nb_rows(); ++line ) {
+        
+            pivot = m.data[line].data.back();
+            m.data[line].data.back() = 0;
+            pivot = sqrt( pivot - dot_chol_factorize( m.data[line], m.data[line] ) );
+            ipivot = 1. / pivot;
+            
+            for(unsigned i = line + 1; i < m.nb_rows(); ++i ) {
+                unsigned ind_j = front_jcol[ i ];
+                unsigned j = m.data[ i ].indices[ front_jcol[ i ] ];
+                if (  j == line ) {
+                    m.data[ i ].data[ ind_j ] = ( m.data[ i ].data[ ind_j ] - dot_chol_factorize( m.data[i], m.data[line] ) ) * ipivot;
+                    front_jcol[ i ]++;
+                } else {
+                    if ( j < line )
+                        front_jcol[ i ]++;
                 }
             }
-
-
-        }
-        //on diag
-        //#ifdef DO_NOT_SQRT_DIAG_CHOL
-        //   m.data[line].data.back() = m.data[line].data.back() - norm_2_p2( m.data[line].data.begin(), m.data[line].data.size()-1 );
-        //#else
-        T d = m.data[line].data.back() - norm_2_p2( m.data[line].data.begin(), m.data[line].data.size()-1 );
-        // assert( d > 0 );
-        m.data[line].data.back() = T(1) / sqrt( abs( d ) + ( d == T(0) ) );
-        //#endif
+            
+            m.data[line].data.back() = pivot;
+        }    
     }
 }
+
+// template<class T> 
+// void incomplete_chol_factorize_bis( Mat<T,Sym<>,SparseLine<> > &m ) {
+//     Vec<T> front_jcol;
+//     T pivot, ipivot;
+//     
+//     front_jcol.resize( m.nb_rows(), 0 );
+// 
+//     for(unsigned line = 0; line < m.nb_rows(); ++line ) {
+//     
+//         pivot = m.data[line].data.back();
+//         m.data[line].data.back() = 0;
+//         pivot = sqrt( pivot - dot_chol_factorize( m.data[line], m.data[line] ) );
+//         ipivot = 1. / pivot;
+//          
+//         for(unsigned i = line + 1; i < m.nb_rows(); ++i ) {
+//             unsigned ind_j = front_jcol[ i ];
+//             unsigned j = m.data[ i ].indices[ front_jcol[ i ] ];
+//             if (  j == line ) {
+//                 m.data[ i ].data[ ind_j ] = ( m.data[ i ].data[ ind_j ] - dot_chol_factorize( m.data[i], m.data[line] ) ) * ipivot;
+//                 front_jcol[ i ]++;
+//             } else {
+//                 if ( j < line )
+//                     front_jcol[ i ]++;
+//             }
+//         }
+//         
+//         m.data[line].data.back() = pivot;
+//     }
+// }
+
+// template<class T> 
+// void incomplete_chol_factorize_terce( Mat<T,Sym<>,SparseLine<> > &m ) {
+//     T pivot, ipivot;
+// 
+//     for(unsigned line = 0; line < m.nb_rows(); ++line ) {
+//     
+//         pivot = m.data[line].data.back();
+//         m.data[line].data.back() = 0;
+//         pivot = sqrt( pivot - dot_chol_factorize( m.data[line], m.data[line] ) );
+//         ipivot = 1. / pivot;
+//          
+//         for(unsigned i = line + 1; i < m.nb_rows(); ++i ) {
+//             unsigned j = 0;
+//             while ( ( j < m.data[ i ].indices.size() ) and ( m.data[ i ].indices[ j ] < line ) )
+//                 ++j;
+//             if ( m.data[ i ].indices[ j ] == line )
+//                 m.data[ i ].data[ j ] = ( m.data[ i ].data[ j ] - dot_chol_factorize( m.data[i], m.data[line] ) ) * ipivot;   
+//         }
+//         
+//         m.data[line].data.back() = pivot;
+//     }
+// }
 
 /// version du Golub page 535
-template<class T> 
-void incomplete_chol_factorize_bis( Mat<T,Sym<>,SparseLine<> > &m ) {
-
-    T ipivot, t;
-    Vec<T> current_row; current_row.resize( m.nb_rows() - 1 );
-
-    for( unsigned line = 0; line < m.nb_rows(); ++line ) {
-    
-        if ( m.data[line].indices.back() == line ) {
-            t = sqrt( m.data[line].data.back() );
-            ipivot = (T)1 / t;
-            m.data[line].data.back() = t;
-        } else
-            ipivot = 1e5; /// problème : pivot nulle !
-        
-        for( unsigned i = line + 1; i < m.nb_rows(); ++i ) {
-            unsigned icol = 0;
-            while ( ( icol < m.data[ i ].indices.size() ) and ( m.data[ i ].indices[ icol ] < line ) ) icol++;
-            /// on ne peut pas avoir que des zéros à partir de line sur la ligne line en théorie...
-            if ( m.data[ i ].indices[ icol ] == line ) {
-                t = m.data[ i ].data[ icol ] * ipivot;
-                current_row[ i - line - 1 ] = t;
-                m.data[ i ].data[ icol ] = t;                
-            } else 
-                current_row[ i - line - 1 ] = (T)0;    
-        }
-        
-        for( unsigned i = line + 1; i < m.nb_rows(); ++i ) {
-            t = current_row[ i - line - 1 ];
-            for( unsigned icol = 0; icol < m.data[ i ].indices.size(); ++icol ) {
-                unsigned j = m.data[ i ].indices[ icol ];
-                if ( j > line ) 
-                    m.data[ i ].data[ icol ] -= t * current_row[ j - line - 1 ];
-            }
-        }
-    }
-}
+// template<class T> 
+// void incomplete_chol_factorize_bis( Mat<T,Sym<>,SparseLine<> > &m ) {
+// 
+//     T ipivot, t;
+//     Vec<T> current_row; current_row.resize( m.nb_rows() - 1 );
+// 
+//     for( unsigned line = 0; line < m.nb_rows(); ++line ) {
+//     
+//         if ( m.data[line].indices.back() == line ) {
+//             t = sqrt( m.data[line].data.back() );
+//             ipivot = (T)1 / t;
+//             m.data[line].data.back() = t;
+//         } else
+//             ipivot = 1e5; /// problème : pivot nulle !
+//         
+//         for( unsigned i = line + 1; i < m.nb_rows(); ++i ) {
+//             unsigned icol = 0;
+//             while ( ( icol < m.data[ i ].indices.size() ) and ( m.data[ i ].indices[ icol ] < line ) ) icol++;
+//             /// on ne peut pas avoir que des zéros à partir de line sur la ligne line en théorie...
+//             if ( m.data[ i ].indices[ icol ] == line ) {
+//                 t = m.data[ i ].data[ icol ] * ipivot;
+//                 current_row[ i - line - 1 ] = t;
+//                 m.data[ i ].data[ icol ] = t;                
+//             } else 
+//                 current_row[ i - line - 1 ] = (T)0;    
+//         }
+//         
+//         for( unsigned i = line + 1; i < m.nb_rows(); ++i ) {
+//             t = current_row[ i - line - 1 ];
+//             for( unsigned icol = 0; icol < m.data[ i ].indices.size(); ++icol ) {
+//                 unsigned j = m.data[ i ].indices[ icol ];
+//                 if ( j > line ) 
+//                     m.data[ i ].data[ icol ] -= t * current_row[ j - line - 1 ];
+//             }
+//         }
+//     }
+// }
 
 /*!
  \internal

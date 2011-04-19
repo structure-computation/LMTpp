@@ -340,7 +340,7 @@ struct MKL_incomplete_chol_matrix : public MKL_CSR_matrix {
     MKL_incomplete_chol_matrix( const TM &mat ) {
         TM K = mat;
         //PRINTN( K );
-        incomplete_chol_factorize_bis( K );
+        incomplete_chol_factorize( K, false );
         //PRINTN( K );
         MKL_CSR_matrix::init( K );
         sol = new double[ n ]; 
