@@ -119,6 +119,9 @@ struct MKL_iterative_solver {
             mtype = 2;
         if ( want_free )
             mat.free(); 
+            
+        dpar[ 1 ] = 1e-6;
+        display_norm2_residual = false;
     }
     
     template<int sr, int sc>
@@ -128,7 +131,10 @@ struct MKL_iterative_solver {
     
         mtype = m.init( mat );
         if ( want_free )
-            mat.free();     
+            mat.free();  
+               
+        dpar[ 1 ] = 1e-6;
+        display_norm2_residual = false;
     }
 
     ~MKL_iterative_solver() {
@@ -191,8 +197,8 @@ struct MKL_iterative_solver {
     }
     
     void set_stopping_test( const double &s ) {
-        ipar[8] = 1; /// test d'arrêt interne à MKL activé
-        ipar[9] = 0; /// test d'arrêt de l'utilisateur inactivé
+        ipar[8] = 0; /// test d'arrêt interne à MKL inactivé
+        ipar[9] = 1; /// test d'arrêt de l'utilisateur activé
            
         dpar[ 1 ] = s; /// precision absolue    
     }
@@ -213,7 +219,7 @@ struct MKL_iterative_solver {
 
     /// comportement par défaut
     template<class CritOperator>
-    bool apply_stopping_test( const CritOperator &s, double *x, double *b ) { return true; }
+    bool apply_stopping_test( const CritOperator &s, double *x, double *b ) { return dpar[ 4 ] < dpar[ 1 ]; }
     
     bool apply_stopping_test( const double &s, double *x, double *b ) {
         return dpar[ 4 ] < dpar[ 1 ];
@@ -240,7 +246,7 @@ struct MKL_iterative_solver {
         
     /// résout le sytème de second membre b et renvoie le résultat dans b
     template<int s, class CritOperator>
-    unsigned solve( const Vec<double, s> &b, Vec<double, s> &x, const CritOperator &crit_op, unsigned max_iter ) {
+    unsigned solve( const Vec<double, s> &b, Vec<double, s> &x, const CritOperator &crit_op, unsigned max_iter, bool display_norm2_residual = false ) {
         
         if ( m.n == 0 ) {
             std::cerr << "Warning Mkl_iterative_solver.solve() : not matrix" << std::endl;
@@ -291,6 +297,8 @@ struct MKL_iterative_solver {
                     mkl_dcsrsymv( &tr, &m.n, m.a, m.ia, m.ja, tmp, &tmp[m.n] );
                 } break;
                 case 2 :
+                    if ( display_norm2_residual ) 
+                        std::cout << "square norm of the current residual = "<< dpar[ 4 ] << std::endl;
                     if ( apply_stopping_test( crit_op, x.ptr(), const_cast<double*>( b.ptr() ) ) )
                         return get_internal_solution( x.ptr(), const_cast<double*>( b.ptr() ) , tmp );
                 break;
@@ -328,6 +336,7 @@ struct MKL_iterative_solver {
     double dpar[128];
     int mtype;
     MKL_CSR_matrix m, *m_cond;
+    bool display_norm2_residual;
 };
 
 };
