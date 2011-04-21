@@ -222,11 +222,11 @@ struct MKL_iterative_solver {
     bool apply_stopping_test( const CritOperator &s, double *x, double *b ) { return dpar[ 4 ] < dpar[ 1 ]; }
     
     bool apply_stopping_test( const double &s, double *x, double *b ) {
-        return dpar[ 4 ] < dpar[ 1 ];
+        return std::sqrt( dpar[ 4 ] ) < dpar[ 1 ];
     }
     
     bool apply_stopping_test( const MKL_norm2_residual_stopping &s, double *x, double *b ) {
-        return dpar[ 4 ] < dpar[ 1 ];
+        return std::sqrt( dpar[ 4 ] ) < dpar[ 1 ];
     }
     
     bool apply_stopping_test( const MKL_norm_inf_residual_stopping &s, double *x, double *b ) {
@@ -298,7 +298,7 @@ struct MKL_iterative_solver {
                 } break;
                 case 2 :
                     if ( display_norm2_residual ) 
-                        std::cout << "square norm of the current residual = "<< dpar[ 4 ] << std::endl;
+                        std::cout << "norm L2 of the current residual = "<< std::sqrt( dpar[ 4 ] ) << std::endl;
                     if ( apply_stopping_test( crit_op, x.ptr(), const_cast<double*>( b.ptr() ) ) )
                         return get_internal_solution( x.ptr(), const_cast<double*>( b.ptr() ) , tmp );
                 break;
@@ -317,6 +317,10 @@ struct MKL_iterative_solver {
         
         delete [] tmp; //free_internal_buffer( tmp );
         return 0;
+    }
+    
+    double last_norm_of_residual() const {
+        return std::sqrt( dpar[ 4 ] );
     }
     
 //     void free_internal_buffer( double *b ) {
