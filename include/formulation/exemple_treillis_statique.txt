@@ -43,7 +43,38 @@
 
             return res
 
-    Voici la fonction make_pb à inclure dans le fichier SConstruct pour générer du code pour un treillis bidimensionnel :
+    On suppose que le fichier s'appelle formulation_treillis_statique.py.
+
+    Pour générer automatiquement le code, le plus simple c'est d'utiliser metil_comp et un programme qui contient un include adapté. Exemple :
+        \code
+            #include "formulation.treillis_statique.Bar.dim=2.h"
+
+            int main() {
+                typedef Mesh<Mesh_carac_treillis_statique<double,2> > TM;
+                typedef Formulation<TM,treillis_statique> TF;
+
+                TM m;
+                m.add_node( vec( 0, 0 ) );
+                m.add_node( vec( 2, 0 ) );
+                m.add_node( vec( 1, 1 ) );
+                m.add_element( Bar(), DefaultBehavior(), 0, 1 );
+                m.add_element( Bar(), DefaultBehavior(), 1, 2 );
+                m.add_element( Bar(), DefaultBehavior(), 2, 0 );
+
+                TF f( m );
+                f.add_constraint( "node[0].dep[0] - 0", 1e5 );
+                f.add_constraint( "node[0].dep[1] - 0", 1e5 );
+                f.add_constraint( "node[1].dep[0] - 1", 1e5 );
+                f.add_constraint( "node[1].dep[1] - 0", 1e5 );
+
+                f.solve();
+
+                display( m );
+            }
+
+    Remarque, la 2D et la 3D peuvent coexister. Il suffit de mettre autant de include que nécessaire.
+
+    Si vous utilisez encore des SConstruct, voici la fonction make_pb à inclure dans le fichier SConstruct pour générer du code pour un treillis bidimensionnel :
 
         \code
             pb_libs = make_pb(
