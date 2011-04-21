@@ -82,6 +82,15 @@ void intersection(const Element<Triangle,TN,TNG,TD,NET> &e,Pvec P1,Pvec P2,T &nu
     else  // exterior
         dist_ext = min(min(fabs(dist0),fabs(dist1)),fabs(dist2));
 }
+
+
+template<class PV>
+typename PV::T sample_normal( Triangle, const PV &pos ) {
+    typename PV::T res = vect_prod( Pvec( pos[ 1 ] - pos[ 0 ] ), Pvec( pos[ 2 ] - pos[ 0 ] ) );
+    return res / length( res );
+}
+
+
 template<class TN,class TNG,class TD,unsigned NET>
 typename TNG::Pvec sample_normal(const Element<Triangle,TN,TNG,TD,NET> &e) {
     DEBUGASSERT( (TNG::dim==3) );
@@ -93,26 +102,105 @@ typename TNG::Pvec sample_normal(const Element<Triangle,TN,TNG,TD,NET> &e) {
 template<class TN,class TNG,class TD,unsigned NET,class TM>
 bool divide_element(Element<Triangle,TN,TNG,TD,NET> &e,TM &m,TNG **nnodes) {
     typedef Element<Triangle,TN,TNG,TD,NET> TE;
+    typedef typename TNG::T T;
     if ( nnodes[0] && nnodes[1] && nnodes[2] ) {
-        DM::copy( e, *m.add_element( Triangle(), TN(), e.node(0), nnodes[0], nnodes[2] ) );
-        DM::copy( e, *m.add_element( Triangle(), TN(), nnodes[2], nnodes[0], nnodes[1] ) );
-        DM::copy( e, *m.add_element( Triangle(), TN(), nnodes[1], nnodes[0], e.node(1) ) );
-        DM::copy( e, *m.add_element( Triangle(), TN(), e.node(2), nnodes[2], nnodes[1] ) );
+        int sommet = -1;
+        T l01 = length( e.node(0)->pos - e.node(1)->pos );
+        T l12 = length( e.node(1)->pos - e.node(2)->pos );
+        T l02 = length( e.node(0)->pos - e.node(2)->pos );
+        T r = 1.43; /// pas trop d'idée... disons > sqrt(2)
+        if ( l01 < l12 ) {
+            if ( l02 > l12 ) {
+                if ( l02 > r * l12 )
+                    sommet = 1; 
+            } else {
+                if ( l02 > l01 ) {
+                    if ( l12 > r * l02 )
+                        sommet = 0;
+                } else {
+                    if ( l12 > r * l01 )
+                        sommet = 0;
+                }
+            }
+        } else {
+            if ( l02 > l01 ) {
+                if ( l02 > r * l01 )
+                    sommet = 1; 
+            } else {
+                if ( l02 > l12 ) {
+                    if ( l01 > r * l02 )
+                        sommet = 2;
+                } else {
+                    if ( l01 > r * l12 )
+                        sommet = 2;
+                }
+            }        
+        }
+        
+        switch( sommet ) {
+            case 0 :
+                DM::copy( e, *m.add_element( Triangle(), TN(), e.node(0), nnodes[0], nnodes[1] ) );
+                DM::copy( e, *m.add_element( Triangle(), TN(), e.node(0), nnodes[1], nnodes[2] ) );
+                DM::copy( e, *m.add_element( Triangle(), TN(), nnodes[0], e.node(1), nnodes[1] ) );
+                DM::copy( e, *m.add_element( Triangle(), TN(), e.node(2), nnodes[2], nnodes[1] ) );            
+                break;
+            case 1 :
+                DM::copy( e, *m.add_element( Triangle(), TN(), e.node(1), nnodes[1], nnodes[2] ) );
+                DM::copy( e, *m.add_element( Triangle(), TN(), e.node(1), nnodes[2], nnodes[0] ) );
+                DM::copy( e, *m.add_element( Triangle(), TN(), nnodes[1], e.node(2), nnodes[2] ) );
+                DM::copy( e, *m.add_element( Triangle(), TN(), e.node(0), nnodes[0], nnodes[2] ) ); 
+                break;
+            case 2 :
+                DM::copy( e, *m.add_element( Triangle(), TN(), e.node(2), nnodes[2], nnodes[0] ) );
+                DM::copy( e, *m.add_element( Triangle(), TN(), e.node(2), nnodes[0], nnodes[1] ) );
+                DM::copy( e, *m.add_element( Triangle(), TN(), nnodes[2], e.node(0), nnodes[0] ) );
+                DM::copy( e, *m.add_element( Triangle(), TN(), e.node(1), nnodes[1], nnodes[0] ) );
+                break;        
+            default :
+                DM::copy( e, *m.add_element( Triangle(), TN(), e.node(0), nnodes[0], nnodes[2] ) );
+                DM::copy( e, *m.add_element( Triangle(), TN(), nnodes[2], nnodes[0], nnodes[1] ) );
+                DM::copy( e, *m.add_element( Triangle(), TN(), nnodes[1], nnodes[0], e.node(1) ) );
+                DM::copy( e, *m.add_element( Triangle(), TN(), e.node(2), nnodes[2], nnodes[1] ) );
+        }
     }
     else if ( nnodes[0] && nnodes[1] ) {
-        DM::copy( e, *m.add_element( Triangle(), TN(), e.node(0), nnodes[0], nnodes[1] ) );
-        DM::copy( e, *m.add_element( Triangle(), TN(), nnodes[0], e.node(1), nnodes[1] ) );
-        DM::copy( e, *m.add_element( Triangle(), TN(), e.node(0), nnodes[1], e.node(2) ) );
+        T l_0_n1 = length( e.node(0)->pos - nnodes[1]->pos );
+        T l_2_n0 = length( e.node(2)->pos - nnodes[0]->pos );
+        if ( l_0_n1 > l_2_n0 ) {
+            DM::copy( e, *m.add_element( Triangle(), TN(), e.node(0), nnodes[0], e.node(2) ) );
+            DM::copy( e, *m.add_element( Triangle(), TN(), nnodes[0], nnodes[1], e.node(2) ) );
+            DM::copy( e, *m.add_element( Triangle(), TN(), e.node(1), nnodes[1], nnodes[0] ) );
+        } else {
+            DM::copy( e, *m.add_element( Triangle(), TN(), e.node(0), nnodes[0], nnodes[1] ) );
+            DM::copy( e, *m.add_element( Triangle(), TN(), nnodes[0], e.node(1), nnodes[1] ) );
+            DM::copy( e, *m.add_element( Triangle(), TN(), e.node(0), nnodes[1], e.node(2) ) );        
+        }
     }
     else if ( nnodes[0] && nnodes[2] ) {
-        DM::copy( e, *m.add_element( Triangle(), TN(), nnodes[2], e.node(0), nnodes[0] ) );
-        DM::copy( e, *m.add_element( Triangle(), TN(), nnodes[2], nnodes[0], e.node(1) ) );
-        DM::copy( e, *m.add_element( Triangle(), TN(), nnodes[2], e.node(1), e.node(2) ) );
+        T l_1_n2 = length( e.node(1)->pos - nnodes[2]->pos );
+        T l_2_n0 = length( e.node(2)->pos - nnodes[0]->pos );
+        if ( l_1_n2 > l_2_n0 ) {
+            DM::copy( e, *m.add_element( Triangle(), TN(), nnodes[2], e.node(0), nnodes[0] ) );
+            DM::copy( e, *m.add_element( Triangle(), TN(), nnodes[2], nnodes[0], e.node(2) ) );
+            DM::copy( e, *m.add_element( Triangle(), TN(), nnodes[0], e.node(1), e.node(2) ) );
+        } else {
+            DM::copy( e, *m.add_element( Triangle(), TN(), nnodes[2], e.node(0), nnodes[0] ) );
+            DM::copy( e, *m.add_element( Triangle(), TN(), nnodes[2], nnodes[0], e.node(1) ) );
+            DM::copy( e, *m.add_element( Triangle(), TN(), nnodes[2], e.node(1), e.node(2) ) );        
+        }
     }
     else if ( nnodes[1] && nnodes[2] ) {
-        DM::copy( e, *m.add_element( Triangle(), TN(), nnodes[2], e.node(0), e.node(1) ) );
-        DM::copy( e, *m.add_element( Triangle(), TN(), nnodes[2], e.node(1), nnodes[1] ) );
-        DM::copy( e, *m.add_element( Triangle(), TN(), nnodes[2], nnodes[1], e.node(2) ) );
+        T l_0_n1 = length( e.node(0)->pos - nnodes[1]->pos );
+        T l_1_n2 = length( e.node(1)->pos - nnodes[2]->pos );
+        if ( l_0_n1 > l_1_n2 ) {
+            DM::copy( e, *m.add_element( Triangle(), TN(), nnodes[2], e.node(0), e.node(1) ) );
+            DM::copy( e, *m.add_element( Triangle(), TN(), nnodes[2], e.node(1), nnodes[1] ) );
+            DM::copy( e, *m.add_element( Triangle(), TN(), nnodes[2], nnodes[1], e.node(2) ) );
+        } else {
+            DM::copy( e, *m.add_element( Triangle(), TN(), nnodes[2], e.node(0), nnodes[1] ) );
+            DM::copy( e, *m.add_element( Triangle(), TN(), nnodes[2], nnodes[1], e.node(2) ) );
+            DM::copy( e, *m.add_element( Triangle(), TN(), e.node(0), e.node(1), nnodes[1] ) );        
+        }
     }
     else if ( nnodes[0] ) {
         DM::copy( e, *m.add_element( Triangle(), TN(), e.node(0), nnodes[0], e.node(2) ) );

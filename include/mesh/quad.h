@@ -213,6 +213,12 @@ typename TNG::T measure( const Element<Quad,TN,TNG,TD,NET> &e ) {
     D0 = D0+D6; D0 = abs(D0); return D0; 
 }
 
+template<class PV>
+typename PV::T sample_normal( Quad, const PV &pos ) {
+    typename PV::T res = vect_prod( Pvec( pos[ 1 ] - pos[ 0 ] ), Pvec( pos[ 2 ] - pos[ 0 ] ) );
+    return res / length( res );
+}
+
 template<class TN,class TNG,class TD,unsigned NET>
 typename TNG::Pvec sample_normal(const Element<Quad,TN,TNG,TD,NET> &e) {
     DEBUGASSERT( (TNG::dim==3) );

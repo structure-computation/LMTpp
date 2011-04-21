@@ -86,9 +86,21 @@ class VariableAncestor
     
     def _get_scalar_var_wo_enr( time, e, n, t, ind, sym_lst, want_ders )
         def index_access( ind )
+            res := ""
             if ind.size
-                return "[" + join( ind, "," ) + "]"
-            return ""
+                if ind.size == 1
+                    res += "["
+                else
+                    res += "("
+                for i in 0 .. ind.size
+                    res += "$(ind[i])"
+                    if i != ind.size - 1
+                        res += ","
+                if ind.size == 1
+                    res += "]"
+                else
+                    res += ")"
+            return res
         def intex_access( ind )
             if ind.size
                 return "_{" + join( ind, "," ) + "}"

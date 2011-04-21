@@ -7,6 +7,7 @@
 #include "mesh/tetra.h"
 #include "mesh/tetra_10.h"
 #include "mesh/wedge.h"
+#include "io/normalize_end_line.h"
 #include <stdexcept>
 #include <map>
 using namespace std;
@@ -171,15 +172,16 @@ void read_avs(TM &mesh, std::istream &is) throw(std::runtime_error) {
     while(nb<nbelem) {
         string str;
         getline(is,str);
-        istringstream s(str);
-        int number,number2;
+        normalize_end_line( str );
+        istringstream s( str );
+        int number, number2;
         s >> number; // numero de l'element
 
         s >> number2; // 1 ou 2
 
         s >> type_elem;//type dl'element
 
-        if (type_elem=="line") {
+        if ( type_elem == "line" ) {
             nnode_elem=2;
             Vec<TNode *> vn;
             vn.resize(nnode_elem);
@@ -191,7 +193,7 @@ void read_avs(TM &mesh, std::istream &is) throw(std::runtime_error) {
             ne->group = number2;
             if(nbelem_data) mesh.elem_list.synchronize_dyn(&dd);
             if(nbelem_data) mesh.elem_list.get_data(dd, *ne) = nb;
-        } else if (type_elem=="tri") {
+        } else if ( type_elem == "tri" ) {
             Vec<TNode *> vn;
             while ( true ) {
                 unsigned number;
@@ -220,7 +222,7 @@ void read_avs(TM &mesh, std::istream &is) throw(std::runtime_error) {
             } else
                 throw std::runtime_error("Unknown element...");
 
-        } else if (type_elem=="quad") {
+        } else if ( type_elem == "quad" ) {
             nnode_elem=4;
             Vec<TNode *> vn;
             vn.resize(nnode_elem);

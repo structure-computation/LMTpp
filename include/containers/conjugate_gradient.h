@@ -13,7 +13,7 @@ namespace LMT {
         unsigned cpt_iter = conjugate_gradient( new_SolveUsingCholFactorize( K ), f.matrices( Number<0>() ), f.sollicitation, f.vectors[ 0 ], ConvergenceCriteriumNormInfDelta<double>( 1e-5 ) );
 */
 template<class Precond,class Matrix,class TV,class TV_SOLUTION,class CritOperator>
-unsigned conjugate_gradient( const Precond &precond, const Matrix &matrix, const TV &sollicitation, TV_SOLUTION &solution, const CritOperator &crit_op ) {
+unsigned conjugate_gradient( const Precond &precond, const Matrix &matrix, const TV &sollicitation, TV_SOLUTION &solution, const CritOperator &crit_op, bool disp_alpha = false ) {
     typedef typename TypeReduction<Plus,TV_SOLUTION>::T T;
     if ( solution.size() <= matrix.nb_rows() )
         solution.resize( matrix.nb_rows(), T(0) );
@@ -39,7 +39,8 @@ unsigned conjugate_gradient( const Precond &precond, const Matrix &matrix, const
         solution += alpha * d;
         r -= alpha * q; // r = b - A * x;
         
-        // PRINT( alpha );
+        if ( disp_alpha )
+            PRINT( alpha );
         
         if ( crit_op( alpha * d, r ) )
             return cpt;
@@ -73,8 +74,8 @@ struct SolveUsingCholFactorize {
 /*
 */
 template<class TK>
-struct SolveUsingCholMod {
-    SolveUsingCholMod( TK &k ) : K( k ) {}
+struct SolveUsingDotSolve {
+    SolveUsingDotSolve( TK &k ) : K( k ) {}
     typedef double MatrixScalarType;
     template<class TV>
     Vec<typename TypePromote<Multiplies,MatrixScalarType,TV>::T> operator*( const Vec<TV> &v ) const {
@@ -98,13 +99,24 @@ struct ConvergenceCriteriumNormInfDelta {
     T crit;
 };
 
+template<class T>
+struct ConvergenceCriteriumNorm2 {
+    static const bool needs_delta_x = true;
+    static const bool residual = false;
+    ConvergenceCriteriumNorm2( T v ) : crit( v ) {}
+    template<class TV0,class TV1> bool operator()( const TV0 &delta_x, const TV1 &residual ) const {
+        return norm_2( delta_x ) < crit;
+    }
+    T crit;
+};
+
 template<class TK>
 SolveUsingCholFactorize<TK> new_SolveUsingCholFactorize( const TK &k ) {
     return k;
 }
 
 template<class TK>
-SolveUsingCholMod<TK> new_SolveUsingCholMod( TK &k ) {
+SolveUsingDotSolve<TK> new_SolveUsingDotSolve( TK &k ) {
     return k;
 }
 // new_SolveUsingInverseMatrix

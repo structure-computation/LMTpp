@@ -1,290 +1,388 @@
 /*!
 \tutorial Comment résoudre un problème éléments finis de façon générale
 
-    La résolution d'un problème avec les éléments finis se fait en trois étapes :
-        * Création d'un fichier Sconstuct qui contiendra un appel de la fonction make_pb() pour définir le nom du problème, la formulation et le type d'éléments finis.
-        * Création d'un autre fichier python pour détailler la formulation (i.e. les équations, les grandeurs inconnues, les paramètres, ...)
-        * Création d'un projet kdevelop pour d'une part générer les fichiers d'en-têtes C++ .h à partir des fichiers Sconstruct et python puis d'autre part écrire le code de calcul.
-
-
-    = Creation d'un fichier Sconstruct
-
-        Rappelons que ce fichier sert à construire un projet de développement (nom du programme, librairies nécessaires,etc...).
-        La partie qui nous intéresse est l'appel de la fonction make_pb() qui fournit des informations sur la formulation et les éléments finis. 
-
-        Exemple de fichier
-
-        \code Python
-            from LMT import *
-            from LMT.formal_lf import *
-            
-            env = Environment(
-                LIBPATH = [ '/usr/lib','/usr/local/lib/'  ],
-                LIBS = [ 'pthread', 'cholmod', 'm ],
-                CPPPATH = [ '#LMT/include' ],
-                CPPFLAGS = cppflags( ['xml2-config'] ) + " -O3 -g3 -Wall",
-                LINKFLAGS = linkflags( ['xml2-config'] ),
-            )
-            make_dep_py(env)
-            
-            env.BuildDir( 'build/LMT', 'LMT/include', duplicate=0 )
-            libs = SConscript( 'LMT/include/SConscript', exports='env', 
-            build_dir='build/LMT' )
-            
-            pb_libs = make_pb(
-                env,
-                opt               = 0,
-                name              = 'pb_elast',
-                formulations      = ['elasticity_isotropy','elasticity_orthotropy'],
-                elements          = ['Triangle','Tetra'],
-                options           = {"behavior_simplification" : 'plane stress'},
-                additional_fields = { "qtrans" : Variable(unit='mm',nb_dim=['DIM']), "typmat" : Variable(interpolation='elementary',unit='',default_value='0')},
-                types             = ['float'],
-                #use_asm           = True,
-                name_der_vars     = ['dep','E']
-            )
-
-            env.Program( "main", ["testdifftherm.cpp"] + libs + pb_libs, build_dir='build/LMT' )
-
-
-
-        Remarques: 
-            * les commentaires python sur une ligne commencent par un diese (#) et les tableaux "explicites" sont de la forme [a,b,... ].
-            * NE PAS OUBLIER d'ajouter pb_libs dans la liste des codes sources dans l'appel final env.Program().
-
-        Détail des paramètres de la fonction make_pb() dans l'ordre :
-            * Ce paramètre est l'objet qui contient l'environnement nécessaire à l'éxécution du programme. 
-            * Ce paramètre , nommé <strong> opt </strong> , vaut soit 0 pour un mode normal soit 1 pour un mode optimisé.
-            * Ce paramètre , nommé  <strong> name </strong> , est le nom donné au problème. Pour déclarer ensuite un maillage il faudra faire 
-                \code C/C++
-                    Mesh<Meshcarac_name<type, dim> > m; // où type est le type des variables (float, double, long double, etc) et dim la dimension de l'espace
-            * Ce paramètre , nommé <strong> formulations </strong>  , contient les noms des formulations sur lesquelles on veut travailler. Dans les repertoires indiqués dans <strong>incpaths</strong> (argument optionel de la fonction make_pb, par exemple ["toto","tata"] pour aller chercher dans les répertoires toto et tata), doivent se trouver des fichiers python nommés formulation_elasticity_isotropy.py, formulation_elasticity_orthotropy.py. Ces fichiers contiennent les variables utilisées pour la formulation (modules materiau, contrainte, deplacement,deformation, energie..). C'est à l'interieur de ce fichier que l'on ecrit directement la formulation sous forme variationnelle (cf ci-dessous).
-            * Ce paramètre , nommé <strong> elements </strong> , contient les types d'éléments à utiliser dans le maillage parmi : Bar, Triangle, Quad, Tetra, Wedge, Cube, etc ... 
-            * Ce paramètre , nommé <strong> additional_fields </strong> , (facultatif) contient les champs additionnels à placer dans les maillages suivant la syntaxe \anchor param
-                \code 
-                    "nom du champs" : Variable (interpolation=valeur, unit=valeur,default_value=valeur,T=valeur,nb_dim=tableau de valeurs) où les valeurs sont exprimées sous forme d'un chaine de caractères. 
-                * <strong> interpolation </strong> : correspond au type d'interpolation de la variable, choisi parmi : nodal (interpolation suivant les valeurs aux noeuds, elementary ( "interpolation" suivant une valeur définie pour l'élément entier), global ( "interpolation" suivant une valeur définie sur tout le maillage) , der_nodal ( "interpolation" suivant une valeur définie pour l'élément entier ),bubble ( ??? ) , etc ... Pour connaître l'ensemble des possibilités, consultez la rubrique Maillage/Interpolation de la page "mot-clés" ou les fichiers sources formulations/element_XXX.py où XXX est le nom de l'élément.
-                * <strong> unit </strong> est l'unité du champs.
-                * <strong> default_value </strong> est la valeur par defaut.
-                * <strong> T </strong> ='type' si on souhaite avoir un type special. Par exemple si un champ dépend de la dimension du problème, on écrira T='Vec<double,dim>' . 
-                * <strong> nb_dim </strong> est la dimension du champ si le champs est un vecteur.
-            * <strong> options </strong> est un comportement comme par exemple "behavior_simplification", 'plane stress', 'axysymmetric', 'plane strain'  ...
-            * Ce paramètre , nommé  <strong> T </strong> , est le type des scalaires (le type par défaut est double).
-            * Le booléen, bommé <strong> use_asm </strong> a False pour valeur par défaut. S'il es positionné à False, le code assembleur est généré par g++ sinon la plate-forme génère elle-même le code assembleur pour gagner du temps sur le temps de compilation et l'espace mémoire.
-            * Enfin le dernier paramètre est <strong> name_der_var </strong>. C'est une liste de nom de variable dont on souhaite pouvoir calculer la dérivée par rapport à un ou plusieurs paramètres. 
-                REMARQUE IMPORTANTE sur l'utilisation de <strong> name_der_var </strong> . Les variables peuvent être de type scalaire mais aussi vectorielle. Dans ce cas, si on a par exemple <strong> name_der_var </strong> = ['dep','E'] où dep est un vecteur à trois composantes et E un scalaire, l'accès à la première composante de dep se fera avec l'entier 0, l'accès à la seconde par l'entier 1, et l'accès à E par l'entier 3. Ainsi l'appel de la méthode assemble_vector_der_val( int ) appliquée à E sera assemble_vector_der_val( 3 ).
-
-
-            REMARQUE : tous les paramètres de la fonction make_pb() n'ont pas été expliqué. Certains (qui n'apparaissent pas sur l'exemple) ont des valeurs par défauts suffisantes pour la majorité des problèmes. Pour plus de détails, consulter son code dans le fichier __init__.py.
-
-    = Création d'un fichier de formulation "formulation_name.py"
-
-        On peut définir un problème sous la forme d'un problème variationnel (avec des fonctions tests) ou sous la forme d'un problème de minimisation ( i.e. minimiser l'énergie). 
-        Ce fichier va contenir la formulation du problème avec ses variables, les équations, ... 
-        De façon générale, le but ici est de travailler sur des formules et non sur des flots de contrôle (if, boucles). Si vous faites un if en python, il ne sera exécuté qu'une fois pour la compilation mais il n'y aura pas de tests à l'exécution. Si vous avez des flags, utilisez par exemple energie = flag_1 * energie_1 + ... Cf. éventuellement heaviside_if en python qui génère des if dans le code final.
-        Commençons par un premier exemple de fichier.
- 
-           = Exemple 1
-
-                C'est le code du fichier formulaton_difftherm.py
-                \code Python
-                    temperature = Variable( unknown=True, nb_der=1, default_value='0.0', unit='K' )
-                    Q = Variable( default_value='0.0', unit='K/s' )
-                    Qs = Variable( interpolation='nodal', default_value='0.0', unit='K/s' )
-                    
-                    density = Variable( interpolation='global', default_value='3160.0', unit='kg/m^3' )
-                    heat_capacity = Variable( interpolation='global', default_value='1100.0', unit='J/kg/K' )
-                    thermal_conductivity = Variable( interpolation='global', default_value='1.5', unit='W/m/K' )
-                    
-                    H  = Variable( interpolation='skin_elementary', default_value='0.0', unit='W/m^2/K' )
-                    t0 = Variable( interpolation='global', default_value='0', unit='K' )
-                    
-                    H2 = Variable( interpolation='elementary', nb_dim=[3], default_value='0.0', unit='W/m^2/K' )
-                    H3 = Variable( interpolation='elementary', nb_dim=[3], default_value='0.0', unit='W/m^2/K' )
-                    #epslopigh = Variable( interpolation='gauss', default_value='500', nb_dim=[6], unit='K' )
-                    
-                    TOTO = Variable( interpolation='elementary', T="float", default_value='0.0', unit='W/m^2/K' )
-                    
-                    left_time_integration  = 0
-                    right_time_integration = 1
-                    
-                    
-                    #
-                    def formulation():
-                        #sys.stderr.write( str( epslopigh.expr ) )
-                        a = thermal_conductivity.expr / ( density.expr * heat_capacity.expr ) 
-                        # 'a' est la diffusivite thermique en m^2/s (ici a=4.3153e-07 m^2/s)
-                        # k = heat_capacity.expr*thermal_conductivity.expr #
-                        t,te = temperature.expr, temperature.test
-                        
-                        res = dot( a * grad(t), grad(te) ) + ( t.diff(time) - Q.expr ) * te * 0
-                        
-                        return res * dV + H.expr * ( t - t0.expr ) * te * dS - Qs.expr * te * dN
-
-            Expliquons le code.
-            = Première partie : définition des variables accessibles au niveau du maillage   
-                C'est la même syntaxe que celle du fichier SConstruct (cf \a #param )  avec un nouveau champ facultatif, <strong> unknown </strong> ,  champs spécial indiquant que la variable est une inconnue du problème (obtenue par résolution d'un systeme en général).
-                Sur l'exemple, l'unique inconnue est la température, calculée sur les noeuds.
-                Avez-vous remarqué le paramètre <strong> nb_der </strong> de l'inconnue temperature ?
-                C'est le degré des polynômes d'approximation de la temperature. Il doit être supérieur ou égal à l'ordre de dérivation maximal dans l'équation. Par exemple, si des dérivées secondes de l'inconnue apparaissent dans l'équation de formulation, il faut prendre <strong> nb_der </strong> supérieur ou égal à 2.
-                Et que signifie <strong> left_time_integration </strong> , et <strong> right_time_integration </strong> ?
-                Ce sont les coefficients alpha et beta de la formulation intégrale de l'équation, ci-dessous :
-                \latex
-                    $$
-                    \int_{t_n \, + \, \alpha \, {\Delta t}_n}^{t_n \, + \, \beta \, {\Delta t}_{n+1}} F(u_n,u_{n+1},t,... ) \; dt
-                    $$ 
-
-            = Deuxième partie : définition de la formulation.
-                Pour cette exemple, on a une formulation variationnelle.
-                On ecrit la formulation dans la fonction formulation(). On aura bien-sûr besoin des champs et d'opérateurs classiques. Pour utiliser un champ C défini dans la première partie, on écrit C.expr et pour exprimer une fonction test du champ, on écrit C.test. Dans l'exemple, on définit des synomymes pour temperature.expr et temperature.test (resp. t et te).
-                Les opérateurs implémentés dans la plate-forme sont :
-                    * grad_sym_col
-                    * grad
-                    * grad_sym
-                    * green_lagrange_col
-                    * green_lagrange
-                    * div
-                    * dot
-                    * analytical_integration
-                    * integration
-                    * les opérations usuelles + - * / avec les remarques : 
-                        * la multiplication matrice-matrice et matrice-vecteur se fait avec mul (i.e. mul(m,v) ). Le symbole * est donc réservé au produit scalaire-vecteur et scalaire-matrice.
-                        * la division se fait terme à terme.
-                Pour être au courant des derniers ajouts d'opérateurs, consulter le fichier "element.py".
-                Enfin la fonction retourne l'expression de la formulation. Expliquons les termes dV, dS, dN ainsi que dE et dS_normal bien q'ils ne soient pas tous  utilisés dans l'exemple.
-                le bout d'expression * dV signifie qu'on intègre sur le volume. Pour * dS on intègre sur les toutes les surfaces des éléments volumiques (mêmes ceux de l'intérieur). * dN (resp. * dE) signifie qu'on fait la somme sur les noeuds (resp. sur les éléments). Enfin avec * dS_normal, on intègre sur la surface avec le vecteur normal de l'élément de surface dS. Exemple :
-                \latex
-                    $$
-                    \int_{\partial \Omega} \vec{u} \times \vec{n} \, dS
-                    $$  
-                La formulation variationnelle est donc pour l'exemple :
-                \latex
-                    $$
-                    \int_{\Omega} a \overrightarrow{\nabla}(T) \cdot \overrightarrow{\nabla}(v) + (\frac{\partial T}{\partial t}-Q) \, v \, dV + \int_{\partial \Omega} H \; (T-T_0) \, v \, dS = \sum_{Noeuds} Q_s \, v \;\;\;\;\; \forall v \in H^1(\Omega)
-                    $$  
-                    
-                Dans le code, on trouve aussi des bouts de code mis en commentaire ( i.e. #sys.stderr.write( str( epslopigh.expr ) ) ). C'est classique lorsqu'on met au point un programme. Par exemple ce fameux 
-                \code Python
-                    sys.stderr.write( str( epslopigh.expr ) ) )
-                permet d'envoyer l'expression de epslopigh dans la sortie d'erreur standard (i.e. la console ).
-                Enfin dernier truc en période de mise au point : peut-être avez-vous remarqué le <strong> * 0 </strong> dans la formulation ?
-                Cette multiplication par 0 annule bien sûr le terme et le supprimer de l'expression de la formulation pour un essai.
- 
-           = Exemple 2 
-
-                C'est un problème elastique. 
-
-               \code Python
-                    f_vol = Variable( interpolation='global', nb_dim=[dim], default_value='0.0,'*(dim-1)+'0.0', unit='N/m^3' )
-                    elastic_modulus = Variable( interpolation='global', default_value='15e3', unit='N/mm^2' )
-                    poisson_ratio = Variable( interpolation='global', default_value='0.3', unit='1' )
-                    density = Variable( interpolation='global', default_value='1', unit='kg/mm^3' )
-        
-                    dep = Variable( unknown=True, nb_dim=[dim], default_value='0.0', unit='mm' )
-        
-                    sigma = Variable( interpolation='der_nodal', default_value='0', nb_dim=[dim*(dim+1)/2], unit='N/mm^2' )
-                    epsilon = Variable( interpolation='der_nodal', default_value='0', nb_dim=[dim*(dim+1)/2], unit='' )
-                    ener = Variable( interpolation='elementary', default_value='0', unit='N*mm' )
-        
-        
-                    def formulation():
-                        epsilon = grad_sym_col(dep.expr)
-                        epstest = grad_sym_col(dep.test)
-                        behavior_simplification=options["behavior_simplification"]
-                        sigma = mul( hooke_matrix(elastic_modulus.expr,poisson_ratio.expr,dim,behavior_simplification) ,epsilon )
-        
-                        res = density.expr * dot( dep.expr.diff(time).diff(time) - f_vol.expr, dep.test )
-                        for i in range(dim): res += sigma[i] * epstest[i]
-                        for i in range(dim,epsilon.size()): res += 2 * sigma[i] * epstest[i]
-        
-                        return res * dV
-        
-                    def apply_on_elements_after_solve(unk_subs): # return a string
-                        H = hooke_matrix(elastic_modulus.expr,poisson_ratio.expr,dim,'plane stress')
-                        epsilon = grad_sym_col(dep.expr)
-                        sigma = mul( H, epsilon )
-                        #my_subs = unk_subs
-                        #my_subs[ time ] = time_steps[0]
-                        #for vi in e.var_inter: my_subs[vi] = number(0.5)
-                        #sigma = sigma.subs(EM(my_subs))
-                        #epsilon = epsilon.subs(EM(my_subs))
-            
-                        cw = Write_code('T')
-                        for i in range(dim*(dim+1)/2):
-                            cw.add( epsilon[i], 'elem.epsilon[0]['+str(i)+']', Write_code.Set )
-                            cw.add( sigma[i], 'elem.sigma[0]['+str(i)+']', Write_code.Set )
-                        return cw.to_string()
-
-            \latex
-                $$
-                    \int_{\Omega} \rho \left( \frac{\partial^2 \overrightarrow{u}}{\partial t^2} - f_{vol} \right) \cdot \overrightarrow{u^*} + Tr \left( \Sigma E \right) d\Omega - \int_{\partial \Omega_f} \overrightarrow{F_imp} \cdot \overrightarrow{u^*} dS = 0
-                $$
-                $$
-                    \int_{\Omega} \rho \left( \frac{\partial^2 \overrightarrow{u}}{\partial t^2} - f_{vol} \right) \cdot \overrightarrow{u^*} + Tr\left(\Sigma E \right) d\Omega = 0
-                $$
-            
-            On retrouve au début les déclarations des variables et de la fonction formulation(). 
-
-
-
-            Dans cet exemple, on définit aussi une fonction apply_on_elements_after_solve(). Elle génèrera une fonction C++ de même nom dans la classe \a Formulation qui sera appelée juste après la fonction solve_system() (i.e. après la résolution de l'équation). Et au besoin, on peut créer d'autres fonctions du même genre avec les noms apply_on_elements_after_solve_2, apply_on_elements_after_solve_3 ... jusqu'à 6.
-            Elles contiendront un objet de type Write_code et c'est l'appel à cw.to_string() qui renvoie le code C++ sous forme d'un chaine de caractères. Pour plus de renseignements sur les possibilités de la classe, allez à \a Write_code .
-
-    = Projet Kdevelop
-
-        Si vous avez oubliez comment on procède pour créer un projet kdevelop, consultez le tutoriel [[Mon premier programme]] .
-        
-        = Le fichier d'en-têtes C++ nécessaire pour la génération du code C++
-            Il est TRES IMPORTANT d'inclure le fichier <strong> d'en_tete de votre problème </strong> dans votre fichier main.cpp.
-            \code C/C++
-                #include "build/problem_XXX/problem.h"
-        
-            où XXX est le nom de votre problème ( défini dans le fichier SConstruct, paramètre name de la fonction make_pb() )
-
-        = Définition d'un problème et d'un maillage
-            Cela prend cette forme :
-            \code C/C++
-                typedef Problem_XXX< TTT , DDD > PB;
-                typedef PB::TM TM;
-                typedef TM::Pvec Pvec;
-
-                TM m;
-                ...
-                PB pb( m );
-        
-            Expliquons ce code.
-            La première ligne définit un synonyme du type ( classe en C++ ) représentant votre problème. Cela allège l'écriture. TTT est en général soit le type float, soit le type double, et DDD est la dimension de votre problème (i.e. 2 ou 3). Un exemple est : typedef Problem_zebulon_thermique<double,2> PB; 
-            Ce type PB contient plein d'informations, en autre un synonyme nommé TM du type de maillage de votre problème. En effet les maillages peuvent contenir de nombreuses sortes d'éléments possédant des attributs variés, etc... et ainsi chaque problème a son type de maillage. on obitent ce type en faisant PB::TM. 
-            Le deuxième typedef définit donc un synonyme du type de votre maillage.
-            Le troisième et dernier typedef définit un synonyme du type servant à définir un point dans l'espace ( P pour point, et vec car c'est un vecteur du plan ou de l'espace).
-            Ensuite la ligne TM m; crée une instance appelée m du type TM : c'est donc un maillage, vide en l'occurence.
-            Enfin on crée une instance du problème, par la ligne PB pb( m );, associé au maillage m précédemment créé.
+    La librairie LMT++ permet de résoudre des équations aux dérivées partielles ou ordinaires. La résolution se fait en deux temps. Premièrement on exprime ses équations dans un fichier .py avec le langage Python. Puis on écrit le code de résolution des équations en C++. Bien sûr le C++ est préféré à Python pour des raisons de performance. 
+    Quand on lance la compilation du code C++, un système transparent se charge de générer toutes les classes C++ représentant vos équations à partir du fichier Python avant la compilation de votre code.
     
-            Remarque : Pour créer une instance de maillage, on peut récupérer son type dans le fichier build/problem_XXX/problem.h. Ce type est de la forme :
-            \code C/C++
-                Mesh< Mesh_carac_XXX< TTT, DDD  > >
-            Donc pour instancier un maillage m, on aurait pu faire :
-            \code C/C++
-                Mesh< Mesh_carac_XXX< TTT, DDD  > > m;
-            Mais il vaut mieux passer par PB::TM ...
-
-        = Pour accéder ou modifier les champs definis au maillage :
-            * champs globaux : m.elastic_modulus
-            * champs nodaux : m.node_list[i].dep  
-            * champs aux elements : créer un opérateur pour réaliser l'operation escomptée (exemple, affichage d'un champ particulier)
-            \code C/C++
-                struct affich_sigma{
-                    template<class TE> void operator()(TE &e) const{
-                    cout<< e.sigma[0] << endl;  // affichage de la contrainte au point de gauss 0
+    Jusqu' à récemment la gestion de tout ce processus de génération et de compilation était géré par [[http://www.scons.org/|scons]] , un logiciel de gestion de projet écrit en Python, très flexible, qui permet le lancement de la génération de code C++. scons a la même fonction que <strong> make </strong> . Il avait besoin d'un fichier <strong> SConstruct </strong> qui est l'équivalent du célèbre <strong> Makefile </strong> de <strong> make </strong> . On avait quand même besoin aussi d'un fichier <strong> Makefile </strong> pour lancer tout cela car <strong> kdevelop </strong> , l' IDE de développement souvent utilisé au centre de calcul, ne connaît pas scons.
+    Maintenant un gestionnaire de projet écrit par Hugo, <strong> metil_comp </strong> , s'occupe de tout le travail à la place de scons. Il n' y a plus besoin de fichier SConstruct ou Makefile ( sauf bien sûr si on utilise kdevelop pour compiler son projet ).
+        
+    Dans ce tutoriel, on fera usage de metil_comp et on laissera à la fin les explications pour scons pour ceux qui l'utilisent.
+     
+    Il existe dans la librairie LMT++ un grand nombre de problèmes et d'équations aux dérivées partielles déjà exprimées en Python ( souvent sous forme d' une formulation faible ).
+    On les trouve dans le répertoire formulations/ . Il se peut que votre problème soit donc déjà traduit en Python ou du moins ces exemples pourront vous servir à écrire votre propre traduction.
+     
+    Le premier paragraphe sera un tutoriel pour un exemple complet dans le cas où la formulation en Python est déjà faite.
+    Ensuite le second paragraphe expliquera comment créer sa propre formulation Python. 
+     
+    = Exemple complet avec une formulation de la plate forme.
+    
+        On choisit l'équation élastique iso (fichier formulations/formulation_elasticity_iso.py ) . Remarque importante : toutes les formulations commencent par "formulation_" .
+         
+        Créez un répertoire. Dedans créz un lien symbolique vers la librairie LMT++ en faisant comme cela :
+        \code 
+            ln -s /home/dupont/LMTpp LMTpp
+            
+        \code 
+            ln -s /home/dupont/LMTpp-test LMTpp
+        si vous souhaitez utiliser la version la plus récente.    
+        
+        Le chemin <strong> /home/dupont/ </strong> sera remplacé par votre propre chemin ( e.g. /usrtmp/dupont/ ).
+         
+        Puis on crée son fichier C++, nommé <strong> main.cpp </strong> :
+        \code C/C++
+            #include "formulation.elasticity_iso.Triangle,Quad,Tetra,Hexa.h"
+            #include "mesh/make_rect.h"
+            
+            using namespace LMT;
+            
+            int main( int argc, const char* argv[] ) {
+            
+                typedef double T;
+                static const unsigned dim = 2;
+                
+                typedef Mesh<Mesh_carac_elasticity_iso< T, dim> > TM;
+                typedef TM::Pvec Pvec;
+                typedef Formulation<TM,elasticity_iso> TF;
+                
+                TM m;
+                T lx = 10, ly = 1;
+                make_rect( m, Triangle(), 0, Pvec( lx, ly ), Pvec( 21, 5 ) );
+                
+                for(unsigned i = 0; i < m.node_list.size(); ++i )
+                    m.node_list[ i ].dep[ 0 ] = 1;
+                
+                TF f( m );
+                
+                T epsi = 1e-6;
+                for(unsigned i = 0; i < m.node_list.size(); ++i )
+                    if ( ( m.node_list[ i ].pos[ 0 ] < epsi ) or ( m.node_list[ i ].pos[ 0 ] > lx - epsi ) ) {
+                        for( int d = 0; d < dim; ++d )
+                            f.add_constraint( "sin( node[" + to_string( i ) + "].dep[" + to_string( d ) + "] ) - " + to_string( 0.1 * m.node_list[ i ].pos[ 0 ] * ( d == 0 ) ), 1e5 );
                     }
-                };
+                    
+                
+                f.solve();
+                display( m );
+                
+                return 0;
+            }             
+        
+        Et un fichier Makefile si vous utilisez make via kdevelop :
+        \code
+            all: 
+                metil_comp -g -I./LMT/include main.cpp
+    
+        Rappelons qu'entre le début de ligne et le texte "metil_comp -g -I./LMT/include main.cpp", il faut une tabulation et pas des espaces.
+        
+        Expliquons en détail le code source:
+        
+        Le premier #include est très important et le texte entre les doubles quotes doit respecter une syntaxe car il sera interprêté par metil_comp.
+        Voici sa forme générale :
+        \verbatim
+            #include "formulation.F.E1[,Ei].h"
+        
+        * <strong> F </strong> sera le nom de la formulation,
+        * <strong> E1 </strong> un nom d'éléments ( e.g. \a Triangle , \a Tetra , \a Wedge ).
+        Il peut y avoir plusieurs noms d'éléments, séparés par une <strong> virgule </strong> . Si on travaille dans le plan et l'espace, on mettra les éléments de chaque dimension nécessaires.
+        
+        Le deuxième #include sert à incorporer la fonction \a make_rect () qui sert à construire des maillages sur un rectangle en 2D ou une brique en 3D.
+        
+        Ensuite <strong> using namespace LMT; </strong> incorpore l'espace de nom LMT donc on pourra utiliser tous les déclarations de la LMT sans les précéder de <strong> LMT:: </strong> ( e.g. LMT::make_rect() est moins lisible que make_rect() ).
+        
+        
+    
+    = Ecrire sa formulation
+    
+    = TODO
+    
 
-        = Définition d'une formulation
-            \code C/C++
-                typedef Formulation<TM,elasticity> TF;
-                TF f(m);
 
-            Remarque : f.m fait référence au maillage de la formulation.
+    = Ancienne documentation avec scons
+
+        La résolution d'un problème avec les éléments finis se fait en trois étapes :
+            * Création d'un fichier Sconstuct qui contiendra un appel de la fonction make_pb() pour définir le nom du problème, la formulation et le type d'éléments finis.
+            * Création d'un autre fichier python pour détailler la formulation (i.e. les équations, les grandeurs inconnues, les paramètres, ...)
+            * Création d'un projet kdevelop pour d'une part générer les fichiers d'en-têtes C++ .h à partir des fichiers Sconstruct et python puis d'autre part écrire le code de calcul.
+
+        = Creation d'un fichier Sconstruct
+    
+            Rappelons que ce fichier sert à construire un projet de développement (nom du programme, librairies nécessaires,etc...).
+            La partie qui nous intéresse est l'appel de la fonction make_pb() qui fournit des informations sur la formulation et les éléments finis. 
+    
+            Exemple de fichier
+    
+            \code Python
+                from LMT import *
+                from LMT.formal_lf import *
+                
+                env = Environment(
+                    LIBPATH = [ '/usr/lib','/usr/local/lib/'  ],
+                    LIBS = [ 'pthread', 'cholmod', 'm ],
+                    CPPPATH = [ '#LMT/include' ],
+                    CPPFLAGS = cppflags( ['xml2-config'] ) + " -O3 -g3 -Wall",
+                    LINKFLAGS = linkflags( ['xml2-config'] ),
+                )
+                make_dep_py(env)
+                
+                env.BuildDir( 'build/LMT', 'LMT/include', duplicate=0 )
+                libs = SConscript( 'LMT/include/SConscript', exports='env', 
+                build_dir='build/LMT' )
+                
+                pb_libs = make_pb(
+                    env,
+                    opt               = 0,
+                    name              = 'pb_elast',
+                    formulations      = ['elasticity_isotropy','elasticity_orthotropy'],
+                    elements          = ['Triangle','Tetra'],
+                    options           = {"behavior_simplification" : 'plane stress'},
+                    additional_fields = { "qtrans" : Variable(unit='mm',nb_dim=['DIM']), "typmat" : Variable(interpolation='elementary',unit='',default_value='0')},
+                    types             = ['float'],
+                    #use_asm           = True,
+                    name_der_vars     = ['dep','E']
+                )
+    
+                env.Program( "main", ["testdifftherm.cpp"] + libs + pb_libs, build_dir='build/LMT' )
+    
+    
+    
+            Remarques: 
+                * les commentaires python sur une ligne commencent par un diese (#) et les tableaux "explicites" sont de la forme [a,b,... ].
+                * NE PAS OUBLIER d'ajouter pb_libs dans la liste des codes sources dans l'appel final env.Program().
+    
+            Détail des paramètres de la fonction make_pb() dans l'ordre :
+                * Ce paramètre est l'objet qui contient l'environnement nécessaire à l'éxécution du programme. 
+                * Ce paramètre , nommé <strong> opt </strong> , vaut soit 0 pour un mode normal soit 1 pour un mode optimisé.
+                * Ce paramètre , nommé  <strong> name </strong> , est le nom donné au problème. Pour déclarer ensuite un maillage il faudra faire 
+                    \code C/C++
+                        Mesh<Meshcarac_name<type, dim> > m; // où type est le type des variables (float, double, long double, etc) et dim la dimension de l'espace
+                * Ce paramètre , nommé <strong> formulations </strong>  , contient les noms des formulations sur lesquelles on veut travailler. Dans les repertoires indiqués dans <strong>incpaths</strong> (argument optionel de la fonction make_pb, par exemple ["toto","tata"] pour aller chercher dans les répertoires toto et tata), doivent se trouver des fichiers python nommés formulation_elasticity_isotropy.py, formulation_elasticity_orthotropy.py. Ces fichiers contiennent les variables utilisées pour la formulation (modules materiau, contrainte, deplacement,deformation, energie..). C'est à l'interieur de ce fichier que l'on ecrit directement la formulation sous forme variationnelle (cf ci-dessous).
+                * Ce paramètre , nommé <strong> elements </strong> , contient les types d'éléments à utiliser dans le maillage parmi : Bar, Triangle, Quad, Tetra, Wedge, Cube, etc ... 
+                * Ce paramètre , nommé <strong> additional_fields </strong> , (facultatif) contient les champs additionnels à placer dans les maillages suivant la syntaxe \anchor param
+                    \code 
+                        "nom du champs" : Variable (interpolation=valeur, unit=valeur,default_value=valeur,T=valeur,nb_dim=tableau de valeurs) où les valeurs sont exprimées sous forme d'un chaine de caractères. 
+                    * <strong> interpolation </strong> : correspond au type d'interpolation de la variable, choisi parmi : nodal (interpolation suivant les valeurs aux noeuds, elementary ( "interpolation" suivant une valeur définie pour l'élément entier), global ( "interpolation" suivant une valeur définie sur tout le maillage) , der_nodal ( "interpolation" suivant une valeur définie pour l'élément entier ),bubble ( ??? ) , etc ... Pour connaître l'ensemble des possibilités, consultez la rubrique Maillage/Interpolation de la page "mot-clés" ou les fichiers sources formulations/element_XXX.py où XXX est le nom de l'élément.
+                    * <strong> unit </strong> est l'unité du champs.
+                    * <strong> default_value </strong> est la valeur par defaut.
+                    * <strong> T </strong> ='type' si on souhaite avoir un type special. Par exemple si un champ dépend de la dimension du problème, on écrira T='Vec<double,dim>' . 
+                    * <strong> nb_dim </strong> est la dimension du champ si le champs est un vecteur.
+                * <strong> options </strong> est un comportement comme par exemple "behavior_simplification", 'plane stress', 'axysymmetric', 'plane strain'  ...
+                * Ce paramètre , nommé  <strong> T </strong> , est le type des scalaires (le type par défaut est double).
+                * Le booléen, bommé <strong> use_asm </strong> a False pour valeur par défaut. S'il es positionné à False, le code assembleur est généré par g++ sinon la plate-forme génère elle-même le code assembleur pour gagner du temps sur le temps de compilation et l'espace mémoire.
+                * Enfin le dernier paramètre est <strong> name_der_var </strong>. C'est une liste de nom de variable dont on souhaite pouvoir calculer la dérivée par rapport à un ou plusieurs paramètres. 
+                    REMARQUE IMPORTANTE sur l'utilisation de <strong> name_der_var </strong> . Les variables peuvent être de type scalaire mais aussi vectorielle. Dans ce cas, si on a par exemple <strong> name_der_var </strong> = ['dep','E'] où dep est un vecteur à trois composantes et E un scalaire, l'accès à la première composante de dep se fera avec l'entier 0, l'accès à la seconde par l'entier 1, et l'accès à E par l'entier 3. Ainsi l'appel de la méthode assemble_vector_der_val( int ) appliquée à E sera assemble_vector_der_val( 3 ).
+    
+    
+                REMARQUE : tous les paramètres de la fonction make_pb() n'ont pas été expliqué. Certains (qui n'apparaissent pas sur l'exemple) ont des valeurs par défauts suffisantes pour la majorité des problèmes. Pour plus de détails, consulter son code dans le fichier __init__.py.
+    
+        = Création d'un fichier de formulation "formulation_name.py"
+    
+            On peut définir un problème sous la forme d'un problème variationnel (avec des fonctions tests) ou sous la forme d'un problème de minimisation ( i.e. minimiser l'énergie). 
+            Ce fichier va contenir la formulation du problème avec ses variables, les équations, ... 
+            De façon générale, le but ici est de travailler sur des formules et non sur des flots de contrôle (if, boucles). Si vous faites un if en python, il ne sera exécuté qu'une fois pour la compilation mais il n'y aura pas de tests à l'exécution. Si vous avez des flags, utilisez par exemple energie = flag_1 * energie_1 + ... Cf. éventuellement heaviside_if en python qui génère des if dans le code final.
+            Commençons par un premier exemple de fichier.
+    
+            = Exemple 1
+    
+                    C'est le code du fichier formulaton_difftherm.py
+                    \code Python
+                        temperature = Variable( unknown=True, nb_der=1, default_value='0.0', unit='K' )
+                        Q = Variable( default_value='0.0', unit='K/s' )
+                        Qs = Variable( interpolation='nodal', default_value='0.0', unit='K/s' )
+                        
+                        density = Variable( interpolation='global', default_value='3160.0', unit='kg/m^3' )
+                        heat_capacity = Variable( interpolation='global', default_value='1100.0', unit='J/kg/K' )
+                        thermal_conductivity = Variable( interpolation='global', default_value='1.5', unit='W/m/K' )
+                        
+                        H  = Variable( interpolation='skin_elementary', default_value='0.0', unit='W/m^2/K' )
+                        t0 = Variable( interpolation='global', default_value='0', unit='K' )
+                        
+                        H2 = Variable( interpolation='elementary', nb_dim=[3], default_value='0.0', unit='W/m^2/K' )
+                        H3 = Variable( interpolation='elementary', nb_dim=[3], default_value='0.0', unit='W/m^2/K' )
+                        #epslopigh = Variable( interpolation='gauss', default_value='500', nb_dim=[6], unit='K' )
+                        
+                        TOTO = Variable( interpolation='elementary', T="float", default_value='0.0', unit='W/m^2/K' )
+                        
+                        left_time_integration  = 0
+                        right_time_integration = 1
+                        
+                        
+                        #
+                        def formulation():
+                            #sys.stderr.write( str( epslopigh.expr ) )
+                            a = thermal_conductivity.expr / ( density.expr * heat_capacity.expr ) 
+                            # 'a' est la diffusivite thermique en m^2/s (ici a=4.3153e-07 m^2/s)
+                            # k = heat_capacity.expr*thermal_conductivity.expr #
+                            t,te = temperature.expr, temperature.test
+                            
+                            res = dot( a * grad(t), grad(te) ) + ( t.diff(time) - Q.expr ) * te * 0
+                            
+                            return res * dV + H.expr * ( t - t0.expr ) * te * dS - Qs.expr * te * dN
+    
+                Expliquons le code.
+                = Première partie : définition des variables accessibles au niveau du maillage   
+                    C'est la même syntaxe que celle du fichier SConstruct (cf \a #param )  avec un nouveau champ facultatif, <strong> unknown </strong> ,  champs spécial indiquant que la variable est une inconnue du problème (obtenue par résolution d'un systeme en général).
+                    Sur l'exemple, l'unique inconnue est la température, calculée sur les noeuds.
+                    Avez-vous remarqué le paramètre <strong> nb_der </strong> de l'inconnue temperature ?
+                    C'est le degré des polynômes d'approximation de la temperature. Il doit être supérieur ou égal à l'ordre de dérivation maximal dans l'équation. Par exemple, si des dérivées secondes de l'inconnue apparaissent dans l'équation de formulation, il faut prendre <strong> nb_der </strong> supérieur ou égal à 2.
+                    Et que signifie <strong> left_time_integration </strong> , et <strong> right_time_integration </strong> ?
+                    Ce sont les coefficients alpha et beta de la formulation intégrale de l'équation, ci-dessous :
+                    \latex
+                        $$
+                        \int_{t_n \, + \, \alpha \, {\Delta t}_n}^{t_n \, + \, \beta \, {\Delta t}_{n+1}} F(u_n,u_{n+1},t,... ) \; dt
+                        $$ 
+    
+                = Deuxième partie : définition de la formulation.
+                    Pour cette exemple, on a une formulation variationnelle.
+                    On ecrit la formulation dans la fonction formulation(). On aura bien-sûr besoin des champs et d'opérateurs classiques. Pour utiliser un champ C défini dans la première partie, on écrit C.expr et pour exprimer une fonction test du champ, on écrit C.test. Dans l'exemple, on définit des synomymes pour temperature.expr et temperature.test (resp. t et te).
+                    Les opérateurs implémentés dans la plate-forme sont :
+                        * grad_sym_col
+                        * grad
+                        * grad_sym
+                        * green_lagrange_col
+                        * green_lagrange
+                        * div
+                        * dot
+                        * analytical_integration
+                        * integration
+                        * les opérations usuelles + - * / avec les remarques : 
+                            * la multiplication matrice-matrice et matrice-vecteur se fait avec mul (i.e. mul(m,v) ). Le symbole * est donc réservé au produit scalaire-vecteur et scalaire-matrice.
+                            * la division se fait terme à terme.
+                    Pour être au courant des derniers ajouts d'opérateurs, consulter le fichier "element.py".
+                    Enfin la fonction retourne l'expression de la formulation. Expliquons les termes dV, dS, dN ainsi que dE et dS_normal bien q'ils ne soient pas tous  utilisés dans l'exemple.
+                    le bout d'expression * dV signifie qu'on intègre sur le volume. Pour * dS on intègre sur les toutes les surfaces des éléments volumiques (mêmes ceux de l'intérieur). * dN (resp. * dE) signifie qu'on fait la somme sur les noeuds (resp. sur les éléments). Enfin avec * dS_normal, on intègre sur la surface avec le vecteur normal de l'élément de surface dS. Exemple :
+                    \latex
+                        $$
+                        \int_{\partial \Omega} \vec{u} \times \vec{n} \, dS
+                        $$  
+                    La formulation variationnelle est donc pour l'exemple :
+                    \latex
+                        $$
+                        \int_{\Omega} a \overrightarrow{\nabla}(T) \cdot \overrightarrow{\nabla}(v) + (\frac{\partial T}{\partial t}-Q) \, v \, dV + \int_{\partial \Omega} H \; (T-T_0) \, v \, dS = \sum_{Noeuds} Q_s \, v \;\;\;\;\; \forall v \in H^1(\Omega)
+                        $$  
+                        
+                    Dans le code, on trouve aussi des bouts de code mis en commentaire ( i.e. #sys.stderr.write( str( epslopigh.expr ) ) ). C'est classique lorsqu'on met au point un programme. Par exemple ce fameux 
+                    \code Python
+                        sys.stderr.write( str( epslopigh.expr ) ) )
+                    permet d'envoyer l'expression de epslopigh dans la sortie d'erreur standard (i.e. la console ).
+                    Enfin dernier truc en période de mise au point : peut-être avez-vous remarqué le <strong> * 0 </strong> dans la formulation ?
+                    Cette multiplication par 0 annule bien sûr le terme et le supprimer de l'expression de la formulation pour un essai.
+    
+            = Exemple 2 
+    
+                    C'est un problème elastique. 
+    
+                \code Python
+                        f_vol = Variable( interpolation='global', nb_dim=[dim], default_value='0.0,'*(dim-1)+'0.0', unit='N/m^3' )
+                        elastic_modulus = Variable( interpolation='global', default_value='15e3', unit='N/mm^2' )
+                        poisson_ratio = Variable( interpolation='global', default_value='0.3', unit='1' )
+                        density = Variable( interpolation='global', default_value='1', unit='kg/mm^3' )
+            
+                        dep = Variable( unknown=True, nb_dim=[dim], default_value='0.0', unit='mm' )
+            
+                        sigma = Variable( interpolation='der_nodal', default_value='0', nb_dim=[dim*(dim+1)/2], unit='N/mm^2' )
+                        epsilon = Variable( interpolation='der_nodal', default_value='0', nb_dim=[dim*(dim+1)/2], unit='' )
+                        ener = Variable( interpolation='elementary', default_value='0', unit='N*mm' )
+            
+            
+                        def formulation():
+                            epsilon = grad_sym_col(dep.expr)
+                            epstest = grad_sym_col(dep.test)
+                            behavior_simplification=options["behavior_simplification"]
+                            sigma = mul( hooke_matrix(elastic_modulus.expr,poisson_ratio.expr,dim,behavior_simplification) ,epsilon )
+            
+                            res = density.expr * dot( dep.expr.diff(time).diff(time) - f_vol.expr, dep.test )
+                            for i in range(dim): res += sigma[i] * epstest[i]
+                            for i in range(dim,epsilon.size()): res += 2 * sigma[i] * epstest[i]
+            
+                            return res * dV
+            
+                        def apply_on_elements_after_solve(unk_subs): # return a string
+                            H = hooke_matrix(elastic_modulus.expr,poisson_ratio.expr,dim,'plane stress')
+                            epsilon = grad_sym_col(dep.expr)
+                            sigma = mul( H, epsilon )
+                            #my_subs = unk_subs
+                            #my_subs[ time ] = time_steps[0]
+                            #for vi in e.var_inter: my_subs[vi] = number(0.5)
+                            #sigma = sigma.subs(EM(my_subs))
+                            #epsilon = epsilon.subs(EM(my_subs))
+                
+                            cw = Write_code('T')
+                            for i in range(dim*(dim+1)/2):
+                                cw.add( epsilon[i], 'elem.epsilon[0]['+str(i)+']', Write_code.Set )
+                                cw.add( sigma[i], 'elem.sigma[0]['+str(i)+']', Write_code.Set )
+                            return cw.to_string()
+    
+                \latex
+                    $$
+                        \int_{\Omega} \rho \left( \frac{\partial^2 \overrightarrow{u}}{\partial t^2} - f_{vol} \right) \cdot \overrightarrow{u^*} + Tr \left( \Sigma E \right) d\Omega - \int_{\partial \Omega_f} \overrightarrow{F_imp} \cdot \overrightarrow{u^*} dS = 0
+                    $$
+                    $$
+                        \int_{\Omega} \rho \left( \frac{\partial^2 \overrightarrow{u}}{\partial t^2} - f_{vol} \right) \cdot \overrightarrow{u^*} + Tr\left(\Sigma E \right) d\Omega = 0
+                    $$
+                
+                On retrouve au début les déclarations des variables et de la fonction formulation(). 
+    
+    
+    
+                Dans cet exemple, on définit aussi une fonction apply_on_elements_after_solve(). Elle génèrera une fonction C++ de même nom dans la classe \a Formulation qui sera appelée juste après la fonction solve_system() (i.e. après la résolution de l'équation). Et au besoin, on peut créer d'autres fonctions du même genre avec les noms apply_on_elements_after_solve_2, apply_on_elements_after_solve_3 ... jusqu'à 6.
+                Elles contiendront un objet de type Write_code et c'est l'appel à cw.to_string() qui renvoie le code C++ sous forme d'un chaine de caractères. Pour plus de renseignements sur les possibilités de la classe, allez à \a Write_code .
+    
+        = Projet Kdevelop
+    
+            Si vous avez oubliez comment on procède pour créer un projet kdevelop, consultez le tutoriel [[Mon premier programme]] .
+            
+            = Le fichier d'en-têtes C++ nécessaire pour la génération du code C++
+                Il est TRES IMPORTANT d'inclure le fichier <strong> d'en_tete de votre problème </strong> dans votre fichier main.cpp.
+                \code C/C++
+                    #include "build/problem_XXX/problem.h"
+            
+                où XXX est le nom de votre problème ( défini dans le fichier SConstruct, paramètre name de la fonction make_pb() )
+    
+            = Définition d'un problème et d'un maillage
+                Cela prend cette forme :
+                \code C/C++
+                    typedef Problem_XXX< TTT , DDD > PB;
+                    typedef PB::TM TM;
+                    typedef TM::Pvec Pvec;
+    
+                    TM m;
+                    ...
+                    PB pb( m );
+            
+                Expliquons ce code.
+                La première ligne définit un synonyme du type ( classe en C++ ) représentant votre problème. Cela allège l'écriture. TTT est en général soit le type float, soit le type double, et DDD est la dimension de votre problème (i.e. 2 ou 3). Un exemple est : typedef Problem_zebulon_thermique<double,2> PB; 
+                Ce type PB contient plein d'informations, en autre un synonyme nommé TM du type de maillage de votre problème. En effet les maillages peuvent contenir de nombreuses sortes d'éléments possédant des attributs variés, etc... et ainsi chaque problème a son type de maillage. on obitent ce type en faisant PB::TM. 
+                Le deuxième typedef définit donc un synonyme du type de votre maillage.
+                Le troisième et dernier typedef définit un synonyme du type servant à définir un point dans l'espace ( P pour point, et vec car c'est un vecteur du plan ou de l'espace).
+                Ensuite la ligne TM m; crée une instance appelée m du type TM : c'est donc un maillage, vide en l'occurence.
+                Enfin on crée une instance du problème, par la ligne PB pb( m );, associé au maillage m précédemment créé.
+        
+                Remarque : Pour créer une instance de maillage, on peut récupérer son type dans le fichier build/problem_XXX/problem.h. Ce type est de la forme :
+                \code C/C++
+                    Mesh< Mesh_carac_XXX< TTT, DDD  > >
+                Donc pour instancier un maillage m, on aurait pu faire :
+                \code C/C++
+                    Mesh< Mesh_carac_XXX< TTT, DDD  > > m;
+                Mais il vaut mieux passer par PB::TM ...
+    
+            = Pour accéder ou modifier les champs definis au maillage :
+                * champs globaux : m.elastic_modulus
+                * champs nodaux : m.node_list[i].dep  
+                * champs aux elements : créer un opérateur pour réaliser l'operation escomptée (exemple, affichage d'un champ particulier)
+                \code C/C++
+                    struct affich_sigma{
+                        template<class TE> void operator()(TE &e) const{
+                        cout<< e.sigma[0] << endl;  // affichage de la contrainte au point de gauss 0
+                        }
+                    };
+    
+            = Définition d'une formulation
+                \code C/C++
+                    typedef Formulation<TM,elasticity> TF;
+                    TF f(m);
+    
+                Remarque : f.m fait référence au maillage de la formulation.
 
     Allez voir les pages de :
     \relates Mesh

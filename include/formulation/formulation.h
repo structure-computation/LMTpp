@@ -19,6 +19,7 @@
 #include "constraint.h"
 #include "sollicitation.h"
 #include "util/symamd.h"
+#include "util/symrcm.h"
 #include "util/solveLDL.h"
 #include "util/MUMPS_solver.h"
 #include "formulation/formulation_ancestor.h"
@@ -35,7 +36,7 @@ struct LocalOperator {
     void update_variables(TM *m){ };
 };
 
-/** To be redefined for each new formulations */
+/*! To be redefined for each new formulations */
 template<class TF>
 void read_material_to_mesh_( const XmlNode &n, TF &f ) {}
 
@@ -76,13 +77,18 @@ public:
     };
 };
 
-/**
+/*!
     Pour le choix du solveur : wont_add_nz=false implique utilisation des solveurs internes.
         wont_add_nz=true implique utilisation de LDL, sauf si "-DWITH_CHOLMOD -DWITH_UMFPACK" sont dans les directives de compilation est à 1 auquel cas on utilise CholMod ou UMFPACK (non symétrique)
 
     Mais qu'est-ce qu'une directive de compilation ?
         cf. CPPFLAGS dans vasoSConstuction
 
+    \relates Comment résoudre un problème éléments finis de façon générale
+    \relates Exemple de problème d'évolution, l'équation de la chaleur
+    \relates Exemple de formulation
+
+    \keyword Formulation
 */
 template<class TM_,class NameFormulation_,class NameVariant_=DefaultBehavior,class ScalarType_=typename TM_::Tpos,bool wont_add_nz=false>
 class Formulation : public FormulationAncestor<ScalarType_> {
@@ -256,6 +262,7 @@ public:
      */
     virtual unsigned update_connectivity() {
         mat_has_been_allocated_with_symamd = this->want_amd;
+        mat_has_been_allocated_with_symrcm = this->want_rcm;
 
         unsigned size = 0;
         // global unknowns
@@ -289,6 +296,11 @@ public:
             assert( nb_unk_elem==0 ); // not managed
             *indice_noda = symamd( *m ) * nnu;
         }
+        if ( this->want_rcm ) {
+            assert( (*indice_glob)==0 ); // not managed
+            assert( nb_unk_elem==0 ); // not managed
+            *indice_noda = symrcm( *m ) * nnu;
+        }
         return size;
     }
     //
@@ -300,11 +312,12 @@ public:
             vectors[i].free();
     }
     //
-    virtual void allocate_matrices() {
+    virtual void allocate_matrices(bool allocate_mat=true,bool allocate_vec=true) {
         if ( allocated )
             return;
         allocated = true;
         mat_has_been_allocated_with_symamd = this->want_amd;
+        mat_has_been_allocated_with_symrcm = this->want_rcm;
 
         unsigned size = 0;
         // global unknowns
@@ -349,9 +362,15 @@ public:
             assert( nb_unk_elem==0 ); // not managed
             *indice_noda = symamd( *m ) * nnu;
         }
+        if ( this->want_rcm ) {
+            assert( (*indice_glob)==0 ); // not managed
+            assert( nb_unk_elem==0 ); // not managed
+            *indice_noda = symrcm( *m ) * nnu;
+        }
 
         // matrice allocation
-        matrices.apply( ResizeMat(), size, *this );
+        if(allocate_mat)
+            matrices.apply( ResizeMat(), size, *this );
 
     }
     virtual void shift(int nb=1) {
@@ -724,18 +743,22 @@ public:
             if ( assemble_vec ) {
                 AssembleNode<true,true> toto2;
                 toto2.vectors = &vectors_;
-                apply( m->node_list, toto2, *this, K, F ); // nodal
+                //apply( m->node_list, toto2, *this, K, F ); // nodal
+                apply_mt( m->node_list, this->nb_threads_assemble_matrix, toto2, *this, K, F ); // nodal
                 AssembleElem<true,true > toto;
                 toto.vectors = &vectors_;
-                apply( m->elem_list, toto, *this, K, F ); // element (and skin elements)
+                //apply( m->elem_list, toto, *this, K, F ); // element (and skin elements)
+                apply_mt( m->elem_list, this->nb_threads_assemble_matrix, toto, *this, K, F ); // element (and skin elements)
             }
             else{
                 AssembleNode<true,false > toto2;
                 toto2.vectors = &vectors_;
-                apply( m->node_list, toto2, *this, K, F ); // nodal
+                //apply( m->node_list, toto2, *this, K, F ); // nodal
+                apply_mt( m->node_list, this->nb_threads_assemble_matrix, toto2, *this, K, F ); // nodal
                 AssembleElem<true,false > toto;
                 toto.vectors = &vectors_;
-                apply( m->elem_list, toto, *this, K, F ); // element (and skin elements)
+                //apply( m->elem_list, toto, *this, K, F ); // element (and skin elements)
+                apply_mt( m->elem_list, this->nb_threads_assemble_matrix, toto, *this, K, F ); // element (and skin elements)
             }
         }
         else {
@@ -994,6 +1017,7 @@ public:
                 if ( converged )
                     break;
             }
+            PRINT( norm_inf( old_vec - vectors[0] ) );
 
             if ( nb_iterations++ >= this->max_non_linear_iteration )
                 throw SolveException();
@@ -2048,6 +2072,8 @@ public:
         Neighbor_table.push_back(table_of_neig);
     }
 
+    TMAT0 &mat() { return matrices( Number<0>() ); }
+
     TM *m;
     Carac carac;
 
@@ -2065,7 +2091,7 @@ public:
     Vec<Constraint<Formulation> > constraints;
     Vec<Sollicitation<Formulation> > sollicitations;
 
-    bool mat_def_pos_if_sym, initial_condition_initialized, user_want_pierre_precond, mat_has_been_allocated_with_symamd;
+    bool mat_def_pos_if_sym, initial_condition_initialized, user_want_pierre_precond, mat_has_been_allocated_with_symamd, mat_has_been_allocated_with_symrcm;
     bool allocated;
     Vec<unsigned>* indice_elem;
     Vec<unsigned>* indice_noda;
