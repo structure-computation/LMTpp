@@ -362,6 +362,18 @@ namespace LMT {
         }
     #endif
 
+        /// contruct a simple static vector
+        template<class T> Vec<T,1> vec( T a ) { return Vec<T,1>( a ); }
+
+        /// contruct a simple static vector
+        template<class T> Vec<T,2> vec( T a, T b ) { return Vec<T,2>( a, b ); }
+
+        /// contruct a simple static vector
+        template<class T> Vec<T,3> vec( T a, T b, T c ) { return Vec<T,3>( a, b, c ); }
+
+        /// contruct a simple static vector
+        template<class T> Vec<T,4> vec( T a, T b, T c, T d ) { return Vec<T,4>( a, b, c, d ); }
+
 }
 
 /*!

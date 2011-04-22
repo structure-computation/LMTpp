@@ -111,6 +111,17 @@ struct ConvergenceCriteriumNormInfDelta {
     T crit;
 };
 
+template<class T>
+struct ConvergenceCriteriumNorm2 {
+    static const bool needs_delta_x = true;
+    static const bool residual = false;
+    ConvergenceCriteriumNorm2( T v ) : crit( v ) {}
+    template<class TV0,class TV1> bool operator()( const TV0 &delta_x, const TV1 &residual ) const {
+        return norm_2( delta_x ) < crit;
+    }
+    T crit;
+};
+
 template<class TK>
 SolveUsingCholFactorize<TK> new_SolveUsingCholFactorize( const TK &k ) {
     return k;

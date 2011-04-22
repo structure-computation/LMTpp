@@ -1,6 +1,7 @@
 """ quelques outils pour faciliter le travail sur les formulations """
 from include.codegen import *
 import math
+import copy
 
 #simplification du comportement
 def simplification_behaviour(Kglo,Hglo,epsth,dim,type_stress_2D='plane stress'):
@@ -300,7 +301,10 @@ def hooke_matrix_shell(E,nu,h,dim,type_behaviour='membrane'):
         raise 'Shell behaviour only available in 3D'
 
 def dev( sigma ):
-    res = sigma
+    d = sigma.size()
+    res = ExVector(d)
+    for i in range(d):
+        res[i] = sigma[i]
     tr = 0
     d = (sigma.size()+1)/2
     for i in range(d): tr += sigma[i]
