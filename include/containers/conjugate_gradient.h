@@ -6,11 +6,23 @@ namespace LMT {
 /*!
     L'opérateur precond doit savoir faire * pour renvoyer l'opération de préconditionnement.
     
+    Exemple avec SparseLine
+
     \code
         Mat<double,Sym<>,SparseLine<> > K( f.matrices( Number<0>() ) );
         incomplete_chol_factorize( K );
     
         unsigned cpt_iter = conjugate_gradient( new_SolveUsingCholFactorize( K ), f.matrices( Number<0>() ), f.sollicitation, f.vectors[ 0 ], ConvergenceCriteriumNormInfDelta<double>( 1e-5 ) );
+
+
+    Exemple avec MatWithTinyBlocks
+    
+    \code
+        MatWithTinyBlocks<double,Sym<3> > O = f.mat();
+        MatWithTinyBlocks<double,Sym<3> > K = O;
+        K.chol_incomp();
+        conjugate_gradient( new_SolveUsingDotSolve( K ), O, f.sollicitation, f.vectors[ 0 ], ConvergenceCriteriumNormInfDelta<double>( 1e-5 ) );
+
 */
 template<class Precond,class Matrix,class TV,class TV_SOLUTION,class CritOperator>
 unsigned conjugate_gradient( const Precond &precond, const Matrix &matrix, const TV &sollicitation, TV_SOLUTION &solution, const CritOperator &crit_op, bool disp_alpha = false ) {
