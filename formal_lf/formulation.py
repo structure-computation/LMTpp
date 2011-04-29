@@ -321,12 +321,16 @@ class Formulation:
     # is_unknown
     all_unk = []
     num_in_vec_unk = []
-    cpt = 0
+    cpt = {}
     for name_var,var in self.get_variables().items():
       if var.unknown:
           all_unk.append( 's=="'+name_var+'"' )
-          num_in_vec_unk.append( cpt )
-          cpt += var.nb_elements()
+          type_unk = var.interpolation
+          if not ( type_unk in cpt ):
+            cpt[ type_unk ] = 0
+          num_in_vec_unk.append( cpt[ type_unk ] )
+          cpt[ type_unk ] += var.nb_elements()
+          
     if all_unk:
         f.write( '  static bool is_unknown(const std::string &s) { return ('+string.join(all_unk,' || ')+'); }\n' )
         f.write( '  static unsigned num_in_vec_unknown(const std::string &s) {' )

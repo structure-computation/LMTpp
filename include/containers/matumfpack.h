@@ -79,6 +79,7 @@ public:
         Numeric = NULL;
     }
 
+    void free() {}
 
     /// creation of a matrix from a SparseUMFPACK matrix
     template<class TT> Mat(const Mat<TT,Gen<>,SparseUMFPACK,void> &mat) {

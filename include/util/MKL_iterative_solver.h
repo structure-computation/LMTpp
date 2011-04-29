@@ -319,6 +319,10 @@ struct MKL_iterative_solver {
         return 0;
     }
     
+    double last_norm_of_residual() const {
+        return std::sqrt( dpar[ 4 ] );
+    }
+    
 //     void free_internal_buffer( double *b ) {
 //         delete[] b;
 //     }

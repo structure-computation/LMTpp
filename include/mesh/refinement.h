@@ -229,6 +229,40 @@ bool refinement_if_length_sup(TM &m,T max_length) {
     return refinement(m,rl);
 }
 
+/*!
+  Exemple :
+
+  \code
+    #include <mesh/mesh.h>
+    #include <mesh/meshcaracstd.h>
+    #include <mesh/refinement.h>
+    #include <mesh/make_rect.h>
+    #include <mesh/displayparaview.h>
+    #include <correlation/ImgInterp.h>
+    using namespace LMT;
+
+
+    int main() {
+        typedef Mesh<MeshCaracStd<2,2> > TM;
+        typedef ImgInterp<double,2> TI;
+
+        TM m;
+        make_rect( m, Triangle(), 0, 1024, 40 );
+
+        TI bin( "/home/leclerc/Data/Croix/masque_0.png" );
+        TI cut = img_dist_from_front( bin, 100, 128.0 );
+        TI stp; stp.resize( cut.sizes, -1 );
+
+        cut.display( true );
+
+        LevelSetImageRefinement<TI> lr( cut, stp );
+        refinement( m, lr );
+
+        display( m );
+    }
+
+
+*/
 template<class TIMG>
 struct LevelSetImageRefinement {
     LevelSetImageRefinement( const TIMG &ls_crack, const TIMG &ls_front ) : ls_crack( ls_crack ), ls_front( ls_front ) {}

@@ -237,7 +237,7 @@ template<class T> void incomplete_chol_factorize( Mat<T,Sym<>,SparseLine<> > &m,
         }
     } else {
     
-        Vec<T> front_jcol;
+        Vec<unsigned> front_jcol;
         T pivot, ipivot;
         
         front_jcol.resize( m.nb_rows(), 0 );
@@ -246,7 +246,7 @@ template<class T> void incomplete_chol_factorize( Mat<T,Sym<>,SparseLine<> > &m,
         
             pivot = m.data[line].data.back();
             m.data[line].data.back() = 0;
-            pivot = sqrt( pivot - dot_chol_factorize( m.data[line], m.data[line] ) );
+            pivot = sqrt( pivot - norm_2_p2( m.data[line].data.begin(), m.data[line].data.size()-1 ) );
             ipivot = 1. / pivot;
             
             for(unsigned i = line + 1; i < m.nb_rows(); ++i ) {
@@ -296,97 +296,36 @@ template<class T> void incomplete_chol_factorize( Mat<T,Sym<>,SparseLine<> > &m,
 //     }
 // }
 
-// template<class T> 
-// void incomplete_chol_factorize_terce( Mat<T,Sym<>,SparseLine<> > &m ) {
-//     T pivot, ipivot;
-// 
-//     for(unsigned line = 0; line < m.nb_rows(); ++line ) {
-//     
-//         pivot = m.data[line].data.back();
-//         m.data[line].data.back() = 0;
-//         pivot = sqrt( pivot - dot_chol_factorize( m.data[line], m.data[line] ) );
-//         ipivot = 1. / pivot;
-//          
-//         for(unsigned i = line + 1; i < m.nb_rows(); ++i ) {
-//             unsigned j = 0;
-//             while ( ( j < m.data[ i ].indices.size() ) and ( m.data[ i ].indices[ j ] < line ) )
-//                 ++j;
-//             if ( m.data[ i ].indices[ j ] == line )
-//                 m.data[ i ].data[ j ] = ( m.data[ i ].data[ j ] - dot_chol_factorize( m.data[i], m.data[line] ) ) * ipivot;   
-//         }
-//         
-//         m.data[line].data.back() = pivot;
-//     }
-// }
-
-/// version du Golub page 535
-// template<class T> 
-// void incomplete_chol_factorize_bis( Mat<T,Sym<>,SparseLine<> > &m ) {
-// 
-//     T ipivot, t;
-//     Vec<T> current_row; current_row.resize( m.nb_rows() - 1 );
-// 
-//     for( unsigned line = 0; line < m.nb_rows(); ++line ) {
-//     
-//         if ( m.data[line].indices.back() == line ) {
-//             t = sqrt( m.data[line].data.back() );
-//             ipivot = (T)1 / t;
-//             m.data[line].data.back() = t;
-//         } else
-//             ipivot = 1e5; /// problème : pivot nulle !
-//         
-//         for( unsigned i = line + 1; i < m.nb_rows(); ++i ) {
-//             unsigned icol = 0;
-//             while ( ( icol < m.data[ i ].indices.size() ) and ( m.data[ i ].indices[ icol ] < line ) ) icol++;
-//             /// on ne peut pas avoir que des zéros à partir de line sur la ligne line en théorie...
-//             if ( m.data[ i ].indices[ icol ] == line ) {
-//                 t = m.data[ i ].data[ icol ] * ipivot;
-//                 current_row[ i - line - 1 ] = t;
-//                 m.data[ i ].data[ icol ] = t;                
-//             } else 
-//                 current_row[ i - line - 1 ] = (T)0;    
-//         }
-//         
-//         for( unsigned i = line + 1; i < m.nb_rows(); ++i ) {
-//             t = current_row[ i - line - 1 ];
-//             for( unsigned icol = 0; icol < m.data[ i ].indices.size(); ++icol ) {
-//                 unsigned j = m.data[ i ].indices[ icol ];
-//                 if ( j > line ) 
-//                     m.data[ i ].data[ icol ] -= t * current_row[ j - line - 1 ];
-//             }
-//         }
-//     }
-// }
 
 /*!
  \internal
 */
-template<class TV,class TM>
-struct PICF {
-    unsigned i, line;
-     TV *cr;
-     TM *m;
-};
+// template<class TV,class TM>
+// struct PICF {
+//     unsigned i, line;
+//      TV *cr;
+//      TM *m;
+// };
 
 /*!
  \internal
 */
-template<class TV,class TM>
-void *apply_incomplete_chol_factorize( void *params ) {
-
-    PICF<TV,TM> &picf ( *static_cast< PICF<TV,TM> *>( params ) );
-    typedef typename TV::template SubType<0,0>::T T;
-
-    T t = (*picf.cr)[ picf.i - picf.line - 1 ];
-
-    for( unsigned icol = 0; icol < picf.m->data[ picf.i ].indices.size(); ++icol ) {
-        unsigned j = picf.m->data[ picf.i ].indices[ icol ];
-        if ( j > picf.line ) 
-            picf.m->data[ picf.i ].data[ icol ] -= t * (*picf.cr)[ j - picf.line - 1 ];
-    }
-
-    return (void *)NULL;
-}
+// template<class TV,class TM>
+// void *apply_incomplete_chol_factorize( void *params ) {
+// 
+//     PICF<TV,TM> &picf ( *static_cast< PICF<TV,TM> *>( params ) );
+//     typedef typename TV::template SubType<0,0>::T T;
+// 
+//     T t = (*picf.cr)[ picf.i - picf.line - 1 ];
+// 
+//     for( unsigned icol = 0; icol < picf.m->data[ picf.i ].indices.size(); ++icol ) {
+//         unsigned j = picf.m->data[ picf.i ].indices[ icol ];
+//         if ( j > picf.line ) 
+//             picf.m->data[ picf.i ].data[ icol ] -= t * (*picf.cr)[ j - picf.line - 1 ];
+//     }
+// 
+//     return (void *)NULL;
+// }
 
 // template<class T> 
 // void incomplete_chol_factorize_bis( Mat<T,Sym<>,SparseLine<> > &m, unsigned nb_threads = 2 ) {

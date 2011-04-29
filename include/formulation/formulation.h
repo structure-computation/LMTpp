@@ -329,7 +329,7 @@ public:
         // elem unknowns. nb_elem_of_type will = nb_unknowns
         unsigned nb_elem_of_type[ TM::TElemList::nb_sub_type ];
         unsigned nb_unknowns_for_type[ TM::TElemList::nb_sub_type ];
-        m->elem_list.get_sizes(nb_elem_of_type);
+        m->elem_list.get_sizes( nb_elem_of_type );
         TM::TElemList::apply_static_with_n( GetNbUnknownByElement(), nb_elem_of_type, size, nb_unknowns_for_type );
 
         //
@@ -340,7 +340,6 @@ public:
         // resize vectors
         for(unsigned i=0;i<vectors.size();++i) vectors[i].resize( size );
         sollicitation.resize( size );
-
 
         // indices
         *indice_glob = 0;
@@ -371,7 +370,6 @@ public:
         // matrice allocation
         if(allocate_mat)
             matrices.apply( ResizeMat(), size, *this );
-
     }
     virtual void shift(int nb=1) {
         while (nb--) {
@@ -543,7 +541,8 @@ public:
         Ex::MapExNum res = val_sub_sym( sub_symbols );
         for( int i = 0; i < sc.coeffs.size(); ++i ) {
             int p = sc.coeffs[ i ].num_in_fmat( *this );
-            res[ sc.coeffs[ i ].sym ] = vectors[ 0 ][ p ];
+            if ( p < vectors[ 0 ].size() )
+                res[ sc.coeffs[ i ].sym ] = vectors[ 0 ][ p ];
         }
         return res;
     }
@@ -653,7 +652,7 @@ public:
                 Vec<ScalarType> coeffs; coeffs.resize( constraints[i].coeffs.size() );
                 Vec<unsigned> num_in_fmat; num_in_fmat.resize( constraints[i].coeffs.size() );
                 for(unsigned j=0;j<constraints[i].coeffs.size();++j) {
-                    num_in_fmat[j] = constraints[i].coeffs[j].num_in_fmat(*this);
+                    num_in_fmat[ j ] = constraints[ i ].coeffs[ j ].num_in_fmat( *this );
                     Ex coeff = constraints[i].coeffs[j].val;
                     Ex::SetEx sub_symbols;
                     res.get_sub_symbols(sub_symbols);
@@ -661,18 +660,18 @@ public:
                     coeffs[j] = (ScalarType)coeff.subs_numerical( vss );
                 }
                 // add to vec and mat
-                if ( constraints[i].penalty_value != ScalarType(0) ) { // -> penalty
+                if ( constraints[i].penalty_value != ScalarType( 0 ) ) { // -> penalty
                     for(unsigned j=0;j<coeffs.size();++j) {
                         ScalarType C = coeffs[j] * this->max_diag * constraints[i].penalty_value;
                         if ( assemble_vec )
-                            sollicitation[num_in_fmat[j]] += C * ress;
+                            sollicitation[ num_in_fmat[ j ] ] += C * ress;
                         if ( assemble_mat ) {
                             if ( MatCarac<0>::symm or MatCarac<0>::herm )
                                 for(unsigned k=0;k<=j;++k)
-                                    matrices(Number<0>())(num_in_fmat[j],num_in_fmat[k]) += C * coeffs[k];
+                                    matrices(Number<0>())( num_in_fmat[ j ], num_in_fmat[ k ] ) += C * coeffs[ k ];
                             else
                                 for(unsigned k=0;k<coeffs.size();++k)
-                                    matrices(Number<0>())(num_in_fmat[j],num_in_fmat[k]) += C * coeffs[k];
+                                    matrices(Number<0>())( num_in_fmat[ j ], num_in_fmat[ k ] ) += C * coeffs[ k ];
                         }
                     }
                 } else { // -> lagrange
@@ -1038,10 +1037,15 @@ public:
     //            }
     //        }
     //    }
+    /// SD stands for "step derivative". SD can be for example StdStepDer...
+    template<class SD>
+    bool solve_and_get_derivatives( Vec<Vec<ScalarType> > &der, const SD &sd, bool der_in_base_node_ordering, Number<0> sym ) {
+        assert( 0 /*TODO*/ );
+    }
 
     /// SD stands for "step derivative". SD can be for example StdStepDer...
     template<class SD>
-    bool solve_and_get_derivatives( Vec<Vec<ScalarType> > &der, const SD &sd, bool der_in_base_node_ordering = false ) {
+    bool solve_and_get_derivatives( Vec<Vec<ScalarType> > &der, const SD &sd, bool der_in_base_node_ordering, Number<1> sym ) {
         assert( this->non_linear_iterative_criterium == 0 );
         assert( MatCarac<0>::symm );
         //
@@ -1088,6 +1092,12 @@ public:
             der = tmp;
 
         return true;
+    }
+
+    /// SD stands for "step derivative". SD can be for example StdStepDer...
+    template<class SD>
+    bool solve_and_get_derivatives( Vec<Vec<ScalarType> > &der, const SD &sd, bool der_in_base_node_ordering = false ) {
+        return solve_and_get_derivatives( der, sd, der_in_base_node_ordering, Number<MatCarac<0>::symm>() );
     }
 
     /// @see solve_and_get_derivatives
