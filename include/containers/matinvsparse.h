@@ -533,8 +533,8 @@ int solve_using_incomplete_chol_factorize( const Mat<T,Sym<>,SparseLine<> > &mp,
 
 
     T deltn = dot( r, d );
-    unsigned cpt = 1;
-    while ( cpt < 200 ) {
+    unsigned cpt = 0;
+    while ( /*cpt < 200*/ true ) {
         T delto = deltn;
 
         q = A * d;
@@ -551,7 +551,7 @@ int solve_using_incomplete_chol_factorize( const Mat<T,Sym<>,SparseLine<> > &mp,
         d = s + beta * d;
         ++cpt;
         if ( disp_r )
-            PRINT( max(abs(r)) );
+            std::cout << "Iteration " << cpt << " : norme inf du residu = " << max(abs(r)) << std::endl;
     }
     return -1;
 }
