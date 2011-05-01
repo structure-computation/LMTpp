@@ -1,7 +1,7 @@
 #ifndef LMTQUAD_8_H
 #define LMTQUAD_8_H
 
-#include "containers/basicops.h"
+#include "../containers/basicops.h"
 #include "bar_3.h"
 
 namespace LMT {

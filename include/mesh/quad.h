@@ -1,7 +1,7 @@
 #ifndef LMTQUAD_H
 #define LMTQUAD_H
 
-#include "containers/basicops.h"
+#include "../containers/basicops.h"
 #include "bar.h"
 #include "triangle.h"
 
