@@ -13,9 +13,9 @@
 #define LMTMESHDATA_H
 
 #ifndef DONT_WANT_XML
-    #include "io/xmlnode.h"
+    #include "../io/xmlnode.h"
 #endif
-#include "containers/mat.h"
+#include "../containers/mat.h"
 
 namespace LMT {
 

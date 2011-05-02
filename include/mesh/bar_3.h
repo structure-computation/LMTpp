@@ -12,7 +12,7 @@
 #ifndef LMTBAR3_H
 #define LMTBAR3_H
 
-#include "containers/staticassert.h"
+#include "../containers/staticassert.h"
 #include "nodalelement.h"
 
 namespace LMT {

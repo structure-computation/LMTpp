@@ -1,8 +1,8 @@
 #ifndef LMTTRIANGLE6_H
 #define LMTTRIANGLE6_H
 
-#include "containers/staticassert.h"
-#include "containers/basicops.h"
+#include "../containers/staticassert.h"
+#include "../containers/basicops.h"
 #include "bar_3.h"
 
 namespace LMT {
