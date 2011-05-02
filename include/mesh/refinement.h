@@ -165,7 +165,7 @@ struct LevelSetRefinement {
     template<class TE> typename TE::T operator()( TE &e ) const {
         typename TE::T d0 = ed( *e.node(0) );
         typename TE::T d1 = ed( *e.node(1) );
-        if ( d0 * d1 >= 0 )
+        if ( ( d0 * d1 ) >= 0 )
             return 0;
         typename TE::T o = d0 / ( d0 - d1 );
         if ( o < 0.1 ) {
@@ -195,7 +195,47 @@ struct LevelSetRemoveNeg {
 };
 
 /*!
+    Ojectif :
+        Cette fonction permet de couper un maillage en fonction de la valeur d'un atribut nodal et scalaire. Plus précisément considérons un attribut nodal scalaire ( i.e. double en général ), qu'on nommera phi. Après l'appel de la fonction, le maillage n'aura que des éléments pour lesquelles la valeur de phi aux noeuds est positive.
+        
+    Paramètres :
+        * <strong> m </strong> est un maillage qui sera modifié si nécessaire.
+        * <strong> PhiExtract </strong> est une classe qui permet d'accéder à la valeur d'un attribut du maillage m. Par exemple ce sera la classe \a ExtractDM < phi_DM > où <strong> phi </strong> est le nom de l'attribut. Remarque : il faut que le MeshCarac du maillage contienne une classe phi_DM.
+           
+    Retour :
+        renvoie vrai s'il y a eu des changements et faux sinon. 
+        
+    Voici un exemple de code. Il faudra adapter le MeshCarac.
+    \code C/C++
+    
+        #include "mesh/make_rect.h"
+        #include "mesh/refinement.h"
+        #include "mesh/displayparaview.h"
+        
+        // inclusion du code de notre MeshCarac  
+        #include "MonMeshCarac.h"
+    
+        int main(int argc,char **argv) {
+        
+            typedef Mesh< Mesh_carac_MonMeshCarac< double,2> > TM;
+            typedef TM::Pvec Pvec;
+            typedef TM::TNode::T T;
+            
+            TM m;
+            make_rect( m, Triangle(), Pvec( 0, 0 ), Pvec( 1., 1. ), Pvec( 20, 20 ) );
+        
+            for( unsigned i = 0 ; i < m.node_list.size(); ++i )
+                m.node_list[i].phi = sin( std::sqrt( i ) * 5. ); 
+        
+            display_mesh( m );
+        
+            PRINT( level_set_cut( m, ExtractDM< phi_DM >() ) );
 
+            display_mesh( m );
+            
+            return 0; 
+        }
+    
 */
 template<class TM,class PhiExtract>
 bool level_set_cut( TM &m, const PhiExtract &p ) {
