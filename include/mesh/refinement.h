@@ -333,6 +333,29 @@ struct LevelSetImageRefinement {
     const TIMG2 &ls_front;
 };
 
+/*!
+    Objectif :
+        Ce foncteur est conçu pour la fonction \a refinement () . Il permet de raffiner localement un maillage. Pour plus de renseignement, voir l'explication à la fin.
+        
+    Attributs :
+        * <strong> c </strong> le centre de la zone que l'on veut raffiner. c n'est pas forcément un point dans le maillage.
+        * <strong> l_min </strong> la longueur minimale des côtés des éléments du maillage.
+        * <strong> k </strong> le coefficient d'augmentation de la longueur maximale des côtés des éléments en fonction de la distance au point c.
+        
+    Description :
+        on décide de couper le côté d'un élément ( i.e. une \a Bar ) si sa longueur est supérieure à d * k + l_min où d est la distance entre le milieu du côté et le centre c.
+         
+    Exemple de code :
+    \code C/C++
+        typedef Mesh< Mesh_carac_MonMeshCarac< double,2> > TM;
+        typedef TM::Pvec Pvec;
+        typedef TM::TNode::T T;
+    
+        refinement( m, Local_refinement<T, Pvec >( 0.01, 0.2, Pvec( 0.2, 0.5 ) ) );
+    
+    On raffinera au point de coordonnées ( 0.2, 0.5 ) avec une longueur minimale de 0.01 et une augmentation de 0.2. 
+
+*/
 template < class T, class Pvec>
 struct Local_refinement {
     Local_refinement( T length_min, T _k, Pvec _c ) : l_min( length_min ), k( _k ), c( _c ) {}

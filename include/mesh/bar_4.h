@@ -19,7 +19,7 @@ namespace LMT {
 
 // --------------------------------------------------------------------------------------------------------
 /*!
-    Bar_4 représente une barre sans dimension ou segment avec deux noeuds dessus.  
+    Bar_4 représente une barre sans dimension ou segment avec quatre noeuds dessus.  
 
     \friend hugo.leclerc@lmt.ens-cachan.fr
     \keyword Maillage/Elément
