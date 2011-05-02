@@ -115,14 +115,13 @@ T var_inter_insideness( const Triangle_6 &e, const TV &var_inter ) {
 }
 
 /*!
-    object :
-        la fonction renvoie vrai si pos est dans le triangle et faux sinon ( sous la condition que le \a Triangle_6 est dans le plan ).
-        Mais pour cet élément non linéaire , on considère le \a Triangle engendré par les 3 premiers noeuds.
+    Objectif :
+        la fonction renvoie vrai si pos est dans le triangle formé par les trois sommets et faux sinon ( sous la condition que le \a Triangle_6 est dans le plan ).
         
-    paramètre :
+    paramètres :
         Tirangle_6 : le type d'élément
         pos_nodes : le position des sommets dans le plan
-        po : la position du point dans le plan
+        pos : la position du point dans le plan
 
 */
 template< class PosNodes, class Pvec > 

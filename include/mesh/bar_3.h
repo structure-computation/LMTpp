@@ -19,7 +19,7 @@ namespace LMT {
 
 // --------------------------------------------------------------------------------------------------------
 /*!
-    Bar_3 représente une barre sans dimension ou segment avec un noeud dessus.  
+    Bar_3 représente une barre sans dimension ou segment avec trois noeuds dessus.  
 
     \friend hugo.leclerc@lmt.ens-cachan.fr
     \keyword Maillage/Elément
