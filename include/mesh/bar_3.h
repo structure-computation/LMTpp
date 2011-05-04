@@ -67,4 +67,6 @@ typename TNG::T measure( const Element<Bar_3,TN,TNG,TD,NET> &e ) {
 
 };
 
+#include "element_Bar_3.h"
+
 #endif
