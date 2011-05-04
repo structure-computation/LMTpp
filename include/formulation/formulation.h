@@ -496,18 +496,7 @@ private:
         //
         template<class TE, class TMA, class TVE> void operator()( const TE &e, Formulation &f, TMA &K, TVE &F ) const {
             unsigned in[ TE::nb_nodes + 1 + nb_global_unknowns ];
-
-            if ( nb_nodal_unknowns )
-                for(unsigned i=0;i<TE::nb_nodes;++i)
-                    in[i] = (*f.indice_noda)[ f.m->node_list.number(*e.node(i)) ];
-
-            typedef CaracFormulationForElement<NameFormulation,TE,NameVariant,ScalarType> CFE;
-            if ( CFE::nb_elementary_unknowns )
-                assert(0);
-
-            if ( nb_global_unknowns )
-                assert(0);
-
+            Formulation::get_ind_for_elem( f, e, in );
             add_elem_matrix( f, K, F, *vectors, Number<MatCarac<0>::symm>(), Number<assemble_mat>(), Number<assemble_vec>(), e, in );
 
             // skin elements
@@ -516,6 +505,30 @@ private:
         }
         Vec<Vec<ScalarType> > *vectors;
     };
+
+    struct AssembleResidual {
+        template<class TE>
+        void operator()( const TE &e, Vec<ScalarType> &res, const Formulation &f ) const {
+            unsigned in[ TE::nb_nodes + 1 + nb_global_unknowns ];
+            Formulation::get_ind_for_elem( f, e, in );
+            add_elem_residual( f, res, f.vectors, e, in );
+        }
+    };
+
+    template<class TE>
+    static void get_ind_for_elem( const Formulation &f, const TE &e, unsigned *in ) {
+        if ( nb_nodal_unknowns )
+            for(unsigned i=0;i<TE::nb_nodes;++i)
+                in[i] = (*f.indice_noda)[ f.m->node_list.number(*e.node(i)) ];
+
+        typedef CaracFormulationForElement<NameFormulation,TE,NameVariant,ScalarType> CFE;
+        if ( CFE::nb_elementary_unknowns )
+            assert(0);
+
+        if ( nb_global_unknowns )
+            assert(0);
+    };
+
 public:
     template<class TE>
     Vec<unsigned,TE::nb_nodes+1+nb_global_unknowns> indices_for_element( const TE &e ) const {
@@ -2081,6 +2094,10 @@ public:
         Neighbor_table.push_back(table_of_neig);
     }
 
+    void add_elem_contribution_to_residual( Vec<ScalarType> &res, const typename TM::EA *elem ) const {
+        m->elem_list.apply_on_down_cast( elem, AssembleResidual(), res, *this );
+    }
+
     TMAT0 &mat() { return matrices( Number<0>() ); }
 
     TM *m;
@@ -2191,6 +2208,21 @@ void add_elem_matrix(
         add_local_elem_matrix( *gp, gp+1, f, matrix, sollicitation , vectors, matrix_is_sym, assemble_mat, assemble_vec, elem, indices );
 }
 
+
+/** To be redefined for each new formulations */
+template<class TF, class TVE, class TVEVE, class TE>
+void add_elem_residual(
+        TF &f,
+        TVE &sollicitation,
+        const TVEVE &vectors,
+        const TE &elem,
+        const unsigned *indices ) {
+    typedef typename TF::ScalarType T;
+    typedef CaracFormulationForElement<typename TF::NameFormulation,TE,typename TF::NameVariant,typename TF::ScalarType> CFE;
+
+    for( const double *gp = gauss_point_for_order( CFE::order_integration, typename TE::NameElem() ); *gp!=0.0; gp += elem.nb_var_inter + 1 )
+        add_local_elem_residual( *gp, gp+1, f, sollicitation, vectors, elem, indices );
+}
 
 
 /** To be redefined for each new formulations */

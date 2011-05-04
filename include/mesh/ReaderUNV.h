@@ -24,6 +24,7 @@
 #include "mesh/tetra_10.h"
 #include "mesh/wedge.h"
 #include "mesh/wedge_15.h"
+#include "../containers/algo.h"
 
 namespace LMT {
     
@@ -400,8 +401,7 @@ struct ReaderUNV {
         }
         
         Vec<int> id_el = map_idGroup_idNode[id_group];
-        sort(id_el);
-
+        sort( id_el );
         
         //on parcourt la liste des elements taggé 
         //(attention hypothese range par ordre croissant) 
