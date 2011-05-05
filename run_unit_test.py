@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import os, stat
+import os, stat, time
 
 def create_html_link( href, text ):
     return '<a href="' + href + '" > ' + text + ' </a>'
@@ -78,7 +78,9 @@ class Tests:
     def run( self, directory ):
         self.html.write('\n\n<table border=1>\n\t<caption> Results </caption>\n\t<tr>\n\t\t<th> Source File Test </th> <th> Compilation </th> <th> Test </th> <th> Result </th> <th> Log File </th> <th> Log Cerr File </th>\n\t</tr>\n' )
         self.find_and_exec( directory )
-        self.html.write('</table>\n<br>\n<br> Global Result '+ create_html_image( self.icon[ self.res ], str(self.res ))+'\n<br>' )
+        self.html.write( '</table>\n<br>\n' )
+        self.html.write( '<br> Date : ' + time.asctime() + '\n<br>\n' )
+        self.html.write( '<br> Global Result '+ create_html_image( self.icon[ self.res ], str(self.res ))+'\n<br>' )
     
 t = Tests( "report_test__LMT++.html", "report unit test for LMT++", ['include/', '/usr/include/', '/usr/include/libxml2/'] )
 
