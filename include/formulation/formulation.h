@@ -2094,6 +2094,14 @@ public:
         Neighbor_table.push_back(table_of_neig);
     }
 
+    /*!
+        Objectif :
+            cette méthode ajoute au vecteur <strong> res </strong>, la contribution au résidu de l'élément <strong> *elem </strong> .
+            
+        Paramètres :
+            * <strong> res </strong> le vecteur contenant le résidu ( sa taille doit être égale au nombre de degrés de liberté du problème),
+            * <strong> elem </strong> pointeur sur l'élément dont on veut obtenir la contribution.
+    */
     void add_elem_contribution_to_residual( Vec<ScalarType> &res, const typename TM::EA *elem ) const {
         m->elem_list.apply_on_down_cast( elem, AssembleResidual(), res, *this );
     }
