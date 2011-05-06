@@ -89,8 +89,26 @@ t.run( "tests" )
 if t.res:
     print " Unit tests Succeeded :-)"
     #os.system( "ssh pasquier@romanee;cd /u/multi/lmtpp;git pull" )
+    ### ENVOI d'un courrier en cas d'erreur ###
+    import smtplib
+    fromaddr = 'cellog.lmt@gmail.com'
+    toaddrs  = 'raphael.pasquier@lmt.ens-cachan.fr'
+    msg = 'There was a terrible error that occured and I wanted you to know!'
+    
+    # Credentials (if needed)
+    uti = 'cellog.lmt'
+    mdp = 'laboratoire'
+    
+    # The actual mail send
+    server = smtplib.SMTP( 'smtp.gmail.com:587' )
+    server.starttls()
+    server.login( uti, mdp )
+    server.sendmail( fromaddr, toaddrs, msg )
+    server.quit()
 else:
     print " Unit tests has failed :-( ... "
+
+    
 
 exit( t.res == 0 )
 
