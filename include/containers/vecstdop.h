@@ -359,8 +359,8 @@ inline typename FloatType<typename TypeReduction<Multiplies,Vec<T,s> >::T>::T le
  */
 template<class T,int s>
 inline typename FloatType<typename TypeReduction<Multiplies,Vec<T,s> >::T>::T distance(const Vec<T,s> &c, const Vec<T,s> &d) {
-    Vec<T,s> tmp = c-d;
-    return length(tmp);
+    Vec<T,s> tmp = c - d;
+    return length( tmp );
 }
 
 /*!    
