@@ -120,6 +120,31 @@ inline typename FloatType<typename TypeReduction<Multiplies,Vec<T,s> >::T>::T re
             return 0;
         }          
      
+     Les utilisateurs de metil_comp devrait pouvoir compiler ce code sans problème. Il faudra simplement ajouter les directives de compilations : <strong> -DANSI_DECLARATORS -DWITH_TRIANGLE_SOFTWARE </strong> .
+     Pour ceux qui utilisent scons, inspirez-vous de cet exemple :
+     \code Python
+        from LMT import *
+        
+        
+        libs_Triangle_software = [
+            '/usr/local/triangle/triangle.o'
+        ]
+        
+        env = Environment(
+            CPPPATH = [ '#LMT/include' ],
+            LIBS = [ 'pthread' ],
+            CPPFLAGS = cppflags( ['xml2-config'] ) + " -O3 -g -DANSI_DECLARATORS -DWITH_TRIANGLE_SOFTWARE",
+            LINKFLAGS = linkflags( ['xml2-config'] ) ,
+            AS = 'yasm -f Elf32 -g Dwarf2'
+        )
+        make_dep_py(env)
+        
+        env.BuildDir( 'build/LMT', 'LMT/include', duplicate=0 )
+        libs = SConscript( 'LMT/include/SConscript', exports='env', build_dir='build/LMT' )
+        
+        # --------------------------------------------------------------------------------------------------
+        
+        env.Program( "main", ["main.cpp"] + libs + libs_Triangle_software, build_dir='build/LMT' ) 
 
 */
 template<class T = double >
