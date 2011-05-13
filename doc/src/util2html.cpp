@@ -101,14 +101,15 @@ string french2webID( const string& s) {
             continue;
         }
         if((short)s[i] != -61) t  += tolower(s[i]);
-                else {  // premier octet utf8
+                else {  /// premier octet utf8
                 switch((short) s[i+1]){
                         case -87 : t += "e"; break; // coresspond à la lettre é
                         case -96 : t += "a"; break; // coresspond à la lettre à
                         case -88 : t += "e"; break; // coresspond à la lettre è
                         case -86 : t += "e"; break; // coresspond à la lettre ê
-                        case -89 : t += "c"; break; // coresspond à la lettre ç /// il manque le ù
-                        default: t += "INCONNU";
+                        case -89 : t += "c"; break; // coresspond à la lettre ç 
+                        case -71 : t += "u"; break; // coresspond à la lettre ù
+                        default: t += "INCONNU_CHAR";
                         }
                  i++; // pour sauter le deuxième octet
                 }

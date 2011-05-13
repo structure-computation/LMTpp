@@ -127,4 +127,6 @@ inline unsigned vtk_num( StructForType<Bar> ) { return 2; }
 
 };
 
+#include "element_Bar.h"
+
 #endif

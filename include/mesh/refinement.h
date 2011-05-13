@@ -14,6 +14,7 @@
 
 #include "mesh.h"
 #include "tetra.h"
+#include "../util/rectilinear_iterator.h"
 
 namespace LMT {
 
@@ -373,6 +374,95 @@ struct Local_refinement {
     T l_min, k;
     Pvec c; /// centre
 };
+
+namespace LMTPRIVATE {
+    template<class TM,class MA,class I>
+    struct MaskCutter {
+        typedef typename TM::Tpos T;
+        MaskCutter( const MA &mask, I lim_inf, I lim_sup ) : mask( mask ), lim_inf( lim_inf ), lim_sup( lim_sup ) {}
+        //
+        struct Cut {
+            Cut( MaskCutter &mc ) : mc( mc ) {}
+            template<class TE> T operator()( TE &e ) const {
+                if ( mc.node_is_blocked[ e.node( 0 )->number ] and mc.node_is_blocked[ e.node( 1 )->number ] )
+                    return 0;
+                double step = 1.0 / measure( e );
+                for( double x=0; x <= 1; x += step ) {
+                    typename TE::Pvec P0 = e.pos( 0 ) + ( e.pos( 1 ) - e.pos( 0 ) ) * ( x - step );
+                    typename TE::Pvec P1 = e.pos( 0 ) + ( e.pos( 1 ) - e.pos( 0 ) ) * ( x        );
+                    bool c_01 = mc.mask( P0 ) < mc.lim_inf and mc.mask( P1 ) >= mc.lim_sup;
+                    bool c_10 = mc.mask( P1 ) < mc.lim_inf and mc.mask( P0 ) >= mc.lim_sup;
+                    if ( c_01 or c_10 )
+                        return x;
+                }
+                return 0;
+            }
+            MaskCutter &mc;
+        };
+        //
+        struct Rem {
+            Rem( MaskCutter &mc ) : mc( mc ) {}
+            template<class TE> bool operator()( TE &e ) const { return mc.mask( center( e ) ) < mc.lim_inf; }
+            MaskCutter &mc;
+        };
+
+        const MA &mask;
+        I lim_inf;
+        I lim_sup;
+        Vec<bool> node_is_blocked;
+    };
+}
+
+/*!
+  coupe d'un maillage par un masque. Un élément est coupé quand un bord a mask < lim_inf et l'autre a mask >= lim_sup
+*/
+template<class TM,class MA,class I>
+bool mask_cut( TM &m, const MA &mask, I lim_inf, I lim_sup, I dist_disp, bool remove_inf_elem = false ) {
+    typedef LMTPRIVATE::MaskCutter<TM,MA,I> MC;
+    typedef typename TM::Pvec Pvec;
+    typedef typename TM::Tpos T;
+    //
+    MC mc( mask, lim_inf, lim_sup );
+    mc.node_is_blocked.resize( m.node_list.size(), false );
+    // nodal displacement
+    m.update_skin();
+    for( int n = 0; n < m.node_list.size(); ++n ) {
+        Pvec &P = m.node_list[ n ].pos, N = P;
+        T o = dist_disp * ( 1 + 1e-6 ), d = o;
+        if ( mask( P ) < lim_inf ) {
+            for( Rectilinear_iterator<T,TM::dim> iter( Pvec( P - dist_disp ), Pvec( P + dist_disp + 1 ) ); iter; ++iter ) {
+                T n = length( P - iter.pos );
+                if ( d > n and mask( iter.pos ) >= lim_sup ) {
+                    N = iter.pos;
+                    d = n;
+                }
+            }
+        } else if ( mask( P ) >= lim_sup ) {
+            for( Rectilinear_iterator<T,TM::dim> iter( Pvec( P - dist_disp ), Pvec( P + dist_disp + 1 ) ); iter; ++iter ) {
+                T n = length( P - iter.pos );
+                if ( d > n and mask( iter.pos ) < lim_inf ) {
+                    N = iter.pos;
+                    d = n;
+                }
+            }
+        }
+        if ( d != o ) {
+            mc.node_is_blocked[ m.node_list[ n ].number ] = true;
+            P = N;
+        }
+    }
+    // cut
+    typename MC::Cut cut( mc );
+    bool res = refinement( m, cut );
+    // rem
+    if ( remove_inf_elem ) {
+        typename MC::Rem rem( mc );
+        m.remove_elements_if( rem );
+    }
+    return res;
+}
+
+
 
 };
 

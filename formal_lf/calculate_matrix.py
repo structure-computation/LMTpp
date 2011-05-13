@@ -14,6 +14,10 @@ def calculate_matrix( expr, unknown_symbols, unknown_test_symbols, subs={}, allo
     if test==False:
         unknown_test_symbols = unknown_symbols
     
+    residual = []
+    for i in unknown_test_symbols:
+        residual.append( expr.diff( i ).subs_with_test(EM( subs_tes )) )
+    
     # if use_subs_instead_of_diff, substitution of vars (expr en test) with 0 and ones
     if use_subs_instead_of_diff:
         for test_unk in unknown_test_symbols:
@@ -54,7 +58,7 @@ def calculate_matrix( expr, unknown_symbols, unknown_test_symbols, subs={}, allo
                 for j in range(len(unknown_symbols)):
                     V[i] += M[i][j] * unknown_symbols[j] * premul_KUn_in_sollicitation
                         
-    return { 'M':matrix( M ), 'V':vector( V ), 'U':unknown_symbols }
+    return { 'M':matrix( M ), 'V':vector( V ), 'U':unknown_symbols, 'R':residual }
 
 
 def write_matrix( f, M, V, symmetric, indices, offsets, assemble_mat, assemble_vec, use_asm, asmout = None, asm_fname = "" ):
