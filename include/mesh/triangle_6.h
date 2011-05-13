@@ -8,6 +8,7 @@
 namespace LMT {
 
 /*!
+    Triangle à 6 noeuds
     \verbatim
             2
             | \
@@ -15,10 +16,9 @@ namespace LMT {
             5   4
             |    \
             |     \
-            0__3___1
-
-
+            0--3---1
     \relates Mesh
+    \relates Element
     \keyword Maillage/Elément 
     \author Hugo LECLERC
     \friend rapahel.pasquier@lmt.ens-cachan.fr
@@ -61,6 +61,36 @@ void append_skin_elements(Element<Triangle_6,TN,TNG,TD,NET> &e,TC &ch,HET &het,N
     het.add_element(e,ch,NodalElement(),e.node(3));
     het.add_element(e,ch,NodalElement(),e.node(4));
     het.add_element(e,ch,NodalElement(),e.node(5));
+}
+
+// --------------------------------------------------------------------------------------------------------
+template<class TN,class TNG,class TD,unsigned NET,class Pvec,class T>
+void update_circum_center(const Element<Triangle_6,TN,TNG,TD,NET> &e,Pvec &C,T &R) {
+    C = getCenterOfCircumCircle( e.node(0)->pos, e.node(1)->pos, e.node(2)->pos );
+    R = length( e.node(0)->pos - C );
+}
+
+template<class TN,class TNG,class TD,unsigned NET,class Pvec,class T>
+void update_in_center(const Element<Triangle_6,TN,TNG,TD,NET> &e,Pvec &C,T &R) {
+    C = getCenterOfInCircle( e.node(0)->pos, e.node(1)->pos, e.node(2)->pos );
+    R = 2 * measure(e) / ( length( e.node(1)->pos - e.node(0)->pos ) + length( e.node(2)->pos - e.node(0)->pos ) + length( e.node(2)->pos - e.node(1)->pos ) );
+}
+
+template<class TN,class TNG,class TD,unsigned NET,class T>
+void update_radius_ratio(const Element<Triangle_6,TN,TNG,TD,NET> &e,T &radius_ratio) {
+    Vec<T> C_circum, C_in;
+    T R_circum, R_in;
+    update_circum_center( e, C_circum, R_circum );
+    update_in_center( e, C_in, R_in );
+    radius_ratio = R_in / R_circum;
+}
+
+template<class TN,class TNG,class TD,unsigned NET,class TM,class T>
+void update_edge_ratio(const Element<Triangle_6,TN,TNG,TD,NET> &e,TM &m,T &edge_ratio) {
+    T edge_length_0 = (m.get_children_of( e, Number<1>() )[ 0 ])->measure_virtual();
+    T edge_length_1 = (m.get_children_of( e, Number<1>() )[ 1 ])->measure_virtual();
+    T edge_length_2 = (m.get_children_of( e, Number<1>() )[ 2 ])->measure_virtual();
+    edge_ratio = min( edge_length_0, edge_length_1, edge_length_2 ) / max( edge_length_0, edge_length_1, edge_length_2 );
 }
 
 template<class TN,class TNG,class TD,unsigned NET,class TM>
@@ -148,8 +178,9 @@ bool is_inside_linear( const Triangle_6 &elem, const PosNodes &pos_nodes, const 
         return false;
 }
 
+inline unsigned vtk_num( StructForType<Triangle_6> ) { return 22; }
 
 };
 #include "element_Triangle_6.h"
 
-#endif
+#endif // LMTTRIANGLE6_H

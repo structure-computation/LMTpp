@@ -1,9 +1,10 @@
 #ifndef READ_VTK_H
 #define READ_VTK_H
 
-#include "mesh/tetra.h"
-#include "mesh/wedge.h"
-#include "mesh/hexa.h"
+#include "../mesh/tetra.h"
+#include "../mesh/wedge.h"
+#include "../mesh/wedge_15.h"
+#include "../mesh/hexa.h"
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
@@ -90,25 +91,49 @@ void read_vtk(TM &mesh, std::istream &is) throw(std::runtime_error) {
                     assert( nb_points_in_element == 4 );
                     mesh.add_element( Tetra(), DefaultBehavior(), (unsigned *)cell_connectivity_data.ptr() + cpt );
                 }
+                else if ( type_cell == 24 ) { // Tetra_10
+                    assert( nb_points_in_element == 10 );
+                    mesh.add_element( Tetra_10(), DefaultBehavior(), (unsigned *)cell_connectivity_data.ptr() + cpt );
+                }
                 else if ( type_cell == 5 ) { // Triangle
                     assert( nb_points_in_element == 3 );
                     mesh.add_element( Triangle(), DefaultBehavior(), (unsigned *)cell_connectivity_data.ptr() + cpt );
                 }
-                else if ( type_cell == 3 ) { // Line
+                else if ( type_cell == 22 ) { // Triangle_6
+                    assert( nb_points_in_element == 6 );
+                    mesh.add_element( Triangle_6(), DefaultBehavior(), (unsigned *)cell_connectivity_data.ptr() + cpt );
+                }
+                else if ( type_cell == 3 ) { // Bar
                     assert( nb_points_in_element == 2 );
                     mesh.add_element( Bar(), DefaultBehavior(), (unsigned *)cell_connectivity_data.ptr() + cpt );
+                }
+                else if ( type_cell == 21 ) { // Bar_3
+                    assert( nb_points_in_element == 3 );
+                    mesh.add_element( Bar_3(), DefaultBehavior(), (unsigned *)cell_connectivity_data.ptr() + cpt );
                 }
                 else if ( type_cell == 9 ) { // Quad
                     assert( nb_points_in_element == 4 );
                     mesh.add_element( Quad(), DefaultBehavior(), (unsigned *)cell_connectivity_data.ptr() + cpt );
                 }
+                else if ( type_cell == 23 ) { // Quad_8
+                    assert( nb_points_in_element == 8 );
+                    mesh.add_element( Quad_8(), DefaultBehavior(), (unsigned *)cell_connectivity_data.ptr() + cpt );
+                }
                 else if ( type_cell == 12 ) { // Hexa
                     assert( nb_points_in_element == 8 );
                     mesh.add_element( Hexa(), DefaultBehavior(), (unsigned *)cell_connectivity_data.ptr() + cpt );
                 }
+                else if ( type_cell == 25 ) { // Hexa_20
+                    assert( nb_points_in_element == 20 );
+                    mesh.add_element( Hexa_20(), DefaultBehavior(), (unsigned *)cell_connectivity_data.ptr() + cpt );
+                }
                 else if ( type_cell == 13 ) { // Wedge
                     assert( nb_points_in_element == 8 );
                     mesh.add_element( Wedge(), DefaultBehavior(), (unsigned *)cell_connectivity_data.ptr() + cpt );
+                }
+                else if ( type_cell == 26 ) { // Wedge_15
+                    assert( nb_points_in_element == 15 );
+                    mesh.add_element( Wedge_15(), DefaultBehavior(), (unsigned *)cell_connectivity_data.ptr() + cpt );
                 }
                 else {
                     std::cerr << "TODO : type cell " << __FILE__ << " " << __LINE__ << std::endl;

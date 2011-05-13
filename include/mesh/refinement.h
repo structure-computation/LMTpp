@@ -13,6 +13,8 @@
 #define LMT_refinement_HEADER
 
 #include "mesh.h"
+#include "triangle.h"
+#include "quad.h"
 #include "tetra.h"
 #include "../util/rectilinear_iterator.h"
 
@@ -169,14 +171,14 @@ struct LevelSetRefinement {
         if ( ( d0 * d1 ) >= 0 )
             return 0;
         typename TE::T o = d0 / ( d0 - d1 );
-        if ( o < 0.1 ) {
-            e.node( 0 )->pos = e.node( 0 )->pos + ( e.node( 1 )->pos - e.node( 0 )->pos ) * o;
-            return 0;
-        }
-        if ( o > 0.9 ) {
-            e.node( 1 )->pos = e.node( 1 )->pos + ( e.node( 0 )->pos - e.node( 1 )->pos ) * ( 1 - o );
-            return 0;
-        }
+//         if ( o < 0.1 ) {
+//             e.node( 0 )->pos = e.node( 0 )->pos + ( e.node( 1 )->pos - e.node( 0 )->pos ) * o;
+//             return 0;
+//         }
+//         if ( o > 0.9 ) {
+//             e.node( 1 )->pos = e.node( 1 )->pos + ( e.node( 0 )->pos - e.node( 1 )->pos ) * ( 1 - o );
+//             return 0;
+//         }
         return o;
     }
     const PhiExtract &ed;

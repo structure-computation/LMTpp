@@ -52,6 +52,9 @@ void set_vtk_cell_type_and_offsets( const TE &elem, Vec<unsigned> &connectivity,
     } else if ( strcmp(TE::can_directly_be_represented_by(),"Quad_8")==0 ) {
         cell_type = 23;
         nb_points = 8;
+    } else if ( strcmp(TE::can_directly_be_represented_by(),"Quad_9")==0 ) {
+        cell_type = 23;
+        nb_points = 8;
     } else if ( strcmp(TE::can_directly_be_represented_by(),"Tetra_10")==0 ) {
         cell_type = 24;
         nb_points = 10;

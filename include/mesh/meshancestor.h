@@ -221,6 +221,25 @@ protected:
 //     typename TElem<NE,BE>::TE *add_element_(const NE &ne,const BE &be,TNode **n) {
         return add_element_(ne,be,n,LMT::Number<TElemList::template IndexOf<NE,BE>::res>());
     }
+//     template<class NE,class BE,unsigned num_index>
+//     typename TElem<NE,BE>::TE *add_element_(const NE &ne,const BE &be,TNode **n,const Number<num_index> &nn) {
+//         typedef typename TElem<NE,BE>::TE TE;
+//         TE *res = elem_list.hp.new_elem(StructForType<TE>()); // template 
+//         for(unsigned i=0;i<NE::nb_nodes;++i) res->nodes[i] = n[i];
+//         res->number = cpt_elem[ TE::num_in_elem_list ]++;
+//         elem_list.push_back_dyn(TE::num_in_elem_list);
+//         return res;
+//     }
+//     ///
+//     template<class NE,class BE>
+//     typename TElem<NE,BE>::TE *add_element_(const NE &ne,const BE &be,TNode **n,const Number<IndexOfMagicValue::res> &nn) {
+//         std::cerr << NE::name() << " with behavior cannot be included in elem_list." << std::endl;
+//         return (typename TElem<NE,BE>::TE *)NULL;
+//     }
+//     ///
+//     template<class NE,class BE> typename TElem<NE,BE>::TE *add_element_(const NE &ne,const BE &be,TNode **n) {
+//         return add_element_(ne,be,n,LMT::Number<TElemList::template IndexOf<NE,BE>::res>());
+//     }
     ///
     void clear_elements() {
         this->elem_list.free();
