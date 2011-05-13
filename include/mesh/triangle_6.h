@@ -170,7 +170,7 @@ bool is_inside_linear( const Triangle_6 &elem, const PosNodes &pos_nodes, const 
         Pvec CA = pos_nodes[ 0 ] - pos_nodes[ 2 ];
         XM = pos - pos_nodes[ 2 ];
         T det3 = CA[ 0 ] * XM[ 1 ] - CA[ 1 ] * XM[ 0 ];
-        if ( ( det1 * det3 ) >= 0 )
+        if ( ( det1 * det3 ) >= 0 and ( det2 * det3 ) >= 0 )
             return true;
         else
             return false;

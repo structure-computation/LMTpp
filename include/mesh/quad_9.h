@@ -155,7 +155,7 @@ T var_inter_insideness( const Quad_9 &e, const TV &var_inter ) {
         Mais pour cet élément non linéaire , on considère le \a Quad engendré par les 4 premiers noeuds.
         
     param :
-        Quad : le type d'élément
+        Quad_9 : le type d'élément
         pos_nodes : le position des sommets dans le plan. Il faut que le Quad ne soit pas "croisé".
         po : la position du point dans le plan
 
@@ -176,7 +176,7 @@ bool is_inside_linear( const Quad_9 &elem, const PosNodes &pos_nodes, const Pvec
         XM = pos - pos_nodes[ 2 ];
         T det3 = CD[ 0 ] * XM[ 1 ] - CD[ 1 ] * XM[ 0 ];
         
-        if ( ( det1 * det3 ) >= 0 ) {
+        if ( ( det1 * det3 ) >= 0 and ( det2 * det3 ) >= 0 ) {
             Pvec DA = pos_nodes[ 0 ] - pos_nodes[ 3 ];
             XM = pos - pos_nodes[ 3 ];
             T det4 = DA[ 0 ] * XM[ 1 ] - DA[ 1 ] * XM[ 0 ];

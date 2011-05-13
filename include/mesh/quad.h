@@ -271,7 +271,7 @@ bool is_inside_linear( const Quad &elem, const PosNodes &pos_nodes, const Pvec &
         XM = pos - pos_nodes[ 2 ];
         T det3 = CD[ 0 ] * XM[ 1 ] - CD[ 1 ] * XM[ 0 ];
         
-        if ( ( det1 * det3 ) >= 0 ) {
+        if ( ( det1 * det3 ) >= 0 and ( det2 * det3 ) >= 0 ) {
             Pvec DA = pos_nodes[ 0 ] - pos_nodes[ 3 ];
             XM = pos - pos_nodes[ 3 ];
             T det4 = DA[ 0 ] * XM[ 1 ] - DA[ 1 ] * XM[ 0 ];
