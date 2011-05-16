@@ -32,4 +32,5 @@
         * <strong> TV </strong> représente un vecteur ( voir \a Vec ).
         * <strong> TF </strong> représente une formulation du genre \a Formulation < ... > .
 
+    \keyword Remarque/Signification des noms de paramètre template
 */
