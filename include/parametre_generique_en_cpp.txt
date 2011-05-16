@@ -1,12 +1,12 @@
 /*!
 \webpage Signification des noms de paramètre template
 
-    La bibbliothèque LMT++ est basée sur la technique de la programmation paramétrique en C++, i.e. les fameux <strong> template <strong> .
+    La bibbliothèque LMT++ est basée sur la technique de la programmation paramétrique en C++, i.e. les fameux <strong> template </strong> .
     Cette souplesse dans le choix des types peut se faire pour les classes ainsi que pour les fonctions et les méthodes. 
     Exemples très classique pour une fonction :
     \code C/C++
         template <class T >
-        T min( T a, T b ) {
+        T mini( T a, T b ) {
             if ( a < b )
                 return a;
             else
@@ -20,7 +20,13 @@
             T* data;
         };
         
-    Dans les deux cas, la lettre <strong> T </strong> représente un type ( une classe ) quelconque. Avec tout de même une condition dans le cas de la fonction min : il faut bien entendu que a < b ait un sens : i.e.  l'opérateur < doit être défini par défaut comme pour le type double, ou bien défini dans la classe.
+    Dans les deux cas, la lettre <strong> T </strong> représente un type ( une classe ) quelconque. Avec tout de même une condition dans le cas de la fonction mini : il faut bien entendu que a < b ait un sens : i.e.  l'opérateur < doit être défini par défaut comme pour le type double, ou bien défini dans la classe. Sinon pendant la compilation le compilateur remplacera toutes les lettres T par votre type et tentera en vain de compiler la fonction. Vous aurez alors un message d'erreur du type :
+    \verbatim
+        main.cpp: In function ‘T mini(T, T) [with T = MonVecteur<bool>]’:
+        main.cpp:28:   instantiated from here
+        main.cpp:13: error: no match for ‘operator<’ in ‘a < b’
+
+
 
     Pour faciliter la compréhension et l'utilisation des types et des fonctions de la libriairie LMT++, des conventions ont été prises pour le nom des types et elles sont presque toujours respectées.
     
