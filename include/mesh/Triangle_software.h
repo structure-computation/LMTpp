@@ -1,12 +1,11 @@
 #ifndef TRIANGLE_SOFTWARE_H
 #define TRIANGLE_SOFTWARE_H
 
-#ifdef WITH_TRIANGLE_SOFTWARE
-
 #ifdef METIL_COMP_DIRECTIVE
 
-#pragma inc_path /usr/local/triangle/triangle/triangle.h
+#pragma inc_path /usr/local/triangle/triangle/
 #pragma lib_path /usr/local/triangle/triangle/
+#pragma lib triangle
 
 #endif /// METIL_COMP_DIRECTIVE
 
@@ -17,7 +16,8 @@
 extern "C" {
     #define REAL double
     #define VOID void
-    #include "/usr/local/triangle/triangle.h"
+    //#include "/usr/local/triangle/triangle.h"
+    #include"/home2/pasquier/triangle_software/triangle.h"
 }
 
 using namespace LMT;
@@ -67,12 +67,15 @@ inline typename FloatType<typename TypeReduction<Multiplies,Vec<T,s> >::T>::T re
             * Skin_and_node_mode : la peau et les noeuds à l'intérieur du maillage
              
     Pour la génération, on uilise la méthode get_triangulation()
-    Le premier paramètre sera le maillage résultat et le second sont les paramètres à passer au programme Triangle.
-    Ce dernier a de nombreuses possibilités de paramètres:
-    Les plus utiles sont :
-        * q?? où ?? représente un angle minimal à respecter. Prendre un valeur comprise entre 23 et 33. Au delà de 33 le programme risque d'échouer.
-        * a?? où ?? est un nombre réel représentant l'aire maximale des triangles.
+        * Le premier paramètre sera le maillage résultat et 
+        * le second sont les paramètres à passer au programme Triangle.
+            Ce dernier a de nombreuses possibilités de paramètres:
+            Les plus utiles sont :
+                * q?? où ?? représente un angle minimal à respecter. Prendre un valeur comprise entre 23 et 33. Au delà de 33 le programme risque d'échouer.
+                * a?? où ?? est un nombre réel représentant l'aire maximale des triangles.
           
+        * le dernier paramètre ( facultatif ) est du type <strong> triunsuitable_criterium_t </strong> qui est un synonyme de <strong> int densite( double *ori, double *dest, double *apex, double area ) </strong> . C'est donc un pointeur de fonction qui dont les paramètres <strong> ori </strong> , <strong> dest </strong> et <strong> apex </strong> sont les coordonnées des sommets dun triangle et <strong> area </strong> son aire.
+            Cette fonction doit renvoyer 1 si le triangle passé en paramètre est trop grand et 0 sinon. Cette fonction permet par exemple de mailler plus finement une zone
     Remarque : les paramètres zpDQ sont mis par défaut.
     
     Voici un exemple de code. On souhaite créer un maillage rectangulaire avec des triangles de plus en plus petits au fur et à mesure que l'on s'approche de l'axe des abscisses.
@@ -120,7 +123,7 @@ inline typename FloatType<typename TypeReduction<Multiplies,Vec<T,s> >::T>::T re
             return 0;
         }          
      
-     Les utilisateurs de metil_comp devrait pouvoir compiler ce code sans problème. Il faudra simplement ajouter les directives de compilations : <strong> -DANSI_DECLARATORS -DWITH_TRIANGLE_SOFTWARE </strong> .
+     Les utilisateurs de metil_comp devrait pouvoir compiler ce code sans problème. Il faudra simplement ajouter les directives de compilations : <strong> -DANSI_DECLARATORS </strong> .
      Pour ceux qui utilisent scons, inspirez-vous de cet exemple :
      \code Python
         from LMT import *
@@ -133,7 +136,7 @@ inline typename FloatType<typename TypeReduction<Multiplies,Vec<T,s> >::T>::T re
         env = Environment(
             CPPPATH = [ '#LMT/include' ],
             LIBS = [ 'pthread' ],
-            CPPFLAGS = cppflags( ['xml2-config'] ) + " -O3 -g -DANSI_DECLARATORS -DWITH_TRIANGLE_SOFTWARE",
+            CPPFLAGS = cppflags( ['xml2-config'] ) + " -O3 -g -DANSI_DECLARATORS ",
             LINKFLAGS = linkflags( ['xml2-config'] ) ,
             AS = 'yasm -f Elf32 -g Dwarf2'
         )
@@ -726,7 +729,7 @@ struct Triangle_software {
     }
     
     template< class TMESH>
-    void get_triangulation( TMESH &m, const std::string& triswitch ) const {
+    void get_triangulation( TMESH &m, const std::string& triswitch, triunsuitable_criterium_t triunsuitable_criterium = NULL ) const {
         triangulateio tri_in, tri_out;
         
         /// initialisation
@@ -758,6 +761,8 @@ struct Triangle_software {
         tri_in.numberofholes              = hole_list.size() / 2;
         tri_in.regionlist                 = NULL;
         tri_in.numberofregions            = 0;
+        tri_in.triunsuitable_criterium    = triunsuitable_criterium;
+        
         
         tri_out.pointlist                  = NULL;
         tri_out.pointattributelist         = NULL;
@@ -780,7 +785,10 @@ struct Triangle_software {
         tri_out.numberofregions            = 0;
         
         std::ostringstream oss;
-        oss << "zpDQ" << triswitch;
+        oss << "zpDQ";
+        if ( triunsuitable_criterium != NULL )
+            oss << "u";
+        oss << triswitch; 
         
         triangulate( const_cast<char*>( oss.str().c_str() ), &tri_in, &tri_out, NULL );
         
@@ -850,9 +858,5 @@ struct Triangle_software {
 
 template<class T>
 T Triangle_software<T>::epsi = std::numeric_limits<T>::epsilon() * 64;
-
-
-
-#endif  /// WITH_TRIANGLE_SOFTWARE
 
 #endif /// TRIANGLE_SOFTWARE_H
