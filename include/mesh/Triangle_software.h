@@ -4,10 +4,9 @@
 #ifdef WITH_TRIANGLE_SOFTWARE
 
 #ifdef METIL_COMP_DIRECTIVE
-
-#pragma inc_path /usr/local/triangle/triangle/triangle.h
+#pragma inc_path /usr/local/triangle/
 #pragma lib_path /usr/local/triangle/triangle/
-
+#pragma lib_name triangle
 #endif /// METIL_COMP_DIRECTIVE
 
 #include <list>
@@ -17,7 +16,7 @@
 extern "C" {
     #define REAL double
     #define VOID void
-    #include "/usr/local/triangle/triangle.h"
+    #include "triangle/triangle.h"
 }
 
 using namespace LMT;
@@ -48,7 +47,6 @@ void display( const triangulateio &tri ) {
 
 template<class T,int s>
 inline typename FloatType<typename TypeReduction<Multiplies,Vec<T,s> >::T>::T relative_distance(const Vec<T,s> &c, const Vec<T,s> &d) {
-
     typedef typename FloatType<typename TypeReduction<Multiplies,Vec<T,s> >::T>::T TR;
     Vec<T,s> tmp = c - d;
     TR lc = length( c );
@@ -120,7 +118,8 @@ inline typename FloatType<typename TypeReduction<Multiplies,Vec<T,s> >::T>::T re
             return 0;
         }          
      
-     Les utilisateurs de metil_comp devrait pouvoir compiler ce code sans problème. Il faudra simplement ajouter les directives de compilations : <strong> -DANSI_DECLARATORS -DWITH_TRIANGLE_SOFTWARE </strong> .
+     Les utilisateurs de metil_comp compile ce code sans problème.
+     
      Pour ceux qui utilisent scons, inspirez-vous de cet exemple :
      \code Python
         from LMT import *
