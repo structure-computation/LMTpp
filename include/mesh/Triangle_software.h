@@ -152,7 +152,7 @@ inline typename FloatType<typename TypeReduction<Multiplies,Vec<T,s> >::T>::T re
         ]
         
         env = Environment(
-            CPPPATH = [ '#LMT/include' ],
+            CPPPATH = [ '#LMT/include' , '/usr/local' ],
             LIBS = [ 'pthread' ],
             CPPFLAGS = cppflags( ['xml2-config'] ) + " -O3 -g -DANSI_DECLARATORS ",
             LINKFLAGS = linkflags( ['xml2-config'] ) ,
