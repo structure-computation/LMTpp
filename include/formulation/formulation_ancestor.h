@@ -40,7 +40,7 @@ public:
         levenberg_marquadt = AbsScalarType(0);
         max_diag = ScalarType(0);
         pthread_mutex_init( &mutex_assemble_matrix, NULL );
-        nb_threads_assemble_matrix = 4;
+        nb_threads_assemble_matrix = 1;
     }
     virtual ~FormulationAncestor() {}
 
