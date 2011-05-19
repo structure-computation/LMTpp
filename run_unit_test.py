@@ -31,9 +31,9 @@ class Tests:
         self.html = file( namefile_html, "w" )
         self.html.write('<!DOCTYPE html PUBLIC "-//W3C//DTDXHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">\n<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr">\n<head>\n<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=utf-8">\n<title>' + title_web_page + '</title>\n</head>\n<body text="#000000" bgcolor="#ffffff" link="#0000cc" vlink="#551a8b" >\n' )
         self.icon = [ 'red.png', 'green.png' ] 
-        self.command = 'metil_comp '
+        self.command = 'metil_comp --comp-dir tests/compilation '
         for dir in list_dir_include:
-            self.command = self.command + ' -I' + dir + ' '
+            self.command += ' -I' + dir + ' '
 
     def __del__( self ):
         self.html.write('\n<br>\n<br>\n<br>\n<br>\n<br>\n<br>\n<br>\n</body>\n</html>\n\n' )
@@ -46,7 +46,9 @@ class Tests:
             elif filename[-4:] == ".cpp": 
                 filename_log = filename[:-4] + ".log"
                 filename_log_cerr = filename[:-4] + ".log_cerr"
-                local_res = os.system( self.command + filename + " > " + filename_log + " 2> " + filename_log_cerr )
+                os.system( "rm -rf tests/compilation" )
+                cmd = self.command + filename + " > " + filename_log + " 2> " + filename_log_cerr
+                local_res = os.system( cmd )
                 print filename, local_res
                 if (local_res == 0): # compilation réussie
                     entree = open( filename_log, 'r' )
