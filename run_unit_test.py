@@ -96,7 +96,7 @@ else:
     ### ENVOI d'un courrier en cas d'erreur ###
     import smtplib
     fromaddr = 'cellog.lmt@gmail.com'
-    toaddrs  = 'raphael.pasquier@lmt.ens-cachan.fr,hugo.leclerc@lmt.ens-cachan.fr'
+    toaddrs  = 'hugo.leclerc@lmt.ens-cachan.fr,raphael.pasquier@lmt.ens-cachan.fr'
     msg = 'Unit tests crash !'
     
     # Credentials (if needed)
