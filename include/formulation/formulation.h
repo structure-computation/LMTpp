@@ -1967,8 +1967,8 @@ public:
                 TM::TElemList::apply_on_down_cast( reinterpret_cast<typename TM::EA *>(elem_list[i]), CallAfterSolve_15(), *this, *vectors_assembly);
         }
     }
-    /**
-     * update variable at end of the time step
+    /*!
+      update variable at end of the time step
      */
     virtual void update_variables() {
         for(unsigned i=0;i<m->node_list.size();++i)
@@ -1984,7 +1984,7 @@ public:
         carac.set_global_unknowns(m,*this,vectors_,*indice_glob);
     }
     /*!
-     * update variable at time t_n + partial_ts
+      update variable at time t_n + partial_ts
      */
     virtual void update_variables(ScalarType partial_ts) {
         for(unsigned i=0;i<m->node_list.size();++i)
@@ -1993,7 +1993,7 @@ public:
         carac.set_global_unknowns(m,*this,vectors,*indice_glob,partial_ts);
     }
     /*!
-     * fill vectors[x] using dern_unknown
+      fill vectors[x] using dern_unknown
      */
     virtual void get_initial_conditions() {
         allocate_matrices();
@@ -2012,11 +2012,11 @@ public:
         initial_condition_initialized = true;
     }
     /*!
-     * add a constraint which will be added to system during assembly
-     * @param txt constraint in analytic form. Example : "node[0].temperature + time**2 - 10"
-     * @param penalty_value constraint will be * by max(abs(diag))*penalty_value
-     * @return number of constraint (usefull in order to remove it...)
-     */
+      add a constraint which will be added to system during assembly
+      @param txt constraint in analytic form. Example : "node[0].temperature + time**2 - 10"
+      @param penalty_value constraint will be * by max(abs(diag))*penalty_value
+      @return number of constraint (usefull in order to remove it...)
+    */
     virtual unsigned add_constraint(const std::string &txt,const ScalarType &penalty_value=0) { return add_constraint( Constraint<Formulation>(txt,penalty_value,*this) ); }
     virtual unsigned add_constraint(const Constraint<Formulation> &c) { constraints.push_back( c ); return constraints.size()-1; }
 
@@ -2151,7 +2151,7 @@ private:
 
 };
 
-/** To be redefined for each new formulations */
+/*! To be redefined for each new formulations */
 template<class TF,class TMA,class TVE,class TVEVE,unsigned _ms,unsigned _am,unsigned _av,class TN>
 void add_nodal_matrix(
     TF &f,
@@ -2165,7 +2165,7 @@ void add_nodal_matrix(
     const unsigned *indices ) {
 }
 
-/** To be redefined for each new formulations */
+/*! To be redefined for each new formulations */
 template<class TF,class TMA,class TVE,class TVEVE,unsigned _ms,unsigned _am,unsigned _av>
 void add_global_matrix(
     TF &f,
@@ -2178,7 +2178,7 @@ void add_global_matrix(
     unsigned indice ) {
 }
 
-/** To be redefined for each new formulations */
+/*! To be redefined for each new formulations */
 template<class T,class TF,class TMA,class TVE,class TVEVE,unsigned _ms,unsigned _am,unsigned _av,class TE>
 void add_local_elem_matrix(
     T pond, const T *var_inter,
@@ -2197,7 +2197,7 @@ void add_local_elem_matrix(
     assert( 0 );
 }
 
-/** To be redefined for each new formulations */
+/*! To be redefined for each new formulations */
 template<class TF, class TMA, class TVE, class TVEVE, unsigned _ms,unsigned _am,unsigned _av,class TE>
 void add_elem_matrix(
         TF &f,
@@ -2217,7 +2217,7 @@ void add_elem_matrix(
 }
 
 
-/** To be redefined for each new formulations */
+/*! To be redefined for each new formulations */
 template<class TF, class TVE, class TVEVE, class TE>
 void add_elem_residual(
         TF &f,
@@ -2233,7 +2233,7 @@ void add_elem_residual(
 }
 
 
-/** To be redefined for each new formulations */
+/*! To be redefined for each new formulations */
 template<class TF,class TMA,class TVE,class TVEVE,unsigned _ms,unsigned _am,unsigned _av,class TN,unsigned num_der_var>
 void add_nodal_vector_der_var(
     TF    &f,
@@ -2245,7 +2245,7 @@ void add_nodal_vector_der_var(
     Number<num_der_var> ) {
 }
 
-/** To be redefined for each new formulations */
+/*! To be redefined for each new formulations */
 template<class TF,class TMA,class TVE,class TVEVE,unsigned num_der_var>
 void add_global_vector_der_var(
     TF    &f,
@@ -2255,7 +2255,7 @@ void add_global_vector_der_var(
     Number<num_der_var> ) {
 }
 
-/** To be redefined for each new formulations */
+/*! To be redefined for each new formulations */
 template<class T,class TF,class TMA,class TVE,class TVEVE,class TE,unsigned num_der_var>
 void add_local_elem_vector_der_var(
     T pond, const T *var_inter,
@@ -2270,7 +2270,7 @@ void add_local_elem_vector_der_var(
     assert( 0 );
 }
 
-/** To be redefined for each new formulations */
+/*! To be redefined for each new formulations */
 template<class TF,class TMA,class TVE,class TVEVE,class TE,unsigned num_der_var>
 void add_elem_vector_der_var(
         TF &f,

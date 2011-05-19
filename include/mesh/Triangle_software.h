@@ -56,7 +56,7 @@ inline typename FloatType<typename TypeReduction<Multiplies,Vec<T,s> >::T>::T re
     Cette classe encapsule certaines fonctionnalités du logiciel [[http://www.cs.cmu.edu/~quake/triangle.h|Triange]] .
     Elle permet de générer un maillage de triangles à partir de points et de segments dans le plan. Certains de ces segments servant à définir la peau du maillage.
     On peut aussi introduire un maillage en plus de points et de segments grâce à la méthode append_mesh() qui prend en paramètre 
-        * un maillage 2D ( de \a Quad ou de \a Triange ).
+        * un maillage 2D ( de \a Quad ou de \a Triangle ).
         * un mode d'insertion 
             * All_mode : toutes les barres et tous les noeuds
             * Only_skin_mode : seulement la peau
@@ -136,12 +136,9 @@ inline typename FloatType<typename TypeReduction<Multiplies,Vec<T,s> >::T>::T re
             return 0;
         }          
      
-<<<<<<< HEAD
+
      Les utilisateurs de metil_comp compile ce code sans problème.
      
-=======
-     Les utilisateurs de metil_comp devrait pouvoir compiler ce code sans problème. Il faudra simplement ajouter les directives de compilations : <strong> -DANSI_DECLARATORS </strong> .
->>>>>>> 9ad9a01d40bb0de6d59cd355410e918beecafab2
      Pour ceux qui utilisent scons, inspirez-vous de cet exemple :
      \code Python
         from LMT import *
@@ -152,7 +149,7 @@ inline typename FloatType<typename TypeReduction<Multiplies,Vec<T,s> >::T>::T re
         ]
         
         env = Environment(
-            CPPPATH = [ '#LMT/include' ],
+            CPPPATH = [ '#LMT/include' , '/usr/local' ],
             LIBS = [ 'pthread' ],
             CPPFLAGS = cppflags( ['xml2-config'] ) + " -O3 -g -DANSI_DECLARATORS ",
             LINKFLAGS = linkflags( ['xml2-config'] ) ,

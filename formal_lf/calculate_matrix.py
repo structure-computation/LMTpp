@@ -92,7 +92,8 @@ def write_matrix( f, M, V, symmetric, indices, offsets, assemble_mat, assemble_v
           res_cpp += '    matrix(indices['+str(indices[i])+']+'+str(offsets[i])+',indices['+str(indices[j])+']+'+str(offsets[j])+') += tmp_'+str(i)+'_'+str(j)+";\n"
   if assemble_vec:
     for i in range(M.nb_rows()):
-      res_cpp += 'sollicitation[indices[' + str(indices[i]) + ']+' + str(offsets[i]) + '] += vec_' + str(i) + ";\n"
+      if V[i]:  
+        res_cpp += 'sollicitation[indices[' + str(indices[i]) + ']+' + str(offsets[i]) + '] += vec_' + str(i) + ";\n"
   res_cpp += '    pthread_mutex_unlock( &( f.mutex_assemble_matrix ) );\n'
   f.write( res_cpp )
 
