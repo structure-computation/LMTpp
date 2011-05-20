@@ -79,17 +79,17 @@ class VariableAncestor
             for num_node in 0 .. e.nb_nodes
                 phi_n := e.get_shape_functions( interpolation_base_ )[ num_node ]
                 num_node_cpp := e.corr_cpp( num_node )
-                sym_lst.push_back( sym = symbol( "elem.node($num_node_cpp)->$n$ind_n", "$(t)^{$num_node_cpp}$ind_t" ),
+                sym_lst.push_back( sym = symbol( "$(e.name_elem).node($num_node_cpp)->$n$ind_n", "$(t)^{$num_node_cpp}$ind_t" ),
                     node = num_node_cpp, name = n, ind_n = ind_n, nder = nb_der )
                 res += phi_n * sym_lst[sym_lst.size-1].sym
             return res
 # res := e.interpolation( sym_lst[ sym_lst.size - e.nb_nodes ... ].map( _0.sym ), interpolation_base_ )
         if interpolation_ == "elementary"
-            return sym_lst.push_back( sym = symbol( "elem.$n$ind_n"     , "$t$ind_t" ), elem = 0, name = n, ind_n = ind_n, nder = nb_der )->sym
+            return sym_lst.push_back( sym = symbol( "$(e.name_elem).$n$ind_n"     , "$t$ind_t" ), elem = 0, name = n, ind_n = ind_n, nder = nb_der )->sym
         if interpolation_ == "global"
             return sym_lst.push_back( sym = symbol( "f.m->$n$ind_n"     , "$t$ind_t" ), glob = 0, name = n, ind_n = ind_n, nder = nb_der )->sym
         if interpolation_ == "skin_elementary"
-            return sym_lst.push_back( sym = symbol( "skin_elem.$n$ind_n", "$t$ind_t" ), skin = 0, name = n, ind_n = ind_n, nder = nb_der )->sym
+            return sym_lst.push_back( sym = symbol( "skin_$(e.name_elem).$n$ind_n", "$t$ind_t" ), skin = 0, name = n, ind_n = ind_n, nder = nb_der )->sym
         assert( 0, "unknown interpolation_ '$interpolation_'" )
     
     def _get_scalar_var_wo_enr( time, e, n, t, ind, sym_lst, want_ders )
@@ -180,10 +180,10 @@ class Variable[ nb_dim = [], sym = false ] inherits VariableAncestor
         for ind, val in  indices_and_values_of( test )
             from_formulation->subs_expr_to_test( test )
         
-    def mesh_symbol( ind )
+    def mesh_symbol( ind, e )
         prefix := ""
         if interpolation == "elementary"
-            prefix = "elem."
+            prefix = "$(e.name_elem)."
         else
             assert( 0, "interpolation=$interpolation not managed" )
         #
@@ -352,7 +352,7 @@ class LmtppFormulationAncestor
                             stderr <<< "Attention : on peut pas coller un champ non constant sur un champ qui est supposé l'être. Si par exemple vous souhaitez avoir la moyenne sur l'élément vous pouvez faire e.mean(...)."
                             # val = e.mean( val )
                             val = val.subs( e.var_inter, e.get_center_of_var_inter() )
-                    cw.add( var.mesh_symbol( ind ), val, reassign )
+                    cw.add( var.mesh_symbol( ind, e ), val, reassign )
         return cw.to_string()
     
     #
