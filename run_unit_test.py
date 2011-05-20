@@ -14,9 +14,9 @@ def extract_function( s ):
         if (j >=0):
             return s[0: j+1]
         else:
-            return '??????'
+            return 'unknown name function'
     else:
-        return '??????'
+        return 'unknown name function'
 
 def extract_leaf( s ):
     i = s.rfind( '/' )
@@ -84,7 +84,7 @@ class Tests:
         self.html.write( '<br> Date : ' + time.asctime() + '\n<br>\n' )
         self.html.write( '<br> Global Result '+ create_html_image( self.icon[ self.res ], str(self.res ))+'\n<br>' )
     
-t = Tests( "report_test__LMT++.html", "report unit test for LMT++", ['include/', '/usr/include/', '/usr/include/libxml2/'] )
+t = Tests( "doc/html/report_test__LMT++.html", "report unit test for LMT++", ['include/', '/usr/include/', '/usr/include/libxml2/'] )
 
 #os.system( "git pull" )
 t.run( "tests" )
