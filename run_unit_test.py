@@ -96,8 +96,7 @@ else:
     ### ENVOI d'un courrier en cas d'erreur ###
     import smtplib
     fromaddr = 'cellog.lmt@gmail.com'
-    toaddrs  = 'hugo.leclerc@lmt.ens-cachan.fr,raphael.pasquier@lmt.ens-cachan.fr'
-    msg = 'Unit tests crash !'
+    msg = 'Unit tests crash !\n\nResults : http://www.lmt.ens-cachan.fr/report_test__LMT++.html \n   '
     
     # Credentials (if needed)
     uti = 'cellog.lmt'
@@ -107,7 +106,8 @@ else:
     server = smtplib.SMTP( 'smtp.gmail.com:587' )
     server.starttls()
     server.login( uti, mdp )
-    server.sendmail( fromaddr, toaddrs, msg )
+    server.sendmail( fromaddr, 'hugo.leclerc@lmt.ens-cachan.fr', msg )
+    server.sendmail( fromaddr, 'raphael.pasquier@lmt.ens-cachan.fr', msg )
     server.quit()
     
 

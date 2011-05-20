@@ -122,7 +122,7 @@ inline typename FloatType<typename TypeReduction<Multiplies,Vec<T,s> >::T>::T re
             
             display_mesh( m_source );
             
-            Triangle_software<> tri( m_source, Triangle_software<>::Skin_and_node_mode );
+            Triangle_software tri( m_source, Triangle_software::Skin_and_node_mode );
             
             int p1 = tri.append_point( -2.5, 0. );
             int p2 = tri.append_point(  2.5, 0. );
@@ -165,8 +165,8 @@ inline typename FloatType<typename TypeReduction<Multiplies,Vec<T,s> >::T>::T re
         env.Program( "main", ["main.cpp"] + libs + libs_Triangle_software, build_dir='build/LMT' ) 
 
 */
-template<class T = double >
 struct Triangle_software {
+    typedef double T;
     typedef Vec<T, 2 > Pvec;
 
     typedef enum {
@@ -872,7 +872,6 @@ struct Triangle_software {
     static T epsi;
 };
 
-template<class T>
-T Triangle_software<T>::epsi = std::numeric_limits<T>::epsilon() * 64;
+double Triangle_software::epsi = std::numeric_limits<double>::epsilon() * 64;
 
 #endif /// TRIANGLE_SOFTWARE_H
