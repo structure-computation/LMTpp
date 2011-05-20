@@ -58,7 +58,7 @@ class VariableAncestor
     name          := ""
     tex_name      := ""
     
-# enrichissement
+    # enrichissement
     enrich        := EnrichList()
     is_numericaly_enriched   := false
     
