@@ -1,13 +1,10 @@
 #ifndef TRIANGLE_SOFTWARE_H
 #define TRIANGLE_SOFTWARE_H
 
-#ifdef WITH_TRIANGLE_SOFTWARE
-
 #ifdef METIL_COMP_DIRECTIVE
-
-#pragma inc_path /usr/local/triangle/triangle/triangle.h
+#pragma inc_path /usr/local/triangle/
 #pragma lib_path /usr/local/triangle/triangle/
-
+#pragma lib_name triangle
 #endif /// METIL_COMP_DIRECTIVE
 
 #include <list>
@@ -17,7 +14,7 @@
 extern "C" {
     #define REAL double
     #define VOID void
-    #include "/usr/local/triangle/triangle.h"
+    #include "triangle/triangle.h"
 }
 
 using namespace LMT;
@@ -48,7 +45,6 @@ void display( const triangulateio &tri ) {
 
 template<class T,int s>
 inline typename FloatType<typename TypeReduction<Multiplies,Vec<T,s> >::T>::T relative_distance(const Vec<T,s> &c, const Vec<T,s> &d) {
-
     typedef typename FloatType<typename TypeReduction<Multiplies,Vec<T,s> >::T>::T TR;
     Vec<T,s> tmp = c - d;
     TR lc = length( c );
@@ -60,24 +56,30 @@ inline typename FloatType<typename TypeReduction<Multiplies,Vec<T,s> >::T>::T re
     Cette classe encapsule certaines fonctionnalités du logiciel [[http://www.cs.cmu.edu/~quake/triangle.h|Triange]] .
     Elle permet de générer un maillage de triangles à partir de points et de segments dans le plan. Certains de ces segments servant à définir la peau du maillage.
     On peut aussi introduire un maillage en plus de points et de segments grâce à la méthode append_mesh() qui prend en paramètre 
-        * un maillage 2D ( de \a Quad ou de \a Triange ).
+        * un maillage 2D ( de \a Quad ou de \a Triangle ).
         * un mode d'insertion 
             * All_mode : toutes les barres et tous les noeuds
-            * Only_skin_mode : seulement la peau et ses noeuds
+            * Only_skin_mode : seulement la peau
             * Skin_and_node_mode : la peau et les noeuds à l'intérieur du maillage
              
     Pour la génération, on uilise la méthode get_triangulation()
-    Le premier paramètre sera le maillage résultat et le second sont les paramètres à passer au programme Triangle.
-    Ce dernier a de nombreuses possibilités de paramètres:
-    Les plus utiles sont :
-        * q?? où ?? représente un angle minimal à respecter. Prendre un valeur comprise entre 23 et 33. Au delà de 33 le programme risque d'échouer.
-        * a?? où ?? est un nombre réel représentant l'aire maximale des triangles.
+        * Le premier paramètre sera le maillage résultat et 
+        * le second sont les paramètres à passer au programme Triangle.
+            Ce dernier a de nombreuses possibilités de paramètres:
+            Les plus utiles sont :
+                * q?? où ?? représente un angle minimal à respecter. Prendre un valeur comprise entre 23 et 33. Au delà de 33 le programme risque d'échouer.
+                * a?? où ?? est un nombre réel représentant l'aire maximale des triangles.
           
-    Remarque : les paramètres zpDQ sont mis par défaut.
+        * le dernier paramètre ( facultatif ) est du type <strong> triunsuitable_criterium_t </strong> qui est un synonyme de <strong> int (*)( double *ori, double *dest, double *apex, double area, void *param ) </strong> . C'est donc un pointeur de fonction qui dont les paramètres <strong> ori </strong> , <strong> dest </strong> et <strong> apex </strong> sont les coordonnées des sommets d'un triangle, <strong> area </strong> son aire et <strong> param </strong> un pointeur générique sur un autre paramètre ( si nécessaire ).
+            Cette fonction doit renvoyer 1 si le triangle passé en paramètre est trop grand et 0 sinon. Cette fonction permet par exemple de mailler plus finement une zone.
+            
+    Remarque : les paramètres du programme Triangle zpDQ sont mis par défaut.
     
-    Voici un exemple de code. On souhaite créer un maillage rectangulaire avec des triangles de plus en plus petits au fur et à mesure que l'on s'approche de l'axe des abscisses.
+    Voici un exemple de code. 
+    On souhaite créer un maillage rectangulaire avec des triangles de plus en plus petits au fur et à mesure que l'on s'approche de l'axe des abscisses.
     Une idée de créer un maillage avec \a make_rect() puis de déplacer les points pour qu'ils se raprochent de l'axe des abscisses.
-    Ensuite on ajoute deux points et un segment sur cet axe.
+    Ensuite on ajoute deux points et un segment sur cet axe des x.
+    Enfin on se sert d'une fonction <strong> densite </strong> qui permet de mailler plus finement au voisinage de zéro. 
     
     \code C/C++
         #include "mesh/meshcaracstd.h"
@@ -86,6 +88,20 @@ inline typename FloatType<typename TypeReduction<Multiplies,Vec<T,s> >::T>::T re
         #include "mesh/read_msh_2.h"
         #include "mesh/Triangle_software.h"
         
+        int densite( double *ori, double *dest, double *apex, double area, void* p ) {
+        
+            double center[ 2 ];
+            
+            center[ 0 ] = (1./3) * ( ori[ 0 ] + dest[ 0 ] + apex[ 0 ] );
+            center[ 1 ] = (1./3) * ( ori[ 1 ] + dest[ 1 ] + apex[ 1 ] );
+            
+            double density = 0.0001 + 0.01 * sqrt( center[ 0 ] * center[ 0 ] + center[ 1 ] * center[ 1 ] );
+            
+            if ( area > density )
+                return 1;
+            else
+                return 0;
+        }
         
         int main( int argc, const char* argv[] ) {
         
@@ -95,9 +111,9 @@ inline typename FloatType<typename TypeReduction<Multiplies,Vec<T,s> >::T>::T re
             typedef TM::Pvec Pvec;
         
             TMS m_source;
-            make_rect( m_source, Quad(), Pvec( -2.5, -1 ), Pvec( 2.5, 1 ), Pvec( 81, 41 ) );
+            make_rect( m_source, Quad(), Pvec( -2.5, -1 ), Pvec( 2.5, 1 ), Pvec( 11, 9 ) );
             for( unsigned i = 0; i < m_source.node_list.size(); ++i ) {
-                double y = pow( abs( m_source.node_list[ i ].pos[ 1 ] ), 1.5 );
+                double y = pow( abs( m_source.node_list[ i ].pos[ 1 ] ), 2 );
                 if ( m_source.node_list[ i ].pos[ 1 ] > 0 )
                     m_source.node_list[ i ].pos[ 1 ] = y;
                 else
@@ -106,21 +122,23 @@ inline typename FloatType<typename TypeReduction<Multiplies,Vec<T,s> >::T>::T re
             
             display_mesh( m_source );
             
-            Triangle_software<> tri( m_source, Triangle_software<>::Skin_and_node_mode );
+            Triangle_software tri( m_source, Triangle_software::Skin_and_node_mode );
             
             int p1 = tri.append_point( -2.5, 0. );
             int p2 = tri.append_point(  2.5, 0. );
             tri.append_segment( p1, p2 );
             
             TM m;
-            tri.get_triangulation( m, "q31" );
+            tri.get_triangulation( m, "q31", densite );
             
             display_mesh( m );
             
             return 0;
         }          
      
-     Les utilisateurs de metil_comp devrait pouvoir compiler ce code sans problème. Il faudra simplement ajouter les directives de compilations : <strong> -DANSI_DECLARATORS -DWITH_TRIANGLE_SOFTWARE </strong> .
+
+     Les utilisateurs de metil_comp compile ce code sans problème.
+     
      Pour ceux qui utilisent scons, inspirez-vous de cet exemple :
      \code Python
         from LMT import *
@@ -131,9 +149,9 @@ inline typename FloatType<typename TypeReduction<Multiplies,Vec<T,s> >::T>::T re
         ]
         
         env = Environment(
-            CPPPATH = [ '#LMT/include' ],
+            CPPPATH = [ '#LMT/include' , '/usr/local' ],
             LIBS = [ 'pthread' ],
-            CPPFLAGS = cppflags( ['xml2-config'] ) + " -O3 -g -DANSI_DECLARATORS -DWITH_TRIANGLE_SOFTWARE",
+            CPPFLAGS = cppflags( ['xml2-config'] ) + " -O3 -g -DANSI_DECLARATORS ",
             LINKFLAGS = linkflags( ['xml2-config'] ) ,
             AS = 'yasm -f Elf32 -g Dwarf2'
         )
@@ -147,8 +165,8 @@ inline typename FloatType<typename TypeReduction<Multiplies,Vec<T,s> >::T>::T re
         env.Program( "main", ["main.cpp"] + libs + libs_Triangle_software, build_dir='build/LMT' ) 
 
 */
-template<class T = double >
 struct Triangle_software {
+    typedef double T;
     typedef Vec<T, 2 > Pvec;
 
     typedef enum {
@@ -726,7 +744,7 @@ struct Triangle_software {
     }
     
     template< class TMESH>
-    void get_triangulation( TMESH &m, const std::string& triswitch ) const {
+    void get_triangulation( TMESH &m, const std::string& triswitch, triunsuitable_criterium_t triunsuitable_criterium = NULL, void* param_triunsuitable = NULL ) const {
         triangulateio tri_in, tri_out;
         
         /// initialisation
@@ -758,6 +776,9 @@ struct Triangle_software {
         tri_in.numberofholes              = hole_list.size() / 2;
         tri_in.regionlist                 = NULL;
         tri_in.numberofregions            = 0;
+        tri_in.triunsuitable_criterium    = triunsuitable_criterium;
+        tri_in.param_triunsuitable        = param_triunsuitable;
+        
         
         tri_out.pointlist                  = NULL;
         tri_out.pointattributelist         = NULL;
@@ -780,7 +801,10 @@ struct Triangle_software {
         tri_out.numberofregions            = 0;
         
         std::ostringstream oss;
-        oss << "zpDQ" << triswitch;
+        oss << "zpDQ";
+        if ( triunsuitable_criterium != NULL )
+            oss << "u";
+        oss << triswitch; 
         
         triangulate( const_cast<char*>( oss.str().c_str() ), &tri_in, &tri_out, NULL );
         
@@ -848,11 +872,6 @@ struct Triangle_software {
     static T epsi;
 };
 
-template<class T>
-T Triangle_software<T>::epsi = std::numeric_limits<T>::epsilon() * 64;
-
-
-
-#endif  /// WITH_TRIANGLE_SOFTWARE
+double Triangle_software::epsi = std::numeric_limits<double>::epsilon() * 64;
 
 #endif /// TRIANGLE_SOFTWARE_H

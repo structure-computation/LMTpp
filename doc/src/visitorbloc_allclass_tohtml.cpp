@@ -89,7 +89,7 @@ void VisitorBloc_AllClass_toHTML::generate_stream_HTML_for_typedef( ofstream* f,
             for(i=0;i<n;i++) {
                 m = b->listTypedef[i].listTag.size();
                 if (m>0) {
-                    *f <<  "<li> <strong> typedef ";
+                    *f <<  "<li> <tt> typedef ";
                     stmp = b->listTypedef[i].type.name;
                     if ((ptr_t = ptr_list_target->isName( stmp )) != 0 )
                         stmp2 = linkHTML( b->reference(), ptr_t->reference(), stmp );
@@ -101,7 +101,7 @@ void VisitorBloc_AllClass_toHTML::generate_stream_HTML_for_typedef( ofstream* f,
                     else
                         stmp3 = french2HTML( stmp );
                     *f << stmp2 << "  &#x21D4 " << stmp3 << " ";
-                    *f << "</strong> </li>" << std::endl;
+                    *f << "</tt> </li>" << std::endl;
                     for(j=0;j<m;j++) 
                         b->listTypedef[i].listTag[j]->generate_pageHTML(f,ptr_list_target,ptr_parent );
                 }
@@ -162,15 +162,10 @@ void VisitorBloc_AllClass_toHTML::generate_stream_HTML_for_sub_class_struct_func
         }
         *f << "<ul>" << std::endl;
         for(i=0;i<list_subStruct.size();i++) {
-            switch(t) {
-                case Normal : *f << "<li> ";break;
-                case Link   : *f << "<li> "; break;
-                case Anchor : *f << "<li> <strong> "; break;
-            }
-            *f << list_subStruct[i]->portee << " ";
+            *f << "<li> " << list_subStruct[i]->portee << " ";
             generate_stream_HTML_for_template_cpp(f,list_subStruct[i]);
             *f << " <strong> struct </strong> ";
-            switch(t) {
+            switch( t ) {
                 case Normal : 
                     *f << french2HTML( list_subStruct[i]->name.name );
                     *f << " </li> ";
@@ -181,19 +176,14 @@ void VisitorBloc_AllClass_toHTML::generate_stream_HTML_for_sub_class_struct_func
                     break;
                 case Anchor : 
                     *f << ancreHTML( list_subStruct[i]->name.name,true );
-                    *f << " </strong> </li> ";
+                    *f << " </li> ";
                     for(j=0;j<list_subStruct[i]->listTag.size();j++) /// affichage des commentaires
-                        list_subStruct[i]->listTag[j]->generate_pageHTML(f,ptr_list_target,ptr_parent );
+                        list_subStruct[i]->listTag[j]->generate_pageHTML( f, ptr_list_target, ptr_parent );
                     break;
             }
         }
         for(i=0;i<list_subClass.size();i++) {
-            switch(t) {
-                case Normal : *f << "<li> ";break;
-                case Link   : *f << "<li> "; break;
-                case Anchor : *f << "<li> <strong> "; break;
-            }
-            *f << list_subClass[i]->portee << " ";
+            *f << "<li> " << list_subClass[i]->portee << " ";
             generate_stream_HTML_for_template_cpp(f,list_subClass[i]);
             *f << " <strong> class </strong> ";
             switch(t) {
@@ -207,7 +197,7 @@ void VisitorBloc_AllClass_toHTML::generate_stream_HTML_for_sub_class_struct_func
                     break;
                 case Anchor : 
                     *f << ancreHTML( list_subClass[i]->name.name,true );
-                    *f << " </strong> </li> ";
+                    *f << " </li> ";
                     for(j=0;j<list_subClass[i]->listTag.size();j++) /// affichage des commentaires
                         list_subClass[i]->listTag[j]->generate_pageHTML(f,ptr_list_target,ptr_parent );
                     break;
@@ -219,24 +209,16 @@ void VisitorBloc_AllClass_toHTML::generate_stream_HTML_for_sub_class_struct_func
     if (list_method.size()) {
         /// il y a des méthodes
         *f <<  "<h3> m&eacute;thodes </h3> " << std::endl;
-        switch(t) {
+        switch( t ) {
             case Normal : *f << "<div class=\"description_methode\">" << std::endl; break;
             case Link   : *f << "<div class=\"sommaire_methode\">" << std::endl; break;
             case Anchor : *f << "<div class=\"description_methode\">" << std::endl; break;
         }
         *f << "<ul>" << std::endl;
         for(i=0;i<list_method.size();i++) {
-            switch(t) {
-                case Normal : *f << "<li> ";break;
-                case Link   : *f << "<li> "; break;
-                case Anchor : *f << "<li> <strong> "; break;
-            }
-            generate_stream_HTML_for_function(f,list_method[i],t);
-            switch(t) {
-                case Normal : *f << "</li> ";break;
-                case Link   : *f << "</li> "; break;
-                case Anchor : *f << " </strong> </li>"; break;
-            }
+            *f << "<li> ";
+            generate_stream_HTML_for_function( f, list_method[ i ], t );
+            *f << " </li> ";
         }
         *f << "</ul>" << std::endl;
         *f << "</div>" << std::endl;
@@ -275,12 +257,7 @@ void VisitorBloc_AllClass_toHTML::generate_stream_HTML_for_sub_classMetil_functi
         }
         *f << "<ul>" << std::endl;
         for(i=0;i<list_subClass.size();i++) {
-            switch(t) {
-                case Normal : *f << "<li> ";break;
-                case Link   : *f << "<li> "; break;
-                case Anchor : *f << "<li> <strong> "; break;
-            }
-            *f << list_subClass[i]->portee << " ";
+            *f << "<li> " << list_subClass[i]->portee << " ";
             generate_stream_HTML_for_template_cpp(f,list_subClass[i]);
             *f << " <strong> class </strong> ";
             switch(t) {
@@ -294,7 +271,7 @@ void VisitorBloc_AllClass_toHTML::generate_stream_HTML_for_sub_classMetil_functi
                     break;
                 case Anchor : 
                     *f << ancreHTML( list_subClass[i]->name.name,true );
-                    *f << " </strong> </li> ";
+                    *f << " </li> ";
                     for(j=0;j<list_subClass[i]->listTag.size();j++) /// affichage des commentaires
                         list_subClass[i]->listTag[j]->generate_pageHTML(f,ptr_list_target,ptr_parent );
                     break;
@@ -304,27 +281,19 @@ void VisitorBloc_AllClass_toHTML::generate_stream_HTML_for_sub_classMetil_functi
         *f << "</div>" << std::endl;
     }
     
-    if (list_method.size()) {
+    if ( list_method.size() ) {
         /// il y a des méthodes
         *f <<  "<h3> m&eacute;thodes </h3> " << std::endl;
-        switch(t) {
+        switch( t ) {
             case Normal : *f << "<div class=\"description_methode\">" << std::endl; break;
             case Link   : *f << "<div class=\"sommaire_methode\">" << std::endl; break;
             case Anchor : *f << "<div class=\"description_methode\">" << std::endl; break;
         }
         *f << "<ul>" << std::endl;
         for(i=0;i<list_method.size();i++) {
-            switch(t) {
-                case Normal : *f << "<li> ";break;
-                case Link   : *f << "<li> "; break;
-                case Anchor : *f << "<li> <strong> "; break;
-            }
-            generate_stream_HTML_for_functionMetil(f,list_method[i],t);
-            switch(t) {
-                case Normal : *f << "</li> ";break;
-                case Link   : *f << "</li> "; break;
-                case Anchor : *f << " </strong> </li>"; break;
-            }
+            *f << "<li> ";
+            generate_stream_HTML_for_functionMetil( f, list_method[ i ], t );
+            *f << "</li> ";
         }
         *f << "</ul>" << std::endl;
         *f << "</div>" << std::endl;
@@ -389,7 +358,7 @@ void VisitorBloc_AllClass_toHTML::generate_stream_HTML_for_method( ofstream* f, 
             for(i=0;i<n;i++) {
                 b->list_subType_function[i]->exec( &visitor_caract_function );
                 if (visitor_caract_function.enphase) {
-                    *f << "<li> <strong> " << b->list_subType_function[i]->portee + " ";
+                    *f << "<li> <tt> " << b->list_subType_function[i]->portee + " ";
                     m = b->list_subType_function[i]->listTemplateParameter.size();
                     if (m>0) {
                         *f << " template  &lt; ";
@@ -437,7 +406,7 @@ void VisitorBloc_AllClass_toHTML::generate_stream_HTML_for_method( ofstream* f, 
                     if (m == 0)
                         *f << " ) ";
                     stmp = *visitor_caract_function.ptr_listAttribut;
-                    *f << " " << stmp << "; </strong> </li>" << std::endl;
+                    *f << " " << stmp << "; </tt> </li>" << std::endl;
                     m = b->list_subType_function[i]->listTag.size();
                     for(j=0;j<m;j++) 
                         b->list_subType_function[i]->listTag[j]->generate_pageHTML(f,ptr_list_target,ptr_parent );
@@ -463,7 +432,7 @@ void VisitorBloc_AllClass_toHTML::generate_stream_HTML_for_property( ofstream* f
             *f << "<div class=\"sommaire_propriete\">" << std::endl;
             *f << "<ul>" << std::endl;
             for(i=0;i<n;i++) {
-                *f << "<li> <strong> property </strong> ";
+                *f << "<li> <tt> property </tt> ";
                 stmp = c->listProperty[i].type.name;
                 if ((ptr_t = ptr_list_target->isName( stmp )) != 0 )
                     stmp2 = linkHTML( c->reference(), ptr_t->reference(), stmp );
@@ -478,7 +447,7 @@ void VisitorBloc_AllClass_toHTML::generate_stream_HTML_for_property( ofstream* f
             *f << "<div class=\"description_propriete\">" << std::endl;
             *f << "<ul>" << std::endl;
             for(i=0;i<n;i++) {
-                *f << "<li> <strong> property </strong> ";
+                *f << "<li> <tt> property </tt> ";
                 stmp = c->listProperty[i].type.name;
                 if ((ptr_t = ptr_list_target->isName( stmp )) != 0 )
                     stmp2 = linkHTML( c->reference(), ptr_t->reference(), stmp );
@@ -537,7 +506,7 @@ void VisitorBloc_AllClass_toHTML::generate_stream_HTML_for_attribut( ofstream* f
             *f << "<ul>" << std::endl;
                 for(i=0;i<n;i++) {
                     stmp = b->listMember[i].listAttribut;
-                    *f << "<li> <strong> " << stmp << " ";
+                    *f << "<li> " << stmp << " ";
                     stmp = b->listMember[i].type.name;
                     if ((ptr_t = ptr_list_target->isName( stmp )) != 0 )
                         stmp2 = linkHTML( b->reference(), ptr_t->reference(), stmp );
@@ -549,11 +518,11 @@ void VisitorBloc_AllClass_toHTML::generate_stream_HTML_for_attribut( ofstream* f
                     if ( b->listMember[i].defaultType.size() >0 ) {
                         stmp = b->listMember[i].defaultType;
                         if (b->listMember[i].op.size())
-                            *f << " " << b->listMember[i].op << " " << french2HTML( stmp ) << " </strong> </li> " << std::endl;
+                            *f << " " << b->listMember[i].op << " " << french2HTML( stmp ) << " </tt> </li> " << std::endl;
                         else
-                            *f << " = " << french2HTML( stmp ) << " </strong> </li> " << std::endl;
+                            *f << " = " << french2HTML( stmp ) << " </tt> </li> " << std::endl;
                     } else
-                        *f << "; </strong> </li> " << std::endl;
+                        *f << "; </li> " << std::endl;
                     m = b->listMember[i].listTag.size();
                     for(j=0;j<m;j++) 
                         b->listMember[i].listTag[j]->generate_pageHTML(f,ptr_list_target,ptr_parent );
@@ -606,7 +575,7 @@ void VisitorBloc_AllClass_toHTML::generate_stream_HTML_for_inheritance( ofstream
 //         *f <<  "<br><strong> Param&egrave;tre template : </strong> " << std::endl;
 //         //pageWeb << "<ul class=\"parameter_template\" >" << std::endl;
 //         for(i=0;i<n;i++) {
-//             //pageWeb << "<li> <strong> " << b->listTemplateParameter[i]->type << " </strong> ";
+//             //pageWeb << "<li> <tt> " << b->listTemplateParameter[i]->type << " </strong> ";
 //             stmp = b->listTemplateParameter[i]->name;
 //             if ((ptr_t = ptr_list_target->isName( stmp )) != 0 )
 //                 stmp2 = linkHTML( b->reference(), ptr_t->reference(), stmp );
@@ -751,7 +720,7 @@ void VisitorBloc_AllClass_toHTML::generate_page_HTML_for_class_or_struct( const 
 //             for(i=0;i<n;i++) {
 //                 b->list_subType_function[i]->exec( &visitor_caract_class );
 //                 if (visitor_caract_class.ptr_listHerited ) {
-//                     *f << "<li> <strong> " << b->list_subType_function[i]->portee + " ";
+//                     *f << "<li> <tt> " << b->list_subType_function[i]->portee + " ";
 //                     m = b->list_subType_function[i]->listTemplateParameter.size();
 //                     if (m>0) {
 //                         *f << " template &lt; ";
@@ -770,7 +739,7 @@ void VisitorBloc_AllClass_toHTML::generate_page_HTML_for_class_or_struct( const 
 //                                 *f << stmp2 << " &gt; ";
 //                         }
 //                     }
-//                     *f << " class " << ancreHTML( b->list_subType_function[i]->name.name,true ) <<  " </strong> </li>" << std::endl;
+//                     *f << " class " << ancreHTML( b->list_subType_function[i]->name.name,true ) <<  " </tt> </li>" << std::endl;
 //                     m = b->list_subType_function[i]->listTag.size();
 //                     for(j=0;j<m;j++) 
 //                         b->list_subType_function[i]->listTag[j]->generate_pageHTML(f,ptr_list_target,ptr_parent );
@@ -1011,7 +980,7 @@ void VisitorBloc_AllClass_toHTML::generate_stream_HTML_for_functionMetil( ofstre
             f->listTag[j]->generate_pageHTML(o,ptr_list_target,ptr_parent );
         }
         if (t == Anchor)
-            *o << " <strong> ";
+            *o << " </strong> ";
     }
     *o << "</div>" << std::endl;
 }
