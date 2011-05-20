@@ -12,7 +12,7 @@
 #ifndef LMTQUAD_6_H
 #define LMTQUAD_6_H
 
-#include "containers/basicops.h"
+#include "../containers/basicops.h"
 #include "bar.h"
 #include "bar_3.h"
 
@@ -58,6 +58,15 @@ void append_skin_elements(Element<Quad_6,TN,TNG,TD,NET> &e,TC &ch,HET &het,Numbe
     het.add_element(e,ch,NodalElement(),e.node(3));
     het.add_element(e,ch,NodalElement(),e.node(4));
     het.add_element(e,ch,NodalElement(),e.node(5));
+}
+
+template<class TN,class TNG,class TD,unsigned NET,class TM,class T>
+void update_edge_ratio(const Element<Quad_6,TN,TNG,TD,NET> &e,TM &m,T &edge_ratio) {
+    T edge_length_0 = (m.get_children_of( e, Number<1>() )[ 0 ])->measure_virtual();
+    T edge_length_1 = (m.get_children_of( e, Number<1>() )[ 1 ])->measure_virtual();
+    T edge_length_2 = (m.get_children_of( e, Number<1>() )[ 2 ])->measure_virtual();
+    T edge_length_3 = (m.get_children_of( e, Number<1>() )[ 3 ])->measure_virtual();
+    edge_ratio = min( edge_length_0, edge_length_1, edge_length_2, edge_length_3 ) / max( edge_length_0, edge_length_1, edge_length_2, edge_length_3 );
 }
 
 template<class TN,class TNG,class TD,unsigned NET>

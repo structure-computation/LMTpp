@@ -1,5 +1,8 @@
 #ifndef LMT_gauss_point_for_simplex_Triangle_H
 #define LMT_gauss_point_for_simplex_Triangle_H
+
+#include "triangle.h"
+
 namespace LMT {
 
 /*!

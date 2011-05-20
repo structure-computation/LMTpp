@@ -360,7 +360,7 @@ int display( const MeshAncestor<Carac,nvi_to_subs,skin> &m, std::string pvsm_fil
     \author Hugal
 */
 template<class Carac, class X, class Y>
-int display( const SubStructuredProblem<Carac,X,Y> &sst_pb, const std::string pvsm_file = "" ) {
+int display( const SubStructuredProblem<Carac,X,Y> &sst_pb, const std::string &pvsm_file = "" ) {
     DisplayParaview dp;
     apply_wi( sst_pb.sub_structures, DisplayParaview::AddSstMesh(), dp, 0 );
     apply_wi( sst_pb.interfaces    , DisplayParaview::AddSstMesh(), dp, 0 );
