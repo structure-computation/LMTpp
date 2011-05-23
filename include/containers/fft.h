@@ -130,15 +130,16 @@ public:
         WARNING : les performances sont excellentes lorsque n1 et n2 sont des puissances de 2 (cf algorithme de la transformée de Fourier rapide FFT)
                   sinon elles sont moins bonnes en général, voire très mauvaises si n1 ou n2 n'est pas un multiple de petits nombres premiers.
     */
-    template<int dim,class Kernel_,class PT_>
-    ImgInterp<std::complex<double>,dim,Kernel_,PT_> fft(const ImgInterp<std::complex<double>,dim,Kernel_,PT_> &i) {
+    template<unsigned dim, class Kernel_, class PT_ >
+    ImgInterp<std::complex<double>,dim,Kernel_,PT_> fft( const ImgInterp< std::complex<double>, dim, Kernel_, PT_ > &i ) {
         ImgInterp<std::complex<double>,dim,Kernel_,PT_> res;
         res.resize(i.size());
-        const fftw_complex *in = (const fftw_complex *)i.data.ptr();
-        fftw_complex *out = (fftw_complex *) res.data.ptr();
-        if ( init==false ) {
+        const fftw_complex *in = ( const fftw_complex* ) i.data.ptr();
+        fftw_complex *out = ( fftw_complex * ) res.data.ptr();
+        
+        if ( init == false ) {
             Vec<int,dim> s = i.sizes; //[ dim - 1 - range( dim ) ];
-            p = fftw_plan_dft( dim, s.ptr(), const_cast<fftw_complex *>(in), out, FFTW_FORWARD, FFTW_ESTIMATE );
+            p = fftw_plan_dft( dim, s.ptr(), const_cast<fftw_complex *>( in ), out, FFTW_FORWARD, FFTW_ESTIMATE );
             fftw_execute( p );
             fftw_destroy_plan( p );
         } else {
@@ -159,22 +160,23 @@ public:
         WARNING : les performances sont excellentes lorsque n1 et n2 sont des puissances de 2 (cf algorithme de la transformée de Fourier rapide FFT)
                   sinon elles sont moins bonnes en général, voire très mauvaises si n1 ou n2 n'est pas un multiple de petits nombres premiers.
     */
-    template<int dim,class Kernel_,class PT_>
-    ImgInterp<std::complex<double>,dim,Kernel_,PT_> ffti(const ImgInterp<std::complex<double>,dim,Kernel_,PT_> &i) {
+    template< unsigned dim, class Kernel_, class PT_ >
+    ImgInterp<std::complex<double>,dim,Kernel_,PT_> ffti( const ImgInterp< std::complex< double >, dim, Kernel_, PT_> &i ) {
         ImgInterp<std::complex<double>,dim,Kernel_,PT_> res;
         res.resize( i.size() );
-        const fftw_complex *in = (const fftw_complex *)i.data.ptr();
-        fftw_complex *out = (fftw_complex *) res.data.ptr();
-        if ( init==false ) {
+        const fftw_complex *in = ( const fftw_complex* ) i.data.ptr();
+        fftw_complex *out = ( fftw_complex * ) res.data.ptr();
+        
+        if ( init == false ) {
             if ( dim == 2 )
-                p = fftw_plan_dft_2d( i.sizes[1], i.sizes[0], const_cast<fftw_complex *>(in), out, FFTW_BACKWARD, FFTW_ESTIMATE);
+                p = fftw_plan_dft_2d( i.sizes[1], i.sizes[0], const_cast<fftw_complex *>( in ), out, FFTW_BACKWARD, FFTW_ESTIMATE);
             else
-                p = fftw_plan_dft_3d( i.sizes[2], i.sizes[1], i.sizes[0], const_cast<fftw_complex *>(in), out, FFTW_BACKWARD, FFTW_ESTIMATE);
+                p = fftw_plan_dft_3d( i.sizes[2], i.sizes[1], i.sizes[0], const_cast<fftw_complex *>( in ), out, FFTW_BACKWARD, FFTW_ESTIMATE);
             fftw_execute(p);
             fftw_destroy_plan( p );
         }
         else {
-            fftw_execute_dft(p,const_cast<fftw_complex *>(in),out);
+            fftw_execute_dft(p,const_cast<fftw_complex *>( in ),out);
         }
         res.data /= std::complex<double>( res.data.size() );
         return res;
