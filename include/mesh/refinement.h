@@ -21,6 +21,26 @@
 namespace LMT {
 
 namespace LMTPRIVATE {
+
+    template<class TM,class TMParent, unsigned nb_elem_type, class TE, class T >
+    void append_node_cut_at_bar( TM &m, 
+                                 TMParent &m_parent, 
+                                 DynamicData<typename TM::TNode*, nb_elem_type > &cut, 
+                                 TE *e, 
+                                 T p0, 
+                                 T p1 ) {
+
+        typedef typename TMParent::TNode TN;
+        TN *nn = m_parent.add_node();
+        m.elem_list.get_data( cut, *e ) = nn;
+
+        std::pair< T,const TN *> pond_list[] = {
+            std::pair< T,const TN *>( p0, e->node_virtual( 0 ) ),
+            std::pair< T,const TN *>( p1, e->node_virtual( 1 ) )
+        };
+        DM::get_ponderation( pond_list, 2, *nn );
+    }
+
     template<class TM,class TMParent,unsigned num_sub_mesh,unsigned max_num_sub_mesh>
     struct Refinment {
         typedef typename TM::TNode TNode;
@@ -30,10 +50,11 @@ namespace LMTPRIVATE {
 
         ///
         Refinment(TMParent *mp):m_parent(mp),cut("cut"),next(mp) {}
+        
         ///
         template<class Op> struct RefineBars {
             template<class TE> void operator()(const TE &e) const {}
-            template<class NB,class TN,class TD,unsigned nl> void operator()(Element<Bar,NB,TN,TD,nl> &e) const {
+            template<class NB,class TN,class TD,unsigned nl> void operator()( Element<Bar,NB,TN,TD,nl> &e ) const {
                 T val = (*op)(e);
                 if ( val == 1 )
                     val = 0.5;
@@ -47,6 +68,7 @@ namespace LMTPRIVATE {
                         std::pair<typename TM::Tpos,const TN *>( val  , e.node(1) )
                     };
                     DM::get_ponderation( pond_list, 2, *nn );
+                    //append_node_cut_at_bar( *m, *m_parent, *cut, &e, 1 - val, val );
                 }
                 else
                     m->elem_list.get_data(*cut,e) = (TNode *)NULL;
@@ -92,6 +114,121 @@ namespace LMTPRIVATE {
         }
         ///
         template<class TE> bool operator()(TE &e) { return div(e,Number<TE::nb_var_inter>()); }
+                
+        /// A tous les éléments 2D qui ont au moins deux arêtes coupés, on coupe tous les autres arêtes
+        /// Number<dim> représente la dimension du maillage initial.
+        template<class TE> 
+        void append_constrainted_cut( TE &e, const Number<0> &nnn ) { }
+        
+        template<class TE> 
+        void append_constrainted_cut( TE &e, const Number<1> &nnn ) { }
+        
+        template<class TE> 
+        void append_constrainted_cut( TE &e, const Number<2> &nnn ) {
+            static const unsigned nb_children = NbChildrenElement<typename TE::NE,1>::res;
+            TNode *nn[ nb_children ];
+            unsigned cpt_cut = 0;
+            for( unsigned i = 0; i < nb_children; ++i ) {
+                nn[ i ] = m_parent->template sub_mesh<1>().elem_list.get_data( next.cut, *m_parent->get_children_of( e, Number<1>() )[ i ] );
+                if ( nn[ i ] )
+                    cpt_cut++;
+            }
+            
+            if ( cpt_cut >= 2 ) {
+                for( unsigned i = 0; i < nb_children; ++i )
+                    if ( nn[ i ] == NULL )
+                        append_node_cut_at_bar( m_parent->template sub_mesh<1>(), 
+                                                *m_parent, 
+                                                next.cut, 
+                                                m_parent->get_children_of( e, Number<1>() )[ i ], 
+                                                0.5, 
+                                                0.5 );
+            }
+        }
+        
+        template<class TE> 
+        void append_constrainted_cut( TE &e, const Number<3> &nnn ) {
+            static const unsigned nb_children = NbChildrenElement<typename TE::NE,2>::res;
+            TNode *nn[nb_children];
+            unsigned cpt_cut = 0;
+            for( unsigned i = 0; i < nb_children; ++i ) {
+                nn[ i ] = m_parent->template sub_mesh<2>().elem_list.get_data( next.next.cut, *m_parent->get_children_of( e, Number<2>() )[ i ] );
+                if ( nn[ i ] )
+                    cpt_cut++;
+            }
+            
+            if ( cpt_cut >= 2 ) {
+                for( unsigned i = 0; i < nb_children; ++i )
+                    if ( nn[ i ] == NULL )
+                        append_node_cut_at_bar( m_parent->template sub_mesh<1>(), 
+                                                *m_parent, 
+                                                next.cut, 
+                                                m_parent->get_children_of( e, Number<2>() )[ i ], 
+                                                0.5, 
+                                                0.5 );
+            }
+        }
+        /// deuxième foncteur
+        template<class TE, unsigned num> bool operator()(TE &e, const Number<num> &nnn ) { 
+            append_constrainted_cut( e, nnn ); 
+        }
+
+        /// on étend la coupe si l'arête coupée n'est pas la plus longue de l'élément 
+        /// Number<dim> représente la dimension du maillage initial.
+        template<class TN> 
+        void spread_cut( ElementAncestor<TN> *ea, const Number<0> &nnn ) { }
+        
+        template<class TN> 
+        void spread_cut( ElementAncestor<TN> *ea, const Number<1> &nnn ) { }
+        
+        template<class TN> 
+        void spread_cut( ElementAncestor<TN> *ea, const Number<2> &nnn ) {
+            typedef typename TN::T T;
+            typedef ElementAncestor<TN> EA;
+            
+            unsigned nb_children = ea->nb_children_virtual( 1 );
+            Vec<TNode *> nn; nn.resize( nb_children );
+            Vec<T> ll; ll.resize( nb_children );
+
+            T max_l_cut = 0.;
+
+            for( unsigned i = 0; i < nb_children; ++i ) {
+                nn[ i ] = m_parent->template sub_mesh<1>().elem_list.get_data( next.cut, *m_parent->get_children_of_EA( ea, Number<1>() )[ i ] );
+                ll[ i ] = length( m_parent->get_children_of_EA( ea, Number<1>() )[ i ]->node_virtual( 1 )->pos - m_parent->get_children_of_EA( ea, Number<1>() )[ i ]->node_virtual( 0 )->pos );
+                if ( ( nn[ i ] ) and ( ll[ i ] > max_l_cut ) )
+                    max_l_cut = ll[ i ];
+            }
+            
+            if ( max_l_cut > 0 ) {
+            
+                SimpleConstIterator<EA *> itea = m_par->get_elem_neighbours_EA( ea );
+            
+                for( unsigned i = 0; i < nb_children; ++i ) {
+                    bool ok_for_spread = false;
+                    if ( ( nn[ i ] == NULL ) and ( ll[ i ] >= max_l_cut ) ) {
+                        append_node_cut_at_bar( m_parent->template sub_mesh<1>(), 
+                                                *m_parent, 
+                                                next.cut, 
+                                                m_parent->get_children_of_EA( ea, Number<1>() )[ i ], 
+                                                0.5, 
+                                                0.5 );
+                        ok_for_spread = true;
+                    }
+                    
+                    if ( ( nn[ i ] ) or ( ok_for_spread ) ) {
+                        /// extension aux voisins
+                        /// TODO
+                        /// ne pas oublier de vérifier que la barre n'est pas déjà coupée            
+                        //spread_cut( , nnn );
+                    }
+                }
+            }
+        }
+        
+        template<class TE> 
+        void spread_cut( TE &e, const Relative_Number<3> &nnn ) {
+            /// TODO
+        }
 
         TMParent *m_parent;
         TDN cut;
@@ -148,8 +285,16 @@ template<class TM,class Op>
 bool refinement(TM &m,Op &op) {
     // m.update_elem_children();
     m.update_elem_children( Number<TM::nvi-1>() );
-    LMTPRIVATE::Refinment<TM,TM,0,TM::dim+1> r(&m);
-    r.update_cut(m,op);
+    LMTPRIVATE::Refinment<TM,TM,0,TM::dim+1> r( &m );
+    r.update_cut( m, op );
+    
+    /// on raffine s'il y a au moins deux arêtes coupées par élément
+    apply( m.elem_list, r, Number<TM::dim>() );
+    /// on propage le raffinement
+//     m.update_elem_neighbours();
+//     for( unsigned i = 0; i < m.elem_list.size(); ++i )
+//         r.spread_cut( m.elem_list[ i ], Number<TM::dim>() );
+    
 
     m.elem_list.reg_dyn( &r.cut );
     bool res = m.remove_elements_if( r );
