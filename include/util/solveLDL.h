@@ -45,6 +45,8 @@ public:
     /// after that, data in mat won't be used anymore.
     void get_factorization( LMT::Mat<double,LMT::Gen<>,LMT::SparseLine<> > &mat, bool want_free=true, bool want_semi_morse=false, bool want_amd_order=true );
     /// after that, data in mat won't be used anymore.
+    void get_factorization( LMT::Mat<double,LMT::Sym<>,LMT::SparseLine<> > &mat, LMT::Vec<LMT::Vec<double> > &Kernel, bool want_free=true, bool want_semi_morse=false, bool want_amd_order=true ); // PK et PG (pseudo-inverse)
+    void get_factorization( LMT::Mat<double,LMT::Gen<>,LMT::SparseLine<> > &mat, LMT::Vec<LMT::Vec<double> > &Kernel, bool want_free=true, bool want_semi_morse=false, bool want_amd_order=true ); // PK et PG (pseudo-inverse)
     void get_factorization( LMT::Mat<double,LMT::Sym<>,LMT::SparseLine<> > &mat, LMT::Vec<LMT::Vec<double> > &Kernel, LMT::Vec<int> &Pivots, bool want_free=true, bool want_semi_morse=false, bool want_amd_order=true ); // PK et PG (pseudo-inverse)
     void get_factorization( LMT::Mat<double,LMT::Gen<>,LMT::SparseLine<> > &mat, LMT::Vec<LMT::Vec<double> > &Kernel, LMT::Vec<int> &Pivots, bool want_free=true, bool want_semi_morse=false, bool want_amd_order=true ); // PK et PG (pseudo-inverse)
     /// ...
