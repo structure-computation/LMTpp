@@ -141,8 +141,8 @@ namespace LMTPRIVATE {
                                                 *m_parent, 
                                                 next.cut, 
                                                 m_parent->get_children_of( e, Number<1>() )[ i ], 
-                                                0.5, 
-                                                0.5 );
+                                                .5, 
+                                                .5 );
             }
         }
         
@@ -164,8 +164,8 @@ namespace LMTPRIVATE {
                                                 *m_parent, 
                                                 next.cut, 
                                                 m_parent->get_children_of( e, Number<2>() )[ i ], 
-                                                0.5, 
-                                                0.5 );
+                                                .5, 
+                                                .5 );
             }
         }
         /// deuxième foncteur
@@ -190,8 +190,9 @@ namespace LMTPRIVATE {
             Vec<TNode *> nn; nn.resize( nb_children );
             Vec<T> ll; ll.resize( nb_children );
 
-            T max_l_cut = 0.;
-
+            T max_l_cut = 0;
+            
+            /// détermination des arêtes coupées et calcule de la longueur des arêtes
             for( unsigned i = 0; i < nb_children; ++i ) {
                 nn[ i ] = m_parent->template sub_mesh<1>().elem_list.get_data( next.cut, *m_parent->get_children_of_EA( ea, Number<1>() )[ i ] );
                 ll[ i ] = length( m_parent->get_children_of_EA( ea, Number<1>() )[ i ]->node_virtual( 1 )->pos - m_parent->get_children_of_EA( ea, Number<1>() )[ i ]->node_virtual( 0 )->pos );
@@ -199,35 +200,84 @@ namespace LMTPRIVATE {
                     max_l_cut = ll[ i ];
             }
             
-            if ( max_l_cut > 0 ) {
+            if ( max_l_cut > 0 ) { /// au moins une barre est coupée
             
-                SimpleConstIterator<EA *> itea = m_parent->get_elem_neighbours_EA( ea );
+                SimpleConstIterator< EA* > itea = m_parent->get_elem_neighbours_EA( ea );
             
                 for( unsigned i = 0; i < nb_children; ++i ) {
-                    bool ok_for_spread = false;
+                    EA *child = NULL;
+                    /// on coupe toutes les arêtes pas déjà coupées et qui ont une longueur supérieure ou égal à la plus longue arête coupée
                     if ( ( nn[ i ] == NULL ) and ( ll[ i ] >= max_l_cut ) ) {
-                        append_node_cut_at_bar( m_parent->template sub_mesh<1>(), 
-                                                *m_parent, 
-                                                next.cut, 
-                                                m_parent->get_children_of_EA( ea, Number<1>() )[ i ], 
-                                                0.5, 
-                                                0.5 );
-                        ok_for_spread = true;
+                        child = m_parent->get_children_of_EA( ea, Number<1>() )[ i ];
+                        
+                        append_node_cut_at_bar( m_parent->template sub_mesh<1>(), *m_parent, next.cut, child, .5, .5 );
                     }
                     
-                    if ( ( nn[ i ] ) or ( ok_for_spread ) ) {
-                        /// extension aux voisins
-                        /// TODO
-                        /// ne pas oublier de vérifier que la barre n'est pas déjà coupée            
-                        //spread_cut( , nnn );
+                    if ( child ) { /// extension aux voisins
+                        /// Détermination du voisin qui a aussi child comme enfant
+                        bool loop = true;
+                        for( SimpleConstIterator< EA*> it( itea ) ; ( bool )it and loop; ++it ) {
+                            for( unsigned j = 0; j < (*it)->nb_children_virtual( 1 ); ++j ) {
+                                if ( child == m_parent->get_children_of_EA( *it, Number<1>() )[ j ] ) {
+                                    spread_cut( *it, nnn );
+                                    loop = false;
+                                    break;
+                                }
+                            }
+                        }           
                     }
                 }
             }
         }
         
-        template<class TE> 
-        void spread_cut( TE &e, const Relative_Number<3> &nnn ) {
-            /// TODO
+        template<class TN>
+        void spread_cut( ElementAncestor<TN> *ea, const Number<3> &nnn ) {
+            /// le code qui suit est un lamentable copier-coller de la version du dessus ( i.e. Number<2> ) : que St Isidore me pardonne
+            typedef typename TN::T T;
+            typedef ElementAncestor<TN> EA;
+            
+            unsigned nb_children = ea->nb_children_virtual( 2 );
+            Vec<TNode *> nn; nn.resize( nb_children );
+            Vec<T> ll; ll.resize( nb_children );
+
+            T max_l_cut = 0;
+            
+            /// détermination des arêtes coupées et calcule de la longueur des arêtes
+            for( unsigned i = 0; i < nb_children; ++i ) {
+                nn[ i ] = m_parent->template sub_mesh<2>().elem_list.get_data( next.cut, *m_parent->get_children_of_EA( ea, Number<2>() )[ i ] );
+                ll[ i ] = length( m_parent->get_children_of_EA( ea, Number<2>() )[ i ]->node_virtual( 1 )->pos - m_parent->get_children_of_EA( ea, Number<2>() )[ i ]->node_virtual( 0 )->pos );
+                if ( ( nn[ i ] ) and ( ll[ i ] > max_l_cut ) )
+                    max_l_cut = ll[ i ];
+            }
+            
+            if ( max_l_cut > 0 ) { /// au moins une barre est coupée
+            
+                SimpleConstIterator< EA* > itea = m_parent->get_elem_neighbours_EA( ea );
+            
+                for( unsigned i = 0; i < nb_children; ++i ) {
+                    EA *child = NULL;
+                    /// on coupe toutes les arêtes pas déjà coupées et qui ont une longueur supérieure ou égal à la plus longue arête coupée
+                    if ( ( nn[ i ] == NULL ) and ( ll[ i ] >= max_l_cut ) ) {
+                        child = m_parent->get_children_of_EA( ea, Number<2>() )[ i ];
+                        
+                        append_node_cut_at_bar( m_parent->template sub_mesh<2>(), *m_parent, next.cut, child, .5, .5 );
+                    }
+                    
+                    if ( child ) { /// extension aux voisins
+                        /// Détermination du voisin qui a aussi child comme enfant
+                        bool loop = true;
+                        for( SimpleConstIterator< EA*> it( itea ) ; ( bool )it and loop; ++it ) {
+                            for( unsigned j = 0; j < (*it)->nb_children_virtual( 1 ); ++j ) {
+                                if ( child == m_parent->get_children_of_EA( *it, Number<2>() )[ j ] ) {
+                                    spread_cut( *it, nnn );
+                                    loop = false;
+                                    break;
+                                }
+                            }
+                        }           
+                    }
+                }
+            }
         }
 
         TMParent *m_parent;
@@ -291,9 +341,9 @@ bool refinement(TM &m,Op &op) {
     /// on raffine s'il y a au moins deux arêtes coupées par élément
     apply( m.elem_list, r, Number<TM::dim>() );
     /// on propage le raffinement
-//     m.update_elem_neighbours();
-//     for( unsigned i = 0; i < m.elem_list.size(); ++i )
-//         r.spread_cut( m.elem_list[ i ], Number<TM::dim>() );
+    m.update_elem_neighbours();
+    for( unsigned i = 0; i < m.elem_list.size(); ++i )
+        r.spread_cut( m.elem_list[ i ], Number<TM::dim>() );
     
 
     m.elem_list.reg_dyn( &r.cut );
