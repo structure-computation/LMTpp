@@ -62,7 +62,7 @@ struct SubStructuredProblem;
 
     Ensuite pour enregistrer un maillage, utilisez la méthode add_mesh(). Le dernier paramètre est le numéro du maillage. Cela peut être aussi une date de type double à la place d'un entier.
 
-    Pour enregistrer et lancer paraview , on utilise la méthode exec(). Si vous exécuter exec() sans paramètre, vous nom de fichier par défaut ( paraview.pvd ).
+    Pour enregistrer et lancer paraview , on utilise la méthode exec(). Si vous exécuter exec() sans paramètre, vous aurez nom de fichier par défaut ( paraview.pvd ).
 
     \author Hugo LECLERC
 */
