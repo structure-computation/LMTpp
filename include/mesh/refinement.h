@@ -201,7 +201,7 @@ namespace LMTPRIVATE {
             
             if ( max_l_cut > 0 ) {
             
-                SimpleConstIterator<EA *> itea = m_par->get_elem_neighbours_EA( ea );
+                SimpleConstIterator<EA *> itea = m_parent->get_elem_neighbours_EA( ea );
             
                 for( unsigned i = 0; i < nb_children; ++i ) {
                     bool ok_for_spread = false;

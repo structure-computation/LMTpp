@@ -198,6 +198,5 @@ bool is_inside_linear( const Quad_25 &elem, const PosNodes &pos_nodes, const Pve
 
 };
 
-};
 
 #endif // LMTQUAD_25_H

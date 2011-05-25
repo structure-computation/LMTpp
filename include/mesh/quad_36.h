@@ -44,7 +44,7 @@ template<> struct NbChildrenElement<Quad_36,0> { static const unsigned res = 1; 
 template<> struct NbChildrenElement<Quad_36,1> { static const unsigned res = 4; };
 template<> struct NbChildrenElement<Quad_36,2> { static const unsigned res = 36; };
 
-template<unsigned n> struct TypeChildrenElement<Quad_36,0,n> { typedef Quad_9 T; };
+template<unsigned n> struct TypeChildrenElement<Quad_36,0,n> { typedef Quad_36 T; };
 template<unsigned n> struct TypeChildrenElement<Quad_36,1,n> { typedef Bar_6 T; };
 template<unsigned n> struct TypeChildrenElement<Quad_36,2,n> { typedef NodalElement T; };
 
@@ -202,8 +202,6 @@ bool is_inside_linear( const Quad_36 &elem, const PosNodes &pos_nodes, const Pve
     } else
         return false;
 }
-
-};
 
 };
 

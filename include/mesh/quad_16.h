@@ -38,7 +38,7 @@ template<> struct NbChildrenElement<Quad_16,0> { static const unsigned res = 1; 
 template<> struct NbChildrenElement<Quad_16,1> { static const unsigned res = 4; };
 template<> struct NbChildrenElement<Quad_16,2> { static const unsigned res = 16; };
 
-template<unsigned n> struct TypeChildrenElement<Quad_16,0,n> { typedef Quad_9 T; };
+template<unsigned n> struct TypeChildrenElement<Quad_16,0,n> { typedef Quad_16 T; };
 template<unsigned n> struct TypeChildrenElement<Quad_16,1,n> { typedef Bar_4 T; };
 template<unsigned n> struct TypeChildrenElement<Quad_16,2,n> { typedef NodalElement T; };
 
