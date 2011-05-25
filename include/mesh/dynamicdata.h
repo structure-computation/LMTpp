@@ -39,7 +39,23 @@ protected:
 };
 
 
-/// nb_elem_type=0 -> for node_list
+/**
+Liste de type T associée à des noeuds.
+
+Ça permet de faire comme un nouvel attribut par élément qui sera géré à l'affichage et pendant les sauvegarde (parce que si vous faites votre vecteur dans votre coin, rien ne dit aux procédures comme write_vtk() qu'il faudra l'enregistrer).
+
+Exemple d'utilisation :
+
+\code
+    TM mesh;
+    DynamicData<double> data( "nom de liste pour paraview ou pour l'affichage en général" );
+    m.node_list.reg_dyn( data ); // pour donner la bonne taille aux vecteurs
+    data[ node ] = 10;
+
+    display( mesh ); // sauve aussi votre vecteur
+
+Si vous voulez enlever le lien m.elem_list.unreg_dyn( data );
+*/
 template<class T,unsigned nb_elem_type=0>
 class DynamicData : public DynamicDataAncestor {
 public:
@@ -75,7 +91,24 @@ protected:
     Vec<T> vec[nb_elem_type];
 };
 
-///
+/**
+Liste de type T associée à des éléments.
+
+Ça sert de (nouveau) vecteur pour les éléments sauf qu'on ne peut pas faire vec[ elem.number ] parce que number c'est dans la sous-liste d'élément...
+
+Ça permet de faire comme un nouvel attribut par élément.
+
+Exemple d'utilisation :
+
+\code
+    TM mesh;
+    DynamicData<double,TM::TElemList::nb_elem_type> data( "nom de liste pour paraview ou pour l'affichage en général" );
+    ... avec elem qui est un élément du maillage
+    m.elem_list.reg_dyn( data ); // pour donner la bonne taille aux vecteurs
+    data[ elem ] = 10;
+
+Si vous voulez enlever le lien m.elem_list.unreg_dyn( data );
+*/
 template<class T>
 class DynamicData<T,0> : public DynamicDataAncestor {
 public:
