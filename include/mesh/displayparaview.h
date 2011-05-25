@@ -31,7 +31,38 @@ template<class Carac, class X, class Y>   /// modif 22/06/2009
 struct SubStructuredProblem;
 
 /*!
-    open paraview and send data
+    Objectif :
+        Cette classe permet de stocker dans des fichiers lisibles par paraview le contenu de maillages mais avec des contraintes sur le type des attributs du maillage car paraview ne gère pas tous les types d'attributs ( e.g. les points de Gauss ).
+        
+    Exemple classique d'utilisation :
+    \code C/C++
+            DisplayParaview dp;
+            Vec<std::string> lp;
+            lp.push_back( "dep" );
+            lp.push_back( "tag" );
+
+            TM m; // un maillage
+                    
+            for( unsigned i = 0; ; ++i ) {
+
+                /// le maillage ou son contenu varie
+                
+                dp.add_mesh( m, "tmp/ref", lp, i + 1 );
+            }
+             
+             dp.exec( "sauvegarde.pvd" );
+
+    Explication du code et quelques commentaires:
+    
+    Avant de commencer à exécuter le code, créer un répertoire tmp dans le répertoire de votre programme.
+    
+    Le vecteur de <strong> string </strong> doit contenir le nom des attributs que vous souhaitez enregistrer. Par défaut la géométrie est toujours enregistrée donc inutile d'ajouter "pos". Si vous souhaitez enregistrer tous les attributs, il suffit de créer un vecteur de <strong> string </strong> qui contient juste la chaîne de caractère "all", i.e. :
+    \code C/C++
+        Vec<std::string> lp( "all" );   
+
+    Ensuite pour enregistrer un maillage, utilisez la méthode add_mesh(). Le dernier paramètre est le numéro du maillage. Cela peut être aussi une date de type double à la place d'un entier.
+
+    Pour enregistrer et lancer paraview , on utilise la méthode exec(). Si vous exécuter exec() sans paramètre, vous nom de fichier par défaut ( paraview.pvd ).
 
     \author Hugo LECLERC
 */
