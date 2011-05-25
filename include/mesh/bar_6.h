@@ -26,7 +26,6 @@ namespace LMT {
     \relates Element
     \keyword Maillage/Elément
     \friend hugo.leclerc@lmt.ens-cachan.fr
-    \keyword Maillage/Elément
 */
 
 struct Bar_6 {

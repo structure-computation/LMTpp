@@ -140,7 +140,9 @@ namespace LMT {
                     return res;
                 }
             };
+            
             int main(int argc,char **argv) {
+                Rosenbrock<> ros;
                 LocalMinimizer<Rosenbrock<>,NewtonAlgorithm<0>,ArmijoStep<0>,RelativeStepCriterion<> > newton_var(ros,1);
                 newton_var.step.value=0.5;
                 PRINT(newton_var.solve(Vec<T>(0,0)));
