@@ -501,13 +501,13 @@ int ldl_numeric_pg    /* returns n if successful, k if D (k,k) is zero */
     int P [ ],      /* optional input of size n */
     int Pinv [ ],    /* optional input of size n */    
     int *ksiz,       /* output giving the number of null pivots */
- //   int kernod [ ],   /* output list of null pivots  */
+    int kernod [ ],   /* output list of null pivots  */
     double **kernel /* output kernel of the matrix in column format*/
 ) {
     double yi, l_ki ;
     int i, k, p, kk, p2, len, top ;
-    const int MAX_KERNOD_SIZE = 40;
-    int kernod[MAX_KERNOD_SIZE];
+    const int MAX_KERNOD_SIZE = n;
+//     int kernod[MAX_KERNOD_SIZE];
     double toupiti = 1.e-8 ; //pg this is a paremeter to detect null pivots
     *ksiz=0;
     for (k = 0 ; k < n ; k++) {

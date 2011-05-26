@@ -40,7 +40,7 @@ public:
         levenberg_marquadt = AbsScalarType(0);
         max_diag = ScalarType(0);
         pthread_mutex_init( &mutex_assemble_matrix, NULL );
-        nb_threads_assemble_matrix = 4;
+        nb_threads_assemble_matrix = 1;
     }
     virtual ~FormulationAncestor() {}
 
@@ -189,6 +189,16 @@ public:
     virtual unsigned get_nb_global_unknowns() const = 0;
     virtual unsigned get_nb_elem_unknowns() const = 0;
 
+    /*!
+        Objectif :
+            cette méthode ajoute au vecteur <strong> res </strong>, la contribution au résidu de l'élément <strong> *elem </strong> .
+
+        Paramètres :
+            * <strong> res </strong> le vecteur contenant le résidu ( sa taille doit être égale au nombre de degrés de liberté du problème),
+            * <strong> elem </strong> pointeur sur l'élément dont on veut obtenir la contribution.
+    */
+    virtual void add_elem_contribution_to_residual( Vec<ScalarType> &res, const void *elem ) const = 0;
+
     #ifdef WITH_UMFPACK
     virtual void get_mat( Mat<ScalarType,Gen<>,SparseUMFPACK> *&mat ) = 0; ///
     #endif
@@ -220,7 +230,7 @@ public:
     ScalarType max_diag;
     Vec<unsigned> id;/// indice pour les variables
     unsigned  nb_threads_assemble_matrix;
-    pthread_mutex_t mutex_assemble_matrix;
+    mutable pthread_mutex_t mutex_assemble_matrix;
 
     virtual void *get_mesh() = 0; /// recupere le maillage associee a une formulation (mais pas avec le bon type)
 };

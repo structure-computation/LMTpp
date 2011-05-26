@@ -1,7 +1,7 @@
 #ifndef LMT_gauss_point_for_simplex_Tetra_H
 #define LMT_gauss_point_for_simplex_Tetra_H
 
-//#include "tetra.h"
+#include "tetra.h"
 
 namespace LMT {
 
@@ -49,7 +49,7 @@ namespace LMT {
         erreur maximale ( sur tous les monomes de degre total <= 23 )    = 3.16885406803635306e-13
   
 */
-void gauss_points( const Tetra &elem, unsigned order, Vec<double> &poids, Vec< Vec<double, Tetra::nb_var_inter > > &valeurs ) { 
+inline void gauss_points( const Tetra &elem, unsigned order, Vec<double> &poids, Vec< Vec<double, Tetra::nb_var_inter > > &valeurs ) { 
     typedef Vec<double, Tetra::nb_var_inter > TPOS;
     
     if ( order <= 1 ) {
@@ -8747,7 +8747,6 @@ void gauss_points( const Tetra &elem, unsigned order, Vec<double> &poids, Vec< V
     //}
     //std::cerr << "TODO : order > 23" << std::endl; assert(0);
 }
-
 
 } /// LMT
 #endif /// LMT_gauss_point_for_simplex_Tetra

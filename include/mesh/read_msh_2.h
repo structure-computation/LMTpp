@@ -12,11 +12,11 @@
 #ifndef LMT_READ_GID2_HEADER
 #define LMT_READ_GID2_HEADER
 
-#include "mesh/hexa.h"
-#include "mesh/tetra.h"
-#include "mesh/wedge.h"
-#include "mesh/tetra_10.h"
-#include "containers/indexof.h"
+#include "../mesh/hexa.h"
+#include "../mesh/tetra.h"
+#include "../mesh/wedge.h"
+#include "../mesh/tetra_10.h"
+#include "../containers/indexof.h"
 
 #include <fstream>
 #include <map>
@@ -273,10 +273,10 @@ void read_msh_2_tags_for_nvi( TM &m, const std::string &fic_name, Number<nvi_to_
                 assign_tag_values( m.sub_mesh( Number<nvi_to_subs>() ).elem_list.find( Hexa()    , DefaultBehavior(), m, v.ptr() ), tag_values, vt, Number<0>(), Number<NbSubTypes<VarTag>::res>() );
             else if ( type_elem == 6 )
                 assign_tag_values( m.sub_mesh( Number<nvi_to_subs>() ).elem_list.find( Wedge()   , DefaultBehavior(), m, v.ptr() ), tag_values, vt, Number<0>(), Number<NbSubTypes<VarTag>::res>() );
-            //             else {
-            //                 std::cout << "unknown type elem." << std::endl;
-            //                 assert ( 0 );
-            //             }
+            else {
+                std::cout << "unknown type elem." << std::endl;
+                assert ( 0 );
+            }
         }
     }
 }

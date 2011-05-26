@@ -62,6 +62,7 @@ def calculate_matrix( expr, unknown_symbols, unknown_test_symbols, subs={}, allo
 
 
 def write_matrix( f, M, V, symmetric, indices, offsets, assemble_mat, assemble_vec, use_asm, asmout = None, asm_fname = "" ):
+  # on ecrit dans des registres temporaires
   cw = Write_code('T')
   for i in range(M.nb_rows()):
     if assemble_mat:
@@ -70,16 +71,7 @@ def write_matrix( f, M, V, symmetric, indices, offsets, assemble_mat, assemble_v
           cw.add( M[i,j], 'tmp_'+str(i)+'_'+str(j), Write_code.Declare )
     if assemble_vec:
       if V[i]:
-        cw.add( V[i], 'sollicitation[indices['+str(indices[i])+']+'+str(offsets[i])+']', Write_code.Add )
-  
-  res_cpp = cw.to_string()
-  if assemble_mat:
-    res_cpp += '    pthread_mutex_lock( &( f.mutex_assemble_matrix ) );\n'
-    for i in range(M.nb_rows()):
-      for j in range(i*symmetric,M.nb_cols()):
-        if M[i,j]:
-          res_cpp += '    matrix(indices['+str(indices[i])+']+'+str(offsets[i])+',indices['+str(indices[j])+']+'+str(offsets[j])+') += tmp_'+str(i)+'_'+str(j)+";\n"
-    res_cpp += '    pthread_mutex_unlock( &( f.mutex_assemble_matrix ) );\n'
+        cw.add( V[i], 'vec_' + str(i), Write_code.Declare )
   
   if use_asm:
     f.write( cw.asm_caller( asm_fname ) )
@@ -88,7 +80,22 @@ def write_matrix( f, M, V, symmetric, indices, offsets, assemble_mat, assemble_v
     asmout.write( '%s:\n' % asm_fname )
     asmout.write( cw.to_asm() )
   else:
-    f.write( res_cpp )
+    f.write( cw.to_string() )
+
+  #
+  res_cpp = ""
+  res_cpp += '    pthread_mutex_lock( &( f.mutex_assemble_matrix ) );\n'
+  if assemble_mat:
+    for i in range(M.nb_rows()):
+      for j in range(i*symmetric,M.nb_cols()):
+        if M[i,j]:
+          res_cpp += '    matrix(indices['+str(indices[i])+']+'+str(offsets[i])+',indices['+str(indices[j])+']+'+str(offsets[j])+') += tmp_'+str(i)+'_'+str(j)+";\n"
+  if assemble_vec:
+    for i in range(M.nb_rows()):
+      if V[i]:  
+        res_cpp += 'sollicitation[indices[' + str(indices[i]) + ']+' + str(offsets[i]) + '] += vec_' + str(i) + ";\n"
+  res_cpp += '    pthread_mutex_unlock( &( f.mutex_assemble_matrix ) );\n'
+  f.write( res_cpp )
 
 def solve_iteration( residual, unknown_symbols, unknown_test_symbols, subs={}, allow_surtension_coefficient=False, assume_non_linear=False, dont_want_to_add_KUn=False, use_subs_instead_of_diff = False ):
     MV = calculate_matrix( residual, unknown_symbols, unknown_test_symbols, subs, allow_surtension_coefficient, assume_non_linear, dont_want_to_add_KUn, use_subs_instead_of_diff = self.use_subs_instead_of_diff )

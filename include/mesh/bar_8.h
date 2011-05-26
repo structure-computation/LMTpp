@@ -12,17 +12,20 @@
 #ifndef LMTBAR8_H
 #define LMTBAR8_H
 
-#include "containers/staticassert.h"
+#include "../containers/staticassert.h"
 #include "nodalelement.h"
 
 namespace LMT {
 
 // --------------------------------------------------------------------------------------------------------
 /*!
-    Bar_8 représente une barre sans dimension ou segment avec six noeuds dessus.  
-
-    \friend hugo.leclerc@lmt.ens-cachan.fr
+    Bar_8 représente une barre sans dimension ou segment avec huit noeud dessus.  
+    \verbatim
+    .                    0--2--3--4--5--6--7--1
+    \relates Mesh
+    \relates Element
     \keyword Maillage/Elément
+    \friend hugo.leclerc@lmt.ens-cachan.fr
 */
 
 struct Bar_8 {
@@ -40,28 +43,28 @@ template<unsigned n> struct TypeChildrenElement<Bar_8,1,n> { typedef NodalElemen
 template<class TN,class TNG,class TD,unsigned NET,class TC,class HET>
 void append_skin_elements(Element<Bar_8,TN,TNG,TD,NET> &e,TC &ch,HET &het,Number<1> nvi_to_subs) {
     het.add_element(e,ch,NodalElement(),e.node(0));
-    het.add_element(e,ch,NodalElement(),e.node(7));
+    het.add_element(e,ch,NodalElement(),e.node(1));
 }
 
 // --------------------------------------------------------------------------------------------------------
 
-// template<class TN,class TNG,class TD,unsigned NET>
-// typename TNG::Pvec sample_normal(const Element<Bar_8,TN,TNG,TD,NET> &e) {
-//     DEBUGASSERT( (TNG::dim==2) );
-//     typename TNG::Pvec res;
-//     res.assign_and_complete_with_last( e.pos(1)[1]-e.pos(0)[1], e.pos(0)[0]-e.pos(1)[0] );
-//     res /= length(res);
-//     return res;
-// }
+template<class TN,class TNG,class TD,unsigned NET>
+typename TNG::Pvec sample_normal(const Element<Bar_8,TN,TNG,TD,NET> &e) {
+    DEBUGASSERT( (TNG::dim==2) );
+    typename TNG::Pvec res;
+    res.assign_and_complete_with_last( e.pos(1)[1]-e.pos(0)[1], e.pos(0)[0]-e.pos(1)[0] );
+    res /= length(res);
+    return res;
+}
 
 
 /* TODO : exact computation */
 template<class TN,class TNG,class TD,unsigned NET>
 typename TNG::T measure( const Element<Bar_8,TN,TNG,TD,NET> &e ) {
-    return length( e.node(7)->pos - e.node(0)->pos );
+    return length( e.node(1)->pos - e.node(0)->pos );
 }
 
 
 };
 
-#endif
+#endif // LMTBAR8_H
