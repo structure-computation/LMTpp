@@ -230,7 +230,7 @@ public:
     ScalarType max_diag;
     Vec<unsigned> id;/// indice pour les variables
     unsigned  nb_threads_assemble_matrix;
-    pthread_mutex_t mutex_assemble_matrix;
+    mutable pthread_mutex_t mutex_assemble_matrix;
 
     virtual void *get_mesh() = 0; /// recupere le maillage associee a une formulation (mais pas avec le bon type)
 };
