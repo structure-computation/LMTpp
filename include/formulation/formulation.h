@@ -2106,6 +2106,10 @@ public:
         m->elem_list.apply_on_down_cast( elem, AssembleResidual(), res, *this );
     }
 
+    virtual void add_elem_contribution_to_residual( Vec<ScalarType> &res, const void *elem ) const {
+        add_elem_contribution_to_residual( res, reinterpret_cast<const typename TM::EA *>( elem ) );
+    }
+
     TMAT0 &mat() { return matrices( Number<0>() ); }
 
     TM *m;

@@ -189,6 +189,16 @@ public:
     virtual unsigned get_nb_global_unknowns() const = 0;
     virtual unsigned get_nb_elem_unknowns() const = 0;
 
+    /*!
+        Objectif :
+            cette méthode ajoute au vecteur <strong> res </strong>, la contribution au résidu de l'élément <strong> *elem </strong> .
+
+        Paramètres :
+            * <strong> res </strong> le vecteur contenant le résidu ( sa taille doit être égale au nombre de degrés de liberté du problème),
+            * <strong> elem </strong> pointeur sur l'élément dont on veut obtenir la contribution.
+    */
+    virtual void add_elem_contribution_to_residual( Vec<ScalarType> &res, const void *elem ) const = 0;
+
     #ifdef WITH_UMFPACK
     virtual void get_mat( Mat<ScalarType,Gen<>,SparseUMFPACK> *&mat ) = 0; ///
     #endif
