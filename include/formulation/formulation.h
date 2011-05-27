@@ -2230,6 +2230,9 @@ void add_elem_matrix(
         add_local_elem_matrix( *gp, gp+1, f, matrix, sollicitation , vectors, matrix_is_sym, assemble_mat, assemble_vec, elem, indices );
 }
 
+template<class A,class B,class C,class D,class E,class F,class G>
+void add_local_elem_residual( const A &a, const B &b, const C &c, const D &d, const E &e, const F &f, const G &g ) {
+}
 
 /*! To be redefined for each new formulations */
 template<class TF, class TVE, class TVEVE, class TE>
