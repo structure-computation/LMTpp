@@ -1,7 +1,7 @@
 
 namespace LMT {
 
-/**
+/*!
     mat * vec
 */
 template<class TM,class TV>
@@ -52,7 +52,7 @@ struct MulMatVecRow {
     }
 };
 
-/**
+/*!
     	odo replace apply_nz by a vectorial version
 */
 template<class T,class Str,class Sto,class IO,class T2,int s2,class IO2>
@@ -92,7 +92,7 @@ typename ReturnTypeMatMultVec<Mat<T,Str,Sto,IO>,Vec<T2,s2,IO2> >::T operator*(co
 
 
 
-/**
+/*!
     mat * vec
 */
 template<class TM1,class TM2>
@@ -113,7 +113,7 @@ public:
     typedef T RetOpConst;
     typedef T RetOp;
 
-    T operator()(unsigned i,unsigned j) const { return dot( m1.row(i), m2.col(j) ); }
+    T operator()( unsigned i, unsigned j ) const { return dot( m1.row(i), m2.col(j) ); }
 
 
     typedef Vec<VecSubMat<Mat,false,ExtractDiag> > RetDiag;
