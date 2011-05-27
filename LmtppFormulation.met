@@ -1304,6 +1304,7 @@ def write_legacy_lmtpp_carac_formulation_for_element( stream, name_form, fe, dim
     stream <<< "        static const bool diag = false;"
     stream <<< "        static const bool linear = $( fe->all_K_are_linear );"
     stream <<< "    };"
+    stream <<< "    static const unsigned order_integration = $( child_cast( fe->pe )->get_order_interpolation()[0] );"
     stream <<< "    static const bool has_elementary_matrix = $( fe->non_null_system( fe->K_dV, fe->F_dV ) );"
     stream <<< "    static const bool has_skin_elementary_matrix = $( fe->need_skin_assembly );"
     stream <<< "    template<class TE,class TF,class TVEVE> static void after_solve(TE &elem,TF &f,TVEVE &vectors,const unsigned *indices) {"
