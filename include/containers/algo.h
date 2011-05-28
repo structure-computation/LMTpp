@@ -274,6 +274,12 @@ template<class NameDM> struct ExactlyEqualDM {
     template<class P1,class P2,class P3=void,class P4=void> struct ReturnType { typedef bool T; };
     template<class P1,class P2> bool operator()(const P1 &p1,const P2 &p2) const { return p1.member_named(NameDM()) == p2.member_named(NameDM()); }
 };
+template<class TT> struct ApproxEqual {
+    ApproxEqual(const TT &v):geom_prec(v) {}
+    template<class P1,class P2,class P3=void,class P4=void> struct ReturnType { typedef bool T; };
+    template<class P1,class P2> bool operator()(const P1 &p1,const P2 &p2) const { return norm_2( p1 - p2 ) < geom_prec; }
+    const TT &geom_prec;
+};
 
 template<class TT> struct ExactlyEqualTo {
     ExactlyEqualTo(const TT &v):val(v) {}
@@ -283,15 +289,17 @@ template<class TT> struct ExactlyEqualTo {
 };
 template<class T> ExactlyEqualTo<T> exactly_equal(const T &val) { return ExactlyEqualTo<T>(val); }
 
+
+template<class TT> struct ApproxEqualTo {
+    ApproxEqualTo(const TT &v):val(v) {}
+//     ApproxEqualTo(const TT &v):geom_prec(v) {}
+    template<class P1,class P2=void,class P3=void,class P4=void> struct ReturnType { typedef bool T; };
+    template<class P1> bool operator()(const P1 &p1) const { return norm_2( p1 - val ) < 1e-6/*geom_prec*/; }
+    const TT &val;
+//     const TT &geom_prec;
+};
 //
-// template<class TT> struct ExactlyEqualTo {
-//     ExactlyEqualTo(const TT &v):val(v) {}
-//     template<class P1,class P2=void,class P3=void,class P4=void> struct ReturnType { typedef bool T; };
-//     template<class P1> bool operator()(const P1 &p1) const { return p1 == val; }
-//     const TT &val;
-// };
-// //
-// template<class T> ApproxEqualTo<T> approx_equal(const T &val,const T ) { return ApproxEqualTo<T>(val); }
+template<class T> ApproxEqualTo<T> approx_equal(const T &val,const T &geom_prec) { return ApproxEqualTo<T>(val,geom_prec); }
 
 
 /*!
@@ -303,6 +311,7 @@ template<class T> ExactlyEqualTo<T> exactly_equal(const T &val) { return Exactly
     \friend raphael.pasquier@lmt.ens-cachan.fr
 */
 template<class TL> void remove_doubles(TL &l) { remove_doubles(l,ExactlyEqual()); }
+template<class TL,class T> void remove_doubles_approx(TL &l,const T &geom_prec) { remove_doubles(l,ApproxEqual<T>(geom_prec)); }
 
 // ----------------------------------------------------------------- minmax -----------------------------------------------------------------
 struct MinMax {

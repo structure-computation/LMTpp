@@ -39,4 +39,4 @@ inline unsigned vtk_num( StructForType<NodalElement> ) { return 1; }
 
 };
 
-#endif
+#endif // LMTNODALELEMENT_H

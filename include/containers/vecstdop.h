@@ -359,8 +359,8 @@ inline typename FloatType<typename TypeReduction<Multiplies,Vec<T,s> >::T>::T le
  */
 template<class T,int s>
 inline typename FloatType<typename TypeReduction<Multiplies,Vec<T,s> >::T>::T distance(const Vec<T,s> &c, const Vec<T,s> &d) {
-    Vec<T,s> tmp = c-d;
-    return length(tmp);
+    Vec<T,s> tmp = c - d;
+    return length( tmp );
 }
 
 /*!    
@@ -552,7 +552,22 @@ Vec<typename Vec<T1,s>::template SubType<0>::T,s> getCenterOfCircumCircle(const 
 }
 /*!
  \relates Vec
-  \keyword Vecteur
+ */
+template<class T1,class T2,class T3,int s>
+Vec<typename Vec<T1,s>::template SubType<0>::T,s> getCenterOfInCircle(const Vec<T1,s> &P0,const Vec<T2,s> &P1,const Vec<T3,s> &P2) {
+    typedef typename Vec<T1,s>::template SubType<0>::T T;
+    Vec<T,s> P01(P1-P0), P02(P2-P0), P12(P2-P1);
+    T x1 = length(P01);
+    T x2 = length(P02);
+    T x3 = length(P12);
+
+    T C01 = x2 / ( x1+x2+x3 );
+    T C02 = x1 / ( x1+x2+x3 );
+
+    return P0 + C01*P01 + C02*P02;
+}
+/*!
+ \relates Vec
  */
 template<class T1,class T2,class T3,class T4,int s>
 Vec<typename Vec<T1,s>::template SubType<0>::T,s> getCenterOfCircumSphere(const Vec<T1,s> &P0,const Vec<T2,s> &P1,const Vec<T3,s> &P2,const Vec<T4,s> &P3) {
@@ -563,6 +578,43 @@ Vec<typename Vec<T1,s>::template SubType<0>::T,s> getCenterOfCircumSphere(const 
     Vec<T,s> N1 = vect_prod(P2-P1,P3-P1);
     Vec<T,s> den = vect_prod(N0,N1);
     return C0 + N0 * dot(vect_prod(N1,C0-C1),den) / dot(den,den);
+}
+/*!
+ \relates Vec
+ */
+template<class T1,class T2,class T3,class T4,int s>
+Vec<typename Vec<T1,s>::template SubType<0>::T,s> getCenterOfInSphere(const Vec<T1,s> &P0,const Vec<T2,s> &P1,const Vec<T3,s> &P2,const Vec<T4,s> &P3) {
+    typedef typename Vec<T1,s>::template SubType<0>::T T;
+    Vec<T,s> P01(P1-P0), P02(P2-P0), P03(P3-P0), P12(P2-P1), P13(P3-P1);
+
+    T x1 = length(P01);
+    T x2 = length(P02);
+    T x12 = length(P12);
+
+    Vec<T,s> P01_N = P01 / x1;
+    Vec<T,s> P02_N = P02 / x2;
+    Vec<T,s> P12_N = P12 / x12;
+
+    Vec<T,s> H1 = P02 - dot( P02, P01_N ) * P01_N;
+    T y1 = length( H1 );
+    T S1 = x1 * y1 / 2;
+
+    Vec<T,s> H2 = P03 - dot( P03, P01_N ) * P01_N;
+    T y2 = length( H2 );
+    T S2 = x1 * y2 / 2;
+
+    Vec<T,s> H3 = P03 - dot( P03, P02_N ) * P02_N;
+    T y3 = length( H3 );
+    T S3 = x2 * y3 / 2;
+
+    Vec<T,s> H4 = P13 - dot( P13, P12_N ) * P12_N;
+    T y4 = length( H4 );
+    T S4 = x12 * y4 / 2;
+
+    T C01 = S3 / ( S1 + S2 + S3 + S4 );
+    T C02 = S2 / ( S1 + S2 + S3 + S4 );
+    T C03 = S1 / ( S1 + S2 + S3 + S4 );
+    return P0 + C01 * P01 + C02 * P02 + C03 * P03;
 }
 
 }

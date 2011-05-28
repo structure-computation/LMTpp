@@ -1,11 +1,11 @@
 /*!
-\example Cas où la dimension des éléments est inférieur à la dimension de la formulation
+\example Cas où la dimension des éléments est inférieure à la dimension de la formulation
 
-    Cet exemple a pour but de montrer un cas particulier où la dimension des éléments est inférieur à la dimension de la formulation. Ici, nous allons générer du code pour calculer des treillis (assemblages de barreaux) bidimensionnels ou tridimensionnels.
+    Cet exemple a pour but de montrer un cas particulier où la dimension des éléments est inférieure à la dimension de la formulation. Ici, nous allons générer du code pour calculer des treillis (assemblages de barreaux) bidimensionnels ou tridimensionnels.
 
     Voici le fichier de formulation qui permet d'appliquer un chargement aux noeuds du treillis en prenant en compte la raideur des barreaux ainsi qu'une éventuelle raideur nodale.
 
-    \code
+    \code Python
         #champs globaux
         young_modulus = Variable( interpolation='global', default_value='69e9', unit='N/m^2' )
         section = Variable( interpolation='global', default_value='51e-3', unit='m^2' )
@@ -46,7 +46,7 @@
     On suppose que le fichier s'appelle formulation_treillis_statique.py.
 
     Pour générer automatiquement le code, le plus simple c'est d'utiliser metil_comp et un programme qui contient un include adapté. Exemple :
-        \code
+        \code C/C++
             #include "formulation.treillis_statique.Bar.dim=2.h"
 
             int main() {
@@ -76,7 +76,7 @@
 
     Si vous utilisez encore des SConstruct, voici la fonction make_pb à inclure dans le fichier SConstruct pour générer du code pour un treillis bidimensionnel :
 
-        \code
+        \code Python
             pb_libs = make_pb(
                 env,
                 opt = 0,

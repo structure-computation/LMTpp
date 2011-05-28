@@ -283,7 +283,115 @@ struct MKL_CSR_matrix {
     double *a;
     static const unsigned s_matdes = 6;
     char matdes[ s_matdes ];
-    int n;
+    int n; /// nb of rows of the matrix
+    int is_one_based_indexing; /// 0 <-> faux   ,   1 <-> vrai
+    /// sur certaines versions de la MKL, l'indéxation C ne marche pas donc on reste toujours en indexation Fortran
+    /// si on change d'avis, les fonctions MKL seront préfixées par mkl_cspblas au lieu mkl_  ( c.f. page 204 de la doc de MKL )
+};
+
+struct MKL_BSR_matrix {
+
+    MKL_BSR_matrix() : ia( NULL ), ja( NULL ), a( NULL ), size_block( 0 ), n( 0 ), is_one_based_indexing( 1 ) {
+        for( unsigned i = 0; i < s_matdes; ++i ) 
+            matdes[ i ] = '\0';
+    }
+    
+    virtual ~MKL_BSR_matrix() {
+        free();
+    }
+    
+    template<class TM>
+    int init( const TM &mat, int p_size_block ) { /// type de matrice inconnue !
+         assert( 0 );
+         return 0;
+    }
+    
+    template<int sr, int sc>
+    int init( const Mat<double, Gen<sr,sc>, SparseLine<Col> > &mat, int p_size_block ) {
+        
+        int ldabsr, info;
+        
+        free();
+        size_block = p_size_block;
+        ia = NULL; ja = NULL; a = NULL;
+        MKL_CSR_matrix m( mat );
+        int job[ 5 ] = { 0, m.is_one_based_indexing, is_one_based_indexing, 0, 1 };
+        mkl_dcsrbsr( job, mat.nb_rows(), size_block, &ldabsr, m.a, m.ja, m.ia, a, ja, ia, &info );
+        
+        PRINT( info );
+    }
+    
+    template<int s>
+    int init( const Mat<double, Sym<s,true>, SparseLine<Col> > &mat, int p_size_block ) {
+    
+        int ldabsr, info;
+        
+        ia = NULL; ja = NULL; a = NULL; n = 0;
+        free();
+        size_block = p_size_block;
+        
+        MKL_CSR_matrix m( mat );
+        int job[ 5 ] = { 0, m.is_one_based_indexing, is_one_based_indexing, 0, 1 };
+        mkl_dcsrbsr( job, mat.nb_rows(), size_block, &ldabsr, m.a, m.ja, m.ia, a, ja, ia, &info );
+        
+        PRINT( info );
+    }
+    
+    /// Mat<TT,Sym<sr,0>,SparseLine<Col>,void>
+    template<int s>
+    int init(  const Mat<double, Sym<s,false>, SparseLine<Col> > &mat, int p_size_block ) {    
+        
+        int ldabsr = 1000, info = 0, nb_row = mat.nb_rows();
+        
+        if ( nb_row % p_size_block ) assert( 0 );
+        
+        size_block = p_size_block;
+        for( unsigned i = 0; i < nb_row; i += size_block ) {
+        
+        }
+    }    
+    
+    template<class TM>
+    MKL_BSR_matrix( const TM &mat, int p_size_block ) { init( mat, p_size_block ); }
+    
+    /*! 
+        renvoie le type de la matrice pour le solver PARDISO
+        La structure matdes ne peut contenir l'information : matrice symmétrique définie positive. Attention. 
+    */
+    int get_mtype() const {
+        
+        char c = matdes[ 0 ];
+        if ( c == 'g' ) {
+            return 11;  /// matrice quelconque réelle
+        } else {
+            if ( c == 's' )
+                return -2; /// matrice symmétrique
+            else
+                return 11; /// retour par défaut
+        }
+    }
+    
+    /// applique la matrice vue comme un conditionneur
+    /// par défaut je ne fais rien
+    virtual void apply_as_conditioner( double *x, double *y ) const {}
+    
+    void free() {
+        if ( n ) {
+            delete[] ia;
+            delete[] ja;
+            delete[] a;
+            n = 0;
+            size_block = 0;
+        }
+    }
+
+    int *ia;
+    int *ja;
+    double *a;
+    static const unsigned s_matdes = 6;
+    char matdes[ s_matdes ];
+    int size_block; /// nb of rows in a block
+    int n; /// nb of blocks in a row matrix
     int is_one_based_indexing; /// 0 <-> faux   ,   1 <-> vrai
     /// sur certaines versions de la MKL, l'indéxation C ne marche pas donc on reste toujours en indexation Fortran
     /// si on change d'avis, les fonctions MKL seront préfixées par mkl_cspblas au lieu mkl_  ( c.f. page 204 de la doc de MKL )

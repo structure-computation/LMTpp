@@ -3,7 +3,7 @@
 //  gouttebroze@lmt.ens-cachan.fr //
 ////////////////////////////////////
 
-#ifndef lm_steps_HEADERconst 
+#ifndef lm_steps_HEADER
 #define lm_steps_HEADER
 
 #include <containers/vec.h>

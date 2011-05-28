@@ -31,6 +31,7 @@
             * la librairie goto blas (http://staff.psc.edu/oneal/charts/es45/LIBGOTO/)
             * libxml2-dev
             * libsuitesparse-dev
+            * yasm pour ceux qui génèrent de l'assembleur
 
         Si vous avez besoin de la librairie cholamd umfpack et que vous avez pas libsuitesparse-dev (vous n'êtes pas sous debian, etc...), il faut récupérer
             /ul/multi/MATH_linux_32.tbz2 ou /ul/multi/MATH_linux_64.tbz2 ou /ul/multi/MATH_mac_32.tbz2 selon votre architecture et la décompresser dans /
