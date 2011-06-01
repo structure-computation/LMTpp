@@ -114,7 +114,9 @@ struct MKL_iterative_solver {
 
         m_cond = NULL;
         
-        mtype = m.init( mat );
+        m.init( mat );
+        mtype = m.get_mtype();
+        
         if ( is_positive_definite )
             mtype = 2;
         if ( want_free )
@@ -129,7 +131,8 @@ struct MKL_iterative_solver {
 
         m_cond = NULL;
     
-        mtype = m.init( mat );
+        m.init( mat );
+        mtype = m.get_mtype();
         if ( want_free )
             mat.free();  
                
