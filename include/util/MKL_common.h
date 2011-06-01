@@ -50,7 +50,7 @@ struct MKL_CSR_matrix {
     
     template<int sr, int sc>
     void init( const Mat<double, Gen<sr,sc>, SparseLine<Col> > &mat ) {
-        
+    
         free();
     
         n = mat.nb_rows();
@@ -244,7 +244,7 @@ struct MKL_CSR_matrix {
     }    
     
     template<class TM>
-    MKL_CSR_matrix( const TM &mat ) { init( mat ); }
+    MKL_CSR_matrix( const TM &mat ) : ia( NULL ), ja( NULL ), a( NULL ), n( 0 ), is_one_based_indexing( 1 ) { init( mat ); }
     
     /*! 
         renvoie le type de la matrice pour le solver PARDISO
@@ -262,7 +262,40 @@ struct MKL_CSR_matrix {
                 return 11; /// retour par défaut
         }
     }
-    
+
+    template<int s>
+    Vec<double,s> operator*( const Vec<double, s> &x ) const {
+
+        assert( x.size() == n );
+        
+        Vec<double, s> res;
+        res.resize( x.size() );
+        if ( matdes[ 0 ] == 'g' ) {
+            char transa = 'n';
+            mkl_dcsrgemv( const_cast<char*>( &transa ), 
+                          const_cast<int*>( &n ), 
+                          const_cast<double*>( a ), 
+                          const_cast<int*>( ia ), 
+                          const_cast<int*>( ja ), 
+                          const_cast<double*>( x.ptr() ), 
+                          res.ptr() );
+        } else {
+            if ( matdes[ 0 ] == 's' )
+                mkl_dcsrsymv( const_cast<char*>( &matdes[ 1 ] ),
+                              const_cast<int*>(&n ), 
+                              const_cast<double*>( a ), 
+                              const_cast<int*>( ia ),
+                              const_cast<int*>( ja ),
+                              const_cast<double*>( x.ptr() ),
+                              res.ptr() );
+            else {
+                res.set( 0 );
+                std::cerr << "Error : MKL_BSR_matrix * Vec " << std::endl;
+            }
+        }
+        return res;
+    }
+
     /// applique la matrice vue comme un conditionneur
     /// par défaut je ne fais rien
     virtual void apply_as_conditioner( double *x, double *y ) const {}
@@ -325,6 +358,8 @@ struct MKL_BSR_matrix {
     
     template<class Stru >
     void init_gen_sym_lower_col( const Mat< double, Stru, SparseLine<Col> > & mat, int p_size_block ) {
+    
+        free();
     
         if ( mat.nb_rows() % p_size_block ) 
             assert( 0 );
@@ -483,7 +518,9 @@ struct MKL_BSR_matrix {
     }    
     
     template<class TM>
-    MKL_BSR_matrix( const TM &mat, int p_size_block ) : is_one_based_indexing( 1 ) { init( mat, p_size_block ); }
+    MKL_BSR_matrix( const TM &mat, int p_size_block ) : ia( NULL ), ja( NULL ), a( NULL ), K( 0 ), n( 0 ), is_one_based_indexing( 1 ) { 
+        init( mat, p_size_block );
+    }
     
     /*! 
         renvoie le type de la matrice pour le solver PARDISO
@@ -519,15 +556,21 @@ struct MKL_BSR_matrix {
                           const_cast<int*>( ja ), 
                           const_cast<double*>( x.ptr() ), 
                           res.ptr() );
-        } else
-            mkl_dbsrsymv( const_cast<char*>( &matdes[ 1 ] ),
-                          const_cast<int*>(&n ), 
-                          const_cast<int*>( &K ),
-                          const_cast<double*>( a ), 
-                          const_cast<int*>( ia ),
-                          const_cast<int*>( ja ),
-                          const_cast<double*>( x.ptr() ),
-                          res.ptr() );
+        } else {
+            if ( matdes[ 0 ] == 's' )
+                mkl_dbsrsymv( const_cast<char*>( &matdes[ 1 ] ),
+                              const_cast<int*>(&n ), 
+                              const_cast<int*>( &K ),
+                              const_cast<double*>( a ), 
+                              const_cast<int*>( ia ),
+                              const_cast<int*>( ja ),
+                              const_cast<double*>( x.ptr() ),
+                              res.ptr() );
+            else {
+                res.set( 0 );
+                std::cerr << "Error : MKL_BSR_matrix * Vec " << std::endl;
+            }
+        }
         return res;
     }
     
