@@ -23,8 +23,6 @@ int pol_degree_4_double_univariable_0() {
 
 int main() {
     UNIT_TEST( pol_degree_4_double_univariable_0() );
-    UNIT_TEST( 0 );
-    UNIT_TEST( 1 );
     
     return 0;
 }

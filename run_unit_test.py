@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import os, stat, time
 
-def create_html_link( href, text ):
-    return '<a href="' + href + '" > ' + text + ' </a>'
+def create_html_link( rpath, href, text ):
+    return '<a href="' + rpath + href + '" > ' + text + ' </a>'
 
 def create_html_image( href, alt='' ):
     return '<img src="' + href + '" alt="' + alt + '"> '
@@ -39,6 +39,7 @@ class Tests:
         self.html.write('\n<br>\n<br>\n<br>\n<br>\n<br>\n<br>\n<br>\n</body>\n</html>\n\n' )
 
     def find_and_exec( self, directory ):
+        os.system( "rm -rf tests/compilation" )
         for filename_ in os.listdir( directory ):
             filename = directory + "/" + filename_
             if stat.S_ISDIR( os.stat( filename )[ stat.ST_MODE ] ):
@@ -46,7 +47,6 @@ class Tests:
             elif filename[-4:] == ".cpp": 
                 filename_log = filename[:-4] + ".log"
                 filename_log_cerr = filename[:-4] + ".log_cerr"
-                os.system( "rm -rf tests/compilation" )
                 cmd = self.command + filename + " > " + filename_log + " 2> " + filename_log_cerr
                 local_res = os.system( cmd )
                 print filename, local_res
@@ -57,7 +57,7 @@ class Tests:
                     k = 0
                     while ( k < nb_tokens ):
                         if (tokens[k] == '__UNIT_TESTING_REPORT__'):
-                            self.html.write( '\t<tr>\n\t\t<td>' + create_html_link( filename, filename ) + ' </td> <td> ' + create_html_image( self.icon[1], 'OK' ) + ' </td> <td> ' +  extract_function( tokens[k+1] ) + ' </td> ' )
+                            self.html.write( '\t<tr>\n\t\t<td>' + create_html_link( '../../', filename, filename ) + ' </td> <td> ' + create_html_image(  self.icon[1], 'OK' ) + ' </td> <td> ' +  extract_function( tokens[k+1] ) + ' </td> ' )
                             ### Nous cherchons ensuite le token >=>=>=> sur la ligne puis sur les lignes suivantes
                             k = k + 2
                             while ( k < nb_tokens ):
@@ -67,14 +67,14 @@ class Tests:
                                     else:
                                         j = 0
                                     self.res &= j
-                                    self.html.write( '<td>' + create_html_image( self.icon[j], tokens[k+1] ) + '</td> <td> ' + create_html_link( filename_log, filename_log ) + ' </td> <td> ' + create_html_link( filename_log_cerr, filename_log_cerr ) + ' </td>\n\t</tr>\n' )
+                                    self.html.write( '<td>' + create_html_image( self.icon[j], tokens[k+1] ) + '</td> <td> ' + create_html_link( '../../', filename_log, filename_log ) + ' </td> <td> ' + create_html_link( '../../', filename_log_cerr, filename_log_cerr ) + ' </td>\n\t</tr>\n' )
                                     k = k + 1
                                     break
                                 k = k + 1
                         k = k + 1
                     entree.close()
                 else: # echec de la compilation
-                    self.html.write( '\t<tr>\n\t\t<td>' + create_html_link( filename, filename ) + ' </td> <td> ' + create_html_image( self.icon[0], 'FAIL' ) +  ' </td> <td> </td> <td> </td> <td> ' + create_html_link( filename_log, filename_log ) + ' </td> <td> ' + create_html_link( filename_log_cerr, filename_log_cerr ) + ' </td>\n\t</tr>\n' )
+                    self.html.write( '\t<tr>\n\t\t<td>' + create_html_link( '../../', filename, filename ) + ' </td> <td> ' + create_html_image( self.icon[0], 'FAIL' ) +  ' </td> <td> </td> <td> </td> <td> ' + create_html_link( '../../', filename_log, filename_log ) + ' </td> <td> ' + create_html_link( '../../',  filename_log_cerr, filename_log_cerr ) + ' </td>\n\t</tr>\n' )
                     self.res = False
 
     def run( self, directory ):
