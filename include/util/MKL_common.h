@@ -10,6 +10,7 @@
 #endif
 
 #include <cmath>
+#include <utility> /// struct pair
 #include "mkl_types.h"
 
 #include "mkl_rci.h"
@@ -20,6 +21,7 @@
 #endif
 
 #include "containers/mat.h"
+#include "containers/algo.h"  /// sort
 #include "containers/matinvsparse.h"
 
 #ifdef WITH_MKL
@@ -42,14 +44,13 @@ struct MKL_CSR_matrix {
     }
     
     template<class TM>
-    int init( const TM &mat ) { /// type de matrice inconnue !
+    void init( const TM &mat ) { /// type de matrice inconnue !
          assert( 0 );
-         return 0;
     }
     
     template<int sr, int sc>
-    int init( const Mat<double, Gen<sr,sc>, SparseLine<Col> > &mat ) {
-        
+    void init( const Mat<double, Gen<sr,sc>, SparseLine<Col> > &mat ) {
+    
         free();
     
         n = mat.nb_rows();
@@ -80,8 +81,7 @@ struct MKL_CSR_matrix {
             matdes[ 3 ] = 'f'; /// fortran
         else
             matdes[ 3 ] = 'c'; /// c
-        
-        return get_mtype();
+            
         //         std::cout << " ia = " ;
         //         for( int i = 0; i <= n; ++i )
         //             std::cout << ia[ i ] << " ";
@@ -97,7 +97,7 @@ struct MKL_CSR_matrix {
     }
     
     template<int s>
-    int init( const Mat<double, Sym<s,true>, SparseLine<Col> > &mat ) {
+    void init( const Mat<double, Sym<s,true>, SparseLine<Col> > &mat ) {
     
         free();
     
@@ -150,7 +150,6 @@ struct MKL_CSR_matrix {
         else
             matdes[ 3 ] = 'c'; /// c
             
-        return get_mtype();
         //         std::cout << " ia = " ;
         //         for( int i = 0; i <= n; ++i )
         //             std::cout << ia[ i ] << " ";
@@ -167,7 +166,7 @@ struct MKL_CSR_matrix {
     
     /// Mat<TT,Sym<sr,0>,SparseLine<Col>,void>
     template<int s>
-    int init(  const Mat<double, Sym<s,false>, SparseLine<Col> > &mat ) {    
+    void init(  const Mat<double, Sym<s,false>, SparseLine<Col> > &mat ) {    
     
         free();
             
@@ -228,7 +227,6 @@ struct MKL_CSR_matrix {
         else
             matdes[ 3 ] = 'c'; /// c
             
-        return get_mtype();
         //         PRINT( offsets );
         //         
         //         std::cout << " ia = " ;
@@ -246,7 +244,7 @@ struct MKL_CSR_matrix {
     }    
     
     template<class TM>
-    MKL_CSR_matrix( const TM &mat ) { init( mat ); }
+    MKL_CSR_matrix( const TM &mat ) : ia( NULL ), ja( NULL ), a( NULL ), n( 0 ), is_one_based_indexing( 1 ) { init( mat ); }
     
     /*! 
         renvoie le type de la matrice pour le solver PARDISO
@@ -264,7 +262,40 @@ struct MKL_CSR_matrix {
                 return 11; /// retour par défaut
         }
     }
-    
+
+    template<int s>
+    Vec<double,s> operator*( const Vec<double, s> &x ) const {
+
+        assert( x.size() == n );
+        
+        Vec<double, s> res;
+        res.resize( x.size() );
+        if ( matdes[ 0 ] == 'g' ) {
+            char transa = 'n';
+            mkl_dcsrgemv( const_cast<char*>( &transa ), 
+                          const_cast<int*>( &n ), 
+                          const_cast<double*>( a ), 
+                          const_cast<int*>( ia ), 
+                          const_cast<int*>( ja ), 
+                          const_cast<double*>( x.ptr() ), 
+                          res.ptr() );
+        } else {
+            if ( matdes[ 0 ] == 's' )
+                mkl_dcsrsymv( const_cast<char*>( &matdes[ 1 ] ),
+                              const_cast<int*>(&n ), 
+                              const_cast<double*>( a ), 
+                              const_cast<int*>( ia ),
+                              const_cast<int*>( ja ),
+                              const_cast<double*>( x.ptr() ),
+                              res.ptr() );
+            else {
+                res.set( 0 );
+                std::cerr << "Error : MKL_BSR_matrix * Vec " << std::endl;
+            }
+        }
+        return res;
+    }
+
     /// applique la matrice vue comme un conditionneur
     /// par défaut je ne fais rien
     virtual void apply_as_conditioner( double *x, double *y ) const {}
@@ -289,9 +320,29 @@ struct MKL_CSR_matrix {
     /// si on change d'avis, les fonctions MKL seront préfixées par mkl_cspblas au lieu mkl_  ( c.f. page 204 de la doc de MKL )
 };
 
+template<class T>
+void symetrise( T* a, int is_one_based_indexing_, int K_ ) {
+
+    if ( is_one_based_indexing_ ) {
+        /// stockage Fortran en colonne
+        for( int i = 1; i < K_; ++i )
+            for( int j = 0; j < i; ++j ) {
+                a[ i * K_ + j ] = a[ j * K_ + i ];
+            }
+            
+    } else {
+        /// stockage en ligne comme en C++
+        for( int i = 0; i < K_ - 1; ++i )
+            for( int j = i + 1; j < K_; ++j ) {
+                a[ i * K_ + j ] = a[ j * K_ + i ];
+            } 
+    }
+}
+
+/// on lower
 struct MKL_BSR_matrix {
 
-    MKL_BSR_matrix() : ia( NULL ), ja( NULL ), a( NULL ), size_block( 0 ), n( 0 ), is_one_based_indexing( 1 ) {
+    MKL_BSR_matrix() : ia( NULL ), ja( NULL ), a( NULL ), K( 0 ), n( 0 ), is_one_based_indexing( 1 ) {
         for( unsigned i = 0; i < s_matdes; ++i ) 
             matdes[ i ] = '\0';
     }
@@ -301,58 +352,175 @@ struct MKL_BSR_matrix {
     }
     
     template<class TM>
-    int init( const TM &mat, int p_size_block ) { /// type de matrice inconnue !
+    void init( const TM &mat, int p_size_block ) { /// type de matrice inconnue !
          assert( 0 );
-         return 0;
+    }
+    
+    template<class Stru >
+    void init_gen_sym_lower_col( const Mat< double, Stru, SparseLine<Col> > & mat, int p_size_block ) {
+    
+        free();
+    
+        if ( mat.nb_rows() % p_size_block ) 
+            assert( 0 );
+        
+        K = p_size_block;
+        n = mat.nb_rows() / p_size_block;
+        
+        ia = new int[ n + 1 ];
+        ia[ 0 ] = 0;
+        
+        /// détermination du nombre de blocks
+        Vec<int> indice;
+        Vec< Vec<int> > col_list; col_list.resize( n );
+
+        for( int i = 0, r = 0; i < mat.nb_rows(); i += K, ++r ) {
+            /// travail sur un paquet de K lignes
+            indice.resize( 0 );
+            for( int i2 = i; i2 < i + K; i2++ )
+                for( int ind = 0; ind < mat.data[ i2 ].indices.size(); ++ind ) {
+                    int c = mat.data[ i2 ].indices[ ind ] / K;
+                    if ( indice.find( c ) == indice.size() )
+                        indice.push_back( c );
+                }
+            ia[ r + 1 ] = ia[ r ] + indice.size();
+            sort( indice );
+            col_list[ r ] = indice;
+            
+        }
+        
+        a  = new double[ K * K * ia[ n ] ];
+        ja = new int[ ia[ n ] ]; 
+        
+        memset( ( void* ) a, 0, sizeof( double ) * K * K * ia[ n ] );
+        
+        /// initialisation de ja
+        for( int i = 0, l = 0; i < n; i++ )
+            for( int j = 0; j < col_list[ i ].size(); j++, l++ )
+                ja[ l ] = col_list[ i ][ j ];
+
+        //for( int i = 0, l = 0; i < n; i++ )
+        //    PRINT( col_list[ i ] );
+
+        /// remplissage des éléments non nuls de a
+        /// pour la version avec indéxation commençant à 1 ( i.e. indéxation Fortran ), les éléments d'un block sont rangés par colonne
+        if ( is_one_based_indexing ) {
+            for( int i = 0, r = 0; i < mat.nb_rows(); i += K, r++ ) {
+                /// travail sur un paquet de K lignes
+                for( int i2 = i; i2 < i + K; i2++ )
+                    for( int ind = 0; ind < mat.data[ i2 ].indices.size(); ++ind ) {
+                        int q = mat.data[ i2 ].indices[ ind ] / K;
+                        int j = mat.data[ i2 ].indices[ ind ] - q * K;
+                        int jb = ia[ r ];
+                        for( ; jb < ia[ r + 1 ]; ++ jb )
+                            if ( ja[ jb ] == q ) {
+                                a[ jb * K * K + j * K + i2 - i ] = mat.data[ i2 ].data[ ind ];
+                                break;
+                            }
+                        if ( jb == ia[ r + 1 ] )
+                            std::cerr << "Error MKL_BSR_matrix::init() : impossible to put the number" <<std::endl;
+                    }
+            }
+        } else {
+            for( int i = 0, r = 0; i < mat.nb_rows(); i += K, r++ ) {
+                /// travail sur un paquet de K lignes
+                for( int i2 = i; i2 < i + K; i2++ )
+                    for( int ind = 0; ind < mat.data[ i2 ].indices.size(); ++ind ) {
+                        int q = mat.data[ i2 ].indices[ ind ] / K;
+                        int j = mat.data[ i2 ].indices[ ind ] - q * K;
+                        int jb = ia[ r ];
+                        for( ; jb < ia[ r + 1 ]; ++ jb )
+                            if ( ja[ jb ] == q ) {
+                                a[ jb * K * K + ( i2 - i ) * K + j ] = mat.data[ i2 ].data[ ind ];
+                                break;
+                            }
+                        if ( jb == ia[ r + 1 ] )
+                            std::cerr << "Error MKL_BSR_matrix::init() : impossible to put the number" <<std::endl;
+                    }
+            }
+        }       
+             
     }
     
     template<int sr, int sc>
-    int init( const Mat<double, Gen<sr,sc>, SparseLine<Col> > &mat, int p_size_block ) {
+    void init( const Mat<double, Gen<sr,sc>, SparseLine<Col> > &mat, int p_size_block ) {
         
-        int ldabsr, info;
+        init_gen_sym_lower_col( mat, p_size_block );
         
-        free();
-        size_block = p_size_block;
-        ia = NULL; ja = NULL; a = NULL;
-        MKL_CSR_matrix m( mat );
-        int job[ 5 ] = { 0, m.is_one_based_indexing, is_one_based_indexing, 0, 1 };
-        mkl_dcsrbsr( job, mat.nb_rows(), size_block, &ldabsr, m.a, m.ja, m.ia, a, ja, ia, &info );
+//         std::cout << "********* ia = " << std::endl;
+//         for( int i = 0; i <= n; ++i )
+//             std::cout << ia[ i ] << " ";
+//         std::cout << std::endl;
+//         std::cout << "********* ja = " << std::endl;
+//         for( int i = 0; i < ia[ n ]; ++i )
+//             std::cout << ja[ i ] << " ";
+//         std::cout << std::endl;
+//         std::cout << "********* a = " << std::endl;
+//         for( int i = 0; i < ia[ n ] * K * K; ++i )
+//             std::cout  << a[ i ] << " ";
+//         std::cout << std::endl; 
         
-        PRINT( info );
-    }
-    
-    template<int s>
-    int init( const Mat<double, Sym<s,true>, SparseLine<Col> > &mat, int p_size_block ) {
-    
-        int ldabsr, info;
+        if ( is_one_based_indexing ) {
+            for( int i = 0; i <= n; ++i )
+                ia[ i ] += 1;
+            for( int i = 0; i < ia[ n ]; ++i )
+                ja[ i ] += 1;                
+        }
         
-        ia = NULL; ja = NULL; a = NULL; n = 0;
-        free();
-        size_block = p_size_block;
-        
-        MKL_CSR_matrix m( mat );
-        int job[ 5 ] = { 0, m.is_one_based_indexing, is_one_based_indexing, 0, 1 };
-        mkl_dcsrbsr( job, mat.nb_rows(), size_block, &ldabsr, m.a, m.ja, m.ia, a, ja, ia, &info );
-        
-        PRINT( info );
+        matdes[ 0 ] = 'g'; /// general
+        matdes[ 1 ] = 'l'; /// lower
+        matdes[ 2 ] = 'n'; /// non unit
+        if ( is_one_based_indexing ) 
+            matdes[ 3 ] = 'f'; /// fortran
+        else
+            matdes[ 3 ] = 'c'; /// c 
     }
     
     /// Mat<TT,Sym<sr,0>,SparseLine<Col>,void>
     template<int s>
-    int init(  const Mat<double, Sym<s,false>, SparseLine<Col> > &mat, int p_size_block ) {    
+    void init(  const Mat<double, Sym<s,false>, SparseLine<Col> > &mat, int p_size_block ) { 
+       
+        init_gen_sym_lower_col( mat, p_size_block );
         
-        int ldabsr = 1000, info = 0, nb_row = mat.nb_rows();
+        /// pour les matrices symétriques, il y a un souci car les blocks diagonaux sont mal remplis.
+        /// il s'agit de les "symétriser"
+        for( int i = 0; i < n; ++i )
+            if ( ja[ ia[ i + 1 ] - 1 ] == i ) /// le dernier block est un block diagonal
+                symetrise( a + ( ia[ i + 1 ] - 1 ) * K * K, is_one_based_indexing, K );
         
-        if ( nb_row % p_size_block ) assert( 0 );
+/*        std::cout << "********* ia = " << std::endl;
+        for( int i = 0; i <= n; ++i )
+            std::cout << ia[ i ] << " ";
+        std::cout << std::endl;
+        std::cout << "********* ja = " << std::endl;
+        for( int i = 0; i < ia[ n ]; ++i )
+            std::cout << ja[ i ] << " ";
+        std::cout << std::endl;
+        std::cout << "********* a = " << std::endl;
+        for( int i = 0; i < ia[ n ] * K * K; ++i )
+            std::cout  << a[ i ] << " ";
+        std::cout << std::endl;*/ 
         
-        size_block = p_size_block;
-        for( unsigned i = 0; i < nb_row; i += size_block ) {
-        
+        if ( is_one_based_indexing ) {
+            for( int i = 0; i <= n; ++i )
+                ia[ i ] += 1;
+            for( int i = 0; i < ia[ n ]; ++i )
+                ja[ i ] += 1;                
         }
+        
+        matdes[ 0 ] = 's'; /// general
+        matdes[ 1 ] = 'l'; /// lower
+        matdes[ 2 ] = 'n'; /// non unit
+        if ( is_one_based_indexing ) 
+            matdes[ 3 ] = 'f'; /// fortran
+        else
+            matdes[ 3 ] = 'c'; /// c        
     }    
     
     template<class TM>
-    MKL_BSR_matrix( const TM &mat, int p_size_block ) { init( mat, p_size_block ); }
+    MKL_BSR_matrix( const TM &mat, int p_size_block ) : ia( NULL ), ja( NULL ), a( NULL ), K( 0 ), n( 0 ), is_one_based_indexing( 1 ) { 
+        init( mat, p_size_block );
+    }
     
     /*! 
         renvoie le type de la matrice pour le solver PARDISO
@@ -371,6 +539,41 @@ struct MKL_BSR_matrix {
         }
     }
     
+    template<int s>
+    Vec<double,s> operator*( const Vec<double, s> &x ) const {
+
+        assert( x.size() == n * K );
+        
+        Vec<double, s> res;
+        res.resize( x.size() );
+        if ( matdes[ 0 ] == 'g' ) {
+            char transa = 'n';
+            mkl_dbsrgemv( const_cast<char*>( &transa ), 
+                          const_cast<int*>( &n ), 
+                          const_cast<int*>( &K ), 
+                          const_cast<double*>( a ), 
+                          const_cast<int*>( ia ), 
+                          const_cast<int*>( ja ), 
+                          const_cast<double*>( x.ptr() ), 
+                          res.ptr() );
+        } else {
+            if ( matdes[ 0 ] == 's' )
+                mkl_dbsrsymv( const_cast<char*>( &matdes[ 1 ] ),
+                              const_cast<int*>(&n ), 
+                              const_cast<int*>( &K ),
+                              const_cast<double*>( a ), 
+                              const_cast<int*>( ia ),
+                              const_cast<int*>( ja ),
+                              const_cast<double*>( x.ptr() ),
+                              res.ptr() );
+            else {
+                res.set( 0 );
+                std::cerr << "Error : MKL_BSR_matrix * Vec " << std::endl;
+            }
+        }
+        return res;
+    }
+    
     /// applique la matrice vue comme un conditionneur
     /// par défaut je ne fais rien
     virtual void apply_as_conditioner( double *x, double *y ) const {}
@@ -381,7 +584,7 @@ struct MKL_BSR_matrix {
             delete[] ja;
             delete[] a;
             n = 0;
-            size_block = 0;
+            K = 0;
         }
     }
 
@@ -390,8 +593,8 @@ struct MKL_BSR_matrix {
     double *a;
     static const unsigned s_matdes = 6;
     char matdes[ s_matdes ];
-    int size_block; /// nb of rows in a block
-    int n; /// nb of blocks in a row matrix
+    int K; /// nb of rows in a block
+    int n; /// nb of blocks in a row of matrix
     int is_one_based_indexing; /// 0 <-> faux   ,   1 <-> vrai
     /// sur certaines versions de la MKL, l'indéxation C ne marche pas donc on reste toujours en indexation Fortran
     /// si on change d'avis, les fonctions MKL seront préfixées par mkl_cspblas au lieu mkl_  ( c.f. page 204 de la doc de MKL )
