@@ -81,7 +81,8 @@ struct MKL_direct_solver {
     template<int sr, bool stored_in_upper_part_ >
     void get_factorization( Mat<double, Sym< sr, stored_in_upper_part_>, SparseLine<> > &mat, bool want_free = true, bool is_positive_definite = false ) {
         free();
-        mtype = m.init( mat );
+        m.init( mat );
+        mtype =  m.get_mtype();
         if ( is_positive_definite )
             mtype = 2;
         get_factorization_general();
