@@ -94,7 +94,8 @@ struct MKL_direct_solver {
     template<int sr, int sc>
     void get_factorization( Mat<double, Gen<sr,sc>, SparseLine<> > &mat, bool want_free = true ) {
         free();
-        mtype = m.init( mat );
+        m.init( mat );
+        mtype = m.get_mtype();
         get_factorization_general();
         if ( want_free )
             mat.free();
