@@ -291,6 +291,123 @@ void construct_matrix( Mat<T0,Str0,Sto0> &res,
 }
 */
 
+/*!
+    Objectif :
+        Cette classe sert à calculer le type de structure du produit de deux matrices.
+        
+    Les structures possibles d'une matrice sont :
+        Gen<sr, sc>
+        Sym<sr, is_upper>
+        Herm<sr, is_upper>
+        AntiSym<sr, is_upper>
+        TriUpper<sr, sc>
+        TriLower<sr, sc>
+        Diag<sr, sc>
+        Hessen<upper>
+        MatPointed<?>
+*/
+template<class Stru_A, class Stru_B >
+struct Mul_Structure_Mat {
+    typedef void T;  /// valeur par défaut qui fera échouer la compilation
+};
+
+/// spécialisations
+/// cas stables
+template< int sr_A, int sc_A, int sc_B >
+struct Mul_Structure_Mat< TriUpper<sr_A,sc_A>, TriUpper<sc_A,sc_B> > {
+    typedef TriUpper<sr_A,sc_B> T;
+};
+
+template< int sr_A, int sc_A, int sc_B >
+struct Mul_Structure_Mat< TriLower<sr_A,sc_A>, TriLower<sc_A,sc_B> > {
+    typedef TriLower<sr_A,sc_B> T;
+};
+
+template< int sr_A, int sc_A, int sc_B >
+struct Mul_Structure_Mat< Diag<sr_A,sc_A>, Diag<sc_A,sc_B> > {
+    typedef Diag<sr_A,sc_B> T;
+};
+
+/// cas avec Gen<>
+template< int sr_A, int sc_A, class Stru_B >
+struct Mul_Structure_Mat< Gen<sr_A,sc_A>, Stru_B > {
+    typedef Gen<sr_A, Stru_B::static_nb_cols > T;
+};
+
+/// Gen<> à droite : on est obligé d'étudier tous les cas . C'est risqué
+template< int sr_A, bool is_upper_A, int sc_B >
+struct Mul_Structure_Mat< Sym<sr_A,is_upper_A>, Gen<sr_A,sc_B> > {
+    typedef Gen<sr_A, sc_B > T;
+};
+
+template< int sr_A, bool is_upper_A, int sc_B >
+struct Mul_Structure_Mat< Herm<sr_A,is_upper_A>, Gen<sr_A,sc_B> > {
+    typedef Gen<sr_A, sc_B > T;
+};
+
+template< int sr_A, bool is_upper_A, int sc_B >
+struct Mul_Structure_Mat< AntiSym<sr_A,is_upper_A>, Gen<sr_A,sc_B> > {
+    typedef Gen<sr_A, sc_B > T;
+};
+
+template< int sr_A, int sc_A, int sc_B >
+struct Mul_Structure_Mat< TriUpper<sr_A,sc_A>, Gen<sc_A,sc_B> > {
+    typedef Gen<sr_A, sc_B > T;
+};
+
+template< int sr_A, int sc_A, int sc_B >
+struct Mul_Structure_Mat< TriLower<sr_A,sc_A>, Gen<sc_A,sc_B> > {
+    typedef Gen<sr_A, sc_B > T;
+};
+
+template< int sr_A, int sc_A, int sc_B >
+struct Mul_Structure_Mat< Diag<sr_A,sc_A>, Gen<sc_A,sc_B> > {
+    typedef Gen<sr_A, sc_B > T;
+};
+
+template< int sr_A, int sc_A, int sc_B >
+struct Mul_Structure_Mat< Sym<sr_A,sc_A>, Sym<sc_A,sc_B> > {
+    typedef Gen<sr_A, sc_B > T;
+};
+
+/*!
+    Objectif :
+        Cette classe sert à calculer le type de stockage du produit de deux matrices.
+        
+    Les stockages possibles d'une matrice sont :
+        Dense<Ori>
+        SparseLine<Ori>
+        SparseLU
+        SemiMorse
+        SparseUMFPACK
+        SparseCholdMod
+        SkyLine<Ori>
+        
+    où Ori est soit Col soit Row.
+    
+    On traitera les principaux cas.
+*/
+template<class Stru_A, class Stru_B >
+struct Mul_Storage_Mat {
+    typedef void T;  /// valeur par défaut qui fera échouer la compilation
+};
+
+/// spécialisations
+template<class Ori, class Sto_B >
+struct Mul_Storage_Mat< Dense<Ori>, Sto_B > {
+    typedef Dense<Ori> T;
+};
+
+template< class Ori >
+struct Mul_Storage_Mat< SparseLine<Ori>, Dense<Ori> > {
+    typedef Dense<Ori> T;
+};
+
+template< class Ori >
+struct Mul_Storage_Mat< SparseLine<Ori>, SparseLine<Ori> > {
+    typedef SparseLine<Ori> T;
+};
+
 /// conversion de A * B * C
 template<class T0,class Str0,class Sto0,class M0, class M1,  class Str1,class Sto1, class M2, class Str2,class Sto2>
 void construct_matrix( Mat<T0,Str0,Sto0> &res, const Mat< MatMultMat< Mat< MatMultMat< M0, M1 >,Str1,Sto1 >, M2 >, Str2, Sto2 > &src ) {

@@ -15,7 +15,11 @@
 namespace LMT {
 
 typedef AlternativeOnType<sizeof(long long)==sizeof(int *),int,long long>::T SizeType;
-    
+
+/*!
+    Objectif: 
+        calculer le produit scalaire 4 par 4 
+*/
 template<class T> inline T dot_aligned(const T *a,const T *b,unsigned size) {
     T res1 = T(0);
     switch ( size & 3 ) {
@@ -50,7 +54,7 @@ template<class T> inline T norm_2_p2(const T *a,unsigned size) {
     return dot_aligned_with_offset(a,a,size);
 }
 
-///
+/// produit sclaire hermitien pour les vecteurs de complexes
 template<class T,class size_type>
 inline T dot_conj(const T *a,const T *b,size_type nb_val) {
   T r1 = 0;
@@ -107,7 +111,7 @@ template<class T> inline T dot_aligned_with_offset(const T *a,const T *b, const 
 }
 
 #ifdef __SSE__
-    /** sum a[i]*b[i] assuming that a and b are aligned adresses */
+    /*! sum a[i]*b[i] assuming that a and b are aligned adresses */
     inline float dot_aligned(const float *a,const float *b,unsigned size) {
         float res = .0f;
         switch ( size & 3 ) {
@@ -144,13 +148,13 @@ template<class T> inline T dot_aligned_with_offset(const T *a,const T *b, const 
         resv1 = _mm_add_ps(resv1, resv4 );
         return res + ((const float *)&resv1)[0] + ((const float *)&resv1)[1] + ((const float *)&resv1)[2] + ((const float *)&resv1)[3];
     }
-    /** Specialization (because of disappointment about compilers) \relates Vec */
+    /*! Specialization (because of disappointment about compilers) \relates Vec */
     inline float dot(const Vec<float,-1> &p1,const Vec<float,-1> &p2) { VECASSERTSAMESIZE(p1,p2); return dot_aligned(p1.ptr(),p2.ptr(),p1.size()); }
-    /** Specialization (because of disappointment about compilers) \relates Vec */
+    /*! Specialization (because of disappointment about compilers) \relates Vec */
     inline float dot(const Vec<Ref<float>,-1> &p1,const Vec<float,-1> &p2) { VECASSERTSAMESIZE(p1,p2); return dot_aligned(p1.ptr(),p2.ptr(),p1.size()); }
 #endif
 #ifdef __SSE2__
-    /** sum a[i]*b[i] assuming that a and b are aligned adresses */
+    /*! sum a[i]*b[i] assuming that a and b are aligned adresses */
     inline double dot_aligned(const double *a,const double *b,int size) {
         __v2df resv1 = _mm_set1_pd(.0), resv2 = _mm_set1_pd(.0), resv3 = resv1, resv4 = resv1;
         int i;
@@ -170,7 +174,7 @@ template<class T> inline T dot_aligned_with_offset(const T *a,const T *b, const 
             return a[ size-1 ] * b[ size-1 ] + res;
         return res;
     }
-    /** Specialization (because of disappointment about compilers) \relates Vec */
+    /*! Specialization (because of disappointment about compilers) \relates Vec */
     //inline double dot(const Vec<double,-1> &p1,const Vec<double,-1> &p2) { VECASSERTSAMESIZE(p1,p2); return dot_aligned(p1.ptr(),p2.ptr(),p1.size()); }
 #endif
 

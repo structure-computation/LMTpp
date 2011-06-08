@@ -6,16 +6,11 @@ using namespace LMT;
 
 Fonction pour calculer la matrice des masses elementaires pour un element
 Elle prend comme arguments:
-<<<<<<< HEAD
-    * l'element (const),
-    * la matrice des masses (attention - elle est reinitialisee a zero au debut),
-    * la dimension du probleme
-=======
     * e l'element de type \a Element ,
     * mass_mat la matrice des masses (attention - elle est reinitialisee a zero au debut),
     * dim la dimension du probleme
->>>>>>> bd251b6beaa3acc621293c64018c6d68542bb08e
-On suppose que tous les ddl sont interpoles avec les memes fonctions de forme
+
+On suppose que tous les ddl sont interpolés avec les mêmes fonctions de forme.
 
 \keyword Maillage/Elément
 */

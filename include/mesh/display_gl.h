@@ -89,6 +89,8 @@ namespace LMT_PRIVATE {
 }
 
 /*!
+    utilisation d' OpenGl pour afficher un maillage
+
 \keyword Visualisation/3D
 */
 template<class TM>

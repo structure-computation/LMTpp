@@ -220,6 +220,9 @@ Update(Vector &x, int k, Matrix &h, Vector &s, VectorVector v)
 }
 
 /*!
+    Objectif :
+        résoudre un système linéaire par la méthode gmres.
+
     \keyword Matrice/Solver
     \keyword Mathématiques/Algèbre linéaire/Système
 
