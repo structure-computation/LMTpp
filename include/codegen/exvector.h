@@ -131,7 +131,18 @@ Ex norm(const ExVector &a,Ex::T additional_val=0.0);
 Ex norm_2(const ExVector &a,Ex::T additional_val=0.0);
 /// dot( a, a )
 inline Ex norm_2_squared( const ExVector &a ) { return dot( a, a ); }
-/// defined only in 3D
+
+/*!
+\generic_comment vect_prod
+    Objectif :
+        calculer le produit vectoriel de deux vecteurs.
+*/
+
+/*!
+Objectif :
+    calculer le produit vectoriel de deux vecteurs.
+ defined only in 3D
+*/
 ExVector vect_prod(const ExVector &v1,const ExVector &v2);
 
 std::ostream &operator<<(std::ostream &os,const Codegen::ExVector &vec);

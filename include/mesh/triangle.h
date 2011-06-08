@@ -297,7 +297,7 @@ T var_inter_insideness( const Triangle &e, const TV &var_inter ) {
         la fonction renvoie vrai si pos est dans l'élément défini par les noeuds "sommets" et faux sinon. Pour les éléments linéaires ( i.e. d'ordre 1 ) cette fonction est équivalente à \a is_inside () mais pour pour des éléments non linéaires, ces fonctions peuvent être différentes. Par exemple pour l'élément non linéaire \a Triangle_6 la fonction renvoie vrai si pos est contenu dans le triangle défini par les sommets de \a Triangle_6 ( i.e. sans tenir compte des noeuds sur les côtés ).
         
     paramètre :
-        1er paramètre est le type d'élément
+        le premier paramètre est le type d'élément
         pos_nodes : le position des sommets dans le plan de l'élément
         pos : la position du point dans le plan
 
