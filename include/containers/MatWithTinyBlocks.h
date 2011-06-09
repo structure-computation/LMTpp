@@ -1091,7 +1091,7 @@ std::ostream &operator<<( std::ostream &os, const MatWithTinyBlocks<T,TO> &m ) {
     return os;
 }
 
-/*
+/*!
  mp -> precond
  A -> original matrix
  b -> sollicitation

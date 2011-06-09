@@ -16,16 +16,16 @@ using namespace LMT;
     On l'utilise comme \a LDL_solver :
     \code C/C++
         Mat< double, Sym<>, SparseLine<> > A;
-        Vec< double > b1, b2, b3;
+        Vec< double > b1, b2, b3, x;
         // ensuite on construit la matrice A et les seconds membres b1,b2, ...
         MUMPS_solver mumps;
         
         mumps.get_factorization( A ); // on effectue la factorisation et le résultat est stocké dans mumps
         
         /// résolution de l'équation A x = b1 
-        mumps.solve( b1 ); /// b1 contient maintenant la solution
+        x = mumps.solve( b1 ); /// x contient maintenant la solution
         
-        mumps.solve( b2 ); /// b2 contient maintenant la solution
+        x = mumps.solve( b2 ); 
          
     Pour la seconde résolution, on a bien-sûr réutilisé la factorisation. 
         

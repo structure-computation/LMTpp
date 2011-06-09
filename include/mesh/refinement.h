@@ -244,10 +244,7 @@ namespace LMTPRIVATE {
             
             /// détermination des arêtes coupées et calcule de la longueur des arêtes
             EA* const * ppea = m_parent->get_children_of_EA( ea, Number<2>() );
-            //PRINT( ppea );
-            //PRINT( nb_children );
             for( unsigned i = 0; i < nb_children; ++i ) {
-                //PRINT( i ); PRINT( ppea[ i ] ); PRINT( ppea[ i ]->node_virtual( 0 )->pos );
                 nn[ i ] = m_parent->template sub_mesh<2>().elem_list.get_data( next.next.cut, *( ppea[ i ] ) );
                 ll[ i ] = length( m_parent->get_children_of_EA( ea, Number<2>() )[ i ]->node_virtual( 1 )->pos - ppea[ i ]->node_virtual( 0 )->pos );
                 if ( ( nn[ i ] ) and ( ll[ i ] > max_l_cut ) )
