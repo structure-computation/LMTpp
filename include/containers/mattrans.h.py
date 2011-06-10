@@ -12,8 +12,8 @@ struct MatTrans {};
 
 template<class TM,bool const_tm> struct IsMatOp<MatTrans<TM,const_tm> > { typedef int T; };
 
-template<class TM,bool const_tm,class Structure,class Storage>
-class Mat<MatTrans<TM,const_tm>,Structure,Storage,int> {
+template<class TM,bool const_tm,class _Structure,class _Storage>
+class Mat<MatTrans<TM,const_tm>,_Structure,_Storage,int> {
 public:
     typedef typename TM::T T;
     typedef _Structure Structure;
