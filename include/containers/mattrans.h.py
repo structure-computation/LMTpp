@@ -4,7 +4,7 @@ from vecgenhelp import *
 print """
 namespace LMT {
 
-/**
+/*!
     mat * vec
 */
 template<class TM,bool const_tm>

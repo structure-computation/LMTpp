@@ -33,6 +33,8 @@ public:
     static const int static_nb_vec = ( col_oriented ? static_rows : static_cols );
     static const unsigned alignement = ( static_nb_vec>=0 ? 1 : SimdSize<TT>::res );
     typedef TT T;
+    typedef STR Structure;
+    typedef SkyLine<O> Storage;
 
     
     Mat() {}

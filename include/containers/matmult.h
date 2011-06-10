@@ -1,7 +1,7 @@
 
 namespace LMT {
 
-/*!
+/**
     mat * vec
 */
 template<class TM,class TV>
@@ -92,7 +92,7 @@ typename ReturnTypeMatMultVec<Mat<T,Str,Sto,IO>,Vec<T2,s2,IO2> >::T operator*(co
 
 
 
-/*!
+/**
     mat * vec
 */
 template<class TM1,class TM2>
@@ -100,11 +100,8 @@ struct MatMultMat {};
 
 template<class TM1,class TM2> struct IsMatOp<MatMultMat<TM1,TM2> > { typedef int T; };
 
-template<class _TM1,class _TM2,class Structure,class Storage>
-class Mat<MatMultMat<_TM1,_TM2>,Structure,Storage,int> {
-    typedef _TM1 TM1;
-    typedef _TM2 TM2;
-
+template<class TM1,class TM2,class Structure,class Storage>
+class Mat<MatMultMat<TM1,TM2>,Structure,Storage,int> {
 public:
     typedef typename TypePromote<Multiplies,typename TM1::T,typename TM2::T>::T T;
 

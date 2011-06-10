@@ -58,6 +58,8 @@ public:
     typedef Vec<TT,static_data_size> TV;
     typedef typename TV::template SubType<0>::T T;
     static const unsigned alignement = ( fixed_size ? 1 : SimdSize<T>::res );
+    typedef STRUCTURE Structure;
+    typedef STORAGE Storage;
 
     #ifdef MATLAB_MEX_FILE
         Mat(const mxArray *variable) throw(std::runtime_error) {

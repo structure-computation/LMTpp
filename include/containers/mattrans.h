@@ -1,7 +1,7 @@
 
 namespace LMT {
 
-/**
+/*!
     mat * vec
 */
 template<class TM,bool const_tm>
@@ -9,10 +9,13 @@ struct MatTrans {};
 
 template<class TM,bool const_tm> struct IsMatOp<MatTrans<TM,const_tm> > { typedef int T; };
 
-template<class TM,bool const_tm,class Structure,class Storage>
-class Mat<MatTrans<TM,const_tm>,Structure,Storage,int> {
+template<class TM,bool const_tm,class _Structure,class _Storage>
+class Mat<MatTrans<TM,const_tm>,_Structure,_Storage,int> {
 public:
     typedef typename TM::T T;
+    typedef _Structure Structure;
+    typedef _Storage Storage;
+    
     
     unsigned nb_rows() const { return ptr.val->nb_cols(); }
     unsigned nb_cols() const { return ptr.val->nb_rows(); }
