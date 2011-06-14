@@ -39,6 +39,8 @@ public:
     typedef Vec<TT,static_data_size> TV;
     typedef typename TV::template SubType<0>::T T;
     static const unsigned alignement = ( fixed_size ? 1 : SimdSize<T>::res );
+    typedef Gen<sr,sc> Structure;
+    typedef Dense<Col> Storage;
 
     #ifdef MATLAB_MEX_FILE
         Mat(const mxArray *variable) throw(std::runtime_error) {
@@ -162,22 +164,7 @@ public:
     }
 
     void resize(unsigned nr) { resize( nr, nr ); }
-    void resize(unsigned nr,unsigned nc) { 
-        unsigned mc = min(nc,this->nc.val); 
-        unsigned mr = min(nr,this->nr.val); 
-        TV od = data; 
-        unsigned o_r = real_nc.val; 
-        unsigned rc=nc+alignement-1; 
-        rc-=rc % alignement; 
-        real_nc.set(rc); 
-        real_nr.set(nr); 
-        data.resize(real_nr.val*real_nc.val); 
-        for(unsigned i=0;i<mr;++i) 
-            for(unsigned j=0;j<mc;++j) 
-                data[real_nc.val*i+j] = od[o_r*i+j]; 
-        this->nr.set(nr);
-        this->nc.set(nc); 
-    }
+    void resize(unsigned nr,unsigned nc) { unsigned mc = min(nc,this->nc.val); unsigned mr = min(nr,this->nr.val); TV od = data; unsigned o_r = real_nc.val; unsigned rc=nc+alignement-1; rc-=rc % alignement; real_nc.set(rc); real_nr.set(nr); data.resize(real_nr.val*real_nc.val); for(unsigned i=0;i<mr;++i) for(unsigned j=0;j<mc;++j) data[real_nc.val*i+j] = od[o_r*i+j]; this->nr.set(nr); this->nc.set(nc); }
 
     typedef Vec<VecSubMat<Mat,false,ExtractDiag>,MIN(sr,sc)> RetDiag;
     typedef Vec<VecSubMat<Mat,true ,ExtractDiag>,MIN(sr,sc)> RetDiagConst;
@@ -255,6 +242,8 @@ public:
     typedef Vec<TT,static_data_size> TV;
     typedef typename TV::template SubType<0>::T T;
     static const unsigned alignement = ( fixed_size ? 1 : SimdSize<T>::res );
+    typedef Gen<sr,sc> Structure;
+    typedef Dense<Row> Storage;
 
     #ifdef MATLAB_MEX_FILE
         Mat(const mxArray *variable) throw(std::runtime_error) {
@@ -456,6 +445,8 @@ public:
     typedef Vec<TT,static_data_size> TV;
     typedef typename TV::template SubType<0>::T T;
     static const unsigned alignement = ( fixed_size ? 1 : SimdSize<T>::res );
+    typedef Sym<sr,0> Structure;
+    typedef Dense<Col> Storage;
 
     #ifdef MATLAB_MEX_FILE
         Mat(const mxArray *variable) throw(std::runtime_error) {
@@ -688,6 +679,8 @@ public:
     typedef Vec<TT,static_data_size> TV;
     typedef typename TV::template SubType<0>::T T;
     static const unsigned alignement = ( fixed_size ? 1 : SimdSize<T>::res );
+    typedef Sym<sr,1> Structure;
+    typedef Dense<Col> Storage;
 
     #ifdef MATLAB_MEX_FILE
         Mat(const mxArray *variable) throw(std::runtime_error) {
@@ -925,6 +918,8 @@ public:
     typedef Vec<TT,static_data_size> TV;
     typedef typename TV::template SubType<0>::T T;
     static const unsigned alignement = ( fixed_size ? 1 : SimdSize<T>::res );
+    typedef Sym<sr,0> Structure;
+    typedef Dense<Row> Storage;
 
     #ifdef MATLAB_MEX_FILE
         Mat(const mxArray *variable) throw(std::runtime_error) {
@@ -1162,6 +1157,8 @@ public:
     typedef Vec<TT,static_data_size> TV;
     typedef typename TV::template SubType<0>::T T;
     static const unsigned alignement = ( fixed_size ? 1 : SimdSize<T>::res );
+    typedef Sym<sr,1> Structure;
+    typedef Dense<Row> Storage;
 
     #ifdef MATLAB_MEX_FILE
         Mat(const mxArray *variable) throw(std::runtime_error) {
@@ -1394,6 +1391,8 @@ public:
     typedef Vec<TT,static_data_size> TV;
     typedef typename TV::template SubType<0>::T T;
     static const unsigned alignement = ( fixed_size ? 1 : SimdSize<T>::res );
+    typedef Herm<sr,0> Structure;
+    typedef Dense<Col> Storage;
 
     #ifdef MATLAB_MEX_FILE
         Mat(const mxArray *variable) throw(std::runtime_error) {
@@ -1626,6 +1625,8 @@ public:
     typedef Vec<TT,static_data_size> TV;
     typedef typename TV::template SubType<0>::T T;
     static const unsigned alignement = ( fixed_size ? 1 : SimdSize<T>::res );
+    typedef Herm<sr,1> Structure;
+    typedef Dense<Col> Storage;
 
     #ifdef MATLAB_MEX_FILE
         Mat(const mxArray *variable) throw(std::runtime_error) {
@@ -1863,6 +1864,8 @@ public:
     typedef Vec<TT,static_data_size> TV;
     typedef typename TV::template SubType<0>::T T;
     static const unsigned alignement = ( fixed_size ? 1 : SimdSize<T>::res );
+    typedef Herm<sr,0> Structure;
+    typedef Dense<Row> Storage;
 
     #ifdef MATLAB_MEX_FILE
         Mat(const mxArray *variable) throw(std::runtime_error) {
@@ -2100,6 +2103,8 @@ public:
     typedef Vec<TT,static_data_size> TV;
     typedef typename TV::template SubType<0>::T T;
     static const unsigned alignement = ( fixed_size ? 1 : SimdSize<T>::res );
+    typedef Herm<sr,1> Structure;
+    typedef Dense<Row> Storage;
 
     #ifdef MATLAB_MEX_FILE
         Mat(const mxArray *variable) throw(std::runtime_error) {
@@ -2332,6 +2337,8 @@ public:
     typedef Vec<TT,static_data_size> TV;
     typedef typename TV::template SubType<0>::T T;
     static const unsigned alignement = ( fixed_size ? 1 : SimdSize<T>::res );
+    typedef AntiSym<sr,0> Structure;
+    typedef Dense<Col> Storage;
 
     #ifdef MATLAB_MEX_FILE
         Mat(const mxArray *variable) throw(std::runtime_error) {
@@ -2564,6 +2571,8 @@ public:
     typedef Vec<TT,static_data_size> TV;
     typedef typename TV::template SubType<0>::T T;
     static const unsigned alignement = ( fixed_size ? 1 : SimdSize<T>::res );
+    typedef AntiSym<sr,1> Structure;
+    typedef Dense<Col> Storage;
 
     #ifdef MATLAB_MEX_FILE
         Mat(const mxArray *variable) throw(std::runtime_error) {
@@ -2801,6 +2810,8 @@ public:
     typedef Vec<TT,static_data_size> TV;
     typedef typename TV::template SubType<0>::T T;
     static const unsigned alignement = ( fixed_size ? 1 : SimdSize<T>::res );
+    typedef AntiSym<sr,0> Structure;
+    typedef Dense<Row> Storage;
 
     #ifdef MATLAB_MEX_FILE
         Mat(const mxArray *variable) throw(std::runtime_error) {
@@ -3038,6 +3049,8 @@ public:
     typedef Vec<TT,static_data_size> TV;
     typedef typename TV::template SubType<0>::T T;
     static const unsigned alignement = ( fixed_size ? 1 : SimdSize<T>::res );
+    typedef AntiSym<sr,1> Structure;
+    typedef Dense<Row> Storage;
 
     #ifdef MATLAB_MEX_FILE
         Mat(const mxArray *variable) throw(std::runtime_error) {
@@ -3270,6 +3283,8 @@ public:
     typedef Vec<TT,static_data_size> TV;
     typedef typename TV::template SubType<0>::T T;
     static const unsigned alignement = ( fixed_size ? 1 : SimdSize<T>::res );
+    typedef TriUpper<sr,sc> Structure;
+    typedef Dense<Col> Storage;
 
     #ifdef MATLAB_MEX_FILE
         Mat(const mxArray *variable) throw(std::runtime_error) {
@@ -3507,6 +3522,8 @@ public:
     typedef Vec<TT,static_data_size> TV;
     typedef typename TV::template SubType<0>::T T;
     static const unsigned alignement = ( fixed_size ? 1 : SimdSize<T>::res );
+    typedef TriUpper<sr,sc> Structure;
+    typedef Dense<Row> Storage;
 
     #ifdef MATLAB_MEX_FILE
         Mat(const mxArray *variable) throw(std::runtime_error) {
@@ -3739,6 +3756,8 @@ public:
     typedef Vec<TT,static_data_size> TV;
     typedef typename TV::template SubType<0>::T T;
     static const unsigned alignement = ( fixed_size ? 1 : SimdSize<T>::res );
+    typedef TriLower<sr,sc> Structure;
+    typedef Dense<Col> Storage;
 
     #ifdef MATLAB_MEX_FILE
         Mat(const mxArray *variable) throw(std::runtime_error) {
@@ -3971,6 +3990,8 @@ public:
     typedef Vec<TT,static_data_size> TV;
     typedef typename TV::template SubType<0>::T T;
     static const unsigned alignement = ( fixed_size ? 1 : SimdSize<T>::res );
+    typedef TriLower<sr,sc> Structure;
+    typedef Dense<Row> Storage;
 
     #ifdef MATLAB_MEX_FILE
         Mat(const mxArray *variable) throw(std::runtime_error) {
@@ -4208,6 +4229,8 @@ public:
     typedef Vec<TT,static_data_size> TV;
     typedef typename TV::template SubType<0>::T T;
     static const unsigned alignement = ( fixed_size ? 1 : SimdSize<T>::res );
+    typedef Diag<sr,sc> Structure;
+    typedef Dense<Col> Storage;
 
     #ifdef MATLAB_MEX_FILE
         Mat(const mxArray *variable) throw(std::runtime_error) {
@@ -4440,6 +4463,8 @@ public:
     typedef Vec<TT,static_data_size> TV;
     typedef typename TV::template SubType<0>::T T;
     static const unsigned alignement = ( fixed_size ? 1 : SimdSize<T>::res );
+    typedef Diag<sr,sc> Structure;
+    typedef Dense<Row> Storage;
 
     #ifdef MATLAB_MEX_FILE
         Mat(const mxArray *variable) throw(std::runtime_error) {

@@ -18,6 +18,9 @@
 
 namespace LMT {
 
+/*!
+\internal
+*/
 template< bool binary >
 struct Write_ply_buffer {
     Write_ply_buffer( ostream & os_ ) : os( os_ ) {} 
@@ -39,6 +42,9 @@ struct Write_ply_buffer {
     ostream &os;
 };
 
+/*!
+
+*/
 template<bool binary,class TM>
 void write_ply( std::ostream &os, const TM &m ) {
     typedef typename TM::TNode::T T;
@@ -80,6 +86,25 @@ void write_ply( std::ostream &os, const TM &m ) {
     Write_ply_buffer<binary> wpb( os );
     apply( m.skin.elem_list, wpb ); 
 }
+
+/*!
+\generic_comment write_ply
+    Objectif :
+        Exporter la peau d'un maillage au format ply
+        
+    Paramètre :
+        * filename est le nom du fichier ( e.g. example.ply )
+        * m est un maillage 2D ou 3D. Si le maillage est 2D, il sera défini dans le plan xy.
+        
+    Remarque  : le format ply pourrait contenir toutes les propriétés du maillage.
+    Remarque2 : le format binaire ne fut pas testé car blender ne le comprend pas. D'ailleurs le lecteur de blender ne connaît pas non plus les quad...
+       
+    Exemple de code :
+    \code C/C++
+        write_ply<false>( "test.ply", m ); /// sauvegarde en ascii
+        write_ply<true>( "test.ply", m ); /// sauvegarde en binaire
+
+*/
 
 /*!
     Objectif :

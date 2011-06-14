@@ -25,7 +25,8 @@ public:
     static const int static_rows = sr;
     static const int static_cols = sc;
     typedef double T;
-
+    typedef Gen<> Structure;
+    typedef SparseUMFPACK Storage;
     ///
     Mat() {
         Numeric = NULL;
