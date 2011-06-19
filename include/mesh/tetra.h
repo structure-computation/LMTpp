@@ -312,20 +312,81 @@ bool divide_element(Element<Tetra,TN,TNG,TD,NET> &e,TM &m,TNG **nodes) {
         return false;
     if ( index==63 ) {
         TNG *node_6 = m.add_node( center(e) );
-        DM::copy( e, *m.add_element( Tetra(), TN(), e.node(0), nodes[0], nodes[1], nodes[2] ) );
-        DM::copy( e, *m.add_element( Tetra(), TN(), e.node(1), nodes[0], nodes[3], nodes[4] ) );
-        DM::copy( e, *m.add_element( Tetra(), TN(), e.node(2), nodes[1], nodes[3], nodes[5] ) );
-        DM::copy( e, *m.add_element( Tetra(), TN(), e.node(3), nodes[2], nodes[4], nodes[5] ) );
+        TNG *nn[4];
+        nn[ 0 ] = e.node(0);
+        nn[ 1 ] = nodes[0];
+        nn[ 2 ] = nodes[1];
+        nn[ 3 ] = nodes[2];
+        permutation_if_jac_neg ( Tetra(), nn );
+        DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+        nn[ 0 ] = e.node(1);
+        nn[ 1 ] = nodes[0];
+        nn[ 2 ] = nodes[3];
+        nn[ 3 ] = nodes[4];
+        permutation_if_jac_neg ( Tetra(), nn );
+        DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+        nn[ 0 ] = e.node(2);
+        nn[ 1 ] = nodes[1];
+        nn[ 2 ] = nodes[3];
+        nn[ 3 ] = nodes[5];
+        permutation_if_jac_neg ( Tetra(), nn );
+        DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+        nn[ 0 ] = e.node(3);
+        nn[ 1 ] = nodes[2];
+        nn[ 2 ] = nodes[4];
+        nn[ 3 ] = nodes[5];
+        permutation_if_jac_neg ( Tetra(), nn );
+        DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
         
-        DM::copy( e, *m.add_element( Tetra(), TN(), nodes[0], nodes[1], nodes[2], node_6 ) );
-        DM::copy( e, *m.add_element( Tetra(), TN(), nodes[0], nodes[3], nodes[4], node_6 ) );
-        DM::copy( e, *m.add_element( Tetra(), TN(), nodes[1], nodes[3], nodes[5], node_6 ) );
-        DM::copy( e, *m.add_element( Tetra(), TN(), nodes[2], nodes[4], nodes[5], node_6 ) );
+        nn[ 0 ] = nodes[0];
+        nn[ 1 ] = nodes[1];
+        nn[ 2 ] = nodes[2];
+        nn[ 3 ] = node_6;
+        permutation_if_jac_neg ( Tetra(), nn );
+        DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+        nn[ 0 ] = nodes[0];
+        nn[ 1 ] = nodes[3];
+        nn[ 2 ] = nodes[4];
+        nn[ 3 ] = node_6;
+        permutation_if_jac_neg ( Tetra(), nn );
+        DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+        nn[ 0 ] = nodes[1];
+        nn[ 1 ] = nodes[3];
+        nn[ 2 ] = nodes[5];
+        nn[ 3 ] = node_6;
+        permutation_if_jac_neg ( Tetra(), nn );
+        DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+        nn[ 0 ] = nodes[2];
+        nn[ 1 ] = nodes[4];
+        nn[ 2 ] = nodes[5];
+        nn[ 3 ] = node_6;
+        permutation_if_jac_neg ( Tetra(), nn );
+        DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
         
-        DM::copy( e, *m.add_element( Tetra(), TN(), nodes[0], nodes[2], nodes[4], node_6 ) );
-        DM::copy( e, *m.add_element( Tetra(), TN(), nodes[1], nodes[2], nodes[5], node_6 ) );
-        DM::copy( e, *m.add_element( Tetra(), TN(), nodes[3], nodes[4], nodes[5], node_6 ) );
-        DM::copy( e, *m.add_element( Tetra(), TN(), nodes[0], nodes[1], nodes[3], node_6 ) );
+        nn[ 0 ] = nodes[0];
+        nn[ 1 ] = nodes[2];
+        nn[ 2 ] = nodes[4];
+        nn[ 3 ] = node_6;
+        permutation_if_jac_neg ( Tetra(), nn );
+        DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+        nn[ 0 ] = nodes[1];
+        nn[ 1 ] = nodes[2];
+        nn[ 2 ] = nodes[5];
+        nn[ 3 ] = node_6;
+        permutation_if_jac_neg ( Tetra(), nn );
+        DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+        nn[ 0 ] = nodes[3];
+        nn[ 1 ] = nodes[4];
+        nn[ 2 ] = nodes[5];
+        nn[ 3 ] = node_6;
+        permutation_if_jac_neg ( Tetra(), nn );
+        DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+        nn[ 0 ] = nodes[0];
+        nn[ 1 ] = nodes[1];
+        nn[ 2 ] = nodes[3];
+        nn[ 3 ] = node_6;
+        permutation_if_jac_neg ( Tetra(), nn );
+        DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
     }
     else {
         for(const int *a = div_tetra + index * 32; *a!=-1; ++a ) {
@@ -335,6 +396,7 @@ bool divide_element(Element<Tetra,TN,TNG,TD,NET> &e,TM &m,TNG **nodes) {
                     nn[i] = e.node( valid_tetra[*a * 4 + i] );
                 else
                     nn[i] = nodes[ valid_tetra[*a * 4 + i] - 4 ];
+            permutation_if_jac_neg ( Tetra(), nn );
             DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
         }
     }
