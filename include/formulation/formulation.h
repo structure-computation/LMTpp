@@ -523,10 +523,10 @@ private:
 
         typedef CaracFormulationForElement<NameFormulation,TE,NameVariant,ScalarType> CFE;
         if ( CFE::nb_elementary_unknowns )
-            assert(0);
+            assert( 0 );
 
         if ( nb_global_unknowns )
-            assert(0);
+            assert( 0 );
     };
 
 public:
@@ -2119,6 +2119,15 @@ public:
     virtual void add_elem_contribution_to_residual( Vec<ScalarType> &res, const void *elem ) const {
         add_elem_contribution_to_residual( res, reinterpret_cast<const typename TM::EA *>( elem ) );
     }
+
+    virtual Vec<ScalarType> get_residual() const {
+        Vec<ScalarType> res;
+        res.resize( vectors[ 0 ].size() );
+        res.set( 0 );
+        apply( m->elem_list, AssembleResidual(), res, *this );
+        return res;
+    }
+
 
     TMAT0 &mat() { return matrices( Number<0>() ); }
 

@@ -362,7 +362,7 @@ struct MatWithTinyBlocks<T,Sym<3> > {
             r[i].resize( nb_rows_, 0 );
         //
         Mul m; m.nb_thread = nb_thread;
-        apply_mt( range(nb_thread), nb_thread, m, *this, v, r );
+        apply_mt( range( nb_thread ), nb_thread, m, *this, v, r );
         //
         for(int n=0;n<nb_rows_;++n) {
             T z = r[0][n];

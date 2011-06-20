@@ -198,6 +198,7 @@ public:
             * <strong> elem </strong> pointeur sur l'élément dont on veut obtenir la contribution.
     */
     virtual void add_elem_contribution_to_residual( Vec<ScalarType> &res, const void *elem ) const = 0;
+    virtual Vec<ScalarType> get_residual() const = 0;
 
     #ifdef WITH_UMFPACK
     virtual void get_mat( Mat<ScalarType,Gen<>,SparseUMFPACK> *&mat ) = 0; ///
