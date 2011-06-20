@@ -162,7 +162,7 @@ namespace LMTPRIVATE {
                     if ( nn[ i ] == NULL )
                         append_node_cut_at_bar( m_parent->template sub_mesh<1>(), 
                                                 *m_parent, 
-                                                next.cut, 
+                                                next.next.cut, 
                                                 m_parent->get_children_of( e, Number<2>() )[ i ], 
                                                 .5, 
                                                 .5 );
@@ -243,9 +243,10 @@ namespace LMTPRIVATE {
             T max_l_cut = 0;
             
             /// détermination des arêtes coupées et calcule de la longueur des arêtes
+            EA* const * ppea = m_parent->get_children_of_EA( ea, Number<2>() );
             for( unsigned i = 0; i < nb_children; ++i ) {
-                nn[ i ] = m_parent->template sub_mesh<2>().elem_list.get_data( next.cut, *m_parent->get_children_of_EA( ea, Number<2>() )[ i ] );
-                ll[ i ] = length( m_parent->get_children_of_EA( ea, Number<2>() )[ i ]->node_virtual( 1 )->pos - m_parent->get_children_of_EA( ea, Number<2>() )[ i ]->node_virtual( 0 )->pos );
+                nn[ i ] = m_parent->template sub_mesh<2>().elem_list.get_data( next.next.cut, *( ppea[ i ] ) );
+                ll[ i ] = length( m_parent->get_children_of_EA( ea, Number<2>() )[ i ]->node_virtual( 1 )->pos - ppea[ i ]->node_virtual( 0 )->pos );
                 if ( ( nn[ i ] ) and ( ll[ i ] > max_l_cut ) )
                     max_l_cut = ll[ i ];
             }
@@ -260,7 +261,7 @@ namespace LMTPRIVATE {
                     if ( ( nn[ i ] == NULL ) and ( ll[ i ] >= max_l_cut ) ) {
                         child = m_parent->get_children_of_EA( ea, Number<2>() )[ i ];
                         
-                        append_node_cut_at_bar( m_parent->template sub_mesh<2>(), *m_parent, next.cut, child, .5, .5 );
+                        append_node_cut_at_bar( m_parent->template sub_mesh<2>(), *m_parent, next.next.cut, child, .5, .5 );
                     }
                     
                     if ( child ) { /// extension aux voisins

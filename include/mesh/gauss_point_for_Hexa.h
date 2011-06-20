@@ -19,7 +19,7 @@ inline void gauss_points( const Hexa &elem, unsigned order, Vec<double> &poids, 
     else {
         Vec<double> pond;
         Vec< Vec<double, Bar::nb_var_inter > > val;
-        unsigned order_Bar = ceil(order,Hexa::nb_var_inter)/Hexa::nb_var_inter;
+        unsigned order_Bar = order; // ceil(order,Hexa::nb_var_inter)/Hexa::nb_var_inter;
         gauss_points( Bar(), order_Bar, pond, val );
         unsigned nb_pts_gauss = pow( pond.size(), Hexa::nb_var_inter );
         poids.resize( nb_pts_gauss );

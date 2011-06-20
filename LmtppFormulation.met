@@ -931,7 +931,10 @@ class LmtppFormulation[ dim ] inherits LmtppFormulationAncestor
 
     def make_matrices( e , integration_type = "gauss_num" )
         residual := Op( formulation( e ) )
-        
+        e.assume_const_jac = true
+        residual_const_jac := Op( formulation( e ) )
+        e.assume_const_jac = hyp_const_jac
+
         # time integration
         if max_nb_der
             if use_theta_method
@@ -941,12 +944,16 @@ class LmtppFormulation[ dim ] inherits LmtppFormulationAncestor
         
         # volumic part
         volumic_part := residual.diff( dV )
+        degre_poly := volumic_part.poly_deg( e.var_inter )
+        if degre_poly < 0
+            volumic_part_const_jac := residual_const_jac.diff( dV )
+            degre_poly = volumic_part_const_jac.poly_deg( e.var_inter )
         if integration_type == "bestial_num"
             volumic_part = e.bestial_num_integration( volumic_part , mul_by_jac = true, div_ = 6 )
         else if integration_type == "gauss_num"
-            volumic_part = e.gauss_num_integration( volumic_part, order_diff = 2 * e.order_interpolation[ 0 ] )
+            volumic_part = e.gauss_num_integration( volumic_part, order_diff = degre_poly )
         else if integration_type == "formal"
-            volumic_part = e.integration( volumic_part, order_diff = 2 * e.order_interpolation[ 0 ] )
+            volumic_part = e.integration( volumic_part, order_diff = degre_poly )
         volumic_part += residual.diff( dE )
         _compute_KF_from_residual( volumic_part, K_dV, F_dV, unk_expr_syms.map( _0->sym ), unk_test_syms.map( _0->sym ) )
         
@@ -965,12 +972,13 @@ class LmtppFormulation[ dim ] inherits LmtppFormulationAncestor
         for pc_, num_child in pe_children, 0...
             pc := child_cast( pc_ )
             loc_surf_part := surf_part.subs( e.var_inter, e.var_inter_from_child_var_inter( sub_nvi = 1, num_child = num_child, child_var_inter = pc->var_inter ) )
+            degre_poly_child := loc_surf_part.poly_deg( pc->var_inter )
             if integration_type == "bestial_num"
                 loc_surf_part = pc->bestial_num_integration( loc_surf_part , mul_by_jac = true, div_ = 6 )
             else if integration_type == "gauss_num"
-                loc_surf_part = pc->gauss_num_integration( loc_surf_part, order_diff = 2 * pc->order_interpolation[ 0 ] )
+                loc_surf_part = pc->gauss_num_integration( loc_surf_part, order_diff = degre_poly_child )
             else if integration_type == "formal"
-                loc_surf_part = pc->integration( loc_surf_part, order_diff = 2 * pc->order_interpolation[ 0 ] )
+                loc_surf_part = pc->integration( loc_surf_part, order_diff = degre_poly_child )
             _compute_KF_from_residual( loc_surf_part, K_dS[ num_child ], F_dS[ num_child ],
                 unk_expr_syms.map( _0->sym ), 
                 unk_test_syms.map( _0->sym )
@@ -979,18 +987,32 @@ class LmtppFormulation[ dim ] inherits LmtppFormulationAncestor
         
     def make_matrices_enriched( e )
         residual := Op( formulation( e ) )
+        e.assume_const_jac = true
+        residual_const_jac := Op( formulation( e ) )
+        e.assume_const_jac = hyp_const_jac
         
         # volumic part
         volumic_part := residual.diff( dV_enr )
-        volumic_part = e.eval_on_gauss_pts( volumic_part, mul_by_jac = true, order_diff = 2 * e.order_interpolation[ 0 ] )
+        degre_poly := volumic_part.poly_deg( e.var_inter )
+        if degre_poly < 0
+            volumic_part_const_jac := residual_const_jac.diff( dV )
+            degre_poly = volumic_part_const_jac.poly_deg( e.var_inter )
+        volumic_part = e.eval_on_gauss_pts( volumic_part, mul_by_jac = true, order_diff = degre_poly )
         _compute_KF_from_residual( volumic_part, K_dV_enr, F_dV_enr, unk_expr_syms.map( _0->sym ), unk_test_syms.map( _0->sym ) )
         
     def make_matrices_enriched_corr( e )
         residual := Op( formulation( e ) )
+        e.assume_const_jac = true
+        residual_const_jac := Op( formulation( e ) )
+        e.assume_const_jac = hyp_const_jac
         
         # volumic part
         volumic_part := residual.diff( dV_corr )
-        volumic_part = e.eval_on_gauss_pts( volumic_part, mul_by_jac = true, order_diff = 2 * e.order_interpolation[ 0 ] )
+        degre_poly := volumic_part.poly_deg( e.var_inter )
+        if degre_poly < 0
+            volumic_part_const_jac := residual_const_jac.diff( dV )
+            degre_poly = volumic_part_const_jac.poly_deg( e.var_inter )
+        volumic_part = e.eval_on_gauss_pts( volumic_part, mul_by_jac = true, order_diff = degre_poly )
         _compute_KF_from_residual( volumic_part, K_dV_corr, F_dV_corr, unk_expr_syms.map( _0->sym ), unk_test_syms.map( _0->sym ) )
         
     #
@@ -1304,6 +1326,7 @@ def write_legacy_lmtpp_carac_formulation_for_element( stream, name_form, fe, dim
     stream <<< "        static const bool diag = false;"
     stream <<< "        static const bool linear = $( fe->all_K_are_linear );"
     stream <<< "    };"
+    stream <<< "    static const unsigned order_integration = $( max( child_cast( fe->pe )->order_interpolation ) );"
     stream <<< "    static const bool has_elementary_matrix = $( fe->non_null_system( fe->K_dV, fe->F_dV ) );"
     stream <<< "    static const bool has_skin_elementary_matrix = $( fe->need_skin_assembly );"
     stream <<< "    template<class TE,class TF,class TVEVE> static void after_solve(TE &elem,TF &f,TVEVE &vectors,const unsigned *indices) {"
@@ -1440,7 +1463,8 @@ def write_add_W_chap_F_chap( stream, e_sst, e_int )
     k_chap := Vec[Op,nb_dim]( x => symbol("elem_int.k_chap[$x]") )
     my_sgn := symbol("my_sgn")
     expr   := dot( dep - W_chap, k_chap * det ) - dot( F_chap, det ) * my_sgn
-    expr    = e_sst.integration( expr #~* e_int.point_is_inside( e_sst.pos )~# )
+    degre_poly_sst := expr.poly_deg( e_sst.var_inter )
+    expr    = e_sst.integration( expr #~* e_int.point_is_inside( e_sst.pos )~#, order_diff = degre_poly_sst )
     dexp   := expr.diff( det_syms )
     ddex   := dexp.diff( dep_syms )
     cwm := CodeWriterAlt("T_pos_0")
