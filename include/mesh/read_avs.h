@@ -301,7 +301,7 @@ void read_avs(TM &mesh, std::istream &is) throw(std::runtime_error) {
             if(nbelem_data) mesh.elem_list.synchronize_dyn(&dd);
             if(nbelem_data) mesh.elem_list.get_data(dd, *ne) = nb;
         } else {
-            cout << "Erreur - type d'element non lu" <<endl;
+            std::cout << "Erreur - type d'element non lu" <<endl;
             assert(0);
         }
         nb+=1;
