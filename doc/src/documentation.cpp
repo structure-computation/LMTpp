@@ -977,6 +977,9 @@ void Documentation::generate_file_css() {
     pageWeb << std::endl;
     pageWeb << "p.bloc {" << std::endl;
     pageWeb << "}" << std::endl;
+    pageWeb << "p.texte_documentation {\n    font-family:\"Times New Roman\", Times, serif;\n}\n" << std::endl;    
+    pageWeb << std::endl;
+    pageWeb << "div.liste {\n    font-family:\"Times New Roman\", Times, serif;\n}\n" << std::endl;
     pageWeb << std::endl;
 //     pageWeb << "ul.ligne_tableau_3colonnes {\n    list-style-image: url(Kurodai-icon.gif);\n    list-style-type: disc;\n    padding: 5px 5px;\n    width: 100%;\n   height: 100px;\n}\n" << std::endl;
     pageWeb << std::endl;

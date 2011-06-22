@@ -17,7 +17,7 @@
 #ifndef RECTILINEAR_ITERATOR_H
 #define RECTILINEAR_ITERATOR_H
 
-#include "containers/vec.h"
+#include "../containers/vec.h"
 
 namespace LMT {
 

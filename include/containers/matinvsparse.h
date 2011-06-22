@@ -200,8 +200,8 @@ template<class T,class TS> void get_Cholesky( Mat<T,TS,SparseLine<> > &m, Mat<T,
 ///
 template<class T,unsigned simplified>
 void incomplete_chol_factorize( Mat<T,Sym<>,SparseLine<> > &m, Number<simplified> ) {
-    for(unsigned line=0;line<m.nb_rows();++line) {
-        for(unsigned ind=0;ind<m.data[line].indices.size()-1;++ind) {
+    for(unsigned line = 0; line < m.nb_rows(); ++line ) {
+        for(unsigned ind = 0; ind < m.data[line].indices.size() - 1; ++ind ) {
             /// m_ij != 0
             unsigned col = m.data[line].indices[ind];
             m.data[line].data[ind] = ( m.data[line].data[ind] - dot_chol_factorize( m.data[col], m.data[line] ) ) * m.data[col].data.back();
@@ -226,51 +226,38 @@ void incomplete_chol_factorize( Mat<T,Sym<>,SparseLine<> > &m, Number<simplified
             //                 }
             //             }
         }
-        //on diag
-        //#ifdef DO_NOT_SQRT_DIAG_CHOL
-        //   m.data[line].data.back() = m.data[line].data.back() - norm_2_p2( m.data[line].data.begin(), m.data[line].data.size()-1 );
-        //#else
-        T d = m.data[line].data.back() - norm_2_p2( m.data[line].data.begin(), m.data[line].data.size()-1 );
-        if ( simplified )
-            m.data[line].data.back() = T(1) / sqrt( abs( d ) + ( d == T(0) ) );
-        else
-            m.data[line].data.back() = sqrt( abs( d ) + ( d == T(0) ) );
+
+        T d = m.data[line].data.back() - norm_2_p2( m.data[line].data.begin(), m.data[line].data.size() - 1 );
+        m.data[line].data.back() = T(1) / sqrt( abs( d ) + ( d == T(0) ) );
     }
-    //         Vec<unsigned> front_jcol;
-    //         T pivot, ipivot;
-    //
-    //         front_jcol.resize( m.nb_rows(), 0 );
-    //
-    //         for(unsigned line = 0; line < m.nb_rows(); ++line ) {
-    //
-    //             pivot = m.data[line].data.back();
-    //             m.data[line].data.back() = 0;
-    //             pivot = sqrt( pivot - norm_2_p2( m.data[line].data.begin(), m.data[line].data.size()-1 ) );
-    //             ipivot = 1. / pivot;
-    //
-    //             for(unsigned i = line + 1; i < m.nb_rows(); ++i ) {
-    //                 unsigned ind_j = front_jcol[ i ];
-    //                 unsigned j = m.data[ i ].indices[ front_jcol[ i ] ];
-    //                 if (  j == line ) {
-    //                     m.data[ i ].data[ ind_j ] = ( m.data[ i ].data[ ind_j ] - dot_chol_factorize( m.data[i], m.data[line] ) ) * ipivot;
-    //                     front_jcol[ i ]++;
-    //                 } else {
-    //                     if ( j < line )
-    //                         front_jcol[ i ]++;
-    //                 }
-    //             }
-    //
-    //             m.data[line].data.back() = pivot;
-    //         }
-    //     }
 }
 
 /// ancienne version de incomplete_chol_factorize
-template<class T> void incomplete_chol_factorize( Mat<T,Sym<>,SparseLine<> > &m, bool simplified = true ) {
-    if ( simplified )
-        incomplete_chol_factorize( m, Number<1>() );
-    else
-        incomplete_chol_factorize( m, Number<0>() );
+template<class T> 
+void incomplete_chol_factorize( Mat<T,Sym<>,SparseLine<> > &m, bool simplified = true ) {
+    if ( simplified ) {
+        for(unsigned line = 0; line < m.nb_rows(); ++line ) {
+            for(unsigned ind = 0; ind < m.data[line].indices.size() - 1; ++ind ) {
+                /// m_ij != 0
+                unsigned col = m.data[line].indices[ind];
+                m.data[line].data[ind] = ( m.data[line].data[ind] - dot_chol_factorize( m.data[col], m.data[line] ) ) * m.data[col].data.back();
+            }
+    
+            T d = m.data[line].data.back() - norm_2_p2( m.data[line].data.begin(), m.data[line].data.size() - 1 );
+            m.data[line].data.back() = T(1) / sqrt( abs( d ) + ( d == T(0) ) );
+        }
+    } else {
+        for(unsigned line = 0; line < m.nb_rows(); ++line ) {
+            for(unsigned ind = 0; ind < m.data[line].indices.size() - 1; ++ind ) {
+                /// m_ij != 0
+                unsigned col = m.data[line].indices[ind];
+                m.data[line].data[ind] = ( m.data[line].data[ind] - dot_chol_factorize( m.data[col], m.data[line] ) ) / m.data[col].data.back();
+            }
+    
+            T d = m.data[line].data.back() - norm_2_p2( m.data[line].data.begin(), m.data[line].data.size() - 1 );
+            m.data[line].data.back() = sqrt( abs( d ) + ( d == T(0) ) );
+        }        
+    }
 }
 
 // template<class T> 
