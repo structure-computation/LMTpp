@@ -1532,7 +1532,7 @@ def write_legacy_lmtpp_code( pb_name, TfList, TeList, dim_function = x => x::nvi
     
     for Tf in TfList
         for Te in TeList
-            e := new SymbolicElement[ Te, dim_function( Te ) ]
+            e := new SymbolicElement[ Te, dim_function( Te ) ]( name_node = "PNODE" )
             e->assume_const_jac = assume_const_jac_in_elems
             f := new Tf[ dim = e->dim ]( @e, "" )
             fe_set[ f->nb_dim ][ Tf ].push_back( f )
