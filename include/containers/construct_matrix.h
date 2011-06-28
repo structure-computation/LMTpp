@@ -411,8 +411,17 @@ struct MulStoMat< SparseLine<Ori>, SparseLine<Ori> > {
 /// conversion de A * B * C
 template<class T0,class Str0,class Sto0,class M0, class M1,  class Str1,class Sto1, class M2, class Str2,class Sto2>
 void construct_matrix( Mat<T0,Str0,Sto0> &res, const Mat< MatMultMat< Mat< MatMultMat< M0, M1 >,Str1,Sto1 >, M2 >, Str2, Sto2 > &src ) {
-    construct_matrix( res, Mat<T0, Str0, Sto0 >( src.m1 ) * src.m2 ); 
-    //construct_matrix( res, Mat<T0, typename MulStruMat<M0,M1>::T, typename MulStoMat<M0,M1>::T >( src.m1 ) * src.m2 ); 
+    //construct_matrix( res, Mat<T0, Str0, Sto0 >( src.m1 ) * src.m2 ); 
+    Mat<T0, 
+        typename MulStruMat< typename M0::Structure, typename M1::Structure >::T, 
+        typename MulStoMat< typename M0::Storage, typename M1::Storage >::T > res_M0_x_M1;
+        
+    //res_M0_x_M1 = src.m1;
+    //construct_matrix( res_M0_x_M1, src.m1 );
+    //construct_matrix( res, res_M0_x_M1 * src.m2 );
+    construct_matrix( res, Mat<T0, 
+                               typename MulStruMat< typename M0::Structure, typename M1::Structure >::T, 
+                               typename MulStoMat< typename M0::Storage, typename M1::Storage >::T >( src.m1 ) * src.m2 ); 
 }
 
 }
