@@ -3,8 +3,9 @@
 
 #ifdef METIL_COMP_DIRECTIVE
 #pragma inc_path /usr/local/triangle/
-#pragma lib_path /usr/local/triangle/triangle/
-#pragma lib_name triangle
+#pragma lib_path /usr/local/triangle/
+//#pragma lib_name triangle.o
+#pragma lnk_flag /usr/local/triangle/triangle.o
 #endif /// METIL_COMP_DIRECTIVE
 
 #include <list>
@@ -14,7 +15,7 @@
 extern "C" {
     #define REAL double
     #define VOID void
-    #include "triangle/triangle.h"
+    #include "/usr/local/triangle/triangle.h"
 }
 
 using namespace LMT;
