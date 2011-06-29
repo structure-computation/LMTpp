@@ -363,7 +363,8 @@ template<class TM,class Op>
 bool refinement( TM &m, Op &op, bool spread_cut = false ) {
     //m.update_elem_children();
     m.update_elem_children( Number<TM::nvi-1>() );
-    m.update_elem_children( Number<TM::nvi-2>() );
+    if ( TM::dim == 3 )
+        m.update_elem_children( Number<TM::nvi-2>() );
     LMTPRIVATE::Refinment<TM,TM,0,TM::dim+1> r( &m );
     r.update_cut( m, op );
     
@@ -471,9 +472,9 @@ struct LevelSetRemoveNeg {
     
 */
 template<class TM,class PhiExtract>
-bool level_set_cut( TM &m, const PhiExtract &p ) {
+bool level_set_cut( TM &m, const PhiExtract &p, bool spread_cut = false ) {
     LevelSetRefinement<PhiExtract> lr( p );
-    refinement( m, lr/*, true*/ );
+    refinement( m, lr, spread_cut );
     LevelSetRemoveNeg<PhiExtract> ln( p );
     return m.remove_elements_if( ln );
 }
@@ -496,10 +497,10 @@ struct RafinementOpBasedOnLength {
     subdivide each element bar e such as length(e)>max_length (true means subdivision).
 */
 template<class TM,class T>
-bool refinement_if_length_sup( TM &m, T max_length ) {
+bool refinement_if_length_sup( TM &m, T max_length, bool spread_cut = false ) {
     RafinementOpBasedOnLength<T> rl;
     rl.max_length = max_length;
-    return refinement( m, rl/*, true*/ );
+    return refinement( m, rl, spread_cut );
 }
 
 /*!
@@ -529,7 +530,7 @@ bool refinement_if_length_sup( TM &m, T max_length ) {
         cut.display( true );
 
         LevelSetImageRefinement<TI> lr( cut, stp );
-        refinement( m, lr, true );
+        refinement( m, lr );
 
         display( m );
     }
@@ -584,7 +585,7 @@ struct LevelSetImageRefinement {
         typedef TM::Pvec Pvec;
         typedef TM::TNode::T T;
     
-        refinement( m, Local_refinement<T, Pvec >( 0.01, 0.2, Pvec( 0.2, 0.5 ) ), true );
+        refinement( m, Local_refinement<T, Pvec >( 0.01, 0.2, Pvec( 0.2, 0.5 ) ) );
     
     On raffinera au point de coordonnées ( 0.2, 0.5 ) avec une longueur minimale de 0.01 et une augmentation de 0.2. 
 
@@ -626,7 +627,7 @@ struct Local_refinement {
         typedef TM::Pvec Pvec;
         typedef TM::TNode::T T;
     
-        refinement( m, Local_refinement<T, Pvec >( 0.01, 0.2, Pvec( 0.2, 0.5 ), 0.2 ), true );
+        refinement( m, Local_refinement<T, Pvec >( 0.01, 0.2, Pvec( 0.2, 0.5 ), 0.2 ) );
     
     On raffinera autour du cercle de centre ( 0.2, 0.5 ) et de rayon 0.2 avec une longueur minimale de 0.01 et une augmentation de 0.2. 
 
@@ -692,7 +693,7 @@ namespace LMTPRIVATE {
   coupe d'un maillage par un masque. Un élément est coupé quand un bord a mask < lim_inf et l'autre a mask >= lim_sup
 */
 template<class TM,class MA,class I>
-bool mask_cut( TM &m, const MA &mask, I lim_inf, I lim_sup, I dist_disp, bool remove_inf_elem = false ) {
+bool mask_cut( TM &m, const MA &mask, I lim_inf, I lim_sup, I dist_disp, bool remove_inf_elem = false, bool spread_cut = false ) {
     typedef LMTPRIVATE::MaskCutter<TM,MA,I> MC;
     typedef typename TM::Pvec Pvec;
     typedef typename TM::Tpos T;
@@ -728,7 +729,7 @@ bool mask_cut( TM &m, const MA &mask, I lim_inf, I lim_sup, I dist_disp, bool re
     }
     // cut
     typename MC::Cut cut( mc );
-    bool res = refinement( m, cut/*, true*/ );
+    bool res = refinement( m, cut, spread_cut );
     // rem
     if ( remove_inf_elem ) {
         typename MC::Rem rem( mc );
