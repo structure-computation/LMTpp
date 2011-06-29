@@ -473,7 +473,7 @@ struct LevelSetRemoveNeg {
 template<class TM,class PhiExtract>
 bool level_set_cut( TM &m, const PhiExtract &p ) {
     LevelSetRefinement<PhiExtract> lr( p );
-    refinement( m, lr );
+    refinement( m, lr, spread_cut = true );
     LevelSetRemoveNeg<PhiExtract> ln( p );
     return m.remove_elements_if( ln );
 }
@@ -496,10 +496,10 @@ struct RafinementOpBasedOnLength {
     subdivide each element bar e such as length(e)>max_length (true means subdivision).
 */
 template<class TM,class T>
-bool refinement_if_length_sup(TM &m,T max_length) {
+bool refinement_if_length_sup( TM &m, T max_length ) {
     RafinementOpBasedOnLength<T> rl;
     rl.max_length = max_length;
-    return refinement(m,rl);
+    return refinement( m, rl, spread_cut = true );
 }
 
 /*!
@@ -529,7 +529,7 @@ bool refinement_if_length_sup(TM &m,T max_length) {
         cut.display( true );
 
         LevelSetImageRefinement<TI> lr( cut, stp );
-        refinement( m, lr );
+        refinement( m, lr, spread_cut = true );
 
         display( m );
     }
@@ -584,7 +584,7 @@ struct LevelSetImageRefinement {
         typedef TM::Pvec Pvec;
         typedef TM::TNode::T T;
     
-        refinement( m, Local_refinement<T, Pvec >( 0.01, 0.2, Pvec( 0.2, 0.5 ) ) );
+        refinement( m, Local_refinement<T, Pvec >( 0.01, 0.2, Pvec( 0.2, 0.5 ) ), spread_cut = true );
     
     On raffinera au point de coordonnées ( 0.2, 0.5 ) avec une longueur minimale de 0.01 et une augmentation de 0.2. 
 
@@ -626,7 +626,7 @@ struct Local_refinement {
         typedef TM::Pvec Pvec;
         typedef TM::TNode::T T;
     
-        refinement( m, Local_refinement<T, Pvec >( 0.01, 0.2, Pvec( 0.2, 0.5 ), 0.2 ) );
+        refinement( m, Local_refinement<T, Pvec >( 0.01, 0.2, Pvec( 0.2, 0.5 ), 0.2 ), spread_cut = true );
     
     On raffinera autour du cercle de centre ( 0.2, 0.5 ) et de rayon 0.2 avec une longueur minimale de 0.01 et une augmentation de 0.2. 
 
@@ -728,7 +728,7 @@ bool mask_cut( TM &m, const MA &mask, I lim_inf, I lim_sup, I dist_disp, bool re
     }
     // cut
     typename MC::Cut cut( mc );
-    bool res = refinement( m, cut );
+    bool res = refinement( m, cut, spread_cut = true );
     // rem
     if ( remove_inf_elem ) {
         typename MC::Rem rem( mc );
