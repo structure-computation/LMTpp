@@ -2180,7 +2180,7 @@ void add_nodal_matrix(
     TF &f,
     TMA &matrix,
     TVE &sollicitation,
-    TVEVE &vectors,
+    const TVEVE &vectors,
     const Number<_ms> &matrix_is_sym,
     const Number<_am> &assemble_mat,
     const Number<_av> &assemble_vec,
