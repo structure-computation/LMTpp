@@ -13,7 +13,7 @@
             * \a MeshCaracAllNvi ,
             * \a CaracMeshShape .
             
-        Si aucun ne convient, on définit le sien à la main ( tâche très ardue ) soit en utilisant un script Python et c'est cette dernière méthode que l'on va maintenant ilustrer.
+        Si aucun ne convient, on définit le sien à la main ( tâche très ardue ) soit en utilisant un script Python et c'est cette dernière méthode que l'on va maintenant illustrer.
         
     = Définition des attributs de son maillage
     

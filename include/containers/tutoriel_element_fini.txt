@@ -15,7 +15,7 @@
     Le premier paragraphe sera un tutoriel pour un exemple complet dans le cas où la formulation en Python est déjà faite.
     Ensuite le second paragraphe expliquera comment créer sa propre formulation Python. 
      
-    = Exemple complet avec une formulation de la plate forme.
+    = Exemple complet avec une formulation de la plate-forme.
     
         On choisit l'équation élastique iso (fichier formulations/formulation_elasticity_iso.py ) . Remarque importante : toutes les formulations commencent par "formulation_" .
          
