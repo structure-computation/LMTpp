@@ -1,4 +1,4 @@
-// file generated from vecsparse.h.py. Do not modify
+/// file generated from vecsparse.h.py. Do not modify
 
 namespace LMT {
 
@@ -195,7 +195,7 @@ public:
                 data.pop_back();
             }
         }
-        si.val = ns;
+        si.set( ns );
     }
     void free() { indices.free(); data.free(); si.set(0); }
     void clear() { indices.free(); data.free(); }

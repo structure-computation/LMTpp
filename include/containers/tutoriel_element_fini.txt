@@ -15,7 +15,7 @@
     Le premier paragraphe sera un tutoriel pour un exemple complet dans le cas où la formulation en Python est déjà faite.
     Ensuite le second paragraphe expliquera comment créer sa propre formulation Python. 
      
-    = Exemple complet avec une formulation de la plate forme.
+    = Exemple complet avec une formulation de la plate-forme.
     
         On choisit l'équation élastique iso (fichier formulations/formulation_elasticity_iso.py ) . Remarque importante : toutes les formulations commencent par "formulation_" .
          
@@ -25,7 +25,7 @@
             
         \code 
             ln -s /home/dupont/LMTpp-test LMTpp
-        si vous souhaitez utiliser la version la plus récente.    
+        si vous souhaitez utiliser la version la plus récente de la LMT++.    
         
         Le chemin <strong> /home/dupont/ </strong> sera remplacé par votre propre chemin ( e.g. /usrtmp/dupont/ ).
          
@@ -68,14 +68,16 @@
                 return 0;
             }             
         
-        Et un fichier Makefile si vous utilisez make via kdevelop :
+        Et un fichier <strong> Makefile </strong> si vous utilisez make via kdevelop :
         \code
             all: 
                 metil_comp -g -I./LMT/include main.cpp
     
         Rappelons qu'entre le début de ligne et le texte "metil_comp -g -I./LMT/include main.cpp", il faut une tabulation et pas des espaces.
         
-        Expliquons en détail le code source:
+        L'objectif de ce code est de résoudre un problème élastique sur une surface rectangulaire avec des conditions aux limites complexes et maillée avec des \a Triangle . 
+        
+        Expliquons le code source:
         
         Le premier #include est très important et le texte entre les doubles quotes doit respecter une syntaxe car il sera interprêté par metil_comp.
         Voici sa forme générale :
@@ -90,13 +92,58 @@
         
         Ensuite <strong> using namespace LMT; </strong> incorpore l'espace de nom LMT donc on pourra utiliser tous les déclarations de la LMT sans les précéder de <strong> LMT:: </strong> ( e.g. LMT::make_rect() est moins lisible que make_rect() ).
         
+        Avec les <strong> typedef </strong> , on définit des synonymes de types dont on aura besoin. En particulier un type de maillage <strong> Mesh<Mesh_carac_elasticity_iso< T, dim> > </strong> et un type de formulation <strong> Formulation<TM,elasticity_iso> </strong> pour un problème élastique isotrope.
         
+        Après avoir créé un maillage de type <strong> Mesh<Mesh_carac_elasticity_iso< T, dim> > </strong> on l'initialise rectangulaire avec la fonction \a make_rect ().
+        
+        Ensuite on donne des conditions initiales et des contraintes avec des boucles <strong> for </strong> qui parcourt les noeuds du maillage nouvellement créé.
+         
+        Puis on résout le problème mécanique via la méthode <strong> solve() </strong> et enfin on affiche le maillage avec le logiciel paraview via la fonction \a display ().
     
     = Ecrire sa formulation
     
-    = TODO
-    
-
+        Bien que le répertoire <strong> LMTpp/formulations </strong> contienne de nombreuses formulations, il se peut que vous ne trouviez pas celle de vos besoin, soit parce qu'il manque un attribut aux noeuds, aux éléments, aux points de Gauss, soit que l'équation dne convient pas. Il vous faut alors créer la votre sur le modèle de celles qui existent.
+        Cela consiste à créer par exemple deux fichiers .py, un contenant les éléments du maillage, l'autre la formulation, les attributs de vos maillages ainsi que des fonctions à éxécuter après une résolution pour faciliter le post-traitement.
+           
+        Voici un exemple pour le premier fichier Python :
+        \code Python
+            # -*- coding: utf-8 -*-
+            from LMT.formal_lf import *
+            
+            write_pb(
+                    name = 'MonMeshCarac',
+                    formulations = ['MonMeshCarac'],
+                    elements = ['Triangle','Triangle_6','Quad','Tetra','Hexa','Wedge'],
+            )
+        
+        Commentons les paramètres de la fonction <strong> write_pb </strong> .
+        * <strong> MonMeshCarac </strong> est le nom du problème et de la formulation s'il n' y en a qu'une seule.
+        * Ensuite on fournit une liste de formulations. Dans notre exemple, on a une seule formulation correspondant au fichier <strong> formulation_MonMeshCarac </strong> .
+        * Enfin on donne les éléments 2D ou 3D qui serviront. 
+          
+        Passons ensuite aux deuxième fichier Python :
+        \code Python
+            # -*- coding: utf-8 -*-
+            
+            dep  = Variable( default_value='0.0', nb_dim=[dim], unit='m' )
+            ener = Variable( interpolation='elementary', default_value='0.0', unit='W/m^2/K' )
+            # Par défaut interpolation a la valeur 'nodal'
+            epsilon = Variable( interpolation='gauss', nb_dim=[3,3], default_value='0.0', unit='W/m^2/K' )
+            
+            numsst = Variable( interpolation='global', default_value='0.0', unit='' )
+            sigma = Variable( interpolation='elementary', nb_dim=[6], default_value='0.0', unit='W/m^2/K' )
+            sigma_von_mises = Variable( interpolation='elementary', default_value='0.0', unit='W/m^2/K' )
+            
+            #attribut_mortel = Variable( T='Mat<double,Gen<>,SparseUMFPACK,void>', unit='Jojo' )
+            # T précise le type exact de l'atribut
+            courbure  = Variable( default_value='0.0', unit='m' )
+            
+            #
+            def formulation():
+                    return 0
+                    
+        Cette fomulation triviale qui suffit si on veut seulement générér la classe <strong> Mesh_carac_MonMeshCarac </strong> indispensable pour paramètrer et construite une classe <strong> Mesh<> </strong> .
+        Pour une description des possibilités de définition d'une formulation, il suffit de lire le paragraphe suivant "Création d'un fichier de formulation" . 
 
     = Ancienne documentation avec scons
 
