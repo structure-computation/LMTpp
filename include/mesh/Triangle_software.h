@@ -137,7 +137,9 @@ inline typename FloatType<typename TypeReduction<Multiplies,Vec<T,s> >::T>::T re
         }          
      
 
-     Les utilisateurs de metil_comp compile ce code sans problème.
+     Les utilisateurs de metil_comp compile ce code sans problème en tapant par exemple :
+     \code 
+        metil_comp -DANSI_DECLARATORS main.cpp
      
      Pour ceux qui utilisent scons, inspirez-vous de cet exemple :
      \code Python

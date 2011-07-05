@@ -122,9 +122,14 @@ public:
     Rem : EF pour élément fini
 */
 struct EFiterator {
+
+    void init( unsigned dim_ ) {
+        pos.resize( dim_, 0 );
+    }
+
     EFiterator( unsigned _dim, unsigned s ) : s( s ), dim( _dim ) { 
-        assert(dim > 0);  
-        pos.resize( dim, 0 );
+        assert( dim > 0 );  
+        init( _dim );
     }
     
     operator bool() const { 
@@ -187,10 +192,15 @@ struct EFiterator {
 template< unsigned _dim >
 struct Hiterator {
     static const unsigned dim = _dim;
+    
+    void init( unsigned s ) {
+        pos[ 0 ] = s;
+        for( unsigned i = 1; i < dim; ++i ) pos[ i ] = 0;    
+    }
+    
     Hiterator( unsigned s ) : s( s ) { 
         assert( dim > 0 );  
-        pos[ 0 ] = s;
-        for( unsigned i = 1; i < dim; ++i ) pos[ i ] = 0;
+        init( s );
     }
     
     operator bool() const { 
