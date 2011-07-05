@@ -30,6 +30,35 @@ struct MakeSubMesh {
 }
 
 /**
+  Exemple (compliqué)
+
+  \code
+    #include <mesh/displayparaview.h>
+    #include <mesh/make_sub_mesh.h>
+    #include <mesh/meshcaracstd.h>
+    #include <mesh/make_rect.h>
+    using namespace LMT;
+
+    int main() {
+        typedef Mesh<MeshCaracStd<2,2> > TM;
+        typedef Mesh<MeshCaracStd<2,1> > TN;
+
+        TM m;
+        make_rect( m, Triangle(), 0, 1, 10 );
+        m.update_skin();
+
+
+        Vec<TM::TSkin::EA *> l;
+        l << m.skin.elem_list[ 0 ];
+        l << m.skin.elem_list[ 3 ];
+
+        TN n;
+        make_sub_mesh( n, m.skin, l );
+
+        display( n );
+    }
+
+
 */
 template<class TM_dst,class TM_src>
 void make_sub_mesh( TM_dst &dst, const TM_src &src, const Vec<typename TM_src::EA *> &l ) {
