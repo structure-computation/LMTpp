@@ -34,7 +34,9 @@ void generator_random_matrix( Mat< T, Sym<s,false>, SparseLine<Orientation>, voi
                 m( i, j ) = 5 - ( rand() % 10 );
 }
 
-int test_convert_sym_dense_time_gen_dense__unit_test() {
+/// ==========  Sym x Gen  ==========
+
+int test_convert_sym_dense_x_gen_dense__unit_test() {
 
     typedef Mat< double,Sym<-1,false>,Dense<Col>,void > TMA;
     typedef Mat< double,Gen<>,Dense<Col>,void > TMB;
@@ -51,7 +53,7 @@ int test_convert_sym_dense_time_gen_dense__unit_test() {
     return max( Rd ) < 1e-7;
 }
 
-int test_convert_sym_dense_time_sparseline_dense__unit_test() {
+int test_convert_sym_dense_x_gen_sparseline__unit_test() {
 
     typedef Mat< double,Sym<-1,false>,Dense<Col>,void > TMA;
     typedef Mat< double,Gen<>,SparseLine<Col>,void > TMB;
@@ -71,7 +73,7 @@ int test_convert_sym_dense_time_sparseline_dense__unit_test() {
     return max( Rd ) < 1e-10;
 }
 
-int test_convert_sym_sparseline_time_gen_dense__unit_test() {
+int test_convert_sym_sparseline_x_gen_dense__unit_test() {
     int s = 3;
     unsigned p;
     typedef Mat< double,Sym<-1,false>,SparseLine<Col>,void > TMA;
@@ -104,7 +106,7 @@ int test_convert_sym_sparseline_time_gen_dense__unit_test() {
     return max( Rref ) < 1e-14; 
 }
 
-int test_convert_sym_sparseline_time_gen_dense_2__unit_test() {
+int test_convert_sym_sparseline_x_gen_dense_2__unit_test() {
 
     int s = 8;
     typedef Mat< double,Sym<-1,false>,SparseLine<Col>,void > TMA;
@@ -124,7 +126,7 @@ int test_convert_sym_sparseline_time_gen_dense_2__unit_test() {
     return  max( Rd ) < 1e-12;
 }
 
-int test_convert_sym_sparseline_time_gen_sparseline__unit_test() {
+int test_convert_sym_sparseline_x_gen_sparseline__unit_test() {
 
     int s = 10;
     typedef Mat< double,Sym<-1,false>,SparseLine<Col>,void > TMA;
@@ -171,7 +173,11 @@ int test_convert_sym_sparseline_to_gen_sparseline__unit_test() {
     return max( R ) < 1e-7; 
 }
 
-int test_convert_sym_sparseline_time_sym_sparseline__unit_test() {
+/// ========== fin de Sym x Gen  ==========
+
+/// ========== Sym x Sym  ==========
+
+int test_convert_sym_sparseline_x_sym_sparseline__unit_test() {
 
     typedef Mat< double,Sym<-1,false>, SparseLine<Col>,void > TMA;
     typedef Mat< double,Gen<>,Dense<Col>,void > TMT;
@@ -187,7 +193,65 @@ int test_convert_sym_sparseline_time_sym_sparseline__unit_test() {
     return max( Rd ) < 1e-7;
 }
 
-int test_convert_gen_sparseline_time_sym_sparseline__unit_test() {
+int test_convert_sym_sparseline_x_sym_dense__unit_test() {
+
+    typedef Mat< double,Sym<-1,false>, SparseLine<Col>,void > TMA;
+    typedef Mat< double,Sym<-1,false>, Dense<Col>,void > TMB;
+    typedef Mat< double,Gen<>,Dense<Col>,void > TMT;
+    TMA A;
+    TMB B;
+    TMT R, Rd;
+
+    A.resize( 10 );
+    B.resize( 10 );
+    generator_random_matrix( A );
+    generator_random_matrix( B );
+    R = A * B;
+    Rd = abs( R - TMT( A ) * TMT( B ) );
+    return max( Rd ) < 1e-7;
+}
+
+int test_convert_sym_dense_x_sym_sparseline__unit_test() {
+
+    typedef Mat< double,Sym<-1,false>, Dense<Col>,void > TMA;
+    typedef Mat< double,Sym<-1,false>, SparseLine<Col>,void > TMB;
+    typedef Mat< double,Gen<>,Dense<Col>,void > TMT;
+    TMA A;
+    TMB B;
+    TMT R, Rd;
+
+    A.resize( 10 );
+    B.resize( 10 );
+    generator_random_matrix( A );
+    generator_random_matrix( B );
+    R = A * B;
+    Rd = abs( R - TMT( A ) * TMT( B ) );
+    return max( Rd ) < 1e-7;
+}
+
+int test_convert_sym_dense_x_sym_dense__unit_test() {
+
+    typedef Mat< double,Sym<-1,false>, Dense<Col>,void > TMA;
+    typedef Mat< double,Sym<-1,false>, Dense<Col>,void > TMB;
+    typedef Mat< double,Gen<>,Dense<Col>,void > TMT;
+    TMA A;
+    TMB B;
+    TMT R, Rd;
+
+    A.resize( 10 );
+    B.resize( 10 );
+    generator_random_matrix( A );
+    generator_random_matrix( B );
+    R = A * B;
+    Rd = abs( R - TMT( A ) * TMT( B ) );
+    return max( Rd ) < 1e-7;
+}
+
+/// ========== fin de Sym x Sym  ==========
+
+/// ========== Gen x Sym  ==========
+
+int test_convert_gen_sparseline_x_sym_sparseline__unit_test() {
 
     typedef Mat< double,Gen<>, SparseLine<Col>,void > TMA;
     typedef Mat< double,Sym<-1,false>, SparseLine<Col>,void > TMB;
@@ -205,7 +269,139 @@ int test_convert_gen_sparseline_time_sym_sparseline__unit_test() {
     return max( Rd ) < 1e-7;
 }
 
-bool test_convert_three_times_00__unit_test() {
+int test_convert_gen_sparseline_x_sym_dense__unit_test() {
+
+    typedef Mat< double,Gen<>, SparseLine<Col>,void > TMA;
+    typedef Mat< double,Sym<-1,false>, Dense<Col>,void > TMB;
+    typedef Mat< double,Gen<>,Dense<Col>,void > TMT;
+    TMA A;
+    TMB B;
+    TMT R, Rd;
+
+    A.resize( 20 );
+    B.resize( 20 );
+    generator_random_matrix( A );
+    generator_random_matrix( B );
+    R = A * B;
+    Rd = abs( R - TMT( A ) * TMT( B ) );
+    return max( Rd ) < 1e-7;
+}
+
+int test_convert_gen_dense_x_sym_sparseline__unit_test() {
+
+    typedef Mat< double,Gen<>, Dense<Col>,void > TMA;
+    typedef Mat< double,Sym<-1,false>, SparseLine<Col>,void > TMB;
+    typedef Mat< double,Gen<>,Dense<Col>,void > TMT;
+    TMA A;
+    TMB B;
+    TMT R, Rd;
+
+    A.resize( 20 );
+    B.resize( 20 );
+    generator_random_matrix( A );
+    generator_random_matrix( B );
+    R = A * B;
+    Rd = abs( R - TMT( A ) * TMT( B ) );
+    return max( Rd ) < 1e-7;
+}
+
+int test_convert_gen_dense_x_sym_dense__unit_test() {
+
+    typedef Mat< double,Gen<>, Dense<Col>,void > TMA;
+    typedef Mat< double,Sym<-1,false>, Dense<Col>,void > TMB;
+    typedef Mat< double,Gen<>,Dense<Col>,void > TMT;
+    TMA A;
+    TMB B;
+    TMT R, Rd;
+
+    A.resize( 20 );
+    B.resize( 20 );
+    generator_random_matrix( A );
+    generator_random_matrix( B );
+    R = A * B;
+    Rd = abs( R - TMT( A ) * TMT( B ) );
+    return max( Rd ) < 1e-7;
+}
+
+/// ========== fin de Gen x Sym  ==========
+
+/// ========== Gen x Gen  ==========
+
+int test_convert_gen_sparseline_x_gen_sparseline__unit_test() {
+
+    typedef Mat< double,Gen<>, SparseLine<Col>,void > TMA;
+    typedef Mat< double,Gen<>, SparseLine<Col>,void > TMB;
+    typedef Mat< double,Gen<>,Dense<Col>,void > TMT;
+    TMA A, R;
+    TMB B;
+    TMT  Rd;
+
+    A.resize( 20 );
+    B.resize( 20 );
+    generator_random_matrix( A );
+    generator_random_matrix( B );
+    R = A * B;
+    Rd = abs( R - TMT( A ) * TMT( B ) );
+    return max( Rd ) < 1e-7;
+}
+
+int test_convert_gen_sparseline_x_gen_dense__unit_test() {
+
+    typedef Mat< double,Gen<>, SparseLine<Col>,void > TMA;
+    typedef Mat< double,Gen<>, Dense<Col>,void > TMB;
+    typedef Mat< double,Gen<>,Dense<Col>,void > TMT;
+    TMA A;
+    TMB B;
+    TMT R, Rd;
+
+    A.resize( 20 );
+    B.resize( 20 );
+    generator_random_matrix( A );
+    generator_random_matrix( B );
+    R = A * B;
+    Rd = abs( R - TMT( A ) * TMT( B ) );
+    return max( Rd ) < 1e-7;
+}
+
+int test_convert_gen_dense_x_gen_sparseline__unit_test() {
+
+    typedef Mat< double,Gen<>, Dense<Col>,void > TMA;
+    typedef Mat< double,Gen<>, SparseLine<Col>,void > TMB;
+    typedef Mat< double,Gen<>,Dense<Col>,void > TMT;
+    TMA A;
+    TMB B;
+    TMT R, Rd;
+
+    A.resize( 20 );
+    B.resize( 20 );
+    generator_random_matrix( A );
+    generator_random_matrix( B );
+    R = A * B;
+    Rd = abs( R - TMT( A ) * TMT( B ) );
+    return max( Rd ) < 1e-7;
+}
+
+int test_convert_gen_dense_x_gen_dense__unit_test() {
+
+    typedef Mat< double,Gen<>, Dense<Col>,void > TMA;
+    typedef Mat< double,Gen<>, Dense<Col>,void > TMB;
+    typedef Mat< double,Gen<>, Dense<Col>,void > TMT;
+    TMA A( 5, 5, Vec<double, 25>( 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25 ) );
+    TMB B( 5, 5, Vec<double, 25>( 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25 ) );
+    TMT R;
+    TMT Rd( 5, 5, Vec<double, 25>( 215,230,245,260,275, 490,530,570,610,650, 765,830,895,960,1025, 1040,1130,1220,1310,1400, 1315,1430,1545,1660,1775 ) );
+
+    PRINTN( A );
+    PRINTN( Rd );
+
+    R = A * B;
+    Rd = abs( R - Rd );
+    return max( Rd ) < 1e-7;
+}
+
+/// ========== fin de Gen x Gen  ==========
+
+bool test_convert_three_x_00__unit_test() {
 
     int s = 10;
     typedef Mat< double,Sym<-1,false>,SparseLine<Col>,void > TMA;
@@ -232,7 +428,7 @@ bool test_convert_three_times_00__unit_test() {
     return max( Rd ) < 1e-10;
 }
 
-bool test_convert_three_times_01__unit_test() {
+bool test_convert_three_x_01__unit_test() {
 
     int s = 10;
     typedef Mat< double,Sym<-1,false>,SparseLine<Col>,void > TMA;
@@ -259,7 +455,7 @@ bool test_convert_three_times_01__unit_test() {
     return max( Rd ) < 1e-10;
 }
 
-bool test_convert_three_times_02__unit_test() {
+bool test_convert_three_x_02__unit_test() {
 
     int s = 10;
     typedef Mat< double,Sym<-1,false>,Dense<Col>,void > TMA;
@@ -286,7 +482,7 @@ bool test_convert_three_times_02__unit_test() {
     return max( Rd ) < 1e-10;
 }
 
-bool test_convert_three_times_03__unit_test() {
+bool test_convert_three_x_03__unit_test() {
 
     int s = 10;
     typedef Mat< double,Sym<-1,false>,SparseLine<Col>,void > TMA;
@@ -313,7 +509,7 @@ bool test_convert_three_times_03__unit_test() {
     return max( Rd ) < 1e-10;
 }
 
-bool test_convert_three_times_04__unit_test() {
+bool test_convert_three_x_04__unit_test() {
 
     int s = 10;
     typedef Mat< double,Sym<-1,false>,Dense<Col>,void > TMA;
@@ -340,7 +536,7 @@ bool test_convert_three_times_04__unit_test() {
     return max( Rd ) < 1e-10;
 }
 
-bool test_convert_three_times_05__unit_test() {
+bool test_convert_three_x_05__unit_test() {
 
     static const int s  = 10;
     static const int s2 = 7;
@@ -366,7 +562,7 @@ bool test_convert_three_times_05__unit_test() {
     return max( Rd ) < 1e-10;
 }
 
-bool test_convert_three_times_06__unit_test() {
+bool test_convert_three_x_06__unit_test() {
 
     static const int s  = 10;
     static const int s2 = 7;
@@ -388,7 +584,7 @@ bool test_convert_three_times_06__unit_test() {
     return max( Rd ) < 1e-10;
 }
 
-bool test_convert_three_times_07__unit_test() {
+bool test_convert_three_x_07__unit_test() {
 
     static const int s  = 10;
     static const int s2 = 7;
@@ -411,22 +607,38 @@ bool test_convert_three_times_07__unit_test() {
 }
 
 int main() {
-    UNIT_TEST( test_convert_sym_dense_time_gen_dense__unit_test() );
-    UNIT_TEST( test_convert_sym_dense_time_sparseline_dense__unit_test );
-    UNIT_TEST( test_convert_sym_sparseline_time_gen_dense__unit_test() );
-    UNIT_TEST( test_convert_sym_sparseline_time_gen_dense_2__unit_test() );
-    UNIT_TEST( test_convert_sym_sparseline_time_gen_sparseline__unit_test() );
+
+    UNIT_TEST( test_convert_sym_dense_x_gen_dense__unit_test() );
+    UNIT_TEST( test_convert_sym_dense_x_gen_sparseline__unit_test );
+    UNIT_TEST( test_convert_sym_sparseline_x_gen_dense__unit_test() );
+    UNIT_TEST( test_convert_sym_sparseline_x_gen_dense_2__unit_test() );
+    UNIT_TEST( test_convert_sym_sparseline_x_gen_sparseline__unit_test() );
+    
+    UNIT_TEST( test_convert_sym_sparseline_x_sym_sparseline__unit_test() );
+    UNIT_TEST( test_convert_sym_sparseline_x_sym_dense__unit_test() );
+    UNIT_TEST( test_convert_sym_dense_x_sym_sparseline__unit_test() );
+    UNIT_TEST( test_convert_sym_dense_x_sym_dense__unit_test() );    
+    
+    UNIT_TEST( test_convert_gen_sparseline_x_sym_sparseline__unit_test() );
+    UNIT_TEST( test_convert_gen_sparseline_x_sym_dense__unit_test() );
+    UNIT_TEST( test_convert_gen_dense_x_sym_sparseline__unit_test() );
+    UNIT_TEST( test_convert_gen_dense_x_sym_dense__unit_test() );
+    
+    UNIT_TEST( test_convert_gen_sparseline_x_gen_sparseline__unit_test() );
+    UNIT_TEST( test_convert_gen_sparseline_x_gen_dense__unit_test() );
+    UNIT_TEST( test_convert_gen_dense_x_gen_sparseline__unit_test() );
+    UNIT_TEST( test_convert_gen_dense_x_gen_dense__unit_test() );
+    
     UNIT_TEST( test_convert_sym_sparseline_to_gen_sparseline__unit_test() );
-    UNIT_TEST( test_convert_sym_sparseline_time_sym_sparseline__unit_test() );
-    UNIT_TEST( test_convert_gen_sparseline_time_sym_sparseline__unit_test() );
-    UNIT_TEST( test_convert_three_times_00__unit_test() );
-    UNIT_TEST( test_convert_three_times_01__unit_test() );
-    UNIT_TEST( test_convert_three_times_02__unit_test() );
-    UNIT_TEST( test_convert_three_times_03__unit_test() );
-    UNIT_TEST( test_convert_three_times_04__unit_test() );
-    UNIT_TEST( test_convert_three_times_05__unit_test() );
-    UNIT_TEST( test_convert_three_times_06__unit_test() );
-    UNIT_TEST( test_convert_three_times_07__unit_test() );
+    
+    UNIT_TEST( test_convert_three_x_00__unit_test() );
+    UNIT_TEST( test_convert_three_x_01__unit_test() );
+    UNIT_TEST( test_convert_three_x_02__unit_test() );
+    UNIT_TEST( test_convert_three_x_03__unit_test() );
+    UNIT_TEST( test_convert_three_x_04__unit_test() );
+    UNIT_TEST( test_convert_three_x_05__unit_test() );
+    UNIT_TEST( test_convert_three_x_06__unit_test() );
+    UNIT_TEST( test_convert_three_x_07__unit_test() );
 //    UNIT_TEST(  );
     return 0;
 }
