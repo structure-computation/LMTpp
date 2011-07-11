@@ -138,7 +138,7 @@ public:
     explicit Mat(unsigned nr) { this->nr.set(default_nb_rows); real_nr.set(default_nb_rows); this->nc.set(default_nb_cols); real_nc.set(default_nb_cols); resize(nr,nr); }
     Mat(unsigned nr,unsigned nc) { this->nr.set(default_nb_rows); real_nr.set(default_nb_rows); this->nc.set(default_nb_cols); real_nc.set(default_nb_cols); resize(nr,nc); }
     Mat(unsigned nr,unsigned nc,const TT &val) { this->nr.set(default_nb_rows); real_nr.set(default_nb_rows); this->nc.set(default_nb_cols); real_nc.set(default_nb_cols); resize(nr,nc); set(val); }
-    template<class T2,int s2> Mat(unsigned r,unsigned c,const Vec<T2,s2> &v):data(v) { this->nr.set(default_nb_rows); real_nr.set(default_nb_rows); this->nc.set(default_nb_cols); real_nc.set(default_nb_cols); resize(r,c); }
+    template<class T2,int s2> Mat(unsigned r,unsigned c,const Vec<T2,s2> &v):data(v) { this->nr.set(r); real_nr.set(r); this->nc.set(c); real_nc.set(c); resize(r,c); }
 
     /*template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
         if ( fixed_size==false )

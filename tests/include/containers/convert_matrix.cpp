@@ -608,37 +608,37 @@ bool test_convert_three_x_07__unit_test() {
 
 int main() {
 
-    UNIT_TEST( test_convert_sym_dense_x_gen_dense__unit_test() );
-    UNIT_TEST( test_convert_sym_dense_x_gen_sparseline__unit_test );
-    UNIT_TEST( test_convert_sym_sparseline_x_gen_dense__unit_test() );
-    UNIT_TEST( test_convert_sym_sparseline_x_gen_dense_2__unit_test() );
-    UNIT_TEST( test_convert_sym_sparseline_x_gen_sparseline__unit_test() );
-    
-    UNIT_TEST( test_convert_sym_sparseline_x_sym_sparseline__unit_test() );
-    UNIT_TEST( test_convert_sym_sparseline_x_sym_dense__unit_test() );
-    UNIT_TEST( test_convert_sym_dense_x_sym_sparseline__unit_test() );
-    UNIT_TEST( test_convert_sym_dense_x_sym_dense__unit_test() );    
-    
-    UNIT_TEST( test_convert_gen_sparseline_x_sym_sparseline__unit_test() );
-    UNIT_TEST( test_convert_gen_sparseline_x_sym_dense__unit_test() );
-    UNIT_TEST( test_convert_gen_dense_x_sym_sparseline__unit_test() );
-    UNIT_TEST( test_convert_gen_dense_x_sym_dense__unit_test() );
-    
-    UNIT_TEST( test_convert_gen_sparseline_x_gen_sparseline__unit_test() );
-    UNIT_TEST( test_convert_gen_sparseline_x_gen_dense__unit_test() );
-    UNIT_TEST( test_convert_gen_dense_x_gen_sparseline__unit_test() );
+//     UNIT_TEST( test_convert_sym_dense_x_gen_dense__unit_test() );
+//     UNIT_TEST( test_convert_sym_dense_x_gen_sparseline__unit_test );
+//     UNIT_TEST( test_convert_sym_sparseline_x_gen_dense__unit_test() );
+//     UNIT_TEST( test_convert_sym_sparseline_x_gen_dense_2__unit_test() );
+//     UNIT_TEST( test_convert_sym_sparseline_x_gen_sparseline__unit_test() );
+//     
+//     UNIT_TEST( test_convert_sym_sparseline_x_sym_sparseline__unit_test() );
+//     UNIT_TEST( test_convert_sym_sparseline_x_sym_dense__unit_test() );
+//     UNIT_TEST( test_convert_sym_dense_x_sym_sparseline__unit_test() );
+//     UNIT_TEST( test_convert_sym_dense_x_sym_dense__unit_test() );    
+//     
+//     UNIT_TEST( test_convert_gen_sparseline_x_sym_sparseline__unit_test() );
+//     UNIT_TEST( test_convert_gen_sparseline_x_sym_dense__unit_test() );
+//     UNIT_TEST( test_convert_gen_dense_x_sym_sparseline__unit_test() );
+//     UNIT_TEST( test_convert_gen_dense_x_sym_dense__unit_test() );
+//     
+//     UNIT_TEST( test_convert_gen_sparseline_x_gen_sparseline__unit_test() );
+//     UNIT_TEST( test_convert_gen_sparseline_x_gen_dense__unit_test() );
+//     UNIT_TEST( test_convert_gen_dense_x_gen_sparseline__unit_test() );
     UNIT_TEST( test_convert_gen_dense_x_gen_dense__unit_test() );
     
-    UNIT_TEST( test_convert_sym_sparseline_to_gen_sparseline__unit_test() );
-    
-    UNIT_TEST( test_convert_three_x_00__unit_test() );
-    UNIT_TEST( test_convert_three_x_01__unit_test() );
-    UNIT_TEST( test_convert_three_x_02__unit_test() );
-    UNIT_TEST( test_convert_three_x_03__unit_test() );
-    UNIT_TEST( test_convert_three_x_04__unit_test() );
-    UNIT_TEST( test_convert_three_x_05__unit_test() );
-    UNIT_TEST( test_convert_three_x_06__unit_test() );
-    UNIT_TEST( test_convert_three_x_07__unit_test() );
+//     UNIT_TEST( test_convert_sym_sparseline_to_gen_sparseline__unit_test() );
+//     
+//     UNIT_TEST( test_convert_three_x_00__unit_test() );
+//     UNIT_TEST( test_convert_three_x_01__unit_test() );
+//     UNIT_TEST( test_convert_three_x_02__unit_test() );
+//     UNIT_TEST( test_convert_three_x_03__unit_test() );
+//     UNIT_TEST( test_convert_three_x_04__unit_test() );
+//     UNIT_TEST( test_convert_three_x_05__unit_test() );
+//     UNIT_TEST( test_convert_three_x_06__unit_test() );
+//     UNIT_TEST( test_convert_three_x_07__unit_test() );
 //    UNIT_TEST(  );
     return 0;
 }
