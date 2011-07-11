@@ -320,8 +320,8 @@ public:
 
     Vec &set(const TT &v) { for(unsigned i=0;i<size();++i) val[i]=v; return *this; }
 
-    /// return a Vec with random values in [-1,1]. if s_dim==-1, user must specify size, else size must be = s_dim
-    static Vec random() { Vec res;  for(unsigned i=0;i<res.size();res[i++]=TT(rand()/(double)RAND_MAX)); return res; }
+    /// return a Vec with random values in [0;1]. if s_dim==-1, user must specify size, else size must be = s_dim
+    static Vec random() { Vec res;  for( unsigned i = 0; i < res.size(); res[i++]=TT(rand()/(double)RAND_MAX) ); return res; }
 
     /*!
     return
