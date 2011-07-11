@@ -7,7 +7,7 @@
 
 #include "polynomials.h" /// ret_roots_by_companion_matrix()
 #include "determinant.h"
-#include "util/combinatorialiterator.h"
+#include "../util/combinatorialiterator.h"
 
 namespace LMT {
 

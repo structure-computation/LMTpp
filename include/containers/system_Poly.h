@@ -6,7 +6,6 @@
 #include <assert.h>
 
 #include "algo.h"
-#include "Poly.h"
 #include "system_Poly_common.h"
 
 namespace LMT {
