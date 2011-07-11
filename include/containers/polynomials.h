@@ -228,14 +228,14 @@ int ret_roots_by_companion_matrix( const Vec<T,s>& a, int m, Vec< complex<T> >& 
     
     memset( A, 0, m * m * sizeof( double ) );
     A[m-1] = -a[0] * iam;
-    for( unsigned i = 1; i < m; ++i ) {
+    for( int i = 1; i < m; ++i ) {
         A[m*i+i-1] = 1;
         A[m*i+m-1] = -a[i] * iam;
     }
     
     dgeev_( const_cast<char*>( pp ), const_cast<char*>( pp ), &m, A, &lda, wr, wi, NULL, &ldvl, NULL, &ldvr, work, &lwork, &info );
     if ( not( info )) {
-        for( unsigned i = 0; i < m; ++i )
+        for( int i = 0; i < m; ++i )
             root.push_back( std::complex<T>( wr[i], wi[i] ) );
     }
     delete[] zone;

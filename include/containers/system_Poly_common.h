@@ -229,13 +229,12 @@ bool solve_polynomial_system( Vec<T> &sol, const Vec<T, s> &coef ) {
                             sol.push_back( -2 * c / ( b - rd ) );
                             sol.push_back( -0.5 * ( b - rd ) );
                         }
-                        return true;
                     }
                     if ( std::abs( delta ) < 32 * ( 2 + std::abs( b ) ) * std::numeric_limits<T>::epsilon() ) {
                         /// delta proche de zéro et on est dans une situation où de petits écarts sur les coefficients entraînent de grandes différences sur les solutions.
-                        sol.push_back( -0.5 * b );
-                        return true; 
-                    } 
+                        sol.push_back( -0.5 * b ); 
+                    }
+                    return true;
                  } break;
         case 3  :{ /// http://fr.wikipedia.org/wiki/Méthode_de_Cardan
                     T den = 1 / coef[ 3 ];
@@ -264,7 +263,7 @@ bool solve_polynomial_system( Vec<T> &sol, const Vec<T, s> &coef ) {
                     Vec<T> pd; pd.resize( coef.size() - 2 );
                      
                     ret_roots_by_companion_matrix( coef, coef.size() - 1, solc );
-                    for( int i = 0; i < solc.size(); ++i ) {
+                    for( unsigned i = 0; i < solc.size(); ++i ) {
                     
                         if ( solc[ i ].imag() == 0 ) {
                                 sol.push_back( solc[ i ].real() );
@@ -285,7 +284,7 @@ bool solve_polynomial_system( Vec<T> &sol, const Vec<T, s> &coef ) {
                                 pd[ 0 ] = pd[ 0 ] * solc[ i ].real() + coef[ k ];
                             }
 
-                            for( int k = 0; k < pd.size(); ++k )
+                            for( unsigned k = 0; k < pd.size(); ++k )
                                 pd[ k ] = std::abs( pd[ k ] );
                                 
                             //for( int k = 0; k < pd.size(); ++k )
@@ -295,10 +294,10 @@ bool solve_polynomial_system( Vec<T> &sol, const Vec<T, s> &coef ) {
                                 continue;
                                             
                             pd[ 0 ] = std::ldexp( pd[ 0 ] + std::numeric_limits<T>::epsilon(), 10 );
-                            for( int k = 1; k < pd.size(); ++k ) {
+                            for( unsigned k = 1; k < pd.size(); ++k ) {
                                 if ( pd[ k ] > pd[ 0 ] ) {
                                     T rac = std::abs( solc[ i ] ), som = 1, rac_pow = rac;
-                                    for( int l = 1; l <= coef.size(); ++l ) {
+                                    for( unsigned l = 1; l <= coef.size(); ++l ) {
                                         som += rac_pow;
                                         rac_pow *= rac;
                                     }
@@ -702,8 +701,10 @@ bool solve_polynomial_system_resultant_2( Vec< Vec<T, 2> > &sol, const Vec<T,6> 
         if ( sol.size() )
             return true;
         else
-            false;
+            return false;
     }
+    
+    return ret;
 }
 
 /*!
