@@ -4,6 +4,7 @@
 #include "vec.h"
 #include "../mesh/Hexa.h"
 #include "../mesh/Wedge.h"
+#include "../mesh/pyramid.h"
 
 namespace LMT {
 
@@ -43,6 +44,19 @@ Vec<T,6> reduction_resultant_for_element( const Wedge &ne, const Vec<T,10> &f, c
     res[2] = g[0]*f[8]+f[3]*g[2]-f[0]*g[8]-g[3]*f[2];
     res[3] = g[1]*f[6]-f[1]*g[6];
     res[4] = g[1]*f[8]+f[6]*g[2]-f[1]*g[8]-g[6]*f[2];
+    res[5] = g[2]*f[8]-f[2]*g[8];
+    return res;
+}
+
+template<class T>
+Vec<T,6> reduction_resultant_for_element( const Pyramid &ne, const Vec<T,10> &f, const Vec<T,10> &g ) {
+    Vec<T,6> res;
+    
+    res[0] = g[0]*f[3]-f[0]*g[3];
+    res[1] = g[1]*f[3]-f[1]*g[3];
+    res[2] = g[0]*f[8]+f[3]*g[2]-f[0]*g[8]-g[3]*f[2];
+    res[3] = 0;
+    res[4] = g[1]*f[8]-f[1]*g[8];
     res[5] = g[2]*f[8]-f[2]*g[8];
     return res;
 }
