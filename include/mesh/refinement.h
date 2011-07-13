@@ -193,7 +193,7 @@ namespace LMTPRIVATE {
         }
         
         /// deuxième foncteur
-        template<class TE, unsigned num> bool operator()( TE &e, const Number<num> &nnn ) { 
+        template<class TE, unsigned num> void operator()( TE &e, const Number<num> &nnn ) { 
             append_constrained_cut( e, nnn ); 
         }
 
