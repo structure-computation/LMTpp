@@ -1,6 +1,8 @@
 #ifndef MAT_DETERMINANT_H
 #define MAT_DETERMINANT_H
 
+#include "mat.h"
+
 extern "C" {
     int dgeev_(char *jobvl, char *jobvr, int *n, double *a, int *lda, double *wr, double *wi, double *vl, int *ldvl, double *vr, int *ldvr, double *work, int *lwork, int *info);
 }

@@ -32,6 +32,12 @@ namespace LMT {
         .                    | /   \ |
         .                    |/     \|
         .                    0______ 1
+        
+    Dans l'espace de référence cela correspond au volume de points M(x,y,z) tels que :
+        * x, y , z >= 0
+        * x <= 1
+        * y <= 1
+        * x+z <= 1
 
     \keyword Maillage/Elément
     \friend raphael.pasquier@lmt.ens-cachan.fr
