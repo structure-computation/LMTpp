@@ -37,7 +37,7 @@ bool get_var_inter_algebric( const Triangle_6 &elem, const PosNodes &pos_nodes, 
     R_6 = R_6+R_11; R_10 = R_6+R_10; coeff_poly[0][2] = R_10; R_11 = R_8+R_11;
     R_1 = R_11+R_1; coeff_poly[0][1] = R_1; R_2 = R_4+R_2; coeff_poly[0][0] = R_2;
 
-
+    //std::cout << setprecision( 17 );
     //PRINT( coeff_poly[0] ); 
     //PRINT( coeff_poly[1] ); 
 

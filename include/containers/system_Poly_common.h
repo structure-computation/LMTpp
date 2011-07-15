@@ -565,11 +565,16 @@ template<class T>
 bool solve_polynomial_system_resultant_2( Vec< Vec<T, 2> > &sol, const Vec<T,6> &f, const Vec<T, 6> &g ) {
 
     typedef Vec<T, 2> V2;
-
+    typedef Vec<T, 3> V3;
+    typedef std::complex<T> C;
+    
+    Vec< V3 > sr; /// Vec<T,3> contient la solution puis la norme du résidu
     sol.resize( 0 );
     Vec<T, 5> coef;
     Vec<V2> residu_list;
-    T repsi = std::ldexp( 1, 4 - ( std::numeric_limits<T>::digits >> 1 ) );
+    T repsi = std::ldexp( 1, - ( std::numeric_limits<T>::digits / 3 ) ), nr;
+    //PRINT( std::numeric_limits<T>::digits );
+    //PRINT( repsi );
 
     /// résultant suivant V, la deuxième indéterminée.  
     coef[ 0 ] = g[0]*g[5]*f[2]*f[2]+f[5]*f[5]*g[0]*g[0]-2*g[5]*f[0]*f[5]*g[0]-g[2]*g[5]*f[2]*f[0]+f[5]*g[2]*g[2]*f[0]+g[5]*g[5]*f[0]*f[0]-g[2]*f[2]*f[5]*g[0];
@@ -579,28 +584,38 @@ bool solve_polynomial_system_resultant_2( Vec< Vec<T, 2> > &sol, const Vec<T,6> 
     
     coef[ 4 ] = g[5]*g[5]*f[3]*f[3]+f[5]*f[5]*g[3]*g[3]+g[3]*g[5]*f[4]*f[4]-2*g[5]*f[3]*f[5]*g[3]-g[4]*g[5]*f[4]*f[3]-g[4]*f[4]*f[5]*g[3]+g[4]*g[4]*f[5]*f[3];
     
+    //PRINT( coef );
     Vec<T> sol1;
     bool ret = solve_polynomial_system( sol1, coef );
+    //PRINT( ret );
+    //PRINT( sol1 );
     
     if ( ret ) {
         for( unsigned i = 0; i < sol1.size(); ++i ) {
             Vec<T, 3> coef2; /// f[0]+f[1]*U+f[2]*V+f[3]*U^2+f[4]*U*V+f[5]*V^2
             T U = sol1[i];
+            //std::cout << "----" << U << std::endl;
             coef2[ 0 ] = f[0] + U * ( f[1] + f[3] * U );
             coef2[ 1 ] = f[2] + f[4] * U;
             coef2[ 2 ] = f[5];
-            Vec<T> sol2;
+            //PRINT( coef2 );
+            Vec<C> sol2;
             T V;
             bool ret2 = solve_polynomial_system( sol2, coef2 );
+            //PRINT( ret2 );
+            //PRINT( sol2 );
             if ( ret2 ) {
-                for( unsigned j = 0; j < sol2.size(); ++j ) {
-                    V = sol2[j];
-                    V2 residu( f[0]+f[1]*U+f[2]*V+f[3]*U*U+f[4]*U*V+f[5]*V*V, g[0]+g[1]*U+g[2]*V+g[3]*U*U+g[4]*U*V+g[5]*V*V );
-                    if ( max( std::abs( residu[ 0 ] ), std::abs( residu[ 1 ] ) ) < repsi ) {
-                        sol.push_back( V2( U, V ) );
-                        residu_list.push_back( residu );
+                for( unsigned j = 0; j < sol2.size(); ++j )
+                    if ( ( sol2[ j ].imag() >= 0 ) and ( sol2[ j ].imag() < repsi ) ) {
+                        V2 uv( U, sol2[j].real() );
+                        V2 residu( polyres( f, uv ), polyres( g, uv ) ); 
+                        //std::cout << "U = " << U << "  V = " << uv[ 1 ] << " residu = " << residu << endl;
+                        nr = norm_inf( residu );
+                        if ( nr < repsi ) {
+                            sr.push_back( V3( uv[ 0 ], uv[ 1 ], nr ) );
+                            residu_list.push_back( residu );
+                        }
                     }
-                }
             } else {
                 /// g[0]+g[1]*U+g[2]*V+g[3]*U^2+g[4]*U*V+g[5]*V^2
                 coef2[ 0 ] = g[0] + sol1[i] * ( g[1] + g[3] * U );
@@ -608,103 +623,113 @@ bool solve_polynomial_system_resultant_2( Vec< Vec<T, 2> > &sol, const Vec<T,6> 
                 coef2[ 2 ] = g[5];
                 ret2 = solve_polynomial_system( sol2, coef2 );
                 if ( ret2 ) {
-                    for( unsigned j = 0; j < sol2.size(); ++j ) {
-                        V = sol2[j];
-                        V2 residu( f[0]+f[1]*U+f[2]*V+f[3]*U*U+f[4]*U*V+f[5]*V*V, g[0]+g[1]*U+g[2]*V+g[3]*U*U+g[4]*U*V+g[5]*V*V );
-                        if ( max( std::abs( residu[ 0 ] ), std::abs( residu[ 1 ] ) ) < repsi ) {
-                            sol.push_back( V2( U, V ) );
-                            residu_list.push_back( residu );
+                    for( unsigned j = 0; j < sol2.size(); ++j )
+                        if ( ( sol2[ j ].imag() >= 0 ) and ( sol2[ j ].imag() < repsi ) ) {
+                            V2 uv( U, sol2[j].real() );
+                            V2 residu( polyres( f, uv ), polyres( g, uv ) );
+                            //std::cout << "U = " << U << "  V = " << uv[ 1 ] << " residu = " << residu << endl;
+                            nr = norm_inf( residu );
+                            if ( nr < repsi ) {
+                                sr.push_back( V3( uv[ 0 ], uv[ 1 ], nr ) );
+                                residu_list.push_back( residu );
+                            }
                         }
-                    }
                 }
             }
         }
-        /// amélioration de la qualité par la méthode de Newton
-        for( unsigned i = 0; i < sol.size(); ++i ) {
-            Mat<T, Gen<2,2>, Dense<> > M;
-            M( 0, 0 ) = f[1]+2*f[3]*sol[ i ][ 0 ]+f[4]*sol[ i ][ 1 ];
-            M( 0, 1 ) = f[2]+2*f[5]*sol[ i ][ 1 ]+f[4]*sol[ i ][ 0 ];
-            M( 1, 0 ) = g[1]+2*g[3]*sol[ i ][ 0 ]+g[4]*sol[ i ][ 1 ];
-            M( 1, 1 ) = g[2]+2*g[5]*sol[ i ][ 1 ]+g[4]*sol[ i ][ 0 ];
-            T deter = determinant( M );
-            if ( std::abs( deter ) > repsi ) {
-                sol[ i ] -= inv( M ) * residu_list[ i ];
-            }
-        }
-        if ( sol.size() )
-            return true;
-        else {
-            sol.resize( 0 );
-            residu_list.resize( 0 );
-        }
-    } 
+    } else {    
+        /// résultant suivant U, la première indéterminée.
+        coef[ 0 ] = g[0]*g[3]*f[1]*f[1]+f[3]*f[3]*g[0]*g[0]-2*g[3]*f[0]*f[3]*g[0]-g[1]*g[3]*f[1]*f[0]+f[3]*g[1]*g[1]*f[0]+g[3]*g[3]*f[0]*f[0]-g[1]*f[1]*f[3]*g[0];
+        coef[ 1 ] = -g[4]*f[1]*f[3]*g[0]+2*g[3]*g[3]*f[0]*f[2]+g[2]*g[3]*f[1]*f[1]-2*g[3]*f[3]*g[0]*f[2]-2*g[3]*f[0]*f[3]*g[2]+2*f[3]*f[3]*g[0]*g[2]-g[4]*g[3]*f[1]*f[0]+2*g[4]*f[3]*g[1]*f[0]-g[1]*g[3]*f[1]*f[2]-g[1]*f[1]*f[3]*g[2]-g[1]*g[3]*f[4]*f[0]-g[1]*f[4]*f[3]*g[0]+f[3]*g[1]*g[1]*f[2]+2*g[0]*g[3]*f[1]*f[4];
+        coef[ 2 ] = g[3]*g[3]*f[2]*f[2]+2*g[3]*g[3]*f[0]*f[5]+f[3]*f[3]*g[2]*g[2]+g[0]*g[3]*f[4]*f[4]+g[3]*g[5]*f[1]*f[1]-g[1]*g[3]*f[1]*f[5]-2*g[3]*f[0]*f[3]*g[5]-2*g[3]*f[3]*g[0]*f[5]+2*f[3]*f[3]*g[0]*g[5]-2*g[3]*f[2]*f[3]*g[2]-g[4]*g[3]*f[1]*f[2]-f[1]*g[4]*f[3]*g[2]-g[4]*g[3]*f[4]*f[0]-g[4]*f[4]*f[3]*g[0]+2*f[3]*g[4]*g[1]*f[2]+g[4]*g[4]*f[3]*f[0]-g[1]*f[1]*f[3]*g[5]-g[1]*g[3]*f[4]*f[2]-g[1]*f[4]*f[3]*g[2]+f[3]*g[1]*g[1]*f[5]+2*g[2]*g[3]*f[1]*f[4];
+        coef[ 3 ] = 2*f[3]*f[3]*g[2]*g[5]-2*g[3]*f[2]*f[3]*g[5]+2*g[3]*g[3]*f[2]*f[5]+g[2]*g[3]*f[4]*f[4]-2*g[3]*f[3]*g[2]*f[5]-g[4]*g[3]*f[1]*f[5]-f[1]*g[4]*f[3]*g[5]-g[4]*g[3]*f[4]*f[2]-g[4]*f[4]*f[3]*g[2]+2*f[3]*g[4]*g[1]*f[5]+g[4]*g[4]*f[3]*f[2]-g[1]*g[3]*f[4]*f[5]-g[1]*f[4]*f[3]*g[5]+2*g[3]*g[5]*f[1]*f[4];
+        coef[ 4 ] = g[5]*g[5]*f[3]*f[3]+f[5]*f[5]*g[3]*g[3]+g[3]*g[5]*f[4]*f[4]-2*g[5]*f[3]*f[5]*g[3]-g[4]*g[5]*f[4]*f[3]-g[4]*f[4]*f[5]*g[3]+g[4]*g[4]*f[5]*f[3];
     
-    /// résultant suivant U, la première indéterminée.
-    coef[ 0 ] = g[0]*g[3]*f[1]*f[1]+f[3]*f[3]*g[0]*g[0]-2*g[3]*f[0]*f[3]*g[0]-g[1]*g[3]*f[1]*f[0]+f[3]*g[1]*g[1]*f[0]+g[3]*g[3]*f[0]*f[0]-g[1]*f[1]*f[3]*g[0];
-    coef[ 1 ] = -g[4]*f[1]*f[3]*g[0]+2*g[3]*g[3]*f[0]*f[2]+g[2]*g[3]*f[1]*f[1]-2*g[3]*f[3]*g[0]*f[2]-2*g[3]*f[0]*f[3]*g[2]+2*f[3]*f[3]*g[0]*g[2]-g[4]*g[3]*f[1]*f[0]+2*g[4]*f[3]*g[1]*f[0]-g[1]*g[3]*f[1]*f[2]-g[1]*f[1]*f[3]*g[2]-g[1]*g[3]*f[4]*f[0]-g[1]*f[4]*f[3]*g[0]+f[3]*g[1]*g[1]*f[2]+2*g[0]*g[3]*f[1]*f[4];
-    coef[ 2 ] = g[3]*g[3]*f[2]*f[2]+2*g[3]*g[3]*f[0]*f[5]+f[3]*f[3]*g[2]*g[2]+g[0]*g[3]*f[4]*f[4]+g[3]*g[5]*f[1]*f[1]-g[1]*g[3]*f[1]*f[5]-2*g[3]*f[0]*f[3]*g[5]-2*g[3]*f[3]*g[0]*f[5]+2*f[3]*f[3]*g[0]*g[5]-2*g[3]*f[2]*f[3]*g[2]-g[4]*g[3]*f[1]*f[2]-f[1]*g[4]*f[3]*g[2]-g[4]*g[3]*f[4]*f[0]-g[4]*f[4]*f[3]*g[0]+2*f[3]*g[4]*g[1]*f[2]+g[4]*g[4]*f[3]*f[0]-g[1]*f[1]*f[3]*g[5]-g[1]*g[3]*f[4]*f[2]-g[1]*f[4]*f[3]*g[2]+f[3]*g[1]*g[1]*f[5]+2*g[2]*g[3]*f[1]*f[4];
-    coef[ 3 ] = 2*f[3]*f[3]*g[2]*g[5]-2*g[3]*f[2]*f[3]*g[5]+2*g[3]*g[3]*f[2]*f[5]+g[2]*g[3]*f[4]*f[4]-2*g[3]*f[3]*g[2]*f[5]-g[4]*g[3]*f[1]*f[5]-f[1]*g[4]*f[3]*g[5]-g[4]*g[3]*f[4]*f[2]-g[4]*f[4]*f[3]*g[2]+2*f[3]*g[4]*g[1]*f[5]+g[4]*g[4]*f[3]*f[2]-g[1]*g[3]*f[4]*f[5]-g[1]*f[4]*f[3]*g[5]+2*g[3]*g[5]*f[1]*f[4];
-    coef[ 4 ] = g[5]*g[5]*f[3]*f[3]+f[5]*f[5]*g[3]*g[3]+g[3]*g[5]*f[4]*f[4]-2*g[5]*f[3]*f[5]*g[3]-g[4]*g[5]*f[4]*f[3]-g[4]*f[4]*f[5]*g[3]+g[4]*g[4]*f[5]*f[3];
-
-    ret = solve_polynomial_system( sol1, coef );
-    
-    if ( ret ) {
-        for( unsigned i = 0; i < sol1.size(); ++i ) {
-            Vec<T, 3> coef2; /// f[0]+f[1]*U+f[2]*V+f[3]*U^2+f[4]*U*V+f[5]*V^2
-            T V = sol1[i];
-            coef2[ 0 ] = f[0] + V * ( f[2] + f[5] * V );
-            coef2[ 1 ] = f[1] + f[4] * V;
-            coef2[ 2 ] = f[3];
-            Vec<T> sol2;
-            bool ret2 = solve_polynomial_system( sol2, coef2 );
-            if ( ret2 ) {
-                T U;
-                for( unsigned j = 0; j < sol2.size(); ++j ) {
-                    U = sol2[ j ];
-                    V2 residu( f[0]+f[1]*U+f[2]*V+f[3]*U*U+f[4]*U*V+f[5]*V*V, g[0]+g[1]*U+g[2]*V+g[3]*U*U+g[4]*U*V+g[5]*V*V );
-                    if ( max( std::abs( residu[ 0 ] ), std::abs( residu[ 1 ] ) ) < repsi ) {
-                        sol.push_back( V2( U, V ) );
-                        residu_list.push_back( residu );
-                    }
-                }
-            } else {
-                /// g[0]+g[1]*U+g[2]*V+g[3]*U^2+g[4]*U*V+g[5]*V^2
-                coef2[ 0 ] = g[0] + V * ( g[2] + g[5] * V );
-                coef2[ 1 ] = g[1] + g[4] * V;
-                coef2[ 2 ] = g[3];
-                ret2 = solve_polynomial_system( sol2, coef2 );
+        ret = solve_polynomial_system( sol1, coef );
+        
+        if ( ret ) {
+            for( unsigned i = 0; i < sol1.size(); ++i ) {
+                Vec<T, 3> coef2; /// f[0]+f[1]*U+f[2]*V+f[3]*U^2+f[4]*U*V+f[5]*V^2
+                T V = sol1[i];
+                coef2[ 0 ] = f[0] + V * ( f[2] + f[5] * V );
+                coef2[ 1 ] = f[1] + f[4] * V;
+                coef2[ 2 ] = f[3];
+                Vec<C> sol2;
+                bool ret2 = solve_polynomial_system( sol2, coef2 );
                 if ( ret2 ) {
-                    T U;
-                    for( unsigned j = 0; j < sol2.size(); ++j ) {
-                        U = sol2[ j ];
-                    V2 residu( f[0]+f[1]*U+f[2]*V+f[3]*U*U+f[4]*U*V+f[5]*V*V, g[0]+g[1]*U+g[2]*V+g[3]*U*U+g[4]*U*V+g[5]*V*V );
-                    if ( max( std::abs( residu[ 0 ] ), std::abs( residu[ 1 ] ) ) < repsi ) {
-                        sol.push_back( V2( U, V ) );
-                        residu_list.push_back( residu );
-                    }
+                    for( unsigned j = 0; j < sol2.size(); ++j )
+                            if ( ( sol2[ j ].imag() >= 0 ) and ( sol2[ j ].imag() < repsi ) ) {
+                                V2 uv( sol2[j].real(), V );
+                                V2 residu( polyres( f, uv ), polyres( g, uv ) ); 
+                                //std::cout << "U = " << U << "  V = " << uv[ 1 ] << " residu = " << residu << endl;
+                                nr = norm_inf( residu );
+                                if ( nr < repsi ) {
+                                    sr.push_back( V3( uv[0], uv[1], nr ) );
+                                    residu_list.push_back( residu );
+                                }
+                            }
+                } else {
+                    /// g[0]+g[1]*U+g[2]*V+g[3]*U^2+g[4]*U*V+g[5]*V^2
+                    coef2[ 0 ] = g[0] + V * ( g[2] + g[5] * V );
+                    coef2[ 1 ] = g[1] + g[4] * V;
+                    coef2[ 2 ] = g[3];
+                    ret2 = solve_polynomial_system( sol2, coef2 );
+                    if ( ret2 ) {
+                        for( unsigned j = 0; j < sol2.size(); ++j )
+                            if ( ( sol2[ j ].imag() >= 0 ) and ( sol2[ j ].imag() < repsi ) ) {
+                                V2 uv( sol2[j].real(), V );
+                                V2 residu( polyres( f, uv ), polyres( g, uv ) );
+                                //std::cout << "U = " << U << "  V = " << uv[ 1 ] << " residu = " << residu << endl;
+                                nr = norm_inf( residu );
+                                if ( max( std::abs( residu[ 0 ] ), std::abs( residu[ 1 ] ) ) < repsi ) {
+                                    sr.push_back( V3( uv[0], uv[1], nr ) );
+                                    residu_list.push_back( residu );
+                                }
+                            }
                     }
                 }
             }
         }
-        /// amélioration de la qualité par la méthode de Newton
-        for( unsigned i = 0; i < sol.size(); ++i ) {
-            Mat<T, Gen<2,2>, Dense<> > M;
-            M( 0, 0 ) = f[1]+2*f[3]*sol[ i ][ 0 ]+f[4]*sol[ i ][ 1 ];
-            M( 0, 1 ) = f[2]+2*f[5]*sol[ i ][ 1 ]+f[4]*sol[ i ][ 0 ];
-            M( 1, 0 ) = g[1]+2*g[3]*sol[ i ][ 0 ]+g[4]*sol[ i ][ 1 ];
-            M( 1, 1 ) = g[2]+2*g[5]*sol[ i ][ 1 ]+g[4]*sol[ i ][ 0 ];
-            T deter = determinant( M );
-            if ( std::abs( deter ) > repsi ) {
-                sol[ i ] -= inv( M ) * residu_list[ i ];
-            }
-        }
-        if ( sol.size() )
-            return true;
-        else
-            return false;
+    
     }
     
-    return ret;
+    //std::cout << "sol = " << sr << std::endl;
+    /// amélioration de la qualité par la méthode de Newton
+    for( unsigned i = 0; i < sr.size(); ++i ) {
+        Mat<T, Gen<2,2>, Dense<> > J;
+        J( 0, 0 ) = f[1]+2*f[3]*sr[ i ][ 0 ]+f[4]*sr[ i ][ 1 ];
+        J( 0, 1 ) = f[2]+2*f[5]*sr[ i ][ 1 ]+f[4]*sr[ i ][ 0 ];
+        J( 1, 0 ) = g[1]+2*g[3]*sr[ i ][ 0 ]+g[4]*sr[ i ][ 1 ];
+        J( 1, 1 ) = g[2]+2*g[5]*sr[ i ][ 1 ]+g[4]*sr[ i ][ 0 ];
+        //std::cout << "sol _ i = " << sr[ i ] << std::endl;
+        //std::cout << "residu initial = " << residu_list[ i ] << std::endl;
+        if ( std::abs( determinant( J ) ) > repsi ) {
+            V2 uv( sr[ i ][ 0 ], sr[ i ][ 1 ] );
+            uv -= inv( J ) * residu_list[ i ];
+            residu_list[ i ] = V2( polyres( f, uv ), polyres( g, uv ) );
+            J( 0, 0 ) = f[1]+2*f[3]*sr[ i ][ 0 ]+f[4]*sr[ i ][ 1 ];
+            J( 0, 1 ) = f[2]+2*f[5]*sr[ i ][ 1 ]+f[4]*sr[ i ][ 0 ];
+            J( 1, 0 ) = g[1]+2*g[3]*sr[ i ][ 0 ]+g[4]*sr[ i ][ 1 ];
+            J( 1, 1 ) = g[2]+2*g[5]*sr[ i ][ 1 ]+g[4]*sr[ i ][ 0 ];
+            //std::cout << "residu intermediaire = " << residu_list[ i ] << std::endl;
+            uv -= inv( J ) * residu_list[ i ];
+            residu_list[ i ] = V2( polyres( f, uv ), polyres( g, uv ) );
+            sr[ i ] = V3( uv[ 0 ], uv[ 1 ], norm_inf( residu_list[ i ] ) );          
+        }
+        //std::cout << "residu final = " << residu_list[ i ] << std::endl;
+    }
+    
+    if ( sr.size() ) {
+        LMT::sort( sr, Less_at_three() );
+        //std::cout << "sol = " << std::endl;
+        //for( unsigned i = 0; i < sr.size(); ++i )
+        //    std::cout << sr[i][0] << " " << sr[i][1] << "  residu = " << sr[i][2] << std::endl; 
+        sol.resize( sr.size() );
+        for( unsigned i = 0; i < sr.size(); ++i )
+            sol[ i ] = V2( sr[ i ][ 0 ], sr[ i ][ 1 ] ); 
+        return true;
+    } else
+        return false;
 }
 
 /*!
@@ -726,7 +751,7 @@ bool solve_polynomial_system_resultant_4_par( Vec< Vec<T, 2> > &sol, const Vec<T
 
     T repsi = std::ldexp( 1, 4 - ( std::numeric_limits<T>::digits >> 2 ) );
     T nr;
-    Vec< V3 > sr; /// Vec<T,3> contien la solution puis la norme du résidu
+    Vec< V3 > sr; /// Vec<T,3> contient la solution puis la norme du résidu
     Vec< V2 > residu_list;
     sol.resize( 0 );
     
