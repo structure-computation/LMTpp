@@ -8,6 +8,21 @@
 #include "../mesh/Wedge.h"
 namespace LMT {
 
+/*!
+    Objectif : 
+        Ces fonctions renvoie la matrice jacobienne J(x) de nb_vi polynômes où nb_vi est le nombre d'indéterminées. La représentation de ces polynômes est très simple puisqu'on stocke leurs coefficients dans un vecteur avec l'ordre suivant 
+            * cas de 3 indéterminées :
+                1 U V W U^2 UV UW V^2 VW W^2 U^3 U^2V U^2W UV^2 UVW UW^2 V^3 V^2W VW^2 W^3 etc... 
+            * cas de 2 indéterminées :
+                1 U V U^2 UV V^2 U^3 U^2V UV^2 V^3 etc...
+
+
+    Paramètres :
+        * <strong> NE </strong> est le type d'élément géométrique ( e.g. \a Hexa , \a Wedge , \a Pyramid , \a Triangle_6 ),
+        * <strong> f </strong> est le système de fonctions polynômes,
+        * <strong> vi </strong> est la variable "x".
+*/ 
+
 template<class T, int s, class NE >
 Mat<T, Gen<NE::nb_var_inter,NE::nb_var_inter>, Dense<> > jacobian_for_element( const NE &ne, 
                                                                                const Vec< Vec<T,s>, NE::nb_var_inter> &f, 
@@ -61,6 +76,21 @@ Mat<T, Gen<Pyramid::nb_var_inter,Pyramid::nb_var_inter>, Dense<> > jacobian_for_
                          
 }
 
+/*!
+    Objectif :
+        Cette fonction calcule des itérés de l'opérateur de Newton-Raphson x -> x - df(x)^(-1) f(x) pour un système polynomiales à stockage simple. Plus précisément un polynôme est représenté par ses coefficients stockés dans un vecteur dans l'ordre suivant 
+            * cas de 3 indéterminées :
+                1 U V W U^2 UV UW V^2 VW W^2 U^3 U^2V U^2W UV^2 UVW UW^2 V^3 V^2W VW^2 W^3 etc... 
+            * cas de 2 indéterminées :
+                1 U V U^2 UV V^2 U^3 U^2V UV^2 V^3 etc...
+        
+    Paramètres :
+        * <strong> NE </strong> est le type d'élément géométrique ( e.g. \a Hexa , \a Wedge , \a Pyramid , \a Triangle_6 ),
+        * <strong> f </strong> est le système de fonctions polynômes,
+        * <strong> vi </strong> est la variable "x",
+        * <strong> residu </strong> est la valeur de f en "x" : "f(x)".
+        * <strong> iter </strong> est le nombre d'itérations
+*/
 template<class T, int s, class NE >
 bool newton_for_element( const NE &ne, 
                          const Vec< Vec<T,s>, NE::nb_var_inter> &f, 

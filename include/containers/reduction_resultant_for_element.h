@@ -8,6 +8,15 @@
 
 namespace LMT {
 
+/*!
+    Objectif : 
+        Ces fonctions renvoie la réduction par le résultant de deux polynômes à 3 indéterminées suivant la troisième indéterminée. La représentation de ces polynômes est très simple puisqu'on stocke leurs coefficients dans un vecteur avec l'ordre suivant 
+            * cas de 3 indéterminées :
+                1 U V W U^2 UV UW V^2 VW W^2 U^3 U^2V U^2W UV^2 UVW UW^2 V^3 V^2W VW^2 W^3 etc... 
+            * cas de 2 indéterminées :
+                1 U V U^2 UV V^2 U^3 U^2V UV^2 V^3 etc...
+
+*/ 
 template<class T, int s, int sr, class NE >
 Vec<T,sr> reduction_resultant_for_element( const NE &ne, const Vec<T,s> &f, const Vec<T,s> &h ) {
     return Vec<T,sr>( 0 );
