@@ -1,0 +1,202 @@
+/*!
+\example Problème élastique
+
+    L'objectif de cet exemple est de vous montrer comment résoudre un problème élastique sur la plate-forme ainsi que d'essayer et d'évaluer différentes librairie de résolution de systèmes linéaires avec matrice symétrique définie positive.
+     
+    Pour compiler le code, on peut utiliser soit le programme <strong> metil_comp </strong> soit <strong> scons </strong> . Après avoir fait un lien symbolique sur la LMT++ : 
+    \code 
+        ln -s /chemin de la librairie/LMTpp LMTpp
+    on tape pour le premier programme :
+        \code 
+            metil_comp -ILMT/include main.cpp
+             
+    Pour scons, on crée le fichier python :
+    
+
+    Voici le code de l'exemple :
+    \code C/C++
+        #include "build/problem_test_all_elasticity/problem.h"
+        #include "mesh/make_rect.h"
+        #include "containers/matcholamd.h"
+        #include "containers/conjugate_gradient.h"
+        #include "containers/MatWithTinyBlocks.h"
+        
+        #include <util/MKL_direct_solver.h>
+        #include <util/MKL_iterative_solver.h>
+        #include <util/MUMPS_solver.h>
+        using namespace LMT;
+        using namespace std;
+        
+        int main(int argc, const char* argv[ ] ) {
+            static const unsigned dim = 3;
+            typedef double T;
+            typedef Problem_test_all_elasticity<T, dim> PB;
+            typedef PB::TM TM;
+            typedef TM::Pvec Pvec;
+        
+            T t1, t2;
+            TM m;
+            make_rect( m, Hexa(), 0, 1, 21 );
+            
+            PB pb( m, true );
+        
+            FormulationAncestor<double> *f = pb.formulation_nb( 0 );
+            
+            for(unsigned i = 0; i < m.node_list.size(); ++i )
+                m.node_list[ i ].dep[ 0 ] = 1;
+            
+            double epsi = 1e-6;
+            for(unsigned i = 0; i < m.node_list.size(); ++i )
+                if ( ( m.node_list[ i ].pos[ 0 ] < epsi ) or ( m.node_list[ i ].pos[ 0 ] > 1 - epsi ) ) {
+                    for( int d = 0; d < dim; ++d )
+                        f->add_constraint( "sin( node[" + to_string( i ) + "].dep[" + to_string( d ) + "] ) - " + to_string( 0.1 * m.node_list[ i ].pos[ 0 ] * ( d == 0 ) ), 1e5 );
+                }
+            
+        //     f->want_rcm = false;
+        //     f->want_amd = true;
+            f->nb_threads_assemble_matrix = 2;
+            
+            f->assemble();
+            Mat<double,Sym<>,SparseCholMod> *A;
+            f->get_mat( A );
+            //PRINTN( *A );
+            //display_structure( *A, "matrice_de_raideur" ); 
+            t1 = time_of_day_in_sec();
+            Mat< double,Sym<>,SparseLine<> > B = *A;
+            t2 = time_of_day_in_sec();
+            cout << "convert Mat< SparseCholMod > to Mat< SparseLine > = " << t2 - t1 << " seconds" << endl;
+            t1 = time_of_day_in_sec();
+            f->solve();
+            T dt_cholmod = time_of_day_in_sec() - t1;
+            
+            Vec<double> &x0 = f->get_result( 0 );
+            Vec<double> &b = f->get_sollicitation();
+            
+            T residu_solve = norm_2( b - B * x0 );
+            
+            MUMPS_solver mumps;
+            Vec<T> xmu;        
+            t1 = time_of_day_in_sec();
+            mumps.get_factorization( B, false, true ); /// on effectue la factorisation et le résultat est stocké dans mumps
+            xmu = mumps.solve( b ); /// xmu contient maintenant la solution
+            T dt_mumps = time_of_day_in_sec() - t1;
+            T residu_mumps = norm_2( b - B * xmu );
+        
+            MKL_direct_solver mkl_ds;
+            Vec<T> xmkl;        
+            t1 = time_of_day_in_sec();
+            mkl_ds.get_factorization( B, false, true ); /// on effectue la factorisation et le résultat est stocké dans mkl_ds
+            xmkl = mkl_ds.solve( b ); /// xmkl contient maintenant la solution
+            T dt_mkl_direct = time_of_day_in_sec() - t1;
+            T residu_mkl_direct = norm_2( b - B * xmkl );
+        
+            PRINT( A->nb_rows() );
+            PRINT( B.nb_nz() );
+        
+            Vec<T> pertub, x( x0 );
+            pertub.resize( x0.size(), 1e-1 * norm_2( x ) );
+            //pertub.resize( x.size(), 8. );
+            x += pertub;
+            
+            ///
+            MKL_iterative_solver solver( B, false );
+            
+            t1 = time_of_day_in_sec();
+            //solver.set_preconditioner( MKL_incomplete_chol_preconditioner, B );
+            solver.set_preconditioner( MKL_Jacobi_preconditioner, B );
+            //solver.set_preconditioner( MKL_SSOR_preconditioner, B );
+        
+            T dt_mkl_preconditiner_jacobi = time_of_day_in_sec() - t1;
+        
+            unsigned nb_iter = solver.solve( b, x, 1e-11 , 10000, false );
+            T dt_mkl_iterative_jacobi = time_of_day_in_sec() - t1;
+            T residu_mkl_iterative_jacobi = norm_2( b - B * x );
+            
+            
+            x = x0 + pertub;
+            t1 = time_of_day_in_sec();
+            solver.set_preconditioner( MKL_incomplete_chol_preconditioner, B );
+            T dt_mkl_preconditiner_incomplete_choleski = time_of_day_in_sec() - t1;
+            
+            nb_iter = solver.solve( b, x, 1e-11 , 10000, false );
+            T dt_mkl_iterative_incomplte_cholesky = time_of_day_in_sec() - t1;
+            T residu_mkl_iterative_incomplete_cholesky = norm_2( b - B * x );
+            
+            Mat<double,Sym<>,SparseLine<> > K( B );
+            t1 = time_of_day_in_sec();
+            incomplete_chol_factorize( K );
+            T dt_lmtpp_preconditiner_incomplete_choleski = time_of_day_in_sec() - t1;
+            
+            x = x0 + pertub;
+        
+            nb_iter = conjugate_gradient( new_SolveUsingCholFactorize( K ), B, b, x, ConvergenceCriteriumNorm2<double>( 1e-11 ) );
+            T dt_lmtpp_cg = time_of_day_in_sec() - t1;
+            T residu_lmt_cg =  norm_2( b - B * x );
+            
+            MatWithTinyBlocks<double,Sym<3> > C( B );
+            MatWithTinyBlocks<double,Sym<3> > P( C );
+            t1 = time_of_day_in_sec();
+            P.chol_incomp();
+            T dt_tiny_block_preconditiner_incomplete_choleski = time_of_day_in_sec() - t1;
+                
+            x = x0 + pertub;
+            solve_using_incomplete_chol_factorize( P, C, b, x, 1e-11 );
+            T dt_tiny_block_cg = time_of_day_in_sec() - t1;
+            T residu_tiny_block_cg = norm_2( b - B * x );
+            
+            cout << "========= Results ========="<< endl;
+            cout << "* duration solve() = " << dt_cholmod << " seconds" << endl;
+            cout << "* duration MUMPS solve = " << dt_mumps << " seconds" << endl;
+            cout << "* duration MKL direct solver = " << dt_mkl_direct << " seconds" << endl;
+            cout << "duration preconditioner MKL Jacobi   = " << dt_mkl_preconditiner_jacobi << " seconds" << endl;
+            cout << "* duration MKL iterative solver with preconditioner Jacobi    = " << dt_mkl_iterative_jacobi << " seconds" << endl;
+            cout << "duration preconditioner MKL incomplete Choleski    = " << dt_mkl_preconditiner_incomplete_choleski << " seconds" << endl;
+            cout << "* duration MKL iterative solver with preconditioner incomplete Choleski = " << dt_mkl_iterative_incomplte_cholesky << " seconds" << endl;
+            cout << "duration preconditioner incomplete Choleski of LMT++  = " << dt_lmtpp_preconditiner_incomplete_choleski << " seconds" << endl;
+            cout << "* duration cg of LMT++ = " << dt_lmtpp_cg << " seconds" << endl;
+            cout << "duration preconditioner tiny block incomplete Choleski = " << dt_tiny_block_preconditiner_incomplete_choleski << " seconds" << endl;
+            cout << "* duration cg with tiny blocks = " << dt_tiny_block_cg << " seconds" << endl;
+            cout << "========= Residuals in norm L2"<< endl;
+            cout << " solve() : " << residu_solve << endl;
+            cout << " MUMPS : " << residu_mumps << endl;
+            cout << " MKL direct solver : " << residu_mkl_direct << endl;
+            cout << " MKL iterative solver with Jacobi : " << residu_mkl_iterative_jacobi << endl;
+            cout << " MKL iterative solver with incomplete Choleski : " << residu_mkl_iterative_incomplete_cholesky << endl;
+            cout << " cg of LMT++ : " << residu_lmt_cg << endl;
+            cout << " cg with tiny blocks : " << residu_tiny_block_cg << endl;
+            
+            return 0;
+        }
+
+    Voici le résultat sur un Core2 Intel 6700 à 2.66 Ghz à pleine puissance
+    \verbatim
+        convert Mat< SparseCholMod > to Mat< SparseLine > = 17.1072 seconds
+        A->nb_rows() -> 27783
+        B.nb_nz() -> 1034030
+        ========= Results =========
+        * duration solve() = 5.42656 seconds
+        * duration MUMPS solve = 2.44596 seconds
+        * duration MKL direct solver = 2.21972 seconds
+        duration preconditioner MKL Jacobi   = 0.0055449 seconds
+        * duration MKL iterative solver with preconditioner Jacobi    = 0.555217 seconds
+        duration preconditioner MKL incomplete Choleski    = 0.230148 seconds
+        * duration MKL iterative solver with preconditioner incomplete Choleski = 0.873854 seconds
+        duration preconditioner incomplete Choleski of LMT++  = 0.185922 seconds
+        * duration cg of LMT++ = 1.32011 seconds
+        duration preconditioner tiny block incomplete Choleski = 0.024024 seconds
+        * duration cg with tiny blocks = 0.430416 seconds
+        ========= Residuals
+        solve() : 1.29333e-11
+        MUMPS : 9.89075e-12
+        MKL direct solver : 1.84119e-16
+        MKL iterative solver with Jacobi : 1.19979e-10
+        MKL iterative solver with incomplete Choleski : 1.47363e-10
+        cg of LMT++ : 1.47902e-10
+        cg with tiny blocks : 1.55903e-10
+
+
+    \keyword Maillage/Elément
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+*/
+
