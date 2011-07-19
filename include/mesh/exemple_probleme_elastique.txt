@@ -10,9 +10,39 @@
         \code 
             metil_comp -ILMT/include main.cpp
              
-    Pour scons, on crée le fichier python :
+    Pour scons, on crée le fichier python <strong> SConstruct </strong> :
+    \code Python
+        from LMT import *
+        from LMT.formal_lf import *
+        
+        env = Environment(
+            #CC = '/opt/intel/bin/icc',
+            #CXX = '/opt/intel/bin/icc',
+            LIBS = [ 'mkl_core', 'mkl_intel_lp64', 'mkl_gnu_thread', 'iomp5', 'pthread', 'cholmod' , 'umfpack' , 'dmumps' , 'mpi_cxx' ],
+            CPPPATH = [ '#LMT/include', '/usr/include/suitesparse', '/opt/intel/Compiler/11.1/064/mkl/include' , '/usr/lib/openmpi/include/' ],
+            CPPFLAGS = cppflags( ['xml2-config'] ) + " -O3 -g -m64 -mtune=core2 "  + " -DWITH_MKL " + " -DWITH_MUMPS "  + " -DWITH_CHOLMOD " + " -DWITH_UMFPACK " ,
+            LINKFLAGS = linkflags( ['xml2-config' ] ) + ' -L/usr/lib/openmpi/lib/ ' + ' -L/opt/intel/Compiler/11.1/064/mkl/lib/em64t/ ' + ' -L/opt/intel/Compiler/11.1/064/lib/intel64/ ' + './build/LMT/util/MKL_direct_solver.o '  + ' ./build/LMT/util/MUMPS_solver.o ' ,
+        )
+        
+        make_dep_py(env)
+        
+        env.BuildDir( 'build/LMT', 'LMT/include', duplicate=0 )
+        libs = SConscript( 'LMT/include/SConscript', exports='env', build_dir='build/LMT' )
+        
+        # --------------------------------------------------------------------------------------------------
+        
+        pb_libs = make_pb(
+            env,
+            0,
+            name = 'test_all_elasticity',
+            formulations = ['elasticity_iso'],
+            elements = [ 'Triangle' , 'Quad', 'Tetra' , 'Hexa' ],
+            dep_py = 1,
+        ) 
+
+        env.Program( "main", ["main.cpp"] + pb_libs + libs , build_dir='build/LMT' )
     
-    Et le fichier Makefile :
+    Et éventuellement le fichier Makefile :
     \code
         all: codegen
             scons
@@ -20,9 +50,14 @@
         codegen:
             cd LMT/include/codegen; scons
 
-    Voici le code de l'exemple :
+    Enfin il faudra mettre à jour la variable d'environnement <strong> LD_LIBRARY_PATH <strong> en tapant dans une console bash :
+    \ code
+        export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/intel/Compiler/11.1/064/lib/intel64/lib:/opt/intel/Compiler/11.1/064/mkl/lib/em64t       
+    Pour les autres shell ( e.g. cshell ), reportez-vous à sa documentaation.
+
+    Voici maintenant le code de l'exemple. C'est un exemple très simple.
     \code C/C++
-        #include "build/problem_test_all_elasticity/problem.h"
+        #include "build/problem_test_all_elasticity/problem.h" /// pour scons uniquement
         #include "mesh/make_rect.h"
         #include "containers/matcholamd.h"
         #include "containers/conjugate_gradient.h"
@@ -49,6 +84,7 @@
         
             FormulationAncestor<double> *f = pb.formulation_nb( 0 );
             
+            /// définition des consitions initiales et des contraintes
             for(unsigned i = 0; i < m.node_list.size(); ++i )
                 m.node_list[ i ].dep[ 0 ] = 1;
             
@@ -64,6 +100,10 @@
             f->nb_threads_assemble_matrix = 2;
             
             f->assemble();
+            t1 = time_of_day_in_sec();
+            f->solve();
+            T dt_cholmod = time_of_day_in_sec() - t1;
+            
             Mat<double,Sym<>,SparseCholMod> *A;
             f->get_mat( A );
             //PRINTN( *A );
@@ -72,9 +112,6 @@
             Mat< double,Sym<>,SparseLine<> > B = *A;
             t2 = time_of_day_in_sec();
             cout << "convert Mat< SparseCholMod > to Mat< SparseLine > = " << t2 - t1 << " seconds" << endl;
-            t1 = time_of_day_in_sec();
-            f->solve();
-            T dt_cholmod = time_of_day_in_sec() - t1;
             
             Vec<double> &x0 = f->get_result( 0 );
             Vec<double> &b = f->get_sollicitation();
@@ -201,6 +238,18 @@
         cg of LMT++ : 1.47902e-10
         cg with tiny blocks : 1.55903e-10
 
+    Première remarque : le premier <strong> include </strong> build/problem_test_all_elasticity/problem.h doit être mis uniquement pour scons. Pour metil_comp on écrira la ligne ...
+    La structure du programme se compose de déclarations d'un maillage, d'un problème et d'une formulation.
+    \code C/C++
+            TM m;
+            PB pb( m, true );
+            FormulationAncestor<double> *f = pb.formulation_nb( 0 );    
+            
+     Ensuite on construit une boîte avec la fonction \a make_rect () puis on définit les consitions initiales et les contraintes.
+     Après on assemble la matrice du problème avec la méthode <strong> assemble() </strong> et on le résout.
+     Pour tester d'autres "solver" linéaires on récupère la matrice et le second membre et la solution via respectivement les méthodes <strong> get_mat()  </strong> et <strong> get_sollicitation() </strong> et <strong> get_result() </strong> .
+     Enfin on résout de nouveau le système avec les solver et on compare les résultats. Les solver itératifs s'en sortent mieux que les solver directs. C'est souvent le cas lorsque la solution grossière qui sert d'amorce à ces méthodes est proche de la solution exacte. Dans notre exemple, on a la solution grossière est à distance L2 de 1/10 * norme_L2( x0 ) de x0 où x0 est une très bonne approximation de la solution. C'était donc plutôt proche.
+     
 
     \keyword Maillage/Elément
     \friend hugo.leclerc@lmt.ens-cachan.fr
