@@ -187,6 +187,7 @@ namespace LMTPRIVATE {
                                                 m_parent->template sub_mesh<2>().elem_list.find( Bar(), DefaultBehavior(), *m_parent, nn ), 
                                                 .5, 
                                                 .5 );
+                        appended_cut |= true;
                         break;
                     }
             }
@@ -311,6 +312,7 @@ namespace LMTPRIVATE {
         TMParent *m_parent;
         TDN cut;
         RNext next;
+        bool appended_cut;
     };
     template<class TM,class TMParent,unsigned max_num_sub_mesh>
     struct Refinment<TM,TMParent,max_num_sub_mesh,max_num_sub_mesh> {
@@ -369,9 +371,18 @@ bool refinement( TM &m, Op &op, bool spread_cut = false ) {
     r.update_cut( m, op );
     
     /// on raffine s'il y a au moins deux arêtes coupées par élément
+
     switch( TM::dim ) {
-        case 2 : apply( m.elem_list, r, Number<TM::dim>() ); break;
-        case 3 : apply( m.sub_mesh( Number<1>() ).elem_list, r, Number<TM::dim>() );break; /// application sur les triangles
+        case 2 : 
+            apply( m.elem_list, r, Number<TM::dim>() );
+            break;
+        case 3 : 
+            do {
+                r.appended_cut = false;
+                apply( m.sub_mesh( Number<1>() ).elem_list, r, Number<TM::dim>() );break; /// application sur les triangles
+                //PRINT( r.appended_cut );
+            } while( r.appended_cut );
+            break;
         default:
             assert( 0 );
     }
