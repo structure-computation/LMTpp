@@ -12,6 +12,13 @@
              
     Pour scons, on crée le fichier python :
     
+    Et le fichier Makefile :
+    \code
+        all: codegen
+            scons
+            ./main
+        codegen:
+            cd LMT/include/codegen; scons
 
     Voici le code de l'exemple :
     \code C/C++

@@ -171,7 +171,7 @@ namespace LMTPRIVATE {
             for( unsigned i = 0 ; i < nb_bar; ++i ) {
                 nn[ 0 ] = e.node( i_n[ i ][ 0 ] );
                 nn[ 1 ] = e.node( i_n[ i ][ 1 ] );            
-                middle[ 0 ] = m_parent->template sub_mesh<2>().elem_list.get_data( next.next.cut, *m_parent->template sub_mesh<2>().elem_list.find( Bar(), DefaultBehavior(), *m_parent, nn ) );
+                middle[ i ] = m_parent->template sub_mesh<2>().elem_list.get_data( next.next.cut, *m_parent->template sub_mesh<2>().elem_list.find( Bar(), DefaultBehavior(), *m_parent, nn ) );
                 if ( middle[ i ] )
                     cpt_cut++;
             }
