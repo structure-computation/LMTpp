@@ -70,7 +70,7 @@ void sep_mesh( TM &m, const TL1 &ls_crack, const TL2 &ls_front ) {
 
 /*!
     Objectif :
-        sep_mesh() sert à couper un maillage 2D ou 3D, noté m. Le résultat est stocké dans m sous la forme d'un seul maillage mais avec ajout de noeuds et d'éléments aux endroits de la coupe et une peau augmentée de la coupe.
+        sep_mesh() sert à redéfinir la peau d' un maillage 2D ou 3D, noté m, en fonction d'une fonctionnelle définie dans le plan ou l'espace suivant la dimension du maillage. Le résultat est stocké dans m sous la forme d'un seul maillage mais avec ajout de noeuds et d'éléments à la peau aux endroits proche de la coupe.
     Remarque :
         ne pas oublier de faire m.update_skin() après l'appel de sep_mesh() pour recalculer la peau du maillage.
          
@@ -84,7 +84,7 @@ void sep_mesh( TM &m, const TL1 &ls_crack, const TL2 &ls_front ) {
         On définit un MeshCarac pour caractériser un maillage avec un attribut nommé <strong> flag </strong> qui nous servira à distinguer les différents parties du maillage.
         On définit une classe <strong> HyperPlan </strong> qui représente une droite du plan ( ou un plan de l'espace ). Cette classe servira aussi de foncteur pour couper un maillage grâce à l'opérateur parenthèse <strong> operator()( const Element<Bar,...> &e ) </strong> 
         
-        Commençons par le MeshCarac contenu dans le fichier Python formulation_test_sep_mesh.py ( que vous créérez ) :
+        Commençons par le MeshCarac contenu dans le fichier Python formulation_test_sep_mesh.py ( que vous créerez ) :
         \code Python
             # -*- coding: utf-8 -*-
             from LMT.formal_lf import *
@@ -96,7 +96,7 @@ void sep_mesh( TM &m, const TL1 &ls_crack, const TL2 &ls_front ) {
                 #elements = ['Triangle','Triangle_6','Quad','Tetra','Hexa','Wedge'],
             )
         
-        Et sa formulation contenue dans le fichier MeshCarac_test_sep_mesh.h.py ( que vous créérez ) :
+        Et sa formulation contenue dans le fichier MeshCarac_test_sep_mesh.h.py ( que vous créerez ) :
         \code Python
             # -*- coding: utf-8 -*-
             
@@ -106,7 +106,8 @@ void sep_mesh( TM &m, const TL1 &ls_crack, const TL2 &ls_front ) {
             def formulation():
                 return 0
         
-        Ensuite le code exemple avec la classe HyperPlan :
+        Ensuite le code exemple avec la classe HyperPlan.
+        Un point important est l'usage de la fonction \a refinement () pour couper le maillage par le plan.
         \code C/C++
             #include "mesh/make_rect.h"
             #include "mesh/mesh.h"
@@ -185,6 +186,7 @@ void sep_mesh( TM &m, const TL1 &ls_crack, const TL2 &ls_front ) {
                 Pvec P( 0.35, 0.45 );
                 HyperPlan<T,dim> plan( nor, P );D 
             
+                refinement( m, plan );
                 sep_mesh( m, plan );
                 
                 for( unsigned i = 0; i < m.node_list.size(); ++i )
@@ -195,7 +197,10 @@ void sep_mesh( TM &m, const TL1 &ls_crack, const TL2 &ls_front ) {
                 return 0;
             }
 
-        
+    \relates level_set_cut
+    \relates refinement
+    \keyword Maillage/Opération
+    \friend lecler@lmt.ens-cachan.fr
 */
 template<class TM,class TL1 >
 void sep_mesh( TM &m, const TL1 &ls_crack ) {

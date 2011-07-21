@@ -440,8 +440,8 @@ struct LevelSetRemoveNeg {
 };
 
 /*!
-    Ojectif :
-        Cette fonction permet de couper un maillage en fonction de la valeur d'un atribut nodal et scalaire. Plus précisément considérons un attribut nodal scalaire ( i.e. double en général ), qu'on nommera phi. Après l'appel de la fonction, le maillage n'aura que des éléments pour lesquelles la valeur de phi aux noeuds est positive.
+    Objectif :
+        Cette fonction permet de couper un maillage en fonction de la valeur d'un attribut nodal et scalaire. Plus précisément considérons un attribut nodal scalaire ( i.e. double en général ), qu'on nommera phi. Après l'appel de la fonction, le maillage n'aura que des éléments pour lesquelles la valeur de phi aux noeuds est positive.
         
     Paramètres :
         * <strong> m </strong> est un maillage qui sera modifié si nécessaire.
@@ -450,7 +450,7 @@ struct LevelSetRemoveNeg {
     Retour :
         renvoie vrai s'il y a eu des changements et faux sinon. 
         
-    Voici un exemple de code. Il faudra adapter le MeshCarac.
+    Voici un exemple de code. Il faudra adapter le MeshCarac ( cf le MeshCarac venant juste après le code C++ ).
     \code C/C++
     
         #include "mesh/make_rect.h"
@@ -481,6 +481,31 @@ struct LevelSetRemoveNeg {
             return 0; 
         }
     
+        Commençons par le MeshCarac contenu dans le fichier Python formulation_test_sep_mesh.py ( que vous créerez ) :
+        \code Python
+            # -*- coding: utf-8 -*-
+            from LMT.formal_lf import *
+            
+            write_pb(
+                name = 'test_cut_mesh',
+                formulations = ['test_cut_mesh'],
+                elements = ['Triangle', 'Tetra' ]
+            )
+        
+        Et sa formulation contenue dans le fichier MeshCarac_test_cut_mesh.h.py ( que vous créerez ) :
+        \code Python
+            # -*- coding: utf-8 -*-
+            
+            phi  = Variable( default_value='1e10', unit='' )
+            
+            #
+            def formulation():
+                return 0
+                
+    \relates level_set_cut
+    \relates refinement
+    \keyword Maillage/Opération
+    \friend lecler@lmt.ens-cachan.fr
 */
 template<class TM,class PhiExtract>
 bool level_set_cut( TM &m, const PhiExtract &p, bool spread_cut = false ) {
@@ -504,7 +529,7 @@ struct RafinementOpBasedOnLength {
     Cette fonction divise toutes les barres (segments) du maillage en deux pour lesquelles la longueur est supérieure à max_length.
     Elle renvoie vrai si elle divise au moins une barre et faux sinon. Ainsi si on souhaite que toutes les barres soient inférieures à max_length, on relancera la fonction autant de fois que nécessaire.
 
-    \keyword Maillage/Elément/Opération
+    \keyword Maillage/Opération
     subdivide each element bar e such as length(e)>max_length (true means subdivision).
 */
 template<class TM,class T>
@@ -546,7 +571,7 @@ bool refinement_if_length_sup( TM &m, T max_length, bool spread_cut = false ) {
         display( m );
     }
 
-
+    \keyword Maillage/Opération
 */
 template<class TIMG1,class TIMG2=TIMG1>
 struct LevelSetImageRefinement {
@@ -599,7 +624,9 @@ struct LevelSetImageRefinement {
         refinement( m, Local_refinement<T, Pvec >( 0.01, 0.2, Pvec( 0.2, 0.5 ) ) );
     
     On raffinera au point de coordonnées ( 0.2, 0.5 ) avec une longueur minimale de 0.01 et une augmentation de 0.2. 
-
+    
+    
+    \keyword Maillage/Opération
 */
 template < class T, class Pvec>
 struct Local_refinement {
@@ -641,7 +668,7 @@ struct Local_refinement {
         refinement( m, Local_refinement<T, Pvec >( 0.01, 0.2, Pvec( 0.2, 0.5 ), 0.2 ) );
     
     On raffinera autour du cercle de centre ( 0.2, 0.5 ) et de rayon 0.2 avec une longueur minimale de 0.01 et une augmentation de 0.2. 
-
+    \keyword Maillage/Opération
 */
 template < class T, class Pvec>
 struct Local_refinement_circle {
@@ -701,7 +728,8 @@ namespace LMTPRIVATE {
 }
 
 /*!
-  coupe d'un maillage par un masque. Un élément est coupé quand un bord a mask < lim_inf et l'autre a mask >= lim_sup
+    coupe d'un maillage par un masque. Un élément est coupé quand un bord a mask < lim_inf et l'autre a mask >= lim_sup
+    \keyword Maillage/Opération
 */
 template<class TM,class MA,class I>
 bool mask_cut( TM &m, const MA &mask, I lim_inf, I lim_sup, I dist_disp, bool remove_inf_elem = false, bool spread_cut = false ) {
