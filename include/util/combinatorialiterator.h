@@ -257,9 +257,14 @@ struct Hiterator {
 template< unsigned _dim >
 struct Piterator {
     static const unsigned dim = _dim;
+    
+    void init() {
+        for( unsigned i = 0; i < dim; ++i ) pos[ i ] = i;
+    }
+    
     Piterator( ) { 
         assert(dim > 1);  
-        for( unsigned i = 0; i < dim; ++i ) pos[ i ] = i;
+        init();
     }
     
     operator bool() const { 

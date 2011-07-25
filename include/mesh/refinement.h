@@ -187,15 +187,45 @@ namespace LMTPRIVATE {
                                                 m_parent->template sub_mesh<2>().elem_list.find( Bar(), DefaultBehavior(), *m_parent, nn ), 
                                                 .5, 
                                                 .5 );
-                        appended_cut |= true;
                         break;
                     }
             }
         }
-        
+
         /// deuxième foncteur
         template<class TE, unsigned num> void operator()( TE &e, const Number<num> &nnn ) { 
             append_constrained_cut( e, nnn ); 
+        }
+        
+        struct Control_two_cuts {
+            Control_two_cuts() : has_two_cuts( false ) {}
+            
+            bool has_two_cuts;
+        };
+        /// pour la 3D mais le foncteur qui utilisera cette méthode parcourera des \a Triangle .
+        template<class TE> 
+        void has_two_cuts( TE &e, const Number<3> &nnn, Control_two_cuts &ctrl ) {
+            static const unsigned nb_bar = 3;
+            unsigned i_n[ nb_bar ][ 2 ] = { { 0, 1 }, { 1, 2 }, { 0, 2 } }; 
+            TNode *nn[ 2 ];
+            TNode *middle[ nb_bar ];
+            unsigned cpt_cut = 0;
+        
+            for( unsigned i = 0 ; i < nb_bar; ++i ) {
+                nn[ 0 ] = e.node( i_n[ i ][ 0 ] );
+                nn[ 1 ] = e.node( i_n[ i ][ 1 ] );            
+                middle[ i ] = m_parent->template sub_mesh<2>().elem_list.get_data( next.next.cut, *m_parent->template sub_mesh<2>().elem_list.find( Bar(), DefaultBehavior(), *m_parent, nn ) );
+                if ( middle[ i ] )
+                    cpt_cut++;
+            }
+            
+            if ( cpt_cut == 2 )
+                ctrl.has_two_cuts = true;
+        }
+        
+        template<class TE>
+        void operator() ( TE &e, const Number<3> &nnn, Control_two_cuts &ctrl ) {
+            has_two_cuts( e, nnn, ctrl );
         }
 
         /// on étend la coupe si l'arête coupée n'est pas la plus longue de l'élément 
@@ -370,28 +400,32 @@ bool refinement( TM &m, Op &op, bool spread_cut = false ) {
     LMTPRIVATE::Refinment<TM,TM,0,TM::dim+1> r( &m );
     r.update_cut( m, op );
     
-    /// on raffine s'il y a au moins deux arêtes coupées par élément
+    typename LMTPRIVATE::Refinment<TM,TM,0,TM::dim+1>::Control_two_cuts ctrl;
+    
+    do {
+        ctrl.has_two_cuts = false;
+        /// on raffine s'il y a au moins deux arêtes coupées par élément
+        switch( TM::dim ) {
+            case 2 : apply( m.elem_list, r, Number<TM::dim>() ); break;
+            case 3 : apply( m.sub_mesh( Number<1>() ).elem_list, r, Number<TM::dim>() ); break;/// application sur les triangles
+            default:
+                assert( 0 );
+        }
+        
+        /// on propage le raffinement au reste du maillage
+        if ( spread_cut ) {
+            m.update_elem_neighbours();
+            for( unsigned i = 0; i < m.elem_list.size(); ++i )
+                r.spread_cut( m.elem_list[ i ], Number<TM::dim>() );
+        }
+        
+        /// contrôle s'il y a deux coupes pour la 3D ( j'espère provisoire )
+        if ( TM::dim == 3 ) {
+            apply( m.sub_mesh( Number<1>() ).elem_list, r, Number<TM::dim>(), ctrl ); /// application sur les triangles
+            //PRINT( ctrl.has_two_cuts );
+        }
 
-    switch( TM::dim ) {
-        case 2 : 
-            apply( m.elem_list, r, Number<TM::dim>() );
-            break;
-        case 3 : 
-            do {
-                r.appended_cut = false;
-                apply( m.sub_mesh( Number<1>() ).elem_list, r, Number<TM::dim>() );break; /// application sur les triangles
-                //PRINT( r.appended_cut );
-            } while( r.appended_cut );
-            break;
-        default:
-            assert( 0 );
-    }
-    /// on propage le raffinement au reste du maillage
-    if ( spread_cut ) {
-        m.update_elem_neighbours();
-        for( unsigned i = 0; i < m.elem_list.size(); ++i )
-            r.spread_cut( m.elem_list[ i ], Number<TM::dim>() );
-    }
+    } while( ctrl.has_two_cuts );
 
     m.elem_list.reg_dyn( &r.cut );
     bool res = m.remove_elements_if( r );
