@@ -211,6 +211,12 @@ std::cout << "Surdiscretisation non implementee pour les Hexa" << std::endl;
 return false;
 };
 
+template<class TN,class TNG,class TD,unsigned NET,class TM>
+bool divide_element(Element<Hexa,TN,TNG,TD,NET> &e,TM &m,TNG **nnodes) {
+   std::cout << "divide_element not implemented for Hexa" << std::endl;
+   assert(0);
+   return false;
+}
 //template<class TN,class TNG,class TD,unsigned NET,class TM>
 //bool divide_element(Element<Hexa,TN,TNG,TD,NET> &e,TM &m,TNG **nodes) {
 //    const unsigned valid_tetra[] = {

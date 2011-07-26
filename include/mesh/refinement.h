@@ -422,7 +422,6 @@ bool refinement( TM &m, Op &op, bool spread_cut = false ) {
         /// contrôle s'il y a deux coupes pour la 3D ( j'espère provisoire )
         if ( TM::dim == 3 ) {
             apply( m.sub_mesh( Number<1>() ).elem_list, r, Number<TM::dim>(), ctrl ); /// application sur les triangles
-            //PRINT( ctrl.has_two_cuts );
         }
 
     } while( ctrl.has_two_cuts );

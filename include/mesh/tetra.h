@@ -142,6 +142,48 @@ void update_edge_ratio(const Element<Tetra,TN,TNG,TD,NET> &e,TM &m,T &edge_ratio
     edge_ratio = min( edge_length_0, edge_length_1, edge_length_2, edge_length_3 ) / max( edge_length_0, edge_length_1, edge_length_2, edge_length_3 );
 }
 
+/*!
+    Objectif:
+        Cette fonction sert à couper un Tétra ou sous-Tétra
+        
+    Paramètres :
+        * <strong> e </strong> est l'élément qu'on veut couper,
+        * <strong> m </strong> es tle maillage auquel il appartient,
+        * <strong> nodes </strong> est un vecteur de Node*, de taille le nombre de barres.
+        
+    Remarques:
+    Cette fonction a été générée par le programmme *** qui est basé sur l'article de Detlef Ruprecht et Heinrich Müller, A Scheme for Edge-based Adaptive Tetrahedron Subdivision.
+    Voici la numérotatoin des noeuds et des barres entre parenthèses dans un repère cartésien.
+    \verbatim
+        .                |3
+        .                |
+        .                |(2)   (5)
+        .                |
+        .           (4)  |___(1)___2
+        .               /0         
+        .              /
+        .             /(0)     (3)
+        .            /
+        .            1
+
+    J'ai choisi les schémas et les configurations de l'article avec la numération des noeuds et des barres suivante ( qui sont les mêmes que pécédemment ) :
+    \verbatim
+        .                     D
+        .                    /|\
+        .                   / | \
+        .               (2)/  |  \(5)
+        .                 /   |   \
+        .                /    |    \
+        .             A /__(1)|_____\ C
+        .               \     |     /
+        .                \   (4)   / 
+        .              (0)\   |   /(3)
+        .                  \  |  /
+        .                   \ | /
+        .                    \|/
+        .                     B
+
+*/
 template<class TN,class TNG,class TD,unsigned NET,class TM>
 bool divide_element( Element< Tetra, TN, TNG, TD, NET> &e, TM &m, TNG **nodes ) {
     typedef typename TNG::T T;
@@ -184,8 +226,57 @@ bool divide_element( Element< Tetra, TN, TNG, TD, NET> &e, TM &m, TNG **nodes ) 
             DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
         } break;
         case 3 : { /// configuration number 2
-            std::cerr << "more complicated configuration number 3 to do" << std::endl;
-            assert( 0 );
+            bool AF;
+            T l_AF = length( e.pos( 1 ) - nodes[ 1 ]->pos );
+            T l_CE = length( e.pos( 2 ) - nodes[ 0 ]->pos );
+            if ( l_AF < l_CE ) {
+                AF = true;
+            } else {
+                if ( l_AF > l_CE )
+                    AF = false;
+                else {
+                    if ( e.node( 1 )->number < e.node( 2 )->number ) AF = true; else AF = false; 
+                }
+            }
+            if ( AF ) {
+                nn[0] = e.node( 3 );
+                nn[1] = e.node( 0 );
+                nn[2] = nodes[ 0 ];
+                nn[3] = nodes[ 1 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+                nn[0] = e.node( 1 );
+                nn[1] = e.node( 3 );
+                nn[2] = nodes[ 0 ];
+                nn[3] = nodes[ 1 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+                nn[0] = e.node( 1 );
+                nn[1] = e.node( 3 );
+                nn[2] = e.node( 2 );
+                nn[3] = nodes[ 1 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+            } else {
+                nn[0] = e.node( 3 );
+                nn[1] = e.node( 0 );
+                nn[2] = nodes[ 0 ];
+                nn[3] = nodes[ 1 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+                nn[0] = e.node( 3 );
+                nn[1] = e.node( 2 );
+                nn[2] = nodes[ 0 ];
+                nn[3] = nodes[ 1 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+                nn[0] = e.node( 1 );
+                nn[1] = e.node( 3 );
+                nn[2] = e.node( 2 );
+                nn[3] = nodes[ 0 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+            }
         } break;
         case 4 : { /// configuration number 1
             nn[0] = e.node( 1 );
@@ -202,12 +293,110 @@ bool divide_element( Element< Tetra, TN, TNG, TD, NET> &e, TM &m, TNG **nodes ) 
             DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
         } break;
         case 5 : { /// configuration number 2
-            std::cerr << "more complicated configuration number 5 to do" << std::endl;
-            assert( 0 );
+            bool AF;
+            T l_AF = length( e.pos( 1 ) - nodes[ 2 ]->pos );
+            T l_CE = length( e.pos( 3 ) - nodes[ 0 ]->pos );
+            if ( l_AF < l_CE ) {
+                AF = true;
+            } else {
+                if ( l_AF > l_CE )
+                    AF = false;
+                else {
+                    if ( e.node( 1 )->number < e.node( 3 )->number ) AF = true; else AF = false; 
+                }
+            }
+            if ( AF ) {
+                nn[0] = e.node( 2 );
+                nn[1] = e.node( 0 );
+                nn[2] = nodes[ 0 ];
+                nn[3] = nodes[ 2 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+                nn[0] = e.node( 1 );
+                nn[1] = e.node( 2 );
+                nn[2] = nodes[ 0 ];
+                nn[3] = nodes[ 2 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+                nn[0] = e.node( 1 );
+                nn[1] = e.node( 2 );
+                nn[2] = e.node( 3 );
+                nn[3] = nodes[ 2 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+            } else {
+                nn[0] = e.node( 2 );
+                nn[1] = e.node( 0 );
+                nn[2] = nodes[ 0 ];
+                nn[3] = nodes[ 2 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+                nn[0] = e.node( 2 );
+                nn[1] = e.node( 3 );
+                nn[2] = nodes[ 0 ];
+                nn[3] = nodes[ 2 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+                nn[0] = e.node( 1 );
+                nn[1] = e.node( 2 );
+                nn[2] = e.node( 3 );
+                nn[3] = nodes[ 0 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+            }
         } break;
         case 6 : { /// configuration number 2
-            std::cerr << "more complicated configuration number 6 to do" << std::endl;
-            assert( 0 );
+            bool AF;
+            T l_AF = length( e.pos( 2 ) - nodes[ 2 ]->pos );
+            T l_CE = length( e.pos( 3 ) - nodes[ 1 ]->pos );
+            if ( l_AF < l_CE ) {
+                AF = true;
+            } else {
+                if ( l_AF > l_CE )
+                    AF = false;
+                else {
+                    if ( e.node( 2 )->number < e.node( 3 )->number ) AF = true; else AF = false; 
+                }
+            }
+            if ( AF ) {
+                nn[0] = e.node( 1 );
+                nn[1] = e.node( 0 );
+                nn[2] = nodes[ 1 ];
+                nn[3] = nodes[ 2 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+                nn[0] = e.node( 2 );
+                nn[1] = e.node( 1 );
+                nn[2] = nodes[ 1 ];
+                nn[3] = nodes[ 2 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+                nn[0] = e.node( 2 );
+                nn[1] = e.node( 1 );
+                nn[2] = e.node( 3 );
+                nn[3] = nodes[ 2 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+            } else {
+                nn[0] = e.node( 1 );
+                nn[1] = e.node( 0 );
+                nn[2] = nodes[ 1 ];
+                nn[3] = nodes[ 2 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+                nn[0] = e.node( 1 );
+                nn[1] = e.node( 3 );
+                nn[2] = nodes[ 1 ];
+                nn[3] = nodes[ 2 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+                nn[0] = e.node( 2 );
+                nn[1] = e.node( 1 );
+                nn[2] = e.node( 3 );
+                nn[3] = nodes[ 1 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+            }
         } break;
         case 7 : { /// configuration number 4
             std::cerr << "more complicated configuration number 7 to do" << std::endl;
@@ -228,12 +417,110 @@ bool divide_element( Element< Tetra, TN, TNG, TD, NET> &e, TM &m, TNG **nodes ) 
             DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
         } break;
         case 9 : { /// configuration number 2
-            std::cerr << "more complicated configuration number 9 to do" << std::endl;
-            assert( 0 );
+            bool AF;
+            T l_AF = length( e.pos( 0 ) - nodes[ 3 ]->pos );
+            T l_CE = length( e.pos( 2 ) - nodes[ 0 ]->pos );
+            if ( l_AF < l_CE ) {
+                AF = true;
+            } else {
+                if ( l_AF > l_CE )
+                    AF = false;
+                else {
+                    if ( e.node( 0 )->number < e.node( 2 )->number ) AF = true; else AF = false; 
+                }
+            }
+            if ( AF ) {
+                nn[0] = e.node( 3 );
+                nn[1] = e.node( 1 );
+                nn[2] = nodes[ 0 ];
+                nn[3] = nodes[ 3 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+                nn[0] = e.node( 0 );
+                nn[1] = e.node( 3 );
+                nn[2] = nodes[ 0 ];
+                nn[3] = nodes[ 3 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+                nn[0] = e.node( 0 );
+                nn[1] = e.node( 3 );
+                nn[2] = e.node( 2 );
+                nn[3] = nodes[ 3 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+            } else {
+                nn[0] = e.node( 3 );
+                nn[1] = e.node( 1 );
+                nn[2] = nodes[ 0 ];
+                nn[3] = nodes[ 3 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+                nn[0] = e.node( 3 );
+                nn[1] = e.node( 2 );
+                nn[2] = nodes[ 0 ];
+                nn[3] = nodes[ 3 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+                nn[0] = e.node( 0 );
+                nn[1] = e.node( 3 );
+                nn[2] = e.node( 2 );
+                nn[3] = nodes[ 0 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+            }
         } break;
         case 10 : { /// configuration number 2
-            std::cerr << "more complicated configuration number 10 to do" << std::endl;
-            assert( 0 );
+            bool AF;
+            T l_AF = length( e.pos( 0 ) - nodes[ 3 ]->pos );
+            T l_CE = length( e.pos( 1 ) - nodes[ 1 ]->pos );
+            if ( l_AF < l_CE ) {
+                AF = true;
+            } else {
+                if ( l_AF > l_CE )
+                    AF = false;
+                else {
+                    if ( e.node( 0 )->number < e.node( 1 )->number ) AF = true; else AF = false; 
+                }
+            }
+            if ( AF ) {
+                nn[0] = e.node( 3 );
+                nn[1] = e.node( 2 );
+                nn[2] = nodes[ 1 ];
+                nn[3] = nodes[ 3 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+                nn[0] = e.node( 0 );
+                nn[1] = e.node( 3 );
+                nn[2] = nodes[ 1 ];
+                nn[3] = nodes[ 3 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+                nn[0] = e.node( 0 );
+                nn[1] = e.node( 3 );
+                nn[2] = e.node( 1 );
+                nn[3] = nodes[ 3 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+            } else {
+                nn[0] = e.node( 3 );
+                nn[1] = e.node( 2 );
+                nn[2] = nodes[ 1 ];
+                nn[3] = nodes[ 3 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+                nn[0] = e.node( 3 );
+                nn[1] = e.node( 1 );
+                nn[2] = nodes[ 1 ];
+                nn[3] = nodes[ 3 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+                nn[0] = e.node( 0 );
+                nn[1] = e.node( 3 );
+                nn[2] = e.node( 1 );
+                nn[3] = nodes[ 1 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+            }
         } break;
         case 11 : { /// configuration number 5
             nn[0] = e.node( 0 );
@@ -314,8 +601,57 @@ bool divide_element( Element< Tetra, TN, TNG, TD, NET> &e, TM &m, TNG **nodes ) 
             DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
         } break;
         case 17 : { /// configuration number 2
-            std::cerr << "more complicated configuration number 17 to do" << std::endl;
-            assert( 0 );
+            bool AF;
+            T l_AF = length( e.pos( 0 ) - nodes[ 4 ]->pos );
+            T l_CE = length( e.pos( 3 ) - nodes[ 0 ]->pos );
+            if ( l_AF < l_CE ) {
+                AF = true;
+            } else {
+                if ( l_AF > l_CE )
+                    AF = false;
+                else {
+                    if ( e.node( 0 )->number < e.node( 3 )->number ) AF = true; else AF = false; 
+                }
+            }
+            if ( AF ) {
+                nn[0] = e.node( 2 );
+                nn[1] = e.node( 1 );
+                nn[2] = nodes[ 0 ];
+                nn[3] = nodes[ 4 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+                nn[0] = e.node( 0 );
+                nn[1] = e.node( 2 );
+                nn[2] = nodes[ 0 ];
+                nn[3] = nodes[ 4 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+                nn[0] = e.node( 0 );
+                nn[1] = e.node( 2 );
+                nn[2] = e.node( 3 );
+                nn[3] = nodes[ 4 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+            } else {
+                nn[0] = e.node( 2 );
+                nn[1] = e.node( 1 );
+                nn[2] = nodes[ 0 ];
+                nn[3] = nodes[ 4 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+                nn[0] = e.node( 2 );
+                nn[1] = e.node( 3 );
+                nn[2] = nodes[ 0 ];
+                nn[3] = nodes[ 4 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+                nn[0] = e.node( 0 );
+                nn[1] = e.node( 2 );
+                nn[2] = e.node( 3 );
+                nn[3] = nodes[ 0 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+            }
         } break;
         case 18 : { /// configuration number 3
             nn[0] = e.node( 0 );
@@ -348,8 +684,57 @@ bool divide_element( Element< Tetra, TN, TNG, TD, NET> &e, TM &m, TNG **nodes ) 
             assert( 0 );
         } break;
         case 20 : { /// configuration number 2
-            std::cerr << "more complicated configuration number 20 to do" << std::endl;
-            assert( 0 );
+            bool AF;
+            T l_AF = length( e.pos( 0 ) - nodes[ 4 ]->pos );
+            T l_CE = length( e.pos( 1 ) - nodes[ 2 ]->pos );
+            if ( l_AF < l_CE ) {
+                AF = true;
+            } else {
+                if ( l_AF > l_CE )
+                    AF = false;
+                else {
+                    if ( e.node( 0 )->number < e.node( 1 )->number ) AF = true; else AF = false; 
+                }
+            }
+            if ( AF ) {
+                nn[0] = e.node( 2 );
+                nn[1] = e.node( 3 );
+                nn[2] = nodes[ 2 ];
+                nn[3] = nodes[ 4 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+                nn[0] = e.node( 0 );
+                nn[1] = e.node( 2 );
+                nn[2] = nodes[ 2 ];
+                nn[3] = nodes[ 4 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+                nn[0] = e.node( 0 );
+                nn[1] = e.node( 2 );
+                nn[2] = e.node( 1 );
+                nn[3] = nodes[ 4 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+            } else {
+                nn[0] = e.node( 2 );
+                nn[1] = e.node( 3 );
+                nn[2] = nodes[ 2 ];
+                nn[3] = nodes[ 4 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+                nn[0] = e.node( 2 );
+                nn[1] = e.node( 1 );
+                nn[2] = nodes[ 2 ];
+                nn[3] = nodes[ 4 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+                nn[0] = e.node( 0 );
+                nn[1] = e.node( 2 );
+                nn[2] = e.node( 1 );
+                nn[3] = nodes[ 2 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+            }
         } break;
         case 21 : { /// configuration number 5
             nn[0] = e.node( 0 );
@@ -386,8 +771,57 @@ bool divide_element( Element< Tetra, TN, TNG, TD, NET> &e, TM &m, TNG **nodes ) 
             assert( 0 );
         } break;
         case 24 : { /// configuration number 2
-            std::cerr << "more complicated configuration number 24 to do" << std::endl;
-            assert( 0 );
+            bool AF;
+            T l_AF = length( e.pos( 2 ) - nodes[ 4 ]->pos );
+            T l_CE = length( e.pos( 3 ) - nodes[ 3 ]->pos );
+            if ( l_AF < l_CE ) {
+                AF = true;
+            } else {
+                if ( l_AF > l_CE )
+                    AF = false;
+                else {
+                    if ( e.node( 2 )->number < e.node( 3 )->number ) AF = true; else AF = false; 
+                }
+            }
+            if ( AF ) {
+                nn[0] = e.node( 0 );
+                nn[1] = e.node( 1 );
+                nn[2] = nodes[ 3 ];
+                nn[3] = nodes[ 4 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+                nn[0] = e.node( 2 );
+                nn[1] = e.node( 0 );
+                nn[2] = nodes[ 3 ];
+                nn[3] = nodes[ 4 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+                nn[0] = e.node( 2 );
+                nn[1] = e.node( 0 );
+                nn[2] = e.node( 3 );
+                nn[3] = nodes[ 4 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+            } else {
+                nn[0] = e.node( 0 );
+                nn[1] = e.node( 1 );
+                nn[2] = nodes[ 3 ];
+                nn[3] = nodes[ 4 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+                nn[0] = e.node( 0 );
+                nn[1] = e.node( 3 );
+                nn[2] = nodes[ 3 ];
+                nn[3] = nodes[ 4 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+                nn[0] = e.node( 2 );
+                nn[1] = e.node( 0 );
+                nn[2] = e.node( 3 );
+                nn[3] = nodes[ 3 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+            }
         } break;
         case 25 : { /// configuration number 4
             std::cerr << "more complicated configuration number 25 to do" << std::endl;
@@ -458,16 +892,114 @@ bool divide_element( Element< Tetra, TN, TNG, TD, NET> &e, TM &m, TNG **nodes ) 
             DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
         } break;
         case 34 : { /// configuration number 2
-            std::cerr << "more complicated configuration number 34 to do" << std::endl;
-            assert( 0 );
+            bool AF;
+            T l_AF = length( e.pos( 0 ) - nodes[ 5 ]->pos );
+            T l_CE = length( e.pos( 3 ) - nodes[ 1 ]->pos );
+            if ( l_AF < l_CE ) {
+                AF = true;
+            } else {
+                if ( l_AF > l_CE )
+                    AF = false;
+                else {
+                    if ( e.node( 0 )->number < e.node( 3 )->number ) AF = true; else AF = false; 
+                }
+            }
+            if ( AF ) {
+                nn[0] = e.node( 1 );
+                nn[1] = e.node( 2 );
+                nn[2] = nodes[ 1 ];
+                nn[3] = nodes[ 5 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+                nn[0] = e.node( 0 );
+                nn[1] = e.node( 1 );
+                nn[2] = nodes[ 1 ];
+                nn[3] = nodes[ 5 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+                nn[0] = e.node( 0 );
+                nn[1] = e.node( 1 );
+                nn[2] = e.node( 3 );
+                nn[3] = nodes[ 5 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+            } else {
+                nn[0] = e.node( 1 );
+                nn[1] = e.node( 2 );
+                nn[2] = nodes[ 1 ];
+                nn[3] = nodes[ 5 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+                nn[0] = e.node( 1 );
+                nn[1] = e.node( 3 );
+                nn[2] = nodes[ 1 ];
+                nn[3] = nodes[ 5 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+                nn[0] = e.node( 0 );
+                nn[1] = e.node( 1 );
+                nn[2] = e.node( 3 );
+                nn[3] = nodes[ 1 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+            }
         } break;
         case 35 : { /// configuration number 6
             std::cerr << "more complicated configuration number 35 to do" << std::endl;
             assert( 0 );
         } break;
         case 36 : { /// configuration number 2
-            std::cerr << "more complicated configuration number 36 to do" << std::endl;
-            assert( 0 );
+            bool AF;
+            T l_AF = length( e.pos( 0 ) - nodes[ 5 ]->pos );
+            T l_CE = length( e.pos( 2 ) - nodes[ 2 ]->pos );
+            if ( l_AF < l_CE ) {
+                AF = true;
+            } else {
+                if ( l_AF > l_CE )
+                    AF = false;
+                else {
+                    if ( e.node( 0 )->number < e.node( 2 )->number ) AF = true; else AF = false; 
+                }
+            }
+            if ( AF ) {
+                nn[0] = e.node( 1 );
+                nn[1] = e.node( 3 );
+                nn[2] = nodes[ 2 ];
+                nn[3] = nodes[ 5 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+                nn[0] = e.node( 0 );
+                nn[1] = e.node( 1 );
+                nn[2] = nodes[ 2 ];
+                nn[3] = nodes[ 5 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+                nn[0] = e.node( 0 );
+                nn[1] = e.node( 1 );
+                nn[2] = e.node( 2 );
+                nn[3] = nodes[ 5 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+            } else {
+                nn[0] = e.node( 1 );
+                nn[1] = e.node( 3 );
+                nn[2] = nodes[ 2 ];
+                nn[3] = nodes[ 5 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+                nn[0] = e.node( 1 );
+                nn[1] = e.node( 2 );
+                nn[2] = nodes[ 2 ];
+                nn[3] = nodes[ 5 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+                nn[0] = e.node( 0 );
+                nn[1] = e.node( 1 );
+                nn[2] = e.node( 2 );
+                nn[3] = nodes[ 2 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+            }
         } break;
         case 37 : { /// configuration number 6
             std::cerr << "more complicated configuration number 37 to do" << std::endl;
@@ -504,8 +1036,57 @@ bool divide_element( Element< Tetra, TN, TNG, TD, NET> &e, TM &m, TNG **nodes ) 
             assert( 0 );
         } break;
         case 40 : { /// configuration number 2
-            std::cerr << "more complicated configuration number 40 to do" << std::endl;
-            assert( 0 );
+            bool AF;
+            T l_AF = length( e.pos( 1 ) - nodes[ 5 ]->pos );
+            T l_CE = length( e.pos( 3 ) - nodes[ 3 ]->pos );
+            if ( l_AF < l_CE ) {
+                AF = true;
+            } else {
+                if ( l_AF > l_CE )
+                    AF = false;
+                else {
+                    if ( e.node( 1 )->number < e.node( 3 )->number ) AF = true; else AF = false; 
+                }
+            }
+            if ( AF ) {
+                nn[0] = e.node( 0 );
+                nn[1] = e.node( 2 );
+                nn[2] = nodes[ 3 ];
+                nn[3] = nodes[ 5 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+                nn[0] = e.node( 1 );
+                nn[1] = e.node( 0 );
+                nn[2] = nodes[ 3 ];
+                nn[3] = nodes[ 5 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+                nn[0] = e.node( 1 );
+                nn[1] = e.node( 0 );
+                nn[2] = e.node( 3 );
+                nn[3] = nodes[ 5 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+            } else {
+                nn[0] = e.node( 0 );
+                nn[1] = e.node( 2 );
+                nn[2] = nodes[ 3 ];
+                nn[3] = nodes[ 5 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+                nn[0] = e.node( 0 );
+                nn[1] = e.node( 3 );
+                nn[2] = nodes[ 3 ];
+                nn[3] = nodes[ 5 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+                nn[0] = e.node( 1 );
+                nn[1] = e.node( 0 );
+                nn[2] = e.node( 3 );
+                nn[3] = nodes[ 3 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+            }
         } break;
         case 41 : { /// configuration number 6
             std::cerr << "more complicated configuration number 41 to do" << std::endl;
@@ -536,8 +1117,57 @@ bool divide_element( Element< Tetra, TN, TNG, TD, NET> &e, TM &m, TNG **nodes ) 
             assert( 0 );
         } break;
         case 48 : { /// configuration number 2
-            std::cerr << "more complicated configuration number 48 to do" << std::endl;
-            assert( 0 );
+            bool AF;
+            T l_AF = length( e.pos( 1 ) - nodes[ 5 ]->pos );
+            T l_CE = length( e.pos( 2 ) - nodes[ 4 ]->pos );
+            if ( l_AF < l_CE ) {
+                AF = true;
+            } else {
+                if ( l_AF > l_CE )
+                    AF = false;
+                else {
+                    if ( e.node( 1 )->number < e.node( 2 )->number ) AF = true; else AF = false; 
+                }
+            }
+            if ( AF ) {
+                nn[0] = e.node( 0 );
+                nn[1] = e.node( 3 );
+                nn[2] = nodes[ 4 ];
+                nn[3] = nodes[ 5 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+                nn[0] = e.node( 1 );
+                nn[1] = e.node( 0 );
+                nn[2] = nodes[ 4 ];
+                nn[3] = nodes[ 5 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+                nn[0] = e.node( 1 );
+                nn[1] = e.node( 0 );
+                nn[2] = e.node( 2 );
+                nn[3] = nodes[ 5 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+            } else {
+                nn[0] = e.node( 0 );
+                nn[1] = e.node( 3 );
+                nn[2] = nodes[ 4 ];
+                nn[3] = nodes[ 5 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+                nn[0] = e.node( 0 );
+                nn[1] = e.node( 2 );
+                nn[2] = nodes[ 4 ];
+                nn[3] = nodes[ 5 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+                nn[0] = e.node( 1 );
+                nn[1] = e.node( 0 );
+                nn[2] = e.node( 2 );
+                nn[3] = nodes[ 4 ];
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+            }
         } break;
         case 49 : { /// configuration number 6
             std::cerr << "more complicated configuration number 49 to do" << std::endl;
@@ -602,7 +1232,6 @@ bool divide_element( Element< Tetra, TN, TNG, TD, NET> &e, TM &m, TNG **nodes ) 
             assert( 0 );
         } break;
         case 59 : { /// configuration number 9
-            PRINT( e.pos( 0 ) ); PRINT( e.pos( 1 ) ); PRINT( e.pos( 2 ) ); PRINT( e.pos( 3 ) );
             std::cerr << "more complicated configuration number 59 to do" << std::endl;
             assert( 0 );
         } break;
@@ -734,7 +1363,6 @@ bool divide_element( Element< Tetra, TN, TNG, TD, NET> &e, TM &m, TNG **nodes ) 
         } break;
         default : ;
     }
-
 
     return true;
 }
