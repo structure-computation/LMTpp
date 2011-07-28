@@ -178,6 +178,18 @@ bool extract_if_linear( Vec< Poly<T>, 2 > &ret, const Vec< char, 2 > _name, cons
 }
 
 /*!
+    Objectif :
+        Calculer la racine cubique d'un nombre réel
+*/
+template <class T>
+T curt( T x ) {
+    if ( x >= 0)
+        return std::pow( x, 1/T(3) );
+    else
+        return sgn(x) * std::pow( std::abs( x ), 1/T(3) );
+}
+
+/*!
     Objectif: 
         Déterminer les racines du polynôme coef[0] + coef[1] X + ... coef[ coef.size()-1 ] X**( coef.size()-1 ) dans T.
         
@@ -367,26 +379,33 @@ bool solve_polynomial_system( Vec< std::complex<T> > &sol, const Vec<T, s> &coef
                     T c   = coef[0] * den;
                     T p   = b - std::pow( a, 2 ) / 3.;
                     T q   = std::pow( a, 3 ) / 13.5 - a * b / 3 + c;
-                    T delta = 4 * std::pow(p, 3 ) + 27 * std::pow( q, 2 );
-                    C  j( -0.5, sqrt( 3. )/2. );
-                    C cj( -0.5, -sqrt( 3. )/2. );
-                    if ( delta >= 0 ) {
-                        T u = -13.5 * q + sqrt( 6.75 * delta );
-                        T v = -13.5 * q - sqrt( 6.75 * delta );
-                        u = sgn(u) * std::pow( std::abs(u), 1/T(3) );
-                        v = sgn(v) * std::pow( std::abs(v), 1/T(3) );
-                        sol.push_back( C( ( u + v - a ) / 3, 0 ) );
+                    T delta = std::pow(p, 3 ) / 6.75 + std::pow( q, 2 );
+                    C  j( -0.5, sqrt( 3. ) * 0.5 );
+                    C cj( -0.5, -sqrt( 3. ) * 0.5 );
+                    T del = -a / 3;
+                    if ( delta > 0 ) {
+                        T r = std::sqrt( delta );
+                        T u = curt( 0.5 * ( -q + r ) );
+                        T v = curt( 0.5 * ( -q - r ) );
+                        sol.push_back( C( u + v + del, 0 ) );
                         C z1 = u * j + v * cj;
-                        sol.push_back( z1 - a / 3 );
-                        sol.push_back( conj( z1 ) - a / 3 );
-                    }
-                    if ( delta < 0 ) {
-                        C j( -0.5, sqrt( 3. )/2. );
-                        C v( -13.5 * q, sqrt( -6.75 * delta ) );
-                        C u = std::pow( v, T(1) / T(3) );
-                        sol.push_back( C( (2.*std::real(u)-a)/3., 0 ) );
-                        sol.push_back( C( (2.*std::real(j*u)-a)/3., 0 ) );
-                        sol.push_back( C( (2.*std::real(j*j*u)-a)/3., 0 ) );
+                        sol.push_back( z1 + del );
+                        sol.push_back( conj( z1 ) + del );
+                    } else {
+                        if ( delta < 0 ) {
+                            T ar = acos( -q * 0.5 * std::sqrt( -27 / std::pow( p, 3 ) ) ) / 3;  
+                            T ardel = 2.0943951023931954923; /// 2pi/3
+                            T r = 2 * std::sqrt( -p / 3 );
+                            sol.push_back( C( r * cos( ar ) + del, 0 ) );
+                            sol.push_back( C( r * cos( ar + ardel ) + del, 0 ) );
+                            sol.push_back( C( r * cos( ar + 2 * ardel ) + del, 0 ) );
+                        } else {
+                            T r = 3 * q / p;
+                            sol.push_back( C( r + del, 0 ) );
+                            r /= -2;
+                            sol.push_back( C( r + del, 0 ) );
+                            sol.push_back( C( r + del, 0 ) );
+                        }
                     }
                 } break;
         default :{  Vec<C> solc; 
