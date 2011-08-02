@@ -202,6 +202,12 @@ namespace LMTPRIVATE {
             
             bool has_two_cuts;
         };
+        template<class TE> 
+        void has_two_cuts( TE &e, const Number<0> &nnn, Control_two_cuts &ctrl ) { }
+        template<class TE> 
+        void has_two_cuts( TE &e, const Number<1> &nnn, Control_two_cuts &ctrl ) { }
+        template<class TE> 
+        void has_two_cuts( TE &e, const Number<2> &nnn, Control_two_cuts &ctrl ) { }
         /// pour la 3D mais le foncteur qui utilisera cette méthode parcourera des \a Triangle .
         template<class TE> 
         void has_two_cuts( TE &e, const Number<3> &nnn, Control_two_cuts &ctrl ) {
@@ -223,8 +229,8 @@ namespace LMTPRIVATE {
                 ctrl.has_two_cuts = true;
         }
         
-        template<class TE>
-        void operator() ( TE &e, const Number<3> &nnn, Control_two_cuts &ctrl ) {
+        template<class TE, unsigned num>
+        void operator() ( TE &e, const Number<num> &nnn, Control_two_cuts &ctrl ) {
             has_two_cuts( e, nnn, ctrl );
         }
 
