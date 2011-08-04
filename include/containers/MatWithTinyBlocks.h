@@ -305,8 +305,8 @@ struct MatWithTinyBlocks<T,Sym<3> > {
         Vec<T> &r_for_trans = r;
         ST beg = (ST)rows.size() * ( num_thread + 0 ) / nb_thread;
         ST end = (ST)rows.size() * ( num_thread + 1 ) / nb_thread;
-        for( ST num_block_set=beg; num_block_set<end; ++num_block_set ) {
-        // for( ST num_block_set=num_thread; num_block_set<(ST)rows.size(); num_block_set += nb_thread ) {
+        for( ST num_block_set = beg; num_block_set < end; ++num_block_set ) {
+            // for( ST num_block_set=num_thread; num_block_set<(ST)rows.size(); num_block_set += nb_thread ) {
             ST real_row = num_block_set * 3;
             const RB &lbs = rows[ num_block_set ];
             const T *d = lbs.data.ptr();
@@ -317,7 +317,7 @@ struct MatWithTinyBlocks<T,Sym<3> > {
             T res_f_0 = 0;
             T res_f_1 = 0;
             T res_f_2 = 0;
-            for(ST ci=0; ci<(ST)lbs.indices.size(); ++ci, d += RB::tiny_block_size ) {
+            for(ST ci = 0; ci < (ST)lbs.indices.size(); ++ci, d += RB::tiny_block_size ) {
                 ST real_col = lbs.indices[ci];
                            
                 SimdVecAl<T,2> vec_s_0(v[real_col+0],v[real_col+1]);

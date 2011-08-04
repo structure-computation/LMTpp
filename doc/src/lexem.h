@@ -12,7 +12,6 @@
 #ifndef LEXEM_H
 #define LEXEM_H
 
-// #include "common/usual_strings.h"
 #include "splittedvec.h"
 
 #include<iostream>
@@ -21,7 +20,6 @@
 #include<deque>
 
 /**
-	@author Grover <hugo@gronordi>
 */
 class Lexem {
 public:
