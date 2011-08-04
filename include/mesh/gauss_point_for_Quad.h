@@ -1025,7 +1025,7 @@ inline void gauss_points( const Quad &elem, unsigned order, Vec<double> &poids, 
     else {
         Vec<double> pond;
         Vec< Vec<double, Bar::nb_var_inter > > val;
-        unsigned order_Bar = ceil(order,Quad::nb_var_inter)/Quad::nb_var_inter;
+        unsigned order_Bar = order; // ceil(order,Quad::nb_var_inter)/Quad::nb_var_inter;
         gauss_points( Bar(), order_Bar, pond, val );
         unsigned nb_pts_gauss = pow( pond.size(), Quad::nb_var_inter );
         poids.resize( nb_pts_gauss );

@@ -39,6 +39,8 @@ public:
     typedef Vec<TT,static_data_size> TV;
     typedef typename TV::template SubType<0>::T T;
     static const unsigned alignement = ( fixed_size ? 1 : SimdSize<T>::res );
+    typedef Gen<sr,sc> Structure;
+    typedef Dense<Col> Storage;
 
     #ifdef MATLAB_MEX_FILE
         Mat(const mxArray *variable) throw(std::runtime_error) {
@@ -136,7 +138,7 @@ public:
     explicit Mat(unsigned nr) { this->nr.set(default_nb_rows); real_nr.set(default_nb_rows); this->nc.set(default_nb_cols); real_nc.set(default_nb_cols); resize(nr,nr); }
     Mat(unsigned nr,unsigned nc) { this->nr.set(default_nb_rows); real_nr.set(default_nb_rows); this->nc.set(default_nb_cols); real_nc.set(default_nb_cols); resize(nr,nc); }
     Mat(unsigned nr,unsigned nc,const TT &val) { this->nr.set(default_nb_rows); real_nr.set(default_nb_rows); this->nc.set(default_nb_cols); real_nc.set(default_nb_cols); resize(nr,nc); set(val); }
-    template<class T2,int s2> Mat(unsigned r,unsigned c,const Vec<T2,s2> &v):data(v) { this->nr.set(default_nb_rows); real_nr.set(default_nb_rows); this->nc.set(default_nb_cols); real_nc.set(default_nb_cols); resize(r,c); }
+    template<class T2,int s2> Mat(unsigned r,unsigned c,const Vec<T2,s2> &v):data(v) { this->nr.set(r); real_nr.set(r); this->nc.set(c); real_nc.set(c); resize(r,c); }
 
     /*template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
         if ( fixed_size==false )
@@ -162,22 +164,7 @@ public:
     }
 
     void resize(unsigned nr) { resize( nr, nr ); }
-    void resize(unsigned nr,unsigned nc) { 
-        unsigned mc = min(nc,this->nc.val); 
-        unsigned mr = min(nr,this->nr.val); 
-        TV od = data; 
-        unsigned o_r = real_nc.val; 
-        unsigned rc=nc+alignement-1; 
-        rc-=rc % alignement; 
-        real_nc.set(rc); 
-        real_nr.set(nr); 
-        data.resize(real_nr.val*real_nc.val); 
-        for(unsigned i=0;i<mr;++i) 
-            for(unsigned j=0;j<mc;++j) 
-                data[real_nc.val*i+j] = od[o_r*i+j]; 
-        this->nr.set(nr);
-        this->nc.set(nc); 
-    }
+    void resize(unsigned nr,unsigned nc) { unsigned mc = min(nc,this->nc.val); unsigned mr = min(nr,this->nr.val); TV od = data; unsigned o_r = real_nc.val; unsigned rc=nc+alignement-1; rc-=rc % alignement; real_nc.set(rc); real_nr.set(nr); data.resize(real_nr.val*real_nc.val); for(unsigned i=0;i<mr;++i) for(unsigned j=0;j<mc;++j) data[real_nc.val*i+j] = od[o_r*i+j]; this->nr.set(nr); this->nc.set(nc); }
 
     typedef Vec<VecSubMat<Mat,false,ExtractDiag>,MIN(sr,sc)> RetDiag;
     typedef Vec<VecSubMat<Mat,true ,ExtractDiag>,MIN(sr,sc)> RetDiagConst;
@@ -255,6 +242,8 @@ public:
     typedef Vec<TT,static_data_size> TV;
     typedef typename TV::template SubType<0>::T T;
     static const unsigned alignement = ( fixed_size ? 1 : SimdSize<T>::res );
+    typedef Gen<sr,sc> Structure;
+    typedef Dense<Row> Storage;
 
     #ifdef MATLAB_MEX_FILE
         Mat(const mxArray *variable) throw(std::runtime_error) {
@@ -352,7 +341,7 @@ public:
     explicit Mat(unsigned nr) { this->nr.set(default_nb_rows); real_nr.set(default_nb_rows); this->nc.set(default_nb_cols); real_nc.set(default_nb_cols); resize(nr,nr); }
     Mat(unsigned nr,unsigned nc) { this->nr.set(default_nb_rows); real_nr.set(default_nb_rows); this->nc.set(default_nb_cols); real_nc.set(default_nb_cols); resize(nr,nc); }
     Mat(unsigned nr,unsigned nc,const TT &val) { this->nr.set(default_nb_rows); real_nr.set(default_nb_rows); this->nc.set(default_nb_cols); real_nc.set(default_nb_cols); resize(nr,nc); set(val); }
-    template<class T2,int s2> Mat(unsigned r,unsigned c,const Vec<T2,s2> &v):data(v) { this->nr.set(default_nb_rows); real_nr.set(default_nb_rows); this->nc.set(default_nb_cols); real_nc.set(default_nb_cols); resize(r,c); }
+    template<class T2,int s2> Mat(unsigned r,unsigned c,const Vec<T2,s2> &v):data(v) { this->nr.set(r); real_nr.set(r); this->nc.set(c); real_nc.set(c); resize(r,c); }
 
     /*template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
         if ( fixed_size==false )
@@ -456,6 +445,8 @@ public:
     typedef Vec<TT,static_data_size> TV;
     typedef typename TV::template SubType<0>::T T;
     static const unsigned alignement = ( fixed_size ? 1 : SimdSize<T>::res );
+    typedef Sym<sr,0> Structure;
+    typedef Dense<Col> Storage;
 
     #ifdef MATLAB_MEX_FILE
         Mat(const mxArray *variable) throw(std::runtime_error) {
@@ -562,7 +553,7 @@ public:
     explicit Mat(unsigned nr) { this->nr.set(default_nb_rows);  resize(nr,nr); }
     Mat(unsigned nr,unsigned nc) { this->nr.set(default_nb_rows);  resize(nr,nc); }
     Mat(unsigned nr,unsigned nc,const TT &val) { this->nr.set(default_nb_rows);  resize(nr,nc); set(val); }
-    template<class T2,int s2> Mat(unsigned r,unsigned c,const Vec<T2,s2> &v):data(v) { this->nr.set(default_nb_rows);  resize(r,c); }
+    template<class T2,int s2> Mat(unsigned r,unsigned c,const Vec<T2,s2> &v):data(v) { this->nr.set(r);  resize(r,c); }
 
     /*template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
         if ( fixed_size==false )
@@ -688,6 +679,8 @@ public:
     typedef Vec<TT,static_data_size> TV;
     typedef typename TV::template SubType<0>::T T;
     static const unsigned alignement = ( fixed_size ? 1 : SimdSize<T>::res );
+    typedef Sym<sr,1> Structure;
+    typedef Dense<Col> Storage;
 
     #ifdef MATLAB_MEX_FILE
         Mat(const mxArray *variable) throw(std::runtime_error) {
@@ -794,7 +787,7 @@ public:
     explicit Mat(unsigned nr) { this->nr.set(default_nb_rows);  resize(nr,nr); }
     Mat(unsigned nr,unsigned nc) { this->nr.set(default_nb_rows);  resize(nr,nc); }
     Mat(unsigned nr,unsigned nc,const TT &val) { this->nr.set(default_nb_rows);  resize(nr,nc); set(val); }
-    template<class T2,int s2> Mat(unsigned r,unsigned c,const Vec<T2,s2> &v):data(v) { this->nr.set(default_nb_rows);  resize(r,c); }
+    template<class T2,int s2> Mat(unsigned r,unsigned c,const Vec<T2,s2> &v):data(v) { this->nr.set(r);  resize(r,c); }
 
     /*template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
         if ( fixed_size==false )
@@ -925,6 +918,8 @@ public:
     typedef Vec<TT,static_data_size> TV;
     typedef typename TV::template SubType<0>::T T;
     static const unsigned alignement = ( fixed_size ? 1 : SimdSize<T>::res );
+    typedef Sym<sr,0> Structure;
+    typedef Dense<Row> Storage;
 
     #ifdef MATLAB_MEX_FILE
         Mat(const mxArray *variable) throw(std::runtime_error) {
@@ -1031,7 +1026,7 @@ public:
     explicit Mat(unsigned nr) { this->nr.set(default_nb_rows);  resize(nr,nr); }
     Mat(unsigned nr,unsigned nc) { this->nr.set(default_nb_rows);  resize(nr,nc); }
     Mat(unsigned nr,unsigned nc,const TT &val) { this->nr.set(default_nb_rows);  resize(nr,nc); set(val); }
-    template<class T2,int s2> Mat(unsigned r,unsigned c,const Vec<T2,s2> &v):data(v) { this->nr.set(default_nb_rows);  resize(r,c); }
+    template<class T2,int s2> Mat(unsigned r,unsigned c,const Vec<T2,s2> &v):data(v) { this->nr.set(r);  resize(r,c); }
 
     /*template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
         if ( fixed_size==false )
@@ -1162,6 +1157,8 @@ public:
     typedef Vec<TT,static_data_size> TV;
     typedef typename TV::template SubType<0>::T T;
     static const unsigned alignement = ( fixed_size ? 1 : SimdSize<T>::res );
+    typedef Sym<sr,1> Structure;
+    typedef Dense<Row> Storage;
 
     #ifdef MATLAB_MEX_FILE
         Mat(const mxArray *variable) throw(std::runtime_error) {
@@ -1268,7 +1265,7 @@ public:
     explicit Mat(unsigned nr) { this->nr.set(default_nb_rows);  resize(nr,nr); }
     Mat(unsigned nr,unsigned nc) { this->nr.set(default_nb_rows);  resize(nr,nc); }
     Mat(unsigned nr,unsigned nc,const TT &val) { this->nr.set(default_nb_rows);  resize(nr,nc); set(val); }
-    template<class T2,int s2> Mat(unsigned r,unsigned c,const Vec<T2,s2> &v):data(v) { this->nr.set(default_nb_rows);  resize(r,c); }
+    template<class T2,int s2> Mat(unsigned r,unsigned c,const Vec<T2,s2> &v):data(v) { this->nr.set(r);  resize(r,c); }
 
     /*template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
         if ( fixed_size==false )
@@ -1394,6 +1391,8 @@ public:
     typedef Vec<TT,static_data_size> TV;
     typedef typename TV::template SubType<0>::T T;
     static const unsigned alignement = ( fixed_size ? 1 : SimdSize<T>::res );
+    typedef Herm<sr,0> Structure;
+    typedef Dense<Col> Storage;
 
     #ifdef MATLAB_MEX_FILE
         Mat(const mxArray *variable) throw(std::runtime_error) {
@@ -1500,7 +1499,7 @@ public:
     explicit Mat(unsigned nr) { this->nr.set(default_nb_rows);  resize(nr,nr); }
     Mat(unsigned nr,unsigned nc) { this->nr.set(default_nb_rows);  resize(nr,nc); }
     Mat(unsigned nr,unsigned nc,const TT &val) { this->nr.set(default_nb_rows);  resize(nr,nc); set(val); }
-    template<class T2,int s2> Mat(unsigned r,unsigned c,const Vec<T2,s2> &v):data(v) { this->nr.set(default_nb_rows);  resize(r,c); }
+    template<class T2,int s2> Mat(unsigned r,unsigned c,const Vec<T2,s2> &v):data(v) { this->nr.set(r);  resize(r,c); }
 
     /*template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
         if ( fixed_size==false )
@@ -1626,6 +1625,8 @@ public:
     typedef Vec<TT,static_data_size> TV;
     typedef typename TV::template SubType<0>::T T;
     static const unsigned alignement = ( fixed_size ? 1 : SimdSize<T>::res );
+    typedef Herm<sr,1> Structure;
+    typedef Dense<Col> Storage;
 
     #ifdef MATLAB_MEX_FILE
         Mat(const mxArray *variable) throw(std::runtime_error) {
@@ -1732,7 +1733,7 @@ public:
     explicit Mat(unsigned nr) { this->nr.set(default_nb_rows);  resize(nr,nr); }
     Mat(unsigned nr,unsigned nc) { this->nr.set(default_nb_rows);  resize(nr,nc); }
     Mat(unsigned nr,unsigned nc,const TT &val) { this->nr.set(default_nb_rows);  resize(nr,nc); set(val); }
-    template<class T2,int s2> Mat(unsigned r,unsigned c,const Vec<T2,s2> &v):data(v) { this->nr.set(default_nb_rows);  resize(r,c); }
+    template<class T2,int s2> Mat(unsigned r,unsigned c,const Vec<T2,s2> &v):data(v) { this->nr.set(r);  resize(r,c); }
 
     /*template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
         if ( fixed_size==false )
@@ -1863,6 +1864,8 @@ public:
     typedef Vec<TT,static_data_size> TV;
     typedef typename TV::template SubType<0>::T T;
     static const unsigned alignement = ( fixed_size ? 1 : SimdSize<T>::res );
+    typedef Herm<sr,0> Structure;
+    typedef Dense<Row> Storage;
 
     #ifdef MATLAB_MEX_FILE
         Mat(const mxArray *variable) throw(std::runtime_error) {
@@ -1969,7 +1972,7 @@ public:
     explicit Mat(unsigned nr) { this->nr.set(default_nb_rows);  resize(nr,nr); }
     Mat(unsigned nr,unsigned nc) { this->nr.set(default_nb_rows);  resize(nr,nc); }
     Mat(unsigned nr,unsigned nc,const TT &val) { this->nr.set(default_nb_rows);  resize(nr,nc); set(val); }
-    template<class T2,int s2> Mat(unsigned r,unsigned c,const Vec<T2,s2> &v):data(v) { this->nr.set(default_nb_rows);  resize(r,c); }
+    template<class T2,int s2> Mat(unsigned r,unsigned c,const Vec<T2,s2> &v):data(v) { this->nr.set(r);  resize(r,c); }
 
     /*template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
         if ( fixed_size==false )
@@ -2100,6 +2103,8 @@ public:
     typedef Vec<TT,static_data_size> TV;
     typedef typename TV::template SubType<0>::T T;
     static const unsigned alignement = ( fixed_size ? 1 : SimdSize<T>::res );
+    typedef Herm<sr,1> Structure;
+    typedef Dense<Row> Storage;
 
     #ifdef MATLAB_MEX_FILE
         Mat(const mxArray *variable) throw(std::runtime_error) {
@@ -2206,7 +2211,7 @@ public:
     explicit Mat(unsigned nr) { this->nr.set(default_nb_rows);  resize(nr,nr); }
     Mat(unsigned nr,unsigned nc) { this->nr.set(default_nb_rows);  resize(nr,nc); }
     Mat(unsigned nr,unsigned nc,const TT &val) { this->nr.set(default_nb_rows);  resize(nr,nc); set(val); }
-    template<class T2,int s2> Mat(unsigned r,unsigned c,const Vec<T2,s2> &v):data(v) { this->nr.set(default_nb_rows);  resize(r,c); }
+    template<class T2,int s2> Mat(unsigned r,unsigned c,const Vec<T2,s2> &v):data(v) { this->nr.set(r);  resize(r,c); }
 
     /*template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
         if ( fixed_size==false )
@@ -2332,6 +2337,8 @@ public:
     typedef Vec<TT,static_data_size> TV;
     typedef typename TV::template SubType<0>::T T;
     static const unsigned alignement = ( fixed_size ? 1 : SimdSize<T>::res );
+    typedef AntiSym<sr,0> Structure;
+    typedef Dense<Col> Storage;
 
     #ifdef MATLAB_MEX_FILE
         Mat(const mxArray *variable) throw(std::runtime_error) {
@@ -2438,7 +2445,7 @@ public:
     explicit Mat(unsigned nr) { this->nr.set(default_nb_rows);  resize(nr,nr); }
     Mat(unsigned nr,unsigned nc) { this->nr.set(default_nb_rows);  resize(nr,nc); }
     Mat(unsigned nr,unsigned nc,const TT &val) { this->nr.set(default_nb_rows);  resize(nr,nc); set(val); }
-    template<class T2,int s2> Mat(unsigned r,unsigned c,const Vec<T2,s2> &v):data(v) { this->nr.set(default_nb_rows);  resize(r,c); }
+    template<class T2,int s2> Mat(unsigned r,unsigned c,const Vec<T2,s2> &v):data(v) { this->nr.set(r);  resize(r,c); }
 
     /*template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
         if ( fixed_size==false )
@@ -2564,6 +2571,8 @@ public:
     typedef Vec<TT,static_data_size> TV;
     typedef typename TV::template SubType<0>::T T;
     static const unsigned alignement = ( fixed_size ? 1 : SimdSize<T>::res );
+    typedef AntiSym<sr,1> Structure;
+    typedef Dense<Col> Storage;
 
     #ifdef MATLAB_MEX_FILE
         Mat(const mxArray *variable) throw(std::runtime_error) {
@@ -2670,7 +2679,7 @@ public:
     explicit Mat(unsigned nr) { this->nr.set(default_nb_rows);  resize(nr,nr); }
     Mat(unsigned nr,unsigned nc) { this->nr.set(default_nb_rows);  resize(nr,nc); }
     Mat(unsigned nr,unsigned nc,const TT &val) { this->nr.set(default_nb_rows);  resize(nr,nc); set(val); }
-    template<class T2,int s2> Mat(unsigned r,unsigned c,const Vec<T2,s2> &v):data(v) { this->nr.set(default_nb_rows);  resize(r,c); }
+    template<class T2,int s2> Mat(unsigned r,unsigned c,const Vec<T2,s2> &v):data(v) { this->nr.set(r);  resize(r,c); }
 
     /*template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
         if ( fixed_size==false )
@@ -2801,6 +2810,8 @@ public:
     typedef Vec<TT,static_data_size> TV;
     typedef typename TV::template SubType<0>::T T;
     static const unsigned alignement = ( fixed_size ? 1 : SimdSize<T>::res );
+    typedef AntiSym<sr,0> Structure;
+    typedef Dense<Row> Storage;
 
     #ifdef MATLAB_MEX_FILE
         Mat(const mxArray *variable) throw(std::runtime_error) {
@@ -2907,7 +2918,7 @@ public:
     explicit Mat(unsigned nr) { this->nr.set(default_nb_rows);  resize(nr,nr); }
     Mat(unsigned nr,unsigned nc) { this->nr.set(default_nb_rows);  resize(nr,nc); }
     Mat(unsigned nr,unsigned nc,const TT &val) { this->nr.set(default_nb_rows);  resize(nr,nc); set(val); }
-    template<class T2,int s2> Mat(unsigned r,unsigned c,const Vec<T2,s2> &v):data(v) { this->nr.set(default_nb_rows);  resize(r,c); }
+    template<class T2,int s2> Mat(unsigned r,unsigned c,const Vec<T2,s2> &v):data(v) { this->nr.set(r);  resize(r,c); }
 
     /*template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
         if ( fixed_size==false )
@@ -3038,6 +3049,8 @@ public:
     typedef Vec<TT,static_data_size> TV;
     typedef typename TV::template SubType<0>::T T;
     static const unsigned alignement = ( fixed_size ? 1 : SimdSize<T>::res );
+    typedef AntiSym<sr,1> Structure;
+    typedef Dense<Row> Storage;
 
     #ifdef MATLAB_MEX_FILE
         Mat(const mxArray *variable) throw(std::runtime_error) {
@@ -3144,7 +3157,7 @@ public:
     explicit Mat(unsigned nr) { this->nr.set(default_nb_rows);  resize(nr,nr); }
     Mat(unsigned nr,unsigned nc) { this->nr.set(default_nb_rows);  resize(nr,nc); }
     Mat(unsigned nr,unsigned nc,const TT &val) { this->nr.set(default_nb_rows);  resize(nr,nc); set(val); }
-    template<class T2,int s2> Mat(unsigned r,unsigned c,const Vec<T2,s2> &v):data(v) { this->nr.set(default_nb_rows);  resize(r,c); }
+    template<class T2,int s2> Mat(unsigned r,unsigned c,const Vec<T2,s2> &v):data(v) { this->nr.set(r);  resize(r,c); }
 
     /*template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
         if ( fixed_size==false )
@@ -3270,6 +3283,8 @@ public:
     typedef Vec<TT,static_data_size> TV;
     typedef typename TV::template SubType<0>::T T;
     static const unsigned alignement = ( fixed_size ? 1 : SimdSize<T>::res );
+    typedef TriUpper<sr,sc> Structure;
+    typedef Dense<Col> Storage;
 
     #ifdef MATLAB_MEX_FILE
         Mat(const mxArray *variable) throw(std::runtime_error) {
@@ -3375,7 +3390,7 @@ public:
     explicit Mat(unsigned nr) { this->nr.set(default_nb_rows);  this->nc.set(default_nb_cols);  resize(nr,nr); }
     Mat(unsigned nr,unsigned nc) { this->nr.set(default_nb_rows);  this->nc.set(default_nb_cols);  resize(nr,nc); }
     Mat(unsigned nr,unsigned nc,const TT &val) { this->nr.set(default_nb_rows);  this->nc.set(default_nb_cols);  resize(nr,nc); set(val); }
-    template<class T2,int s2> Mat(unsigned r,unsigned c,const Vec<T2,s2> &v):data(v) { this->nr.set(default_nb_rows);  this->nc.set(default_nb_cols);  resize(r,c); }
+    template<class T2,int s2> Mat(unsigned r,unsigned c,const Vec<T2,s2> &v):data(v) { this->nr.set(r);  this->nc.set(c);  resize(r,c); }
 
     /*template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
         if ( fixed_size==false )
@@ -3507,6 +3522,8 @@ public:
     typedef Vec<TT,static_data_size> TV;
     typedef typename TV::template SubType<0>::T T;
     static const unsigned alignement = ( fixed_size ? 1 : SimdSize<T>::res );
+    typedef TriUpper<sr,sc> Structure;
+    typedef Dense<Row> Storage;
 
     #ifdef MATLAB_MEX_FILE
         Mat(const mxArray *variable) throw(std::runtime_error) {
@@ -3612,7 +3629,7 @@ public:
     explicit Mat(unsigned nr) { this->nr.set(default_nb_rows);  this->nc.set(default_nb_cols);  resize(nr,nr); }
     Mat(unsigned nr,unsigned nc) { this->nr.set(default_nb_rows);  this->nc.set(default_nb_cols);  resize(nr,nc); }
     Mat(unsigned nr,unsigned nc,const TT &val) { this->nr.set(default_nb_rows);  this->nc.set(default_nb_cols);  resize(nr,nc); set(val); }
-    template<class T2,int s2> Mat(unsigned r,unsigned c,const Vec<T2,s2> &v):data(v) { this->nr.set(default_nb_rows);  this->nc.set(default_nb_cols);  resize(r,c); }
+    template<class T2,int s2> Mat(unsigned r,unsigned c,const Vec<T2,s2> &v):data(v) { this->nr.set(r);  this->nc.set(c);  resize(r,c); }
 
     /*template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
         if ( fixed_size==false )
@@ -3739,6 +3756,8 @@ public:
     typedef Vec<TT,static_data_size> TV;
     typedef typename TV::template SubType<0>::T T;
     static const unsigned alignement = ( fixed_size ? 1 : SimdSize<T>::res );
+    typedef TriLower<sr,sc> Structure;
+    typedef Dense<Col> Storage;
 
     #ifdef MATLAB_MEX_FILE
         Mat(const mxArray *variable) throw(std::runtime_error) {
@@ -3844,7 +3863,7 @@ public:
     explicit Mat(unsigned nr) { this->nr.set(default_nb_rows);  this->nc.set(default_nb_cols);  resize(nr,nr); }
     Mat(unsigned nr,unsigned nc) { this->nr.set(default_nb_rows);  this->nc.set(default_nb_cols);  resize(nr,nc); }
     Mat(unsigned nr,unsigned nc,const TT &val) { this->nr.set(default_nb_rows);  this->nc.set(default_nb_cols);  resize(nr,nc); set(val); }
-    template<class T2,int s2> Mat(unsigned r,unsigned c,const Vec<T2,s2> &v):data(v) { this->nr.set(default_nb_rows);  this->nc.set(default_nb_cols);  resize(r,c); }
+    template<class T2,int s2> Mat(unsigned r,unsigned c,const Vec<T2,s2> &v):data(v) { this->nr.set(r);  this->nc.set(c);  resize(r,c); }
 
     /*template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
         if ( fixed_size==false )
@@ -3971,6 +3990,8 @@ public:
     typedef Vec<TT,static_data_size> TV;
     typedef typename TV::template SubType<0>::T T;
     static const unsigned alignement = ( fixed_size ? 1 : SimdSize<T>::res );
+    typedef TriLower<sr,sc> Structure;
+    typedef Dense<Row> Storage;
 
     #ifdef MATLAB_MEX_FILE
         Mat(const mxArray *variable) throw(std::runtime_error) {
@@ -4076,7 +4097,7 @@ public:
     explicit Mat(unsigned nr) { this->nr.set(default_nb_rows);  this->nc.set(default_nb_cols);  resize(nr,nr); }
     Mat(unsigned nr,unsigned nc) { this->nr.set(default_nb_rows);  this->nc.set(default_nb_cols);  resize(nr,nc); }
     Mat(unsigned nr,unsigned nc,const TT &val) { this->nr.set(default_nb_rows);  this->nc.set(default_nb_cols);  resize(nr,nc); set(val); }
-    template<class T2,int s2> Mat(unsigned r,unsigned c,const Vec<T2,s2> &v):data(v) { this->nr.set(default_nb_rows);  this->nc.set(default_nb_cols);  resize(r,c); }
+    template<class T2,int s2> Mat(unsigned r,unsigned c,const Vec<T2,s2> &v):data(v) { this->nr.set(r);  this->nc.set(c);  resize(r,c); }
 
     /*template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
         if ( fixed_size==false )
@@ -4208,6 +4229,8 @@ public:
     typedef Vec<TT,static_data_size> TV;
     typedef typename TV::template SubType<0>::T T;
     static const unsigned alignement = ( fixed_size ? 1 : SimdSize<T>::res );
+    typedef Diag<sr,sc> Structure;
+    typedef Dense<Col> Storage;
 
     #ifdef MATLAB_MEX_FILE
         Mat(const mxArray *variable) throw(std::runtime_error) {
@@ -4313,7 +4336,7 @@ public:
     explicit Mat(unsigned nr) { this->nr.set(default_nb_rows);  this->nc.set(default_nb_cols);  resize(nr,nr); }
     Mat(unsigned nr,unsigned nc) { this->nr.set(default_nb_rows);  this->nc.set(default_nb_cols);  resize(nr,nc); }
     Mat(unsigned nr,unsigned nc,const TT &val) { this->nr.set(default_nb_rows);  this->nc.set(default_nb_cols);  resize(nr,nc); set(val); }
-    template<class T2,int s2> Mat(unsigned r,unsigned c,const Vec<T2,s2> &v):data(v) { this->nr.set(default_nb_rows);  this->nc.set(default_nb_cols);  resize(r,c); }
+    template<class T2,int s2> Mat(unsigned r,unsigned c,const Vec<T2,s2> &v):data(v) { this->nr.set(r);  this->nc.set(c);  resize(r,c); }
 
     /*template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
         if ( fixed_size==false )
@@ -4440,6 +4463,8 @@ public:
     typedef Vec<TT,static_data_size> TV;
     typedef typename TV::template SubType<0>::T T;
     static const unsigned alignement = ( fixed_size ? 1 : SimdSize<T>::res );
+    typedef Diag<sr,sc> Structure;
+    typedef Dense<Row> Storage;
 
     #ifdef MATLAB_MEX_FILE
         Mat(const mxArray *variable) throw(std::runtime_error) {
@@ -4545,7 +4570,7 @@ public:
     explicit Mat(unsigned nr) { this->nr.set(default_nb_rows);  this->nc.set(default_nb_cols);  resize(nr,nr); }
     Mat(unsigned nr,unsigned nc) { this->nr.set(default_nb_rows);  this->nc.set(default_nb_cols);  resize(nr,nc); }
     Mat(unsigned nr,unsigned nc,const TT &val) { this->nr.set(default_nb_rows);  this->nc.set(default_nb_cols);  resize(nr,nc); set(val); }
-    template<class T2,int s2> Mat(unsigned r,unsigned c,const Vec<T2,s2> &v):data(v) { this->nr.set(default_nb_rows);  this->nc.set(default_nb_cols);  resize(r,c); }
+    template<class T2,int s2> Mat(unsigned r,unsigned c,const Vec<T2,s2> &v):data(v) { this->nr.set(r);  this->nc.set(c);  resize(r,c); }
 
     /*template<class T2,class STR2,class STO2,class O2> Mat(const Mat<T2,STR2,STO2,O2> &val) {
         if ( fixed_size==false )

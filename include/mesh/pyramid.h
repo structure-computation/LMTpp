@@ -20,8 +20,13 @@ namespace LMT {
 
 // --------------------------------------------------------------------------------------------------------
 /*!
+    C'est une pyramide à base carrée dans le plan xOy.
     
-
+    Dans l'espace de référence cela correspond au volume de points M(x,y,z) tels que :
+        * x, y , z >= 0
+        * x + z <= 1
+        * y + z <= 1
+        
     \keyword Maillage/Elément
     \friend raphael.pasquier@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr

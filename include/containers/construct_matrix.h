@@ -235,66 +235,130 @@ void construct_matrix( Mat<T0,Str0,Sto0> &res,
     construct_matrix( res, A * B );
 }
 
-/*
-/// conversion de Mat< Gen, SparseLine<Col> > * Mat< Sym<s,false>, Dense<Col> >
-template<class T0,class Str0,class Sto0,class T0_,int s0_,class T1_,int s_r1_,int s_c1_, class Str2,class Sto2>
-void construct_matrix( Mat<T0,Str0,Sto0> &res, 
-                       const Mat< MatMultMat< Mat<T0_,Sym<s0_,false>,Dense<Col>,void >, Mat<T1_,Gen<s_r1_,s_c1_>,SparseLine<Col>,void> >, Str2,Sto2> &src ) {
-    typedef typename TypePromote<Multiplies,T0_,T1_>::T T;
-    const Mat< T0_,Sym<s0_,false>,Dense<Col>,void >   &A = src.m1;
-    const Mat< T1_,Gen<s_r1_,s_c1_>,SparseLine<Col>,void > &B = src.m2;
-    
-    res.resize( A.nb_rows(), B.nb_cols() );
-    Vec<T> tmp; tmp.resize( B.nb_cols() );
-    PRINT( "Mat< Sym<s,false>, Dense<Col> > * Mat< Gen, SparseLine<Col> >" );
-    for( unsigned ra = 0; ra < A.nb_rows(); ++ra ) {
-        tmp.set( 0 );
-        for( unsigned ca = 0; ca <= ra; ca++ )
-            for( unsigned ib = 0; ib < B.data[ ca ].indices.size(); ++ib )
-                tmp[ B.data[ ca ].indices[ ib ] ] += A( ra , ca ) * B.data[ ca ].data[ ib ];
-        for( unsigned ca = ra + 1; ca < A.nb_cols(); ca++ )
-            for( unsigned ib = 0; ib < B.data[ ca ].indices.size(); ++ib )
-                tmp[ B.data[ ca ].indices[ ib ] ] += A( ca , ra ) * B.data[ ca ].data[ ib ];
-        //
-        res.row( ra ) = tmp;
-    }
-}
-
-/// conversion de Mat< Gen, Dense<Col> > * Mat< Sym, SparseLine<Col> >
-/// ou
-/// conversion de Mat< Gen, SparseLine<Col> > * Mat< Sym, SparseLine<Col> >
-template<class T0,class Str0,class Sto0,class T0_,int s0_,class T1_,int s_r1_,int s_c1_, class Sto1, class Str2,class Sto2>
-void construct_matrix( Mat<T0,Str0,Sto0> &res, 
-                       const Mat< MatMultMat< Mat<T0_,Sym<s0_,false>,SparseLine<Col>,void >, Mat<T1_,Gen<s_r1_,s_c1_>,Sto1,void> >, Str2,Sto2> &src ) {
-    typedef typename TypePromote<Multiplies,T0_,T1_>::T T;
-    const Mat< T0_,Sym<s0_,false>,SparseLine<Col>,void >   &A = src.m1;
-    const Mat< T1_,Gen<s_r1_,s_c1_>,Sto1,void > &B = src.m2;
-    res.resize( A.nb_rows(), B.nb_cols() );
-    Vec<T> tmp; tmp.resize( B.nb_cols() );
-
-    for( unsigned ra = 0; ra < A.nb_rows(); ++ra ) {
-        tmp.set( 0 );
-        for( unsigned ca = 0; ca < A.data[ ra ].indices.size(); ca++ )
-            tmp += A.data[ ra ].data[ ca ] * B.row( A.data[ ra ].indices[ ca ] );
-        for( unsigned ca = ra + 1; ca < A.nb_rows(); ca++ ) {
-            /// comme les données sont rangées par indice croissant dans une matrice creuse, on peut gagner un peu de temps pour chercher l'indice ra
-            /// une recherche dichotomique serait meilleure...
-            for( unsigned i = 0; i < A.data[ ca ].indices.size(); ++i )
-                if ( A.data[ ca ].indices[ i ] == ra )
-                    tmp += A.data[ ca ].data[ i ] * B.row( ca );
-                else
-                    if ( A.data[ ca ].indices[ i ] > ra )
-                        break;
-        }
-        res.row( ra ) = tmp;
-    }
-}
+/*!
+    Objectif :
+        Cette classe sert à calculer le type de structure du produit de deux matrices.
+        
+    Les structures possibles d'une matrice sont :
+        Gen<sr, sc>
+        Sym<sr, is_upper>
+        Herm<sr, is_upper>
+        AntiSym<sr, is_upper>
+        TriUpper<sr, sc>
+        TriLower<sr, sc>
+        Diag<sr, sc>
+        Hessen<upper>
+        MatPointed<?>
 */
+template<class Stru_A, class Stru_B >
+struct MulStruMat {
+    typedef void T;  /// valeur par défaut qui fera échouer la compilation
+};
+
+/// spécialisations
+/// cas stables
+template< int sr_A, int sc_A, int sc_B >
+struct MulStruMat< TriUpper<sr_A,sc_A>, TriUpper<sc_A,sc_B> > {
+    typedef TriUpper<sr_A,sc_B> T;
+};
+
+template< int sr_A, int sc_A, int sc_B >
+struct MulStruMat< TriLower<sr_A,sc_A>, TriLower<sc_A,sc_B> > {
+    typedef TriLower<sr_A,sc_B> T;
+};
+
+template< int sr_A, int sc_A, int sc_B >
+struct MulStruMat< Diag<sr_A,sc_A>, Diag<sc_A,sc_B> > {
+    typedef Diag<sr_A,sc_B> T;
+};
+
+/// cas avec Gen<>
+template< int sr_A, int sc_A, class Stru_B >
+struct MulStruMat< Gen<sr_A,sc_A>, Stru_B > {
+    typedef Gen<sr_A, Stru_B::static_nb_cols > T;
+};
+
+/// Gen<> à droite : on est obligé d'étudier tous les cas . C'est risqué
+template< int sr_A, bool is_upper_A, int sc_B >
+struct MulStruMat< Sym<sr_A,is_upper_A>, Gen<sr_A,sc_B> > {
+    typedef Gen<sr_A, sc_B > T;
+};
+
+template< int sr_A, bool is_upper_A, int sc_B >
+struct MulStruMat< Herm<sr_A,is_upper_A>, Gen<sr_A,sc_B> > {
+    typedef Gen<sr_A, sc_B > T;
+};
+
+template< int sr_A, bool is_upper_A, int sc_B >
+struct MulStruMat< AntiSym<sr_A,is_upper_A>, Gen<sr_A,sc_B> > {
+    typedef Gen<sr_A, sc_B > T;
+};
+
+template< int sr_A, int sc_A, int sc_B >
+struct MulStruMat< TriUpper<sr_A,sc_A>, Gen<sc_A,sc_B> > {
+    typedef Gen<sr_A, sc_B > T;
+};
+
+template< int sr_A, int sc_A, int sc_B >
+struct MulStruMat< TriLower<sr_A,sc_A>, Gen<sc_A,sc_B> > {
+    typedef Gen<sr_A, sc_B > T;
+};
+
+template< int sr_A, int sc_A, int sc_B >
+struct MulStruMat< Diag<sr_A,sc_A>, Gen<sc_A,sc_B> > {
+    typedef Gen<sr_A, sc_B > T;
+};
+
+template< int sr_A, int sc_A, int sc_B >
+struct MulStruMat< Sym<sr_A,sc_A>, Sym<sc_A,sc_B> > {
+    typedef Gen<sr_A, sc_B > T;
+};
+
+/*!
+    Objectif :
+        Cette classe sert à calculer le type de stockage du produit de deux matrices.
+        
+    Les stockages possibles d'une matrice sont :
+        Dense<Ori>
+        SparseLine<Ori>
+        SparseLU
+        SemiMorse
+        SparseUMFPACK
+        SparseCholdMod
+        SkyLine<Ori>
+        
+    où Ori est soit Col soit Row.
+    
+    On traitera les principaux cas.
+*/
+template<class Stru_A, class Stru_B >
+struct MulStoMat {
+    typedef void T;  /// valeur par défaut qui fera échouer la compilation
+};
+
+/// spécialisations
+template<class Ori, class Sto_B >
+struct MulStoMat< Dense<Ori>, Sto_B > {
+    typedef Dense<Ori> T;
+};
+
+template< class Ori_A, class Ori_B >
+struct MulStoMat< SparseLine<Ori_A>, Dense<Ori_B> > {
+    typedef Dense<Col> T;
+};
+
+template< class Ori_A, class Ori_B >
+struct MulStoMat< SparseLine<Ori_A>, SparseLine<Ori_B> > {
+    typedef SparseLine<Col> T;
+};
 
 /// conversion de A * B * C
 template<class T0,class Str0,class Sto0,class M0, class M1,  class Str1,class Sto1, class M2, class Str2,class Sto2>
 void construct_matrix( Mat<T0,Str0,Sto0> &res, const Mat< MatMultMat< Mat< MatMultMat< M0, M1 >,Str1,Sto1 >, M2 >, Str2, Sto2 > &src ) {
-    construct_matrix( res, Mat<T0,Str0,Sto0>( src.m1 ) * src.m2 ); 
+    //construct_matrix( res, Mat<T0, Str0, Sto0 >( src.m1 ) * src.m2 ); 
+    construct_matrix( res, Mat<T0, 
+                               typename MulStruMat< typename M0::Structure, typename M1::Structure >::T, 
+                               typename MulStoMat< typename M0::Storage, typename M1::Storage >::T >( src.m1 ) * src.m2 ); 
 }
 
 }

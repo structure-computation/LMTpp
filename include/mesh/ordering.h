@@ -25,7 +25,7 @@ struct Sort_xyz_ordering {
     Vec<unsigned> best_axes;
 };
 
-/**
+/*!
  * Simple nodal reordering of m using sort using axis x,y,z
  * @param  
  */

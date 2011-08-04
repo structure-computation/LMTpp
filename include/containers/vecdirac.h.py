@@ -60,7 +60,7 @@ private:
 */
 template<class T> Vec<VecDirac<T>,-1> dirac_vec(const T &val,unsigned nn,unsigned size) { return Vec<VecDirac<T>,-1>(val,nn,size); }
 /*! 
-  Cette fonction retourne un vecteur static \a Vec<VecDirac<T>,int> , spécialisation de \a Vec , qui est nul partout sauf à l'indice nn avec la valeur val.
+  Cette fonction retourne un vecteur static \\a Vec<VecDirac<T>,int> , spécialisation de \\a Vec , qui est nul partout sauf à l'indice nn avec la valeur val.
   \\relates dirac_vec 
   \\relates Vec 
  \\friend raphael.pasquier@lmt.ens-cachan.fr

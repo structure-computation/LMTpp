@@ -5,76 +5,195 @@ namespace LMT {
  
 template<class TM>
 struct Replace_Wedge_by_Tetra {
-    Replace_Wedge_by_Tetra( TM &m ) : ptr_m( &m ) {} 
+    Replace_Wedge_by_Tetra( TM &m ) : ptr_m( &m ), impossible( false ) {} 
     
     template< class NameBehavior, class TNode_, class TData, unsigned num_in_elem_list_ >
     bool operator() ( Element< Wedge, NameBehavior, TNode_, TData, num_in_elem_list_ > &e ) {
-        Vec< typename Element< Wedge, NameBehavior, TNode_, TData, num_in_elem_list_ >::TNode*, 4 > vn;
-        /// Tetra 0
-//         vn[ 0 ] = e.node( 0 );
-//         vn[ 1 ] = e.node( 1 );
-//         vn[ 2 ] = e.node( 2 );
-//         vn[ 3 ] = e.node( 5 );
-//         permutation_if_jac_neg ( Tetra(), vn.ptr() );
-//         ptr_m->add_element( Tetra(), DefaultBehavior(), vn.ptr() );
-//         /// Tetra 1
-//         vn[ 0 ] = e.node( 0 );
-//         vn[ 1 ] = e.node( 1 );
-//         vn[ 2 ] = e.node( 3 );
-//         vn[ 3 ] = e.node( 5 );
-//         permutation_if_jac_neg ( Tetra(), vn.ptr() );
-//         ptr_m->add_element( Tetra(), DefaultBehavior(), vn.ptr() );
-//         /// Tetra 2
-//         vn[ 0 ] = e.node( 1 );
-//         vn[ 1 ] = e.node( 3 );
-//         vn[ 2 ] = e.node( 4 );
-//         vn[ 3 ] = e.node( 5 );
-//         permutation_if_jac_neg ( Tetra(), vn.ptr() );
-//         ptr_m->add_element( Tetra(), DefaultBehavior(), vn.ptr() );
+        typedef typename Element< Wedge, NameBehavior, TNode_, TData, num_in_elem_list_ >::TNode::T T;
+        
+        typename Element< Wedge, NameBehavior, TNode_, TData, num_in_elem_list_ >::TNode* nn[4];
+        T l1, l2;
+        unsigned min1, min2, BF, BD, CD;
+        
+        if ( impossible ) return false;
+        
+        
+        l1 = length( e.pos( 1 ) - e.pos( 5 ) );
+        l2 = length( e.pos( 2 ) - e.pos( 4 ) );
+        if ( l1 < l2 ) 
+            BF = 1;
+        else {
+            if ( l2 > l1 )
+               BF = 0;
+            else {
+                min1 = min( e.node( 1 )->number, e.node( 5 )->number );
+                min2 = min( e.node( 2 )->number, e.node( 4 )->number );
+                if ( min1 < min2 ) BF = 1; else BF = 0;
+            }
+        }
 
-/// well
-        vn[ 0 ] = e.node( 0 );
-        vn[ 1 ] = e.node( 1 );
-        vn[ 2 ] = e.node( 2 );
-        vn[ 3 ] = e.node( 3 );
-        permutation_if_jac_neg ( Tetra(), vn.ptr() );
-        ptr_m->add_element( Tetra(), DefaultBehavior(), vn.ptr() );
-        /// Tetra 1
-        vn[ 0 ] = e.node( 2 );
-        vn[ 1 ] = e.node( 3 );
-        vn[ 2 ] = e.node( 4 );
-        vn[ 3 ] = e.node( 5 );
-        permutation_if_jac_neg ( Tetra(), vn.ptr() );
-        ptr_m->add_element( Tetra(), DefaultBehavior(), vn.ptr() );
-        /// Tetra 2
-        vn[ 0 ] = e.node( 1 );
-        vn[ 1 ] = e.node( 2 );
-        vn[ 2 ] = e.node( 3 );
-        vn[ 3 ] = e.node( 4 );
-        permutation_if_jac_neg ( Tetra(), vn.ptr() );
-        ptr_m->add_element( Tetra(), DefaultBehavior(), vn.ptr() );
+        l1 = length( e.pos( 1 ) - e.pos( 3 ) );
+        l2 = length( e.pos( 0 ) - e.pos( 4 ) );
+        if ( l1 < l2 ) 
+            BD = 1;
+        else {
+            if ( l2 > l1 )
+               BD = 0;
+            else {
+                min1 = min( e.node( 1 )->number, e.node( 3 )->number );
+                min2 = min( e.node( 0 )->number, e.node( 4 )->number );
+                if ( min1 < min2 ) BD = 1; else BD = 0;
+            }
+        }
 
-/// old
-//         vn[ 0 ] = e.node( 0 );
-//         vn[ 1 ] = e.node( 1 );
-//         vn[ 2 ] = e.node( 2 );
-//         vn[ 3 ] = e.node( 4 );
-//         permutation_if_jac_neg ( Tetra(), vn.ptr() );
-//         ptr_m->add_element( Tetra(), DefaultBehavior(), vn.ptr() );
-//         /// Tetra 1
-//         vn[ 0 ] = e.node( 0 );
-//         vn[ 1 ] = e.node( 2 );
-//         vn[ 2 ] = e.node( 4 );
-//         vn[ 3 ] = e.node( 5 );
-//         permutation_if_jac_neg ( Tetra(), vn.ptr() );
-//         ptr_m->add_element( Tetra(), DefaultBehavior(), vn.ptr() );
-//         /// Tetra 2
-//         vn[ 0 ] = e.node( 0 );
-//         vn[ 1 ] = e.node( 3 );
-//         vn[ 2 ] = e.node( 4 );
-//         vn[ 3 ] = e.node( 5 );
-//         permutation_if_jac_neg ( Tetra(), vn.ptr() );
-//         ptr_m->add_element( Tetra(), DefaultBehavior(), vn.ptr() );
+        l1 = length( e.pos( 2 ) - e.pos( 3 ) );
+        l2 = length( e.pos( 0 ) - e.pos( 5 ) );
+        if ( l1 < l2 ) 
+            CD = 1;
+        else {
+            if ( l2 > l1 )
+               CD = 0;
+            else {
+                min1 = min( e.node( 2 )->number, e.node( 3 )->number );
+                min2 = min( e.node( 0 )->number, e.node( 5 )->number );
+                if ( min1 < min2 ) CD = 1; else CD = 0;
+            }
+        }
+        
+        unsigned index = BF + 2 * BD + 4 * CD;
+        switch( index ) {
+            case 0 : /// 000
+                nn[0] = e.node( 0 );
+                nn[1] = e.node( 1 );
+                nn[2] = e.node( 2 );
+                nn[3] = e.node( 4 );
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *( ptr_m->add_element( Tetra(), NameBehavior(), nn ) ) );
+                nn[0] = e.node( 3 );
+                nn[1] = e.node( 4 );
+                nn[2] = e.node( 5 );
+                nn[3] = e.node( 0 );
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *( ptr_m->add_element( Tetra(), NameBehavior(), nn ) ) );
+                nn[0] = e.node( 0 );
+                nn[1] = e.node( 2 );
+                nn[2] = e.node( 5 );
+                nn[3] = e.node( 4 );
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *( ptr_m->add_element( Tetra(), NameBehavior(), nn ) ) );
+                break;
+            case 1 : /// 001
+                nn[0] = e.node( 0 );
+                nn[1] = e.node( 1 );
+                nn[2] = e.node( 2 );
+                nn[3] = e.node( 5 );
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *( ptr_m->add_element( Tetra(), NameBehavior(), nn ) ) );
+                nn[0] = e.node( 0 );
+                nn[1] = e.node( 1 );
+                nn[2] = e.node( 4 );
+                nn[3] = e.node( 5 );
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *( ptr_m->add_element( Tetra(), NameBehavior(), nn ) ) );
+                nn[0] = e.node( 0 );
+                nn[1] = e.node( 3 );
+                nn[2] = e.node( 5 );
+                nn[3] = e.node( 4 );
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *( ptr_m->add_element( Tetra(), NameBehavior(), nn ) ) );
+                break;                
+            case 2 : /// 010
+                impossible = true;
+                std::cerr << "Error Replace_Wedge_by_Tetra : case 2" << std::endl;
+                return false;
+                break;
+            case 3 : /// 011
+                nn[0] = e.node( 0 );
+                nn[1] = e.node( 1 );
+                nn[2] = e.node( 2 );
+                nn[3] = e.node( 5 );
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *( ptr_m->add_element( Tetra(), NameBehavior(), nn ) ) );
+                nn[0] = e.node( 1 );
+                nn[1] = e.node( 3 );
+                nn[2] = e.node( 4 );
+                nn[3] = e.node( 5 );
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *( ptr_m->add_element( Tetra(), NameBehavior(), nn ) ) );
+                nn[0] = e.node( 0 );
+                nn[1] = e.node( 1 );
+                nn[2] = e.node( 3 );
+                nn[3] = e.node( 5 );
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *( ptr_m->add_element( Tetra(), NameBehavior(), nn ) ) );
+                break;
+            case 4 : /// 100
+                nn[0] = e.node( 3 );
+                nn[1] = e.node( 4 );
+                nn[2] = e.node( 5 );
+                nn[3] = e.node( 2 );
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *( ptr_m->add_element( Tetra(), NameBehavior(), nn ) ) );
+                nn[0] = e.node( 0 );
+                nn[1] = e.node( 1 );
+                nn[2] = e.node( 2 );
+                nn[3] = e.node( 4 );
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *( ptr_m->add_element( Tetra(), NameBehavior(), nn ) ) );
+                nn[0] = e.node( 0 );
+                nn[1] = e.node( 3 );
+                nn[2] = e.node( 4 );
+                nn[3] = e.node( 2 );
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *( ptr_m->add_element( Tetra(), NameBehavior(), nn ) ) );
+                break;
+            case 5 : /// 101
+                impossible = true;
+                std::cerr << "Error Replace_Wedge_by_Tetra : case 5" << std::endl;
+                return false;
+                break;
+            case 6 : /// 110
+                nn[0] = e.node( 3 );
+                nn[1] = e.node( 4 );
+                nn[2] = e.node( 5 );
+                nn[3] = e.node( 2 );
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *( ptr_m->add_element( Tetra(), NameBehavior(), nn ) ) );
+                nn[0] = e.node( 1 );
+                nn[1] = e.node( 3 );
+                nn[2] = e.node( 4 );
+                nn[3] = e.node( 2 );
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *( ptr_m->add_element( Tetra(), NameBehavior(), nn ) ) );
+                nn[0] = e.node( 0 );
+                nn[1] = e.node( 1 );
+                nn[2] = e.node( 3 );
+                nn[3] = e.node( 2 );
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *( ptr_m->add_element( Tetra(), NameBehavior(), nn ) ) );
+                break;
+            case 7 : /// 111
+                nn[0] = e.node( 0 );
+                nn[1] = e.node( 1 );
+                nn[2] = e.node( 2 );
+                nn[3] = e.node( 3 );
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *( ptr_m->add_element( Tetra(), NameBehavior(), nn ) ) );
+                nn[0] = e.node( 1 );
+                nn[1] = e.node( 3 );
+                nn[2] = e.node( 4 );
+                nn[3] = e.node( 5 );
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *( ptr_m->add_element( Tetra(), NameBehavior(), nn ) ) );
+                nn[0] = e.node( 1 );
+                nn[1] = e.node( 2 );
+                nn[2] = e.node( 5 );
+                nn[3] = e.node( 3 );
+                permutation_if_jac_neg ( Tetra(), nn );
+                DM::copy( e, *( ptr_m->add_element( Tetra(), NameBehavior(), nn ) ) );
+                break;
+            default : ;
+        }
         return true;    
     }
     
@@ -85,6 +204,7 @@ struct Replace_Wedge_by_Tetra {
     }
 
     TM* ptr_m;
+    bool impossible;
 };
 
 /*!
@@ -103,6 +223,9 @@ void replace_Wedge_by_Tetra( TM &m ) {
     Replace_Wedge_by_Tetra<TM> rw( m );
     
     m.remove_elements_if( rw );
+    
+    if ( rw.impossible ) 
+        std::cerr << "Error replace_Wedge_by_Tetra() : impossible to replace all wedges. " << std::endl;
 }
  
 }

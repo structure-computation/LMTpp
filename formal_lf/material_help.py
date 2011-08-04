@@ -299,17 +299,21 @@ def hooke_matrix_shell(E,nu,h,dim,type_behaviour='membrane'):
 
     else:
         raise 'Shell behaviour only available in 3D'
+    
+def trace( sigma ):
+    tr = 0
+    d = (sigma.size()+1)/2
+    for i in range(d): tr += sigma[i]
+    tr /= d
+    return tr
 
 def dev( sigma ):
     d = sigma.size()
     res = ExVector(d)
     for i in range(d):
         res[i] = sigma[i]
-    tr = 0
-    d = (sigma.size()+1)/2
-    for i in range(d): tr += sigma[i]
-    tr /= d
-    for i in range(d): res[i] -= tr
+    tr = trace(res)
+    for i in range((d+1)/2): res[i] -= tr
     return res
 
 # ne fonctionne qu'en 3D

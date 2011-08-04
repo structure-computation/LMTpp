@@ -128,7 +128,7 @@ struct cell_output_ascii {
             outfile << "cu20 ";
             for(unsigned i=0;i<20;++i)
                 outfile << (e.node(i)->number_in_original_mesh()+1) << " ";
-            outfile  << endl;
+            outfile  << std::endl;
          }
     }
 };

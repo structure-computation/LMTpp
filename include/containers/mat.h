@@ -595,6 +595,13 @@ const Mat<T,Sym<s,b>,STO,IO> &sym (const Mat<T,Sym<s,b>,STO,IO> &M) {
     }
 #endif
 
+/*!
+    Objectif : 
+        convertir un vecteur en une matrice M symétrque dense tel que M( i, j ) = v[ i ] * v[ j ]
+         
+    \keyword Matrice/Conversion
+
+*/
 template <class T, int s>
 Mat<T,Sym<s>,Dense<> > vec2matsym (const Vec<T,s> &v) {
     Mat<T,Sym<>,Dense<> > res;

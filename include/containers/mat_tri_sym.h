@@ -45,6 +45,9 @@ struct TriDiag { };
 template<class T>
 class Mat<T,Sym<>,TriDiag,void> {
 public:
+    typedef Sym<> Structure;
+    typedef TriDiag Storage;
+    
     Mat() {  }
     
     void resize( unsigned n ) {

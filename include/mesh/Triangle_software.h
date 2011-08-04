@@ -3,8 +3,8 @@
 
 #ifdef METIL_COMP_DIRECTIVE
 #pragma inc_path /usr/local/triangle/
-#pragma lib_path /usr/local/triangle/triangle/
-#pragma lib_name triangle
+#pragma lib_path /usr/local/triangle/
+#pragma lnk_flag /usr/local/triangle/triangle.o
 #endif /// METIL_COMP_DIRECTIVE
 
 #include <list>
@@ -14,7 +14,7 @@
 extern "C" {
     #define REAL double
     #define VOID void
-    #include "triangle/triangle.h"
+    #include "/usr/local/triangle/triangle.h"
 }
 
 using namespace LMT;
@@ -137,7 +137,9 @@ inline typename FloatType<typename TypeReduction<Multiplies,Vec<T,s> >::T>::T re
         }          
      
 
-     Les utilisateurs de metil_comp compile ce code sans problème.
+     Les utilisateurs de metil_comp compile ce code sans problème en tapant par exemple :
+     \code 
+        metil_comp -DANSI_DECLARATORS main.cpp
      
      Pour ceux qui utilisent scons, inspirez-vous de cet exemple :
      \code Python
