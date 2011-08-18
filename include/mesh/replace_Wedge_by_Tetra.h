@@ -3,20 +3,80 @@
   
 namespace LMT {
  
-template<class TM>
+struct OrderNumber {
+
+    typedef unsigned Ret;
+
+    template<class TNode>
+    Ret operator()( const TNode *n ) {
+        return n->number;
+    }
+
+};
+
+template<class Pvec> 
+struct Pos {
+    Pos() : data( 0 ) {}
+    Pos( const Pvec &p ) : data( p ) {} 
+    
+    bool operator<( const Pos<Pvec> &p2 ) const {
+    
+        const unsigned char *a = reinterpret_cast<const unsigned char*>( &data );
+        const unsigned char *b = reinterpret_cast<const unsigned char*>( &p2.data );
+        unsigned carry = 0;
+        for( unsigned i = 0; i < sizeof( Pvec ); ++i ) {
+            unsigned ca = a[ i ] + carry;
+            unsigned cb = b[ i ];
+            if ( cb < ca )
+                carry = 1;
+            else 
+                carry = 0; 
+        }
+
+        return ( carry != 1 );
+    }
+    
+    bool operator==( const Pos<Pvec> &p2 ) const {
+    
+        const unsigned char *a = reinterpret_cast<const unsigned char*>( &data );
+        const unsigned char *b = reinterpret_cast<const unsigned char*>( &p2.data );
+        for( unsigned i = 0; i < sizeof( Pvec ); ++i )
+            if ( a[ i ] != b[ i ] )
+                return false;
+        return true;
+    }
+    
+    Pvec data;
+};
+
+template<class Pvec>
+struct OrderPosition {
+
+    typedef Pos<Pvec> Ret;
+
+    template<class TNode>
+    Ret operator()( const TNode *n ) {
+        return Ret( n->pos );
+    }
+
+};
+
+template<class TM, class Order >
 struct Replace_Wedge_by_Tetra {
-    Replace_Wedge_by_Tetra( TM &m ) : ptr_m( &m ), impossible( false ) {} 
+    Replace_Wedge_by_Tetra( TM &m, const Order &order ) : ptr_m( &m ), impossible( false ) , o( order ) {} 
     
     template< class NameBehavior, class TNode_, class TData, unsigned num_in_elem_list_ >
     bool operator() ( Element< Wedge, NameBehavior, TNode_, TData, num_in_elem_list_ > &e ) {
-        typedef typename Element< Wedge, NameBehavior, TNode_, TData, num_in_elem_list_ >::TNode::T T;
-        
+         
         typename Element< Wedge, NameBehavior, TNode_, TData, num_in_elem_list_ >::TNode* nn[4];
-        T l1, l2;
-        unsigned min1, min2, BF, BD, CD;
-        
+
         if ( impossible ) return false;
         
+        typedef typename Element< Wedge, NameBehavior, TNode_, TData, num_in_elem_list_ >::TNode::T T;
+    
+        T l1, l2;
+        typename Order::Ret min1, min2;
+        unsigned BF, BD, CD;
         
         l1 = length( e.pos( 1 ) - e.pos( 5 ) );
         l2 = length( e.pos( 2 ) - e.pos( 4 ) );
@@ -24,43 +84,44 @@ struct Replace_Wedge_by_Tetra {
             BF = 1;
         else {
             if ( l2 > l1 )
-               BF = 0;
+                BF = 0;
             else {
-                min1 = min( e.node( 1 )->number, e.node( 5 )->number );
-                min2 = min( e.node( 2 )->number, e.node( 4 )->number );
+                min1 = min( o( e.node( 1 ) ), o( e.node( 5 ) ) );
+                min2 = min( o( e.node( 2 ) ), o( e.node( 4 ) ) );
                 if ( min1 < min2 ) BF = 1; else BF = 0;
             }
         }
-
+    
         l1 = length( e.pos( 1 ) - e.pos( 3 ) );
         l2 = length( e.pos( 0 ) - e.pos( 4 ) );
         if ( l1 < l2 ) 
             BD = 1;
         else {
             if ( l2 > l1 )
-               BD = 0;
+                BD = 0;
             else {
-                min1 = min( e.node( 1 )->number, e.node( 3 )->number );
-                min2 = min( e.node( 0 )->number, e.node( 4 )->number );
+                min1 = min( o( e.node( 1 ) ), o( e.node( 3 ) ) );
+                min2 = min( o( e.node( 0 ) ), o( e.node( 4 ) ) );
                 if ( min1 < min2 ) BD = 1; else BD = 0;
             }
         }
-
+    
         l1 = length( e.pos( 2 ) - e.pos( 3 ) );
         l2 = length( e.pos( 0 ) - e.pos( 5 ) );
         if ( l1 < l2 ) 
             CD = 1;
         else {
             if ( l2 > l1 )
-               CD = 0;
+                CD = 0;
             else {
-                min1 = min( e.node( 2 )->number, e.node( 3 )->number );
-                min2 = min( e.node( 0 )->number, e.node( 5 )->number );
+                min1 = min( o( e.node( 2 ) ), o( e.node( 3 ) ) );
+                min2 = min( o( e.node( 0 ) ), o( e.node( 5 ) ) );
                 if ( min1 < min2 ) CD = 1; else CD = 0;
             }
         }
         
         unsigned index = BF + 2 * BD + 4 * CD;
+        
         switch( index ) {
             case 0 : /// 000
                 nn[0] = e.node( 0 );
@@ -205,29 +266,56 @@ struct Replace_Wedge_by_Tetra {
 
     TM* ptr_m;
     bool impossible;
+    Order o;
 };
 
 /*!
-Cette fonction enlève tous les \a Hexa du maillage "m" et les remplace par des \a Wedge . Le maillage "m" est donc __modifié__ .  
+    Cette fonction enlève tous les \a Hexa du maillage "m" et les remplace par des \a Wedge . Le maillage "m" est donc __modifié__ .  
 
-Param :
-    m : est un maillage de la plateforme.
+    Paramètre :
+        * m : est un maillage de la plateforme.
+        * order : est un opérateur qui doit pouvoir ordonner les noeuds de l'espace, cad si on a deux noeuds n1 et n2, order( n1 ) doit renvoyer une classe pour laquelle l'opérateur < a un sens. L'opérateur le plus simple est celui qui renvoie l'indice du noeud dans le maillage. Il s'appelle \a OrderNumber . 
+        
+    Lorsqu'on manipule plusieurs maillages qui ont des noeuds superposés au niveau de la peau, on peut souhaiter que la découpe des \a Wedge se fasse de façon conforme ( i.e. ne pas avoir des \a Tetra dont les arêtes se croisent ). On peut alors utiliser la position des noeuds pour les identifier avec la classe \a OrderPosition .  
+
+    Problème : si l'opération échoue, un message d'erreur est affiché et le maillage contient des \a Wedge et des \a Tetra avec très certainement des faces de Tetra et de Wedge en non-conformité. Il faut donc ne pas utiliser le maillage!
+
+    Exemples :
+    \code C/C++
+        TM m;
+        
+        make_rect( m, Wedge(), Pvec( 0, 0 , 0 ), Pvec( 1, 1, 1 ), Pvec( 2, 2, 2 ) );
+   
+        display_mesh( m );
     
-Retour :
-    m avec aucun \a Wedge
-
+        replace_Wedge_by_Tetra( m, OrderNumber() );
+        
+        display_mesh( m );
+    
+    \code C/C++
+        typedef TM::Pvec Pvec;
+        
+        TM m;
+        
+        make_rect( m, Wedge(), Pvec( 0, 0 , 0 ), Pvec( 1, 1, 1 ), Pvec( 2, 2, 2 ) );
+   
+        display_mesh( m );
+    
+        replace_Wedge_by_Tetra( m, OrderPosition<Pvec>() );
+        
+        display_mesh( m );
 */
-template <class TM>
-void replace_Wedge_by_Tetra( TM &m ) {
+template <class TM, class Order >
+void replace_Wedge_by_Tetra( TM &m, const Order &order ) {
 
-    Replace_Wedge_by_Tetra<TM> rw( m );
+    Replace_Wedge_by_Tetra<TM, Order> rw( m, order );
     
     m.remove_elements_if( rw );
     
     if ( rw.impossible ) 
         std::cerr << "Error replace_Wedge_by_Tetra() : impossible to replace all wedges. " << std::endl;
 }
- 
+
 }
 #endif  /// REPLACE_WEDGE_BY_TETRA
  
