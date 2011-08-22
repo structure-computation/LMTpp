@@ -1,20 +1,18 @@
 #ifndef LMTQUAD_H
 #define LMTQUAD_H
 
-#include "containers/basicops.h"
+#include "../containers/basicops.h"
 #include "bar.h"
 #include "triangle.h"
 
 namespace LMT {
 /*!
-
+    Carré à 4 noeuds
     \verbatim
-                    3------2
-                    |      |
-                    |      |
-                    |      |
-                    0------1
-
+    .                    3-----2
+    .                    |     |
+    .                    |     |
+    .                    0-----1
     \relates Mesh
     \relates Element
     \keyword Maillage/Elément
@@ -57,6 +55,15 @@ void append_skin_elements(Element<Quad,TN,TNG,TD,NET> &e,TC &ch,HET &het,Number<
     het.add_element(e,ch,NodalElement(),e.node(1));
     het.add_element(e,ch,NodalElement(),e.node(2));
     het.add_element(e,ch,NodalElement(),e.node(3));
+}
+
+template<class TN,class TNG,class TD,unsigned NET,class TM,class T>
+void update_edge_ratio(const Element<Quad,TN,TNG,TD,NET> &e,TM &m,T &edge_ratio) {
+    T edge_length_0 = (m.get_children_of( e, Number<1>() )[ 0 ])->measure_virtual();
+    T edge_length_1 = (m.get_children_of( e, Number<1>() )[ 1 ])->measure_virtual();
+    T edge_length_2 = (m.get_children_of( e, Number<1>() )[ 2 ])->measure_virtual();
+    T edge_length_3 = (m.get_children_of( e, Number<1>() )[ 3 ])->measure_virtual();
+    edge_ratio = min( edge_length_0, edge_length_1, edge_length_2, edge_length_3 ) / max( edge_length_0, edge_length_1, edge_length_2, edge_length_3 );
 }
 
 template<class TN,class TNG,class TD,unsigned NET,class TM>
@@ -213,6 +220,12 @@ typename TNG::T measure( const Element<Quad,TN,TNG,TD,NET> &e ) {
     D0 = D0+D6; D0 = abs(D0); return D0; 
 }
 
+template<class PV>
+typename PV::T sample_normal( Quad, const PV &pos ) {
+    typename PV::T res = vect_prod( Pvec( pos[ 1 ] - pos[ 0 ] ), Pvec( pos[ 2 ] - pos[ 0 ] ) );
+    return res / length( res );
+}
+
 template<class TN,class TNG,class TD,unsigned NET>
 typename TNG::Pvec sample_normal(const Element<Quad,TN,TNG,TD,NET> &e) {
     DEBUGASSERT( (TNG::dim==3) );
@@ -258,7 +271,7 @@ bool is_inside_linear( const Quad &elem, const PosNodes &pos_nodes, const Pvec &
         XM = pos - pos_nodes[ 2 ];
         T det3 = CD[ 0 ] * XM[ 1 ] - CD[ 1 ] * XM[ 0 ];
         
-        if ( ( det1 * det3 ) >= 0 ) {
+        if ( ( det1 * det3 ) >= 0 and ( det2 * det3 ) >= 0 ) {
             Pvec DA = pos_nodes[ 0 ] - pos_nodes[ 3 ];
             XM = pos - pos_nodes[ 3 ];
             T det4 = DA[ 0 ] * XM[ 1 ] - DA[ 1 ] * XM[ 0 ];
@@ -271,6 +284,8 @@ bool is_inside_linear( const Quad &elem, const PosNodes &pos_nodes, const Pvec &
     } else
         return false;
 }
+
+inline unsigned vtk_num( StructForType<Quad> ) { return 9; }
 
 };
 

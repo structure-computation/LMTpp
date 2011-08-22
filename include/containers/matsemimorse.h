@@ -21,7 +21,9 @@ template<class T>
 struct Mat<T, Sym<>, SemiMorse, void> {
     static const unsigned al = SimdSize<T>::res; /// alignement
     static const unsigned want_aligned_block_if_size_supeq = al * 3;
-    
+    typedef Sym<> Structure;
+    typedef SemiMorse Storage;
+        
     Mat() { r=0; c=0; }
     
     template<class AP,class AI,class AX> Mat( const AP &Ap, const AI &Ai, const AX &Ax, const DI &diag_ ) {

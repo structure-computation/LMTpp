@@ -34,15 +34,11 @@ public:
         Codegen::Ex val; /// coeff
         Codegen::Ex sym; /// symbol
         unsigned num_in_fmat(const TF &f) const {
-            if ( type_var==-2 ) {
-                return (*f.indice_glob) + num_in_vec;
-            }
-            else if ( type_var==-1 ) {
-                return (*f.indice_noda)[ num ] + num_in_vec;
-            }
-            else {
-                return f.indice_elem[ type_var ][ num ] + num_in_vec;
-            }
+            if ( type_var==-2 )
+                return ( *f.indice_glob ) + num_in_vec;
+            if ( type_var==-1 )
+                return ( *f.indice_noda )[ num ] + num_in_vec;
+            return f.indice_elem[ type_var ][ num ] + num_in_vec;
         }
     };
     
@@ -70,23 +66,23 @@ public:
                 if ( f.carac.is_unknown( name_unk ) ) {
                     Coeff c;
                     c.sym = symbols[ i ];
-                    if ( split.size()==0 ) c.type_var = -2;
+                    if ( split.size()==0 )
+                        c.type_var = -2;
                     else if ( split[0][0]=='n' ) {
                         c.type_var = -1;
                         Vec<std::string> splitpar = tokenize( split[0], '[' );
                         if ( splitpar.size()!=2 or splitpar[1][splitpar[1].size()-1]!=']' )
                             throw Read_ex_error("syntax for node data is node[0].data.",0);
                         c.num = (unsigned)atoi( std::string(splitpar[1].begin(),splitpar[1].begin()+splitpar[1].size()-1).c_str() );
-                    }
-                    else {
+                    } else {
                         c.type_var = 0;
                     }
                     c.val = ex.diff( symbols[i] );
-                    if ( split_nu.size()!=1 )
+                    if ( split_nu.size() != 1 )
                         c.num_in_vec = (unsigned)atoi( std::string(split_nu[1].begin(),split_nu[1].begin()+split_nu[1].size()-1).c_str() );
                     //
                     c.num_in_vec += f.carac.num_in_vec_unknown( name_unk );
-                    
+
                     coeffs.push_back( c );
                     
                     ex = ex.subs( symbols[i], 0 );

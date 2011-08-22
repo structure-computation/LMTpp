@@ -1,7 +1,7 @@
 #ifndef LMTQUAD_9_H
 #define LMTQUAD_9_H
 
-#include "containers/basicops.h"
+#include "../containers/basicops.h"
 #include "bar_3.h"
 
 namespace LMT {
@@ -11,14 +11,15 @@ namespace LMT {
     Carré à 9 noeuds
 
     \verbatim
-        3----6----2
-        |    |    |
-        |    |    |
-        7----8----5
-        |    |    |
-        |    |    |
-        0----4----1
-
+    .                    3-----6-----2
+    .                    |     |     |
+    .                    |     |     |
+    .                    7-----8-----5
+    .                    |     |     |
+    .                    |     |     |
+    .                    0-----4-----1
+    \relates Mesh
+    \relates Element
     \keyword Maillage/Elément
     \friend raphael.pasquier@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
@@ -27,7 +28,7 @@ struct Quad_9 {
     static const unsigned nb_var_inter = 2;
     static const unsigned nb_nodes = 9;
     static const char *name() { return "Quad_9"; }
-    static const char *can_directly_be_represented_by() { return "Quad_8"; }
+    static const char *can_directly_be_represented_by() { return "Quad_9"; }
 };
 
 // --------------------------------------------------------------------------------------------------------
@@ -46,10 +47,10 @@ void append_skin_elements(Element<Quad_9,TN,TNG,TD,NET> &e,TC &ch,HET &het,Numbe
 
 template<class TN,class TNG,class TD,unsigned NET,class TC,class HET>
 void append_skin_elements(Element<Quad_9,TN,TNG,TD,NET> &e,TC &ch,HET &het,Number<1> nvi_to_subs) {
-    het.add_element(e,ch,Bar_3(),e.node(0),e.node(4),e.node(1));
-    het.add_element(e,ch,Bar_3(),e.node(1),e.node(5),e.node(2));
-    het.add_element(e,ch,Bar_3(),e.node(2),e.node(6),e.node(3));
-    het.add_element(e,ch,Bar_3(),e.node(3),e.node(7),e.node(0));
+    het.add_element(e,ch,Bar_3(),e.node(0),e.node(1),e.node(4));
+    het.add_element(e,ch,Bar_3(),e.node(1),e.node(2),e.node(5));
+    het.add_element(e,ch,Bar_3(),e.node(2),e.node(3),e.node(6));
+    het.add_element(e,ch,Bar_3(),e.node(3),e.node(0),e.node(7));
 }
 template<class TN,class TNG,class TD,unsigned NET,class TC,class HET>
 void append_skin_elements(Element<Quad_9,TN,TNG,TD,NET> &e,TC &ch,HET &het,Number<2> nvi_to_subs) {
@@ -62,6 +63,15 @@ void append_skin_elements(Element<Quad_9,TN,TNG,TD,NET> &e,TC &ch,HET &het,Numbe
     het.add_element(e,ch,NodalElement(),e.node(6));
     het.add_element(e,ch,NodalElement(),e.node(7));
     het.add_element(e,ch,NodalElement(),e.node(8));
+}
+
+template<class TN,class TNG,class TD,unsigned NET,class TM,class T>
+void update_edge_ratio(const Element<Quad_9,TN,TNG,TD,NET> &e,TM &m,T &edge_ratio) {
+    T edge_length_0 = (m.get_children_of( e, Number<1>() )[ 0 ])->measure_virtual();
+    T edge_length_1 = (m.get_children_of( e, Number<1>() )[ 1 ])->measure_virtual();
+    T edge_length_2 = (m.get_children_of( e, Number<1>() )[ 2 ])->measure_virtual();
+    T edge_length_3 = (m.get_children_of( e, Number<1>() )[ 3 ])->measure_virtual();
+    edge_ratio = min( edge_length_0, edge_length_1, edge_length_2, edge_length_3 ) / max( edge_length_0, edge_length_1, edge_length_2, edge_length_3 );
 }
 
 // --------------------------------------------------------------------------------------------------------
@@ -145,7 +155,7 @@ T var_inter_insideness( const Quad_9 &e, const TV &var_inter ) {
         Mais pour cet élément non linéaire , on considère le \a Quad engendré par les 4 premiers noeuds.
         
     param :
-        Quad : le type d'élément
+        Quad_9 : le type d'élément
         pos_nodes : le position des sommets dans le plan. Il faut que le Quad ne soit pas "croisé".
         po : la position du point dans le plan
 
@@ -166,7 +176,7 @@ bool is_inside_linear( const Quad_9 &elem, const PosNodes &pos_nodes, const Pvec
         XM = pos - pos_nodes[ 2 ];
         T det3 = CD[ 0 ] * XM[ 1 ] - CD[ 1 ] * XM[ 0 ];
         
-        if ( ( det1 * det3 ) >= 0 ) {
+        if ( ( det1 * det3 ) >= 0 and ( det2 * det3 ) >= 0 ) {
             Pvec DA = pos_nodes[ 0 ] - pos_nodes[ 3 ];
             XM = pos - pos_nodes[ 3 ];
             T det4 = DA[ 0 ] * XM[ 1 ] - DA[ 1 ] * XM[ 0 ];
@@ -179,6 +189,8 @@ bool is_inside_linear( const Quad_9 &elem, const PosNodes &pos_nodes, const Pvec
     } else
         return false;
 }
+
+inline unsigned vtk_num( StructForType<Quad_9> ) { return 23; }
 
 };
 

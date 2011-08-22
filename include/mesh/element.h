@@ -35,6 +35,7 @@ public:
     virtual const char *can_directly_be_represented_by_virtual() = 0;
     virtual unsigned num_in_elem_list_virtual() const = 0;
     virtual T measure_virtual() const = 0;
+    virtual unsigned nb_children_virtual( unsigned nvisubs ) const = 0;
 
     virtual typename TNode::Pvec sample_normal_virtual() const = 0;
     virtual typename TNode::Pvec sample_tangent_virtual() const = 0;
@@ -171,6 +172,18 @@ public:
         return sample_tangent(*this);
     }
     virtual T measure_virtual() const { return measure( *this ); }
+
+    virtual unsigned nb_children_virtual( unsigned nvisubs ) const {
+        switch( nvisubs ) {
+        case 0: return NbChildrenElement<NameElem,0>::res;
+        case 1: return NbChildrenElement<NameElem,1>::res;
+        case 2: return NbChildrenElement<NameElem,2>::res;
+        case 3: return NbChildrenElement<NameElem,3>::res;
+        case 4: return NbChildrenElement<NameElem,4>::res;
+        default: assert( 0 );
+        }
+        return 0;
+    }
 
     virtual ~Element() {}
 

@@ -9,13 +9,13 @@
 // Copyright: See COPYING file that comes with this distribution
 //
 //
-#include "mesh/tetra.h"
-#include "mesh/hexa.h"
-#include "mesh/wedge.h"
-#include "mesh/wedge_15.h"
-#include "mesh/triangle_6.h"
-#include "mesh/hexa_20.h"
-#include "mesh/tetra_10.h"
+#include "../mesh/tetra.h"
+#include "../mesh/hexa.h"
+#include "../mesh/wedge.h"
+#include "../mesh/wedge_15.h"
+#include "../mesh/triangle_6.h"
+#include "../mesh/hexa_20.h"
+#include "../mesh/tetra_10.h"
 
 namespace LMT {
 

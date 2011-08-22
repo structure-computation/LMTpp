@@ -220,6 +220,9 @@ Update(Vector &x, int k, Matrix &h, Vector &s, VectorVector v)
 }
 
 /*!
+    Objectif :
+        résoudre un système linéaire par la méthode gmres.
+
     \keyword Matrice/Solver
     \keyword Mathématiques/Algèbre linéaire/Système
 
@@ -389,7 +392,7 @@ struct SolveUsingCholMod {
 
 template<class T,class Structure,class Storage>
 struct SolveUsingSSOR {
-    SolveUsingSSOR( Mat<T,Structure,Storage> &k ) : K( k ) {}
+    SolveUsingSSOR( const Mat<T,Structure,Storage> &k ) : K( k ) {}
     typedef double MatrixScalarType;
     template<class TV>
     Vec<typename TypePromote<Multiplies,MatrixScalarType,TV>::T> operator*( const Vec<TV> &v ) const {
@@ -398,7 +401,7 @@ struct SolveUsingSSOR {
         //C^-1=(D+LT)^-1D(D+L)^1
         typedef typename TypePromote<Multiplies,MatrixScalarType,TV>::T TR;
         Vec<TR> res;
-        res.resize(K.size());
+        res.resize(K.nb_cols());
         //descente
         for(unsigned i=0;i<K.nb_rows();++i) {
             TR tmp = v[i];
@@ -417,7 +420,7 @@ struct SolveUsingSSOR {
         }
         return res;
     }
-    mutable Mat<T,Structure,Storage> &K;
+    const Mat<T,Structure,Storage> &K;
 };
 
 /*!
@@ -428,7 +431,7 @@ struct SolveUsingSSOR {
 */
 template<class T>
 struct SolveUsingSSOR<T,Sym<>,SparseLine<> > {
-    SolveUsingSSOR( Mat<T,Sym<>,SparseLine<> > &k ) : K( k ) {}
+    SolveUsingSSOR( const Mat<T,Sym<>,SparseLine<> > &k ) : K( k ) {}
     typedef double MatrixScalarType;
     template<class TV>
     Vec<typename TypePromote<Multiplies,MatrixScalarType,TV>::T> operator*( const Vec<TV> &sol ) const {
@@ -462,7 +465,7 @@ struct SolveUsingSSOR<T,Sym<>,SparseLine<> > {
         }
         return res;
     }
-    mutable Mat<T,Sym<>,SparseLine<> > &K;
+    const Mat<T,Sym<>,SparseLine<> > &K;
 };
 
 /*!
@@ -473,18 +476,18 @@ struct SolveUsingSSOR<T,Sym<>,SparseLine<> > {
 */
 template<class TK>
 struct SolveUsingJacobi {
-    SolveUsingJacobi( TK &k ) : K( k ) {}
+    SolveUsingJacobi( const TK &k ) : K( k ) {}
     typedef double MatrixScalarType;
     template<class TV>
     Vec<typename TypePromote<Multiplies,MatrixScalarType,TV>::T> operator*( const Vec<TV> &v ) const {
         //C=Diag(K)
         Vec<typename TypePromote<Multiplies,MatrixScalarType,TV>::T> res;
-        res.resize(K.size());
+        res.resize(K.nb_cols());
         //diag
         res = solve(K.diag(),v);
         return res;
     }
-    mutable TK &K;
+    const TK &K;
 };
 
 /*!
@@ -493,9 +496,11 @@ pour les systemes couplés
     \keyword Matrice/Solver
     \keyword Mathématiques/Algèbre linéaire/Système
 */
-template<class TK>
+template<class TK, class TCholMod, class TUMFPACK>
 struct SolveUsingCholModSystemWithSameK {
-    SolveUsingCholModSystemWithSameK( TK &k ) : K( k ) {}
+    SolveUsingCholModSystemWithSameK( TCholMod &kc , TUMFPACK &ku  ) : KCholMod( kc ) , KUMFPACK( ku )  {
+        use_cholmod = true;
+    }
     typedef double MatrixScalarType;
     template<class TV>
     Vec<typename TypePromote<Multiplies,MatrixScalarType,TV>::T> operator*( const Vec<TV> &v ) const {
@@ -503,21 +508,89 @@ struct SolveUsingCholModSystemWithSameK {
         
         Vec<typename TypePromote<Multiplies,MatrixScalarType,TV>::T> res;
         res.resize(v.size());
+        if( use_cholmod ){
+            res[range(total_size / 2 )] = KCholMod.solve( v[range( total_size / 2 )] );
+            if(isnan(res[0])){
+                use_cholmod = false ;
+                PRINTN("cholmod failed"); 
+                KCholMod.free_data();
+                res[range(total_size / 2 )] = KUMFPACK.solve( v[range( total_size / 2 )] );
+            }
+        }
+        else
+            res[range(total_size / 2 )] = KUMFPACK.solve( v[range( total_size / 2 )] );
         
-        res[range(total_size / 2 )] = K.solve( v[range( total_size / 2 )] );
-        res[range(total_size / 2 , total_size )] = K.solve( v[range( total_size / 2 , total_size )] );
+        if( use_cholmod )
+            res[range(total_size / 2 , total_size )] = KCholMod.solve( v[range( total_size / 2 , total_size )] );
+        else
+            res[range(total_size / 2 , total_size )] = KUMFPACK.solve( v[range( total_size / 2 , total_size )] );
         
         return res;
     }
-    mutable TK &K;
+    mutable bool use_cholmod;
+    TCholMod &KCholMod;
+    TUMFPACK &KUMFPACK;
+    
 };
 
-/*!
-    doc ?
+template<class TK>
+struct SolveUsingLDLSystemWithSameK {
+    SolveUsingLDLSystemWithSameK( TK &k ) : K( k ) {}
+    typedef double MatrixScalarType;
+    template<class TV>
+    Vec<typename TypePromote<Multiplies,MatrixScalarType,TV>::T> operator*( const Vec<TV> &v ) const {
+        unsigned total_size = v.size();
+        
+        Vec<typename TypePromote<Multiplies,MatrixScalarType,TV>::T> res1( v[range( total_size / 2 )] );
+        Vec<typename TypePromote<Multiplies,MatrixScalarType,TV>::T> res2( v[range( total_size / 2 ,total_size )] );
+        
+        K.solve( res1 );
+        K.solve( res2 );
+        
+        Vec<TV> res;res.resize(total_size,0.);
+        res[range( total_size / 2 )]=res1;
+        res[range( total_size / 2 ,total_size )]=res2;
+        return res;
+    }
+    TK &K;
+};
 
-    \keyword Matrice/Solver
-    \keyword Mathématiques/Algèbre linéaire/Système
-*/
+template<class TK>
+struct SolveUsingPREGCSystemWithSameK {
+    SolveUsingPREGCSystemWithSameK( TK &k ) : K( k ) {}
+    typedef double MatrixScalarType;
+    template<class TV>
+    Vec<typename TypePromote<Multiplies,MatrixScalarType,TV>::T> operator*( const Vec<TV> &v ) const {
+        unsigned total_size = v.size();
+
+        Vec<typename TypePromote<Multiplies,MatrixScalarType,TV>::T> res1;
+        res1.resize(total_size / 2,0.);
+        Vec<typename TypePromote<Multiplies,MatrixScalarType,TV>::T> res2;
+        res2.resize(total_size / 2,0.);
+        
+        Vec<TV> v1(v[range( total_size / 2 )]);
+        Vec<TV> v2(v[range( total_size / 2 ,total_size )]);
+
+        PRINTN("Precon");
+        int max_iter = 400;
+        double tol = 1e-20;
+        unsigned status = PreBiCGSTAB( new_SolveUsingSSOR( K ) , K , v1 , res1, ConvergenceCriteriumNormInfDelta<double>( tol ) , max_iter );
+        PRINTN(max_iter);
+        PRINTN(tol);
+        status = PreBiCGSTAB( new_SolveUsingSSOR( K ) , K , v2 , res2 , ConvergenceCriteriumNormInfDelta<double>(tol ) , max_iter );
+        PRINTN(max_iter);
+        PRINTN(tol);
+        PRINTN("fin Precon");
+        
+        Vec<TV> res;res.resize(total_size,0.);
+        res[range( total_size / 2 )]=res1;
+        res[range( total_size / 2 ,total_size )]=res2;
+        return res;
+    }
+    const TK &K;
+//     const TK &K1;
+};
+
 template<class TK>
 struct GrosseMatriceParPetitBout {
     GrosseMatriceParPetitBout( TK &k11 , TK &k12 , TK &k21 , TK &k22 ) : K11( k11 ) , K12( k12) , K21( k21 ) , K22( k22 ) {}
@@ -525,13 +598,13 @@ struct GrosseMatriceParPetitBout {
     template<class TV>
     Vec<typename TypePromote<Multiplies,MatrixScalarType,TV>::T> operator*( const Vec<TV> &v ) const {
         unsigned total_size = v.size();
-        
+
         Vec<typename TypePromote<Multiplies,MatrixScalarType,TV>::T> res;
         res.resize(v.size());
         
         res[range(total_size / 2 )] = K11 * v[range( total_size / 2 )] + K12 * v[range( total_size / 2 , total_size )];
         res[range(total_size / 2 , total_size )] = K21 * v[range( total_size / 2 )] + K22 * v[range( total_size / 2 , total_size)];
-        
+
         return res;
     }
     
@@ -575,7 +648,7 @@ struct ConvergenceCriteriumNormInfResidual {
     static const bool residual = false;
     ConvergenceCriteriumNormInfResidual( T v ) : crit( v ) {}
     template<class TV0,class TV1> bool operator()( const TV0 &delta_x, const TV1 &residual ) const {
-        for(unsigned i=0;i<delta_x.size();++i)
+        for(unsigned i=0;i<residual.size();++i)
             if ( abs(residual[i]) > crit )
                 return false;
         return true;
@@ -612,7 +685,7 @@ SolveUsingCholMod<TK> new_SolveUsingCholMod( TK &k ) {
     \keyword Mathématiques/Algèbre linéaire/Système
 */
 template<class T,class Structure,class Storage>
-SolveUsingSSOR<T,Structure,Storage> new_SolveUsingSSOR( Mat<T,Structure,Storage> &k ) {
+SolveUsingSSOR<T,Structure,Storage> new_SolveUsingSSOR( const Mat<T,Structure,Storage> &k ) {
     return k;
 }
 
@@ -633,10 +706,10 @@ pour la resolution de systeme HX + BX' = F , HX' + B'X = F'
     \keyword Matrice/Solver
     \keyword Mathématiques/Algèbre linéaire/Système
 */
-template<class TK>
-SolveUsingCholModSystemWithSameK<TK> new_SolveUsingCholModSystemWithSameK( TK &k ) {
-    return k;
-}
+// template<class TK>
+// SolveUsingCholModSystemWithSameK<TK> new_SolveUsingCholModSystemWithSameK( TK &k ) {
+//     return k;
+// }
 
 /*!
      

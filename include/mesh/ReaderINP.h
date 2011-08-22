@@ -13,7 +13,8 @@
 #include "tetra_10.h"
 #include "triangle.h"
 #include "triangle_6.h"
-
+#include "../io/lineoutput.h" /// normalize_end_line()
+#include "../io/normalize_end_line.h" /// normalize_end_line()
 
 namespace LMT {
 
@@ -29,12 +30,11 @@ void replace_char( std::string& str, char c, char subs) {
 /*!
     lorsque une ligne d'un fichier texte DOS est lue, il reste le caractère CR Carriage Return ( code ASCII 13 ) qui gène la récupèration des nombres de la ligne. Il est donc nécessaire de le retirer. On supprime aussi les espaces pour une meilleure lecture.
 */
-void normalize_end_line( std::string& str ) {
-    size_t pos = str.size() - 1;
-    while( ( pos >= 1 ) and ( ( str[ pos ] == 13 ) or ( str[ pos ] == ' ' ) ) ) pos--;
-    str.resize( pos + 1 );
-    //std::cout << "--|" << str << "|--" << std::endl;
-}
+// void normalize_end_line( std::string& str ) {
+//     size_t pos = str.size() - 1;
+//     while( ( pos >= 1 ) and ( ( str[ pos ] == 13 ) or ( str[ pos ] == ' ' ) ) ) pos--;
+//     str.resize( pos + 1 );
+// }
 
 /// retourne le nombre de caractères c à partir de la position start
 unsigned compter_caractere( const std::string& s, char c, int start = 0 ) {
@@ -876,60 +876,165 @@ struct ReaderINP {
         Element_LMT_ID element_LMT;
     };
     
-    struct ConstraintBoundary {
-        typedef enum {
-            TYPE_CONSTRAINT_UNKNOWN = -1,
-            TYPE_CONSTRAINT_NORMAL  = 0,
-            TYPE_CONSTRAINT_SYMETRIC = 1,
-            TYPE_CONSTRAINT_ANTISYMETRIC = 2
-        } TYPE_CONSTRAINT_ID;
-        
-        ConstraintBoundary() : value( 0 ) { 
-            is_constraint.set( false ); 
-            type.set( TYPE_CONSTRAINT_NORMAL );
+    /// TINFO = unsigned pour un index de noeud ou un string pour un nom de NodeSet.
+    template<class TINFO = unsigned >
+    struct BNode {
+        BNode() : _constraint( 0 ) {}
+    
+        /// 0 <-> u_x, 1 <-> u_y, 2 <-> u_z, 3 <-> phi_x, 4 <-> phi_y, 5 <-> phi_z
+        void set_constraint( unsigned i ) {
+            char mask = 1 << i;
+            _constraint |= mask;
         }
-          
-        Vec<bool, 3> is_constraint;
-        Vec<TYPE_CONSTRAINT_ID, 3> type;
-        double value;
+        
+        bool constraint( unsigned i ) const {
+            char mask = 1 << i;
+            mask = mask & _constraint;
+            mask >>= i;
+            return (bool) mask;
+        }
+    
+        TINFO info;
+        char _constraint;
+        double value; /// je ne sais pas s'il faut une valeur ou une valeur pour chaque contrainte
     };
     
-    struct Boundary : public ClusterList<unsigned, ConstraintBoundary> {
+    struct Boundary {
         
-        Boundary& operator=( const ClusterList<unsigned, void> &cl ) {
-            this->ci = cl.ci;
-            this->isGenerate = cl.isGenerate;
-            return *this;      
+        /// lit la fin de la ligne : node or nodeset, 1,,    0.0 à partir de deb et modifie bn en conséquence
+        template< class TINFO>
+        void read_the_end( std::string& str, size_t deb, BNode<TINFO> &bn ) {
+        
+            bn.value = std::numeric_limits<double>::quiet_NaN();
+            unsigned number, number2;
+            char c = str[ deb ];
+            if ( isdigit( c ) ) {
+                number = c - '0' - 1;
+                bn.set_constraint( number );
+                deb += 2;
+                if ( deb >= str.size() )
+                    return;
+                if ( str[ deb ] == ',' ) {
+                    deb++;
+                    if ( deb >= str.size() )
+                        return;
+                    bn.value = atof( str.c_str() + deb );
+                } else {
+                    deb++;
+                    if ( deb >= str.size() )
+                        return;
+                    c = str[ deb ];
+                    if ( isdigit( c ) ) {
+                        number2 = c - '0' -1;
+                        for( unsigned i = number + 1; i <= number2; ++i )
+                            bn.set_constraint( i );
+                    }
+                    deb += 2;
+                    if ( deb >= str.size() )
+                        return;
+                    bn.value = atof( str.c_str() + deb );                    
+                }
+                
+            } else {
+                if ( strcmp( str.c_str() + deb, "XSYMM" ) == 0 ) {
+                    bn.set_constraint( 0 );
+                    bn.set_constraint( 4 );
+                    bn.set_constraint( 5 );
+                    return;
+                }
+                if ( strcmp( str.c_str() + deb, "YSYMM" ) == 0 ) {
+                    bn.set_constraint( 1 );
+                    bn.set_constraint( 3 );
+                    bn.set_constraint( 5 );
+                    return;
+                }                
+                if ( strcmp( str.c_str() + deb, "ZSYMM" ) == 0 ) {
+                    bn.set_constraint( 2 );
+                    bn.set_constraint( 3 );
+                    bn.set_constraint( 4 );
+                    return;
+                }
+                if ( strcmp( str.c_str() + deb, "ENCASTRE" ) == 0 ) {
+                    bn.set_constraint( 1 );
+                    bn.set_constraint( 2 );
+                    bn.set_constraint( 3 );
+                    bn.set_constraint( 4 );
+                    bn.set_constraint( 5 );
+                    bn.set_constraint( 0 );
+                    return;
+                }
+                if ( strcmp( str.c_str() + deb, "PINNED" ) == 0 ) {
+                    bn.set_constraint( 0 );
+                    bn.set_constraint( 1 );
+                    bn.set_constraint( 2 );
+                    return;
+                }
+                if ( strcmp( str.c_str() + deb, "XASYMM" ) == 0 ) {
+                    bn.set_constraint( 1 );
+                    bn.set_constraint( 2 );
+                    bn.set_constraint( 3 );
+                    return;
+                }
+                if ( strcmp( str.c_str() + deb, "YASYMM" ) == 0 ) {
+                    bn.set_constraint( 0 );
+                    bn.set_constraint( 2 );
+                    bn.set_constraint( 4 );
+                    return;
+                }                
+                if ( strcmp( str.c_str() + deb, "ZASYMM" ) == 0 ) {
+                    bn.set_constraint( 0 );
+                    bn.set_constraint( 1 );
+                    bn.set_constraint( 5 );
+                    return;
+                }
+            }
         }
         
         void read( std::string& str ) {
+            std::string stmp;
             //PRINT( str );
             char c = str[ 0 ];
-            if ( not( isdigit( c ) ) and ( c != ' ' ) ) {
-                if ( not( name_nodeset.size() ) ) {
-                    size_t pos = str.find( ',' );
-                    name_nodeset = str.substr( 0, pos );
+            if ( not( isdigit( c ) ) and ( c != ' ' ) ) { /// name of NodeSet
+                size_t pos = str.find( ',' );
+                stmp = str.substr( 0, pos );
+                unsigned i;
+                for( i = 0; i < list_bnodeset.size(); ++i )
+                    if ( list_bnodeset[ i ].info == stmp )
+                        break;
+                if ( i < list_bnodeset.size() ) {
+                    read_the_end( str, pos + 2, list_bnodeset[ i ] );
+                } else {
+                    BNode<std::string> bnodeset;
+                    bnodeset.info = str.substr( 0, pos );
+                    read_the_end( str, pos + 2, bnodeset );
+                    list_bnodeset.push_back( bnodeset );
                 }
-                return;
+            } else { /// index of Node
+                BNode<> bnode;
+                bnode.info = (unsigned ) atoi( str.c_str() );
+                size_t pos = str.find( ',' );
+                read_the_end( str, pos + 2, bnode );            
+                list_bnode.push_back( bnode );
             }
-            this->isGenerate = false;
-            replace_char( str, ',', ' ' );
-            std::istringstream iss( str );
-            unsigned number;
-            iss >> number;
-            this->ci.push_back( number );
         }
         
         void display() const {
-            if ( name_nodeset.size() )
-                std::cout << "name of node set is " << name_nodeset << std::endl;
-            typename Boundary::iterator it;
-            for( it = this->begin(); it != this->end(); ++it )
-                std::cout << *it << " ";
+            for( unsigned i = 0; i < list_bnodeset.size(); ++i ) {
+                std::cout << "name of node set is " << list_bnodeset[ i ].info << std::endl;
+                std::cout << "constraint = ";
+                for( unsigned j = 1; j <= 6; ++j ) 
+                    std::cout << list_bnodeset[ i ].constraint( j ) << std::endl;
+            }
+            for( unsigned i = 0; i < list_bnode.size(); ++i ) {
+                std::cout << "index INP of node is " << list_bnode[ i ].info << std::endl;
+                for( unsigned j = 1; j <= 6; ++j ) 
+                    std::cout << list_bnode[ i ].constraint( j ) << std::endl;
+            }
             std::cout << std::endl;
         }
         
-        std::string name_nodeset;
+        Vec<BNode<std::string> > list_bnodeset; /// list_nodeset
+        Vec<BNode<> > list_bnode; /// index des noeuds par rapport à l'index INP
     };
     
     struct Orientation {
@@ -1351,23 +1456,23 @@ struct ReaderINP {
         Malheureusement la définition de certains bords dépend d'un NodeSet qui est défini après lui d'où la création de cette méthode.
     
     */
-    void update_Boundary() {
-        typename std::map< std::string, Boundary* >::iterator it;
-    
-        for( it = map_Boundary.begin(); it != map_Boundary.end(); it++ )
-            if ( ( it->second ) and ( it->second->name_nodeset.size() ) ) {
-                /// 
-                typename std::map< std::string, NodeSet* >::iterator it2 = map_NodeSet.find( it->second->name_nodeset );
-                if ( it2 != map_NodeSet.end() ) {
-                    *(it->second) = *(it2->second);
-                } else  
-                    std::cerr << "Error ReaderINP : impossible to find the NodeSet " << it->second->name_nodeset << " of Boundary " << it->first << std::endl;
-            }
-    }
+//     void update_Boundary() {
+//         typename std::map< std::string, Boundary* >::iterator it;
+//     
+//         for( it = map_Boundary.begin(); it != map_Boundary.end(); it++ )
+//             if ( ( it->second ) and ( it->second->name_nodeset.size() ) ) {
+//                 /// 
+//                 typename std::map< std::string, NodeSet* >::iterator it2 = map_NodeSet.find( it->second->name_nodeset );
+//                 if ( it2 != map_NodeSet.end() ) {
+//                     *(it->second) = *(it2->second);
+//                 } else  
+//                     std::cerr << "Error ReaderINP : impossible to find the NodeSet " << it->second->name_nodeset << " of Boundary " << it->first << std::endl;
+//             }
+//     }
     
     /*!
         Cette méthode sert à définir le type d'élément des Elset.
-    
+        Pas vraiment nécessaire.
     */
     void update_Elset() {
         typename std::map< std::string, ElementSet* >::iterator it;
@@ -1609,7 +1714,7 @@ struct ReaderINP {
         is.close();
         update_Elset();
         update_solidSection();
-        update_Boundary();
+        //update_Boundary();
         /// initialisation des index_LMTpp, les index des noeuds du maillage principal "m".
         std::map< unsigned, unsigned >::iterator it;
         for( it = match_inode_inp_lmtpp.begin(); it != match_inode_inp_lmtpp.end(); ++it )  
@@ -1818,21 +1923,38 @@ struct ReaderINP {
     unsigned get_index_node_of_boundary( Vec<unsigned> &index, const std::string& nameBoundary ) {
     
         typename std::map< std::string, Boundary* >::iterator it;
-        int i;
+        int ind;
         
         it = map_Boundary.find( nameBoundary );
         index.resize( 0 );
         
         if ( it != map_Boundary.end() ) {
-            typename Boundary::iterator it2;
-            for( it2 = it->second->begin(); it2 != it->second->end(); ++it2 ) {
-                i = map_num_node[ *it2 ].index_LMTpp;
-                if ( i >= 0 )
-                    index.push_back( i );
+            Boundary* bord = it->second;
+            for( unsigned i = 0; i < bord->list_bnode.size(); ++i ) {
+                ind = map_num_node[ bord->list_bnode[ i ].info ].index_LMTpp;
+                if ( ind >= 0 )
+                    index.push_back( ind );
                 else {   
                     std::cerr << "WARNING ReaderINP.get_index_node_of_boundary() : negative index" << std::endl;
                     //assert( 0 );
                 }
+            }
+            
+            for( unsigned i = 0; i < bord->list_bnodeset.size(); ++i ) {
+                typename std::map< std::string, NodeSet* >::iterator it2 = map_NodeSet.find( bord->list_bnodeset[ i ].info   );
+                if ( it2 != map_NodeSet.end() ) {
+                    typename NodeSet::iterator it3;
+                    for( it3 = it2->second->begin(); it3 != it2->second->end(); ++it3 ) {
+                        ind = map_num_node[ *it3 ].index_LMTpp;
+                        if ( ind >= 0 )
+                            index.push_back( ind );
+                        else {   
+                            std::cerr << "WARNING ReaderINP.get_index_node_of_boundary() : negative index" << std::endl;
+                            //assert( 0 );
+                        }                    
+                    }
+                } else
+                    std::cerr << "WARNING ReaderINP.get_index_node_of_boundary() : unknown NodeSet" << std::endl;
             }
         
         } else {
@@ -1840,6 +1962,116 @@ struct ReaderINP {
         }
         
         return index.size();
+    }
+    
+    //template<class TMESH,class TTOL>
+    //unsigned get_node_of_boundary( Vec<BNode<> > &bnode_list, TMESH &m, const std::string & nameBoundary, TTOL tol = 1e-4 ) const {
+    unsigned get_node_of_boundary( Vec<BNode<> > &bnode_list, const std::string & nameBoundary ) {
+        typename std::map< std::string, Boundary* >::iterator it;
+        int ind;
+        
+        it = map_Boundary.find( nameBoundary );
+        bnode_list.resize( 0 );
+        
+        if ( it != map_Boundary.end() ) {
+            Boundary* bord = it->second;
+            for( unsigned i = 0; i < bord->list_bnode.size(); ++i ) {
+                ind = map_num_node[ bord->list_bnode[ i ].info ].index_LMTpp;
+                if ( ind >= 0 ) {
+                    BNode<> bn = bord->list_bnode[ i ];
+                    bn.info = (unsigned ) ind; /// on met à jour l'index avec celui du maillage LMTpp
+                    bnode_list.push_back( bn );
+                } else {   
+                    std::cerr << "WARNING ReaderINP.get_node_of_boundary() : negative index" << std::endl;
+                    //assert( 0 );
+                }
+            }
+            
+            for( unsigned i = 0; i < bord->list_bnodeset.size(); ++i ) {
+                typename std::map< std::string, NodeSet* >::iterator it2 = map_NodeSet.find( bord->list_bnodeset[ i ].info   );
+                if ( it2 != map_NodeSet.end() ) {
+                    typename NodeSet::iterator it3;
+                    for( it3 = it2->second->begin(); it3 != it2->second->end(); ++it3 ) {
+                        ind = map_num_node[ *it3 ].index_LMTpp;
+                        if ( ind >= 0 ) {
+                            BNode<> bn;
+                            bn._constraint = bord->list_bnodeset[ i ]._constraint;
+                            bn.value = bord->list_bnodeset[ i ].value;
+                            bn.info = (unsigned ) ind; /// on met à jour l'index avec celui du maillage LMTpp
+                            bnode_list.push_back( bn );
+                        } else {   
+                            std::cerr << "WARNING ReaderINP.get_node_of_boundary() : negative index" << std::endl;
+                            //assert( 0 );
+                        }                    
+                    }    
+                } else
+                    std::cerr << "WARNING ReaderINP.get_node_of_boundary() : unknown NodeSet" << std::endl;
+            }
+        
+        } else {
+            std::cerr << "WARNING ReaderINP : you use get_node_of_boundary() with unknown name " << nameBoundary << std::endl;
+        }
+        
+        return bnode_list.size();
+    }
+    
+    template< class Ca, unsigned ma, class TTOL>
+    unsigned get_node_of_boundary( Vec< BNode<> > &bnode_list, Mesh<Ca,ma> &m, const std::string & nameBoundary, TTOL tol ) {
+    
+        typename std::map< std::string, Boundary* >::iterator it;
+        PvecInp p;
+        unsigned j;
+        
+        it = map_Boundary.find( nameBoundary );
+        bnode_list.resize( 0 );
+        
+        if ( it != map_Boundary.end() ) {
+            Boundary* bord = it->second;
+            for( unsigned i = 0; i < bord->list_bnode.size(); ++i ) {
+                p = map_num_node[ bord->list_bnode[ i ].info ].pos;
+                /// on recherche dans le maillage m s'il existe un noeud à la même position 
+                for( j = 0; j < m.node_list.size(); ++j ) 
+                    if ( length( p - m.node_list[ j ].pos ) < tol )
+                        break;
+                if ( j < m.node_list.size() ) {
+                    BNode<> bn = bord->list_bnode[ i ];
+                    bn.info = j; /// on met à jour l'index avec celui du maillage LMTpp
+                    bnode_list.push_back( bn );
+                } else {
+                    std::cerr << "WARNING ReaderINP.get_node_of_boundary() : unfound node at position " << p << std::endl;
+                }
+            }
+            
+            for( unsigned i = 0; i < bord->list_bnodeset.size(); ++i ) {
+                typename std::map< std::string, NodeSet* >::iterator it2 = map_NodeSet.find( bord->list_bnodeset[ i ].info   );
+                if ( it2 != map_NodeSet.end() ) {
+                    typename NodeSet::iterator it3;
+                    for( it3 = it2->second->begin(); it3 != it2->second->end(); ++it3 ) {
+                        p = map_num_node[ *it3 ].pos;
+                        /// on recherche dans le maillage m s'il existe un noeud à la même position
+                        for( j = 0; j < m.node_list.size(); ++j ) 
+                            if ( length( p - m.node_list[ j ].pos ) < tol )
+                                break;                        
+                        if ( j < m.node_list.size() ) {
+                            BNode<> bn;
+                            bn._constraint = bord->list_bnodeset[ i ]._constraint;
+                            bn.value = bord->list_bnodeset[ i ].value;
+                            bn.info = j; /// on met à jour l'index avec celui du maillage LMTpp
+                            bnode_list.push_back( bn );
+                        } else {   
+                            std::cerr << "WARNING ReaderINP.get_node_of_boundary() : unfound node at position " << p << std::endl;
+                            //assert( 0 );
+                        }                    
+                    }    
+                } else
+                    std::cerr << "WARNING ReaderINP.get_node_of_boundary() : unknown NodeSet" << std::endl;
+            }
+        
+        } else {
+            std::cerr << "WARNING ReaderINP : you use get_node_of_boundary() with unknown name " << nameBoundary << std::endl;
+        }
+        
+        return bnode_list.size();
     }
     
     /*!
@@ -1876,7 +2108,7 @@ struct ReaderINP {
             }
         
         } else {
-            std::cerr << "WARNING ReaderINP : you use get_index_node_of_node_set() with unknown name " << nameNodeSet << std::endl;
+            std::cerr << "WARNING ReaderINP : you use get_node_of_boundary() with unknown name " << nameNodeSet << std::endl;
         }
         
         return index.size();

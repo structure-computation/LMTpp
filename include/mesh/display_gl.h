@@ -88,7 +88,11 @@ namespace LMT_PRIVATE {
     }
 }
 
-///
+/*!
+    utilisation d' OpenGl pour afficher un maillage
+
+\keyword Visualisation/3D
+*/
 template<class TM>
 void display_gl( const TM &mesh ) {
     LMT_PRIVATE::display_gl( mesh, Number<TM::nvi>() );

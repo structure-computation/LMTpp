@@ -362,7 +362,7 @@ struct MatWithTinyBlocks<T,Sym<3> > {
             r[i].resize( nb_rows_, 0 );
         //
         Mul m; m.nb_thread = nb_thread;
-        apply_mt( range(nb_thread), nb_thread, m, *this, v, r );
+        apply_mt( range( nb_thread ), nb_thread, m, *this, v, r );
         //
         for(int n=0;n<nb_rows_;++n) {
             T z = r[0][n];
@@ -471,12 +471,12 @@ struct MatWithTinyBlocks<T,Sym<3> > {
                         ob( 0,0 ) = ( ob( 0,0 )-res_s_0_0[0]-res_s_0_0[1]-res_f_0_0 ) / db( 0,0 );
                         ob( 1,0 ) = ( ob( 1,0 )-res_s_1_0[0]-res_s_1_0[1]-res_f_1_0 ) / db( 0,0 );
                         ob( 2,0 ) = ( ob( 2,0 )-res_s_2_0[0]-res_s_2_0[1]-res_f_2_0 ) / db( 0,0 );
-                        ob( 0,1 ) = ( ob( 0,1 )-res_s_0_1[0]-res_s_0_1[1]-res_f_0_1-ob( 0,0 ) *db( 1,0 ) ) / db( 1,1 );
-                        ob( 1,1 ) = ( ob( 1,1 )-res_s_1_1[0]-res_s_1_1[1]-res_f_1_1-ob( 1,0 ) *db( 1,0 ) ) / db( 1,1 );
-                        ob( 2,1 ) = ( ob( 2,1 )-res_s_2_1[0]-res_s_2_1[1]-res_f_2_1-ob( 2,0 ) *db( 1,0 ) ) / db( 1,1 );
-                        ob( 0,2 ) = ( ob( 0,2 )-res_s_0_2[0]-res_s_0_2[1]-res_f_0_2-ob( 0,0 ) *db( 2,0 )-ob( 0,1 ) *db( 2,1 ) ) / db( 2,2 );
-                        ob( 1,2 ) = ( ob( 1,2 )-res_s_1_2[0]-res_s_1_2[1]-res_f_1_2-ob( 1,0 ) *db( 2,0 )-ob( 1,1 ) *db( 2,1 ) ) / db( 2,2 );
-                        ob( 2,2 ) = ( ob( 2,2 )-res_s_2_2[0]-res_s_2_2[1]-res_f_2_2-ob( 2,0 ) *db( 2,0 )-ob( 2,1 ) *db( 2,1 ) ) / db( 2,2 );
+                        ob( 0,1 ) = ( ob( 0,1 )-res_s_0_1[0]-res_s_0_1[1]-res_f_0_1 - ob( 0,0 ) * db( 1,0 ) ) / db( 1,1 );
+                        ob( 1,1 ) = ( ob( 1,1 )-res_s_1_1[0]-res_s_1_1[1]-res_f_1_1 - ob( 1,0 ) * db( 1,0 ) ) / db( 1,1 );
+                        ob( 2,1 ) = ( ob( 2,1 )-res_s_2_1[0]-res_s_2_1[1]-res_f_2_1 - ob( 2,0 ) * db( 1,0 ) ) / db( 1,1 );
+                        ob( 0,2 ) = ( ob( 0,2 )-res_s_0_2[0]-res_s_0_2[1]-res_f_0_2 - ob( 0,0 ) * db( 2,0 ) - ob( 0,1 ) * db( 2,1 ) ) / db( 2,2 );
+                        ob( 1,2 ) = ( ob( 1,2 )-res_s_1_2[0]-res_s_1_2[1]-res_f_1_2 - ob( 1,0 ) * db( 2,0 ) - ob( 1,1 ) * db( 2,1 ) ) / db( 2,2 );
+                        ob( 2,2 ) = ( ob( 2,2 )-res_s_2_2[0]-res_s_2_2[1]-res_f_2_2 - ob( 2,0 ) * db( 2,0 ) - ob( 2,1 ) * db( 2,1 ) ) / db( 2,2 );
                     }
                     else {
                         typename RB::Block &ob = *reinterpret_cast<typename RB::Block *> ( d ); d += RB::tiny_block_size;
@@ -484,12 +484,12 @@ struct MatWithTinyBlocks<T,Sym<3> > {
                         ob( 0,0 ) = ob( 0,0 ) / db ( 0,0 );
                         ob( 1,0 ) = ob( 1,0 ) / db ( 0,0 );
                         ob( 2,0 ) = ob( 2,0 ) / db ( 0,0 );
-                        ob( 0,1 ) = ( ob( 0,1 )-ob( 0,0 ) *db ( 1,0 ) ) / db ( 1,1 );
-                        ob( 1,1 ) = ( ob( 1,1 )-ob( 1,0 ) *db ( 1,0 ) ) / db ( 1,1 );
-                        ob( 2,1 ) = ( ob( 2,1 )-ob( 2,0 ) *db ( 1,0 ) ) / db ( 1,1 );
-                        ob( 0,2 ) = ( ob( 0,2 )-ob( 0,0 ) *db ( 2,0 )-ob( 0,1 ) *db ( 2,1 ) ) / db ( 2,2 );
-                        ob( 1,2 ) = ( ob( 1,2 )-ob( 1,0 ) *db ( 2,0 )-ob( 1,1 ) *db ( 2,1 ) ) / db ( 2,2 );
-                        ob( 2,2 ) = ( ob( 2,2 )-ob( 2,0 ) *db ( 2,0 )-ob( 2,1 ) *db ( 2,1 ) ) / db ( 2,2 );
+                        ob( 0,1 ) = ( ob( 0,1 ) - ob( 0,0 ) * db( 1,0 ) ) / db ( 1,1 );
+                        ob( 1,1 ) = ( ob( 1,1 ) - ob( 1,0 ) * db( 1,0 ) ) / db ( 1,1 );
+                        ob( 2,1 ) = ( ob( 2,1 ) - ob( 2,0 ) * db( 1,0 ) ) / db ( 1,1 );
+                        ob( 0,2 ) = ( ob( 0,2 ) - ob( 0,0 ) * db( 2,0 ) - ob( 0,1 ) *db ( 2,1 ) ) / db ( 2,2 );
+                        ob( 1,2 ) = ( ob( 1,2 ) - ob( 1,0 ) * db( 2,0 ) - ob( 1,1 ) *db ( 2,1 ) ) / db ( 2,2 );
+                        ob( 2,2 ) = ( ob( 2,2 ) - ob( 2,0 ) * db( 2,0 ) - ob( 2,1 ) *db ( 2,1 ) ) / db ( 2,2 );
                     }
                 }
             }
@@ -928,7 +928,7 @@ struct MatWithTinyBlocks<T,Gen<3> > {
                     rows[ r ].add( n*c, 0, 0, 0, 0, 0, 0, 0, 0, 0 );
         }
     }
-    
+
 };
 
 ///
@@ -1091,7 +1091,7 @@ std::ostream &operator<<( std::ostream &os, const MatWithTinyBlocks<T,TO> &m ) {
     return os;
 }
 
-/*
+/*!
  mp -> precond
  A -> original matrix
  b -> sollicitation

@@ -231,14 +231,17 @@ void VisitorCommentItem_toHTML :: function_at_CommentItemTxt( CommentItemTxt* c 
 
     int i,n;
 
-    *web << "<p class=\"texte\">" << std::endl;
+    *web << "<p class=\"texte_documentation\">" << std::endl;
     n = c->txt.size();
-    if (not(n))
+    if ( not( n ) ) {
+        *web << "</p>" << std::endl;
         return;
-    if (c->txt[0].size())
+    }
+    if ( c->txt[0].size() )
         *web << text2HTML( c->txt[0],ptr_parent,ptr_list_target );
-    for(i=1;i<n;i++) {
-        if (c->txt[i].size())
+    
+    for( i = 1; i < n; i++ ) {
+        if ( c->txt[i].size() )
             *web << "<br /> " <<  text2HTML( c->txt[i],ptr_parent,ptr_list_target ); //<< std::endl ;
     }
     *web << "</p>" << std::endl;

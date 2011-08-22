@@ -12,7 +12,7 @@
 #ifndef LMTBAR_H
 #define LMTBAR_H
 
-#include "containers/staticassert.h"
+#include "../containers/staticassert.h"
 #include "nodalelement.h"
 
 namespace LMT {
@@ -20,7 +20,10 @@ namespace LMT {
 // --------------------------------------------------------------------------------------------------------
 /*!
     Bar représente un segment ou bien une tige sans épaisseur. 
-
+    \verbatim
+    .                    0--1
+    \relates Mesh
+    \relates Element
     \keyword Maillage/Elément
     \friend raphael.pasquier@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
@@ -123,8 +126,10 @@ typename TNG::T measure( const Element<Bar,TN,TNG,TD,NET> &e ) {
     return length( e.node(1)->pos - e.node(0)->pos );
 }
 
-inline unsigned vtk_num( StructForType<Bar> ) { return 2; }
+inline unsigned vtk_num( StructForType<Bar> ) { return 3; }
 
 };
 
-#endif
+#include "element_Bar.h"
+
+#endif // LMTBAR_H

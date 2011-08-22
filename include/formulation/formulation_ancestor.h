@@ -35,11 +35,12 @@ public:
         assume_skin_not_needed = false;
         max_non_linear_iteration = 50;
         premul_KUn_in_sollicitation = ScalarType(1);
-        want_amd = false ;
+        want_amd = false;
+        want_rcm = false;
         levenberg_marquadt = AbsScalarType(0);
         max_diag = ScalarType(0);
         pthread_mutex_init( &mutex_assemble_matrix, NULL );
-        nb_threads_assemble_matrix = 4;
+        nb_threads_assemble_matrix = 1;
     }
     virtual ~FormulationAncestor() {}
 
@@ -48,7 +49,7 @@ public:
 
     virtual bool solve( AbsScalarType iterative_criterium=AbsScalarType(0), bool disp_timing=false ) = 0; ///  The all-in-one procedure -> allocate if necessary, assemble, solve, update_variables, call_after_solve
     virtual bool solve_and_get_derivatives( Vec<Vec<ScalarType> > &der, bool der_in_base_node_ordering = false ) = 0;  /// get value and derivative respective to "der_var" defined in SConsruct or in python
-    virtual void allocate_matrices() = 0; /// alloue les matrices
+    virtual void allocate_matrices(bool allocate_mat=true,bool allocate_vec=true) = 0; /// alloue les matrices
     /*!
         Objectif : 
             cette fonction est utilisée dans le cas d'un problème qui dépend du temps. Elle gère la correspondance d'un vecteur de solutions au problème et l'ordre temporel. Plus précisément la taille de ce vecteur est la valeur nb_der, i.e. le nombre de pas de la méthode de résolution en temps ( qui doit être au moins égal au plus grand ordre de dérivation en temps des équations aux dérivées partielles ).
@@ -188,6 +189,17 @@ public:
     virtual unsigned get_nb_global_unknowns() const = 0;
     virtual unsigned get_nb_elem_unknowns() const = 0;
 
+    /*!
+        Objectif :
+            cette méthode ajoute au vecteur <strong> res </strong>, la contribution au résidu de l'élément <strong> *elem </strong> .
+
+        Paramètres :
+            * <strong> res </strong> le vecteur contenant le résidu ( sa taille doit être égale au nombre de degrés de liberté du problème),
+            * <strong> elem </strong> pointeur sur l'élément dont on veut obtenir la contribution.
+    */
+    virtual void add_elem_contribution_to_residual( Vec<ScalarType> &res, const void *elem ) const = 0;
+    virtual Vec<ScalarType> get_residual() const = 0;
+
     #ifdef WITH_UMFPACK
     virtual void get_mat( Mat<ScalarType,Gen<>,SparseUMFPACK> *&mat ) = 0; ///
     #endif
@@ -214,12 +226,12 @@ public:
     bool assume_skin_not_needed;
     unsigned max_non_linear_iteration;
     ScalarType premul_KUn_in_sollicitation;
-    bool want_amd;
+    bool want_amd, want_rcm;
     AbsScalarType levenberg_marquadt; /// K += levenberg_marquadt * max( abs( K ) ) * Id; 0 by default
     ScalarType max_diag;
     Vec<unsigned> id;/// indice pour les variables
     unsigned  nb_threads_assemble_matrix;
-    pthread_mutex_t mutex_assemble_matrix;
+    mutable pthread_mutex_t mutex_assemble_matrix;
 
     virtual void *get_mesh() = 0; /// recupere le maillage associee a une formulation (mais pas avec le bon type)
 };

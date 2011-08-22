@@ -12,17 +12,20 @@
 #ifndef LMTBAR4_H
 #define LMTBAR4_H
 
-#include "containers/staticassert.h"
+#include "../containers/staticassert.h"
 #include "nodalelement.h"
 
 namespace LMT {
 
 // --------------------------------------------------------------------------------------------------------
 /*!
-    Bar_4 représente une barre sans dimension ou segment avec deux noeuds dessus.  
-
-    \friend hugo.leclerc@lmt.ens-cachan.fr
+    Bar_4 représente une barre sans dimension ou segment avec quatre noeuds dessus.  
+    \verbatim
+    .                    0--2--3--1
+    \relates Mesh
+    \relates Element
     \keyword Maillage/Elément
+    \friend hugo.leclerc@lmt.ens-cachan.fr
 */
 
 struct Bar_4 {
@@ -64,4 +67,6 @@ typename TNG::T measure( const Element<Bar_4,TN,TNG,TD,NET> &e ) {
 
 };
 
-#endif
+#include "element_Bar_4.h"
+
+#endif // LMTBAR4_H

@@ -24,7 +24,7 @@ struct CalculateNormals {
 };
 
 /*!
-Objet :
+Objetif :
     calculer une certaine normale aux noeuds d'un maillage : plus précisément elle calcule la normale de chaque élément puis l'ajoute à l'attribut nommé "normal" des noeuds de l'élément et enfin normalise l'addition.
 
 Paramètre:
@@ -35,6 +35,8 @@ Paramètre:
 */
 template<class TM>
 void calculate_normals(TM &m) {
+    for(unsigned i=0;i<m.node_list.size();++i)
+        m.node_list[i].normal = 0;
     apply( m.elem_list, CalculateNormals() );
     for(unsigned i=0;i<m.node_list.size();++i)
         m.node_list[i].normal /= length( m.node_list[i].normal, 1e-40 );

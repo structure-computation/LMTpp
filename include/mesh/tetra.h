@@ -90,6 +90,57 @@ void update_circum_center(const Element<Tetra,TN,TNG,TD,NET> &e,Pvec &C,T &R) {
     R = length( e.node(0)->pos - C );
 }
 
+template<class TN,class TNG,class TD,unsigned NET,class Pvec,class T>
+void update_in_center(const Element<Tetra,TN,TNG,TD,NET> &e,Pvec &C,T &R) {
+    C = getCenterOfInSphere( e.node(0)->pos, e.node(1)->pos, e.node(2)->pos, e.node(3)->pos );
+
+    Pvec P0 = e.node(0)->pos, P1 = e.node(1)->pos, P2 = e.node(2)->pos, P3 = e.node(3)->pos;
+    Pvec P01 = P1-P0, P02 = P2-P0, P03 = P3-P0, P12 = P2-P1, P13 = P3-P1;
+
+    T x1 = length(P01);
+    T x2 = length(P02);
+    T x12 = length(P12);
+
+    Pvec P01_N = P01 / x1;
+    Pvec P02_N = P02 / x2;
+    Pvec P12_N = P12 / x12;
+
+    Pvec H1 = P02 - dot( P02, P01_N ) * P01_N;
+    T y1 = length( H1 );
+    T S1 = x1 * y1 / 2;
+
+    Pvec H2 = P03 - dot( P03, P01_N ) * P01_N;
+    T y2 = length( H2 );
+    T S2 = x1 * y2 / 2;
+
+    Pvec H3 = P03 - dot( P03, P02_N ) * P02_N;
+    T y3 = length( H3 );
+    T S3 = x2 * y3 / 2;
+
+    Pvec H4 = P13 - dot( P13, P12_N ) * P12_N;
+    T y4 = length( H4 );
+    T S4 = x12 * y4 / 2;
+
+    R = 3 * measure(e) / ( S1 + S2 + S3 + S4 );
+}
+
+template<class TN,class TNG,class TD,unsigned NET,class T>
+void update_radius_ratio(const Element<Tetra,TN,TNG,TD,NET> &e,T &radius_ratio) {
+    Vec<T> C_circum, C_in;
+    T R_circum, R_in;
+    update_circum_center( e, C_circum, R_circum );
+    update_in_center( e, C_in, R_in );
+    radius_ratio = R_in / R_circum;
+}
+
+template<class TN,class TNG,class TD,unsigned NET,class TM,class T>
+void update_edge_ratio(const Element<Tetra,TN,TNG,TD,NET> &e,TM &m,T &edge_ratio) {
+    T edge_length_0 = (m.get_children_of( e, Number<1>() )[ 0 ])->measure_virtual();
+    T edge_length_1 = (m.get_children_of( e, Number<1>() )[ 1 ])->measure_virtual();
+    T edge_length_2 = (m.get_children_of( e, Number<1>() )[ 2 ])->measure_virtual();
+    T edge_length_3 = (m.get_children_of( e, Number<1>() )[ 3 ])->measure_virtual();
+    edge_ratio = min( edge_length_0, edge_length_1, edge_length_2, edge_length_3 ) / max( edge_length_0, edge_length_1, edge_length_2, edge_length_3 );
+}
 
 template<class TN,class TNG,class TD,unsigned NET,class TM>
 bool divide_element(Element<Tetra,TN,TNG,TD,NET> &e,TM &m,TNG **nodes) {
@@ -261,20 +312,81 @@ bool divide_element(Element<Tetra,TN,TNG,TD,NET> &e,TM &m,TNG **nodes) {
         return false;
     if ( index==63 ) {
         TNG *node_6 = m.add_node( center(e) );
-        DM::copy( e, *m.add_element( Tetra(), TN(), e.node(0), nodes[0], nodes[1], nodes[2] ) );
-        DM::copy( e, *m.add_element( Tetra(), TN(), e.node(1), nodes[0], nodes[3], nodes[4] ) );
-        DM::copy( e, *m.add_element( Tetra(), TN(), e.node(2), nodes[1], nodes[3], nodes[5] ) );
-        DM::copy( e, *m.add_element( Tetra(), TN(), e.node(3), nodes[2], nodes[4], nodes[5] ) );
+        TNG *nn[4];
+        nn[ 0 ] = e.node(0);
+        nn[ 1 ] = nodes[0];
+        nn[ 2 ] = nodes[1];
+        nn[ 3 ] = nodes[2];
+        permutation_if_jac_neg ( Tetra(), nn );
+        DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+        nn[ 0 ] = e.node(1);
+        nn[ 1 ] = nodes[0];
+        nn[ 2 ] = nodes[3];
+        nn[ 3 ] = nodes[4];
+        permutation_if_jac_neg ( Tetra(), nn );
+        DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+        nn[ 0 ] = e.node(2);
+        nn[ 1 ] = nodes[1];
+        nn[ 2 ] = nodes[3];
+        nn[ 3 ] = nodes[5];
+        permutation_if_jac_neg ( Tetra(), nn );
+        DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+        nn[ 0 ] = e.node(3);
+        nn[ 1 ] = nodes[2];
+        nn[ 2 ] = nodes[4];
+        nn[ 3 ] = nodes[5];
+        permutation_if_jac_neg ( Tetra(), nn );
+        DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
         
-        DM::copy( e, *m.add_element( Tetra(), TN(), nodes[0], nodes[1], nodes[2], node_6 ) );
-        DM::copy( e, *m.add_element( Tetra(), TN(), nodes[0], nodes[3], nodes[4], node_6 ) );
-        DM::copy( e, *m.add_element( Tetra(), TN(), nodes[1], nodes[3], nodes[5], node_6 ) );
-        DM::copy( e, *m.add_element( Tetra(), TN(), nodes[2], nodes[4], nodes[5], node_6 ) );
+        nn[ 0 ] = nodes[0];
+        nn[ 1 ] = nodes[1];
+        nn[ 2 ] = nodes[2];
+        nn[ 3 ] = node_6;
+        permutation_if_jac_neg ( Tetra(), nn );
+        DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+        nn[ 0 ] = nodes[0];
+        nn[ 1 ] = nodes[3];
+        nn[ 2 ] = nodes[4];
+        nn[ 3 ] = node_6;
+        permutation_if_jac_neg ( Tetra(), nn );
+        DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+        nn[ 0 ] = nodes[1];
+        nn[ 1 ] = nodes[3];
+        nn[ 2 ] = nodes[5];
+        nn[ 3 ] = node_6;
+        permutation_if_jac_neg ( Tetra(), nn );
+        DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+        nn[ 0 ] = nodes[2];
+        nn[ 1 ] = nodes[4];
+        nn[ 2 ] = nodes[5];
+        nn[ 3 ] = node_6;
+        permutation_if_jac_neg ( Tetra(), nn );
+        DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
         
-        DM::copy( e, *m.add_element( Tetra(), TN(), nodes[0], nodes[2], nodes[4], node_6 ) );
-        DM::copy( e, *m.add_element( Tetra(), TN(), nodes[1], nodes[2], nodes[5], node_6 ) );
-        DM::copy( e, *m.add_element( Tetra(), TN(), nodes[3], nodes[4], nodes[5], node_6 ) );
-        DM::copy( e, *m.add_element( Tetra(), TN(), nodes[0], nodes[1], nodes[3], node_6 ) );
+        nn[ 0 ] = nodes[0];
+        nn[ 1 ] = nodes[2];
+        nn[ 2 ] = nodes[4];
+        nn[ 3 ] = node_6;
+        permutation_if_jac_neg ( Tetra(), nn );
+        DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+        nn[ 0 ] = nodes[1];
+        nn[ 1 ] = nodes[2];
+        nn[ 2 ] = nodes[5];
+        nn[ 3 ] = node_6;
+        permutation_if_jac_neg ( Tetra(), nn );
+        DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+        nn[ 0 ] = nodes[3];
+        nn[ 1 ] = nodes[4];
+        nn[ 2 ] = nodes[5];
+        nn[ 3 ] = node_6;
+        permutation_if_jac_neg ( Tetra(), nn );
+        DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
+        nn[ 0 ] = nodes[0];
+        nn[ 1 ] = nodes[1];
+        nn[ 2 ] = nodes[3];
+        nn[ 3 ] = node_6;
+        permutation_if_jac_neg ( Tetra(), nn );
+        DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
     }
     else {
         for(const int *a = div_tetra + index * 32; *a!=-1; ++a ) {
@@ -284,6 +396,7 @@ bool divide_element(Element<Tetra,TN,TNG,TD,NET> &e,TM &m,TNG **nodes) {
                     nn[i] = e.node( valid_tetra[*a * 4 + i] );
                 else
                     nn[i] = nodes[ valid_tetra[*a * 4 + i] - 4 ];
+            permutation_if_jac_neg ( Tetra(), nn );
             DM::copy( e, *m.add_element( Tetra(), TN(), nn ) );
         }
     }
@@ -359,6 +472,8 @@ bool var_inter_is_inside( const Tetra &e, const TV &var_inter, T tol = 0 ) {
     return heaviside( var_inter[0] + tol ) * heaviside( var_inter[1] + tol ) * heaviside( var_inter[2] + tol ) * heaviside( 1 - var_inter[0] - var_inter[1] - var_inter[2] + tol );
 }
 
+inline unsigned vtk_num( StructForType<Tetra> ) { return 10; }
+
 /// >= 0 -> inside, < 0 -> outside
 template<class T,class TV>
 T var_inter_insideness( const Tetra &e, const TV &var_inter ) {
@@ -413,4 +528,4 @@ bool is_inside_linear( const Tetra &elem, const PosNodes &pos_nodes, const Pvec 
 
 #include "element_Tetra.h"
 
-#endif
+#endif // LMTTETRA_H

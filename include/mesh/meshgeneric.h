@@ -49,6 +49,7 @@ class MeshGeneric : public MeshAncestor<Carac,nvi_to_subs_,skin> {
 public:
     typedef MeshAncestor<Carac,nvi_to_subs_,skin> MA;
     typedef typename MA::TElemList TElemList;
+    typedef typename MA::TElemListPtr TElemListPtr;
     typedef typename MA::TNode TNode;
     typedef ElementAncestor<TNode> EA;
     static const unsigned nvi_to_subs = nvi_to_subs_;

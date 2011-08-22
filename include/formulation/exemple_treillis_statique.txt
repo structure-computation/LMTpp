@@ -1,0 +1,91 @@
+/*!
+\example Cas où la dimension des éléments est inférieure à la dimension de la formulation
+
+    Cet exemple a pour but de montrer un cas particulier où la dimension des éléments est inférieure à la dimension de la formulation. Ici, nous allons générer du code pour calculer des treillis (assemblages de barreaux) bidimensionnels ou tridimensionnels.
+
+    Voici le fichier de formulation qui permet d'appliquer un chargement aux noeuds du treillis en prenant en compte la raideur des barreaux ainsi qu'une éventuelle raideur nodale.
+
+    \code Python
+        #champs globaux
+        young_modulus = Variable( interpolation='global', default_value='69e9', unit='N/m^2' )
+        section = Variable( interpolation='global', default_value='51e-3', unit='m^2' )
+
+        #champs nodaux
+        dep = Variable( unknown=True, nb_dim=[dim], nb_der=0, default_value='0.', unit='m' )
+        nodal_load = Variable( nb_dim=[dim], nb_der=0, default_value='0.', unit='N' )
+        nodal_stiffness = Variable( nb_dim=[dim], nb_der=0, default_value='0.', unit='N/m' )
+
+        # -----------------------------------------------------------------------------------------------------------------
+        def formulation():
+
+            #calcul de la direction d'un element
+            grad_pos = grad(e.pos())
+            direction_element = ExVector(dim)
+            for i in range(dim) :
+                direction_element[i] = grad_pos[i,0]
+            direction_element /= norm(direction_element)
+
+            #champs cinematiques
+            epsilon = grad( dot ( dep.expr, direction_element ) )
+            epsilon_test = grad( dot ( dep.test, direction_element ) )
+
+            #champs statique
+            normal_stress = young_modulus.expr * section.expr * epsilon
+
+            #formulation variationnelle (equilibre interne, termes volumiques)
+            res = ( normal_stress[0] * epsilon_test[0] ) * dV
+
+            #formulation variationnelle (equilibre interne, termes nodaux)
+            res += dot( nodal_stiffness.expr * dep.expr , dep.test ) * dN
+
+            #formulation variationnelle (chargement, termes nodaux)
+            res -= dot( nodal_load.expr , dep.test ) * dN
+
+            return res
+
+    On suppose que le fichier s'appelle formulation_treillis_statique.py.
+
+    Pour générer automatiquement le code, le plus simple c'est d'utiliser metil_comp et un programme qui contient un include adapté. Exemple :
+        \code C/C++
+            #include "formulation.treillis_statique.Bar.dim=2.h"
+
+            int main() {
+                typedef Mesh<Mesh_carac_treillis_statique<double,2> > TM;
+                typedef Formulation<TM,treillis_statique> TF;
+
+                TM m;
+                m.add_node( vec( 0, 0 ) );
+                m.add_node( vec( 2, 0 ) );
+                m.add_node( vec( 1, 1 ) );
+                m.add_element( Bar(), DefaultBehavior(), 0, 1 );
+                m.add_element( Bar(), DefaultBehavior(), 1, 2 );
+                m.add_element( Bar(), DefaultBehavior(), 2, 0 );
+
+                TF f( m );
+                f.add_constraint( "node[0].dep[0] - 0", 1e5 );
+                f.add_constraint( "node[0].dep[1] - 0", 1e5 );
+                f.add_constraint( "node[1].dep[0] - 1", 1e5 );
+                f.add_constraint( "node[1].dep[1] - 0", 1e5 );
+
+                f.solve();
+
+                display( m );
+            }
+
+    Remarque, la 2D et la 3D peuvent coexister. Il suffit de mettre autant de include que nécessaire.
+
+    Si vous utilisez encore des SConstruct, voici la fonction make_pb à inclure dans le fichier SConstruct pour générer du code pour un treillis bidimensionnel :
+
+        \code Python
+            pb_libs = make_pb(
+                env,
+                opt = 0,
+                name = 'treillis_statique_2d',
+                formulations = ['treillis_statique'],
+                elements = ['Bar'],
+                dim = '2'
+            )
+
+    Pour un treillis tridimensionnel, il faut bien sur mettre dim = '3'.
+
+*/

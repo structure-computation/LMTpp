@@ -1,12 +1,16 @@
 #ifndef READ_AVS_H
 #define READ_AVS_H
 
-#include "mesh/mesh.h"
-#include "mesh/hexa.h"
-#include "mesh/triangle_6.h"
-#include "mesh/tetra.h"
-#include "mesh/tetra_10.h"
-#include "mesh/wedge.h"
+#include "../mesh/mesh.h"
+#include "../mesh/hexa.h"
+#include "../mesh/triangle_6.h"
+#include "../mesh/tetra.h"
+#include "../mesh/tetra_10.h"
+#include "../mesh/wedge.h"
+#include "../mesh/quad_8.h"
+#include "../mesh/quad_9.h"
+#include "../mesh/hexa_20.h"
+#include "../io/normalize_end_line.h"
 #include <stdexcept>
 #include <map>
 using namespace std;
@@ -171,15 +175,16 @@ void read_avs(TM &mesh, std::istream &is) throw(std::runtime_error) {
     while(nb<nbelem) {
         string str;
         getline(is,str);
-        istringstream s(str);
-        int number,number2;
+        normalize_end_line( str );
+        istringstream s( str );
+        int number, number2;
         s >> number; // numero de l'element
 
         s >> number2; // 1 ou 2
 
         s >> type_elem;//type dl'element
 
-        if (type_elem=="line") {
+        if ( type_elem == "line" ) {
             nnode_elem=2;
             Vec<TNode *> vn;
             vn.resize(nnode_elem);
@@ -191,7 +196,7 @@ void read_avs(TM &mesh, std::istream &is) throw(std::runtime_error) {
             ne->group = number2;
             if(nbelem_data) mesh.elem_list.synchronize_dyn(&dd);
             if(nbelem_data) mesh.elem_list.get_data(dd, *ne) = nb;
-        } else if (type_elem=="tri") {
+        } else if ( type_elem == "tri" ) {
             Vec<TNode *> vn;
             while ( true ) {
                 unsigned number;
@@ -220,7 +225,7 @@ void read_avs(TM &mesh, std::istream &is) throw(std::runtime_error) {
             } else
                 throw std::runtime_error("Unknown element...");
 
-        } else if (type_elem=="quad") {
+        } else if ( type_elem == "quad" ) {
             nnode_elem=4;
             Vec<TNode *> vn;
             vn.resize(nnode_elem);
@@ -230,6 +235,32 @@ void read_avs(TM &mesh, std::istream &is) throw(std::runtime_error) {
             }
             permutation_if_jac_neg(Quad(),vn.ptr());
             typename TM::EA *ne = reinterpret_cast<typename TM::EA *>(mesh.add_element(Quad(),DefaultBehavior(),&vn[0]));
+            ne->group = number2;
+            if(nbelem_data) mesh.elem_list.synchronize_dyn(&dd);
+            if(nbelem_data) mesh.elem_list.get_data(dd, *ne) = nb;
+        } else if (type_elem=="quad8") {
+            nnode_elem=8;
+            Vec<TNode *> vn;
+            vn.resize(nnode_elem);
+            for(int i=0;i<nnode_elem;i++) {
+                s >> number;
+                vn[i] = map_num_node[number];
+            }
+            permutation_if_jac_neg(Quad_8(),vn.ptr());
+            typename TM::EA *ne = reinterpret_cast<typename TM::EA *>(mesh.add_element(Quad_8(),DefaultBehavior(),&vn[0]));
+            ne->group = number2;
+            if(nbelem_data) mesh.elem_list.synchronize_dyn(&dd);
+            if(nbelem_data) mesh.elem_list.get_data(dd, *ne) = nb;
+        } else if (type_elem=="quad9") {
+            nnode_elem=9;
+            Vec<TNode *> vn;
+            vn.resize(nnode_elem);
+            for(int i=0;i<nnode_elem;i++) {
+                s >> number;
+                vn[i] = map_num_node[number];
+            }
+            permutation_if_jac_neg(Quad_9(),vn.ptr());
+            typename TM::EA *ne = reinterpret_cast<typename TM::EA *>(mesh.add_element(Quad_9(),DefaultBehavior(),&vn[0]));
             ne->group = number2;
             if(nbelem_data) mesh.elem_list.synchronize_dyn(&dd);
             if(nbelem_data) mesh.elem_list.get_data(dd, *ne) = nb;
@@ -298,6 +329,19 @@ void read_avs(TM &mesh, std::istream &is) throw(std::runtime_error) {
             ne->group = number2;
             if(nbelem_data) mesh.elem_list.synchronize_dyn(&dd);
             if(nbelem_data) mesh.elem_list.get_data(dd, *ne) = nb;
+        } else if (type_elem=="cu20") {
+            nnode_elem=20;
+            Vec<TNode *> vn;
+            vn.resize(nnode_elem);
+            for(int i=0;i<nnode_elem;i++) {
+                s >> number;
+                vn[i] = map_num_node[number];
+            }
+            permutation_if_jac_neg(Hexa_20(),vn.ptr());
+            //typename TM::template TElem<Wedge,DefaultBehavior>::TE *ne = mesh.add_element(Wedge(),DefaultBehavior(),&vn[0]);
+            typename TM::EA *ne = reinterpret_cast<typename TM::EA *>(mesh.add_element(Hexa_20(),DefaultBehavior(),&vn[0]));
+            if(nbelem_data) mesh.elem_list.synchronize_dyn(&dd);
+            if(nbelem_data) mesh.elem_list.get_data(dd, *ne) = nb; 
         } else {
             cout << "Erreur - type d'element non lu" <<endl;
             assert(0);

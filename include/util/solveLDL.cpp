@@ -233,7 +233,7 @@ void LDL_solver::get_factorization( LMT::Mat<double,LMT::Gen<>,LMT::SparseLine<>
 //         want_semi_morse_ = false;
 // }
 
-void LDL_solver::get_factorization( LMT::Mat<double,LMT::Sym<>,LMT::SparseLine<> > &m, LMT::Vec<LMT::Vec<double> > &Kernel, bool want_free, bool want_semi_morse, bool want_amd_order ) {
+void LDL_solver::get_factorization( LMT::Mat<double,LMT::Sym<>,LMT::SparseLine<> > &m, LMT::Vec<LMT::Vec<double> > &Kernel, LMT::Vec<int> &Pivots, bool want_free, bool want_semi_morse, bool want_amd_order ) {
     //     TicToc tt; tt.start();
     LMT::Mat<double,LMT::Gen<>,LMT::SparseLine<> > mat( m.nb_rows(), m.nb_rows() );
 
@@ -261,12 +261,12 @@ void LDL_solver::get_factorization( LMT::Mat<double,LMT::Sym<>,LMT::SparseLine<>
     // std::cout << mat << std::endl;
     if ( want_free )
         m.free();
-    get_factorization( mat, Kernel, false, want_semi_morse, want_amd_order );
+    get_factorization( mat, Kernel, Pivots, false, want_semi_morse, want_amd_order );
 
     //    tt.stop();
 }
 
-void LDL_solver::get_factorization( LMT::Mat<double,LMT::Gen<>,LMT::SparseLine<> > &mat, LMT::Vec<LMT::Vec<double> > &Kernel, bool want_free, bool want_semi_morse, bool want_amd_order ) {
+void LDL_solver::get_factorization( LMT::Mat<double,LMT::Gen<>,LMT::SparseLine<> > &mat, LMT::Vec<LMT::Vec<double> > &Kernel, LMT::Vec<int> &Pivots, bool want_free, bool want_semi_morse, bool want_amd_order ) {
     n = mat.nb_rows();
 
     Flag.resize( n );
@@ -338,6 +338,7 @@ void LDL_solver::get_factorization( LMT::Mat<double,LMT::Gen<>,LMT::SparseLine<>
 //    Knod.resize(maxkersiz);Knod.set(0);
     //Ker.resize(maxkersiz*n);Ker.set(0.);
     double *Ker_ptr = NULL;
+	kernod.resize(n);
 
 //    int d = ldl_numeric (n, Ap.ptr(), Ai.ptr(), Ax.ptr(), Lp.ptr(), Parent.ptr(), Lnz.ptr(), Li.ptr(),
 //                         Lx.ptr(), D.ptr(), Y.ptr(), Flag.ptr(), Pattern.ptr(), P.ptr(), Pinv.ptr());
@@ -357,7 +358,7 @@ void LDL_solver::get_factorization( LMT::Mat<double,LMT::Gen<>,LMT::SparseLine<>
     } else {
         d = ldl_numeric_pg (n, Ap.ptr(), Ai.ptr(), Ax.ptr(), Lp.ptr(), Parent.ptr(), Lnz.ptr(), Li.ptr(),
                          Lx.ptr(), D.ptr(), Y.ptr(), Flag.ptr(), Pattern.ptr(), P.ptr(), Pinv.ptr(),
-                         &Ksiz, &Ker_ptr );
+                         &Ksiz, kernod.ptr(), &Ker_ptr );
 
         LMT::Vec<double> Ker; Ker.resize( n * Ksiz );
         for(int i=0;i<n * Ksiz;++i)
@@ -367,11 +368,13 @@ void LDL_solver::get_factorization( LMT::Mat<double,LMT::Gen<>,LMT::SparseLine<>
 
         //std::cout << "\t\t\t\ttaille du noyau : " << Ksiz << std::endl ;
 
-        Kernel.resize(Ksiz) ;
+        Kernel.resize(Ksiz);
+		Pivots.resize(Ksiz);
         for (unsigned i=0;i<(unsigned)Ksiz;i++){
-            Kernel[i].resize(n) ;
-            Vec<unsigned> rep = range(i*n,(i+1)*n) ;
-            Kernel[i] = Ker[rep] ;
+            Kernel[i].resize(n);
+            Vec<unsigned> rep = range(i*n,(i+1)*n);
+            Kernel[i] = Ker[rep];
+			Pivots[i] = kernod[i];
         }
 
     }

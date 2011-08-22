@@ -15,8 +15,8 @@ print """
 
 namespace LMT {
 
-/**
-    \relates Mat
+/*!
+    \\relates Mat
     goal : display data on one line (to be redefined for matrices, ...)
 */
 template<class T,class Structure,class O,class OP>
@@ -24,8 +24,8 @@ std::ostream &line_output( std::ostream &s, const Mat<T,Structure,Dense<O>,OP> &
     s << m.data;
     return s;
 }
-/**
-    \relates Mat
+/*!
+    \\relates Mat
     goal : get data from one line (to be redefined for matrices, ...)
 */
 template<class T,class Structure,class O,class OP>
@@ -58,6 +58,8 @@ public:
     typedef Vec<TT,static_data_size> TV;
     typedef typename TV::template SubType<0>::T T;
     static const unsigned alignement = ( fixed_size ? 1 : SimdSize<T>::res );
+    typedef STRUCTURE Structure;
+    typedef STORAGE Storage;
 
     #ifdef MATLAB_MEX_FILE
         Mat(const mxArray *variable) throw(std::runtime_error) {
