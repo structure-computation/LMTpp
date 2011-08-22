@@ -524,8 +524,7 @@ public:
         Ex::MapExNum res = val_sub_sym( sub_symbols );
         for( int i = 0; i < sc.coeffs.size(); ++i ) {
             int p = sc.coeffs[ i ].num_in_fmat( *this );
-            if ( vectors[ 0 ].size() )
-                res[ sc.coeffs[ i ].sym ] = vectors[ 0 ][ p ];
+            res[ sc.coeffs[ i ].sym ] = vectors[ 0 ][ p ];
         }
         return res;
     }
