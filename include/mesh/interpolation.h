@@ -60,10 +60,11 @@ template<class Carac,unsigned nvi_to_subs,unsigned skin,class NameDM,class Pvec>
 typename TypeOfVariableInterpolationInMesh<MeshAncestor<Carac,nvi_to_subs,skin>,NameDM>::T interpolation( const MeshAncestor<Carac,nvi_to_subs,skin> &m, NameDM, const Pvec &pos ) {
     typedef TypeOfVariableInterpolationInMesh<MeshAncestor<Carac,nvi_to_subs,skin>,NameDM> Tof;
     Tof tof;
-    if ( not find( m.elem_list, tof, pos ) ) {
-        apply( m.elem_list, tof, pos );
+    find( m.elem_list, tof, pos );
+//     if ( not find( m.elem_list, tof, pos ) ) {
+//         apply( m.elem_list, tof, pos );
         // throw FindEnglobingElementAndReturnInterpolationException();
-    }
+//     }
     return tof.res;
 }
 
