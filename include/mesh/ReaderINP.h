@@ -895,9 +895,14 @@ struct ReaderINP {
             }
     }
     
-    ReaderINP() {}
+    ReaderINP() {
+        conversion_factor=1;
+    }
     
-    ReaderINP( TM &m, const char* filename) { parse( m, filename ); }
+    ReaderINP( TM &m, const char* filename) { 
+        parse( m, filename );
+        conversion_factor=1;
+    }
     
     ~ReaderINP() {
         typename std::map< std::string, ElementSet*>::iterator it;
@@ -1157,7 +1162,7 @@ struct ReaderINP {
     }
     
     template<class TMESH>
-    void create_mesh_by_material( TMESH &mesh, const std::string &nameMaterial, const double &conversion_factor ) {
+    void create_mesh_by_material( TMESH &mesh, const std::string &nameMaterial ) {
         std::map< unsigned, unsigned > match_inode_inp_lmtpp;
         typename std::map< std::string, SolidSection* >::iterator it;
         typename TMESH::MA::EA *ptrEA;
@@ -1359,7 +1364,7 @@ struct ReaderINP {
     //Map_num_node    map_num_node;
     Map_num_node map_num_node;
     Map_num_element map_num_element;
-
+    double conversion_factor;
     static const char* internal_name[ 2 ];
     static const unsigned nb_principale_keyword = 26;
     static const char* list_principale_keyword[ nb_principale_keyword ];
