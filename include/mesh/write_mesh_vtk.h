@@ -635,6 +635,12 @@ void write_mesh_vtk(std::ostream &os,const TM &m,const Vec<std::string> &display
 
 }
 
+template<class TM>
+void write_mesh_vtk( std::string file,const TM &m,const Vec<std::string> &display_fields=Vec<std::string>("all")) {
+    std::ofstream os( file.c_str() );
+    write_mesh_vtk<true>( os, m, display_fields );
+}
+
 template<bool binary,class TM>
 void write_mesh_vtk_v2(std::ostream &os,const TM &m,const Vec<std::string> &display_fields=Vec<std::string>("all")) {
     using namespace std;
