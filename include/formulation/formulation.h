@@ -2236,7 +2236,7 @@ void add_nodal_matrix(
     TF &f,
     TMA &matrix,
     TVE &sollicitation,
-    const TVEVE &vectors,
+    TVEVE &vectors,
     const Number<_ms> &matrix_is_sym,
     const Number<_am> &assemble_mat,
     const Number<_av> &assemble_vec,
@@ -2264,7 +2264,7 @@ void add_local_elem_matrix(
     TF &f,
     TMA &matrix,
     TVE &sollicitation,
-    const TVEVE &vectors,
+    TVEVE &vectors,
     const Number<_ms> &matrix_is_sym,
     const Number<_am> &assemble_mat,
     const Number<_av> &assemble_vec,
@@ -2282,7 +2282,7 @@ void add_elem_matrix(
         TF &f,
         TMA &matrix,
         TVE &sollicitation,
-        const TVEVE &vectors,
+        TVEVE &vectors,
         const Number<_ms> &matrix_is_sym,
         const Number<_am> &assemble_mat,
         const Number<_av> &assemble_vec,
@@ -2304,7 +2304,7 @@ template<class TF, class TVE, class TVEVE, class TE>
 void add_elem_residual(
         TF &f,
         TVE &sollicitation,
-        const TVEVE &vectors,
+        TVEVE &vectors,
         const TE &elem,
         const unsigned *indices ) {
     typedef typename TF::ScalarType T;
