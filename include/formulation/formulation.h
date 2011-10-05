@@ -1514,7 +1514,10 @@ public:
     virtual void call_after_solve(Vec<Vec<ScalarType> > &vectors_) {
         apply( m->elem_list, CallAfterSolve(), *this, vectors_);
     }
-    
+    virtual void call_after_solve(unsigned nb_thread, Vec<Vec<ScalarType> > &vectors_)  {
+        apply_mt( m->elem_list, nb_thread, CallAfterSolve(), *this, vectors_ );
+    }
+    //
     virtual void call_after_solve_2() {
         if (vectors_assembly== NULL){
             if ( not allocated )
@@ -1536,7 +1539,10 @@ public:
     virtual void call_after_solve_2(Vec<Vec<ScalarType> > &vectors_)  {
         apply( m->elem_list, CallAfterSolve_2(), *this, vectors_ );
     }
-
+    virtual void call_after_solve_2(unsigned nb_thread, Vec<Vec<ScalarType> > &vectors_)  {
+        apply_mt( m->elem_list, nb_thread, CallAfterSolve_2(), *this, vectors_ );
+    }
+    //
     virtual void call_after_solve_3() {
         if (vectors_assembly== NULL){
             if ( not allocated )
@@ -1558,7 +1564,10 @@ public:
     virtual void call_after_solve_3(Vec<Vec<ScalarType> > &vectors_)  {
         apply( m->elem_list, CallAfterSolve_3(), *this, vectors_ );
     }
-
+    virtual void call_after_solve_3(unsigned nb_thread, Vec<Vec<ScalarType> > &vectors_)  {
+        apply_mt( m->elem_list, nb_thread, CallAfterSolve_3(), *this, vectors_ );
+    }
+    //
     virtual void call_after_solve_4() {
         if (vectors_assembly== NULL){
             if ( not allocated )
@@ -1580,7 +1589,10 @@ public:
     virtual void call_after_solve_4(Vec<Vec<ScalarType> > &vectors_)  {
         apply( m->elem_list, CallAfterSolve_4(), *this, vectors_ );
     }
-
+    virtual void call_after_solve_4(unsigned nb_thread, Vec<Vec<ScalarType> > &vectors_)  {
+        apply_mt( m->elem_list, nb_thread, CallAfterSolve_4(), *this, vectors_ );
+    }
+    //
     virtual void call_after_solve_5() {
         if (vectors_assembly== NULL){
             if ( not allocated )
@@ -1602,6 +1614,10 @@ public:
     virtual void call_after_solve_5(Vec<Vec<ScalarType> > &vectors_)  {
         apply( m->elem_list, CallAfterSolve_5(), *this, vectors_ );
     }
+    virtual void call_after_solve_5(unsigned nb_thread, Vec<Vec<ScalarType> > &vectors_)  {
+        apply_mt( m->elem_list, nb_thread, CallAfterSolve_5(), *this, vectors_ );
+    }
+    //
     virtual void call_after_solve_6() {
         if (vectors_assembly== NULL){
             if ( not allocated )
@@ -1623,6 +1639,10 @@ public:
     virtual void call_after_solve_6(Vec<Vec<ScalarType> > &vectors_)  {
         apply( m->elem_list, CallAfterSolve_6(), *this, vectors_ );
     }
+    virtual void call_after_solve_6(unsigned nb_thread, Vec<Vec<ScalarType> > &vectors_)  {
+        apply_mt( m->elem_list, nb_thread, CallAfterSolve_6(), *this, vectors_ );
+    }
+    //
     virtual void call_after_solve_7() {
         if (vectors_assembly== NULL){
             if ( not allocated )
