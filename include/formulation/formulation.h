@@ -79,7 +79,7 @@ public:
 
 /*!
     Pour le choix du solveur : wont_add_nz=false implique utilisation des solveurs internes.
-        wont_add_nz=true implique utilisation de LDL, sauf si "-DWITH_CHOLMOD -DWITH_UMFPACK" sont dans les directives de compilation est à 1 auquel cas on utilise CholMod ou UMFPACK (non symétrique)
+        wont_add_nz=true implique utilisation de LDL, sauf si "-DWITH_CHOLMOD -DWITH_UMFPACK" sont dans les directives de compilation est �  1 auquel cas on utilise CholMod ou UMFPACK (non symétrique)
 
     Mais qu'est-ce qu'une directive de compilation ?
         cf. CPPFLAGS dans vasoSConstuction
@@ -2300,7 +2300,7 @@ void add_local_elem_residual( const A &a, const B &b, const C &c, const D &d, co
 }
 
 /*! To be redefined for each new formulations */
-template<class TF, class TVE, class TVEVE, class TE>
+template<class TF,class TVE,class TVEVE,class TE>
 void add_elem_residual(
         TF &f,
         TVE &sollicitation,
