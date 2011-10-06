@@ -131,14 +131,6 @@ public:
     virtual void call_after_solve_14(Vec<Vec<ScalarType> > &vectors) = 0 ;
     virtual void call_after_solve_15(Vec<Vec<ScalarType> > &vectors) = 0 ;
 
-<<<<<<< HEAD
-    virtual void call_after_solve(unsigned nb_thread, Vec<Vec<ScalarType> > &vectors) = 0 ;
-    virtual void call_after_solve_2(unsigned nb_thread, Vec<Vec<ScalarType> > &vectors) = 0 ;
-    virtual void call_after_solve_3(unsigned nb_thread, Vec<Vec<ScalarType> > &vectors) = 0 ;
-    virtual void call_after_solve_4(unsigned nb_thread, Vec<Vec<ScalarType> > &vectors) = 0 ;
-    virtual void call_after_solve_5(unsigned nb_thread, Vec<Vec<ScalarType> > &vectors) = 0 ;
-    virtual void call_after_solve_6(unsigned nb_thread, Vec<Vec<ScalarType> > &vectors) = 0 ;
-=======
     virtual void call_after_solve(    Vec<Vec<ScalarType> > &vectors, unsigned nb_thread ) = 0 ;
     virtual void call_after_solve_2(  Vec<Vec<ScalarType> > &vectors, unsigned nb_thread ) = 0 ;
     virtual void call_after_solve_3(  Vec<Vec<ScalarType> > &vectors, unsigned nb_thread ) = 0 ;
@@ -154,7 +146,6 @@ public:
     virtual void call_after_solve_13( Vec<Vec<ScalarType> > &vectors, unsigned nb_thread ) = 0 ;
     virtual void call_after_solve_14( Vec<Vec<ScalarType> > &vectors, unsigned nb_thread ) = 0 ;
     virtual void call_after_solve_15( Vec<Vec<ScalarType> > &vectors, unsigned nb_thread ) = 0 ;
->>>>>>> e218ba4b93a67b74d0255e95d966cb8dab60d423
 
     virtual void set_vectors_assembly(Vec<Vec<ScalarType> > &vec) = 0;
     virtual void set_indice_noda(Vec<unsigned> &vec) = 0;

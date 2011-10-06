@@ -271,90 +271,54 @@ namespace LMT {
             for(unsigned i=0;i<formulations.size();++i)
                 formulation(i)->call_after_solve(vectors);
         }
-<<<<<<< HEAD
-        void call_after_solve(unsigned nb_thread) {
-            for(unsigned i=0;i<formulations.size();++i)
-                formulation(i)->call_after_solve(nb_thread, vectors);
-=======
         void call_after_solve( unsigned nb_thread ) {
             for(unsigned i=0;i<formulations.size();++i)
                 formulation(i)->call_after_solve( vectors, nb_thread );
->>>>>>> e218ba4b93a67b74d0255e95d966cb8dab60d423
         }
         //
         void call_after_solve_2() {
             for(unsigned i=0;i<formulations.size();++i)
                 formulation(i)->call_after_solve_2(vectors);
         }
-<<<<<<< HEAD
-        void call_after_solve_2(unsigned nb_thread) {
-            for(unsigned i=0;i<formulations.size();++i)
-                formulation(i)->call_after_solve_2(nb_thread, vectors);
-=======
-        void call_after_solve_2( unsigned nb_thread ) {
+	void call_after_solve_2( unsigned nb_thread ) {
             for(unsigned i=0;i<formulations.size();++i)
                 formulation(i)->call_after_solve_2( vectors, nb_thread );
->>>>>>> e218ba4b93a67b74d0255e95d966cb8dab60d423
         }
         //
         void call_after_solve_3() {
             for(unsigned i=0;i<formulations.size();++i)
                 formulation(i)->call_after_solve_3(vectors);
         }
-<<<<<<< HEAD
-        void call_after_solve_3(unsigned nb_thread) {
-            for(unsigned i=0;i<formulations.size();++i)
-                formulation(i)->call_after_solve_3(nb_thread, vectors);
-=======
         void call_after_solve_3( unsigned nb_thread ) {
             for(unsigned i=0;i<formulations.size();++i)
                 formulation(i)->call_after_solve_3( vectors, nb_thread );
->>>>>>> e218ba4b93a67b74d0255e95d966cb8dab60d423
         }
         //
         void call_after_solve_4() {
             for(unsigned i=0;i<formulations.size();++i)
                 formulation(i)->call_after_solve_4(vectors);
         }
-<<<<<<< HEAD
-        void call_after_solve_4(unsigned nb_thread) {
-            for(unsigned i=0;i<formulations.size();++i)
-                formulation(i)->call_after_solve_4(nb_thread, vectors);
-=======
         void call_after_solve_4( unsigned nb_thread ) {
             for(unsigned i=0;i<formulations.size();++i)
                 formulation(i)->call_after_solve_4( vectors, nb_thread );
->>>>>>> e218ba4b93a67b74d0255e95d966cb8dab60d423
         }
         //
         void call_after_solve_5() {
             for(unsigned i=0;i<formulations.size();++i)
                 formulation(i)->call_after_solve_5(vectors);
         }
-<<<<<<< HEAD
-        void call_after_solve_5(unsigned nb_thread) {
-            for(unsigned i=0;i<formulations.size();++i)
-                formulation(i)->call_after_solve_5(nb_thread, vectors);
-=======
         void call_after_solve_5( unsigned nb_thread ) {
             for(unsigned i=0;i<formulations.size();++i)
                 formulation(i)->call_after_solve_5( vectors, nb_thread );
->>>>>>> e218ba4b93a67b74d0255e95d966cb8dab60d423
         }
         //
         void call_after_solve_6() {
             for(unsigned i=0;i<formulations.size();++i)
                 formulation(i)->call_after_solve_6(vectors);
         }
-<<<<<<< HEAD
-        void call_after_solve_6(unsigned nb_thread) {
-            for(unsigned i=0;i<formulations.size();++i)
-                formulation(i)->call_after_solve_6(nb_thread, vectors);
-=======
         void call_after_solve_6( unsigned nb_thread ) {
             for(unsigned i=0;i<formulations.size();++i)
                 formulation(i)->call_after_solve_6( vectors, nb_thread );
->>>>>>> e218ba4b93a67b74d0255e95d966cb8dab60d423
         }
         //
 /*        void call_after_solve(const Vec<void *> &elem_list) {
