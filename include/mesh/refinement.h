@@ -171,7 +171,7 @@ namespace LMTPRIVATE {
             for( unsigned i = 0 ; i < nb_bar; ++i ) {
                 nn[ 0 ] = e.node( i_n[ i ][ 0 ] );
                 nn[ 1 ] = e.node( i_n[ i ][ 1 ] );            
-                middle[ 0 ] = m_parent->template sub_mesh<2>().elem_list.get_data( next.next.cut, *m_parent->template sub_mesh<2>().elem_list.find( Bar(), DefaultBehavior(), *m_parent, nn ) );
+                middle[ i ] = m_parent->template sub_mesh<2>().elem_list.get_data( next.next.cut, *m_parent->template sub_mesh<2>().elem_list.find( Bar(), DefaultBehavior(), *m_parent, nn ) );
                 if ( middle[ i ] )
                     cpt_cut++;
             }
@@ -191,10 +191,47 @@ namespace LMTPRIVATE {
                     }
             }
         }
-        
+
         /// deuxième foncteur
-        template<class TE, unsigned num> bool operator()( TE &e, const Number<num> &nnn ) { 
+        template<class TE, unsigned num> void operator()( TE &e, const Number<num> &nnn ) { 
             append_constrained_cut( e, nnn ); 
+        }
+        
+        struct Control_two_cuts {
+            Control_two_cuts() : has_two_cuts( false ) {}
+            
+            bool has_two_cuts;
+        };
+        template<class TE> 
+        void has_two_cuts( TE &e, const Number<0> &nnn, Control_two_cuts &ctrl ) { }
+        template<class TE> 
+        void has_two_cuts( TE &e, const Number<1> &nnn, Control_two_cuts &ctrl ) { }
+        template<class TE> 
+        void has_two_cuts( TE &e, const Number<2> &nnn, Control_two_cuts &ctrl ) { }
+        /// pour la 3D mais le foncteur qui utilisera cette méthode parcourera des \a Triangle .
+        template<class TE> 
+        void has_two_cuts( TE &e, const Number<3> &nnn, Control_two_cuts &ctrl ) {
+            static const unsigned nb_bar = 3;
+            unsigned i_n[ nb_bar ][ 2 ] = { { 0, 1 }, { 1, 2 }, { 0, 2 } }; 
+            TNode *nn[ 2 ];
+            TNode *middle[ nb_bar ];
+            unsigned cpt_cut = 0;
+        
+            for( unsigned i = 0 ; i < nb_bar; ++i ) {
+                nn[ 0 ] = e.node( i_n[ i ][ 0 ] );
+                nn[ 1 ] = e.node( i_n[ i ][ 1 ] );            
+                middle[ i ] = m_parent->template sub_mesh<2>().elem_list.get_data( next.next.cut, *m_parent->template sub_mesh<2>().elem_list.find( Bar(), DefaultBehavior(), *m_parent, nn ) );
+                if ( middle[ i ] )
+                    cpt_cut++;
+            }
+            
+            if ( cpt_cut == 2 )
+                ctrl.has_two_cuts = true;
+        }
+        
+        template<class TE, unsigned num>
+        void operator() ( TE &e, const Number<num> &nnn, Control_two_cuts &ctrl ) {
+            has_two_cuts( e, nnn, ctrl );
         }
 
         /// on étend la coupe si l'arête coupée n'est pas la plus longue de l'élément 
@@ -311,6 +348,7 @@ namespace LMTPRIVATE {
         TMParent *m_parent;
         TDN cut;
         RNext next;
+        bool appended_cut;
     };
     template<class TM,class TMParent,unsigned max_num_sub_mesh>
     struct Refinment<TM,TMParent,max_num_sub_mesh,max_num_sub_mesh> {
@@ -363,23 +401,36 @@ template<class TM,class Op>
 bool refinement( TM &m, Op &op, bool spread_cut = false ) {
     //m.update_elem_children();
     m.update_elem_children( Number<TM::nvi-1>() );
-    m.update_elem_children( Number<TM::nvi-2>() );
+    if ( TM::dim == 3 )
+        m.update_elem_children( Number<TM::nvi-2>() );
     LMTPRIVATE::Refinment<TM,TM,0,TM::dim+1> r( &m );
     r.update_cut( m, op );
     
-    /// on raffine s'il y a au moins deux arêtes coupées par élément
-    switch( TM::dim ) {
-        case 2 : apply( m.elem_list, r, Number<TM::dim>() ); break;
-        case 3 : apply( m.sub_mesh( Number<1>() ).elem_list, r, Number<TM::dim>() );break; /// application sur les triangles
-        default:
-            assert( 0 );
-    }
-    /// on propage le raffinement au reste du maillage
-    if ( spread_cut ) {
-        m.update_elem_neighbours();
-        for( unsigned i = 0; i < m.elem_list.size(); ++i )
-            r.spread_cut( m.elem_list[ i ], Number<TM::dim>() );
-    }
+    typename LMTPRIVATE::Refinment<TM,TM,0,TM::dim+1>::Control_two_cuts ctrl;
+    
+    do {
+        ctrl.has_two_cuts = false;
+        /// on raffine s'il y a au moins deux arêtes coupées par élément
+        switch( TM::dim ) {
+            case 2 : apply( m.elem_list, r, Number<TM::dim>() ); break;
+            case 3 : apply( m.sub_mesh( Number<1>() ).elem_list, r, Number<TM::dim>() ); break;/// application sur les triangles
+            default:
+                assert( 0 );
+        }
+        
+        /// on propage le raffinement au reste du maillage
+        if ( spread_cut ) {
+            m.update_elem_neighbours();
+            for( unsigned i = 0; i < m.elem_list.size(); ++i )
+                r.spread_cut( m.elem_list[ i ], Number<TM::dim>() );
+        }
+        
+        /// contrôle s'il y a deux coupes pour la 3D ( j'espère provisoire )
+        if ( TM::dim == 3 ) {
+            apply( m.sub_mesh( Number<1>() ).elem_list, r, Number<TM::dim>(), ctrl ); /// application sur les triangles
+        }
+
+    } while( ctrl.has_two_cuts );
 
     m.elem_list.reg_dyn( &r.cut );
     bool res = m.remove_elements_if( r );
@@ -428,8 +479,8 @@ struct LevelSetRemoveNeg {
 };
 
 /*!
-    Ojectif :
-        Cette fonction permet de couper un maillage en fonction de la valeur d'un atribut nodal et scalaire. Plus précisément considérons un attribut nodal scalaire ( i.e. double en général ), qu'on nommera phi. Après l'appel de la fonction, le maillage n'aura que des éléments pour lesquelles la valeur de phi aux noeuds est positive.
+    Objectif :
+        Cette fonction permet de couper un maillage en fonction de la valeur d'un attribut nodal et scalaire. Plus précisément considérons un attribut nodal scalaire ( i.e. double en général ), qu'on nommera phi. Après l'appel de la fonction, le maillage n'aura que des éléments pour lesquelles la valeur de phi aux noeuds est positive.
         
     Paramètres :
         * <strong> m </strong> est un maillage qui sera modifié si nécessaire.
@@ -438,7 +489,7 @@ struct LevelSetRemoveNeg {
     Retour :
         renvoie vrai s'il y a eu des changements et faux sinon. 
         
-    Voici un exemple de code. Il faudra adapter le MeshCarac.
+    Voici un exemple de code. Il faudra adapter le MeshCarac ( cf le MeshCarac venant juste après le code C++ ).
     \code C/C++
     
         #include "mesh/make_rect.h"
@@ -469,11 +520,36 @@ struct LevelSetRemoveNeg {
             return 0; 
         }
     
+        Commençons par le MeshCarac contenu dans le fichier Python formulation_test_sep_mesh.py ( que vous créerez ) :
+        \code Python
+            # -*- coding: utf-8 -*-
+            from LMT.formal_lf import *
+            
+            write_pb(
+                name = 'test_cut_mesh',
+                formulations = ['test_cut_mesh'],
+                elements = ['Triangle', 'Tetra' ]
+            )
+        
+        Et sa formulation contenue dans le fichier MeshCarac_test_cut_mesh.h.py ( que vous créerez ) :
+        \code Python
+            # -*- coding: utf-8 -*-
+            
+            phi  = Variable( default_value='1e10', unit='' )
+            
+            #
+            def formulation():
+                return 0
+                
+    \relates level_set_cut
+    \relates refinement
+    \keyword Maillage/Opération
+    \friend lecler@lmt.ens-cachan.fr
 */
 template<class TM,class PhiExtract>
-bool level_set_cut( TM &m, const PhiExtract &p ) {
+bool level_set_cut( TM &m, const PhiExtract &p, bool spread_cut = false ) {
     LevelSetRefinement<PhiExtract> lr( p );
-    refinement( m, lr );
+    refinement( m, lr, spread_cut );
     LevelSetRemoveNeg<PhiExtract> ln( p );
     return m.remove_elements_if( ln );
 }
@@ -492,14 +568,14 @@ struct RafinementOpBasedOnLength {
     Cette fonction divise toutes les barres (segments) du maillage en deux pour lesquelles la longueur est supérieure à max_length.
     Elle renvoie vrai si elle divise au moins une barre et faux sinon. Ainsi si on souhaite que toutes les barres soient inférieures à max_length, on relancera la fonction autant de fois que nécessaire.
 
-    \keyword Maillage/Elément/Opération
+    \keyword Maillage/Opération
     subdivide each element bar e such as length(e)>max_length (true means subdivision).
 */
 template<class TM,class T>
-bool refinement_if_length_sup(TM &m,T max_length) {
+bool refinement_if_length_sup( TM &m, T max_length, bool spread_cut = false ) {
     RafinementOpBasedOnLength<T> rl;
     rl.max_length = max_length;
-    return refinement(m,rl);
+    return refinement( m, rl, spread_cut );
 }
 
 /*!
@@ -534,7 +610,7 @@ bool refinement_if_length_sup(TM &m,T max_length) {
         display( m );
     }
 
-
+    \keyword Maillage/Opération
 */
 template<class TIMG1,class TIMG2=TIMG1>
 struct LevelSetImageRefinement {
@@ -568,7 +644,7 @@ struct LevelSetImageRefinement {
 
 /*!
     Objectif :
-        Ce foncteur est conçu pour la fonction \a refinement () . Il permet de raffiner localement un maillage. Pour plus de renseignement, voir l'explication à la fin.
+        Ce foncteur est conçu pour la fonction \a refinement () . Il permet de raffiner localement un maillage autour d'un point. Pour plus de renseignement, voir l'explication à la fin.
         
     Attributs :
         * <strong> c </strong> le centre de la zone que l'on veut raffiner. c n'est pas forcément un point dans le maillage.
@@ -587,7 +663,9 @@ struct LevelSetImageRefinement {
         refinement( m, Local_refinement<T, Pvec >( 0.01, 0.2, Pvec( 0.2, 0.5 ) ) );
     
     On raffinera au point de coordonnées ( 0.2, 0.5 ) avec une longueur minimale de 0.01 et une augmentation de 0.2. 
-
+    
+    
+    \keyword Maillage/Opération
 */
 template < class T, class Pvec>
 struct Local_refinement {
@@ -605,6 +683,49 @@ struct Local_refinement {
 
     T l_min, k;
     Pvec c; /// centre
+};
+
+/*!
+    Objectif :
+        Ce foncteur est conçu pour la fonction \a refinement () . Il permet de raffiner localement un maillage autour d'un cercle. Pour plus de renseignement, voir l'explication à la fin.
+        
+    Attributs :
+        * <strong> c </strong> le centre du cercle autour duquel on veut raffiner. c n'est pas forcément un point dans le maillage.
+        * <strong> R </strong> le rayon du cercle autour duquel on veut raffiner.
+        * <strong> l_min </strong> la longueur minimale des côtés des éléments du maillage.
+        * <strong> k </strong> le coefficient d'augmentation de la longueur maximale des côtés des éléments en fonction de la distance au point c.
+        
+    Description :
+        on décide de couper le côté d'un élément ( i.e. une \a Bar ) si sa longueur est supérieure à d * k + l_min où d est la distance entre le milieu du côté et le cercle de centre c et de rayon R.
+         
+    Exemple de code :
+    \code C/C++
+        typedef Mesh< Mesh_carac_MonMeshCarac< double,2> > TM;
+        typedef TM::Pvec Pvec;
+        typedef TM::TNode::T T;
+    
+        refinement( m, Local_refinement<T, Pvec >( 0.01, 0.2, Pvec( 0.2, 0.5 ), 0.2 ) );
+    
+    On raffinera autour du cercle de centre ( 0.2, 0.5 ) et de rayon 0.2 avec une longueur minimale de 0.01 et une augmentation de 0.2. 
+    \keyword Maillage/Opération
+*/
+template < class T, class Pvec>
+struct Local_refinement_circle {
+    Local_refinement_circle( T length_min, T _k, Pvec _c, T _R ) : l_min( length_min ), k( _k ), c( _c ), R( _R ) {}
+
+    template<class TE> 
+    bool operator()( TE &e ) const {
+        T l = length( e.node( 1 )->pos - e.node( 0 )->pos );
+        T v = fabs( R - length( center( e ) - c ) ) * k + l_min;
+        if ( l > v ) 
+            return true;
+        else
+            return false;
+    }
+
+    T l_min, k;
+    T R; /// rayon du cercle
+    Pvec c; /// centre du cercle
 };
 
 namespace LMTPRIVATE {
@@ -646,10 +767,11 @@ namespace LMTPRIVATE {
 }
 
 /*!
-  coupe d'un maillage par un masque. Un élément est coupé quand un bord a mask < lim_inf et l'autre a mask >= lim_sup
+    coupe d'un maillage par un masque. Un élément est coupé quand un bord a mask < lim_inf et l'autre a mask >= lim_sup
+    \keyword Maillage/Opération
 */
 template<class TM,class MA,class I>
-bool mask_cut( TM &m, const MA &mask, I lim_inf, I lim_sup, I dist_disp, bool remove_inf_elem = false ) {
+bool mask_cut( TM &m, const MA &mask, I lim_inf, I lim_sup, I dist_disp, bool remove_inf_elem = false, bool spread_cut = false ) {
     typedef LMTPRIVATE::MaskCutter<TM,MA,I> MC;
     typedef typename TM::Pvec Pvec;
     typedef typename TM::Tpos T;
@@ -685,7 +807,7 @@ bool mask_cut( TM &m, const MA &mask, I lim_inf, I lim_sup, I dist_disp, bool re
     }
     // cut
     typename MC::Cut cut( mc );
-    bool res = refinement( m, cut );
+    bool res = refinement( m, cut, spread_cut );
     // rem
     if ( remove_inf_elem ) {
         typename MC::Rem rem( mc );
