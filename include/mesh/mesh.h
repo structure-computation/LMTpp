@@ -105,6 +105,14 @@ public:
     template<class NE,class BE> typename TElemPtr<NE,BE>::TE add_element(const NE &ne,const BE &be,unsigned n0,unsigned n1,unsigned n2,unsigned n3,unsigned n4,unsigned n5,unsigned n6,unsigned n7,unsigned n8) { unsigned n[] = {n0,n1,n2,n3,n4,n5,n6,n7,n8}; return add_element(ne,be,n); }
     template<class NE,class BE> typename TElemPtr<NE,BE>::TE add_element(const NE &ne,const BE &be,unsigned n0,unsigned n1,unsigned n2,unsigned n3,unsigned n4,unsigned n5,unsigned n6,unsigned n7,unsigned n8,unsigned n9) { unsigned n[] = {n0,n1,n2,n3,n4,n5,n6,n7,n8,n9}; return add_element(ne,be,n); }
 
+    template<class NE,class BE> typename TElemPtr<NE,BE>::TE add_element( const NE &ne, const BE &be, unsigned *n, bool test_jac_neg ) {
+        TNode *np[ NE::nb_nodes ];
+        for( unsigned i = 0; i < NE::nb_nodes; ++i )
+            np[ i ] = &this->node_list[ n[ i ] ];
+        if ( test_jac_neg )
+            permutation_if_jac_neg( ne, np );
+        return MA::add_element_( ne, be, np );
+    }
 
     ///
 //     template<class NE,class BE> typename TElem<NE,BE>::TE *add_element(const NE &ne,const BE &be,TNode **n) { return MA::add_element_(ne,be,n); }
