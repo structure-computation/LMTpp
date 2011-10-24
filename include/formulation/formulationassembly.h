@@ -280,7 +280,7 @@ namespace LMT {
             for(unsigned i=0;i<formulations.size();++i)
                 formulation(i)->call_after_solve_2(vectors);
         }
-	void call_after_solve_2( unsigned nb_thread ) {
+        void call_after_solve_2( unsigned nb_thread ) {
             for(unsigned i=0;i<formulations.size();++i)
                 formulation(i)->call_after_solve_2( vectors, nb_thread );
         }

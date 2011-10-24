@@ -11,8 +11,8 @@ inline void gauss_points( const Bar &elem, unsigned order, Vec<double> &poids, V
     if ( order <= 1 ) {
         poids.resize( 1 );
         valeurs.resize( 1 );
-        poids[0] = 0.5; /// 1/2
-        valeurs[0] = TPOS( 1.0 ); ///  1 
+        poids[0] = 1.0; /// 1
+        valeurs[0] = TPOS( 0.5 ); ///  1/2
         return;
     }
     if ( order <= 3 ) {
