@@ -276,6 +276,7 @@ class LmtppFormulationAncestor
     dV_corr                  := symbol("dV_corr")
     
     dS                       := symbol("dS")
+    dS_handbook              := symbol("dS_handbook")
     dN                       := symbol("dN")
     dE                       := symbol("dE")
     pe                       := Ptr[ SymbolicElementAncestor ]()
@@ -987,18 +988,28 @@ class LmtppFormulation[ dim ] inherits LmtppFormulationAncestor
         
         # surf parts
         surf_part := residual.diff( dS )
+        surf_part_const_jac := residual_const_jac.diff( dS )
+        surf_part_handbook := residual.diff( dS_handbook )
         K_dS.resize( pe_children.size )
         F_dS.resize( pe_children.size )
         for pc_, num_child in pe_children, 0...
             pc := child_cast( pc_ )
             loc_surf_part := surf_part.subs( e.var_inter, e.var_inter_from_child_var_inter( sub_nvi = 1, num_child = num_child, child_var_inter = pc->var_inter ) )
             degre_poly_child := loc_surf_part.poly_deg( pc->var_inter )
+            if degre_poly_child < 0
+                loc_surf_part_const_jac := surf_part_const_jac.subs( e.var_inter, e.var_inter_from_child_var_inter( sub_nvi = 1, num_child = num_child, child_var_inter = pc->var_inter ) )
+                degre_poly_child = loc_surf_part_const_jac.poly_deg( pc->var_inter )
+            loc_surf_part_handbook := surf_part_handbook.subs( e.var_inter, e.var_inter_from_child_var_inter( sub_nvi = 1, num_child = num_child, child_var_inter = pc->var_inter ) )
             if integration_type == "bestial_num"
                 loc_surf_part = pc->bestial_num_integration( loc_surf_part , mul_by_jac = true, div_ = 6 )
+                loc_surf_part_handbook = pc->bestial_num_integration( loc_surf_part_handbook , mul_by_jac = true, div_ = 10 )
             else if integration_type == "gauss_num"
                 loc_surf_part = pc->gauss_num_integration( loc_surf_part, order_diff = degre_poly_child )
+                loc_surf_part_handbook = pc->gauss_num_integration( loc_surf_part_handbook, order_diff = degre_poly_enrichment )
             else if integration_type == "formal"
                 loc_surf_part = pc->integration( loc_surf_part, order_diff = degre_poly_child )
+                loc_surf_part_handbook = pc->integration( loc_surf_part_handbook, order_diff = degre_poly_enrichment )
+            loc_surf_part += loc_surf_part_handbook
             _compute_KF_from_residual( loc_surf_part, K_dS[ num_child ], F_dS[ num_child ],
                 unk_expr_syms.map( _0->sym ), 
                 unk_test_syms.map( _0->sym )
