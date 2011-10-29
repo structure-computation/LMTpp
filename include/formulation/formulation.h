@@ -79,13 +79,13 @@ public:
 
 /*!
     Pour le choix du solveur : wont_add_nz=false implique utilisation des solveurs internes.
-        wont_add_nz=true implique utilisation de LDL, sauf si "-DWITH_CHOLMOD -DWITH_UMFPACK" sont dans les directives de compilation est Ã  1 auquel cas on utilise CholMod ou UMFPACK (non symÃ©trique)
+        wont_add_nz=true implique utilisation de LDL, sauf si "-DWITH_CHOLMOD -DWITH_UMFPACK" sont dans les directives de compilation est à 1 auquel cas on utilise CholMod ou UMFPACK (non symétrique)
 
     Mais qu'est-ce qu'une directive de compilation ?
         cf. CPPFLAGS dans vasoSConstuction
 
-    \relates Comment rÃ©soudre un problÃ¨me Ã©lÃ©ments finis de faÃ§on gÃ©nÃ©rale
-    \relates Exemple de problÃ¨me d'Ã©volution, l'Ã©quation de la chaleur
+    \relates Comment résoudre un problème éléments finis de façon générale
+    \relates Exemple de problème d'évolution, l'équation de la chaleur
     \relates Exemple de formulation
 
     \keyword Formulation
@@ -2164,11 +2164,11 @@ public:
 
     /*!
         Objectif :
-            cette mÃ©thode ajoute au vecteur <strong> res </strong>, la contribution au rÃ©sidu de l'Ã©lÃ©ment <strong> *elem </strong> .
+            cette méthode ajoute au vecteur <strong> res </strong>, la contribution au résidu de l'élément <strong> *elem </strong> .
 
-        ParamÃ¨tres :
-            * <strong> res </strong> le vecteur contenant le rÃ©sidu ( sa taille doit Ãªtre Ã©gale au nombre de degrÃ©s de libertÃ© du problÃ¨me),
-            * <strong> elem </strong> pointeur sur l'Ã©lÃ©ment dont on veut obtenir la contribution.
+        Paramètres :
+            * <strong> res </strong> le vecteur contenant le résidu ( sa taille doit être égale au nombre de degrés de liberté du problème),
+            * <strong> elem </strong> pointeur sur l'élément dont on veut obtenir la contribution.
     */
     void add_elem_contribution_to_residual( Vec<ScalarType> &res, const typename TM::EA *elem ) const {
         m->elem_list.apply_on_down_cast( elem, AssembleResidual(), res, *this );
@@ -2273,7 +2273,7 @@ void add_local_elem_matrix(
     const TE &elem,
     const unsigned *indices ) {
 
-    std::cerr << "Attention : ni add_elem_matrix, ni add_local_elem_matrix n'ont Ã©tÃ© surdÃ©finis pour la formulation " << f.get_name() << " avec l'Ã©lÃ©ment "
+    std::cerr << "Attention : ni add_elem_matrix, ni add_local_elem_matrix n'ont été surdéfinis pour la formulation " << f.get_name() << " avec l'élément "
               << elem.name << "." << std::endl;
     assert( 0 );
 }
@@ -2302,7 +2302,7 @@ void add_local_elem_residual( const A &a, const B &b, const C &c, const D &d, co
 }
 
 /*! To be redefined for each new formulations */
-template<class TF, class TVE, class TVEVE, class TE>
+template<class TF,class TVE,class TVEVE,class TE>
 void add_elem_residual(
         TF &f,
         TVE &sollicitation,
