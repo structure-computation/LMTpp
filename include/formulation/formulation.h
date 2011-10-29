@@ -338,7 +338,8 @@ public:
             size += ( constraints[i].penalty_value == ScalarType(0) );
 
         // resize vectors
-        for(unsigned i=0;i<vectors.size();++i) vectors[i].resize( size );
+        for(unsigned i=0;i<vectors.size();++i)
+            vectors[i].resize( size );
         sollicitation.resize( size );
 
         // indices
@@ -1517,7 +1518,7 @@ public:
     virtual void call_after_solve(Vec<Vec<ScalarType> > &vectors_, unsigned nb_thread ) {
         apply_mt( m->elem_list, nb_thread, CallAfterSolve(), *this, vectors_);
     }
-    
+
     virtual void call_after_solve_2() {
         if (vectors_assembly== NULL){
             if ( not allocated )
@@ -1617,7 +1618,7 @@ public:
     virtual void call_after_solve_5(Vec<Vec<ScalarType> > &vectors_, unsigned nb_thread ) {
         apply_mt( m->elem_list, nb_thread, CallAfterSolve_5(), *this, vectors_);
     }
-    
+
     virtual void call_after_solve_6() {
         if (vectors_assembly== NULL){
             if ( not allocated )
@@ -1642,7 +1643,7 @@ public:
     virtual void call_after_solve_6(Vec<Vec<ScalarType> > &vectors_, unsigned nb_thread ) {
         apply_mt( m->elem_list, nb_thread, CallAfterSolve_6(), *this, vectors_);
     }
-    
+
     virtual void call_after_solve_7() {
         if (vectors_assembly== NULL){
             if ( not allocated )
@@ -1667,7 +1668,7 @@ public:
     virtual void call_after_solve_7(Vec<Vec<ScalarType> > &vectors_, unsigned nb_thread ) {
         apply_mt( m->elem_list, nb_thread, CallAfterSolve_7(), *this, vectors_);
     }
-    
+
     virtual void call_after_solve_8() {
         if (vectors_assembly== NULL){
             if ( not allocated )
@@ -1692,7 +1693,7 @@ public:
     virtual void call_after_solve_8(Vec<Vec<ScalarType> > &vectors_, unsigned nb_thread ) {
         apply_mt( m->elem_list, nb_thread, CallAfterSolve_8(), *this, vectors_);
     }
-    
+
     virtual void call_after_solve_9() {
         if (vectors_assembly== NULL){
             if ( not allocated )
@@ -1717,7 +1718,7 @@ public:
     virtual void call_after_solve_9(Vec<Vec<ScalarType> > &vectors_, unsigned nb_thread ) {
         apply_mt( m->elem_list, nb_thread, CallAfterSolve_9(), *this, vectors_);
     }
-    
+
     virtual void call_after_solve_10() {
         if (vectors_assembly== NULL){
             if ( not allocated )
@@ -1742,7 +1743,7 @@ public:
     virtual void call_after_solve_10(Vec<Vec<ScalarType> > &vectors_, unsigned nb_thread ) {
         apply_mt( m->elem_list, nb_thread, CallAfterSolve_10(), *this, vectors_);
     }
-    
+
     virtual void call_after_solve_11() {
         if (vectors_assembly== NULL){
             if ( not allocated )
@@ -1767,7 +1768,7 @@ public:
     virtual void call_after_solve_11(Vec<Vec<ScalarType> > &vectors_, unsigned nb_thread ) {
         apply_mt( m->elem_list, nb_thread, CallAfterSolve_11(), *this, vectors_);
     }
-    
+
     virtual void call_after_solve_12() {
         if (vectors_assembly== NULL){
             if ( not allocated )
@@ -1792,7 +1793,7 @@ public:
     virtual void call_after_solve_12(Vec<Vec<ScalarType> > &vectors_, unsigned nb_thread ) {
         apply_mt( m->elem_list, nb_thread, CallAfterSolve_12(), *this, vectors_);
     }
-    
+
     virtual void call_after_solve_13() {
         if (vectors_assembly== NULL){
             if ( not allocated )
@@ -1817,7 +1818,7 @@ public:
     virtual void call_after_solve_13(Vec<Vec<ScalarType> > &vectors_, unsigned nb_thread ) {
         apply_mt( m->elem_list, nb_thread, CallAfterSolve_13(), *this, vectors_);
     }
-    
+
     virtual void call_after_solve_14() {
         if (vectors_assembly== NULL){
             if ( not allocated )
@@ -1842,7 +1843,7 @@ public:
     virtual void call_after_solve_14(Vec<Vec<ScalarType> > &vectors_, unsigned nb_thread ) {
         apply_mt( m->elem_list, nb_thread, CallAfterSolve_14(), *this, vectors_);
     }
-    
+
     virtual void call_after_solve_15() {
         if (vectors_assembly== NULL){
             if ( not allocated )
@@ -1867,7 +1868,7 @@ public:
     virtual void call_after_solve_15(Vec<Vec<ScalarType> > &vectors_, unsigned nb_thread ) {
         apply_mt( m->elem_list, nb_thread, CallAfterSolve_15(), *this, vectors_);
     }
-    
+
     virtual void call_after_solve(const Vec<void *> &elem_list) {
         if (vectors_assembly == NULL){
             if ( not allocated )
@@ -2119,6 +2120,7 @@ public:
     virtual void erase_constraints() { constraints.resize(0); }
     virtual void erase_constraints_from(unsigned number) { constraints.resize(number); }
 
+    virtual void     set_indice_noda(unsigned num_node, unsigned index) const { (*indice_noda)[num_node] = index; }
     virtual unsigned get_indice_noda(unsigned num_node) const { return (*indice_noda)[num_node]; }
     virtual unsigned num_in_vec_unknown(const std::string &name) const { return carac.num_in_vec_unknown( name ); }
 
@@ -2163,7 +2165,7 @@ public:
     /*!
         Objectif :
             cette méthode ajoute au vecteur <strong> res </strong>, la contribution au résidu de l'élément <strong> *elem </strong> .
-            
+
         Paramètres :
             * <strong> res </strong> le vecteur contenant le résidu ( sa taille doit être égale au nombre de degrés de liberté du problème),
             * <strong> elem </strong> pointeur sur l'élément dont on veut obtenir la contribution.

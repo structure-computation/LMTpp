@@ -299,7 +299,7 @@ def hooke_matrix_shell(E,nu,h,dim,type_behaviour='membrane'):
 
     else:
         raise 'Shell behaviour only available in 3D'
-    
+
 def trace( sigma ):
     tr = 0
     d = (sigma.size()+1)/2
