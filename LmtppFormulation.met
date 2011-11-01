@@ -277,6 +277,8 @@ class LmtppFormulationAncestor
     
     dS                       := symbol("dS")
     dS_handbook              := symbol("dS_handbook")
+    diF                      := symbol("diF")
+    diF_handbook             := symbol("diF_handbook")
     dN                       := symbol("dN")
     dE                       := symbol("dE")
     pe                       := Ptr[ SymbolicElementAncestor ]()
@@ -305,17 +307,19 @@ class LmtppFormulationAncestor
     K_dV_enr    := Mat[ Op ]()
     K_dV_corr   := Mat[ Op ]()
     
-    K_dG := Mat[ Op ]()
-    K_dN := Mat[ Op ]()
-    K_dS := Vec[ Mat[ Op ] ]()
+    K_dG  := Mat[ Op ]()
+    K_dN  := Mat[ Op ]()
+    K_dS  := Vec[ Mat[ Op ] ]()
+    K_diF := Vec[ Mat[ Op ] ]()
     
     F_dV        := Vec[ Op ]()
     F_dV_enr    := Vec[ Op ]()
     F_dV_corr   := Vec[ Op ]()
     
-    F_dG := Vec[ Op ]()
-    F_dN := Vec[ Op ]()
-    F_dS := Vec[ Vec[ Op ] ]()
+    F_dG  := Vec[ Op ]()
+    F_dN  := Vec[ Op ]()
+    F_dS  := Vec[ Vec[ Op ] ]()
+    F_diF := Vec[ Vec[ Op ] ]()
     
     name := ""
     
@@ -349,6 +353,12 @@ class LmtppFormulationAncestor
     def get_need_skin_assembly
         for n in 0 .. K_dS.size
             if non_null_system( K_dS[n], F_dS[n] )
+                return true
+        return false
+
+    def get_need_internal_face_assembly
+        for n in 0 .. K_diF.size
+            if non_null_system( K_diF[n], F_diF[n] )
                 return true
         return false
     
@@ -559,7 +569,7 @@ class LmtppFormulationAncestor
                             const unsigned *indices ) {
                             pthread_mutex_t* mutex = &f.mutex;
                             #define PNODE(N) elem.node(N)
-                        $( write_mat( K_dS[num_pc], F_dS[num_pc], assemble_mat, assemble_vec, want_nodal=true, want_skin_elem=true, want_elem=true, want_global=true , want_parallele = is_numericaly_enriched ) )
+                        $( write_mat( K_dS[num_pc], F_dS[num_pc], assemble_mat, assemble_vec, want_nodal=true, want_skin_elem=true, want_elem=true, want_global=true , want_parallele=is_numericaly_enriched ) )
                             #undef PNODE
                         }
                     stream <<<<
@@ -575,6 +585,40 @@ class LmtppFormulationAncestor
                             const Number<$num_pc> &num_child,
                             const unsigned *indices ) {
                             add_skin_elem_matrix( f, f.matrices(Number<0>()), f.sollicitation, f.vectors, matrix_is_sym, assemble_mat, assemble_vec, elem, skin_elem, num_child, indices );
+                        }
+                    stream <<<<
+                        // 
+                        template<class TM,class T,bool wont_add_nz,class TK,class TF,class TV,unsigned symm,class T_pos,class ND,class ED,unsigned nim,class ED2,unsigned nim2>
+                        void add_internal_face_matrix(
+                            Formulation<TM,$name,DefaultBehavior,T,wont_add_nz> &f,
+                            TK &K,
+                            TF &F,
+                            TV &vectors,
+                            const Number<symm> &matrix_is_sym,
+                            const Number<$assemble_mat> &assemble_mat,
+                            const Number<$assemble_vec> &assemble_vec,
+                            const Element<$(pe->name),DefaultBehavior,Node<$nb_dim,T_pos,ND>,ED,nim> &elem,
+                            const Element<$(pc->name),DefaultBehavior,Node<$nb_dim,T_pos,ND>,ED2,nim2> &skin_elem,
+                            const Number<$num_pc> &num_child,
+                            const unsigned *indices ) {
+                            pthread_mutex_t* mutex = &f.mutex;
+                            #define PNODE(N) elem.node(N)
+                        $( write_mat( K_diF[num_pc], F_diF[num_pc], assemble_mat, assemble_vec, want_nodal=true, want_skin_elem=true, want_elem=true, want_global=true , want_parallele=is_numericaly_enriched ) )
+                            #undef PNODE
+                        }
+                    stream <<<<
+                        // 
+                        template<class TM,class T,bool wont_add_nz,unsigned symm,class T_pos,class ND,class ED,unsigned nim,class ED2,unsigned nim2>
+                        void add_internal_face_matrix(
+                            Formulation<TM,$name,DefaultBehavior,T,wont_add_nz> &f,
+                            const Number<symm> &matrix_is_sym,
+                            const Number<$assemble_mat> &assemble_mat,
+                            const Number<$assemble_vec> &assemble_vec,
+                            const Element<$(pe->name),DefaultBehavior,Node<$nb_dim,T_pos,ND>,ED,nim> &elem,
+                            const Element<$(pc->name),DefaultBehavior,Node<$nb_dim,T_pos,ND>,ED2,nim2> &skin_elem,
+                            const Number<$num_pc> &num_child,
+                            const unsigned *indices ) {
+                            add_internal_face_matrix( f, f.matrices(Number<0>()), f.sollicitation, f.vectors, matrix_is_sym, assemble_mat, assemble_vec, elem, skin_elem, num_child, indices );
                         }
         stream <<< "} // namespace LMT"
         
@@ -989,32 +1033,53 @@ class LmtppFormulation[ dim ] inherits LmtppFormulationAncestor
         # surf parts
         surf_part := residual.diff( dS )
         surf_part_const_jac := residual_const_jac.diff( dS )
+        internal_surf_part := residual.diff( diF )
+        internal_surf_part_const_jac := residual_const_jac.diff( diF )
         surf_part_handbook := residual.diff( dS_handbook )
+        internal_surf_part_handbook := residual.diff( diF_handbook )
         K_dS.resize( pe_children.size )
         F_dS.resize( pe_children.size )
+        K_diF.resize( pe_children.size )
+        F_diF.resize( pe_children.size )
         for pc_, num_child in pe_children, 0...
             pc := child_cast( pc_ )
             loc_surf_part := surf_part.subs( e.var_inter, e.var_inter_from_child_var_inter( sub_nvi = 1, num_child = num_child, child_var_inter = pc->var_inter ) )
-            degre_poly_child := loc_surf_part.poly_deg( pc->var_inter )
-            if degre_poly_child < 0
+            degre_poly_surf := loc_surf_part.poly_deg( pc->var_inter )
+            if degre_poly_surf < 0
                 loc_surf_part_const_jac := surf_part_const_jac.subs( e.var_inter, e.var_inter_from_child_var_inter( sub_nvi = 1, num_child = num_child, child_var_inter = pc->var_inter ) )
-                degre_poly_child = loc_surf_part_const_jac.poly_deg( pc->var_inter )
+                degre_poly_surf = loc_surf_part_const_jac.poly_deg( pc->var_inter )
+            loc_internal_surf_part := internal_surf_part.subs( e.var_inter, e.var_inter_from_child_var_inter( sub_nvi = 1, num_child = num_child, child_var_inter = pc->var_inter ) )
+            degre_poly_internal_surf := loc_internal_surf_part.poly_deg( pc->var_inter )
+            if degre_poly_internal_surf < 0
+                loc_internal_surf_part_const_jac := internal_surf_part_const_jac.subs( e.var_inter, e.var_inter_from_child_var_inter( sub_nvi = 1, num_child = num_child, child_var_inter = pc->var_inter ) )
+                degre_poly_internal_surf = loc_internal_surf_part_const_jac.poly_deg( pc->var_inter )
             loc_surf_part_handbook := surf_part_handbook.subs( e.var_inter, e.var_inter_from_child_var_inter( sub_nvi = 1, num_child = num_child, child_var_inter = pc->var_inter ) )
+            loc_internal_surf_part_handbook := internal_surf_part_handbook.subs( e.var_inter, e.var_inter_from_child_var_inter( sub_nvi = 1, num_child = num_child, child_var_inter = pc->var_inter ) )
             if integration_type == "bestial_num"
                 loc_surf_part = pc->bestial_num_integration( loc_surf_part , mul_by_jac = true, div_ = 6 )
+                loc_internal_surf_part = pc->bestial_num_integration( loc_internal_surf_part , mul_by_jac = true, div_ = 6 )
                 loc_surf_part_handbook = pc->bestial_num_integration( loc_surf_part_handbook , mul_by_jac = true, div_ = 10 )
+                loc_internal_surf_part_handbook = pc->bestial_num_integration( loc_internal_surf_part_handbook , mul_by_jac = true, div_ = 10 )
             else if integration_type == "gauss_num"
-                loc_surf_part = pc->gauss_num_integration( loc_surf_part, order_diff = degre_poly_child )
+                loc_surf_part = pc->gauss_num_integration( loc_surf_part, order_diff = degre_poly_surf )
+                loc_internal_surf_part = pc->gauss_num_integration( loc_internal_surf_part, order_diff = degre_poly_internal_surf )
                 loc_surf_part_handbook = pc->gauss_num_integration( loc_surf_part_handbook, order_diff = degre_poly_enrichment )
+                loc_internal_surf_part_handbook = pc->gauss_num_integration( loc_internal_surf_part_handbook, order_diff = degre_poly_enrichment )
             else if integration_type == "formal"
-                loc_surf_part = pc->integration( loc_surf_part, order_diff = degre_poly_child )
+                loc_surf_part = pc->integration( loc_surf_part, order_diff = degre_poly_surf )
+                loc_internal_surf_part = pc->integration( loc_internal_surf_part, order_diff = degre_poly_internal_surf )
                 loc_surf_part_handbook = pc->integration( loc_surf_part_handbook, order_diff = degre_poly_enrichment )
+                loc_internal_surf_part_handbook = pc->integration( loc_internal_surf_part_handbook, order_diff = degre_poly_enrichment )
             loc_surf_part += loc_surf_part_handbook
             _compute_KF_from_residual( loc_surf_part, K_dS[ num_child ], F_dS[ num_child ],
                 unk_expr_syms.map( _0->sym ), 
                 unk_test_syms.map( _0->sym )
             )
-            # F_dS[ num_child ].display_tex()
+            loc_internal_surf_part += loc_internal_surf_part_handbook
+            _compute_KF_from_residual( loc_internal_surf_part, K_diF[ num_child ], F_diF[ num_child ],
+                unk_expr_syms.map( _0->sym ), 
+                unk_test_syms.map( _0->sym )
+            )
         
     def make_matrices_enriched( e )
         residual := Op( formulation( e ) )
@@ -1360,6 +1425,7 @@ def write_legacy_lmtpp_carac_formulation_for_element( stream, name_form, fe, dim
     stream <<< "    static const unsigned order_integration = $( max( child_cast( fe->pe )->order_interpolation ) );"
     stream <<< "    static const bool has_elementary_matrix = $( fe->non_null_system( fe->K_dV, fe->F_dV ) );"
     stream <<< "    static const bool has_skin_elementary_matrix = $( fe->need_skin_assembly );"
+    stream <<< "    static const bool has_internal_face_matrix = $( fe->need_internal_face_assembly );"
     stream <<< "    template<class TE,class TF,class TVEVE> static void after_solve(TE &elem,TF &f,TVEVE &vectors,const unsigned *indices) {"
     stream <<< "    #define PNODE(N) elem.node(N)"
     if not fe->is_numericaly_enriched
