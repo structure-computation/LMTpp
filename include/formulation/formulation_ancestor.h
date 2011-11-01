@@ -75,6 +75,8 @@ public:
     virtual void assemble_sollicitations(Mat<ScalarType,Sym<>,SparseLine<> > &K, Vec<ScalarType> &F, Vec<Vec<ScalarType> > &vectors_, bool assemble_mat=true,bool assemble_vec=true) = 0 ;
     virtual void assemble(Mat<ScalarType,Sym<>,SparseLine<> > &K, Vec<ScalarType> &F, Vec<Vec<ScalarType> > &vectors_, bool assemble_mat=true, bool assemble_vec=true)=0;
 
+    virtual void resize() = 0;
+
     virtual void read_material_to_mesh(const XmlNode &) = 0;
 
     virtual void get_precond() = 0;

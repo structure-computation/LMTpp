@@ -201,6 +201,7 @@ private:
             Vec<Vec<unsigned> > v; v.resize( s );
             for(unsigned i=0;i<s;++i) v[i].reserve( 32 );
             apply( f.m->elem_list, GetNZ(), f, v ); // loop on all elements to find non zero terms
+            for(unsigned i=0;i<s;++i) if (v[i].size() == 0) v[i].push_back(i);
             for(unsigned i=0;i<s;++i) std::sort( v[i].begin(), v[i].end() );
 
             //             std::cout << "size -> " << s << std::endl;
@@ -371,6 +372,15 @@ public:
         // matrice allocation
         if(allocate_mat)
             matrices.apply( ResizeMat(), size, *this );
+    }
+    virtual void resize() {
+        unsigned size = 0;
+        unsigned ng = nb_global_unknowns;
+        size += ng;
+        unsigned nn = m->node_list.size() * nb_nodal_unknowns;
+        size += nn;
+
+        matrices.apply( ResizeMat(), size, *this );
     }
     virtual void shift(int nb=1) {
         while (nb--) {
