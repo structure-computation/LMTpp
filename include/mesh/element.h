@@ -363,6 +363,17 @@ template<class TE,class Pvec> bool pos_is_inside( const TE &elem,const Pvec &pos
     return var_inter_is_inside( typename TE::NE(), var_inter, tol );
 }
 
+/*!
+    A faire
+
+
+    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend hugo.leclerc@lmt.ens-cachan.fr
+*/
+template<class TE,class PosNodes,class Pvec > bool is_inside_linear( const TE &elem, const PosNodes &pos_nodes, const Pvec &pos ) {
+    assert( 0 ); // non défini
+    return false;
+}
 
 /*!
     A faire
