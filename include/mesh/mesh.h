@@ -52,7 +52,9 @@ public:
     typedef MeshAncestor<Carac,0,false> MA;
     typedef typename MA::TNode TNode;
     typedef typename MA::TElemList TElemList;
+    typedef typename MA::TElemListPtr  TElemListPtr;
     typedef MeshGenericBis< Carac, true, nb_sub_meshes > TSkin;
+    typedef typename MGB::MG::template SubMesh< 1 >::T::TElemListPtr TSubElemListPtr;
     template<class NE,class BE=DefaultBehavior> struct TElem { typedef typename TElemList::template TElem<NE,BE>::TE TE; };
     /*!
     Type utilisé seulement pour add_element().
@@ -332,6 +334,334 @@ public:
 private:
     unsigned cpt_nodes;
     unsigned date_last_skin_update;
+    
+    
+    /// Ajout des groupes d'elements
+    
+private:
+    // Structure de stockage : nom + list de pointeur sur les elements
+    struct group_elem_ {
+      std::string name;
+      TElemListPtr list_elem;
+      
+      // constructeurs
+      group_elem_() {};
+      group_elem_( std::string nom, TElemListPtr &list ) { name = nom; list_elem = list; };
+      
+      template< class TE >
+      group_elem_( std::string nom, TE* e ) { name = nom; list_elem.push_back(e); };
+      
+      // methode ajout d'un elem dans le groupe ( on rajoute meme si deja dedans : je sais pas comment tester si deja dedans )
+      template< class TE >
+      void add_elem(TE* e) {
+        list_elem.push_back(e);
+      }
+      
+      // methode pour changer le nom du groupe
+      void change_name( std::string &nom) {
+        name = nom;       
+      }       
+    };
+    
+    // Methode de creation d'un groupe
+    template< class TE>
+    void new_groupe ( std::string nom, TE* e ) {
+      group_elem_ nw_group(nom,e);
+      list_group_elem.resize( list_group_elem.size() + 1 );
+      list_group_elem.push_back(nw_group);
+    };
+    
+    // helper pour la recherche des groupes
+    template<class TG>
+    struct look_for_group {
+      bool operator()( TG &group, std::string name ) {
+          if (group.name == name) {
+            groupe = & group;
+            return true;
+          }
+          else
+            return false;
+      }
+     TG* groupe;
+    };
+    
+public: 
+    // stockage des groupes
+    Vec<group_elem_> list_group_elem;
+    
+    // methode d'ajout d'un groupe d'element entier
+    void add_group_elem (std::string &name, TElemListPtr &list) {
+      look_for_group<group_elem_> lkforgrp;
+      if ( find(list_group_elem, lkforgrp, name) ) {
+        std::cerr << "Ce groupe ("<< name <<") existe deja ! ! !" << std::endl ;
+      } else {
+        group_elem_ grrrrrrr(name,list);
+        list_group_elem.resize( list_group_elem.size() + 1 );
+        list_group_elem.push_back(grrrrrrr);
+      }
+    }
+    
+    // methode d'ajout d'un element a un groupe
+    template< class TE >
+    void add_elem_to_group (std::string &name, TE* e) {
+      
+      // le groupe existe-t-il ? Si oui, on rajoute l'element
+      look_for_group<group_elem_> lkforgrp;
+      if ( find(list_group_elem, lkforgrp, name) ) {
+        lkforgrp.groupe->add_elem(e);
+        
+      // sinon on le creer
+      } else {
+        new_groupe(name, e);
+      }
+    }
+    
+    // methode pour l'ajout d'element a plusieurs groupes
+    template< class TE >
+    void add_elem_to_group ( Vec<double> Tags, TE* e) {   
+      for (unsigned i=0; i<Tags.size(); i++) {
+        std::string tmp = to_string(Tags[i]);
+        add_elem_to_group(tmp, e);
+      }
+    }
+    
+    // methode appel groupes : !! Attention !! resort le groupe et pas la liste d'element : utiliser de preference la methode suivante group_elem()
+    group_elem_* get_group_elem(std::string &name) { 
+      look_for_group<group_elem_> lkforgrp;
+      if ( ! find(list_group_elem, lkforgrp, name) ) { std::cerr << "Ce groupe ("<< name <<") n'existe pas" << std::endl; return NULL;};
+      return ((lkforgrp.groupe));
+    }    
+    
+    // methode pour l'appel des groupes : on fait m.group_elem("le_nom") et ca sort une TListPtr
+    TElemListPtr group_elem(std::string &name) { 
+      look_for_group<group_elem_> lkforgrp;
+      if ( ! find(list_group_elem, lkforgrp, name) ) { std::cerr << "Ce groupe ("<< name <<") n'existe pas" << std::endl ;};
+      return (lkforgrp.groupe->list_elem);
+    }
+    
+    // methode donnant la liste des groupes d'elements disponibles pour le maillage
+    Vec< std::string > get_group_elem_list () {
+      std::string la_liste ="";
+      Vec< std::string > liste;
+      for (int i=0;i<list_group_elem.size();i++) {
+        la_liste += to_string(list_group_elem[i].name) + " " ;
+        liste.push_back(to_string(list_group_elem[i].name));
+      }
+      std::cout << "Les groupes disponibles sont : " << la_liste << std::endl;
+      return liste;
+    }
+    
+   
+	/// Ajout des groupes d'elements surfacique (dans le submesh)
+    
+private:
+    // Structure de stockage : nom + list de pointeur sur les elements
+    struct group_sub_elem_ {
+		std::string name;
+		TSubElemListPtr list_elem;
+		
+		// constructeurs
+		group_sub_elem_() {};
+		group_sub_elem_( std::string nom, TSubElemListPtr &list ) { name = nom; list_elem = list; };
+		
+		template< class TE >
+		group_sub_elem_( std::string nom, TE* e ) { name = nom; list_elem.push_back(e); };
+		
+		// methode ajout d'un elem dans le groupe ( on rajoute meme si deja dedans : je sais pas comment tester si deja dedans )
+		template< class TE >
+		void add_elem(TE* e) {
+			list_elem.push_back(e);
+		}
+		
+		// methode pour changer le nom du groupe
+		void change_name( std::string &nom) {
+			name = nom;       
+		}       
+    };
+    
+    // Methode de creation d'un groupe
+    template< class TE>
+    void new_submesh_groupe ( std::string nom, TE* e ) {
+		group_sub_elem_ nw_group(nom,e);
+		list_group_sub_elem.resize( list_group_sub_elem.size() + 1 );
+		list_group_sub_elem.push_back(nw_group);
+    };
+    
+public: 
+    // stockage des groupes
+    Vec<group_sub_elem_> list_group_sub_elem;
+    
+    // methode d'ajout d'un groupe d'element entier
+    void add_group_elem (std::string &name, TSubElemListPtr &list) {
+		look_for_group<group_sub_elem_> lkforgrp;
+		if ( find(list_group_sub_elem, lkforgrp, name) ) {
+			std::cerr << "Ce groupe ("<< name <<") existe deja ! ! !" << std::endl ;
+		} else {
+			group_elem_ grrrrrrr(name,list);
+			list_group_sub_elem.resize( list_group_sub_elem.size() + 1 );
+			list_group_sub_elem.push_back(grrrrrrr);
+		}
+    }
+    
+    // methode d'ajout d'un element a un groupe
+    template< class TE >
+    void add_sub_elem_to_group (std::string &name, TE* e) {
+		if (e != NULL) {
+            // le groupe existe-t-il ? Si oui, on rajoute l'element
+            look_for_group<group_sub_elem_> lkforgrp;
+            if ( find(list_group_sub_elem, lkforgrp, name) ) {
+                lkforgrp.groupe->add_elem(e);
+			
+            // sinon on le creer
+            } else {
+                new_submesh_groupe(name, e);
+            }
+        } else {
+            std::cout << "ACHTUNG, l'element que vous voulez ajouter pointe sur NULL (il n'a donc pas ete trouve lors de la construction du groupe)" << std::endl;
+        }
+
+    }
+    
+    // methode pour l'ajout d'element a plusieurs groupes
+    template< class TE >
+    void add_sub_elem_to_group ( Vec<double> Tags, TE* e) {   
+		for (unsigned i=0; i<Tags.size(); i++) {
+			std::string tmp = to_string(Tags[i]);
+			add_sub_elem_to_group(tmp, e);
+		}
+    }
+    
+    // methode appel groupes : !! Attention !! resort le groupe et pas la liste d'element : utiliser de preference la methode suivante group_elem()
+    group_sub_elem_* get_group_sub_elem(std::string &name) { 
+		look_for_group<group_sub_elem_> lkforgrp;
+		if ( ! find(list_group_sub_elem, lkforgrp, name) ) { std::cerr << "Ce groupe ("<< name <<") n'existe pas" << std::endl; return NULL;};
+		return ((lkforgrp.groupe));
+    }    
+    
+    // methode pour l'appel des groupes : on fait m.group_elem("le_nom") et ca sort une TListPtr
+    TSubElemListPtr group_sub_elem(std::string &name) { 
+		look_for_group<group_sub_elem_> lkforgrp;
+		if ( ! find(list_group_sub_elem, lkforgrp, name) ) { std::cerr << "Ce groupe ("<< name <<") n'existe pas" << std::endl ;};
+		return (lkforgrp.groupe->list_elem);
+    }
+    
+    // methode donnant la liste des groupes d'elements disponibles pour le maillage
+    Vec< std::string > get_group_sub_elem_list () {
+		std::string la_liste ="";
+		Vec< std::string > liste;
+		for (int i=0;i<list_group_sub_elem.size();i++) {
+			la_liste += to_string(list_group_sub_elem[i].name) + " " ;
+			liste.push_back(to_string(list_group_sub_elem[i].name));
+		}
+		std::cout << "Les groupes disponibles sont : " << la_liste << std::endl;
+		return liste;
+    }
+    
+	
+	
+        /// Ajout des groupes de noeuds
+    
+private:
+    // Structure de stockage : nom + list de pointeur sur les noeuds
+    struct group_node_ {
+      std::string name;
+      Vec< TNode* > list_node;
+      
+      group_node_() {};
+      group_node_( std::string nom, Vec< TNode* > &list ) { name = nom; list_node = list; };
+      
+      template< class TN >
+      group_node_( std::string nom, TN* n ) { name = nom; list_node.push_back(n); };
+      
+      // methode ajout d'un noeud dans le groupe (on l'ajoute pas s'il existe deja)
+      template< class TN >
+      void add_node(TN* n) {
+        
+        for (unsigned i=0; i<list_node.size(); i++) {
+          if ( n == list_node[i] )
+            return;
+        }
+        
+        list_node.push_back(n);
+      }   
+      
+      unsigned size() { return list_node.size() ; }
+      
+      // methode pour changer le nom du groupe
+      void change_name( std::string &nom) {
+        name = nom;       
+      }  
+    };
+    
+    // Methode de creation d'un groupe
+    template< class TN>
+    void new_groupe_node ( std::string nom, TN* n ) {
+      group_node_ nw_group(nom,n);
+      list_group_node.push_back(nw_group);
+    };
+    
+public: 
+    // stockage des groupes
+    Vec<group_node_> list_group_node;
+    
+    // methode d'ajout d'un groupe de noeuds
+    void add_group_node (std::string &name, Vec< TNode* > &list) {
+      look_for_group<group_node_> lkforgrpnd;
+      if ( find(list_group_node, lkforgrpnd, name) ) {
+        std::cerr << "Ce groupe ("<< name <<") existe deja ! ! !" << std::endl ;
+      } else {
+        group_node_ grrrrrrr(name,list);
+        list_group_node.resize( list_group_node.size() + 1 );
+        list_group_node.push_back(grrrrrrr);
+      }
+    }
+    
+    // methode d'ajout d'un noeuds a un groupe
+    template< class TN >
+    void add_node_to_group (std::string &name, TN* n) {
+      
+      // le groupe existe-t-il ? Si oui, on rajoute l'element
+      look_for_group<group_node_> lkforgrp;
+      if ( find(list_group_node, lkforgrp, name) ) {
+        lkforgrp.groupe->add_node(n);
+        
+      // sinon on le creer
+      } else {
+        new_groupe_node(name, n);
+      }
+    }
+    
+    // methode pour l'ajout d'un noeuds a plusieurs groupes
+    template< class TN >
+    void add_node_to_group ( Vec<double> Tags, TN* n) {   
+      for (unsigned i=0; i<Tags.size(); i++) {
+        std::string tmp = to_string(Tags[i]);
+        add_node_to_group(tmp, n);
+      }
+    }
+    
+    // methode appel groupes : !! Attention !! resort le groupe et pas la liste de noeuds : utiliser de preference la methode suivante group_node()
+    group_node_* get_group_node(std::string &name) { 
+      look_for_group<group_node_> lkforgrp;
+      if ( ! find(list_group_node, lkforgrp, name) ) { std::cerr << "Ce groupe ("<< name <<") n'existe pas" << std::endl ; return NULL;};
+      return ((lkforgrp.groupe));
+    }   
+    
+    // methode pour l'appel des groupes : on fait m.group_node("le_nom") et ca sort un Vec< TNode* > 
+    Vec<group_node_> group_node(std::string &name) { 
+      look_for_group<group_node_> lkforgrpnd;
+      if ( ! find(list_group_node, lkforgrpnd, name) ) { std::cerr << "Ce groupe ("<< name <<") n'existe pas" << std::endl ;};
+      return (lkforgrpnd.groupe->list_elem);
+    }
+    
+    // methode donnant la liste des groupes de noeuds disponibles pour le maillage
+    void get_group_node_list () {
+      std::string la_liste ="";
+      for (int i=0;i<list_group_node.size();i++) {
+        la_liste += to_string(list_group_node[i].name)+ " (" + to_string(list_group_node[i].size()) + " noeuds)  ;"  ;
+      }
+      std::cout << "Les groupes disponibles sont : " << la_liste << std::endl;
+    }
 };
 
 namespace LMTPRIVATE {

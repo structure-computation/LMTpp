@@ -126,6 +126,8 @@ public:
         indice_glob = &indice_glob_internal;
         f_nodal = &f_nodal_internal;
         offset_lagrange_multipliers = 0;
+        
+        is_numerically_enriched = false;
     }
     virtual std::string get_name() const { return Carac::name(); }
     virtual void set_mesh( void *m_ ) { m = reinterpret_cast<TM *>( m_ ); }
@@ -319,6 +321,7 @@ public:
         mat_has_been_allocated_with_symamd = this->want_amd;
         mat_has_been_allocated_with_symrcm = this->want_rcm;
 
+        unsigned di = m->dim;
         unsigned size = 0;
         // global unknowns
         unsigned ng = nb_global_unknowns;
@@ -331,6 +334,10 @@ public:
         unsigned nb_unknowns_for_type[ TM::TElemList::nb_sub_type ];
         m->elem_list.get_sizes( nb_elem_of_type );
         TM::TElemList::apply_static_with_n( GetNbUnknownByElement(), nb_elem_of_type, size, nb_unknowns_for_type );
+//         if (is_numerically_enriched) {
+//             for(int i=0;i<m->elem_list.size();i++)
+//                 size += (interface.elem_enrichment_ID[i].size() - 1 )*3;
+//         }
 
         //
         offset_lagrange_multipliers = size;
@@ -350,10 +357,21 @@ public:
         unsigned nb_unk_elem = 0;
 
         for(unsigned i=0,ne=0;i<TM::TElemList::nb_sub_type;++i) {
-            indice_elem[i] = range( ne, ne + nb_elem_of_type[i] ) * nb_unknowns_for_type[i] + ind;
-            ne += nb_elem_of_type[i];
-            ind += nb_unknowns_for_type[i] * nb_elem_of_type[i];
-            nb_unk_elem += nb_unknowns_for_type[i];
+//             if (is_numerically_enriched) {
+//                 indice_elem[i].resize(m->elem_list.size());
+//                 unsigned sum = 0;
+//                 for (int j=0;j<m->elem_list.size();++j) {
+//                     indice_elem[i][j] = sum + ind;
+//                     sum +=(interface.elem_enrichment_ID[j].size())*3;
+//                 }
+//                 ind += sum * nb_elem_of_type[i];
+//                 nb_unk_elem += sum;
+//             } else {
+                indice_elem[i] = range( ne, ne + nb_elem_of_type[i] ) * nb_unknowns_for_type[i] + ind;
+                ne += nb_elem_of_type[i];
+                ind += nb_unknowns_for_type[i] * nb_elem_of_type[i];
+                nb_unk_elem += nb_unknowns_for_type[i];
+//             }
         }
 
         if ( this->want_amd ) {
@@ -615,6 +633,8 @@ public:
             get_initial_conditions();
             shift();
         }
+        
+        pthread_mutex_init(&mutex, NULL);
 
         if ( assemble_vec ) // preinitialisation
             sollicitation.set(ScalarType(0));
@@ -644,11 +664,13 @@ public:
                 add_global_matrix( *this, matrices(Number<0>()), sollicitation, vectors, Number<MatCarac<0>::symm>(), Number<false>(), Number<true>(), *indice_glob ); // global
                 apply( m->node_list, AssembleNode<false,true >(), *indice_noda, *this ); // nodal
                 apply( m->elem_list, AssembleElem<false,true >(), *indice_noda, indice_elem, *this ); // element (and skin elements)
+//                 apply_mt( m->elem_list, this->nb_threads_assemble_matrix, AssembleElem<false,true >(), *indice_noda, indice_elem, *this ); // element (and skin elements)
             }
             else {
                 add_global_matrix( *this, matrices(Number<0>()), sollicitation, vectors, Number<MatCarac<0>::symm>(), Number<false>(), Number<false>(), *indice_glob ); // global
                 apply( m->node_list, AssembleNode<false,false>(), *indice_noda, *this ); // nodal
                 apply( m->elem_list, AssembleElem<false,false>(), *indice_noda, indice_elem, *this ); // element (and skin elements)
+//                 apply_mt( m->elem_list, this->nb_threads_assemble_matrix, AssembleElem<false,false>(), *indice_noda, indice_elem, *this ); // element (and skin elements)
             }
         }
     }
@@ -823,6 +845,7 @@ public:
             AssembleElem<false,true > toto;
             toto.vectors = &vectors_;
             apply( m->elem_list, toto, *this , K, F ); // element (and skin elements)
+//             apply_mt( m->elem_list, this->nb_threads_assemble_matrix, toto, *this, K, F );
         }
     }
     virtual void read_material_to_mesh( const XmlNode &n ){
@@ -2277,6 +2300,15 @@ public:
     Vec< Vec < typename TM::TElemList::TListPtr > > Neighbor_table ;          /// Table of neighbor-element for each elem from m_macro in m_micro
     Vec<ScalarType>* f_nodal;
 
+    bool is_numerically_enriched;                                /// Number of numerical enrichment
+
+    pthread_mutex_t mutex;    /// autoverrou pour le multithread
+    
+    /// instance de l'interface micro-macro et des operateurs _values_ (c.f. Interface_micro_macro.h)
+    //Interface_micro_macro<TM,TM::dim,typename TM::Tpos> interface;
+    
+    static const bool is_global;
+    
 private:
     Vec<unsigned> indice_elem_internal[ TM::TElemList::nb_sub_type ];
     Vec<unsigned> indice_noda_internal;
