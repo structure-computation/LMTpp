@@ -274,14 +274,24 @@ class LmtppFormulationAncestor
     dV_handbook              := symbol("dV_handbook")
     dV_enr                   := symbol("dV_enr")
     dV_corr                  := symbol("dV_corr")
-    dV_coupl                  := symbol("dV_coupl")
+    dV_coupl                 := symbol("dV_coupl")
+    dV_eig_A                 := symbol("dV_eig_A")
+    dV_eig_B                 := symbol("dV_eig_B")
     
     dS                       := symbol("dS")
     dS_handbook              := symbol("dS_handbook")
+    dS_eig_A                 := symbol("dS_eig_A")
+    dS_eig_B                 := symbol("dS_eig_B")
     diF                      := symbol("diF")
     diF_handbook             := symbol("diF_handbook")
+    diF_eig_A                := symbol("diF_eig_A")
+    diF_eig_B                := symbol("diF_eig_B")
     dN                       := symbol("dN")
+    dN_eig_A                 := symbol("dN_eig_A")
+    dN_eig_B                 := symbol("dN_eig_B")
     dE                       := symbol("dE")
+    dE_eig_A                 := symbol("dE_eig_A")
+    dE_eig_B                 := symbol("dE_eig_B")
     pe                       := Ptr[ SymbolicElementAncestor ]()
     pe_children              := Vec[ Ptr[ SymbolicElementAncestor ] ]()
     
@@ -313,6 +323,18 @@ class LmtppFormulationAncestor
     K_dN  := Mat[ Op ]()
     K_dS  := Vec[ Mat[ Op ] ]()
     K_diF := Vec[ Mat[ Op ] ]()
+
+    A_dV        := Mat[ Op ]()
+    A_dG  := Mat[ Op ]()
+    A_dN  := Mat[ Op ]()
+    A_dS  := Vec[ Mat[ Op ] ]()
+    A_diF := Vec[ Mat[ Op ] ]()
+
+    B_dV        := Mat[ Op ]()
+    B_dG  := Mat[ Op ]()
+    B_dN  := Mat[ Op ]()
+    B_dS  := Vec[ Mat[ Op ] ]()
+    B_diF := Vec[ Mat[ Op ] ]()
     
     F_dV        := Vec[ Op ]()
     F_dV_enr    := Vec[ Op ]()
@@ -327,7 +349,7 @@ class LmtppFormulationAncestor
     name := ""
     
     # Is a variable numerically enriched
-    is_numericaly_enriched := false
+    is_numerically_enriched := false
 
     virtual def formulation_init( e ) pertinence 0
         pass
@@ -438,7 +460,7 @@ class LmtppFormulationAncestor
         return res
         
     #
-    def write_mat( K, F, assemble_mat, assemble_vec, want_nodal, want_skin_elem, want_elem, want_global , want_assign = false, want_parallele = false )
+    def write_mat( K, F, assemble_mat, assemble_vec, want_nodal, want_skin_elem, want_elem, want_global, want_assign = false, want_parallele = false )
         #
         num_inds := Vec[Int32]()
         off_inds := Vec[Int32]()
@@ -469,7 +491,7 @@ class LmtppFormulationAncestor
                     num_inds.push_back( num_ind )
                     off_inds.push_back( s->off_ind )
                     has_unknown_this_kind = true
-                    if is_numericaly_enriched
+                    if is_numerically_enriched
                         corr_off_inds.push_back(symbol("6*id"))
                     else
                         corr_off_inds.push_back(symbol("0"))
@@ -482,7 +504,7 @@ class LmtppFormulationAncestor
                     num_inds.push_back( num_ind )
                     off_inds.push_back( s->off_ind )
                     has_unknown_this_kind = true
-                    if is_numericaly_enriched
+                    if is_numerically_enriched
                         corr_off_inds.push_back(symbol("6*id"))
                     else
                         corr_off_inds.push_back(symbol("0"))
@@ -508,8 +530,81 @@ class LmtppFormulationAncestor
                             cw.add( "K(indices[$(num_inds[r])]+$(off_inds[r])+$(corr_off_inds[r]),indices[$(num_inds[c])]+$(off_inds[c])+$(corr_off_inds[c]))", K[r,c] * ( 1 - symm * ( c > r ) ), add )
         # info time_of_day_in_sec() - t0
         return cw.to_string()
- 
-    def write_mat_with_cond( K, F, assemble_mat, assemble_vec, want_nodal, want_skin_elem, want_elem, want_global , want_assign = false, want_parallele = false, line_range_min = 0, line_range_max = F.size )
+
+    #
+    def write_mat_eig( A, B, assemble_mat, want_nodal, want_skin_elem, want_elem, want_global, want_assign = false, want_parallele = false )
+        #
+        num_inds := Vec[Int32]()
+        off_inds := Vec[Int32]()
+        corr_off_inds := Vec[Op]() # pour l'enrichissement
+        num_ind  := 0
+        if want_nodal
+            for s in unk_expr_syms
+                if s->node >= 0
+                    num_inds.push_back( s->node )
+                    off_inds.push_back( s->off_ind )
+                    corr_off_inds.push_back(symbol("0"))
+            num_ind += pe->nb_nodes_
+        
+        if want_skin_elem
+            has_unknown_this_kind := false
+            for s in unk_expr_syms
+                if s->skin >= 0
+                    num_inds.push_back( num_ind )
+                    off_inds.push_back( s->off_ind )
+                    has_unknown_this_kind = true
+                    corr_off_inds.push_back(symbol("0"))
+            num_ind += has_unknown_this_kind
+        
+        if want_elem
+            has_unknown_this_kind := false
+            for s in unk_expr_syms
+                if s->elem >= 0
+                    num_inds.push_back( num_ind )
+                    off_inds.push_back( s->off_ind )
+                    has_unknown_this_kind = true
+                    if is_numerically_enriched
+                        corr_off_inds.push_back(symbol("6*id"))
+                    else
+                        corr_off_inds.push_back(symbol("0"))
+            num_ind += has_unknown_this_kind
+                
+        if want_global
+            has_unknown_this_kind := false
+            for s in unk_expr_syms
+                if s->glob >= 0
+                    num_inds.push_back( num_ind )
+                    off_inds.push_back( s->off_ind )
+                    has_unknown_this_kind = true
+                    if is_numerically_enriched
+                        corr_off_inds.push_back(symbol("6*id"))
+                    else
+                        corr_off_inds.push_back(symbol("0"))
+            num_ind += has_unknown_this_kind
+            
+        #
+        symm := symbol("symm")
+        cw := CodeWriterAlt("T") # Alt
+        cw.make_cw_parallele( want_parallele )
+        # t0 := time_of_day_in_sec()
+        for r in 0 .. A.nb_rows
+            if assemble_mat
+                for c in 0 .. A.nb_cols
+                    if not assumed( A[r,c] == 0 )
+                        if want_assign
+                            cw.add( "A(indices[$(num_inds[r])]+$(off_inds[r])+$(corr_off_inds[r]),indices[$(num_inds[c])]+$(off_inds[c])+$(corr_off_inds[c]))", A[r,c] * ( 1 - symm * ( c > r ) ), reassign )
+                        else
+                            cw.add( "A(indices[$(num_inds[r])]+$(off_inds[r])+$(corr_off_inds[r]),indices[$(num_inds[c])]+$(off_inds[c])+$(corr_off_inds[c]))", A[r,c] * ( 1 - symm * ( c > r ) ), add )
+                    if not assumed( B[r,c] == 0 )
+                        if want_assign
+                            cw.add( "B(indices[$(num_inds[r])]+$(off_inds[r])+$(corr_off_inds[r]),indices[$(num_inds[c])]+$(off_inds[c])+$(corr_off_inds[c]))", B[r,c] * ( 1 - symm * ( c > r ) ), reassign )
+                        else
+                            cw.add( "B(indices[$(num_inds[r])]+$(off_inds[r])+$(corr_off_inds[r]),indices[$(num_inds[c])]+$(off_inds[c])+$(corr_off_inds[c]))", B[r,c] * ( 1 - symm * ( c > r ) ), add )
+        # info time_of_day_in_sec() - t0
+        return cw.to_string()
+
+    # 
+    def write_mat_with_cond( K, F, assemble_mat, assemble_vec, want_nodal, want_skin_elem, want_elem, want_global, want_assign = false, want_parallele = false, line_range_min = 0, line_range_max = F.size )
         #
         num_inds := Vec[Int32]()
         off_inds := Vec[Int32]()
@@ -540,7 +635,7 @@ class LmtppFormulationAncestor
                     num_inds.push_back( num_ind )
                     off_inds.push_back( s->off_ind )
                     has_unknown_this_kind = true
-                    if is_numericaly_enriched
+                    if is_numerically_enriched
                         corr_off_inds.push_back(symbol("id_offset"))
                     else
                         corr_off_inds.push_back(symbol("0"))
@@ -553,7 +648,7 @@ class LmtppFormulationAncestor
                     num_inds.push_back( num_ind )
                     off_inds.push_back( s->off_ind )
                     has_unknown_this_kind = true
-                    if is_numericaly_enriched
+                    if is_numerically_enriched
                         corr_off_inds.push_back(symbol("id_offset")) 
                     else
                         corr_off_inds.push_back(symbol("0"))
@@ -580,7 +675,8 @@ class LmtppFormulationAncestor
         # info time_of_day_in_sec() - t0
         return cw.to_string()
         
-    def write_mat_zero( K, F, assemble_mat, assemble_vec, want_nodal, want_skin_elem, want_elem, want_global , want_parallele = false)
+    #
+    def write_mat_zero( K, F, assemble_mat, assemble_vec, want_nodal, want_skin_elem, want_elem, want_global, want_parallele = false )
         #
         num_inds := Vec[Int32]()
         off_inds := Vec[Int32]()
@@ -611,7 +707,7 @@ class LmtppFormulationAncestor
                     num_inds.push_back( num_ind )
                     off_inds.push_back( s->off_ind )
                     has_unknown_this_kind = true
-                    if is_numericaly_enriched
+                    if is_numerically_enriched
                         corr_off_inds.push_back(symbol("6*id"))
                     else
                         corr_off_inds.push_back(symbol("0"))
@@ -624,7 +720,7 @@ class LmtppFormulationAncestor
                     num_inds.push_back( num_ind )
                     off_inds.push_back( s->off_ind )
                     has_unknown_this_kind = true
-                    if is_numericaly_enriched
+                    if is_numerically_enriched
                         corr_off_inds.push_back(symbol("6*id"))
                     else
                         corr_off_inds.push_back(symbol("0"))
@@ -652,7 +748,7 @@ class LmtppFormulationAncestor
         appel_enr := ""
         appel_corr:= ""
         sum_K   :=""
-        if is_numericaly_enriched
+        if is_numerically_enriched
             appel_K = "TK K_tmp; K_tmp.resize( f.matrices(Number<0>()).nb_rows() ); K_tmp.clear();"
             appel_F = "TF F_tmp; F_tmp.resize( f.sollicitation.size() ); F_tmp.set(0.);"
             appel_enr = "add_elem_matrix_enriched( f, K_tmp, F_tmp, f.vectors, matrix_is_sym, assemble_mat, assemble_vec, elem, indices );"
@@ -676,7 +772,7 @@ class LmtppFormulationAncestor
                         const unsigned *indices ) {
                         pthread_mutex_t* mutex = &f.mutex;
                         #define PNODE(N) elem.node(N)
-                    $( write_mat( K_dV, F_dV, assemble_mat, assemble_vec, want_nodal=true, want_skin_elem=true, want_elem=true, want_global=true , want_parallele=is_numericaly_enriched ) )
+                    $( write_mat( K_dV, F_dV, assemble_mat, assemble_vec, want_nodal=true, want_skin_elem=true, want_elem=true, want_global=true, want_parallele=is_numerically_enriched ) )
                     $(appel_K)
                     $(appel_F)
                     $(appel_enr)
@@ -695,7 +791,6 @@ class LmtppFormulationAncestor
                         add_elem_matrix( f, f.matrices(Number<0>()), f.sollicitation, f.vectors, matrix_is_sym, assemble_mat, assemble_vec, elem, indices );
                     }
                 
-        #
                 for pc, num_pc in pe_children, 0...
                     stream <<<<
                         // 
@@ -714,7 +809,7 @@ class LmtppFormulationAncestor
                             const unsigned *indices ) {
                             pthread_mutex_t* mutex = &f.mutex;
                             #define PNODE(N) elem.node(N)
-                        $( write_mat( K_dS[num_pc], F_dS[num_pc], assemble_mat, assemble_vec, want_nodal=true, want_skin_elem=true, want_elem=true, want_global=true , want_parallele=is_numericaly_enriched ) )
+                        $( write_mat( K_dS[num_pc], F_dS[num_pc], assemble_mat, assemble_vec, want_nodal=true, want_skin_elem=true, want_elem=true, want_global=true, want_parallele=is_numerically_enriched ) )
                             #undef PNODE
                         }
                     stream <<<<
@@ -748,7 +843,7 @@ class LmtppFormulationAncestor
                             const unsigned *indices ) {
                             pthread_mutex_t* mutex = &f.mutex;
                             #define PNODE(N) elem.node(N)
-                        $( write_mat( K_diF[num_pc], F_diF[num_pc], assemble_mat, assemble_vec, want_nodal=true, want_skin_elem=true, want_elem=true, want_global=true , want_parallele=is_numericaly_enriched ) )
+                        $( write_mat( K_diF[num_pc], F_diF[num_pc], assemble_mat, assemble_vec, want_nodal=true, want_skin_elem=true, want_elem=true, want_global=true, want_parallele=is_numerically_enriched ) )
                             #undef PNODE
                         }
                     stream <<<<
@@ -765,6 +860,100 @@ class LmtppFormulationAncestor
                             const unsigned *indices ) {
                             add_internal_face_matrix( f, f.matrices(Number<0>()), f.sollicitation, f.vectors, matrix_is_sym, assemble_mat, assemble_vec, elem, skin_elem, num_child, indices );
                         }
+        for assemble_mat in 0 .. 2
+            stream <<<<
+                // 
+                template<class TM,class T,bool wont_add_nz,class TK,class TV,unsigned symm,class T_pos,class ND,class ED,unsigned nim>
+                void add_elem_matrix(
+                    Formulation<TM,$name,DefaultBehavior,T,wont_add_nz> &f,
+                    TK &A,
+                    TK &B,
+                    TV &vectors,
+                    const Number<symm> &matrix_is_sym,
+                    const Number<$assemble_mat> &assemble_mat,
+                    const Element<$(pe->name),DefaultBehavior,Node<$nb_dim,T_pos,ND>,ED,nim> &elem,
+                    const unsigned *indices ) {
+                    pthread_mutex_t* mutex = &f.mutex;
+                    #define PNODE(N) elem.node(N)
+                $( write_mat_eig( A_dV, B_dV, assemble_mat, want_nodal=true, want_skin_elem=true, want_elem=true, want_global=true, want_parallele=is_numerically_enriched ) )
+                    #undef PNODE
+                }
+                //
+                template<class TM,class T,bool wont_add_nz,unsigned symm,class T_pos,class ND,class ED,unsigned nim>
+                void add_elem_matrix(
+                    Formulation<TM,$name,DefaultBehavior,T,wont_add_nz> &f,
+                    const Number<symm> &matrix_is_sym,
+                    const Number<$assemble_mat> &assemble_mat,
+                    const Element<$(pe->name),DefaultBehavior,Node<$nb_dim,T_pos,ND>,ED,nim> &elem,
+                    const unsigned *indices ) {
+                    add_elem_matrix( f, f.matrices(Number<1>()), f.matrices(Number<2>()), f.vectors, matrix_is_sym, assemble_mat, elem, indices );
+                }
+            
+            for pc, num_pc in pe_children, 0...
+                stream <<<<
+                    // 
+                    template<class TM,class T,bool wont_add_nz,class TK,class TV,unsigned symm,class T_pos,class ND,class ED,unsigned nim,class ED2,unsigned nim2>
+                    void add_skin_elem_matrix(
+                        Formulation<TM,$name,DefaultBehavior,T,wont_add_nz> &f,
+                        TK &A,
+                        TK &B,
+                        TV &vectors,
+                        const Number<symm> &matrix_is_sym,
+                        const Number<$assemble_mat> &assemble_mat,
+                        const Element<$(pe->name),DefaultBehavior,Node<$nb_dim,T_pos,ND>,ED,nim> &elem,
+                        const Element<$(pc->name),DefaultBehavior,Node<$nb_dim,T_pos,ND>,ED2,nim2> &skin_elem,
+                        const Number<$num_pc> &num_child,
+                        const unsigned *indices ) {
+                        pthread_mutex_t* mutex = &f.mutex;
+                        #define PNODE(N) elem.node(N)
+                    $( write_mat_eig( A_dS[num_pc], B_dS[num_pc], assemble_mat, want_nodal=true, want_skin_elem=true, want_elem=true, want_global=true, want_parallele=is_numerically_enriched ) )
+                        #undef PNODE
+                    }
+                stream <<<<
+                    // 
+                    template<class TM,class T,bool wont_add_nz,unsigned symm,class T_pos,class ND,class ED,unsigned nim,class ED2,unsigned nim2>
+                    void add_skin_elem_matrix(
+                        Formulation<TM,$name,DefaultBehavior,T,wont_add_nz> &f,
+                        const Number<symm> &matrix_is_sym,
+                        const Number<$assemble_mat> &assemble_mat,
+                        const Element<$(pe->name),DefaultBehavior,Node<$nb_dim,T_pos,ND>,ED,nim> &elem,
+                        const Element<$(pc->name),DefaultBehavior,Node<$nb_dim,T_pos,ND>,ED2,nim2> &skin_elem,
+                        const Number<$num_pc> &num_child,
+                        const unsigned *indices ) {
+                        add_skin_elem_matrix( f, f.matrices(Number<1>()), f.matrices(Number<2>()), f.vectors, matrix_is_sym, assemble_mat, elem, skin_elem, num_child, indices );
+                    }
+                stream <<<<
+                    // 
+                    template<class TM,class T,bool wont_add_nz,class TK,class TV,unsigned symm,class T_pos,class ND,class ED,unsigned nim,class ED2,unsigned nim2>
+                    void add_internal_face_matrix(
+                        Formulation<TM,$name,DefaultBehavior,T,wont_add_nz> &f,
+                        TK &A,
+                        TK &B,
+                        TV &vectors,
+                        const Number<symm> &matrix_is_sym,
+                        const Number<$assemble_mat> &assemble_mat,
+                        const Element<$(pe->name),DefaultBehavior,Node<$nb_dim,T_pos,ND>,ED,nim> &elem,
+                        const Element<$(pc->name),DefaultBehavior,Node<$nb_dim,T_pos,ND>,ED2,nim2> &skin_elem,
+                        const Number<$num_pc> &num_child,
+                        const unsigned *indices ) {
+                        pthread_mutex_t* mutex = &f.mutex;
+                        #define PNODE(N) elem.node(N)
+                    $( write_mat_eig( A_diF[num_pc], B_diF[num_pc], assemble_mat, want_nodal=true, want_skin_elem=true, want_elem=true, want_global=true, want_parallele=is_numerically_enriched ) )
+                        #undef PNODE
+                    }
+                stream <<<<
+                    // 
+                    template<class TM,class T,bool wont_add_nz,unsigned symm,class T_pos,class ND,class ED,unsigned nim,class ED2,unsigned nim2>
+                    void add_internal_face_matrix(
+                        Formulation<TM,$name,DefaultBehavior,T,wont_add_nz> &f,
+                        const Number<symm> &matrix_is_sym,
+                        const Number<$assemble_mat> &assemble_mat,
+                        const Element<$(pe->name),DefaultBehavior,Node<$nb_dim,T_pos,ND>,ED,nim> &elem,
+                        const Element<$(pc->name),DefaultBehavior,Node<$nb_dim,T_pos,ND>,ED2,nim2> &skin_elem,
+                        const Number<$num_pc> &num_child,
+                        const unsigned *indices ) {
+                        add_internal_face_matrix( f, f.matrices(Number<1>()), f.matrices(Number<2>()), f.vectors, matrix_is_sym, assemble_mat, elem, skin_elem, num_child, indices );
+                    }
         stream <<< "} // namespace LMT"
         
     def write_add_elem_matrices_enriched( stream )
@@ -791,12 +980,12 @@ class LmtppFormulationAncestor
                       gauss_point.prout( elem_enr, hdbk);
                       for (unsigned i=0;i<gauss_point.size();i++) {
                           if(/* pos_is_inside(*elem,gauss_point[i].positions,10e-4)*/ 1) {
-                            add_elem_matrix_enriched_corr( *f, K, F, f->vectors, *matrix_is_sym, *assemble_mat, *assemble_vec, *elem, indices, gauss_point[i], *id_group_hdbk, elem_enr, elem_enr1, elem_enr2, hdbk);
-                            add_elem_matrix_enriched_coupl( *f, K, F, f->vectors, *matrix_is_sym, *assemble_mat, *assemble_vec, *elem, indices, gauss_point[i], *id_group_hdbk, elem_enr, elem_enr1,elem_enr2, hdbk);
-                            add_elem_matrix_enriched( *f, K, F, f->vectors, *matrix_is_sym, *assemble_mat, *assemble_vec, *elem, indices, gauss_point[i], *id_group_hdbk, elem_enr, elem_enr1,elem_enr2, hdbk);
+                              add_elem_matrix_enriched_corr( *f, K, F, f->vectors, *matrix_is_sym, *assemble_mat, *assemble_vec, *elem, indices, gauss_point[i], *id_group_hdbk, elem_enr, elem_enr1, elem_enr2, hdbk);
+                              add_elem_matrix_enriched_coupl( *f, K, F, f->vectors, *matrix_is_sym, *assemble_mat, *assemble_vec, *elem, indices, gauss_point[i], *id_group_hdbk, elem_enr, elem_enr1,elem_enr2, hdbk);
+                              add_elem_matrix_enriched( *f, K, F, f->vectors, *matrix_is_sym, *assemble_mat, *assemble_vec, *elem, indices, gauss_point[i], *id_group_hdbk, elem_enr, elem_enr1,elem_enr2, hdbk);
                           }
                       }
-              }
+                  }
               };
           for assemble_mat in 0 .. 2
               for assemble_vec in 0 .. 2
@@ -820,12 +1009,12 @@ class LmtppFormulationAncestor
                               Interface_micro_macro_handbook_values_dy_<TM,THDBK,TEE,TEE2,TEE3> Fun_enr_dy(&f.interface,hdbk,elem_enr,elem_enr2,elem_enr3);
                               Interface_micro_macro_handbook_values_young_<TM,THDBK,TEE> Young_enr(&f.interface,hdbk,elem_enr);
                               Interface_micro_macro_handbook_values_poisson_<TM,THDBK,TEE> Poisson_enr(&f.interface,hdbk,elem_enr);
-                      // std::cout<<indices[0]<< " " << indices[1]<< " " << indices[2] << " " << indices[3]<< " " << indices[4]<<std::endl;
+                              // std::cout<<indices[0]<< " " << indices[1]<< " " << indices[2] << " " << indices[3]<< " " << indices[4]<<std::endl;
                       pthread_mutex_t* mutex = &f.mutex;
-                      $( write_mat( K_dV_enr, F_dV_enr, assemble_mat, assemble_vec, want_nodal=true, want_skin_elem=true, want_elem=true, want_global=true#~, want_assign = true, want_parallele = is_numericaly_enriched~# ) )
+                      $( write_mat( K_dV_enr, F_dV_enr, assemble_mat, assemble_vec, want_nodal=true, want_skin_elem=true, want_elem=true, want_global=true#~, want_assign = true, want_parallele=is_numerically_enriched~# ) )
                       }
                       //
-                      template<class TM,class T,bool wont_add_nz,class TK,class TF,class TV ,unsigned symm,class T_pos,class ND,class ED,unsigned nim>
+                      template<class TM,class T,bool wont_add_nz,class TK,class TF,class TV, unsigned symm,class T_pos,class ND,class ED,unsigned nim>
                       void put_elem_matrix_enriched_zero(
                           Formulation<TM,$name,DefaultBehavior,T,wont_add_nz> &f,
                           TK &K,
@@ -837,7 +1026,7 @@ class LmtppFormulationAncestor
                           const Element<$(pe->name),DefaultBehavior,Node<$nb_dim,T_pos,ND>,ED,nim> &elem,
                           const unsigned *indices, const unsigned &id_group_hdbk ) {
                               unsigned id = id_group_hdbk;
-                      $( write_mat_zero( K_dV_enr, F_dV_enr, assemble_mat, assemble_vec, want_nodal=true, want_skin_elem=true, want_elem=true, want_global=true#~, want_parallele = is_numericaly_enriched~# ) )
+                      $( write_mat_zero( K_dV_enr, F_dV_enr, assemble_mat, assemble_vec, want_nodal=true, want_skin_elem=true, want_elem=true, want_global=true#~, want_parallele=is_numerically_enriched~# ) )
                       }
                       //
                       //
@@ -855,28 +1044,28 @@ class LmtppFormulationAncestor
                               double tps_moy1=0;
                               double nb=0;
                               for (unsigned j=0; j<f.interface.elem_enrichment_ID[elem.number].size();j++) {
-                                      cout<< " terme enrichissement Kphipsy et Kef : groupe " << f.interface.elem_enrichment_ID[elem.number][j] << "et j ="<< j << "et elem.number = " << elem.number << endl;
-                                    //if ($(toto)) {
-                                          TicToc tp1;
-                                          tp1.start();
-                                          add_elem_matrix_struct_$(pe->name)<TM,T, wont_add_nz, symm, T_pos, ND, ED, nim, $assemble_mat, $assemble_vec,Triangle, typename Formulation<TM,$name,DefaultBehavior,T,wont_add_nz>::THDBK> str_1;
-                                          str_1.matrix_is_sym = &matrix_is_sym;
-                                          str_1.assemble_mat = &assemble_mat;
-                                          str_1.assemble_vec = &assemble_vec;
-                                          str_1.elem = &elem;
-                                          str_1.indices = indices;
-                                          str_1.f = &f;
-                                          str_1.id_hdbk = 0;
-                                          str_1.id_group_hdbk = &j;
-                                          str_1.hdbk = f.interface.elem_enrichment_ID[elem.number][j];
-                                          apply_3( (f.interface.elem_enrichment_ID[elem.number][j]->formulation[0])->elem_list ,(f.interface.elem_enrichment_ID[elem.number][j]->formulation[1])->elem_list ,(f.interface.elem_enrichment_ID[elem.number][j]->formulation[2])->elem_list , str_1, K, F);
-                                          tp1.stop();
-                                          tps_moy1 += tp1.res;
-                                          nb += 1;
-                                    // }
-                                }
-                                  cout <<"temps moyen par pts de gauss (enrichissement)"<< tps_moy1/nb << "pour " << nb << "patches" <<endl;
+                                  cout<< " terme enrichissement Kphipsy et Kef : groupe " << f.interface.elem_enrichment_ID[elem.number][j] << "et j ="<< j << "et elem.number = " << elem.number << endl;
+                                  // if ($(toto)) {
+                                      TicToc tp1;
+                                      tp1.start();
+                                      add_elem_matrix_struct_$(pe->name)<TM,T, wont_add_nz, symm, T_pos, ND, ED, nim, $assemble_mat, $assemble_vec,Triangle, typename Formulation<TM,$name,DefaultBehavior,T,wont_add_nz>::THDBK> str_1;
+                                      str_1.matrix_is_sym = &matrix_is_sym;
+                                      str_1.assemble_mat = &assemble_mat;
+                                      str_1.assemble_vec = &assemble_vec;
+                                      str_1.elem = &elem;
+                                      str_1.indices = indices;
+                                      str_1.f = &f;
+                                      str_1.id_hdbk = 0;
+                                      str_1.id_group_hdbk = &j;
+                                      str_1.hdbk = f.interface.elem_enrichment_ID[elem.number][j];
+                                      apply_3( (f.interface.elem_enrichment_ID[elem.number][j]->formulation[0])->elem_list, (f.interface.elem_enrichment_ID[elem.number][j]->formulation[1])->elem_list, (f.interface.elem_enrichment_ID[elem.number][j]->formulation[2])->elem_list, str_1, K, F );
+                                      tp1.stop();
+                                      tps_moy1 += tp1.res;
+                                      nb += 1;
+                                  // }
                               }
+                              cout <<"temps moyen par pts de gauss (enrichissement)"<< tps_moy1/nb << "pour " << nb << "patches" <<endl;
+                      }
                       //
       #
         if nb_dim == 3
@@ -894,22 +1083,23 @@ class LmtppFormulationAncestor
                   const unsigned *id_hdbk;
                   THDBK* hdbk;                	
                   bool want_enr;
-                	double length_frac;
+                  double length_frac;
                   template<class TE1,class TE2,class TE3,class TE4,class TE5,class TE6, class TK, class TF> void operator()( const TE1 elem_enr, const TE2 elem_enr1, const TE3 elem_enr2, const TE4 elem_enr3, const TE5 elem_enr4, const TE6 elem_enr5, TK &K, TF &F) const {
                       //indices[$(pe->nb_nodes_)] = hdbk->indices;
                       Gauss_Pts_for_one_element<TM,TE1> gauss_point;
                       gauss_point.prout( elem_enr, hdbk);
                       for (unsigned i=0;i<gauss_point.size();i++) {
-                        double tmp_weight = length_frac*gauss_point[i].weight;
-                  		  double sauv_weigth = gauss_point[i].weight;
-                      	gauss_point.pos_and_wei[i].weight = tmp_weight;
-                        if(/* pos_is_inside(*elem,gauss_point[i].positions,10e-4)*/ 1) {
-                          add_elem_matrix_enriched_corr( *f, K, F, f->vectors, *matrix_is_sym, *assemble_mat, *assemble_vec, *elem, indices, gauss_point[i], *id_group_hdbk, elem_enr, elem_enr1, elem_enr2, elem_enr3, elem_enr4, elem_enr5, hdbk);
-                          add_elem_matrix_enriched_coupl( *f, K, F, f->vectors, *matrix_is_sym, *assemble_mat, *assemble_vec, *elem, indices, gauss_point[i], *id_group_hdbk, elem_enr, elem_enr1, elem_enr2, elem_enr3, elem_enr4, elem_enr5, hdbk);
-                          if (want_enr) {
-                            gauss_point.pos_and_wei[i].weight = sauv_weigth;
-                            add_elem_matrix_enriched( *f, K, F, f->vectors, *matrix_is_sym, *assemble_mat, *assemble_vec, *elem, indices, gauss_point[i], *id_group_hdbk, elem_enr, elem_enr1,elem_enr2, elem_enr3, elem_enr4, elem_enr5, hdbk);}
-                        }
+                          double tmp_weight = length_frac*gauss_point[i].weight;
+                          double sauv_weigth = gauss_point[i].weight;
+                          gauss_point.pos_and_wei[i].weight = tmp_weight;
+                          if(/* pos_is_inside(*elem,gauss_point[i].positions,10e-4)*/ 1) {
+                              add_elem_matrix_enriched_corr( *f, K, F, f->vectors, *matrix_is_sym, *assemble_mat, *assemble_vec, *elem, indices, gauss_point[i], *id_group_hdbk, elem_enr, elem_enr1, elem_enr2, elem_enr3, elem_enr4, elem_enr5, hdbk);
+                              add_elem_matrix_enriched_coupl( *f, K, F, f->vectors, *matrix_is_sym, *assemble_mat, *assemble_vec, *elem, indices, gauss_point[i], *id_group_hdbk, elem_enr, elem_enr1, elem_enr2, elem_enr3, elem_enr4, elem_enr5, hdbk);
+                              if (want_enr) {
+                                  gauss_point.pos_and_wei[i].weight = sauv_weigth;
+                                  add_elem_matrix_enriched( *f, K, F, f->vectors, *matrix_is_sym, *assemble_mat, *assemble_vec, *elem, indices, gauss_point[i], *id_group_hdbk, elem_enr, elem_enr1,elem_enr2, elem_enr3, elem_enr4, elem_enr5, hdbk);
+                              }
+                          }
                       }
                   }
                   template<class TE1,class TE2,class TE3, class TK, class TF> void operator()( const TE1 elem_enr, const TE2 elem_enr1, const TE3 elem_enr2, TK &K, TF &F) const {
@@ -917,16 +1107,17 @@ class LmtppFormulationAncestor
                       Gauss_Pts_for_one_element<TM,TE1> gauss_point;
                       gauss_point.prout( elem_enr, hdbk);
                       for (unsigned i=0;i<gauss_point.size();i++) {
-                        double tmp_weight = length_frac*gauss_point[i].weight;
-                  		  double sauv_weigth = gauss_point[i].weight;
-                      	gauss_point.pos_and_wei[i].weight = tmp_weight;
-                        if(/* pos_is_inside(*elem,gauss_point[i].positions,10e-4)*/ 1) {
-                          add_elem_matrix_enriched_corr( *f, K, F, f->vectors, *matrix_is_sym, *assemble_mat, *assemble_vec, *elem, indices, gauss_point[i], *id_group_hdbk, elem_enr, elem_enr1, elem_enr2, hdbk);
-                          add_elem_matrix_enriched_coupl( *f, K, F, f->vectors, *matrix_is_sym, *assemble_mat, *assemble_vec, *elem, indices, gauss_point[i], *id_group_hdbk, elem_enr, elem_enr1, elem_enr2, hdbk);
-                          if (want_enr) {
-                            gauss_point.pos_and_wei[i].weight = sauv_weigth;
-                            add_elem_matrix_enriched( *f, K, F, f->vectors, *matrix_is_sym, *assemble_mat, *assemble_vec, *elem, indices, gauss_point[i], *id_group_hdbk, elem_enr, elem_enr1,elem_enr2, hdbk);}
-                        }
+                          double tmp_weight = length_frac*gauss_point[i].weight;
+                          double sauv_weigth = gauss_point[i].weight;
+                          gauss_point.pos_and_wei[i].weight = tmp_weight;
+                          if(/* pos_is_inside(*elem,gauss_point[i].positions,10e-4)*/ 1) {
+                              add_elem_matrix_enriched_corr( *f, K, F, f->vectors, *matrix_is_sym, *assemble_mat, *assemble_vec, *elem, indices, gauss_point[i], *id_group_hdbk, elem_enr, elem_enr1, elem_enr2, hdbk);
+                              add_elem_matrix_enriched_coupl( *f, K, F, f->vectors, *matrix_is_sym, *assemble_mat, *assemble_vec, *elem, indices, gauss_point[i], *id_group_hdbk, elem_enr, elem_enr1, elem_enr2, hdbk);
+                              if (want_enr) {
+                                  gauss_point.pos_and_wei[i].weight = sauv_weigth;
+                                  add_elem_matrix_enriched( *f, K, F, f->vectors, *matrix_is_sym, *assemble_mat, *assemble_vec, *elem, indices, gauss_point[i], *id_group_hdbk, elem_enr, elem_enr1,elem_enr2, hdbk);
+                              }
+                          }
                       }
                   } 
               };
@@ -953,9 +1144,9 @@ class LmtppFormulationAncestor
                               Interface_micro_macro_handbook_values_dz_3D<TM,THDBK,TEE,TEE2,TEE3,TEE3,TEE3,TEE3> Fun_enr_3D_dz(&f.interface,hdbk,elem_enr,elem_enr2,elem_enr3);
                               Interface_micro_macro_handbook_values_young_<TM,THDBK,TEE> Young_enr_3D(&f.interface,hdbk,elem_enr);
                               Interface_micro_macro_handbook_values_poisson_<TM,THDBK,TEE> Poisson_enr_3D(&f.interface,hdbk,elem_enr);
-                      // std::cout<<indices[0]<< " " << indices[1]<< " " << indices[2] << " " << indices[3]<< " " << indices[4]<<std::endl;
+                              // std::cout<<indices[0]<< " " << indices[1]<< " " << indices[2] << " " << indices[3]<< " " << indices[4]<<std::endl;
                       pthread_mutex_t* mutex = &f.mutex;
-                      $( write_mat_with_cond( K_dV_enr, F_dV_enr, assemble_mat, assemble_vec, want_nodal=true, want_skin_elem=true, want_elem=true, want_global=true, want_assign = false, want_parallele = false, line_range_min = e->nb_nodes * nb_dim - 1, line_range_max = e->nb_nodes * nb_dim + 3) )
+                      $( write_mat_with_cond( K_dV_enr, F_dV_enr, assemble_mat, assemble_vec, want_nodal=true, want_skin_elem=true, want_elem=true, want_global=true, want_assign=false, want_parallele=false, line_range_min=e->nb_nodes * nb_dim - 1, line_range_max=e->nb_nodes * nb_dim + 3) )
                       }
                       //
                       template<class TM,class T,bool wont_add_nz,class TK,class TF,class TV, class TVV,unsigned symm,class T_pos,class ND,class ED,unsigned nim, class TEE, class TEE2, class TEE3, class TEE4, class TEE5, class TEE6, class THDBK>
@@ -976,9 +1167,9 @@ class LmtppFormulationAncestor
                               Interface_micro_macro_handbook_values_dz_3D<TM,THDBK,TEE,TEE2,TEE3,TEE4,TEE5,TEE6> Fun_enr_3D_dz(&f.interface,hdbk,elem_enr,elem_enr2,elem_enr3,elem_enr4,elem_enr5,elem_enr6);
                               Interface_micro_macro_handbook_values_young_<TM,THDBK,TEE> Young_enr_3D(&f.interface,hdbk,elem_enr);
                               Interface_micro_macro_handbook_values_poisson_<TM,THDBK,TEE> Poisson_enr_3D(&f.interface,hdbk,elem_enr);
-                      // std::cout<<indices[0]<< " " << indices[1]<< " " << indices[2] << " " << indices[3]<< " " << indices[4]<<std::endl;
+                              // std::cout<<indices[0]<< " " << indices[1]<< " " << indices[2] << " " << indices[3]<< " " << indices[4]<<std::endl;
                       pthread_mutex_t* mutex = &f.mutex;
-                      $( write_mat_with_cond( K_dV_enr, F_dV_enr, assemble_mat, assemble_vec, want_nodal=true, want_skin_elem=true, want_elem=true, want_global=true, want_assign = false, want_parallele = false, line_range_min = e->nb_nodes * nb_dim - 1, line_range_max = e->nb_nodes * nb_dim + 6) )
+                      $( write_mat_with_cond( K_dV_enr, F_dV_enr, assemble_mat, assemble_vec, want_nodal=true, want_skin_elem=true, want_elem=true, want_global=true, want_assign=false, want_parallele=false, line_range_min=e->nb_nodes * nb_dim - 1, line_range_max=e->nb_nodes * nb_dim + 6) )
                       }
                       //
                       //
@@ -1014,39 +1205,39 @@ class LmtppFormulationAncestor
                                   str_1.id_hdbk = 0;
                                   str_1.id_group_hdbk = &offset; //avant j
                                   str_1.hdbk = f.interface.elem_enrichment_ID[elem.number][j];
-                            			str_1.want_enr = want_enr;
-                            			str_1.length_frac = 1;
-                            		  if (not f.interface.elem_enrichment_ID[elem.number][j]->size_in_element.empty())
-                            					str_1.length_frac *= f.interface.elem_enrichment_ID[elem.number][j]->size_in_element[elem.number];
-                            					//
+                                  str_1.want_enr = want_enr;
+                                  str_1.length_frac = 1;
+                                  if (not f.interface.elem_enrichment_ID[elem.number][j]->size_in_element.empty())
+                                      str_1.length_frac *= f.interface.elem_enrichment_ID[elem.number][j]->size_in_element[elem.number];
+                                  //
                                   if (f.interface.elem_enrichment_ID[elem.number][j]->indices == 0) {
                                       f.interface.elem_enrichment_ID[elem.number][j]->indices = indices[$(e->nb_nodes)]+offset;
-                            					  str_1.indices = indices;
-                                        if (f.interface.elem_enrichment_ID[elem.number][j]->formulation.size() == 6 ) {
-                                           apply_6( (f.interface.elem_enrichment_ID[elem.number][j]->formulation[0])->elem_list ,(f.interface.elem_enrichment_ID[elem.number][j]->formulation[1])->elem_list ,(f.interface.elem_enrichment_ID[elem.number][j]->formulation[2])->elem_list,(f.interface.elem_enrichment_ID[elem.number][j]->formulation[3])->elem_list,(f.interface.elem_enrichment_ID[elem.number][j]->formulation[4])->elem_list,(f.interface.elem_enrichment_ID[elem.number][j]->formulation[5])->elem_list , str_1, K, F);
-                                           offset += 6;}
-                                        if (f.interface.elem_enrichment_ID[elem.number][j]->formulation.size() == 3 ) {
-                                           apply_3( (f.interface.elem_enrichment_ID[elem.number][j]->formulation[0])->elem_list ,(f.interface.elem_enrichment_ID[elem.number][j]->formulation[1])->elem_list ,(f.interface.elem_enrichment_ID[elem.number][j]->formulation[2])->elem_list, str_1, K, F);
-                                           offset += 3;}                                              
-                                    }
-                                    else {
-                                        indices_dupl[$(e->nb_nodes)] = f.interface.elem_enrichment_ID[elem.number][j]->indices;
-                                        str_1.indices = indices_dupl;
-                                        want_enr = false;
-                            				    str_1.want_enr = want_enr;
-                                        unsigned tmp = 0;
-                                        str_1.id_group_hdbk = &tmp;
-                                        if (f.interface.elem_enrichment_ID[elem.number][j]->formulation.size() == 6 ) {
-                                            apply_6( (f.interface.elem_enrichment_ID[elem.number][j]->formulation[0])->elem_list ,(f.interface.elem_enrichment_ID[elem.number][j]->formulation[1])->elem_list ,(f.interface.elem_enrichment_ID[elem.number][j]->formulation[2])->elem_list,(f.interface.elem_enrichment_ID[elem.number][j]->formulation[3])->elem_list,(f.interface.elem_enrichment_ID[elem.number][j]->formulation[4])->elem_list,(f.interface.elem_enrichment_ID[elem.number][j]->formulation[5])->elem_list , str_1, K, F);
-                                        }
-                                        if (f.interface.elem_enrichment_ID[elem.number][j]->formulation.size() == 3 ) {
-                                            apply_3( (f.interface.elem_enrichment_ID[elem.number][j]->formulation[0])->elem_list ,(f.interface.elem_enrichment_ID[elem.number][j]->formulation[1])->elem_list ,(f.interface.elem_enrichment_ID[elem.number][j]->formulation[2])->elem_list, str_1, K, F);
-                                        }
-                                    }
-                                    tp1.stop();
-                                    tps_moy1 += tp1.res;
-                                    nb += 1;
-                                      // }
+                                          str_1.indices = indices;
+                                          if (f.interface.elem_enrichment_ID[elem.number][j]->formulation.size() == 6 ) {
+                                              apply_6( (f.interface.elem_enrichment_ID[elem.number][j]->formulation[0])->elem_list, (f.interface.elem_enrichment_ID[elem.number][j]->formulation[1])->elem_list, (f.interface.elem_enrichment_ID[elem.number][j]->formulation[2])->elem_list,(f.interface.elem_enrichment_ID[elem.number][j]->formulation[3])->elem_list,(f.interface.elem_enrichment_ID[elem.number][j]->formulation[4])->elem_list,(f.interface.elem_enrichment_ID[elem.number][j]->formulation[5])->elem_list, str_1, K, F );
+                                              offset += 6;}
+                                          if (f.interface.elem_enrichment_ID[elem.number][j]->formulation.size() == 3 ) {
+                                              apply_3( (f.interface.elem_enrichment_ID[elem.number][j]->formulation[0])->elem_list, (f.interface.elem_enrichment_ID[elem.number][j]->formulation[1])->elem_list, (f.interface.elem_enrichment_ID[elem.number][j]->formulation[2])->elem_list, str_1, K, F );
+                                              offset += 3;}                                              
+                                  }
+                                  else {
+                                      indices_dupl[$(e->nb_nodes)] = f.interface.elem_enrichment_ID[elem.number][j]->indices;
+                                      str_1.indices = indices_dupl;
+                                      want_enr = false;
+                                      str_1.want_enr = want_enr;
+                                      unsigned tmp = 0;
+                                      str_1.id_group_hdbk = &tmp;
+                                      if (f.interface.elem_enrichment_ID[elem.number][j]->formulation.size() == 6 ) {
+                                          apply_6( (f.interface.elem_enrichment_ID[elem.number][j]->formulation[0])->elem_list, (f.interface.elem_enrichment_ID[elem.number][j]->formulation[1])->elem_list, (f.interface.elem_enrichment_ID[elem.number][j]->formulation[2])->elem_list,(f.interface.elem_enrichment_ID[elem.number][j]->formulation[3])->elem_list,(f.interface.elem_enrichment_ID[elem.number][j]->formulation[4])->elem_list,(f.interface.elem_enrichment_ID[elem.number][j]->formulation[5])->elem_list, str_1, K, F );
+                                      }
+                                      if (f.interface.elem_enrichment_ID[elem.number][j]->formulation.size() == 3 ) {
+                                          apply_3( (f.interface.elem_enrichment_ID[elem.number][j]->formulation[0])->elem_list, (f.interface.elem_enrichment_ID[elem.number][j]->formulation[1])->elem_list, (f.interface.elem_enrichment_ID[elem.number][j]->formulation[2])->elem_list, str_1, K, F );
+                                      }
+                                  }
+                                  tp1.stop();
+                                  tps_moy1 += tp1.res;
+                                  nb += 1;
+                                  // }
                               }
                               cout <<"temps moyen par pts de gauss (enrichissement)"<< tps_moy1/nb << "pour " << nb << "patches" <<endl;
                           }
@@ -1072,14 +1263,14 @@ class LmtppFormulationAncestor
                           const Number<$assemble_mat> &assemble_mat,
                           const Number<$assemble_vec> &assemble_vec,
                           const Element<$(pe->name),DefaultBehavior,Node<$nb_dim,T_pos,ND>,ED,nim> &elem,
-                          const unsigned *indices, const TVV &gauss_point, const unsigned &id_group_hdbk,const TEE &elem_enr,const TEE2 &elem_enr2,const TEE3 &elem_enr3 , THDBK* hdbk) {
+                          const unsigned *indices, const TVV &gauss_point, const unsigned &id_group_hdbk, const TEE &elem_enr, const TEE2 &elem_enr2, const TEE3 &elem_enr3, THDBK* hdbk) {
                               Interface_micro_macro_handbook_values_<TM,THDBK,TEE,TEE2,TEE3> Fun_enr(&f.interface,hdbk,elem_enr,elem_enr2,elem_enr3);
                               Interface_micro_macro_handbook_values_dx_<TM,THDBK,TEE,TEE2,TEE3> Fun_enr_dx(&f.interface,hdbk,elem_enr,elem_enr2,elem_enr3);
                               Interface_micro_macro_handbook_values_dy_<TM,THDBK,TEE,TEE2,TEE3> Fun_enr_dy(&f.interface,hdbk,elem_enr,elem_enr2,elem_enr3);
                               Interface_micro_macro_handbook_values_young_<TM,THDBK,TEE> Young_enr(&f.interface,hdbk,elem_enr);
                               Interface_micro_macro_handbook_values_poisson_<TM,THDBK,TEE> Poisson_enr(&f.interface,hdbk,elem_enr);
                               pthread_mutex_t* mutex = &f.mutex;
-                      $( write_mat( K_dV_corr, F_dV_corr, assemble_mat, assemble_vec, want_nodal=true, want_skin_elem=true, want_elem=true, want_global=true #~, want_parallele = is_numericaly_enriched~#) )
+                      $( write_mat( K_dV_corr, F_dV_corr, assemble_mat, assemble_vec, want_nodal=true, want_skin_elem=true, want_elem=true, want_global=true #~, want_parallele=is_numerically_enriched~#) )
                       }
                       //
                       //
@@ -1100,15 +1291,15 @@ class LmtppFormulationAncestor
                           const Number<$assemble_mat> &assemble_mat,
                           const Number<$assemble_vec> &assemble_vec,
                           const Element<$(pe->name),DefaultBehavior,Node<$nb_dim,T_pos,ND>,ED,nim> &elem,
-                          const unsigned *indices, const TVV &gauss_point, const unsigned &id_group_hdbk,const TEE &elem_enr,const TEE2 &elem_enr2,const TEE3 &elem_enr3, const TEE4 &elem_enr4,const TEE5 &elem_enr5,const TEE6 &elem_enr6 , THDBK* hdbk) {
-                              Interface_micro_macro_handbook_values_3D<TM,THDBK,TEE,TEE2,TEE3,TEE4,TEE5,TEE6> Fun_enr(&f.interface,hdbk,elem_enr,elem_enr2,elem_enr3,elem_enr4,elem_enr5,elem_enr6);
+                          const unsigned *indices, const TVV &gauss_point, const unsigned &id_group_hdbk, const TEE &elem_enr, const TEE2 &elem_enr2, const TEE3 &elem_enr3, const TEE4 &elem_enr4, const TEE5 &elem_enr5, const TEE6 &elem_enr6, THDBK* hdbk) {
+                              Interface_micro_macro_handbook_values_3D<TM,THDBK,TEE,TEE2,TEE3,TEE4,TEE5,TEE6> Fun_enr(&f.interface,hdbk, elem_enr,elem_enr2,elem_enr3,elem_enr4,elem_enr5,elem_enr6);
                               Interface_micro_macro_handbook_values_dx_3D<TM,THDBK,TEE,TEE2,TEE3,TEE4,TEE5,TEE6> Fun_enr_3D_dx(&f.interface,hdbk,elem_enr,elem_enr2,elem_enr3,elem_enr4,elem_enr5,elem_enr6);
                               Interface_micro_macro_handbook_values_dy_3D<TM,THDBK,TEE,TEE2,TEE3,TEE4,TEE5,TEE6> Fun_enr_3D_dy(&f.interface,hdbk,elem_enr,elem_enr2,elem_enr3,elem_enr4,elem_enr5,elem_enr6);
                               Interface_micro_macro_handbook_values_dz_3D<TM,THDBK,TEE,TEE2,TEE3,TEE4,TEE5,TEE6> Fun_enr_3D_dz(&f.interface,hdbk,elem_enr,elem_enr2,elem_enr3,elem_enr4,elem_enr5,elem_enr6);
                               Interface_micro_macro_handbook_values_young_<TM,THDBK,TEE> Young_enr_3D(&f.interface,hdbk,elem_enr);
                               Interface_micro_macro_handbook_values_poisson_<TM,THDBK,TEE> Poisson_enr_3D(&f.interface,hdbk,elem_enr);
                               pthread_mutex_t* mutex = &f.mutex;
-                      $( write_mat( K_dV_corr, F_dV_corr, assemble_mat, assemble_vec, want_nodal=true, want_skin_elem=true, want_elem=true, want_global=true #~, want_parallele = is_numericaly_enriched~#) )
+                      $( write_mat( K_dV_corr, F_dV_corr, assemble_mat, assemble_vec, want_nodal=true, want_skin_elem=true, want_elem=true, want_global=true #~, want_parallele=is_numerically_enriched~#) )
                       }
                       //
                       template<class TM,class T,bool wont_add_nz,class TK,class TF,class TV, class TVV,unsigned symm,class T_pos,class ND,class ED,unsigned nim, class TEE, class TEE2, class TEE3, class THDBK>
@@ -1121,7 +1312,7 @@ class LmtppFormulationAncestor
                           const Number<$assemble_mat> &assemble_mat,
                           const Number<$assemble_vec> &assemble_vec,
                           const Element<$(pe->name),DefaultBehavior,Node<$nb_dim,T_pos,ND>,ED,nim> &elem,
-                          const unsigned *indices, const TVV &gauss_point, const unsigned &id_group_hdbk,const TEE &elem_enr,const TEE2 &elem_enr2,const TEE3 &elem_enr3 , THDBK* hdbk) {
+                          const unsigned *indices, const TVV &gauss_point, const unsigned &id_group_hdbk, const TEE &elem_enr, const TEE2 &elem_enr2, const TEE3 &elem_enr3, THDBK* hdbk) {
                               Interface_micro_macro_handbook_values_3D<TM,THDBK,TEE,TEE2,TEE3,TEE3,TEE3,TEE3> Fun_enr(&f.interface,hdbk,elem_enr,elem_enr2,elem_enr3);
                               Interface_micro_macro_handbook_values_dx_3D<TM,THDBK,TEE,TEE2,TEE3,TEE3,TEE3,TEE3> Fun_enr_3D_dx(&f.interface,hdbk,elem_enr,elem_enr2,elem_enr3);
                               Interface_micro_macro_handbook_values_dy_3D<TM,THDBK,TEE,TEE2,TEE3,TEE3,TEE3,TEE3> Fun_enr_3D_dy(&f.interface,hdbk,elem_enr,elem_enr2,elem_enr3);
@@ -1129,7 +1320,7 @@ class LmtppFormulationAncestor
                               Interface_micro_macro_handbook_values_young_<TM,THDBK,TEE> Young_enr_3D(&f.interface,hdbk,elem_enr);
                               Interface_micro_macro_handbook_values_poisson_<TM,THDBK,TEE> Poisson_enr_3D(&f.interface,hdbk,elem_enr);
                               pthread_mutex_t* mutex = &f.mutex;
-                      $( write_mat( K_dV_corr, F_dV_corr, assemble_mat, assemble_vec, want_nodal=true, want_skin_elem=true, want_elem=true, want_global=true #~, want_parallele = is_numericaly_enriched~#) )
+                      $( write_mat( K_dV_corr, F_dV_corr, assemble_mat, assemble_vec, want_nodal=true, want_skin_elem=true, want_elem=true, want_global=true #~, want_parallele=is_numerically_enriched~#) )
                       }
                       //
     #
@@ -1154,7 +1345,7 @@ class LmtppFormulationAncestor
                           const Number<$assemble_mat> &assemble_mat,
                           const Number<$assemble_vec> &assemble_vec,
                           const Element<$(pe->name),DefaultBehavior,Node<$nb_dim,T_pos,ND>,ED,nim> &elem,
-                          const unsigned *indices, const TVV &gauss_point, const unsigned &id_group_hdbk,const TEE &elem_enr,const TEE2 &elem_enr2,const TEE3 &elem_enr3 , THDBK* hdbk) {
+                          const unsigned *indices, const TVV &gauss_point, const unsigned &id_group_hdbk, const TEE &elem_enr, const TEE2 &elem_enr2, const TEE3 &elem_enr3, THDBK* hdbk) {
                               unsigned id = id_group_hdbk;
                               Interface_micro_macro_handbook_values_<TM,THDBK,TEE,TEE2,TEE3> Fun_enr(&f.interface,hdbk,elem_enr,elem_enr2,elem_enr3);
                               Interface_micro_macro_handbook_values_dx_<TM,THDBK,TEE,TEE2,TEE3> Fun_enr_dx(&f.interface,hdbk,elem_enr,elem_enr2,elem_enr3);
@@ -1162,7 +1353,7 @@ class LmtppFormulationAncestor
                               Interface_micro_macro_handbook_values_young_<TM,THDBK,TEE> Young_enr(&f.interface,hdbk,elem_enr);
                               Interface_micro_macro_handbook_values_poisson_<TM,THDBK,TEE> Poisson_enr(&f.interface,hdbk,elem_enr);
                               pthread_mutex_t* mutex = &f.mutex;
-                      $( write_mat( K_dV_coupl, F_dV_coupl, assemble_mat, assemble_vec, want_nodal=true, want_skin_elem=true, want_elem=true, want_global=true #~, want_parallele = is_numericaly_enriched~#) )
+                      $( write_mat( K_dV_coupl, F_dV_coupl, assemble_mat, assemble_vec, want_nodal=true, want_skin_elem=true, want_elem=true, want_global=true #~, want_parallele=is_numerically_enriched~#) )
                       }
                       //
                       //
@@ -1183,7 +1374,7 @@ class LmtppFormulationAncestor
                           const Number<$assemble_mat> &assemble_mat,
                           const Number<$assemble_vec> &assemble_vec,
                           const Element<$(pe->name),DefaultBehavior,Node<$nb_dim,T_pos,ND>,ED,nim> &elem,
-                          const unsigned *indices, const TVV &gauss_point, const unsigned &id_group_hdbk,const TEE &elem_enr,const TEE2 &elem_enr2,const TEE3 &elem_enr3, const TEE4 &elem_enr4,const TEE5 &elem_enr5,const TEE6 &elem_enr6 , THDBK* hdbk) {
+                          const unsigned *indices, const TVV &gauss_point, const unsigned &id_group_hdbk, const TEE &elem_enr, const TEE2 &elem_enr2, const TEE3 &elem_enr3, const TEE4 &elem_enr4, const TEE5 &elem_enr5, const TEE6 &elem_enr6, THDBK* hdbk) {
                               unsigned id_offset = id_group_hdbk;
                               Interface_micro_macro_handbook_values_3D<TM,THDBK,TEE,TEE2,TEE3,TEE4,TEE5,TEE6> Fun_enr(&f.interface,hdbk,elem_enr,elem_enr2,elem_enr3,elem_enr4,elem_enr5,elem_enr6);
                               Interface_micro_macro_handbook_values_dx_3D<TM,THDBK,TEE,TEE2,TEE3,TEE4,TEE5,TEE6> Fun_enr_3D_dx(&f.interface,hdbk,elem_enr,elem_enr2,elem_enr3,elem_enr4,elem_enr5,elem_enr6);
@@ -1192,7 +1383,7 @@ class LmtppFormulationAncestor
                               Interface_micro_macro_handbook_values_young_<TM,THDBK,TEE> Young_enr_3D(&f.interface,hdbk,elem_enr);
                               Interface_micro_macro_handbook_values_poisson_<TM,THDBK,TEE> Poisson_enr_3D(&f.interface,hdbk,elem_enr);
                               pthread_mutex_t* mutex = &f.mutex;
-                              $( write_mat_with_cond( K_dV_coupl, F_dV_coupl, assemble_mat, assemble_vec, want_nodal=true, want_skin_elem=true, want_elem=true, want_global=true, want_assign = false, want_parallele = false, line_range_min = e->nb_nodes * nb_dim - 1, line_range_max = e->nb_nodes * nb_dim + 6) )
+                              $( write_mat_with_cond( K_dV_coupl, F_dV_coupl, assemble_mat, assemble_vec, want_nodal=true, want_skin_elem=true, want_elem=true, want_global=true, want_assign=false, want_parallele=false, line_range_min=e->nb_nodes * nb_dim - 1, line_range_max=e->nb_nodes * nb_dim + 6) )
                       }
                       //
                       template<class TM,class T,bool wont_add_nz,class TK,class TF,class TV, class TVV,unsigned symm,class T_pos,class ND,class ED,unsigned nim, class TEE, class TEE2, class TEE3, class THDBK>
@@ -1205,7 +1396,7 @@ class LmtppFormulationAncestor
                           const Number<$assemble_mat> &assemble_mat,
                           const Number<$assemble_vec> &assemble_vec,
                           const Element<$(pe->name),DefaultBehavior,Node<$nb_dim,T_pos,ND>,ED,nim> &elem,
-                          const unsigned *indices, const TVV &gauss_point, const unsigned &id_group_hdbk,const TEE &elem_enr,const TEE2 &elem_enr2,const TEE3 &elem_enr3 , THDBK* hdbk) {
+                          const unsigned *indices, const TVV &gauss_point, const unsigned &id_group_hdbk, const TEE &elem_enr, const TEE2 &elem_enr2, const TEE3 &elem_enr3, THDBK* hdbk) {
                               unsigned id_offset = id_group_hdbk;
                               Interface_micro_macro_handbook_values_3D<TM,THDBK,TEE,TEE2,TEE3,TEE3,TEE3,TEE3> Fun_enr(&f.interface,hdbk,elem_enr,elem_enr2,elem_enr3);
                               Interface_micro_macro_handbook_values_dx_3D<TM,THDBK,TEE,TEE2,TEE3,TEE3,TEE3,TEE3> Fun_enr_3D_dx(&f.interface,hdbk,elem_enr,elem_enr2,elem_enr3);
@@ -1214,7 +1405,7 @@ class LmtppFormulationAncestor
                               Interface_micro_macro_handbook_values_young_<TM,THDBK,TEE> Young_enr_3D(&f.interface,hdbk,elem_enr);
                               Interface_micro_macro_handbook_values_poisson_<TM,THDBK,TEE> Poisson_enr_3D(&f.interface,hdbk,elem_enr);
                               pthread_mutex_t* mutex = &f.mutex;
-                              $( write_mat_with_cond( K_dV_coupl, F_dV_coupl, assemble_mat, assemble_vec, want_nodal=true, want_skin_elem=true, want_elem=true, want_global=true, want_assign = false, want_parallele = false, line_range_min = e->nb_nodes * nb_dim - 1, line_range_max = e->nb_nodes * nb_dim + 3) )
+                              $( write_mat_with_cond( K_dV_coupl, F_dV_coupl, assemble_mat, assemble_vec, want_nodal=true, want_skin_elem=true, want_elem=true, want_global=true, want_assign=false, want_parallele=false, line_range_min=e->nb_nodes * nb_dim - 1, line_range_max=e->nb_nodes * nb_dim + 3) )
                       }
                       //
     #
@@ -1252,6 +1443,31 @@ class LmtppFormulationAncestor
                         const unsigned *indices ) {
                         add_nodal_matrix( f, f.matrices(Number<0>()), f.sollicitation, f.vectors, matrix_is_sym, assemble_mat, assemble_vec, node, indices );
                     }
+        for assemble_mat in 0 .. 2
+            stream <<<<
+                template<class TM,class TK,class TF,class TV,class T,bool wont_add_nz,unsigned symm>
+                void add_nodal_matrix(
+                    Formulation<TM,$name,DefaultBehavior,T,wont_add_nz> &f,
+                    TK &A,
+                    TK &B,
+                    TV &vectors,
+                    const Number<symm> &matrix_is_sym,
+                    const Number<$assemble_mat> &assemble_mat,
+                    const typename TM::TNode &node,
+                    const unsigned *indices ) {
+                    #define PNODE(N) (&node)
+                $( write_mat_eig( A_dN, B_dN, assemble_mat, want_nodal=true, want_skin_elem=false, want_elem=false, want_global=true ) )
+                    #undef PNODE
+                }
+                template<class TM,class T,bool wont_add_nz,unsigned symm>
+                void add_nodal_matrix(
+                    Formulation<TM,$name,DefaultBehavior,T,wont_add_nz> &f,
+                    const Number<symm> &matrix_is_sym,
+                    const Number<$assemble_mat> &assemble_mat,
+                    const typename TM::TNode &node,
+                    const unsigned *indices ) {
+                    add_nodal_matrix( f, f.matrices(Number<1>()), f.matrices(Number<2>()), f.vectors, matrix_is_sym, assemble_mat, node, indices );
+                }
         stream <<< "} // namespace LMT"
         stream <<< "#endif"
     
@@ -1349,7 +1565,7 @@ class LmtppFormulation[ dim ] inherits LmtppFormulationAncestor
 
     #
 
-    def make_matrices( e , integration_type = "gauss_num", degre_poly_enrichment = 1 )
+    def make_matrices( e, integration_type = "gauss_num", degre_poly_enrichment = 1 )
         residual := Op( formulation( e ) )
         e.assume_const_jac = true
         residual_const_jac := Op( formulation( e ) )
@@ -1370,8 +1586,8 @@ class LmtppFormulation[ dim ] inherits LmtppFormulationAncestor
             degre_poly = volumic_part_const_jac.poly_deg( e.var_inter )
         volumic_part_handbook := residual.diff( dV_handbook )
         if integration_type == "bestial_num"
-            volumic_part = e.bestial_num_integration( volumic_part , mul_by_jac = true, div_ = 6 )
-            volumic_part_handbook = e.bestial_num_integration( volumic_part_handbook , mul_by_jac = true, div_ = 10 )
+            volumic_part = e.bestial_num_integration( volumic_part, mul_by_jac = true, div_ = 6 )
+            volumic_part_handbook = e.bestial_num_integration( volumic_part_handbook, mul_by_jac = true, div_ = 10 )
         else if integration_type == "gauss_num"
             volumic_part = e.gauss_num_integration( volumic_part, order_diff = degre_poly )
             volumic_part_handbook = e.gauss_num_integration( volumic_part_handbook, order_diff = degre_poly_enrichment )
@@ -1416,10 +1632,10 @@ class LmtppFormulation[ dim ] inherits LmtppFormulationAncestor
             loc_surf_part_handbook := surf_part_handbook.subs( e.var_inter, e.var_inter_from_child_var_inter( sub_nvi = 1, num_child = num_child, child_var_inter = pc->var_inter ) )
             loc_internal_surf_part_handbook := internal_surf_part_handbook.subs( e.var_inter, e.var_inter_from_child_var_inter( sub_nvi = 1, num_child = num_child, child_var_inter = pc->var_inter ) )
             if integration_type == "bestial_num"
-                loc_surf_part = pc->bestial_num_integration( loc_surf_part , mul_by_jac = true, div_ = 6 )
-                loc_internal_surf_part = pc->bestial_num_integration( loc_internal_surf_part , mul_by_jac = true, div_ = 6 )
-                loc_surf_part_handbook = pc->bestial_num_integration( loc_surf_part_handbook , mul_by_jac = true, div_ = 10 )
-                loc_internal_surf_part_handbook = pc->bestial_num_integration( loc_internal_surf_part_handbook , mul_by_jac = true, div_ = 10 )
+                loc_surf_part = pc->bestial_num_integration( loc_surf_part, mul_by_jac = true, div_ = 6 )
+                loc_internal_surf_part = pc->bestial_num_integration( loc_internal_surf_part, mul_by_jac = true, div_ = 6 )
+                loc_surf_part_handbook = pc->bestial_num_integration( loc_surf_part_handbook, mul_by_jac = true, div_ = 10 )
+                loc_internal_surf_part_handbook = pc->bestial_num_integration( loc_internal_surf_part_handbook, mul_by_jac = true, div_ = 10 )
             else if integration_type == "gauss_num"
                 loc_surf_part = pc->gauss_num_integration( loc_surf_part, order_diff = degre_poly_surf )
                 loc_internal_surf_part = pc->gauss_num_integration( loc_internal_surf_part, order_diff = degre_poly_internal_surf )
@@ -1437,6 +1653,125 @@ class LmtppFormulation[ dim ] inherits LmtppFormulationAncestor
             )
             loc_internal_surf_part += loc_internal_surf_part_handbook
             _compute_KF_from_residual( loc_internal_surf_part, K_diF[ num_child ], F_diF[ num_child ],
+                unk_expr_syms.map( _0->sym ), 
+                unk_test_syms.map( _0->sym )
+            )
+
+    def make_matrices_eig( e, integration_type = "gauss_num" )
+        residual := Op( formulation( e ) )
+        e.assume_const_jac = true
+        residual_const_jac := Op( formulation( e ) )
+        e.assume_const_jac = hyp_const_jac
+
+        # time integration
+        if max_nb_der
+            if use_theta_method
+                residual = residual.subs( time, theta * time_steps[1] )
+            else
+                residual = integration( residual, time, left_time_integration * time_steps[1], right_time_integration * time_steps[0] )
+        
+        # volumic part
+        volumic_part_A := residual.diff( dV_eig_A )
+        volumic_part_B := residual.diff( dV_eig_B )
+        degre_poly_A := volumic_part_A.poly_deg( e.var_inter )
+        degre_poly_B := volumic_part_B.poly_deg( e.var_inter )
+        if degre_poly_A < 0
+            volumic_part_A_const_jac := residual_const_jac.diff( dV_eig_A )
+            degre_poly_A = volumic_part_A_const_jac.poly_deg( e.var_inter )
+        if degre_poly_B < 0
+            volumic_part_B_const_jac := residual_const_jac.diff( dV_eig_B )
+            degre_poly_B = volumic_part_B_const_jac.poly_deg( e.var_inter )
+        if integration_type == "bestial_num"
+            volumic_part_A = e.bestial_num_integration( volumic_part_A, mul_by_jac = true, div_ = 6 )
+            volumic_part_B = e.bestial_num_integration( volumic_part_B, mul_by_jac = true, div_ = 6 )
+        else if integration_type == "gauss_num"
+            volumic_part_A = e.gauss_num_integration( volumic_part_A, order_diff = degre_poly_A )
+            volumic_part_B = e.gauss_num_integration( volumic_part_B, order_diff = degre_poly_B )
+        else if integration_type == "formal"
+            volumic_part_A = e.integration( volumic_part_A, order_diff = degre_poly_A )
+            volumic_part_B = e.integration( volumic_part_B, order_diff = degre_poly_B )
+        volumic_part_A += residual.diff( dE_eig_A )
+        volumic_part_B += residual.diff( dE_eig_B )
+        _compute_K_from_residual( volumic_part_A, A_dV, unk_expr_syms.map( _0->sym ), unk_test_syms.map( _0->sym ) )
+        _compute_K_from_residual( volumic_part_B, B_dV, unk_expr_syms.map( _0->sym ), unk_test_syms.map( _0->sym ) )
+        
+        # nodal part
+        nodal_part_A := residual.diff( dN_eig_A )
+        nodal_part_A = nodal_part_A.subs( e.var_inter, e.points[ 0 ] )
+        nodal_part_B := residual.diff( dN_eig_B )
+        nodal_part_B = nodal_part_B.subs( e.var_inter, e.points[ 0 ] )
+        _compute_K_from_residual( nodal_part_A, A_dN, 
+            unk_expr_syms.filter( _0->node >=0 or _0->glob >= 0 ).map( _0->sym ), 
+            unk_test_syms.filter( _0->node >=0 or _0->glob >= 0 ).map( _0->sym )
+        )
+        _compute_K_from_residual( nodal_part_B, B_dN, 
+            unk_expr_syms.filter( _0->node >=0 or _0->glob >= 0 ).map( _0->sym ), 
+            unk_test_syms.filter( _0->node >=0 or _0->glob >= 0 ).map( _0->sym )
+        )
+        
+        # surf parts
+        surf_part_A := residual.diff( dS_eig_A )
+        surf_part_B := residual.diff( dS_eig_B )
+        surf_part_A_const_jac := residual_const_jac.diff( dS_eig_A )
+        surf_part_B_const_jac := residual_const_jac.diff( dS_eig_B )
+        internal_surf_part_A := residual.diff( diF_eig_A )
+        internal_surf_part_B := residual.diff( diF_eig_B )
+        internal_surf_part_A_const_jac := residual_const_jac.diff( diF_eig_A )
+        internal_surf_part_B_const_jac := residual_const_jac.diff( diF_eig_B )
+        A_dS.resize( pe_children.size )
+        B_dS.resize( pe_children.size )
+        A_diF.resize( pe_children.size )
+        B_diF.resize( pe_children.size )
+        for pc_, num_child in pe_children, 0...
+            pc := child_cast( pc_ )
+            loc_surf_part_A := surf_part_A.subs( e.var_inter, e.var_inter_from_child_var_inter( sub_nvi = 1, num_child = num_child, child_var_inter = pc->var_inter ) )
+            loc_surf_part_B := surf_part_B.subs( e.var_inter, e.var_inter_from_child_var_inter( sub_nvi = 1, num_child = num_child, child_var_inter = pc->var_inter ) )
+            degre_poly_surf_A := loc_surf_part_A.poly_deg( pc->var_inter )
+            degre_poly_surf_B := loc_surf_part_B.poly_deg( pc->var_inter )
+            if degre_poly_surf_A < 0
+                loc_surf_part_A_const_jac := surf_part_A_const_jac.subs( e.var_inter, e.var_inter_from_child_var_inter( sub_nvi = 1, num_child = num_child, child_var_inter = pc->var_inter ) )
+                degre_poly_surf_A = loc_surf_part_A_const_jac.poly_deg( pc->var_inter )
+            if degre_poly_surf_B < 0
+                loc_surf_part_B_const_jac := surf_part_B_const_jac.subs( e.var_inter, e.var_inter_from_child_var_inter( sub_nvi = 1, num_child = num_child, child_var_inter = pc->var_inter ) )
+                degre_poly_surf_B = loc_surf_part_B_const_jac.poly_deg( pc->var_inter )
+            loc_internal_surf_part_A := internal_surf_part_A.subs( e.var_inter, e.var_inter_from_child_var_inter( sub_nvi = 1, num_child = num_child, child_var_inter = pc->var_inter ) )
+            loc_internal_surf_part_B := internal_surf_part_B.subs( e.var_inter, e.var_inter_from_child_var_inter( sub_nvi = 1, num_child = num_child, child_var_inter = pc->var_inter ) )
+            degre_poly_internal_surf_A := loc_internal_surf_part_A.poly_deg( pc->var_inter )
+            degre_poly_internal_surf_B := loc_internal_surf_part_B.poly_deg( pc->var_inter )
+            if degre_poly_internal_surf_A < 0
+                loc_internal_surf_part_A_const_jac := internal_surf_part_A_const_jac.subs( e.var_inter, e.var_inter_from_child_var_inter( sub_nvi = 1, num_child = num_child, child_var_inter = pc->var_inter ) )
+                degre_poly_internal_surf_A = loc_internal_surf_part_A_const_jac.poly_deg( pc->var_inter )
+            if degre_poly_internal_surf_B < 0
+                loc_internal_surf_part_B_const_jac := internal_surf_part_B_const_jac.subs( e.var_inter, e.var_inter_from_child_var_inter( sub_nvi = 1, num_child = num_child, child_var_inter = pc->var_inter ) )
+                degre_poly_internal_surf_B = loc_internal_surf_part_B_const_jac.poly_deg( pc->var_inter )
+            if integration_type == "bestial_num"
+                loc_surf_part_A = pc->bestial_num_integration( loc_surf_part_A, mul_by_jac = true, div_ = 6 )
+                loc_surf_part_A = pc->bestial_num_integration( loc_surf_part_B, mul_by_jac = true, div_ = 6 )
+                loc_internal_surf_part_A = pc->bestial_num_integration( loc_internal_surf_part_A, mul_by_jac = true, div_ = 6 )
+                loc_internal_surf_part_B = pc->bestial_num_integration( loc_internal_surf_part_B, mul_by_jac = true, div_ = 6 )
+            else if integration_type == "gauss_num"
+                loc_surf_part_A = pc->gauss_num_integration( loc_surf_part_A, order_diff = degre_poly_surf_A )
+                loc_surf_part_B = pc->gauss_num_integration( loc_surf_part_B, order_diff = degre_poly_surf_B )
+                loc_internal_surf_part_A = pc->gauss_num_integration( loc_internal_surf_part_A, order_diff = degre_poly_internal_surf_A )
+                loc_internal_surf_part_B = pc->gauss_num_integration( loc_internal_surf_part_B, order_diff = degre_poly_internal_surf_B )
+            else if integration_type == "formal"
+                loc_surf_part_A = pc->integration( loc_surf_part_A, order_diff = degre_poly_surf_A )
+                loc_internal_surf_part_A = pc->integration( loc_internal_surf_part_A, order_diff = degre_poly_internal_surf_A )
+                loc_surf_part_B = pc->integration( loc_surf_part_B, order_diff = degre_poly_surf_B )
+                loc_internal_surf_part_B = pc->integration( loc_internal_surf_part_B, order_diff = degre_poly_internal_surf_B )
+            _compute_K_from_residual( loc_surf_part_A, A_dS[ num_child ],
+                unk_expr_syms.map( _0->sym ), 
+                unk_test_syms.map( _0->sym )
+            )
+            _compute_K_from_residual( loc_surf_part_B, B_dS[ num_child ],
+                unk_expr_syms.map( _0->sym ), 
+                unk_test_syms.map( _0->sym )
+            )
+            _compute_K_from_residual( loc_internal_surf_part_A, A_diF[ num_child ],
+                unk_expr_syms.map( _0->sym ), 
+                unk_test_syms.map( _0->sym )
+            )
+            _compute_K_from_residual( loc_internal_surf_part_B, B_diF[ num_child ],
                 unk_expr_syms.map( _0->sym ), 
                 unk_test_syms.map( _0->sym )
             )
@@ -1527,6 +1862,29 @@ class LmtppFormulation[ dim ] inherits LmtppFormulationAncestor
         else
             F += K * expr_symbols
         
+    #
+    def _compute_K_from_residual( residual, K, expr_symbols_, test_symbols_ )
+        expr_symbols := Vec[Op]( expr_symbols_ ) # hum
+        test_symbols := Vec[Op]( test_symbols_ ) # hum
+        F := Vec[Op]()
+
+        # minimization ?
+        if assumed( norm_1( expr_symbols - test_symbols ) == 0 )
+            qe := quadratic_expansion( residual, expr_symbols )
+            K = qe.m
+            F = qe.v
+        # else, use test_symbols
+        else
+            K.resize( test_symbols.size, expr_symbols.size )
+            F.resize( test_symbols.size )
+            # K and F
+            res_diff_test := Vec[Op]()
+            for test_symbol, cpt_test in test_symbols, 0...
+                F[ cpt_test ] = residual.diff( test_symbol )
+            for expr_symbol, cpt_expr in expr_symbols, 0...
+                K.col( cpt_expr ) = diff( F, expr_symbol )
+            # if non linear / test_symbols
+            K =  K.subs( test_symbols, expr_symbols )
 
     # helpers
     def grad    ( expr )  return pe->grad    ( expr )
@@ -1743,7 +2101,7 @@ def write_legacy_lmtpp_carac_formulation( stream, name_form, fe_set_by_dim_and_n
             static const bool need_skin_assembly = $( any( fe_set_by_dim_and_name.map( x => x->need_skin_assembly ) ) );
             typedef Norm1_is_inf Name_convergence_criterium;
             static const unsigned nb_vectors = $( max( fe_set_by_dim_and_name.map( x => x->max_nb_der ) ) + 4 );
-            static const unsigned nb_matrices = 1;
+            static const unsigned nb_matrices = 3;
             static const unsigned auto_contact = false;
             static const bool friction_coeff_is_a_nodal_variable = 0;
             static const unsigned offset_of_pos_unknown = 3;
@@ -1803,7 +2161,7 @@ def write_legacy_lmtpp_carac_formulation_for_element( stream, name_form, fe, dim
     stream <<< "    static const bool has_internal_face_matrix = $( fe->need_internal_face_assembly );"
     stream <<< "    template<class TE,class TF,class TVEVE> static void after_solve(TE &elem,TF &f,TVEVE &vectors,const unsigned *indices) {"
     stream <<< "    #define PNODE(N) elem.node(N)"
-    if not fe->is_numericaly_enriched
+    if not fe->is_numerically_enriched
         stream <<< fe->call_after_solve( @child_cast( fe->pe ) )
     stream <<< "    #undef PNODE"
     stream <<< "    }"
@@ -1893,7 +2251,7 @@ def write_legacy_lmtpp_all_in_one_file( stream, pb_name, fe_set, typeList, list_
                     #include "form_carac_$name_form.$dim.$(fe->pe->name).h"
                     #include "add_matrices_$name_form.$dim.$(fe->pe->name).h"
             for fe in fe_set_by_dim_and_name
-                if fe->is_numericaly_enriched
+                if fe->is_numerically_enriched
                         stream <<<<
                             #include "add_matrices_enriched_$name_form.$dim.$(fe->pe->name).h"
                             #include "add_matrices_corrected_$name_form.$dim.$(fe->pe->name).h"
@@ -1994,7 +2352,7 @@ def write_add_W_chap_F_chap( stream, e_sst, e_int )
     funcList -> [ Function1, Function2, ... ]
 ~#
 def write_legacy_lmtpp_code( pb_name, TfList, TeList, dim_function = x => x::nvi, base_rep = "build", typeList = ["double"], 
-        assume_const_jac_in_elems = true, funcList = [], h_file = "", make_latin_funcs = false , integration_type = "gauss_num", degre_poly_enrichment = 1 )
+        assume_const_jac_in_elems = true, funcList = [], h_file = "", make_latin_funcs = false, integration_type = "gauss_num", degre_poly_enrichment = 1 )
     fe_set := Map[ Int32 #~dim~#, Map[ String #~Formulation~#, Vec[ Ptr[ LmtppFormulationAncestor ] ] ] ]()
     list_sup_all_in_one := Vec[ String ]()
     list_f := Vec[ Ptr[ LmtppFormulationAncestor ] ]()
@@ -2012,6 +2370,7 @@ def write_legacy_lmtpp_code( pb_name, TfList, TeList, dim_function = x => x::nvi
             f->name = Tf
             #
             f->make_matrices( @e, integration_type, degre_poly_enrichment )
+            f->make_matrices_eig( @e, integration_type )
             f->make_matrices_enriched( @e )
             f->make_matrices_coupl( @e )
             f->make_matrices_enriched_corr( @e )
@@ -2052,7 +2411,7 @@ def write_legacy_lmtpp_code( pb_name, TfList, TeList, dim_function = x => x::nvi
                 if not cpt_elem
                     fe->write_add_nodal_matrices( File( rep + "/add_nodal_matrices_$name_form.$dim.h", "w" ) )
                 fe->write_add_elem_matrices( File( rep + "/add_matrices_$name_form.$dim.$(fe->pe->name).h", "w" ) )
-                if fe->is_numericaly_enriched
+                if fe->is_numerically_enriched
                     fe->write_add_elem_matrices_enriched( File( rep + "/add_matrices_enriched_$name_form.$dim.$(fe->pe->name).h", "w" ) )
                     fe->write_add_elem_matrices_enriched_corr( File( rep + "/add_matrices_corrected_$name_form.$dim.$(fe->pe->name).h", "w" ) )
                     fe->write_add_elem_matrices_enriched_coupl( File( rep + "/add_matrices_coupl_$name_form.$dim.$(fe->pe->name).h", "w" ) )
