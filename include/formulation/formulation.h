@@ -2137,7 +2137,7 @@ public:
     virtual void call_after_solve(const Vec<void *> &elem_list) {
         if (vectors_assembly == NULL){
             if ( not allocated )
-                 allocate_matrices();
+                allocate_matrices();
             for(unsigned i=0;i<elem_list.size();++i)
                 TM::TElemList::apply_on_down_cast( reinterpret_cast<typename TM::EA *>(elem_list[i]), CallAfterSolve(), *this, vectors );
         } else {
@@ -2148,7 +2148,7 @@ public:
     virtual void call_after_solve_2(const Vec<void *> &elem_list) {
         if (vectors_assembly== NULL){
             if ( not allocated )
-                 allocate_matrices();
+                allocate_matrices();
             for(unsigned i=0;i<elem_list.size();++i)
                 TM::TElemList::apply_on_down_cast( reinterpret_cast<typename TM::EA *>(elem_list[i]), CallAfterSolve_2(), *this, vectors );
         } else {
