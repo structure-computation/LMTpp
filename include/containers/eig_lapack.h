@@ -86,8 +86,8 @@ void get_eig_val_sym( const TM &m, Vec<double> &eig_val ) {
     char uplo = 'L'; // Lower triangle of m is stored.
     int n = m.nb_rows();
     Vec<double> A; A.resize( n * n );
-    for(unsigned i=0,c=0;i<m.nb_rows();++i)
-        for(unsigned j=0;j<m.nb_cols();++j,++c)
+    for(unsigned j=0,c=0;j<m.nb_cols();++j)
+        for(unsigned i=0;i<m.nb_rows();++i,++c)
             A[ c ] = m( i, j );
     eig_val.resize( n );
     int lwork = 3*n-1;
@@ -106,8 +106,8 @@ void get_eig_sym( const TM &m, Vec<double> &eig_val, Mat<double> &eig_vec ) {
     char uplo = 'L'; // Lower triangle of m is stored.
     int n = m.nb_rows();
     Vec<double> A; A.resize( n * n );
-    for(unsigned i=0,c=0;i<m.nb_rows();++i)
-        for(unsigned j=0;j<m.nb_cols();++j,++c)
+    for(unsigned j=0,c=0;j<m.nb_cols();++j)
+        for(unsigned i=0;i<m.nb_rows();++i,++c)
             A[ c ] = m( i, j );
     eig_val.resize( n );
     int lwork = 3*n-1;
@@ -149,12 +149,12 @@ template<class TM1, class TM2> void get_eig_val_gen( const TM1 &A, const TM2 &B,
     char uplo = 'L'; // Lower triangles of A and B are stored.
     int n = A.nb_rows();
     Vec<double> A_data; A_data.resize( n * n );
-    for(unsigned i=0,c=0;i<A.nb_rows();++i)
-        for(unsigned j=0;j<A.nb_cols();++j,++c)
+    for(unsigned j=0,c=0;j<A.nb_cols();++j)
+        for(unsigned i=0;i<A.nb_rows();++i,++c)
             A_data[ c ] = A( i, j );
     Vec<double> B_data; B_data.resize( n * n );
-    for(unsigned i=0,c=0;i<B.nb_rows();++i)
-        for(unsigned j=0;j<B.nb_cols();++j,++c)
+    for(unsigned j=0,c=0;j<B.nb_cols();++j)
+        for(unsigned i=0;i<B.nb_rows();++i,++c)
             B_data[ c ] = B( i, j );
     eig_val.resize( n );
     int lwork = 3*n-1;
@@ -176,12 +176,12 @@ template<class TM1, class TM2> void get_eig_gen( const TM1 &A, const TM2 &B, Vec
     char uplo = 'L'; // Lower triangles of A and B are stored.
     int n = A.nb_rows();
     Vec<double> A_data; A_data.resize( n * n );
-    for(unsigned i=0,c=0;i<A.nb_rows();++i)
-        for(unsigned j=0;j<A.nb_cols();++j,++c)
+    for(unsigned j=0,c=0;j<A.nb_cols();++j)
+        for(unsigned i=0;i<A.nb_rows();++i,++c)
             A_data[ c ] = A( i, j );
     Vec<double> B_data; B_data.resize( n * n );
-    for(unsigned i=0,c=0;i<B.nb_rows();++i)
-        for(unsigned j=0;j<B.nb_cols();++j,++c)
+    for(unsigned j=0,c=0;j<B.nb_cols();++j)
+        for(unsigned i=0;i<B.nb_rows();++i,++c)
             B_data[ c ] = B( i, j );
     eig_val.resize( n );
     int lwork = 3*n-1;

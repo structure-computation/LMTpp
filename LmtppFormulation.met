@@ -270,6 +270,9 @@ class LmtppFormulationAncestor
     abs_time                 := time_beg_time_step + time
     time_steps               := Vec[ Op ]( size = 32, function = x => symbol("f.time_steps[$x]","\\delta t_$x") )
     
+    pe                       := Ptr[ SymbolicElementAncestor ]()
+    pe_children              := Vec[ Ptr[ SymbolicElementAncestor ] ]()
+    
     dV                       := symbol("dV")
     dV_handbook              := symbol("dV_handbook")
     dV_enr                   := symbol("dV_enr")
@@ -277,24 +280,27 @@ class LmtppFormulationAncestor
     dV_coupl                 := symbol("dV_coupl")
     dV_eig_A                 := symbol("dV_eig_A")
     dV_eig_B                 := symbol("dV_eig_B")
+    dV_eig_C                 := Vec[ Op ]( size = 6, function = x => symbol("dV_eig_C[$x]") )
     
     dS                       := symbol("dS")
     dS_handbook              := symbol("dS_handbook")
     dS_eig_A                 := symbol("dS_eig_A")
     dS_eig_B                 := symbol("dS_eig_B")
+    dS_eig_C                 := Vec[ Op ]( size = 6, function = x => symbol("dS_eig_C[$x]") )
     diF                      := symbol("diF")
     diF_handbook             := symbol("diF_handbook")
     diF_eig_A                := symbol("diF_eig_A")
     diF_eig_B                := symbol("diF_eig_B")
+    diF_eig_C                := Vec[ Op ]( size = 6, function = x => symbol("diF_eig_C[$x]") )
     dN                       := symbol("dN")
     dN_eig_A                 := symbol("dN_eig_A")
     dN_eig_B                 := symbol("dN_eig_B")
+    dN_eig_C                 := Vec[ Op ]( size = 6, function = x => symbol("dN_eig_C[$x]") )
     dE                       := symbol("dE")
     dE_eig_A                 := symbol("dE_eig_A")
     dE_eig_B                 := symbol("dE_eig_B")
-    pe                       := Ptr[ SymbolicElementAncestor ]()
-    pe_children              := Vec[ Ptr[ SymbolicElementAncestor ] ]()
-    
+    dE_eig_C                 := Vec[ Op ]( size = 6, function = x => symbol("dE_eig_C[$x]") )
+        
     # parameters
     left_time_integration    := 0
     right_time_integration   := 1
@@ -324,18 +330,6 @@ class LmtppFormulationAncestor
     K_dS  := Vec[ Mat[ Op ] ]()
     K_diF := Vec[ Mat[ Op ] ]()
 
-    A_dV        := Mat[ Op ]()
-    A_dG  := Mat[ Op ]()
-    A_dN  := Mat[ Op ]()
-    A_dS  := Vec[ Mat[ Op ] ]()
-    A_diF := Vec[ Mat[ Op ] ]()
-
-    B_dV        := Mat[ Op ]()
-    B_dG  := Mat[ Op ]()
-    B_dN  := Mat[ Op ]()
-    B_dS  := Vec[ Mat[ Op ] ]()
-    B_diF := Vec[ Mat[ Op ] ]()
-    
     F_dV        := Vec[ Op ]()
     F_dV_enr    := Vec[ Op ]()
     F_dV_coupl  := Vec[ Op ]()
@@ -345,6 +339,25 @@ class LmtppFormulationAncestor
     F_dN  := Vec[ Op ]()
     F_dS  := Vec[ Vec[ Op ] ]()
     F_diF := Vec[ Vec[ Op ] ]()
+
+    A_dV  := Mat[ Op ]()
+    A_dG  := Mat[ Op ]()
+    A_dN  := Mat[ Op ]()
+    A_dS  := Vec[ Mat[ Op ] ]()
+    A_diF := Vec[ Mat[ Op ] ]()
+
+    B_dV  := Mat[ Op ]()
+    B_dG  := Mat[ Op ]()
+    B_dN  := Mat[ Op ]()
+    B_dS  := Vec[ Mat[ Op ] ]()
+    B_diF := Vec[ Mat[ Op ] ]()
+
+    C_dV  := Mat[ Op ]()
+    C_dG  := Mat[ Op ]()
+    C_dN  := Mat[ Op ]()
+    C_dS  := Vec[ Mat[ Op ] ]()
+    C_diF := Vec[ Mat[ Op ] ]()
+    
     
     name := ""
     
@@ -530,9 +543,9 @@ class LmtppFormulationAncestor
                             cw.add( "K(indices[$(num_inds[r])]+$(off_inds[r])+$(corr_off_inds[r]),indices[$(num_inds[c])]+$(off_inds[c])+$(corr_off_inds[c]))", K[r,c] * ( 1 - symm * ( c > r ) ), add )
         # info time_of_day_in_sec() - t0
         return cw.to_string()
-
+        
     #
-    def write_mat_eig( A, B, assemble_mat, want_nodal, want_skin_elem, want_elem, want_global, want_assign = false, want_parallele = false )
+    def write_mat_eig( A, B, assemble_mat_A, assemble_mat_B, want_nodal, want_skin_elem, want_elem, want_global, want_assign = false, want_parallele = false )
         #
         num_inds := Vec[Int32]()
         off_inds := Vec[Int32]()
@@ -583,26 +596,96 @@ class LmtppFormulationAncestor
             num_ind += has_unknown_this_kind
             
         #
-        symm := symbol("symm")
+        Asymm := symbol("Asymm")
+        Bsymm := symbol("Bsymm")
         cw := CodeWriterAlt("T") # Alt
         cw.make_cw_parallele( want_parallele )
         # t0 := time_of_day_in_sec()
         for r in 0 .. A.nb_rows
-            if assemble_mat
+            if assemble_mat_A
                 for c in 0 .. A.nb_cols
                     if not assumed( A[r,c] == 0 )
                         if want_assign
-                            cw.add( "A(indices[$(num_inds[r])]+$(off_inds[r])+$(corr_off_inds[r]),indices[$(num_inds[c])]+$(off_inds[c])+$(corr_off_inds[c]))", A[r,c] * ( 1 - symm * ( c > r ) ), reassign )
+                            cw.add( "A(indices[$(num_inds[r])]+$(off_inds[r])+$(corr_off_inds[r]),indices[$(num_inds[c])]+$(off_inds[c])+$(corr_off_inds[c]))", A[r,c] * ( 1 - Asymm * ( c > r ) ), reassign )
                         else
-                            cw.add( "A(indices[$(num_inds[r])]+$(off_inds[r])+$(corr_off_inds[r]),indices[$(num_inds[c])]+$(off_inds[c])+$(corr_off_inds[c]))", A[r,c] * ( 1 - symm * ( c > r ) ), add )
+                            cw.add( "A(indices[$(num_inds[r])]+$(off_inds[r])+$(corr_off_inds[r]),indices[$(num_inds[c])]+$(off_inds[c])+$(corr_off_inds[c]))", A[r,c] * ( 1 - Asymm * ( c > r ) ), add )
+        for r in 0 .. B.nb_rows
+            if assemble_mat_B
+                for c in 0 .. B.nb_cols
                     if not assumed( B[r,c] == 0 )
                         if want_assign
-                            cw.add( "B(indices[$(num_inds[r])]+$(off_inds[r])+$(corr_off_inds[r]),indices[$(num_inds[c])]+$(off_inds[c])+$(corr_off_inds[c]))", B[r,c] * ( 1 - symm * ( c > r ) ), reassign )
+                            cw.add( "B(indices[$(num_inds[r])]+$(off_inds[r])+$(corr_off_inds[r]),indices[$(num_inds[c])]+$(off_inds[c])+$(corr_off_inds[c]))", B[r,c] * ( 1 - Bsymm * ( c > r ) ), reassign )
                         else
-                            cw.add( "B(indices[$(num_inds[r])]+$(off_inds[r])+$(corr_off_inds[r]),indices[$(num_inds[c])]+$(off_inds[c])+$(corr_off_inds[c]))", B[r,c] * ( 1 - symm * ( c > r ) ), add )
+                            cw.add( "B(indices[$(num_inds[r])]+$(off_inds[r])+$(corr_off_inds[r]),indices[$(num_inds[c])]+$(off_inds[c])+$(corr_off_inds[c]))", B[r,c] * ( 1 - Bsymm * ( c > r ) ), add )
         # info time_of_day_in_sec() - t0
         return cw.to_string()
 
+    #
+    def write_mat_eq( C, assemble_mat, want_nodal, want_skin_elem, want_elem, want_global, want_assign = false, want_parallele = false )
+        #
+        num_inds := Vec[Int32]()
+        off_inds := Vec[Int32]()
+        corr_off_inds := Vec[Op]() # pour l'enrichissement
+        num_ind  := 0
+        if want_nodal
+            for s in unk_expr_syms
+                if s->node >= 0
+                    num_inds.push_back( s->node )
+                    off_inds.push_back( s->off_ind )
+                    corr_off_inds.push_back(symbol("0"))
+            num_ind += pe->nb_nodes_
+        
+        if want_skin_elem
+            has_unknown_this_kind := false
+            for s in unk_expr_syms
+                if s->skin >= 0
+                    num_inds.push_back( num_ind )
+                    off_inds.push_back( s->off_ind )
+                    has_unknown_this_kind = true
+                    corr_off_inds.push_back(symbol("0"))
+            num_ind += has_unknown_this_kind
+        
+        if want_elem
+            has_unknown_this_kind := false
+            for s in unk_expr_syms
+                if s->elem >= 0
+                    num_inds.push_back( num_ind )
+                    off_inds.push_back( s->off_ind )
+                    has_unknown_this_kind = true
+                    if is_numerically_enriched
+                        corr_off_inds.push_back(symbol("6*id"))
+                    else
+                        corr_off_inds.push_back(symbol("0"))
+            num_ind += has_unknown_this_kind
+                
+        if want_global
+            has_unknown_this_kind := false
+            for s in unk_expr_syms
+                if s->glob >= 0
+                    num_inds.push_back( num_ind )
+                    off_inds.push_back( s->off_ind )
+                    has_unknown_this_kind = true
+                    if is_numerically_enriched
+                        corr_off_inds.push_back(symbol("6*id"))
+                    else
+                        corr_off_inds.push_back(symbol("0"))
+            num_ind += has_unknown_this_kind
+            
+        #
+        cw := CodeWriterAlt("T") # Alt
+        cw.make_cw_parallele( want_parallele )
+        # t0 := time_of_day_in_sec()
+        for r in 0 .. C.nb_rows
+            if assemble_mat
+                for c in 0 .. C.nb_cols
+                    if not assumed( C[r,c] == 0 )
+                        if want_assign
+                            cw.add( "C($r,indices[$(num_inds[c])]+$(off_inds[c])+$(corr_off_inds[c]))", C[r,c], reassign )
+                        else
+                            cw.add( "C($r,indices[$(num_inds[c])]+$(off_inds[c])+$(corr_off_inds[c]))", C[r,c], add )
+        # info time_of_day_in_sec() - t0
+        return cw.to_string()
+        
     # 
     def write_mat_with_cond( K, F, assemble_mat, assemble_vec, want_nodal, want_skin_elem, want_elem, want_global, want_assign = false, want_parallele = false, line_range_min = 0, line_range_max = F.size )
         #
@@ -860,14 +943,120 @@ class LmtppFormulationAncestor
                             const unsigned *indices ) {
                             add_internal_face_matrix( f, f.matrices(Number<0>()), f.sollicitation, f.vectors, matrix_is_sym, assemble_mat, assemble_vec, elem, skin_elem, num_child, indices );
                         }
+        for assemble_mat_A in 0 .. 2
+            for assemble_mat_B in 0 .. 2
+                stream <<<<
+                    // 
+                    template<class TM,class T,bool wont_add_nz,class TK,class TV,unsigned Asymm,unsigned Bsymm,class T_pos,class ND,class ED,unsigned nim>
+                    void add_elem_matrix(
+                        Formulation<TM,$name,DefaultBehavior,T,wont_add_nz> &f,
+                        TK &A,
+                        TK &B,
+                        TV &vectors,
+                        const Number<Asymm> &matrix_A_is_sym,
+                        const Number<Bsymm> &matrix_B_is_sym,
+                        const Number<$assemble_mat_A> &assemble_mat_A,
+                        const Number<$assemble_mat_B> &assemble_mat_B,
+                        const Element<$(pe->name),DefaultBehavior,Node<$nb_dim,T_pos,ND>,ED,nim> &elem,
+                        const unsigned *indices ) {
+                        pthread_mutex_t* mutex = &f.mutex;
+                        #define PNODE(N) elem.node(N)
+                    $( write_mat_eig( A_dV, B_dV, assemble_mat_A, assemble_mat_B, want_nodal=true, want_skin_elem=true, want_elem=true, want_global=true, want_parallele=is_numerically_enriched ) )
+                        #undef PNODE
+                    }
+                    //
+                    template<class TM,class T,bool wont_add_nz,unsigned Asymm,unsigned Bsymm,class T_pos,class ND,class ED,unsigned nim>
+                    void add_elem_matrix(
+                        Formulation<TM,$name,DefaultBehavior,T,wont_add_nz> &f,
+                        const Number<Asymm> &matrix_A_is_sym,
+                        const Number<Bsymm> &matrix_B_is_sym,
+                        const Number<$assemble_mat_A> &assemble_mat_A,
+                        const Number<$assemble_mat_B> &assemble_mat_B,
+                        const Element<$(pe->name),DefaultBehavior,Node<$nb_dim,T_pos,ND>,ED,nim> &elem,
+                        const unsigned *indices ) {
+                        add_elem_matrix( f, f.matrices(Number<1>()), f.matrices(Number<2>()), f.vectors, matrix_A_is_sym, matrix_B_is_sym, assemble_mat_A, assemble_mat_B, elem, indices );
+                    }
+                
+                for pc, num_pc in pe_children, 0...
+                    stream <<<<
+                        // 
+                        template<class TM,class T,bool wont_add_nz,class TK,class TV,unsigned Asymm,unsigned Bsymm,class T_pos,class ND,class ED,unsigned nim,class ED2,unsigned nim2>
+                        void add_skin_elem_matrix(
+                            Formulation<TM,$name,DefaultBehavior,T,wont_add_nz> &f,
+                            TK &A,
+                            TK &B,
+                            TV &vectors,
+                            const Number<Asymm> &matrix_A_is_sym,
+                            const Number<Bsymm> &matrix_B_is_sym,
+                            const Number<$assemble_mat_A> &assemble_mat_A,
+                            const Number<$assemble_mat_B> &assemble_mat_B,
+                            const Element<$(pe->name),DefaultBehavior,Node<$nb_dim,T_pos,ND>,ED,nim> &elem,
+                            const Element<$(pc->name),DefaultBehavior,Node<$nb_dim,T_pos,ND>,ED2,nim2> &skin_elem,
+                            const Number<$num_pc> &num_child,
+                            const unsigned *indices ) {
+                            pthread_mutex_t* mutex = &f.mutex;
+                            #define PNODE(N) elem.node(N)
+                        $( write_mat_eig( A_dS[num_pc], B_dS[num_pc], assemble_mat_A, assemble_mat_B, want_nodal=true, want_skin_elem=true, want_elem=true, want_global=true, want_parallele=is_numerically_enriched ) )
+                            #undef PNODE
+                        }
+                    stream <<<<
+                        // 
+                        template<class TM,class T,bool wont_add_nz,unsigned Asymm,unsigned Bsymm,class T_pos,class ND,class ED,unsigned nim,class ED2,unsigned nim2>
+                        void add_skin_elem_matrix(
+                            Formulation<TM,$name,DefaultBehavior,T,wont_add_nz> &f,
+                            const Number<Asymm> &matrix_A_is_sym,
+                            const Number<Bsymm> &matrix_B_is_sym,
+                            const Number<$assemble_mat_A> &assemble_mat_A,
+                            const Number<$assemble_mat_B> &assemble_mat_B,
+                            const Element<$(pe->name),DefaultBehavior,Node<$nb_dim,T_pos,ND>,ED,nim> &elem,
+                            const Element<$(pc->name),DefaultBehavior,Node<$nb_dim,T_pos,ND>,ED2,nim2> &skin_elem,
+                            const Number<$num_pc> &num_child,
+                            const unsigned *indices ) {
+                            add_skin_elem_matrix( f, f.matrices(Number<1>()), f.matrices(Number<2>()), f.vectors, matrix_A_is_sym, matrix_B_is_sym, assemble_mat_A, assemble_mat_B, elem, skin_elem, num_child, indices );
+                        }
+                    stream <<<<
+                        // 
+                        template<class TM,class T,bool wont_add_nz,class TK,class TV,unsigned Asymm,unsigned Bsymm,class T_pos,class ND,class ED,unsigned nim,class ED2,unsigned nim2>
+                        void add_internal_face_matrix(
+                            Formulation<TM,$name,DefaultBehavior,T,wont_add_nz> &f,
+                            TK &A,
+                            TK &B,
+                            TV &vectors,
+                            const Number<Asymm> &matrix_A_is_sym,
+                            const Number<Bsymm> &matrix_B_is_sym,
+                            const Number<$assemble_mat_A> &assemble_mat_A,
+                            const Number<$assemble_mat_B> &assemble_mat_B,
+                            const Element<$(pe->name),DefaultBehavior,Node<$nb_dim,T_pos,ND>,ED,nim> &elem,
+                            const Element<$(pc->name),DefaultBehavior,Node<$nb_dim,T_pos,ND>,ED2,nim2> &skin_elem,
+                            const Number<$num_pc> &num_child,
+                            const unsigned *indices ) {
+                            pthread_mutex_t* mutex = &f.mutex;
+                            #define PNODE(N) elem.node(N)
+                        $( write_mat_eig( A_diF[num_pc], B_diF[num_pc], assemble_mat_A, assemble_mat_B, want_nodal=true, want_skin_elem=true, want_elem=true, want_global=true, want_parallele=is_numerically_enriched ) )
+                            #undef PNODE
+                        }
+                    stream <<<<
+                        // 
+                        template<class TM,class T,bool wont_add_nz,unsigned Asymm,unsigned Bsymm,class T_pos,class ND,class ED,unsigned nim,class ED2,unsigned nim2>
+                        void add_internal_face_matrix(
+                            Formulation<TM,$name,DefaultBehavior,T,wont_add_nz> &f,
+                            const Number<Asymm> &matrix_A_is_sym,
+                            const Number<Bsymm> &matrix_B_is_sym,
+                            const Number<$assemble_mat_A> &assemble_mat_A,
+                            const Number<$assemble_mat_B> &assemble_mat_B,
+                            const Element<$(pe->name),DefaultBehavior,Node<$nb_dim,T_pos,ND>,ED,nim> &elem,
+                            const Element<$(pc->name),DefaultBehavior,Node<$nb_dim,T_pos,ND>,ED2,nim2> &skin_elem,
+                            const Number<$num_pc> &num_child,
+                            const unsigned *indices ) {
+                            add_internal_face_matrix( f, f.matrices(Number<1>()), f.matrices(Number<2>()), f.vectors, matrix_A_is_sym, matrix_B_is_sym, assemble_mat_A, assemble_mat_B, elem, skin_elem, num_child, indices );
+                        }
         for assemble_mat in 0 .. 2
             stream <<<<
                 // 
                 template<class TM,class T,bool wont_add_nz,class TK,class TV,unsigned symm,class T_pos,class ND,class ED,unsigned nim>
                 void add_elem_matrix(
                     Formulation<TM,$name,DefaultBehavior,T,wont_add_nz> &f,
-                    TK &A,
-                    TK &B,
+                    TK &C,
                     TV &vectors,
                     const Number<symm> &matrix_is_sym,
                     const Number<$assemble_mat> &assemble_mat,
@@ -875,7 +1064,7 @@ class LmtppFormulationAncestor
                     const unsigned *indices ) {
                     pthread_mutex_t* mutex = &f.mutex;
                     #define PNODE(N) elem.node(N)
-                $( write_mat_eig( A_dV, B_dV, assemble_mat, want_nodal=true, want_skin_elem=true, want_elem=true, want_global=true, want_parallele=is_numerically_enriched ) )
+                $( write_mat_eq( C_dV, assemble_mat, want_nodal=true, want_skin_elem=true, want_elem=true, want_global=true, want_parallele=is_numerically_enriched ) )
                     #undef PNODE
                 }
                 //
@@ -886,7 +1075,7 @@ class LmtppFormulationAncestor
                     const Number<$assemble_mat> &assemble_mat,
                     const Element<$(pe->name),DefaultBehavior,Node<$nb_dim,T_pos,ND>,ED,nim> &elem,
                     const unsigned *indices ) {
-                    add_elem_matrix( f, f.matrices(Number<1>()), f.matrices(Number<2>()), f.vectors, matrix_is_sym, assemble_mat, elem, indices );
+                    add_elem_matrix( f, f.matrices(Number<3>()), f.vectors, matrix_is_sym, assemble_mat, elem, indices );
                 }
             
             for pc, num_pc in pe_children, 0...
@@ -895,8 +1084,7 @@ class LmtppFormulationAncestor
                     template<class TM,class T,bool wont_add_nz,class TK,class TV,unsigned symm,class T_pos,class ND,class ED,unsigned nim,class ED2,unsigned nim2>
                     void add_skin_elem_matrix(
                         Formulation<TM,$name,DefaultBehavior,T,wont_add_nz> &f,
-                        TK &A,
-                        TK &B,
+                        TK &C,
                         TV &vectors,
                         const Number<symm> &matrix_is_sym,
                         const Number<$assemble_mat> &assemble_mat,
@@ -906,7 +1094,7 @@ class LmtppFormulationAncestor
                         const unsigned *indices ) {
                         pthread_mutex_t* mutex = &f.mutex;
                         #define PNODE(N) elem.node(N)
-                    $( write_mat_eig( A_dS[num_pc], B_dS[num_pc], assemble_mat, want_nodal=true, want_skin_elem=true, want_elem=true, want_global=true, want_parallele=is_numerically_enriched ) )
+                    $( write_mat_eq( C_dS[num_pc], assemble_mat, want_nodal=true, want_skin_elem=true, want_elem=true, want_global=true, want_parallele=is_numerically_enriched ) )
                         #undef PNODE
                     }
                 stream <<<<
@@ -920,15 +1108,14 @@ class LmtppFormulationAncestor
                         const Element<$(pc->name),DefaultBehavior,Node<$nb_dim,T_pos,ND>,ED2,nim2> &skin_elem,
                         const Number<$num_pc> &num_child,
                         const unsigned *indices ) {
-                        add_skin_elem_matrix( f, f.matrices(Number<1>()), f.matrices(Number<2>()), f.vectors, matrix_is_sym, assemble_mat, elem, skin_elem, num_child, indices );
+                        add_skin_elem_matrix( f, f.matrices(Number<3>()), f.vectors, matrix_is_sym, assemble_mat, elem, skin_elem, num_child, indices );
                     }
                 stream <<<<
                     // 
                     template<class TM,class T,bool wont_add_nz,class TK,class TV,unsigned symm,class T_pos,class ND,class ED,unsigned nim,class ED2,unsigned nim2>
                     void add_internal_face_matrix(
                         Formulation<TM,$name,DefaultBehavior,T,wont_add_nz> &f,
-                        TK &A,
-                        TK &B,
+                        TK &C,
                         TV &vectors,
                         const Number<symm> &matrix_is_sym,
                         const Number<$assemble_mat> &assemble_mat,
@@ -938,7 +1125,7 @@ class LmtppFormulationAncestor
                         const unsigned *indices ) {
                         pthread_mutex_t* mutex = &f.mutex;
                         #define PNODE(N) elem.node(N)
-                    $( write_mat_eig( A_diF[num_pc], B_diF[num_pc], assemble_mat, want_nodal=true, want_skin_elem=true, want_elem=true, want_global=true, want_parallele=is_numerically_enriched ) )
+                    $( write_mat_eq( C_diF[num_pc], assemble_mat, want_nodal=true, want_skin_elem=true, want_elem=true, want_global=true, want_parallele=is_numerically_enriched ) )
                         #undef PNODE
                     }
                 stream <<<<
@@ -952,7 +1139,7 @@ class LmtppFormulationAncestor
                         const Element<$(pc->name),DefaultBehavior,Node<$nb_dim,T_pos,ND>,ED2,nim2> &skin_elem,
                         const Number<$num_pc> &num_child,
                         const unsigned *indices ) {
-                        add_internal_face_matrix( f, f.matrices(Number<1>()), f.matrices(Number<2>()), f.vectors, matrix_is_sym, assemble_mat, elem, skin_elem, num_child, indices );
+                        add_internal_face_matrix( f, f.matrices(Number<3>()), f.vectors, matrix_is_sym, assemble_mat, elem, skin_elem, num_child, indices );
                     }
         stream <<< "} // namespace LMT"
         
@@ -1443,20 +1630,49 @@ class LmtppFormulationAncestor
                         const unsigned *indices ) {
                         add_nodal_matrix( f, f.matrices(Number<0>()), f.sollicitation, f.vectors, matrix_is_sym, assemble_mat, assemble_vec, node, indices );
                     }
+        for assemble_mat_A in 0 .. 2
+            for assemble_mat_B in 0 .. 2
+                stream <<<<
+                    template<class TM,class TK,class TV,class T,bool wont_add_nz,unsigned Asymm,unsigned Bsymm>
+                    void add_nodal_matrix(
+                        Formulation<TM,$name,DefaultBehavior,T,wont_add_nz> &f,
+                        TK &A,
+                        TK &B,
+                        TV &vectors,
+                        const Number<Asymm> &matrix_A_is_sym,
+                        const Number<Bsymm> &matrix_B_is_sym,
+                        const Number<$assemble_mat_A> &assemble_mat_A,
+                        const Number<$assemble_mat_B> &assemble_mat_B,
+                        const typename TM::TNode &node,
+                        const unsigned *indices ) {
+                        #define PNODE(N) (&node)
+                    $( write_mat_eig( A_dN, B_dN, assemble_mat_A, assemble_mat_B, want_nodal=true, want_skin_elem=false, want_elem=false, want_global=true ) )
+                        #undef PNODE
+                    }
+                    template<class TM,class T,bool wont_add_nz,unsigned Asymm,unsigned Bsymm,unsigned Csymm>
+                    void add_nodal_matrix(
+                        Formulation<TM,$name,DefaultBehavior,T,wont_add_nz> &f,
+                        const Number<Asymm> &matrix_A_is_sym,
+                        const Number<Bsymm> &matrix_B_is_sym,
+                        const Number<$assemble_mat_A> &assemble_mat_A,
+                        const Number<$assemble_mat_B> &assemble_mat_B,
+                        const typename TM::TNode &node,
+                        const unsigned *indices ) {
+                        add_nodal_matrix( f, f.matrices(Number<1>()), f.matrices(Number<2>()), f.vectors, matrix_A_is_sym, matrix_B_is_sym, assemble_mat_A, assemble_mat_B, node, indices );
+                    }
         for assemble_mat in 0 .. 2
             stream <<<<
-                template<class TM,class TK,class TF,class TV,class T,bool wont_add_nz,unsigned symm>
+                template<class TM,class TK,class TV,class T,bool wont_add_nz,unsigned symm>
                 void add_nodal_matrix(
                     Formulation<TM,$name,DefaultBehavior,T,wont_add_nz> &f,
-                    TK &A,
-                    TK &B,
+                    TK &C,
                     TV &vectors,
                     const Number<symm> &matrix_is_sym,
                     const Number<$assemble_mat> &assemble_mat,
                     const typename TM::TNode &node,
                     const unsigned *indices ) {
                     #define PNODE(N) (&node)
-                $( write_mat_eig( A_dN, B_dN, assemble_mat, want_nodal=true, want_skin_elem=false, want_elem=false, want_global=true ) )
+                $( write_mat_eq( C_dN, assemble_mat, want_nodal=true, want_skin_elem=false, want_elem=false, want_global=true ) )
                     #undef PNODE
                 }
                 template<class TM,class T,bool wont_add_nz,unsigned symm>
@@ -1466,7 +1682,7 @@ class LmtppFormulationAncestor
                     const Number<$assemble_mat> &assemble_mat,
                     const typename TM::TNode &node,
                     const unsigned *indices ) {
-                    add_nodal_matrix( f, f.matrices(Number<1>()), f.matrices(Number<2>()), f.vectors, matrix_is_sym, assemble_mat, node, indices );
+                    add_nodal_matrix( f, f.matrices(Number<3>()), f.vectors, matrix_is_sym, assemble_mat, node, indices );
                 }
         stream <<< "} // namespace LMT"
         stream <<< "#endif"
@@ -1775,6 +1991,94 @@ class LmtppFormulation[ dim ] inherits LmtppFormulationAncestor
                 unk_expr_syms.map( _0->sym ), 
                 unk_test_syms.map( _0->sym )
             )
+
+    def make_matrices_eq( e, integration_type = "gauss_num" )
+        residual := Op( formulation( e ) )
+        e.assume_const_jac = true
+        residual_const_jac := Op( formulation( e ) )
+        e.assume_const_jac = hyp_const_jac
+
+        # time integration
+        if max_nb_der
+            if use_theta_method
+                residual = residual.subs( time, theta * time_steps[1] )
+            else
+                residual = integration( residual, time, left_time_integration * time_steps[1], right_time_integration * time_steps[0] )
+        
+        C_dV.resize( Int32( pe->nb_dim*(pe->nb_dim+1)/2 ), Vec[Op]( unk_test_syms.map( _0->sym ) ).size )
+        C_dN.resize( Int32( pe->nb_dim*(pe->nb_dim+1)/2 ), Vec[Op]( unk_test_syms.filter( _0->node >=0 or _0->glob >= 0 ).map( _0->sym ) ).size )
+        for n in 0 .. Int32( pe->nb_dim*(pe->nb_dim+1)/2 )
+            # volumic part
+            volumic_part_C := residual.diff( dV_eig_C[ n ] )
+            degre_poly_C := volumic_part_C.poly_deg( e.var_inter )
+            if degre_poly_C < 0
+                volumic_part_C_const_jac := residual_const_jac.diff( dV_eig_C[ n ] )
+                degre_poly_C = volumic_part_C_const_jac.poly_deg( e.var_inter )
+            if integration_type == "bestial_num"
+                volumic_part_C = e.bestial_num_integration( volumic_part_C, mul_by_jac = true, div_ = 6 )
+            else if integration_type == "gauss_num"
+                volumic_part_C = e.gauss_num_integration( volumic_part_C, order_diff = degre_poly_C )
+            else if integration_type == "formal"
+                volumic_part_C = e.integration( volumic_part_C, order_diff = degre_poly_C )
+            volumic_part_C += residual.diff( dE_eig_C[ n ] )
+            C_dV_tmp := Vec[ Op ]()
+            _compute_F_from_residual( volumic_part_C, C_dV_tmp, unk_expr_syms.map( _0->sym ), unk_test_syms.map( _0->sym ) )
+            C_dV.row( n ) = C_dV_tmp
+            
+            # nodal part
+            nodal_part_C := residual.diff( dN_eig_C[ n ] )
+            nodal_part_C = nodal_part_C.subs( e.var_inter, e.points[ 0 ] )
+            C_dN_tmp := Vec[ Op ]()
+            _compute_F_from_residual( nodal_part_C, C_dN_tmp, 
+                unk_expr_syms.filter( _0->node >=0 or _0->glob >= 0 ).map( _0->sym ), 
+                unk_test_syms.filter( _0->node >=0 or _0->glob >= 0 ).map( _0->sym )
+            )
+            C_dN.row( n ) = C_dN_tmp
+            
+        # surf parts
+        C_dS.resize( pe_children.size )
+        C_diF.resize( pe_children.size )
+        for pc_, num_child in pe_children, 0...
+            C_dS[ num_child ].resize( Int32( pe->nb_dim*(pe->nb_dim+1)/2 ), Vec[Op]( unk_test_syms.map( _0->sym ) ).size )
+            C_diF[ num_child ].resize( Int32( pe->nb_dim*(pe->nb_dim+1)/2 ), Vec[Op]( unk_test_syms.map( _0->sym ) ).size )
+        for n in 0 .. Int32( pe->nb_dim*(pe->nb_dim+1)/2 )
+            surf_part_C := residual.diff( dS_eig_C[ n ] )
+            surf_part_C_const_jac := residual_const_jac.diff( dS_eig_C[ n ] )
+            internal_surf_part_C := residual.diff( diF_eig_C[ n ] )
+            internal_surf_part_C_const_jac := residual_const_jac.diff( diF_eig_C[ n ] )
+            for pc_, num_child in pe_children, 0...
+                pc := child_cast( pc_ )
+                loc_surf_part_C := surf_part_C.subs( e.var_inter, e.var_inter_from_child_var_inter( sub_nvi = 1, num_child = num_child, child_var_inter = pc->var_inter ) )
+                degre_poly_surf_C := loc_surf_part_C.poly_deg( pc->var_inter )
+                if degre_poly_surf_C < 0
+                    loc_surf_part_C_const_jac := surf_part_C_const_jac.subs( e.var_inter, e.var_inter_from_child_var_inter( sub_nvi = 1, num_child = num_child, child_var_inter = pc->var_inter ) )
+                    degre_poly_surf_C = loc_surf_part_C_const_jac.poly_deg( pc->var_inter )
+                loc_internal_surf_part_C := internal_surf_part_C.subs( e.var_inter, e.var_inter_from_child_var_inter( sub_nvi = 1, num_child = num_child, child_var_inter = pc->var_inter ) )
+                degre_poly_internal_surf_C := loc_internal_surf_part_C.poly_deg( pc->var_inter )
+                if degre_poly_internal_surf_C < 0
+                    loc_internal_surf_part_C_const_jac := internal_surf_part_C_const_jac.subs( e.var_inter, e.var_inter_from_child_var_inter( sub_nvi = 1, num_child = num_child, child_var_inter = pc->var_inter ) )
+                    degre_poly_internal_surf_C = loc_internal_surf_part_C_const_jac.poly_deg( pc->var_inter )
+                if integration_type == "bestial_num"
+                    loc_surf_part_C = pc->bestial_num_integration( loc_surf_part_C, mul_by_jac = true, div_ = 6 )
+                    loc_internal_surf_part_C = pc->bestial_num_integration( loc_internal_surf_part_C, mul_by_jac = true, div_ = 6 )
+                else if integration_type == "gauss_num"
+                    loc_surf_part_C = pc->gauss_num_integration( loc_surf_part_C, order_diff = degre_poly_surf_C )
+                    loc_internal_surf_part_C = pc->gauss_num_integration( loc_internal_surf_part_C, order_diff = degre_poly_internal_surf_C )
+                else if integration_type == "formal"
+                    loc_surf_part_C = pc->integration( loc_surf_part_C, order_diff = degre_poly_surf_C )
+                    loc_internal_surf_part_C = pc->integration( loc_internal_surf_part_C, order_diff = degre_poly_internal_surf_C )
+                C_dS_tmp := Vec[ Op ]()
+                _compute_F_from_residual( loc_surf_part_C, C_dS_tmp,
+                    unk_expr_syms.map( _0->sym ), 
+                    unk_test_syms.map( _0->sym )
+                )
+                C_dS[ num_child ].row( n ) = C_dS_tmp
+                C_diF_tmp := Vec[ Op ]()
+                _compute_F_from_residual( loc_internal_surf_part_C, C_diF_tmp,
+                    unk_expr_syms.map( _0->sym ), 
+                    unk_test_syms.map( _0->sym )
+                )
+                C_diF[ num_child ].row( n ) = C_diF_tmp
         
     def make_matrices_enriched( e )
         residual := Op( formulation( e ) )
@@ -1867,7 +2171,7 @@ class LmtppFormulation[ dim ] inherits LmtppFormulationAncestor
         expr_symbols := Vec[Op]( expr_symbols_ ) # hum
         test_symbols := Vec[Op]( test_symbols_ ) # hum
         F := Vec[Op]()
-
+        
         # minimization ?
         if assumed( norm_1( expr_symbols - test_symbols ) == 0 )
             qe := quadratic_expansion( residual, expr_symbols )
@@ -1885,6 +2189,39 @@ class LmtppFormulation[ dim ] inherits LmtppFormulationAncestor
                 K.col( cpt_expr ) = diff( F, expr_symbol )
             # if non linear / test_symbols
             K =  K.subs( test_symbols, expr_symbols )
+        
+    #
+    def _compute_F_from_residual( residual, F, expr_symbols_, test_symbols_ )
+        expr_symbols := Vec[Op]( expr_symbols_ ) # hum
+        test_symbols := Vec[Op]( test_symbols_ ) # hum
+        K := Mat[Op]()
+        
+        # minimization ?
+        if assumed( norm_1( expr_symbols - test_symbols ) == 0 )
+            qe := quadratic_expansion( residual, expr_symbols )
+            K = qe.m
+            F = qe.v
+        # else, use test_symbols
+        else
+            K.resize( test_symbols.size, expr_symbols.size )
+            F.resize( test_symbols.size )
+            # K and F
+            res_diff_test := Vec[Op]()
+            for test_symbol, cpt_test in test_symbols, 0...
+                F[ cpt_test ] = residual.diff( test_symbol )
+            for expr_symbol, cpt_expr in expr_symbols, 0...
+                K.col( cpt_expr ) = diff( F, expr_symbol )
+            # if non linear / test_symbols
+            K =  K.subs( test_symbols, expr_symbols )
+            F = -F.subs( test_symbols, expr_symbols )
+            
+        # if linear simplification, else, we K U_n+1 = F + K U_n
+        linear_expr := not K.depends_on( expr_symbols )
+        all_K_are_linear &= linear_expr
+        if linear_expr
+            F = F.subs( expr_symbols, expr_symbols * 0 )
+        else
+            F += K * expr_symbols
 
     # helpers
     def grad    ( expr )  return pe->grad    ( expr )
@@ -2101,7 +2438,7 @@ def write_legacy_lmtpp_carac_formulation( stream, name_form, fe_set_by_dim_and_n
             static const bool need_skin_assembly = $( any( fe_set_by_dim_and_name.map( x => x->need_skin_assembly ) ) );
             typedef Norm1_is_inf Name_convergence_criterium;
             static const unsigned nb_vectors = $( max( fe_set_by_dim_and_name.map( x => x->max_nb_der ) ) + 4 );
-            static const unsigned nb_matrices = 3;
+            static const unsigned nb_matrices = 4;
             static const unsigned auto_contact = false;
             static const bool friction_coeff_is_a_nodal_variable = 0;
             static const unsigned offset_of_pos_unknown = 3;
@@ -2371,6 +2708,7 @@ def write_legacy_lmtpp_code( pb_name, TfList, TeList, dim_function = x => x::nvi
             #
             f->make_matrices( @e, integration_type, degre_poly_enrichment )
             f->make_matrices_eig( @e, integration_type )
+            f->make_matrices_eq( @e, integration_type )
             f->make_matrices_enriched( @e )
             f->make_matrices_coupl( @e )
             f->make_matrices_enriched_corr( @e )

@@ -75,6 +75,7 @@ public:
     virtual void assemble_sollicitations(Mat<ScalarType,Sym<>,SparseLine<> > &K, Vec<ScalarType> &F, Vec<Vec<ScalarType> > &vectors_, bool assemble_mat=true,bool assemble_vec=true) = 0 ;
     virtual void assemble(Mat<ScalarType,Sym<>,SparseLine<> > &K, Vec<ScalarType> &F, Vec<Vec<ScalarType> > &vectors_, bool assemble_mat=true, bool assemble_vec=true)=0;
     virtual void assemble(Mat<ScalarType,Sym<>,SparseLine<> > &A, Mat<ScalarType,Sym<>,SparseLine<> > &B, Vec<Vec<ScalarType> > &vectors_, bool assemble_mat=true)=0;
+    virtual void assemble(Mat<ScalarType,Gen<>,SparseLine<> > &C, Vec<Vec<ScalarType> > &vectors_, bool assemble_mat=true)=0;
 
     virtual void read_material_to_mesh(const XmlNode &) = 0;
 
