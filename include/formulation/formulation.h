@@ -938,9 +938,9 @@ public:
 //             apply( m->node_list, AssembleNodeEq<true >(), *indice_noda, *this ); // nodal
 //             apply( m->elem_list, AssembleElemEq<true >(), *indice_noda, indice_elem, *this ); // element (and skin elements)
             apply_mt( m->node_list, this->nb_threads_assemble_matrix, AssembleNodeEig<true,true >(), *indice_noda, *this ); // nodal
-            apply_mt( m->elem_list, this->nb_threads_assemble_matrix, AssembleElemEig<true,true >(), *indice_noda, indice_elem, *this ); // element (and skin elements
+            apply_mt( m->elem_list, this->nb_threads_assemble_matrix, AssembleElemEig<true,true >(), *indice_noda, indice_elem, *this ); // element (and skin elements)
             apply_mt( m->node_list, this->nb_threads_assemble_matrix, AssembleNodeEq<true >(), *indice_noda, *this ); // nodal
-            apply_mt( m->elem_list, this->nb_threads_assemble_matrix, AssembleElemEq<true >(), *indice_noda, indice_elem, *this ); // element (and skin elements
+            apply_mt( m->elem_list, this->nb_threads_assemble_matrix, AssembleElemEq<true >(), *indice_noda, indice_elem, *this ); // element (and skin elements)
         }
         else {
             if ( assemble_vec ) {
@@ -2958,7 +2958,7 @@ void add_internal_face_matrix(
 }
 
 /*! To be redefined for each new formulations */
-template<class TF,class TMA,class TVE,class TVEVE,unsigned _mAs,unsigned _mBs,unsigned _amA,unsigned _amB,class TE,class TCE,unsigned _n>
+template<class TF,class TMA,class TVEVE,unsigned _mAs,unsigned _mBs,unsigned _amA,unsigned _amB,class TE,class TCE,unsigned _n>
 void add_internal_face_matrix(
         TF &f,
         TMA &matrix_A,
@@ -2975,7 +2975,7 @@ void add_internal_face_matrix(
 }
 
 /*! To be redefined for each new formulations */
-template<class TF,class TMA,class TVE,class TVEVE,unsigned _ms,unsigned _am,class TE,class TCE,unsigned _n>
+template<class TF,class TMA,class TVEVE,unsigned _ms,unsigned _am,class TE,class TCE,unsigned _n>
 void add_internal_face_matrix(
         TF &f,
         TMA &matrix,
