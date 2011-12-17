@@ -1,6 +1,3 @@
-#ifndef WRITE_AVS_H
-#define WRITE_AVS_H
-
 //
 // C++ Interface: write_avs
 //
@@ -12,6 +9,9 @@
 // Copyright: See COPYING file that comes with this distribution
 //
 //
+#ifndef WRITE_AVS_H
+#define WRITE_AVS_H
+
 //#include<cstdlib>
 #include <fstream>
 #include <iostream>
