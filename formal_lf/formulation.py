@@ -304,7 +304,7 @@ class Formulation:
     f.write( '  static const bool need_skin_assembly=%s;\n'%(['false','true'][self.need_skin_assembly]) )
     f.write( '  typedef Norm1_is_inf Name_convergence_criterium;\n' )
     f.write( '  static const unsigned nb_vectors = 4;\n' )
-    f.write( '  static const unsigned nb_matrices = 1;\n' )
+    f.write( '  static const unsigned nb_matrices = 4;\n' )
     f.write( '  static const unsigned auto_contact = %s;\n'%(['false','true'][self.auto_contact]) )
     f.write( '  static const bool friction_coeff_is_a_nodal_variable = 0;\n' )
     f.write( '  static const unsigned offset_of_pos_unknown=3;\n' )
