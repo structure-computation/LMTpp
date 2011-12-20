@@ -1,0 +1,251 @@
+class GenericVariable
+    _dat := Vec[Op]()
+    _dlt := Vec[Op]()
+    _dim := Vec[Int32]()
+    _sym := true
+
+    def _init( vec_dlt, file, name )
+        name_vec := _name_vec()
+
+        if _dim.size == 0
+            file <<< "// $name_vec[ $(vec_dlt.size) ] -> $name"
+            _dat.push_back( symbol( "$name_vec[$(vec_dlt.size)]", name ) )
+
+            sym := symbol( "dlt_$name_vec[$(vec_dlt.size)]", "\Delta " + name )
+            vec_dlt.push_back( sym )
+            _dlt.push_back( sym )
+
+        if _dim.size == 1
+            for n in 0 .. _dim[ 0 ]
+                file <<< "// $name_vec[ $(vec_dlt.size) ] -> $name[ $n ]"
+                _dat.push_back( symbol( "$name_vec[$(vec_dlt.size)]", "$name_$n" ) )
+
+                sym := symbol( "dlt_$name_vec[$(vec_dlt.size)]", "\Delta $name_$n" )
+                vec_dlt.push_back( sym )
+                _dlt.push_back( sym )
+
+        if _dim.size == 2
+            if _sym
+                for n in [ [0,0,0], [1,1,1], [2,2,2], [0,1,3], [0,2,4], [1,2,5] ]
+                    file <<< "// $name_vec[ $(vec_dlt.size) ] -> $name[ $(n[0]), $(n[1]) ]"
+                    _dat.push_back( symbol( "$name_vec[$(vec_dlt.size)]", "$(name)_{$(n[0]),$(n[1])}" ) )
+
+                    sym := symbol( "dlt_$name_vec[$(vec_dlt.size)]", "\Delta $(name)_{$(n[0]),$(n[1])}" )
+                    vec_dlt.push_back( sym )
+                    _dlt.push_back( sym )
+
+    def get_val
+        if _dim.size == 0
+            return _dat[ 0 ] + _dlt[ 0 ] * type_VariableInterne
+
+        if _dim.size == 1
+            return _dat + _dlt * type_VariableInterne
+
+        if _dim.size == 2
+            if _sym
+                res := Mat[Op,Sym[_dim[0]]]()
+                for n in [ [0,0,0], [1,1,1], [2,2,2], [0,1,3], [0,2,4], [1,2,5] ]
+                    res[ n[ 0 ], n[ 1 ] ] = _dat[ n[ 2 ] ] + _dlt[ n[ 2 ] ] * type_VariableInterne
+                return res
+
+        assert( 0, "TODO" )
+
+    def get_dlt
+        if _dim.size == 0
+            return _dlt[ 0 ]
+
+        if _dim.size == 1
+            return _dlt
+
+        if _dim.size == 2
+            if _sym
+                res := Mat[Op,Sym[_dim[0]]]()
+                for n in [ [0,0,0], [1,1,1], [2,2,2], [0,1,3], [0,2,4], [1,2,5] ]
+                    res[ n[ 0 ], n[ 1 ] ] = _dlt[ n[ 2 ] ]
+                return res
+
+        assert( 0, "TODO" )
+
+class Parameter inherits GenericVariable
+    property type_Parameter
+
+    def init( dim ) when dim.tensor_order == 1
+        init_using_default_values( self )
+        _dim = dim
+
+    def _name_vec
+        return "props"
+
+class VariableInterne inherits GenericVariable
+    property type_VariableInterne
+    _asf  := ""
+
+    def init( associated_force, dim )
+        init_using_default_values( self )
+        _dim = dim
+        _asf = associated_force
+
+    def _name_vec
+        return "statev"
+
+    def dissipation( const_law ) 
+        # on cherche la force associe
+        for name, variable in AttributeExplorer( const_law )
+            if name == _asf
+                return get_dlt() : variable
+
+class ConstitutiveLaw
+    sigma := Mat[Op,Sym[3]]()
+
+    def write_umat( file )
+        vec_dlt := Vec[ Op ]()
+        properties := Vec[ Op ]()
+
+        for name, val in AttributeExplorer( self )
+            if val.type_Parameter
+                val._init( properties, file, name )
+            if val.type_VariableInterne
+                val._init( vec_dlt   , file, name )
+
+        num_ij := [ 0, 3, 4  3, 1, 5  4, 5, 2 ]
+        inv_num_ij := [ [0,0,0], [1,1,1], [2,2,2], [0,1,3], [0,2,4], [1,2,5] ]
+
+        eps_init := Mat[Op,Sym[3]]()
+        eps_upda := Mat[Op,Sym[3]]()
+        for i in 0 .. 3
+            for j in 0 .. i + 1
+                eps_init[ i, j ] = symbol( "stran[ $(num_ij[i,j]) ]", "\varepsilon_{$i,$j}" )
+                eps_upda[ i, j ] = symbol( "dstran[ $(num_ij[i,j]) ]", "\epsilon_{$i,$j}" )
+
+        eps := eps_init + eps_upda
+
+        # 
+        sigma = elasticite( eps )
+
+        f := surface_seuil( sigma )
+
+
+        file <<<<
+            #include <math.h>
+            #include <iostream>
+            typedef long int integer;
+            typedef double doublereal;
+            typedef short ftnlen;
+            static double heaviside( double a ) { return a >= 0; }
+            static double rsqrt( double a ) { return 1 / sqrt( a ); }
+            static double eqz( double a ) { return a == 0; }
+            extern "C" int umat_(doublereal *stress, doublereal *statev, doublereal *ddsdde, doublereal *sse, doublereal *spd,
+                                doublereal *scd, doublereal *rpl, doublereal *ddsddt,
+                                doublereal *drplde, doublereal *drpldt, doublereal *stran, doublereal *dstran,
+                                doublereal *time, doublereal *dtime, doublereal *temp, doublereal *dtemp, doublereal *predef, 
+                                doublereal *dpred, char *cmname, integer *ndi, integer *nshr, integer *ntens, integer *nstatv,
+                                doublereal *props, integer *nprops, doublereal *coords, doublereal *drot,
+                                doublereal *pnewdt, doublereal *celent, doublereal *dfgrd0, doublereal *dfgrd1, integer *noel,
+                                integer *npt, integer *layer, integer *kspt, integer *kstep, integer *kinc, 
+                                ftnlen cmname_len ) {
+                typedef double T;
+
+        cw := CodeWriterAlt()
+        cw.add( "f", f.subs( vec_dlt, vec_dlt * 0 ) )
+        for n in inv_num_ij
+            cw.add( "stress[$(n[2])]", sigma[ n[ 0 ], n[ 1 ] ].subs( vec_dlt, vec_dlt * 0 ), reassign )
+        file <<< cw.to_string( 4 )
+        
+        file <<< "    if ( f <= 0 )"
+        file <<< "        return 0;"
+
+        #--------- debut de la boucle
+        file <<< "    T dlt_statev[ $(vec_dlt.size) ] = { $( join( ( 0 .. vec_dlt.size ).map( x => "0" ), ", " ) ) };"
+        file <<< "    while ( true ) {"
+
+        # calcul de la dissipation
+        dissipation := Op( 0 )
+        for name, variable in AttributeExplorer( self )
+            if variable.type_VariableInterne
+                dissipation += variable.dissipation( self ) 
+
+
+        # mise a jour des variables internes
+        lag := symbol( "lag" )
+
+        sol := newton_raphson_minimize_iteration( dissipation + lag * f, vec_dlt +++ [ lag ], vec_dlt +++ [ 0 ] )
+
+        cl := CodeWriterAlt()
+        for n in 0 .. vec_dlt.size
+            cl.add( "vec_dlt_$n", sol[ n ], init )
+        file <<< cl.to_string( 8 )
+
+        
+        file <<< "        T norm_inf = 0;"
+        for n in 0 .. vec_dlt.size
+            file <<< "        norm_inf = LMT::max( norm_inf, LMT::abs( vec_dlt_$n - dlt_statev[ $n ] ) );"
+        for n in 0 .. vec_dlt.size
+            file <<< "        dlt_statev[ $n ] = vec_dlt_$n;"
+
+        file <<< "        PRINT( norm_inf );"
+        file <<< "        if ( norm_inf < 1e-6 )"
+        file <<< "            break;"
+        file <<< "    }"
+        #--------- fin de la boucle
+
+        for n in 0 .. vec_dlt.size
+            file <<< "    statev[ $n ] += dlt_statev[ $n ];"
+
+        # -------- calcul du sigma / ... mis a jour
+        file <<< "    {"
+        cx := CodeWriterAlt()
+        for n in inv_num_ij
+            cx.add( "stress[$(n[2])]", sigma[ n[ 0 ], n[ 1 ] ].subs( vec_dlt, vec_dlt * 0 ), reassign )
+        file <<< cx.to_string( 8 )
+        file <<< "    }"
+
+
+        file <<<<
+                PRINT( f );
+            }
+
+    def identity
+        return Mat[Op,Sym[3]]([ 1, 0, 0  0, 1, 0  0, 0, 1 ])
+
+    def trace( a )
+        return a[ 0 ] + a[ 1 ] + a[ 2 ]
+
+    def dev( a ) pertinence 2
+        return a - trace( a ) / 3 * identity()
+
+    def von_mises( a ) pertinence 2
+        dim := a.nb_rows
+        d := dev( a )
+        if dim == 3
+            return sqrt( 3 / 2 * d : d )
+        if dim == 2
+            return sqrt( 2 * d : d )
+
+
+class ElastoPlasticity inherits ConstitutiveLaw
+    E      := Parameter()
+    nu     := Parameter()
+    sigma0 := Parameter()
+
+    Ep     := VariableInterne( "sigma", dim = [ 3, 3 ] )
+
+    def elasticite( eps_tot )
+        eps   := eps_tot - Ep.val
+
+        bul   := E.val / ( 1.0 - 2.0 * nu.val )
+        g     := E.val / ( 1.0 + nu.val )
+        mu    := g / 2.0
+        lamda := ( bul - g ) / 3.0
+        
+        return lamda * trace( eps ) * identity() + 2.0 * mu * eps
+        
+    def surface_seuil( sigma )
+        return von_mises( sigma ) - sigma0.val
+    
+    def pseudo_potentiel( sigma )
+        f = sigma_equivalent(sigma) - sigma0.val
+        F = f
+        return F
+    
+e := ElastoPlasticity()
+e.write_umat( File( "plast_impl_umat.h", "w" ) )
