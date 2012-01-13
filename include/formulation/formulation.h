@@ -2815,10 +2815,6 @@ void add_local_elem_matrix(
     const Number<_amB> &assemble_mat_B,
     const TE &elem,
     const unsigned *indices ) {
-
-    std::cerr << "Attention : ni add_elem_matrix, ni add_local_elem_matrix n'ont été surdéfinis pour la formulation " << f.get_name() << " avec l'élément "
-              << elem.name << "." << std::endl;
-    assert( 0 );
 }
 
 /*! To be redefined for each new formulations */
