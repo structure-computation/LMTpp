@@ -37,9 +37,9 @@ void assign_tag_values( TE *e, const Vec<double> &tag_values, const VarTag &vt, 
     ev( *e ) = tag_values[ n ];
     assign_tag_values( e, tag_values, vt, Number<n+1>(), Number<m>() );
 }
-template<class TE,class VarTag,unsigned n           > void assign_tag_values( TE   *e, const Vec<double> &tag_values, const VarTag &vt, Number<n>, Number<n> ) { e->set_field("tag", tag_values[1]); }
+// template<class TE,class VarTag,unsigned n           > void assign_tag_values( TE   *e, const Vec<double> &tag_values, const VarTag &vt, Number<n>, Number<n> ) { e->set_field("tag", tag_values[1]); }
 // template<class TE,class VarTag,unsigned n           > void assign_tag_values( TE   *e, const Vec<double> &tag_values, const VarTag &vt, Number<n>, Number<n> ) { Vec<double, 2> tags = tag_values; e->set_field("tags", tags); }
-// template<class TE,class VarTag,unsigned n           > void assign_tag_values( TE   *e, const Vec<double> &tag_values, const VarTag &vt, Number<n>, Number<n> ) { }
+template<class TE,class VarTag,unsigned n           > void assign_tag_values( TE   *e, const Vec<double> &tag_values, const VarTag &vt, Number<n>, Number<n> ) { }
 template<         class VarTag,unsigned n,unsigned m> void assign_tag_values( void *e, const Vec<double> &tag_values, const VarTag &vt, Number<n>, Number<m> ) { }
 template<         class VarTag,unsigned n           > void assign_tag_values( void *e, const Vec<double> &tag_values, const VarTag &vt, Number<n>, Number<n> ) { }
 
