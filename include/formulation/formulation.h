@@ -79,13 +79,13 @@ public:
 
 /*!
     Pour le choix du solveur : wont_add_nz=false implique utilisation des solveurs internes.
-        wont_add_nz=true implique utilisation de LDL, sauf si "-DWITH_CHOLMOD -DWITH_UMFPACK" sont dans les directives de compilation est à 1 auquel cas on utilise CholMod ou UMFPACK (non symétrique)
+        wont_add_nz=true implique utilisation de LDL, sauf si "-DWITH_CHOLMOD -DWITH_UMFPACK" sont dans les directives de compilation est a 1 auquel cas on utilise CholMod ou UMFPACK (non symetrique)
 
     Mais qu'est-ce qu'une directive de compilation ?
         cf. CPPFLAGS dans vasoSConstuction
 
-    \relates Comment résoudre un problème éléments finis de façon générale
-    \relates Exemple de problème d'évolution, l'équation de la chaleur
+    \relates Comment resoudre un probleme elements finis de facon generale
+    \relates Exemple de probleme d'evolution, l'equation de la chaleur
     \relates Exemple de formulation
 
     \keyword Formulation
@@ -2626,11 +2626,11 @@ public:
 
     /*!
         Objectif :
-            cette méthode ajoute au vecteur <strong> res </strong>, la contribution au résidu de l'élément <strong> *elem </strong> .
+            cette methode ajoute au vecteur <strong> res </strong>, la contribution au residu de l'element <strong> *elem </strong> .
             
-        Paramètres :
-            * <strong> res </strong> le vecteur contenant le résidu ( sa taille doit être égale au nombre de degrés de liberté du problème),
-            * <strong> elem </strong> pointeur sur l'élément dont on veut obtenir la contribution.
+        Parametres :
+            * <strong> res </strong> le vecteur contenant le residu ( sa taille doit etre egale au nombre de degres de liberte du probleme),
+            * <strong> elem </strong> pointeur sur l'element dont on veut obtenir la contribution.
     */
     void add_elem_contribution_to_residual( Vec<ScalarType> &res, const typename TM::EA *elem ) const {
         m->elem_list.apply_on_down_cast( elem, AssembleResidual(), res, *this );
@@ -2796,7 +2796,7 @@ void add_local_elem_matrix(
     const TE &elem,
     const unsigned *indices ) {
 
-    std::cerr << "Attention : ni add_elem_matrix, ni add_local_elem_matrix n'ont été surdéfinis pour la formulation " << f.get_name() << " avec l'élément "
+    std::cerr << "Attention : ni add_elem_matrix, ni add_local_elem_matrix n'ont ete surdefinis pour la formulation " << f.get_name() << " avec l'element "
               << elem.name << "." << std::endl;
     assert( 0 );
 }
@@ -2829,7 +2829,7 @@ void add_local_elem_matrix(
     const TE &elem,
     const unsigned *indices ) {
 
-    std::cerr << "Attention : ni add_elem_matrix, ni add_local_elem_matrix n'ont été surdéfinis pour la formulation " << f.get_name() << " avec l'élément "
+    std::cerr << "Attention : ni add_elem_matrix, ni add_local_elem_matrix n'ont ete surdefinis pour la formulation " << f.get_name() << " avec l'element "
               << elem.name << "." << std::endl;
     assert( 0 );
 }
@@ -3065,6 +3065,10 @@ void add_elem_vector_der_var(
             indices,
             Number<num_der_var>()
         );
+}
+
+template<class a,class b,class c,class d,class e,class f,class g,class h,class i>
+void add_internal_face_vector_der_var( const a&, const b&, const c&, const d&, const e&, const f&, const g&, const h&, const i& ) {
 }
 
 };
