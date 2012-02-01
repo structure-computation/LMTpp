@@ -82,7 +82,7 @@ namespace LMT {
 */
 template<class TM>
 void get_eig_val_sym( const TM &m, Vec<double> &eig_val ) {
-    char jobz = 'U'; // Compute eigenvalues only.
+    char jobz = 'N'; // Compute eigenvalues only.
     char uplo = 'L'; // Lower triangle of m is stored.
     int n = m.nb_rows();
     Vec<double> A; A.resize( n * n );
