@@ -725,7 +725,7 @@ void read_vtu(TM &m, const char* filename ) {
     }
     
     /// assignation des attributs des éléments du maillage
-    GetListNamefieldAndCo<TM::TElemList::template SubType<0>::T> gnf;
+    GetListNamefieldAndCo<typename TM::TElemList::template SubType<0>::T> gnf;
     int l;
         
     for ( it = celldatas.begin(); it != celldatas.end(); ++it) {
