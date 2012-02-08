@@ -40,9 +40,9 @@ void cut_char( std::string& s, const char* l) {
 L'objectif de cet objet est de connaître les noms des champs d'un élément ainsi que le nombre de composantes par champs.
 
 */
+template<class TE>
 struct GetListNamefieldAndCo {
-    template<class TE>
-    void operator() ( const TE& e) {
+    GetListNamefieldAndCo() {
         names.resize( TE::nb_params );
         DM::get_names<TE>( &names[0] );
         nb_comp.resize( TE::nb_params );
@@ -725,8 +725,7 @@ void read_vtu(TM &m, const char* filename ) {
     }
     
     /// assignation des attributs des éléments du maillage
-    GetListNamefieldAndCo gnf;
-    gnf( m.elem_list.hp[0] ); //apply( m.elem_list, gnf );
+    GetListNamefieldAndCo<TM::TElemList::template SubType<0>::T> gnf;
     int l;
         
     for ( it = celldatas.begin(); it != celldatas.end(); ++it) {
