@@ -203,6 +203,7 @@ private:
             Vec<Vec<unsigned> > v; v.resize( s );
             for(unsigned i=0;i<s;++i) v[i].reserve( 32 );
             apply( f.m->elem_list, GetNZ(), f, v ); // loop on all elements to find non zero terms
+            for(unsigned i=0;i<s;++i) if (v[i].size() == 0) v[i].push_back(i);
             for(unsigned i=0;i<s;++i) std::sort( v[i].begin(), v[i].end() );
 
             //             std::cout << "size -> " << s << std::endl;
@@ -344,8 +345,7 @@ public:
 
         //
         offset_lagrange_multipliers = size;
-        for(unsigned i=0;i<constraints.size();++i)
-            size += ( constraints[i].penalty_value == ScalarType(0) );
+        for(unsigned i=0;i<constraints.size();++i) size += ( constraints[i].penalty_value == ScalarType(0) );
 
         // resize vectors
         for(unsigned i=0;i<vectors.size();++i) vectors[i].resize( size );
@@ -391,6 +391,15 @@ public:
         // matrice allocation
         if(allocate_mat)
             matrices.apply( ResizeMat(), size, *this );
+    }
+    virtual void resize() {
+        unsigned size = 0;
+        unsigned ng = nb_global_unknowns;
+        size += ng;
+        unsigned nn = m->node_list.size() * nb_nodal_unknowns;
+        size += nn;
+
+        matrices.apply( ResizeMat(), size, *this );
     }
     virtual void shift(int nb=1) {
         while (nb--) {
@@ -2583,6 +2592,7 @@ public:
     virtual void erase_constraints() { constraints.resize(0); }
     virtual void erase_constraints_from(unsigned number) { constraints.resize(number); }
 
+    virtual void     set_indice_noda(unsigned num_node, unsigned index) const { (*indice_noda)[num_node] = index; }
     virtual unsigned get_indice_noda(unsigned num_node) const { return (*indice_noda)[num_node]; }
     virtual unsigned num_in_vec_unknown(const std::string &name) const { return carac.num_in_vec_unknown( name ); }
 

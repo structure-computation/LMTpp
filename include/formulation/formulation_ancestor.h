@@ -77,6 +77,8 @@ public:
     virtual void assemble(Mat<ScalarType,Sym<>,SparseLine<> > &A, Mat<ScalarType,Sym<>,SparseLine<> > &B, Vec<Vec<ScalarType> > &vectors_, bool assemble_mat=true)=0;
     virtual void assemble(Mat<ScalarType,Gen<>,SparseLine<> > &C, Vec<Vec<ScalarType> > &vectors_, bool assemble_mat=true)=0;
 
+    virtual void resize() = 0;
+
     virtual void read_material_to_mesh(const XmlNode &) = 0;
 
     virtual void get_precond() = 0;
@@ -183,6 +185,7 @@ public:
 
     virtual void Get_Nb_UnknownByElement( unsigned* nb_elem_of_type, unsigned &size,  unsigned* nb_unknowns_for_type) = 0 ;
 
+    virtual void     set_indice_noda(unsigned num_node, unsigned index) const = 0;
     virtual unsigned get_indice_noda(unsigned num_node) const = 0;
     virtual unsigned num_in_vec_unknown(const std::string &name) const = 0;
 
