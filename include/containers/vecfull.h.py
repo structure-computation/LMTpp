@@ -16,7 +16,7 @@ for static_size in [1,0]:
         constructors  = '    Vec() {}\n'
         constructors += '    template<class T2> Vec(const T2 &v) { for(unsigned i=0;i<(unsigned)static_size;val[i++]=v); } /// copy val in all elements of *this\n'
         constructors += '    void get_data_from_ptr(const TT *v) { for(unsigned i=0;i<(unsigned)static_size;++i) val[i]=v[i]; } /// copy val in all elements of *this\n'
-        for i in range(1,17):
+        for i in range(1,38):
             args = string.join( [ 'const TT &v%i'%k for k in range(i) ], ',')
             sets = string.join( [ 'val[%i]=v%i;'%(k,k) for k in range(i) ] , ' ')
             if i>1:
@@ -24,7 +24,7 @@ for static_size in [1,0]:
             constructors += '    void assign_and_complete_with_last('+args+') { '+sets+' for(unsigned i='+str(i)+';i<size();++i) val[i]=v'+str(i-1)+'; }\n'
     else:
         constructors = '    Vec() { init(); }\n'
-        for i in range(1,17):
+        for i in range(1,38):
             args = string.join( [ 'const TT &v%i'%k for k in range(i) ] ,',')
             sets = string.join( [ 'val[%i]=v%i;'%(k,k) for k in range(i) ] ,' ')
             constructors += '    explicit Vec('+args+') { init(); resize(%i); %s } /// declare a vector containing args\n' % (i,sets)
@@ -320,8 +320,8 @@ public:
 
     Vec &set(const TT &v) { for(unsigned i=0;i<size();++i) val[i]=v; return *this; }
 
-    /// return a Vec with random values in [-1,1]. if s_dim==-1, user must specify size, else size must be = s_dim
-    static Vec random("""+'unsigned size_vec'*(1-static_size)+""") { Vec res; """+'res.resize(size_vec);'*(1-static_size)+""" for(unsigned i=0;i<res.size();res[i++]=TT(rand()/(double)RAND_MAX)); return res; }
+    /// return a Vec with random values in [0,1]. if s_dim==-1, user must specify size, else size must be = s_dim
+    static Vec random("""+'unsigned size_vec'*(1-static_size)+""") { Vec res; """+'res.resize(size_vec);'*(1-static_size)+""" for(unsigned  i = 0; i < res.size(); res[i++] = TT(rand()/(double)RAND_MAX) ); return res; }
 
     /*!
     return

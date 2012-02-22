@@ -12,10 +12,13 @@
         = Résolution numérique
         
             La résolution dépend de plusieurs paramètres :
-                * la dimension de la matrice
-                * les propriétés de symétrie de la matrice
-                * son type de stockage
-                * si l'on souhaite calculer plusieurs systèmes avec la même matrice
+                * la dimension de la matrice,
+                * les propriétés de symétrie de la matrice,
+                * son type de stockage,
+                * si l'on souhaite calculer plusieurs systèmes avec la même matrice. Dans ce cas une factorisation s'impose sauf si on n'a pas assez de mémoire.
+                
+            Il existe des fonctions écrites sur la plate-forme pour tous les types de matrices et de stockages. Il y a aussi des interfaces pour d'autres librairies comme suitesparse, MUMPS, MKL. Afin de comparer les différentes méthodes pour des matrices symétriques engendrées par un problème élastique résolu par la méthode des éléments finis, on a écrit ce petit exemple \a Problème élastique .
+            Dans la suite on discute des dfférents méthodes en fonction de la taille du système.          
               
             = Cas des matrices de petite dimension <= ~ 1000
             
@@ -448,8 +451,9 @@
 
                 = Matrice générale
                     
-                    On peut essayer la décomposition <strong> LU </strong> ... 
-                    Bonne chance ! 
+                    On peut tenter une méthode itérative avec l'agorithme <strong> GMRES </strong> ( voir les fonctions \a GMERES () ou \a gmres () ). 
+                    
+                    On peut aussi essayer la décomposition <strong> LU </strong> avec <strong> MUMPS </strong> ou <strong> MKL </strong> . <strong> MUMPS </strong> a la possibilité de faire du calcul parallèle avec mémoire distribuée ou enregistrée sur disque dur mais cette fonctionnalité n'est pas implémentée dans l'interface car cela ne correspond pas à un besoin du labo.
                 
                 = Matrice symétrique
 

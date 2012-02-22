@@ -66,6 +66,29 @@ void update_circum_center(const Element<Triangle,TN,TNG,TD,NET> &e,Pvec &C,T &R)
 }
 
 template<class TN,class TNG,class TD,unsigned NET,class Pvec,class T>
+void update_in_center(const Element<Triangle,TN,TNG,TD,NET> &e,Pvec &C,T &R) {
+    C = getCenterOfInCircle( e.node(0)->pos, e.node(1)->pos, e.node(2)->pos );
+    R = 2 * measure(e) / ( length( e.node(1)->pos - e.node(0)->pos ) + length( e.node(2)->pos - e.node(0)->pos ) + length( e.node(2)->pos - e.node(1)->pos ) );
+}
+
+template<class TN,class TNG,class TD,unsigned NET,class T>
+void update_radius_ratio(const Element<Triangle,TN,TNG,TD,NET> &e,T &radius_ratio) {
+    Vec<T> C_circum, C_in;
+    T R_circum, R_in;
+    update_circum_center( e, C_circum, R_circum );
+    update_in_center( e, C_in, R_in );
+    radius_ratio = R_in / R_circum;
+}
+
+template<class TN,class TNG,class TD,unsigned NET,class TM,class T>
+void update_edge_ratio(const Element<Triangle,TN,TNG,TD,NET> &e,TM &m,T &edge_ratio) {
+    T edge_length_0 = (m.get_children_of( e, Number<1>() )[ 0 ])->measure_virtual();
+    T edge_length_1 = (m.get_children_of( e, Number<1>() )[ 1 ])->measure_virtual();
+    T edge_length_2 = (m.get_children_of( e, Number<1>() )[ 2 ])->measure_virtual();
+    edge_ratio = min( edge_length_0, edge_length_1, edge_length_2 ) / max( edge_length_0, edge_length_1, edge_length_2 );
+}
+
+template<class TN,class TNG,class TD,unsigned NET,class Pvec,class T>
 void intersection(const Element<Triangle,TN,TNG,TD,NET> &e,Pvec P1,Pvec P2,T &numP1P2,T &dist_ext) {
     DEBUGASSERT( (TNG::dim==3) );
 
@@ -269,11 +292,23 @@ T var_inter_insideness( const Triangle &e, const TV &var_inter ) {
 }
 
 /*!
-    object :
+\generic_comment is_inside_linear
+    objectif :
+        la fonction renvoie vrai si pos est dans l'élément défini par les noeuds "sommets" et faux sinon. Pour les éléments linéaires ( i.e. d'ordre 1 ) cette fonction est équivalente à \a is_inside () mais pour pour des éléments non linéaires, ces fonctions peuvent être différentes. Par exemple pour l'élément non linéaire \a Triangle_6 la fonction renvoie vrai si pos est contenu dans le triangle défini par les sommets de \a Triangle_6 ( i.e. sans tenir compte des noeuds sur les côtés ).
+        
+    paramètre :
+        le premier paramètre est le type d'élément
+        pos_nodes : le position des sommets dans le plan de l'élément
+        pos : la position du point dans le plan
+
+*/
+
+/*!
+    objectif :
         la fonction renvoie vrai si pos est dans le triangle et faux sinon ( sous la condition que le \a Triangle est dans le plan ).
         
     paramètre :
-        Tirangle : le type d'élément
+        Triangle : le type d'élément
         pos_nodes : le position des sommets dans le plan
         pos : la position du point dans le plan
 
@@ -294,7 +329,7 @@ bool is_inside_linear( const Triangle &elem, const PosNodes &pos_nodes, const Pv
         Pvec CA = pos_nodes[ 0 ] - pos_nodes[ 2 ];
         XM = pos - pos_nodes[ 2 ];
         T det3 = CA[ 0 ] * XM[ 1 ] - CA[ 1 ] * XM[ 0 ];
-        if ( ( det1 * det3 ) >= 0 )
+        if ( ( det1 * det3 ) >= 0 and ( det2 * det3 ) >=0 )
             return true;
         else
             return false;
@@ -302,8 +337,10 @@ bool is_inside_linear( const Triangle &elem, const PosNodes &pos_nodes, const Pv
         return false;
 }
 
+inline unsigned vtk_num( StructForType<Triangle> ) { return 5; }
+
 };
 
 #include "element_Triangle.h"
 
-#endif
+#endif // LMTTRIANGLE_H

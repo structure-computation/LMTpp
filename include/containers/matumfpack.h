@@ -25,7 +25,8 @@ public:
     static const int static_rows = sr;
     static const int static_cols = sc;
     typedef double T;
-
+    typedef Gen<> Structure;
+    typedef SparseUMFPACK Storage;
     ///
     Mat() {
         Numeric = NULL;
@@ -79,7 +80,6 @@ public:
         Numeric = NULL;
     }
 
-    void free() {}
 
     /// creation of a matrix from a SparseUMFPACK matrix
     template<class TT> Mat(const Mat<TT,Gen<>,SparseUMFPACK,void> &mat) {
@@ -159,6 +159,8 @@ public:
     /// met à zéro tous les éléments de la matrice
     void clear() { Ax.set( 0.0 ); }
 
+	void free() { clear(); }
+	
     ///
     #ifdef WITH_UMFPACK
     bool get_factorization() {

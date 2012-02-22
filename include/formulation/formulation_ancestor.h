@@ -131,6 +131,22 @@ public:
     virtual void call_after_solve_14(Vec<Vec<ScalarType> > &vectors) = 0 ;
     virtual void call_after_solve_15(Vec<Vec<ScalarType> > &vectors) = 0 ;
 
+    virtual void call_after_solve(    Vec<Vec<ScalarType> > &vectors, unsigned nb_thread ) = 0 ;
+    virtual void call_after_solve_2(  Vec<Vec<ScalarType> > &vectors, unsigned nb_thread ) = 0 ;
+    virtual void call_after_solve_3(  Vec<Vec<ScalarType> > &vectors, unsigned nb_thread ) = 0 ;
+    virtual void call_after_solve_4(  Vec<Vec<ScalarType> > &vectors, unsigned nb_thread ) = 0 ;
+    virtual void call_after_solve_5(  Vec<Vec<ScalarType> > &vectors, unsigned nb_thread ) = 0 ;
+    virtual void call_after_solve_6(  Vec<Vec<ScalarType> > &vectors, unsigned nb_thread ) = 0 ;
+    virtual void call_after_solve_7(  Vec<Vec<ScalarType> > &vectors, unsigned nb_thread ) = 0 ;
+    virtual void call_after_solve_8(  Vec<Vec<ScalarType> > &vectors, unsigned nb_thread ) = 0 ;
+    virtual void call_after_solve_9(  Vec<Vec<ScalarType> > &vectors, unsigned nb_thread ) = 0 ;
+    virtual void call_after_solve_10( Vec<Vec<ScalarType> > &vectors, unsigned nb_thread ) = 0 ;
+    virtual void call_after_solve_11( Vec<Vec<ScalarType> > &vectors, unsigned nb_thread ) = 0 ;
+    virtual void call_after_solve_12( Vec<Vec<ScalarType> > &vectors, unsigned nb_thread ) = 0 ;
+    virtual void call_after_solve_13( Vec<Vec<ScalarType> > &vectors, unsigned nb_thread ) = 0 ;
+    virtual void call_after_solve_14( Vec<Vec<ScalarType> > &vectors, unsigned nb_thread ) = 0 ;
+    virtual void call_after_solve_15( Vec<Vec<ScalarType> > &vectors, unsigned nb_thread ) = 0 ;
+
     virtual void set_vectors_assembly(Vec<Vec<ScalarType> > &vec) = 0;
     virtual void set_indice_noda(Vec<unsigned> &vec) = 0;
     virtual void set_indice_elem(Vec<unsigned>* vec) = 0;
@@ -189,6 +205,17 @@ public:
     virtual unsigned get_nb_global_unknowns() const = 0;
     virtual unsigned get_nb_elem_unknowns() const = 0;
 
+    /*!
+        Objectif :
+            cette méthode ajoute au vecteur <strong> res </strong>, la contribution au résidu de l'élément <strong> *elem </strong> .
+
+        Paramètres :
+            * <strong> res </strong> le vecteur contenant le résidu ( sa taille doit être égale au nombre de degrés de liberté du problème),
+            * <strong> elem </strong> pointeur sur l'élément dont on veut obtenir la contribution.
+    */
+    virtual void add_elem_contribution_to_residual( Vec<ScalarType> &res, const void *elem ) const = 0;
+    virtual Vec<ScalarType> get_residual() const = 0;
+
     #ifdef WITH_UMFPACK
     virtual void get_mat( Mat<ScalarType,Gen<>,SparseUMFPACK> *&mat ) = 0; ///
     #endif
@@ -220,7 +247,7 @@ public:
     ScalarType max_diag;
     Vec<unsigned> id;/// indice pour les variables
     unsigned  nb_threads_assemble_matrix;
-    pthread_mutex_t mutex_assemble_matrix;
+    mutable pthread_mutex_t mutex_assemble_matrix;
 
     virtual void *get_mesh() = 0; /// recupere le maillage associee a une formulation (mais pas avec le bon type)
 };

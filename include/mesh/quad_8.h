@@ -5,29 +5,19 @@
 #include "bar_3.h"
 
 namespace LMT {
-
-/**
-  3    6    2
-  x----x----x
-  |         |
- 7|         x5
-  |         |
-  x----x----x
-  0    4    1
-*/
-
 // --------------------------------------------------------------------------------------------------------
 /*!
-    Carré
+    Carré à 8 noeuds
     \verbatim
-        .                        3    6    2
-        .                        x----x----x
-        .                        |         |
-        .                        x7         x5
-        .                        |         |
-        .                        x----x----x
-        .                        0    4    1
-
+    .                    3-----6-----2
+    .                    |           |
+    .                    |           |
+    .                    7           5
+    .                    |           |
+    .                    |           |
+    .                    0-----4-----1
+    \relates Mesh
+    \relates Element
     \keyword Maillage/Elément
     \friend raphael.pasquier@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
@@ -55,10 +45,10 @@ void append_skin_elements(Element<Quad_8,TN,TNG,TD,NET> &e,TC &ch,HET &het,Numbe
 
 template<class TN,class TNG,class TD,unsigned NET,class TC,class HET>
 void append_skin_elements(Element<Quad_8,TN,TNG,TD,NET> &e,TC &ch,HET &het,Number<1> nvi_to_subs) {
-    het.add_element(e,ch,Bar_3(),e.node(0),e.node(4),e.node(1));
-    het.add_element(e,ch,Bar_3(),e.node(1),e.node(5),e.node(2));
-    het.add_element(e,ch,Bar_3(),e.node(2),e.node(6),e.node(3));
-    het.add_element(e,ch,Bar_3(),e.node(3),e.node(7),e.node(0));
+    het.add_element(e,ch,Bar_3(),e.node(0),e.node(1),e.node(4));
+    het.add_element(e,ch,Bar_3(),e.node(1),e.node(2),e.node(5));
+    het.add_element(e,ch,Bar_3(),e.node(2),e.node(3),e.node(6));
+    het.add_element(e,ch,Bar_3(),e.node(3),e.node(0),e.node(7));
 }
 template<class TN,class TNG,class TD,unsigned NET,class TC,class HET>
 void append_skin_elements(Element<Quad_8,TN,TNG,TD,NET> &e,TC &ch,HET &het,Number<2> nvi_to_subs) {
@@ -70,6 +60,15 @@ void append_skin_elements(Element<Quad_8,TN,TNG,TD,NET> &e,TC &ch,HET &het,Numbe
     het.add_element(e,ch,NodalElement(),e.node(5));
     het.add_element(e,ch,NodalElement(),e.node(6));
     het.add_element(e,ch,NodalElement(),e.node(7));
+}
+
+template<class TN,class TNG,class TD,unsigned NET,class TM,class T>
+void update_edge_ratio(const Element<Quad_8,TN,TNG,TD,NET> &e,TM &m,T &edge_ratio) {
+    T edge_length_0 = (m.get_children_of( e, Number<1>() )[ 0 ])->measure_virtual();
+    T edge_length_1 = (m.get_children_of( e, Number<1>() )[ 1 ])->measure_virtual();
+    T edge_length_2 = (m.get_children_of( e, Number<1>() )[ 2 ])->measure_virtual();
+    T edge_length_3 = (m.get_children_of( e, Number<1>() )[ 3 ])->measure_virtual();
+    edge_ratio = min( edge_length_0, edge_length_1, edge_length_2, edge_length_3 ) / max( edge_length_0, edge_length_1, edge_length_2, edge_length_3 );
 }
 
 // --------------------------------------------------------------------------------------------------------
@@ -187,6 +186,8 @@ bool is_inside_linear( const Quad_8 &elem, const PosNodes &pos_nodes, const Pvec
     } else
         return false;
 }
+
+inline unsigned vtk_num( StructForType<Quad_8> ) { return 23; }
 
 };
 

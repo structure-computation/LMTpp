@@ -152,12 +152,12 @@ namespace LMT {
             diag_before_constraints.resize( pos.size() * nb_ddl_per_node, T(0) );
         }
         //
-        void assemble_clean_mat (bool assemble_mat=true, bool assemble_vec=true)
+        void assemble_clean_mat(bool assemble_mat=true, bool assemble_vec=true)
         {
             assemble_clean_mat(K, F, assemble_mat, assemble_vec);
         }
         //
-        void assemble_clean_mat (Mat<T, Sym<>, SparseLine<> > &K, Vec<T> &F, bool assemble_mat=true, bool assemble_vec=true)
+        void assemble_clean_mat(Mat<T, Sym<>, SparseLine<> > &K, Vec<T> &F, bool assemble_mat=true, bool assemble_vec=true)
         {
             allocate_matrices();
             if (assemble_mat)
@@ -189,12 +189,12 @@ namespace LMT {
             }
         }
         //
-        void assemble_sollicitations (bool assemble_mat=true, bool assemble_vec=true)
+        void assemble_sollicitations(bool assemble_mat=true, bool assemble_vec=true)
         {
             assemble_sollicitations(K, F, assemble_mat, assemble_vec);
         }
         //
-        void assemble_sollicitations (Mat<T, Sym<>, SparseLine<> > &K, Vec<T> &F, bool assemble_mat=true, bool assemble_vec=true)
+        void assemble_sollicitations(Mat<T, Sym<>, SparseLine<> > &K, Vec<T> &F, bool assemble_mat=true, bool assemble_vec=true)
         {
             for (unsigned i=0; i<formulations.size(); ++i)
             {
@@ -202,12 +202,12 @@ namespace LMT {
             }
         }
         //
-        void assemble_constraints (bool assemble_mat=true, bool assemble_vec=true)
+        void assemble_constraints(bool assemble_mat=true, bool assemble_vec=true)
         {
             assemble_constraints(K, F, M, assemble_mat, assemble_vec);
         }
         //
-        void assemble_constraints (Mat<T, Sym<>, SparseLine<> > &K, Vec<T> &F, T M, bool assemble_mat=true, bool assemble_vec=true)
+        void assemble_constraints(Mat<T, Sym<>, SparseLine<> > &K, Vec<T> &F, T M, bool assemble_mat=true, bool assemble_vec=true)
         {
             for (unsigned i=0; i<formulations.size(); ++i)
             {
@@ -215,7 +215,7 @@ namespace LMT {
             }
         }
         //
-        void assemble (bool assemble_mat=true, bool assemble_vec=true)
+        void assemble( bool assemble_mat=true, bool assemble_vec=true)
         {
             assemble_clean_mat(assemble_mat, assemble_vec);
             assemble_sollicitations(assemble_mat, assemble_vec);
@@ -271,30 +271,54 @@ namespace LMT {
             for(unsigned i=0;i<formulations.size();++i)
                 formulation(i)->call_after_solve(vectors);
         }
+        void call_after_solve( unsigned nb_thread ) {
+            for(unsigned i=0;i<formulations.size();++i)
+                formulation(i)->call_after_solve( vectors, nb_thread );
+        }
         //
         void call_after_solve_2() {
             for(unsigned i=0;i<formulations.size();++i)
                 formulation(i)->call_after_solve_2(vectors);
+        }
+        void call_after_solve_2( unsigned nb_thread ) {
+            for(unsigned i=0;i<formulations.size();++i)
+                formulation(i)->call_after_solve_2( vectors, nb_thread );
         }
         //
         void call_after_solve_3() {
             for(unsigned i=0;i<formulations.size();++i)
                 formulation(i)->call_after_solve_3(vectors);
         }
+        void call_after_solve_3( unsigned nb_thread ) {
+            for(unsigned i=0;i<formulations.size();++i)
+                formulation(i)->call_after_solve_3( vectors, nb_thread );
+        }
         //
         void call_after_solve_4() {
             for(unsigned i=0;i<formulations.size();++i)
                 formulation(i)->call_after_solve_4(vectors);
+        }
+        void call_after_solve_4( unsigned nb_thread ) {
+            for(unsigned i=0;i<formulations.size();++i)
+                formulation(i)->call_after_solve_4( vectors, nb_thread );
         }
         //
         void call_after_solve_5() {
             for(unsigned i=0;i<formulations.size();++i)
                 formulation(i)->call_after_solve_5(vectors);
         }
+        void call_after_solve_5( unsigned nb_thread ) {
+            for(unsigned i=0;i<formulations.size();++i)
+                formulation(i)->call_after_solve_5( vectors, nb_thread );
+        }
         //
         void call_after_solve_6() {
             for(unsigned i=0;i<formulations.size();++i)
                 formulation(i)->call_after_solve_6(vectors);
+        }
+        void call_after_solve_6( unsigned nb_thread ) {
+            for(unsigned i=0;i<formulations.size();++i)
+                formulation(i)->call_after_solve_6( vectors, nb_thread );
         }
         //
 /*        void call_after_solve(const Vec<void *> &elem_list) {

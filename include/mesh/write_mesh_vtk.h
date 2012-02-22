@@ -52,6 +52,9 @@ void set_vtk_cell_type_and_offsets( const TE &elem, Vec<unsigned> &connectivity,
     } else if ( strcmp(TE::can_directly_be_represented_by(),"Quad_8")==0 ) {
         cell_type = 23;
         nb_points = 8;
+    } else if ( strcmp(TE::can_directly_be_represented_by(),"Quad_9")==0 ) {
+        cell_type = 23;
+        nb_points = 8;
     } else if ( strcmp(TE::can_directly_be_represented_by(),"Tetra_10")==0 ) {
         cell_type = 24;
         nb_points = 10;
@@ -630,6 +633,12 @@ void write_mesh_vtk(std::ostream &os,const TM &m,const Vec<std::string> &display
 
     os << "</VTKFile>" << endl;
 
+}
+
+template<class TM>
+void write_mesh_vtk( std::string file,const TM &m,const Vec<std::string> &display_fields=Vec<std::string>("all")) {
+    std::ofstream os( file.c_str() );
+    write_mesh_vtk<true>( os, m, display_fields );
 }
 
 template<bool binary,class TM>

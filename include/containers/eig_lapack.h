@@ -102,7 +102,7 @@ Vec<T> solve_using_eig_val( const TM &m, const Vec<T> &v, T rm_eig_if_inf_rel = 
     Vec<T> eig_val;
     Mat<T> eig_vec;
     get_eig_sym( m, eig_val, eig_vec );
-    // PRINT( eig_val );
+    //PRINT( eig_val );
 
     Vec<T> valid = ( abs( eig_val ) > rm_eig_if_inf_rel * norm_inf( eig_val ) );
     Mat<T, Sym<>, SparseLine<> > t( m.nb_rows() );

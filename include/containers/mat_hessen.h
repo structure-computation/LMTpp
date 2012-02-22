@@ -41,6 +41,8 @@ class Mat<TT,Hessen<upper>,Dense<> > {
 public:
     typedef TT T;
     typedef DelayedAssignementHessenSource<T,upper> DA;
+    typedef Hessen<upper> Structure;
+    typedef Dense<> Storage;
     
     Mat() : size_( 0 ) {  }
     

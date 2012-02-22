@@ -24,7 +24,7 @@ struct CalculateNormals {
 };
 
 /*!
-Objet :
+Objetif :
     calculer une certaine normale aux noeuds d'un maillage : plus précisément elle calcule la normale de chaque élément puis l'ajoute à l'attribut nommé "normal" des noeuds de l'élément et enfin normalise l'addition.
 
 Paramètre:

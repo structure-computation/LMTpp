@@ -659,3 +659,4 @@ tests/include/containers/polynomials_test.cpp
 tests/include/mesh/compilations/pyramid_test.cpp
 tests/include/mesh/pyramid_test.cpp
 include/mesh/MeshCoulour.h
+include/mesh/make_sub_mesh.h

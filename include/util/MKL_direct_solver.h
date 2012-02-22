@@ -5,6 +5,15 @@
 
 #ifdef METIL_COMP_DIRECTIVE
 
+#pragma lib_path /opt/intel/Compiler/11.1/064/lib/intel64/lib
+#pragma lib_path /opt/intel/Compiler/11.1/064/mkl/lib/em64t
+#pragma lib_path /opt/intel/Compiler/11.1/064/lib/intel64/
+#pragma lib_name mkl_intel_lp64
+#pragma lib_name mkl_gnu_thread
+#pragma lib_name mkl_core
+#pragma lib_name iomp5
+#pragma lnk_flag /usr/lib/libpthread_nonshared.a
+
 #pragma inc_path /opt/intel/Compiler/11.1/064/mkl/include/
 
 #endif
@@ -81,7 +90,8 @@ struct MKL_direct_solver {
     template<int sr, bool stored_in_upper_part_ >
     void get_factorization( Mat<double, Sym< sr, stored_in_upper_part_>, SparseLine<> > &mat, bool want_free = true, bool is_positive_definite = false ) {
         free();
-        mtype = m.init( mat );
+        m.init( mat );
+        mtype =  m.get_mtype();
         if ( is_positive_definite )
             mtype = 2;
         get_factorization_general();
@@ -93,7 +103,8 @@ struct MKL_direct_solver {
     template<int sr, int sc>
     void get_factorization( Mat<double, Gen<sr,sc>, SparseLine<> > &mat, bool want_free = true ) {
         free();
-        mtype = m.init( mat );
+        m.init( mat );
+        mtype = m.get_mtype();
         get_factorization_general();
         if ( want_free )
             mat.free();

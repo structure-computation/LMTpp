@@ -47,6 +47,8 @@ public:
     /// after that, data in mat won't be used anymore.
     void get_factorization( LMT::Mat<double,LMT::Sym<>,LMT::SparseLine<> > &mat, LMT::Vec<LMT::Vec<double> > &Kernel, bool want_free=true, bool want_semi_morse=false, bool want_amd_order=true ); // PK et PG (pseudo-inverse)
     void get_factorization( LMT::Mat<double,LMT::Gen<>,LMT::SparseLine<> > &mat, LMT::Vec<LMT::Vec<double> > &Kernel, bool want_free=true, bool want_semi_morse=false, bool want_amd_order=true ); // PK et PG (pseudo-inverse)
+    void get_factorization( LMT::Mat<double,LMT::Sym<>,LMT::SparseLine<> > &mat, LMT::Vec<LMT::Vec<double> > &Kernel, LMT::Vec<int> &Pivots, bool want_free=true, bool want_semi_morse=false, bool want_amd_order=true ); // PK et PG (pseudo-inverse)
+    void get_factorization( LMT::Mat<double,LMT::Gen<>,LMT::SparseLine<> > &mat, LMT::Vec<LMT::Vec<double> > &Kernel, LMT::Vec<int> &Pivots, bool want_free=true, bool want_semi_morse=false, bool want_amd_order=true ); // PK et PG (pseudo-inverse)
     /// ...
     template<class TM> void get_factorization( const TM &mat, bool want_free=true, bool want_semi_morse=false, bool want_amd_order=true ) { assert(0); /* TODO */ }
     /// ...
@@ -65,7 +67,7 @@ private:
     /// LDL stuff
     double Info[AMD_INFO];
     LMT::Vec<double> Ax, Lx, B, D, X, Y;
-    LMT::Vec<int> Ai, Ap, Li, Lp, P, Pinv, Flag, Pattern, Lnz, Parent;
+    LMT::Vec<int> Ai, Ap, Li, Lp, P, Pinv, Flag, Pattern, Lnz, Parent, kernod;
     int lnz, n;
     
     /// semimorse stuff

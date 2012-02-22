@@ -20,8 +20,13 @@ namespace LMT {
 
 // --------------------------------------------------------------------------------------------------------
 /*!
+    C'est une pyramide à base carrée dans le plan xOy.
     
-
+    Dans l'espace de référence cela correspond au volume de points M(x,y,z) tels que :
+        * x, y , z >= 0
+        * x + z <= 1
+        * y + z <= 1
+        
     \keyword Maillage/Elément
     \friend raphael.pasquier@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
@@ -74,6 +79,19 @@ void append_skin_elements(Element<Pyramid,TN,TNG,TD,NET> &e,TC &ch,HET &het,Numb
     het.add_element(e,ch,NodalElement(),e.node(4));
 }
 
+template<class TN,class TNG,class TD,unsigned NET,class TM,class T>
+void update_edge_ratio(const Element<Pyramid,TN,TNG,TD,NET> &e,TM &m,T &edge_ratio) {
+    T edge_length_0 = (m.get_children_of( e, Number<1>() )[ 0 ])->measure_virtual();
+    T edge_length_1 = (m.get_children_of( e, Number<1>() )[ 1 ])->measure_virtual();
+    T edge_length_2 = (m.get_children_of( e, Number<1>() )[ 2 ])->measure_virtual();
+    T edge_length_3 = (m.get_children_of( e, Number<1>() )[ 3 ])->measure_virtual();
+    T edge_length_4 = (m.get_children_of( e, Number<1>() )[ 4 ])->measure_virtual();
+    T edge_min_1 = min( edge_length_0, edge_length_1, edge_length_2 );
+    T edge_min_2 = min( edge_length_3, edge_length_4 );
+    T edge_max_1 = max( edge_length_0, edge_length_1, edge_length_2 );
+    T edge_max_2 = max( edge_length_3, edge_length_4 );
+    edge_ratio = min( edge_min_1, edge_min_2 ) / max( edge_max_1, edge_max_2 );
+}
 
 // extern unsigned valid_pyramid_face_center[];
 // extern int div_pyramid_face_center[];

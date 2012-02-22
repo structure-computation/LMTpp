@@ -26,6 +26,8 @@ public:
     typedef typename TVl::template SubType<0>::T T;
     typedef Vec<TVl,static_rows> TVL;
     typedef Vec<TVu,static_cols> TVU;
+    typedef Gen<sr,sc> Structure;
+    typedef SparseLU Storage;
     
     typedef typename TVl::RetOp RetOp;
     typedef typename TVl::RetOpConst RetOpConst;

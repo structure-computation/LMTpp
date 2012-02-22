@@ -19,6 +19,8 @@ public:
     typedef typename TVI::template SubType<0>::T T;
     typedef T T0;
     typedef Vec<TVI,static_rows> TV;
+    typedef Gen<sr,sc> Structure;
+    typedef SparseLine<Col> Storage;
 
     void clear() { for(unsigned i=0;i<data.size();++i) { data[i].indices.free(); data[i].data.free(); } } /// set all values to 0
     void clear_data_only() { for(unsigned i=0;i<data.size();++i) { data[i].data.set( 0 ); } } /// set all values to 0 but do not free indices
@@ -265,6 +267,8 @@ public:
     typedef typename TVI::template SubType<0>::T T;
     typedef T T0;
     typedef Vec<TVI,static_cols> TV;
+    typedef Gen<sr,sc> Structure;
+    typedef SparseLine<Row> Storage;
 
     void clear() { for(unsigned i=0;i<data.size();++i) { data[i].indices.free(); data[i].data.free(); } } /// set all values to 0
     void clear_data_only() { for(unsigned i=0;i<data.size();++i) { data[i].data.set( 0 ); } } /// set all values to 0 but do not free indices
@@ -511,6 +515,8 @@ public:
     typedef typename TVI::template SubType<0>::T T;
     typedef T T0;
     typedef Vec<TVI,static_rows> TV;
+    typedef Sym<sr,0> Structure;
+    typedef SparseLine<Col> Storage;
 
     void clear() { for(unsigned i=0;i<data.size();++i) { data[i].indices.free(); data[i].data.free(); } } /// set all values to 0
     void clear_data_only() { for(unsigned i=0;i<data.size();++i) { data[i].data.set( 0 ); } } /// set all values to 0 but do not free indices
@@ -779,6 +785,8 @@ public:
     typedef typename TVI::template SubType<0>::T T;
     typedef T T0;
     typedef Vec<TVI,static_rows> TV;
+    typedef Sym<sr,1> Structure;
+    typedef SparseLine<Col> Storage;
 
     void clear() { for(unsigned i=0;i<data.size();++i) { data[i].indices.free(); data[i].data.free(); } } /// set all values to 0
     void clear_data_only() { for(unsigned i=0;i<data.size();++i) { data[i].data.set( 0 ); } } /// set all values to 0 but do not free indices
@@ -1047,6 +1055,8 @@ public:
     typedef typename TVI::template SubType<0>::T T;
     typedef T T0;
     typedef Vec<TVI,static_cols> TV;
+    typedef Sym<sr,0> Structure;
+    typedef SparseLine<Row> Storage;
 
     void clear() { for(unsigned i=0;i<data.size();++i) { data[i].indices.free(); data[i].data.free(); } } /// set all values to 0
     void clear_data_only() { for(unsigned i=0;i<data.size();++i) { data[i].data.set( 0 ); } } /// set all values to 0 but do not free indices
@@ -1315,6 +1325,8 @@ public:
     typedef typename TVI::template SubType<0>::T T;
     typedef T T0;
     typedef Vec<TVI,static_cols> TV;
+    typedef Sym<sr,1> Structure;
+    typedef SparseLine<Row> Storage;
 
     void clear() { for(unsigned i=0;i<data.size();++i) { data[i].indices.free(); data[i].data.free(); } } /// set all values to 0
     void clear_data_only() { for(unsigned i=0;i<data.size();++i) { data[i].data.set( 0 ); } } /// set all values to 0 but do not free indices
@@ -1583,6 +1595,8 @@ public:
     typedef typename TVI::template SubType<0>::T T;
     typedef T T0;
     typedef Vec<TVI,static_rows> TV;
+    typedef Herm<sr,0> Structure;
+    typedef SparseLine<Col> Storage;
 
     void clear() { for(unsigned i=0;i<data.size();++i) { data[i].indices.free(); data[i].data.free(); } } /// set all values to 0
     void clear_data_only() { for(unsigned i=0;i<data.size();++i) { data[i].data.set( 0 ); } } /// set all values to 0 but do not free indices
@@ -1851,6 +1865,8 @@ public:
     typedef typename TVI::template SubType<0>::T T;
     typedef T T0;
     typedef Vec<TVI,static_rows> TV;
+    typedef Herm<sr,1> Structure;
+    typedef SparseLine<Col> Storage;
 
     void clear() { for(unsigned i=0;i<data.size();++i) { data[i].indices.free(); data[i].data.free(); } } /// set all values to 0
     void clear_data_only() { for(unsigned i=0;i<data.size();++i) { data[i].data.set( 0 ); } } /// set all values to 0 but do not free indices
@@ -2119,6 +2135,8 @@ public:
     typedef typename TVI::template SubType<0>::T T;
     typedef T T0;
     typedef Vec<TVI,static_cols> TV;
+    typedef Herm<sr,0> Structure;
+    typedef SparseLine<Row> Storage;
 
     void clear() { for(unsigned i=0;i<data.size();++i) { data[i].indices.free(); data[i].data.free(); } } /// set all values to 0
     void clear_data_only() { for(unsigned i=0;i<data.size();++i) { data[i].data.set( 0 ); } } /// set all values to 0 but do not free indices
@@ -2387,6 +2405,8 @@ public:
     typedef typename TVI::template SubType<0>::T T;
     typedef T T0;
     typedef Vec<TVI,static_cols> TV;
+    typedef Herm<sr,1> Structure;
+    typedef SparseLine<Row> Storage;
 
     void clear() { for(unsigned i=0;i<data.size();++i) { data[i].indices.free(); data[i].data.free(); } } /// set all values to 0
     void clear_data_only() { for(unsigned i=0;i<data.size();++i) { data[i].data.set( 0 ); } } /// set all values to 0 but do not free indices
@@ -2655,6 +2675,8 @@ public:
     typedef typename TVI::template SubType<0>::T T;
     typedef T T0;
     typedef Vec<TVI,static_rows> TV;
+    typedef AntiSym<sr,0> Structure;
+    typedef SparseLine<Col> Storage;
 
     void clear() { for(unsigned i=0;i<data.size();++i) { data[i].indices.free(); data[i].data.free(); } } /// set all values to 0
     void clear_data_only() { for(unsigned i=0;i<data.size();++i) { data[i].data.set( 0 ); } } /// set all values to 0 but do not free indices
@@ -2923,6 +2945,8 @@ public:
     typedef typename TVI::template SubType<0>::T T;
     typedef T T0;
     typedef Vec<TVI,static_rows> TV;
+    typedef AntiSym<sr,1> Structure;
+    typedef SparseLine<Col> Storage;
 
     void clear() { for(unsigned i=0;i<data.size();++i) { data[i].indices.free(); data[i].data.free(); } } /// set all values to 0
     void clear_data_only() { for(unsigned i=0;i<data.size();++i) { data[i].data.set( 0 ); } } /// set all values to 0 but do not free indices
@@ -3191,6 +3215,8 @@ public:
     typedef typename TVI::template SubType<0>::T T;
     typedef T T0;
     typedef Vec<TVI,static_cols> TV;
+    typedef AntiSym<sr,0> Structure;
+    typedef SparseLine<Row> Storage;
 
     void clear() { for(unsigned i=0;i<data.size();++i) { data[i].indices.free(); data[i].data.free(); } } /// set all values to 0
     void clear_data_only() { for(unsigned i=0;i<data.size();++i) { data[i].data.set( 0 ); } } /// set all values to 0 but do not free indices
@@ -3459,6 +3485,8 @@ public:
     typedef typename TVI::template SubType<0>::T T;
     typedef T T0;
     typedef Vec<TVI,static_cols> TV;
+    typedef AntiSym<sr,1> Structure;
+    typedef SparseLine<Row> Storage;
 
     void clear() { for(unsigned i=0;i<data.size();++i) { data[i].indices.free(); data[i].data.free(); } } /// set all values to 0
     void clear_data_only() { for(unsigned i=0;i<data.size();++i) { data[i].data.set( 0 ); } } /// set all values to 0 but do not free indices
@@ -3727,6 +3755,8 @@ public:
     typedef typename TVI::template SubType<0>::T T;
     typedef T T0;
     typedef Vec<TVI,static_rows> TV;
+    typedef TriUpper<sr,sc> Structure;
+    typedef SparseLine<Col> Storage;
 
     void clear() { for(unsigned i=0;i<data.size();++i) { data[i].indices.free(); data[i].data.free(); } } /// set all values to 0
     void clear_data_only() { for(unsigned i=0;i<data.size();++i) { data[i].data.set( 0 ); } } /// set all values to 0 but do not free indices
@@ -3995,6 +4025,8 @@ public:
     typedef typename TVI::template SubType<0>::T T;
     typedef T T0;
     typedef Vec<TVI,static_cols> TV;
+    typedef TriUpper<sr,sc> Structure;
+    typedef SparseLine<Row> Storage;
 
     void clear() { for(unsigned i=0;i<data.size();++i) { data[i].indices.free(); data[i].data.free(); } } /// set all values to 0
     void clear_data_only() { for(unsigned i=0;i<data.size();++i) { data[i].data.set( 0 ); } } /// set all values to 0 but do not free indices
@@ -4263,6 +4295,8 @@ public:
     typedef typename TVI::template SubType<0>::T T;
     typedef T T0;
     typedef Vec<TVI,static_rows> TV;
+    typedef TriLower<sr,sc> Structure;
+    typedef SparseLine<Col> Storage;
 
     void clear() { for(unsigned i=0;i<data.size();++i) { data[i].indices.free(); data[i].data.free(); } } /// set all values to 0
     void clear_data_only() { for(unsigned i=0;i<data.size();++i) { data[i].data.set( 0 ); } } /// set all values to 0 but do not free indices
@@ -4531,6 +4565,8 @@ public:
     typedef typename TVI::template SubType<0>::T T;
     typedef T T0;
     typedef Vec<TVI,static_cols> TV;
+    typedef TriLower<sr,sc> Structure;
+    typedef SparseLine<Row> Storage;
 
     void clear() { for(unsigned i=0;i<data.size();++i) { data[i].indices.free(); data[i].data.free(); } } /// set all values to 0
     void clear_data_only() { for(unsigned i=0;i<data.size();++i) { data[i].data.set( 0 ); } } /// set all values to 0 but do not free indices
@@ -4799,6 +4835,8 @@ public:
     typedef typename TVI::template SubType<0>::T T;
     typedef T T0;
     typedef Vec<TVI,static_rows> TV;
+    typedef Diag<sr,sc> Structure;
+    typedef SparseLine<Col> Storage;
 
     void clear() { for(unsigned i=0;i<data.size();++i) { data[i].indices.free(); data[i].data.free(); } } /// set all values to 0
     void clear_data_only() { for(unsigned i=0;i<data.size();++i) { data[i].data.set( 0 ); } } /// set all values to 0 but do not free indices
@@ -5067,6 +5105,8 @@ public:
     typedef typename TVI::template SubType<0>::T T;
     typedef T T0;
     typedef Vec<TVI,static_cols> TV;
+    typedef Diag<sr,sc> Structure;
+    typedef SparseLine<Row> Storage;
 
     void clear() { for(unsigned i=0;i<data.size();++i) { data[i].indices.free(); data[i].data.free(); } } /// set all values to 0
     void clear_data_only() { for(unsigned i=0;i<data.size();++i) { data[i].data.set( 0 ); } } /// set all values to 0 but do not free indices

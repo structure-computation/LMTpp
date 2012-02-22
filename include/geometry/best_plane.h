@@ -63,6 +63,49 @@ T best_plane( T &a, T &b, T &c, T &d, const Vec< Vec< T, s >, s2 > & list_points
     return res;
 }
 
+/*!
+    Objectif :
+        Cette classe est un foncteur qui s'applique sur les éléments d'un maillage 3D pour déterminer l'applatissement de ses éléments.
+        
+    Exemple d'utilisation :
+    \code C/C++
+        TM m; /// maillage 3D
+        
+        Applatissement<> app;
+        app.init();
+        apply( m.elem_list, app );
+        PRINT( app.applatissement ); /// affiche l'applatissement "minimale" des éléments de m.
+        
+        
+    \keyword Maillage/Opération
+    \friend leclerc@lmt.ens-cachan.fr
+*/
+template <class T = double>
+struct Applatissement {
+    Applatissement() {
+        init();
+    }
+    
+    void init() {
+        applatissement = 1e100;
+    }
+    
+    template<class TE>
+    void operator() ( const TE &e ) {
+        Vec< typename TE::Pvec, TE::nb_nodes > list_points;
+        T a, b, c, d, res;
+        
+        for( unsigned j = 0 ; j < TE::nb_nodes; ++j ) 
+            list_points[ j ] = e.pos( j );
+        res = best_plane( a, b, c ,d, list_points );
+        if ( res < applatissement )
+            applatissement = res;
+    }    
+
+
+    T applatissement;
+};
+
 };
 
 #endif /// BEST_PLANE_H

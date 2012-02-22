@@ -13,12 +13,13 @@
 //
 //
 //#include<cstdlib>
-#include<fstream>
+#include <fstream>
 #include <iostream>
 #include <exception>
-#include<cstdlib>
+#include <cstdlib>
 
 #include <containers/vec.h>
+#include "write_mesh_vtk.h"
 
 namespace LMT {
 
@@ -123,7 +124,13 @@ struct cell_output_ascii {
             for(unsigned i=0;i<4;++i)
                 outfile << (e.node(i)->number_in_original_mesh()+1) << " ";
             outfile  << std::endl;
-        }
+        } else if(e.name_virtual() == std::string("Hexa_20") ) {
+            /// Number of nodes
+            outfile << "cu20 ";
+            for(unsigned i=0;i<20;++i)
+                outfile << (e.node(i)->number_in_original_mesh()+1) << " ";
+            outfile  << std::endl;
+         }
     }
 };
 

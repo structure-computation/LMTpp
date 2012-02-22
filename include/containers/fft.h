@@ -337,11 +337,11 @@ int modulo( int x, int N ) {
     Réf : http://pixel-shaker.fr/
 
 */
-template< int dim_, class T_, class Kernel_,class PT_>
-Vec<int,dim_> rigid_body_translation( const ImgInterp<T_,dim_,Kernel_,PT_> &i, 
+template< unsigned dim_, class T_, class Kernel_,class PT_>
+Vec<int,2> rigid_body_translation( const ImgInterp<T_,dim_,Kernel_,PT_> &i, 
                                       const ImgInterp<T_,dim_,Kernel_,PT_> &i2,
-                                      Vec<int,dim_> xmin,
-                                      Vec<int,dim_> xmax /*,
+                                      Vec<int,2> xmin,
+                                      Vec<int,2> xmax /*,
                                       Vec<PT_,dim_> h = Vec<PT_,dim_>( 0, 0 )*/ ) {
     typedef Vec< int, dim_ > POSI;   
     typedef std::complex<double> C;
