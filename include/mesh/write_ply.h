@@ -1,3 +1,4 @@
+//
 // C++ Interface: write_ply
 //
 // Description:
