@@ -37,7 +37,7 @@ void read_geof(TM &mesh, std::istream &is) throw(std::runtime_error) {
     s >> dim1;
 
     if (dim1 != dim) {
-        cout << "Dimension du maillage � lire ("<<dim1<<") incompatible avec celle du maillage pass� ("<<dim<<")" << endl;
+        std::cout << "Dimension du maillage � lire ("<<dim1<<") incompatible avec celle du maillage pass� ("<<dim<<")" << endl;
         assert(0);
     }
 
@@ -159,7 +159,7 @@ void read_geof(TM &mesh, std::istream &is) throw(std::runtime_error) {
             permutation_if_jac_neg(Wedge(),vn.ptr());
             mesh.add_element(Wedge(),DefaultBehavior(),&vn[0]);
         } else {
-            cout << "Erreur - type d'element non lu" <<endl;
+            std::cout << "Erreur - type d'element non lu" <<endl;
             assert(0);
         }
         nb+=1;

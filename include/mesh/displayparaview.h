@@ -76,7 +76,7 @@ public:
     ~DisplayParaview() {
     }
     
-    template<class TM> std::string add_mesh(const TM &m,const std::string &prefix="paraview",const Vec<std::string> &display_fields=Vec<std::string>("all"),double time_step=0 ) {
+    template<class TM> std::string add_mesh(const TM &m,const std::string &prefix="paraview",const Vec<std::string> &display_fields=Vec<std::string>("all"),double time_step=0) {
         std::string pvu_name = prefix;
         //if ( prefix.rfind(".vtu") != prefix.size() - 4 )
         pvu_name += "_" + to_string( time_step ) + "_" + to_string( pvu_files[time_step].size() ) + ".vtu";
@@ -95,8 +95,8 @@ public:
     }
 
 
-    template<class TM> std::string add_mesh_MT(const TM &m,const std::string &prefix="paraview",const Vec<std::string> &display_fields=Vec<std::string>("all"),double time_step=0) {
-        std::string pvu_name = prefix;
+    template<class TM> std::string add_mesh_1(const TM &m,const std::string &prefix="paraview",const Vec<std::string> &display_fields=Vec<std::string>("all"),double time_step=0) {
+        std::string pvu_name = prefix + ".vtu";
         //if ( prefix.rfind(".vtu") != prefix.size() - 4 )
         //pvu_name += "_" + to_string( time_step ) + "_" + to_string( pvu_files[time_step].size() ) + ".vtu";
         // std::cout << pvu_name << std::endl;
@@ -116,11 +116,10 @@ public:
 
 
 
-    template<class TM> void add_mesh_1(const TM &m,const std::string &prefix="/tmp/trovalet/paraview0.vtu",const Vec<std::string> &display_fields=Vec<std::string>("all")) {
-//     template<class TM> void add_mesh_1(const TM &m,const std::string &prefix="/tmp/trovalet/paraview0.vtu",std::string &display_fields="critere_G") {
+    template<class TM> void add_mesh_2(const TM &m,const std::string &prefix="paraview",const Vec<std::string> &display_fields=Vec<std::string>("all")) {
         std::ostringstream ss;
         ss << prefix ;//<< pvu_files[prefix].size() << ".vtu";
-        std::string pvu_name( ss.str() );
+        std::string pvu_name( ss.str() + ".vtu" );
         pvu_files[ 0 ].push_back(pvu_name);
         std::ofstream f(pvu_name.c_str());
         
@@ -366,9 +365,9 @@ struct DpExec { void operator()(DisplayParaview &dp,unsigned i) const { dp.exec(
 /*!
 */
 template<class Carac,unsigned nvi_to_subs,unsigned skin>
-int display( const MeshAncestor<Carac,nvi_to_subs,skin> &m, std::string pvsm_file = "" ) {
+int display( const MeshAncestor<Carac,nvi_to_subs,skin> &m, const std::string &prefix="paraview", const std::string &pvsm_file = "" ) {
     DisplayParaview dp;
-    std::string res = dp.add_mesh( m );
+    std::string res = dp.add_mesh( m, prefix );
     
     if ( pvsm_file.size() ) {
         std::string t = "paraview --state=" + pvsm_file;
