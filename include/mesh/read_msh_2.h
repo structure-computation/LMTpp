@@ -37,9 +37,9 @@ void assign_tag_values( TE *e, const Vec<double> &tag_values, const VarTag &vt, 
     ev( *e ) = tag_values[ n ];
     assign_tag_values( e, tag_values, vt, Number<n+1>(), Number<m>() );
 }
-// template<class TE,class VarTag,unsigned n           > void assign_tag_values( TE   *e, const Vec<double> &tag_values, const VarTag &vt, Number<n>, Number<n> ) { e->set_field("tag", tag_values[1]); }
+template<class TE,class VarTag,unsigned n           > void assign_tag_values( TE   *e, const Vec<double> &tag_values, const VarTag &vt, Number<n>, Number<n> ) { e->set_field("tag", tag_values[0]); }
 // template<class TE,class VarTag,unsigned n           > void assign_tag_values( TE   *e, const Vec<double> &tag_values, const VarTag &vt, Number<n>, Number<n> ) { Vec<double, 2> tags = tag_values; e->set_field("tags", tags); }
-template<class TE,class VarTag,unsigned n           > void assign_tag_values( TE   *e, const Vec<double> &tag_values, const VarTag &vt, Number<n>, Number<n> ) { }
+// template<class TE,class VarTag,unsigned n           > void assign_tag_values( TE   *e, const Vec<double> &tag_values, const VarTag &vt, Number<n>, Number<n> ) { }
 template<         class VarTag,unsigned n,unsigned m> void assign_tag_values( void *e, const Vec<double> &tag_values, const VarTag &vt, Number<n>, Number<m> ) { }
 template<         class VarTag,unsigned n           > void assign_tag_values( void *e, const Vec<double> &tag_values, const VarTag &vt, Number<n>, Number<n> ) { }
 
@@ -293,7 +293,7 @@ void read_msh_2_tags_on_skin( TM &m, const std::string &fic_name, const VarTag &
 
 /// put gid mesh in m
 /*!
-Attention: importe seulement les Bar(), les Triangle(), les Quad(), les Hexa(), les Tetra() et les Wedge(). 
+Attention: importe seulement les Bar(), les Triangle(), les Quad(), les Hexa(), les Tetra() et les Wedge().
 */
 template<class TM>
 void read_msh_2( TM &m,const std::string &fic_name, unsigned nvi = 0 ) throw ( std::runtime_error ) {
@@ -306,7 +306,7 @@ void read_msh_2( TM &m,const std::string &fic_name, unsigned nvi = 0 ) throw ( s
 
 /*!
 put gid mesh in m
-Attention: importe seulement les Bar(), les Triangle(), les Quad(), les Hexa(), les Tetra() et les Wedge(). 
+Attention: importe seulement les Bar(), les Triangle(), les Quad(), les Hexa(), les Tetra() et les Wedge().
 
 \keyword Maillage/Import
 */
