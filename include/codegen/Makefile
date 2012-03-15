@@ -1,6 +1,6 @@
 SOURCES     = ex.cpp op.cpp write_code.cpp write_graphviz.cpp exmatrix.cpp exvector.cpp read_ex.cpp write_code_language_cpp.cpp codegen_wrap.cc
 OBJECTS     = ex.o   op.o   write_code.o   write_graphviz.o   exmatrix.o   exvector.o   read_ex.o   write_code_language_cpp.o   codegen_wrap.o
-CXXFLAGS    = -O3 -fPIC -I/usr/include/python2.6 -I/usr/include/python2.5 -I/usr/include/python2.4 -I/usr/include/python2.3
+CXXFLAGS    = -O3 -fPIC -I/usr/include/python2.7 -I/usr/include/python2.6 -I/usr/include/python2.5 -I/usr/include/python2.4 -I/usr/include/python2.3
 
 all: _codegen.so
 
