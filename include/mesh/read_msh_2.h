@@ -308,10 +308,12 @@ void read_msh_2( TM &m,const std::string &fic_name, unsigned nvi = 0 ) throw ( s
 put gid mesh in m
 Attention: importe seulement les Bar(), les Triangle(), les Quad(), les Hexa(), les Tetra() et les Wedge(). 
 
+read_msh_2( m, "toto.msh", dim, HeteroExplPack<toto_DM,tata_DM>() )
+
 \keyword Maillage/Import
 */
 template<class TM,class VarTag>
-void read_msh_2( TM &m,const std::string &fic_name, unsigned nvi, const VarTag &vt  ) throw ( std::runtime_error ) {
+void read_msh_2( TM &m,const std::string &fic_name, unsigned nvi, const VarTag &vt ) throw ( std::runtime_error ) {
     // ouverture du fichier
     std::ifstream my_file( fic_name.c_str() );
     if ( ! my_file.is_open() )
