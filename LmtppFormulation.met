@@ -2439,7 +2439,7 @@ def write_legacy_lmtpp_mesh_carac( stream, pb_name, fe_set_by_dim, dim )
                 stream <<<<
                     #ifndef IFNDEF_$(name)_DM
                     #define IFNDEF_$(name)_DM
-                        struct $(name)_DM {};
+                        struct $(name)_DM { static std::string name() { return "$(name)"; } };
                     #endif // IFNDEF_$(name)_DM
         
     # CARACDMEXTNAMES
