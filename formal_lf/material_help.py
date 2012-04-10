@@ -76,6 +76,17 @@ def simplification_projection(P,dim):
    elif dim==1:
       return 1
 
+#loi de hooke isotrope direct 2d
+def hooke_direct_isotrope_2d(E,nu):
+    l = E * nu / (1. + nu) / (1. - nu)
+    m = E / (1. + nu)
+    H = matrix([
+            [l+m,  l ,  0.],
+            [ l , l+m,  0.],
+            [ 0.,  0.,  m ],
+            ])
+    return H
+
 #loi de hooke isotrope direct 3d
 def hooke_direct_isotrope_3d(E,nu):
     l = E * nu / (1. + nu) / (1. - 2. * nu)
@@ -89,6 +100,11 @@ def hooke_direct_isotrope_3d(E,nu):
             [ 0.,  0.,  0., 0., 0., m ],
             ])
     return H
+
+#loi de hooke isotrope direct
+def hooke_direct_isotrope(E,nu,dim):
+    if   (dim==2): return hooke_direct_isotrope_2d(E,nu)
+    elif (dim==3): return hooke_direct_isotrope_3d(E,nu)
 
 #loi de hooke isotrope 3d
 def hooke_isotrope_th_3d(E,nu,alpha):
