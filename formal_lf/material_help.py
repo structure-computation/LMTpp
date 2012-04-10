@@ -88,9 +88,9 @@ def hooke_direct_isotrope_2d(E,nu):
     return H
 
 #loi de hooke isotrope direct 3d
-def hooke_direct_isotrope_3d(E,nu):
+def hooke_isotrope_direct_3d(E,nu):
     l = E * nu / (1. + nu) / (1. - 2. * nu)
-    m = E / (1. + nu)
+    m = 2. * E / (1. + nu)
     H = matrix([
             [l+m,  l ,  l , 0., 0., 0.],
             [ l , l+m,  l , 0., 0., 0.],
@@ -125,20 +125,6 @@ def hooke_isotrope_th_3d(E,nu,alpha):
     epsth=vecalpha
     sigth = mul(Kglo,vecalpha)
     return Kglo, Hglo, epsth
-
-#loi de hooke isotrope direct 3d
-def hooke_isotrope_direct_3d(E,nu):
-    l = E * nu / (1. + nu) / (1. - 2. * nu)
-    m = 2. * E / (1. + nu)
-    H = matrix([
-            [l+m,  l ,  l , 0., 0., 0.],
-            [ l , l+m,  l , 0., 0., 0.],
-            [ l ,  l , l+m, 0., 0., 0.],
-            [ 0.,  0.,  0., m , 0., 0.],
-            [ 0.,  0.,  0., 0., m , 0.],
-            [ 0.,  0.,  0., 0., 0., m ],
-            ])
-    return H
 
 #
 def hooke_isotrope_3d(E,nu):
