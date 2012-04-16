@@ -2637,19 +2637,11 @@ public:
 
     /*!
         Objectif :
-<<<<<<< HEAD
-            cette méthode ajoute au vecteur <strong> res </strong>, la contribution au résidu de l'élément <strong> *elem </strong> .
-
-        Paramètres :
-            * <strong> res </strong> le vecteur contenant le résidu ( sa taille doit être égale au nombre de degrés de liberté du problème),
-            * <strong> elem </strong> pointeur sur l'élément dont on veut obtenir la contribution.
-=======
             cette methode ajoute au vecteur <strong> res </strong>, la contribution au residu de l'element <strong> *elem </strong> .
             
         Parametres :
             * <strong> res </strong> le vecteur contenant le residu ( sa taille doit etre egale au nombre de degres de liberte du probleme),
             * <strong> elem </strong> pointeur sur l'element dont on veut obtenir la contribution.
->>>>>>> 297c3f9531ae9b572059d281434b3fafdbcccd0f
     */
     void add_elem_contribution_to_residual( Vec<ScalarType> &res, const typename TM::EA *elem ) const {
         m->elem_list.apply_on_down_cast( elem, AssembleResidual(), res, *this );

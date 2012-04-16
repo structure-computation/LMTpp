@@ -88,7 +88,7 @@ def hooke_direct_isotrope_2d(E,nu):
     return H
 
 #loi de hooke isotrope direct 3d
-def hooke_isotrope_direct_3d(E,nu):
+def hooke_direct_isotrope_3d(E,nu):
     l = E * nu / (1. + nu) / (1. - 2. * nu)
     m = 2. * E / (1. + nu)
     H = matrix([
