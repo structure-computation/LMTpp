@@ -833,8 +833,8 @@ class LmtppFormulationAncestor
         appel_enr := "add_elem_matrix_enriched( f, K_tmp, F_tmp, f.vectors, matrix_is_sym, assemble_mat, assemble_vec, elem, indices );"
         appel_corr:= "add_elem_matrix_enriched_corr( f, f.matrices(Number<0>()), f.sollicitation, f.vectors, matrix_is_sym, assemble_mat, assemble_vec, elem, indices );"
         sum_K := "pthread_mutex_lock(mutex); f.matrices(Number<0>()) += K_tmp; f.sollicitation += F_tmp; pthread_mutex_unlock(mutex);"
-        stream <<< "#ifndef ADD_ELEM_MATRIX_H"
-        stream <<< "#define ADD_ELEM_MATRIX_H"
+        stream <<< "#ifndef ADD_ELEM_MATRIX_$(nb_dim)_$(name)_FOR_ELEMENT_$(pe->name)_H"
+        stream <<< "#define ADD_ELEM_MATRIX_$(nb_dim)_$(name)_FOR_ELEMENT_$(pe->name)_H"
         stream <<< "namespace LMT {"
         for assemble_mat in 0 .. 2
             for assemble_vec in 0 .. 2
@@ -949,8 +949,8 @@ class LmtppFormulationAncestor
         
     #
     def write_add_elem_matrices_eig( stream )
-        stream <<< "#ifndef ADD_ELEM_MATRIX_EIG_H"
-        stream <<< "#define ADD_ELEM_MATRIX_EIG_H"
+        stream <<< "#ifndef ADD_ELEM_MATRIX_EIG_$(nb_dim)_$(name)_FOR_ELEMENT_$(pe->name)_H"
+        stream <<< "#define ADD_ELEM_MATRIX_EIG_$(nb_dim)_$(name)_FOR_ELEMENT_$(pe->name)_H"
         for assemble_mat_A in 0 .. 2
             for assemble_mat_B in 0 .. 2
                 stream <<<<
@@ -1154,8 +1154,8 @@ class LmtppFormulationAncestor
 
     #
     def write_add_elem_matrices_enriched( stream )
-        stream <<< "#ifndef ADD_ELEM_MATRIX_ENRICHED_H"
-        stream <<< "#define ADD_ELEM_MATRIX_ENRICHED_H"
+        stream <<< "#ifndef ADD_ELEM_MATRIX_ENRICHED_$(nb_dim)_$(name)_FOR_ELEMENT_$(pe->name)_H"
+        stream <<< "#define ADD_ELEM_MATRIX_ENRICHED_$(nb_dim)_$(name)_FOR_ELEMENT_$(pe->name)_H"
         stream <<< "namespace LMT {"
         e := child_cast(pe)
         toto := e->point_is_inside([symbol("f.interface.handbooks[f.interface.elem_enrichment_ID[elem.number][j]].pts_gauss_hdbk.pos_and_wei[i].positions[0]") symbol("f.interface.handbooks[f.interface.elem_enrichment_ID[elem.number][j]].pts_gauss_hdbk.pos_and_wei[i].positions[1]")])
@@ -1448,8 +1448,8 @@ class LmtppFormulationAncestor
         
     #
     def write_add_elem_matrices_enriched_corr( stream )
-        stream <<< "#ifndef ADD_ELEM_MATRIX_ENRICHED_CORR_H"
-        stream <<< "#define ADD_ELEM_MATRIX_ENRICHED_CORR_H"
+        stream <<< "#ifndef ADD_ELEM_MATRIX_ENRICHED_CORR_$(nb_dim)_$(name)_FOR_ELEMENT_$(pe->name)_H"
+        stream <<< "#define ADD_ELEM_MATRIX_ENRICHED_CORR_$(nb_dim)_$(name)_FOR_ELEMENT_$(pe->name)_H"
         stream <<< "namespace LMT {"
         #
         if nb_dim == 2
@@ -1536,8 +1536,8 @@ class LmtppFormulationAncestor
     #
     def write_add_elem_matrices_enriched_coupl( stream )
         e := child_cast(pe)
-        stream <<< "#ifndef ADD_ELEM_MATRIX_ENRICHED_COUPL_H"
-        stream <<< "#define ADD_ELEM_MATRIX_ENRICHED_COUPL_H"
+        stream <<< "#ifndef ADD_ELEM_MATRIX_ENRICHED_COUPL_$(nb_dim)_$(name)_FOR_ELEMENT_$(pe->name)_H"
+        stream <<< "#define ADD_ELEM_MATRIX_ENRICHED_COUPL_$(nb_dim)_$(name)_FOR_ELEMENT_$(pe->name)_H"
         stream <<< "namespace LMT {"
         #
         if nb_dim == 2
@@ -1626,8 +1626,8 @@ class LmtppFormulationAncestor
 
     # 
     def write_add_nodal_matrices( stream )
-        stream <<< "#ifndef ADD_NODAL_MATRIX_H"
-        stream <<< "#define ADD_NODAL_MATRIX_H"
+        stream <<< "#ifndef ADD_NODAL_MATRIX_$(name)_H"
+        stream <<< "#define ADD_NODAL_MATRIX_$(name)_H"
         stream <<< "namespace LMT {"
         for assemble_mat in 0 .. 2
             for assemble_vec in 0 .. 2
@@ -1716,8 +1716,8 @@ class LmtppFormulationAncestor
 
     # 
     def write_add_nodal_matrices_eig( stream )
-        stream <<< "#ifndef ADD_NODAL_MATRIX_EIG_H"
-        stream <<< "#define ADD_NODAL_MATRIX_EIG_H"
+        stream <<< "#ifndef ADD_NODAL_MATRIX_EIG_$(name)_H"
+        stream <<< "#define ADD_NODAL_MATRIX_EIG_$(name)_H"
         stream <<< "namespace LMT {"
         for assemble_mat_A in 0 .. 2
             for assemble_mat_B in 0 .. 2
@@ -2426,7 +2426,10 @@ def write_legacy_lmtpp_mesh_carac( stream, pb_name, fe_set_by_dim, dim )
         for name_elem in name_elems
             stream <<< "#include <mesh/$name_elem.h>"
     stream <<< "namespace LMT {"
+    stream <<< "#ifndef Mesh_carac_$(pb_name)_HEADER"
+    stream <<< "#define Mesh_carac_$(pb_name)_HEADER"
     stream <<< "template<class TP,unsigned dim> struct Mesh_carac_$(pb_name) {};"
+    stream <<< "#endif // Mesh_carac_$(pb_name)_HEADER"
     
     # mesh data structs
     for v in variable_list
@@ -2478,7 +2481,7 @@ def write_legacy_lmtpp_mesh_carac( stream, pb_name, fe_set_by_dim, dim )
         $element_choices
         };
         } // namespace LMT
-        #endif // Mesh_carac_$(pb_name)_HEADER
+        #endif // Mesh_carac_$(pb_name)_$(dim)_HEADER
 
 
 #
@@ -2509,7 +2512,7 @@ def write_legacy_lmtpp_carac_formulation( stream, name_form, fe_set_by_dim_and_n
         namespace LMT {
         #ifndef CARAC_FORMULATION_$(dim)_$(name_form)_H
         #define CARAC_FORMULATION_$(dim)_$(name_form)_H
-            #ifndef STRUCT_FORMULATION_$(name_form)
+        #ifndef STRUCT_FORMULATION_$(name_form)
         #define STRUCT_FORMULATION_$(name_form)
         struct $(name_form) {
             static const char *name() { return "$(name_form)"; }
