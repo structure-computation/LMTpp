@@ -1626,13 +1626,13 @@ class LmtppFormulationAncestor
 
     # 
     def write_add_nodal_matrices( stream )
-        stream <<< "#ifndef ADD_NODAL_MATRIX_$(name)_H"
-        stream <<< "#define ADD_NODAL_MATRIX_$(name)_H"
+        stream <<< "#ifndef ADD_NODAL_MATRIX_$(nb_dim)_$(name)_H"
+        stream <<< "#define ADD_NODAL_MATRIX_$(nb_dim)_$(name)_H"
         stream <<< "namespace LMT {"
         for assemble_mat in 0 .. 2
             for assemble_vec in 0 .. 2
                 stream <<<<
-                    template<class TM,class TK,class TF,class TV,class T,bool wont_add_nz,unsigned symm>
+                    template<class TM,class TK,class TF,class TV,class T,bool wont_add_nz,unsigned symm,class T_pos,class ND>
                     void add_nodal_matrix(
                         Formulation<TM,$name,DefaultBehavior,T,wont_add_nz> &f,
                         TK &K,
@@ -1641,26 +1641,26 @@ class LmtppFormulationAncestor
                         const Number<symm> &matrix_is_sym,
                         const Number<$assemble_mat> &assemble_mat,
                         const Number<$assemble_vec> &assemble_vec,
-                        const typename TM::TNode &node,
+                        const Node<$nb_dim,T_pos,ND> &node,
                         const unsigned *indices ) {
                         #define PNODE(N) (&node)
                     $( write_mat( K_dN, F_dN, assemble_mat, assemble_vec, want_nodal=true, want_skin_elem=false, want_elem=false, want_global=true ) )
                         #undef PNODE
                     }
-                    template<class TM,class T,bool wont_add_nz,unsigned symm>
+                    template<class TM,class T,bool wont_add_nz,unsigned symm,class T_pos,class ND>
                     void add_nodal_matrix(
                         Formulation<TM,$name,DefaultBehavior,T,wont_add_nz> &f,
                         const Number<symm> &matrix_is_sym,
                         const Number<$assemble_mat> &assemble_mat,
                         const Number<$assemble_vec> &assemble_vec,
-                        const typename TM::TNode &node,
+                        const Node<$nb_dim,T_pos,ND> &node,
                         const unsigned *indices ) {
                         add_nodal_matrix( f, f.matrices(Number<0>()), f.sollicitation, f.vectors, matrix_is_sym, assemble_mat, assemble_vec, node, indices );
                     }
         for assemble_mat_A in 0 .. 2
             for assemble_mat_B in 0 .. 2
                 stream <<<<
-                    template<class TM,class TK,class TV,class T,bool wont_add_nz,unsigned Asymm,unsigned Bsymm>
+                    template<class TM,class TK,class TV,class T,bool wont_add_nz,unsigned Asymm,unsigned Bsymm,class T_pos,class ND>
                     void add_nodal_matrix(
                         Formulation<TM,$name,DefaultBehavior,T,wont_add_nz> &f,
                         TK &A,
@@ -1670,44 +1670,44 @@ class LmtppFormulationAncestor
                         const Number<Bsymm> &matrix_B_is_sym,
                         const Number<$assemble_mat_A> &assemble_mat_A,
                         const Number<$assemble_mat_B> &assemble_mat_B,
-                        const typename TM::TNode &node,
+                        const Node<$nb_dim,T_pos,ND> &node,
                         const unsigned *indices ) {
                         #define PNODE(N) (&node)
                     $( write_mat_eig( A_dN, B_dN, assemble_mat_A, assemble_mat_B, want_nodal=true, want_skin_elem=false, want_elem=false, want_global=true ) )
                         #undef PNODE
                     }
-                    template<class TM,class T,bool wont_add_nz,unsigned Asymm,unsigned Bsymm,unsigned Csymm>
+                    template<class TM,class T,bool wont_add_nz,unsigned Asymm,unsigned Bsymm,unsigned Csymm,class T_pos,class ND>
                     void add_nodal_matrix(
                         Formulation<TM,$name,DefaultBehavior,T,wont_add_nz> &f,
                         const Number<Asymm> &matrix_A_is_sym,
                         const Number<Bsymm> &matrix_B_is_sym,
                         const Number<$assemble_mat_A> &assemble_mat_A,
                         const Number<$assemble_mat_B> &assemble_mat_B,
-                        const typename TM::TNode &node,
+                        const Node<$nb_dim,T_pos,ND> &node,
                         const unsigned *indices ) {
                         add_nodal_matrix( f, f.matrices(Number<1>()), f.matrices(Number<2>()), f.vectors, matrix_A_is_sym, matrix_B_is_sym, assemble_mat_A, assemble_mat_B, node, indices );
                     }
         for assemble_mat in 0 .. 2
             stream <<<<
-                template<class TM,class TK,class TV,class T,bool wont_add_nz,unsigned symm>
+                template<class TM,class TK,class TV,class T,bool wont_add_nz,unsigned symm,class T_pos,class ND>
                 void add_nodal_matrix(
                     Formulation<TM,$name,DefaultBehavior,T,wont_add_nz> &f,
                     TK &C,
                     TV &vectors,
                     const Number<symm> &matrix_is_sym,
                     const Number<$assemble_mat> &assemble_mat,
-                    const typename TM::TNode &node,
+                    const Node<$nb_dim,T_pos,ND> &node,
                     const unsigned *indices ) {
                     #define PNODE(N) (&node)
                 $( write_mat_eq( C_dN, assemble_mat, want_nodal=true, want_skin_elem=false, want_elem=false, want_global=true ) )
                     #undef PNODE
                 }
-                template<class TM,class T,bool wont_add_nz,unsigned symm>
+                template<class TM,class T,bool wont_add_nz,unsigned symm,class T_pos,class ND>
                 void add_nodal_matrix(
                     Formulation<TM,$name,DefaultBehavior,T,wont_add_nz> &f,
                     const Number<symm> &matrix_is_sym,
                     const Number<$assemble_mat> &assemble_mat,
-                    const typename TM::TNode &node,
+                    const Node<$nb_dim,T_pos,ND> &node,
                     const unsigned *indices ) {
                     add_nodal_matrix( f, f.matrices(Number<3>()), f.vectors, matrix_is_sym, assemble_mat, node, indices );
                 }
@@ -1716,13 +1716,13 @@ class LmtppFormulationAncestor
 
     # 
     def write_add_nodal_matrices_eig( stream )
-        stream <<< "#ifndef ADD_NODAL_MATRIX_EIG_$(name)_H"
-        stream <<< "#define ADD_NODAL_MATRIX_EIG_$(name)_H"
+        stream <<< "#ifndef ADD_NODAL_MATRIX_EIG_$(nb_dim)_$(name)_H"
+        stream <<< "#define ADD_NODAL_MATRIX_EIG_$(nb_dim)_$(name)_H"
         stream <<< "namespace LMT {"
         for assemble_mat_A in 0 .. 2
             for assemble_mat_B in 0 .. 2
                 stream <<<<
-                    template<class TM,class TK,class TV,class T,bool wont_add_nz,unsigned Asymm,unsigned Bsymm>
+                    template<class TM,class TK,class TV,class T,bool wont_add_nz,unsigned Asymm,unsigned Bsymm,class T_pos,class ND>
                     void add_nodal_matrix(
                         Formulation<TM,$name,DefaultBehavior,T,wont_add_nz> &f,
                         TK &A,
@@ -1732,44 +1732,44 @@ class LmtppFormulationAncestor
                         const Number<Bsymm> &matrix_B_is_sym,
                         const Number<$assemble_mat_A> &assemble_mat_A,
                         const Number<$assemble_mat_B> &assemble_mat_B,
-                        const typename TM::TNode &node,
+                        const Node<$nb_dim,T_pos,ND> &node,
                         const unsigned *indices ) {
                         #define PNODE(N) (&node)
                     $( write_mat_eig( A_dN, B_dN, assemble_mat_A, assemble_mat_B, want_nodal=true, want_skin_elem=false, want_elem=false, want_global=true ) )
                         #undef PNODE
                     }
-                    template<class TM,class T,bool wont_add_nz,unsigned Asymm,unsigned Bsymm,unsigned Csymm>
+                    template<class TM,class T,bool wont_add_nz,unsigned Asymm,unsigned Bsymm,unsigned Csymm,class T_pos,class ND>
                     void add_nodal_matrix(
                         Formulation<TM,$name,DefaultBehavior,T,wont_add_nz> &f,
                         const Number<Asymm> &matrix_A_is_sym,
                         const Number<Bsymm> &matrix_B_is_sym,
                         const Number<$assemble_mat_A> &assemble_mat_A,
                         const Number<$assemble_mat_B> &assemble_mat_B,
-                        const typename TM::TNode &node,
+                        const Node<$nb_dim,T_pos,ND> &node,
                         const unsigned *indices ) {
                         add_nodal_matrix( f, f.matrices(Number<1>()), f.matrices(Number<2>()), f.vectors, matrix_A_is_sym, matrix_B_is_sym, assemble_mat_A, assemble_mat_B, node, indices );
                     }
         for assemble_mat in 0 .. 2
             stream <<<<
-                template<class TM,class TK,class TV,class T,bool wont_add_nz,unsigned symm>
+                template<class TM,class TK,class TV,class T,bool wont_add_nz,unsigned symm,class T_pos,class ND>
                 void add_nodal_matrix(
                     Formulation<TM,$name,DefaultBehavior,T,wont_add_nz> &f,
                     TK &C,
                     TV &vectors,
                     const Number<symm> &matrix_is_sym,
                     const Number<$assemble_mat> &assemble_mat,
-                    const typename TM::TNode &node,
+                    const Node<$nb_dim,T_pos,ND> &node,
                     const unsigned *indices ) {
                     #define PNODE(N) (&node)
                 $( write_mat_eq( C_dN, assemble_mat, want_nodal=true, want_skin_elem=false, want_elem=false, want_global=true ) )
                     #undef PNODE
                 }
-                template<class TM,class T,bool wont_add_nz,unsigned symm>
+                template<class TM,class T,bool wont_add_nz,unsigned symm,class T_pos,class ND>
                 void add_nodal_matrix(
                     Formulation<TM,$name,DefaultBehavior,T,wont_add_nz> &f,
                     const Number<symm> &matrix_is_sym,
                     const Number<$assemble_mat> &assemble_mat,
-                    const typename TM::TNode &node,
+                    const Node<$nb_dim,T_pos,ND> &node,
                     const unsigned *indices ) {
                     add_nodal_matrix( f, f.matrices(Number<3>()), f.vectors, matrix_is_sym, assemble_mat, node, indices );
                 }
