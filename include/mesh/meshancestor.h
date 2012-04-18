@@ -188,7 +188,10 @@ public:
         unsigned cpt = 0;
         apply( elem_list, AbsoluteNumberUpdate(), cpt );
     }
-    
+
+    /// surdefined by children
+    void update_skin() {}
+
 
     ///    
     TNodeList node_list;
