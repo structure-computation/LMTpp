@@ -157,7 +157,6 @@ def hooke_orthotrope_th_3d(E1,E2,E3,nu12,nu13,nu23,G12,G13,G23,v1,v2,alpha1,alph
    return Kglo, Hglo, epsth, P
 
 def hooke_orthotrope_th_3d_endo(E1,E2,E3,nu12,nu13,nu23,G12,G13,G23,v1,v2,alpha1,alpha2,alpha3,d,dp,df):
-   print 'toto'
    P,Pinv=matrice_passage(v1,v2)
    Hloc = matrix([
    [1./(E1*(1-df)), -nu12/(E1*(1-df)), -nu13/(E1*(1-df)), 0, 0, 0],
