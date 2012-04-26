@@ -78,9 +78,9 @@ def simplification_projection(P,dim):
 
 #coefficients de lame
 def get_lame_coefficients(E, nu, type='3D'):
-    if (type in {'3D', 'PE'}):
+    if (type in ['3D', 'PE']):
         l = E * nu / (1. + nu) / (1. - 2. * nu)
-    elif (type in {'PS'}):
+    elif (type in ['PS']):
         l = E * nu / (1. + nu) / (1. - nu)
     else:
         print "Type for Lame coefficients must be 3D, PE (plane strain) or PS (plane stress). Aborting."
