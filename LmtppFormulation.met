@@ -2666,9 +2666,12 @@ def write_legacy_lmtpp_problem_h_file( stream, pb_name, fe_set, typeList )
 #~ ~#
 def write_legacy_lmtpp_all_in_one_file( stream, pb_name, fe_set, typeList, list_sup_all_in_one, want_latin )
     stream <<<< 
+        #ifndef all_in_one_$(pb_name)_h
+        #define all_in_one_$(pb_name)_h
         #ifndef all_in_one_h
         #define all_in_one_h
         #include <formulation/formulation.h>
+        #endif
         #include "mesh_carac.h"
     for dim, fe_set_by_dim in fe_set
         for name_form, fe_set_by_dim_and_name in fe_set_by_dim

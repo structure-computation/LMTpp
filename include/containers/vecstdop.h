@@ -274,7 +274,7 @@ inline unsigned index_of_min( const TV &c, const Op &op ) {
     return index;
 }
 
-/** index_of_max
+/** index_of_min
  \relates Vec
   \keyword Vecteur
  */
