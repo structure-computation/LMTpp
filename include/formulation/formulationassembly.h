@@ -171,7 +171,7 @@ namespace LMT {
                 K_before_constraints = K;
                 if (K.nb_rows() == 0)
                 {
-                    M = T(0);
+                    M = AbsT(0);
                 }
                 else
                 {
@@ -207,7 +207,7 @@ namespace LMT {
             assemble_constraints(K, F, M, assemble_mat, assemble_vec);
         }
         //
-        void assemble_constraints(Mat<T, Sym<>, SparseLine<> > &K, Vec<T> &F, T M, bool assemble_mat=true, bool assemble_vec=true)
+        void assemble_constraints(Mat<T, Sym<>, SparseLine<> > &K, Vec<T> &F, AbsT M, bool assemble_mat=true, bool assemble_vec=true)
         {
             for (unsigned i=0; i<formulations.size(); ++i)
             {
@@ -486,7 +486,7 @@ namespace LMT {
         unsigned nb_vectors;
         Vec<Vec<T> > vectors;
         Vec<AbsT> time_steps;
-        T M;                                   ///< Factor de penalisation
+        AbsT M;                                   ///< Factor de penalisation
         AbsT time;                             ///< at end of current step
         bool mat_already_allocated;
         bool connectivity_calculated;
