@@ -89,6 +89,7 @@ def problem_name( formulation, T, dimension ):
     Tbis = Tbis.replace( ">" , "_GreaterThan_" )
     Tbis = Tbis.replace( "," , "_Comma_" )
     Tbis = Tbis.replace( ":" , "_Colon_" )
+    Tbis = Tbis.replace( " " , "_Space_" )
     return 'Problem_'+formulation+'_'+Tbis+'_'+str(dimension)
 
 class MakePb:
