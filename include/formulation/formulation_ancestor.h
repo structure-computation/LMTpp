@@ -38,7 +38,7 @@ public:
         want_amd = false;
         want_rcm = false;
         levenberg_marquadt = AbsScalarType(0);
-        max_diag = ScalarType(0);
+        max_diag = AbsScalarType(0);
         pthread_mutex_init( &mutex_assemble_matrix, NULL );
         nb_threads_assemble_matrix = 1;
     }
@@ -71,7 +71,7 @@ public:
     virtual Vec<LinearizedConstraint> get_linearized_constraints() = 0;
 
     virtual void assemble_clean_mat     (Mat<ScalarType,Sym<>,SparseLine<> > &K, Vec<ScalarType> &F, Vec<Vec<ScalarType> > &vectors_, bool assemble_mat=true,bool assemble_vec=true) = 0;
-    virtual void assemble_constraints   (Mat<ScalarType,Sym<>,SparseLine<> > &K, Vec<ScalarType> &F, Vec<Vec<ScalarType> > &vectors_, const ScalarType &M, bool assemble_mat=true,bool assemble_vec=true) = 0;
+    virtual void assemble_constraints   (Mat<ScalarType,Sym<>,SparseLine<> > &K, Vec<ScalarType> &F, Vec<Vec<ScalarType> > &vectors_, const AbsScalarType &M, bool assemble_mat=true,bool assemble_vec=true) = 0;
     virtual void assemble_sollicitations(Mat<ScalarType,Sym<>,SparseLine<> > &K, Vec<ScalarType> &F, Vec<Vec<ScalarType> > &vectors_, bool assemble_mat=true,bool assemble_vec=true) = 0 ;
     virtual void assemble(Mat<ScalarType,Sym<>,SparseLine<> > &K, Vec<ScalarType> &F, Vec<Vec<ScalarType> > &vectors_, bool assemble_mat=true, bool assemble_vec=true)=0;
     virtual void assemble(Mat<ScalarType,Sym<>,SparseLine<> > &A, Mat<ScalarType,Sym<>,SparseLine<> > &B, Vec<Vec<ScalarType> > &vectors_, bool assemble_mat=true)=0;
@@ -196,10 +196,10 @@ public:
      * @return number of constraint (usefull in order to remove it...)
      */
     virtual unsigned add_constraint(const std::string &txt,const ScalarType &penalty_value) = 0;
-    virtual void set_initial_time_step( AbsScalarType ts ) = 0; ///
+    virtual void set_initial_time_step( ScalarType ts ) = 0; ///
     virtual ScalarType get_next_time_step() const = 0; ///
     virtual ScalarType get_time() const = 0; ///
-    virtual void set_time( AbsScalarType ts ) = 0; /// Attention, pilotage a faire soi-meme si utilisation de cette fonction....
+    virtual void set_time( ScalarType ts ) = 0; /// Attention, pilotage a faire soi-meme si utilisation de cette fonction....
     virtual void clean_mats() = 0; /// 0 in all matrices
     virtual void free_matrices() = 0;///free all matrices
     virtual unsigned nb_constraints() const = 0;
@@ -249,7 +249,7 @@ public:
     ScalarType premul_KUn_in_sollicitation;
     bool want_amd, want_rcm;
     AbsScalarType levenberg_marquadt; /// K += levenberg_marquadt * max( abs( K ) ) * Id; 0 by default
-    ScalarType max_diag;
+    AbsScalarType max_diag;
     Vec<unsigned> id;/// indice pour les variables
     unsigned  nb_threads_assemble_matrix;
     mutable pthread_mutex_t mutex_assemble_matrix;

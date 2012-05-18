@@ -110,8 +110,8 @@ public:
         m = &mm;
         localOP = new LocalOperator<NameFormulation, TM::dim, ScalarType>;
         mat_def_pos_if_sym = Carac::matrix_will_be_definite_positive;
-        time = AbsScalarType(0);
-        time_steps = AbsScalarType(1e40);
+        time = ScalarType(0);
+        time_steps = ScalarType(1e40);
         initial_condition_initialized = false;
         user_want_pierre_precond = true;
         //this->order_integration_when_integration_totale = Carac::order_integration;
@@ -1109,7 +1109,7 @@ public:
         // PRINT( F.size() );
         vectors_.resize( nb_vectors );
         for( int i = 0; i < nb_vectors; ++i )
-            vectors_[ i ].resize( F.size(), 0 );
+            vectors_[ i ].resize( F.size(), ScalarType(0) );
 
         if ( not initial_condition_initialized ) { // old_vectors
             get_initial_conditions( vectors_ );
@@ -1160,7 +1160,7 @@ public:
         // PRINT( F.size() );
         vectors_.resize( nb_vectors );
         for( int i = 0; i < nb_vectors; ++i )
-            vectors_[ i ].resize( A.nb_cols(), 0 );
+            vectors_[ i ].resize( A.nb_cols(), ScalarType(0) );
 
         if ( not initial_condition_initialized ) { // old_vectors
             get_initial_conditions( vectors_ );
@@ -1200,7 +1200,7 @@ public:
         // PRINT( F.size() );
         vectors_.resize( nb_vectors );
         for( int i = 0; i < nb_vectors; ++i )
-            vectors_[ i ].resize( C.nb_cols(), 0 );
+            vectors_[ i ].resize( C.nb_cols(), ScalarType(0) );
 
         if ( not initial_condition_initialized ) { // old_vectors
             get_initial_conditions( vectors_ );
@@ -1248,7 +1248,7 @@ public:
        localOP->update_variables(m);
     };
     ///
-    virtual void assemble_constraints(Mat<ScalarType,Sym<>,SparseLine<> > &K, Vec<ScalarType> &F, Vec<Vec<ScalarType> > &vectors_, const ScalarType &M, bool assemble_mat=true,bool assemble_vec=true) {
+    virtual void assemble_constraints(Mat<ScalarType,Sym<>,SparseLine<> > &K, Vec<ScalarType> &F, Vec<Vec<ScalarType> > &vectors_, const AbsScalarType &M, bool assemble_mat=true,bool assemble_vec=true) {
         // constraints
         if ( constraints.size() ) {
             for(unsigned i=0;i<constraints.size();++i) {
@@ -1312,7 +1312,7 @@ public:
         // assemble_mat
         assemble_clean_mat( K, F, vectors_, assemble_mat, assemble_vec );
         // constraints
-        ScalarType M = max( abs( K.diag() ) );
+        AbsScalarType M = max( abs( K.diag() ) );
         assemble_constraints( K, F, vectors_,  M, assemble_mat, assemble_vec );
         // sollicitations
         assemble_sollicitations( K, F, vectors_,  assemble_mat, assemble_vec );
@@ -1421,6 +1421,10 @@ public:
     ///
     template<unsigned nddl,unsigned sym,class TTT,unsigned wna> bool solve_system_iterative_block(ScalarType iterative_criterium, Number<nddl>/*nb_nodal_unknowns*/, Number<sym>/*sym*/,StructForType<TTT>, Number<wna>) {
         assert( 0 );
+        return false;
+    }
+    ///
+    bool solve_system_iterative_block(AbsScalarType iterative_criterium, Number<nb_nodal_unknowns>, Number<MatCarac<0>::symm>, StructForType<ScalarType>, Number<wont_add_nz>) {
         return false;
     }
     ///
@@ -2563,10 +2567,10 @@ public:
     virtual void add_sollicitation(int type_var,const std::string &val,unsigned nb_in_type,unsigned num_in_vec=0) {
         sollicitations.push_back( Sollicitation<Formulation>(type_var,val,nb_in_type,num_in_vec) );
     }
-    virtual void set_initial_time_step( AbsScalarType ts ) { time_steps = ts; time = -2 * ts; }
+    virtual void set_initial_time_step( ScalarType ts ) { time_steps = ts; time = -ScalarType(2) * ts; }
     virtual ScalarType get_next_time_step() const { return time_steps[0]; }
     virtual ScalarType get_time() const { return time; }
-    virtual void set_time( AbsScalarType ts ) { time = ts; } /// Attention, pilotage a faire soi-meme si utilisation de cette fonction....
+    virtual void set_time( ScalarType ts ) { time = ts; } /// Attention, pilotage a faire soi-meme si utilisation de cette fonction....
 private:
     template<class TMAT> void get_mat_( TMAT *&mat, const Number<0> &n ) {
         std::cerr << "Wrong matrix type. We expected a " << std::endl;
@@ -2654,7 +2658,7 @@ public:
     virtual Vec<ScalarType> get_residual() const {
         Vec<ScalarType> res;
         res.resize( vectors[ 0 ].size() );
-        res.set( 0 );
+        res.set( ScalarType(0) );
         apply( m->elem_list, AssembleResidual(), res, *this );
         return res;
     }
@@ -2670,8 +2674,8 @@ public:
     Vec<Vec<ScalarType>,nb_vectors> vectors;
     Vec<Vec<ScalarType> >* vectors_assembly;      ///< vectors from formulationassembly;
     Vec<ScalarType> sollicitation;
-    Vec<AbsScalarType,nb_vectors> time_steps;
-    AbsScalarType time; /// at end of current step
+    Vec<ScalarType,nb_vectors> time_steps;
+    ScalarType time; /// at end of current step
     Vec<ScalarType> old_vec;
 
     LocalOperator<NameFormulation, TM::dim, ScalarType>* localOP;
