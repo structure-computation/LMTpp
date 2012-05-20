@@ -890,7 +890,7 @@ public:
         for( int i = 0; i < sc.coeffs.size(); ++i ) {
             int p = sc.coeffs[ i ].num_in_fmat( *this );
             if ( p < vectors[ 0 ].size() )
-                res[ sc.coeffs[ i ].sym ] = vectors[ 0 ][ p ];
+                res[ sc.coeffs[ i ].sym ] = real( vectors[ 0 ][ p ] );
         }
         return res;
     }
@@ -900,7 +900,7 @@ public:
         for(Ex::SetEx::const_iterator iter=sub_symbols.begin();iter!=sub_symbols.end();++iter) {
             std::string str = iter->to_string();
             if ( str=="time" )
-                res[ *iter ] = time;
+                res[ *iter ] = real(time);
             else
                 std::cout << "Unknown symbol : " << str << std::endl;
         }

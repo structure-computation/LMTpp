@@ -147,7 +147,7 @@ namespace LMT {
             F_CL.resize( pos.size() * nb_ddl_per_node, T(0) );
             f_reaction.resize( pos.size() * nb_ddl_per_node, T(0) );
             f_reaction.set(T(0));
-            f_nodal.resize( pos.size() * nb_ddl_per_node, 0.0 );
+            f_nodal.resize( pos.size() * nb_ddl_per_node, T(0) );
             X_before_constraints.resize( pos.size() * nb_ddl_per_node, T(0) );
             diag_before_constraints.resize( pos.size() * nb_ddl_per_node, T(0) );
         }
