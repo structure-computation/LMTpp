@@ -911,7 +911,7 @@ class Pol {
         return *this;
     }
 
-    operator bool() const {return true;}
+//    operator bool() const {return true;}
 
     template <class T2>
     bool operator== (const Pol<nd,nx,T2> &P) const { return coefs==P.coefficients(); }

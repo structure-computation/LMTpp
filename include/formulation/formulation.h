@@ -97,7 +97,6 @@ public:
     typedef NameFormulation_ NameFormulation;
     typedef NameVariant_ NameVariant;
     typedef ScalarType_ ScalarType;
-    typedef typename TypePromote<Abs,ScalarType>::T AbsScalarType;
     typedef CaracFormulation<NameFormulation,TM::dim,ScalarType,NameVariant> Carac;
     static const unsigned nb_nodal_unknowns = Carac::nb_nodal_unknowns;
     static const unsigned nb_global_unknowns = Carac::nb_global_unknowns;
@@ -1005,11 +1004,11 @@ public:
     }
     ///
     virtual void assemble_constraints(bool assemble_mat=true,bool assemble_vec=true) {
-        if ( assemble_mat and ( constraints.size() or this->levenberg_marquadt ) )
+        if ( boolean_(assemble_mat) and ( constraints.size() or boolean_(this->levenberg_marquadt) ) )
             this->max_diag = max(abs(matrices(Number<0>()).diag()));
 
         //
-        if ( assemble_mat and this->levenberg_marquadt )
+        if ( boolean_(assemble_mat) and boolean_(this->levenberg_marquadt) )
             matrices( Number<0>() ).diag() += this->max_diag * this->levenberg_marquadt;
 
         // constraints
@@ -1036,7 +1035,7 @@ public:
                 // add to vec and mat
                 if ( constraints[i].penalty_value != ScalarType( 0 ) ) { // -> penalty
                     for(unsigned j=0;j<coeffs.size();++j) {
-                        ScalarType C = coeffs[j] * this->max_diag * constraints[i].penalty_value;
+                        ScalarType C = coeffs[j] * ScalarType( this->max_diag ) * constraints[i].penalty_value;
                         if ( assemble_vec )
                             sollicitation[ num_in_fmat[ j ] ] += C * ress;
                         if ( assemble_mat ) {
@@ -1248,7 +1247,7 @@ public:
        localOP->update_variables(m);
     };
     ///
-    virtual void assemble_constraints(Mat<ScalarType,Sym<>,SparseLine<> > &K, Vec<ScalarType> &F, Vec<Vec<ScalarType> > &vectors_, const AbsScalarType &M, bool assemble_mat=true,bool assemble_vec=true) {
+    virtual void assemble_constraints(Mat<ScalarType,Sym<>,SparseLine<> > &K, Vec<ScalarType> &F, Vec<Vec<ScalarType> > &vectors_, const ScalarType &M, bool assemble_mat=true,bool assemble_vec=true) {
         // constraints
         if ( constraints.size() ) {
             for(unsigned i=0;i<constraints.size();++i) {
@@ -1272,7 +1271,7 @@ public:
                 }
                 // add to vec and mat
                 for(unsigned j=0;j<coeffs.size();++j) {
-                    ScalarType C = coeffs[j] * M * constraints[i].penalty_value;
+                    ScalarType C = coeffs[j] * ScalarType(M) * constraints[i].penalty_value;
                     if ( assemble_vec )
                         F[num_in_fmat[j]] += C * ress;
                     if ( assemble_mat ) {
@@ -1312,7 +1311,7 @@ public:
         // assemble_mat
         assemble_clean_mat( K, F, vectors_, assemble_mat, assemble_vec );
         // constraints
-        AbsScalarType M = max( abs( K.diag() ) );
+        ScalarType M = max( abs( K.diag() ) );
         assemble_constraints( K, F, vectors_,  M, assemble_mat, assemble_vec );
         // sollicitations
         assemble_sollicitations( K, F, vectors_,  assemble_mat, assemble_vec );
@@ -1328,7 +1327,7 @@ public:
         assemble_clean_mat( C, vectors_, assemble_mat );
     }
     ///
-    bool solve_system_(AbsScalarType iterative_criterium, const Number<1> &n_wont_add_nz, const Number<0> &sym) {
+    bool solve_system_(ScalarType iterative_criterium, const Number<1> &n_wont_add_nz, const Number<0> &sym) {
         #if LDL
         // PRINT("LDL");
         solver.get_factorization(matrices(Number<0>()),false);
@@ -1355,7 +1354,7 @@ public:
         return true;
     }
     ///
-    bool solve_system_(AbsScalarType iterative_criterium, const Number<1> &n_wont_add_nz, const Number<1> &sym) {
+    bool solve_system_(ScalarType iterative_criterium, const Number<1> &n_wont_add_nz, const Number<1> &sym) {
         #if WITH_CHOLMOD
         //PRINT("CHOLMOD");
         if ( not matrices(Number<0>()).get_factorization() ) {
@@ -1369,7 +1368,7 @@ public:
         vectors[0] = solver.solve( sollicitation );
         #else
         //PRINT("LMT");
-        if ( iterative_criterium ) {
+        if ( boolean_(iterative_criterium) ) {
             Mat<ScalarType,Sym<>,SparseLine<> > mm = matrices(Number<0>());
             incomplete_chol_factorize( mm );
             solve_using_incomplete_chol_factorize( mm, matrices(Number<0>()), sollicitation, vectors[0], iterative_criterium );
@@ -1383,7 +1382,7 @@ public:
     }
 
     ///
-    bool solve_system_(AbsScalarType iterative_criterium, const Number<0> &n_wont_add_nz, const Number<0> &sym) {
+    bool solve_system_(ScalarType iterative_criterium, const Number<0> &n_wont_add_nz, const Number<0> &sym) {
         try {
             //if ( MatCarac<0>::symm and matrices(Number<0>()).nb_rows() > 1000000 ) {
             //    LDL_solver ls;
@@ -1396,9 +1395,9 @@ public:
         } catch(const SolveException &e) { std::cerr << "system not inversible" << std::endl; return false; }
         return true;
     }
-    bool solve_system_(AbsScalarType iterative_criterium, const Number<0> &n_wont_add_nz, const Number<1> &sym) {
+    bool solve_system_(ScalarType iterative_criterium, const Number<0> &n_wont_add_nz, const Number<1> &sym) {
         try {
-            if ( iterative_criterium ) {
+            if ( boolean_(iterative_criterium) ) {
                 Mat<ScalarType,Sym<>,SparseLine<> > mm = matrices(Number<0>());
                 incomplete_chol_factorize( mm );
                 solve_using_incomplete_chol_factorize( mm, matrices(Number<0>()), sollicitation, vectors[0], iterative_criterium );
@@ -1424,21 +1423,21 @@ public:
         return false;
     }
     ///
-    bool solve_system_iterative_block(AbsScalarType iterative_criterium, Number<nb_nodal_unknowns>, Number<MatCarac<0>::symm>, StructForType<ScalarType>, Number<wont_add_nz>) {
+    bool solve_system_iterative_block(ScalarType iterative_criterium, Number<nb_nodal_unknowns>, Number<MatCarac<0>::symm>, StructForType<ScalarType>, Number<wont_add_nz>) {
         return false;
     }
     ///
-    bool solve_system_iterative_block(AbsScalarType iterative_criterium, Number<3>/*nb_nodal_unknowns*/, Number<true>/*sym*/,StructForType<double>, Number<false>/*wont_add_nz*/ ) {
+    bool solve_system_iterative_block(ScalarType iterative_criterium, Number<3>/*nb_nodal_unknowns*/, Number<true>/*sym*/,StructForType<double>, Number<false>/*wont_add_nz*/ ) {
         MatWithTinyBlocks<ScalarType,Sym<3> > M( matrices(Number<0>()) );
         MatWithTinyBlocks<ScalarType,Sym<3> > F = M; F.chol_incomp();
         solve_using_incomplete_chol_factorize( F, M, sollicitation, vectors[0], iterative_criterium );
         return true;
     }
     ///
-    bool solve_system(AbsScalarType iterative_criterium=AbsScalarType(0),bool disp_timing=false) {
+    bool solve_system(ScalarType iterative_criterium=ScalarType(0),bool disp_timing=false) {
         bool res;
         double t0 = time_of_day_in_sec();
-        if ( iterative_criterium and nb_nodal_unknowns==3 and sollicitation.size() % 3 == 0 and TypeInformation<ScalarType>::type()=="double" and wont_add_nz == false )
+        if ( boolean_(iterative_criterium) and nb_nodal_unknowns==3 and sollicitation.size() % 3 == 0 and TypeInformation<ScalarType>::type()=="double" and wont_add_nz == false )
             res = solve_system_iterative_block( iterative_criterium, Number<nb_nodal_unknowns>(), Number<MatCarac<0>::symm>(), StructForType<ScalarType>(), Number<wont_add_nz>() );
         else
             res = solve_system_( iterative_criterium, Number<wont_add_nz>(), Number<MatCarac<0>::symm>() );
@@ -1458,12 +1457,12 @@ public:
      * call all functions to get solution...
      * @return
      */
-    bool solve( AbsScalarType iterative_criterium=AbsScalarType(0), bool disp_timing=false ) {
+    bool solve( ScalarType iterative_criterium=ScalarType(0), bool disp_timing=false ) {
         allocate_matrices();
         shift();
         //
         Vec<ScalarType> old_vec;
-        if ( this->non_linear_iterative_criterium or this->non_linear_iterative_criterium_vec.size() )
+        if ( boolean_(this->non_linear_iterative_criterium) or this->non_linear_iterative_criterium_vec.size() )
             old_vec.resize( vectors[0].size(), ScalarType(0) );
         //
         unsigned nb_iterations = 0;
@@ -1474,9 +1473,9 @@ public:
             if ( solve_system(iterative_criterium,disp_timing) == false )
                 return false;
 
-            if ( this->non_linear_iterative_criterium == 0 and this->non_linear_iterative_criterium_vec.size() == 0 ) // assuming linear system
+            if ( this->non_linear_iterative_criterium == ScalarType(0.) and this->non_linear_iterative_criterium_vec.size() == 0 ) // assuming linear system
                 break;
-            if ( this->non_linear_iterative_criterium and norm_inf( old_vec - vectors[0] ) <= this->non_linear_iterative_criterium )
+            if ( boolean_(this->non_linear_iterative_criterium) and norm_inf( old_vec - vectors[0] ) <= abs( this->non_linear_iterative_criterium ) )
                 break;
             if ( this->non_linear_iterative_criterium_vec.size() ) {
                 bool converged = true;
@@ -1484,13 +1483,13 @@ public:
                 for(unsigned n=0;n<nb_nodal_unknowns;++n,++num_unk) {
                     for(unsigned i=0;i<m->node_list.size() and converged;++i) {
                         unsigned ind = (*indice_noda)[i] + n;
-                        converged &= abs( old_vec[ind] - vectors[0][ind] ) <= this->non_linear_iterative_criterium_vec[ num_unk ];
+                        converged &= abs( old_vec[ind] - vectors[0][ind] ) <= abs( this->non_linear_iterative_criterium_vec[ num_unk ] );
                     }
                 }
                 converged &= not find( m->elem_list, ChecKNLConv(), this );
                 for(unsigned n=0;n<nb_global_unknowns;++n,++num_unk) {
                     unsigned ind = *indice_glob + n;
-                    converged &= abs( old_vec[ind] - vectors[0][ind] ) <= this->non_linear_iterative_criterium_vec[ num_unk ];
+                    converged &= abs( old_vec[ind] - vectors[0][ind] ) <= abs( this->non_linear_iterative_criterium_vec[ num_unk ] );
                 }
                 if ( converged )
                     break;
@@ -1526,7 +1525,7 @@ public:
     /// SD stands for "step derivative". SD can be for example StdStepDer...
     template<class SD>
     bool solve_and_get_derivatives( Vec<Vec<ScalarType> > &der, const SD &sd, bool der_in_base_node_ordering, Number<1> sym ) {
-        assert( this->non_linear_iterative_criterium == 0 );
+        assert( this->non_linear_iterative_criterium == ScalarType(0.) );
         assert( MatCarac<0>::symm );
         //
         allocate_matrices();
@@ -1595,7 +1594,7 @@ public:
 
 
     virtual void get_precond() { get_precond( Number<MatCarac<0>::symm>() ); }
-    virtual void solve_system_using_precond(AbsScalarType iterative_criterium) { solve_system_using_precond( iterative_criterium, Number<MatCarac<0>::symm>() ); }
+    virtual void solve_system_using_precond(ScalarType iterative_criterium) { solve_system_using_precond( iterative_criterium, Number<MatCarac<0>::symm>() ); }
     virtual void get_factorization_matrix() { get_factorization_matrix( Number<MatCarac<0>::symm>() ); }
     virtual void solve_system_using_factorization_matrix() { solve_system_using_factorization_matrix( Number<MatCarac<0>::symm>() ); }
 
@@ -1736,12 +1735,12 @@ private:
         incomplete_chol_factorize( precond_matrix );
         #endif
     }
-    void solve_system_using_precond(AbsScalarType iterative_criterium,const Number<0> &sym) {
+    void solve_system_using_precond(ScalarType iterative_criterium,const Number<0> &sym) {
         #ifndef WITH_UMFPACK
         solve_using_incomplete_lu_factorize( precond_matrix, matrices(Number<0>()), sollicitation, vectors[0], iterative_criterium );
         #endif
     }
-    void solve_system_using_precond(AbsScalarType iterative_criterium,const Number<1> &sym) {
+    void solve_system_using_precond(ScalarType iterative_criterium,const Number<1> &sym) {
         #ifndef WITH_UMFPACK
         solve_using_incomplete_chol_factorize( precond_matrix, matrices(Number<0>()), sollicitation, vectors[0], iterative_criterium );
         #endif
