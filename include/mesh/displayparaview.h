@@ -76,7 +76,7 @@ public:
     ~DisplayParaview() {
     }
     
-    template<class TM> std::string add_mesh(const TM &m,const std::string &prefix="paraview",const Vec<std::string> &display_fields=Vec<std::string>("all"),double time_step=0 ) {
+    template<class TM> std::string add_mesh(const TM &m,const std::string &prefix="paraview",const Vec<std::string> &display_fields=Vec<std::string>("all"),double time_step=0) {
         std::string pvu_name = prefix;
         //if ( prefix.rfind(".vtu") != prefix.size() - 4 )
         pvu_name += "_" + to_string( time_step ) + "_" + to_string( pvu_files[time_step].size() ) + ".vtu";
@@ -94,11 +94,10 @@ public:
         return pvu_name;
     }
 
-
-    template<class TM> std::string add_mesh_MT(const TM &m,const std::string &prefix="paraview",const Vec<std::string> &display_fields=Vec<std::string>("all"),double time_step=0) {
+    template<class TM> std::string add_mesh_1(const TM &m,const std::string &prefix="paraview",const Vec<std::string> &display_fields=Vec<std::string>("all"),double time_step=0) {
         std::string pvu_name = prefix;
         //if ( prefix.rfind(".vtu") != prefix.size() - 4 )
-        //pvu_name += "_" + to_string( time_step ) + "_" + to_string( pvu_files[time_step].size() ) + ".vtu";
+        pvu_name += "_" + to_string( time_step ) + ".vtu";
         // std::cout << pvu_name << std::endl;
     
         pvu_files[ time_step ].push_back( pvu_name );
@@ -113,23 +112,38 @@ public:
         return pvu_name;
     }
 
-
-
-
-    template<class TM> void add_mesh_1(const TM &m,const std::string &prefix="/tmp/trovalet/paraview0.vtu",const Vec<std::string> &display_fields=Vec<std::string>("all")) {
-//     template<class TM> void add_mesh_1(const TM &m,const std::string &prefix="/tmp/trovalet/paraview0.vtu",std::string &display_fields="critere_G") {
+    template<class TM> std::string add_mesh_2(const TM &m,const std::string &prefix="paraview",const Vec<std::string> &display_fields=Vec<std::string>("all")) {
         std::ostringstream ss;
         ss << prefix ;//<< pvu_files[prefix].size() << ".vtu";
-        std::string pvu_name( ss.str() );
-        pvu_files[ 0 ].push_back(pvu_name);
-        std::ofstream f(pvu_name.c_str());
+        std::string pvu_name( ss.str() + ".vtu" );
+        pvu_files[ 0 ].push_back( pvu_name );
+        std::ofstream f( pvu_name.c_str() );
         
-        write_mesh_vtk<true>(f,m,display_fields);
+        write_mesh_vtk<true>( f, m, display_fields );
 
         typename TM::Pvec xmi,xma;
         get_min_max( m.node_list, ExtractDM<pos_DM>(), xmi, xma );
         if ( m.node_list.size() )
             app_xminmax(prefix,xmi,xma);
+        return pvu_name;
+    }
+
+    template<class TM> std::string add_mesh_3(const TM &m,const std::string &prefix="paraview",const Vec<std::string> &display_fields=Vec<std::string>("all"),double iter=0) {
+        std::string pvu_name = prefix;
+        //if ( prefix.rfind(".vtu") != prefix.size() - 4 )
+        pvu_name += "_iteration_" + to_string( iter ) + ".vtu";
+        // std::cout << pvu_name << std::endl;
+    
+        pvu_files[ iter ].push_back( pvu_name );
+        std::ofstream f( pvu_name.c_str() );
+        
+        write_mesh_vtk<true>( f, m, display_fields );
+    
+        typename TM::Pvec xmi,xma;
+        get_min_max( m.node_list, ExtractDM<pos_DM>(), xmi, xma );
+        if ( m.node_list.size() )
+            app_xminmax(prefix,xmi,xma);
+        return pvu_name;
     }
 
     template<class TS> std::string add_shape(const Shape<2,TS> &shape,unsigned grid_size,const std::string &prefix="paraview") {
@@ -366,9 +380,9 @@ struct DpExec { void operator()(DisplayParaview &dp,unsigned i) const { dp.exec(
 /*!
 */
 template<class Carac,unsigned nvi_to_subs,unsigned skin>
-int display( const MeshAncestor<Carac,nvi_to_subs,skin> &m, std::string pvsm_file = "" ) {
+int display( const MeshAncestor<Carac,nvi_to_subs,skin> &m, const std::string &prefix="paraview", const std::string &pvsm_file = "" ) {
     DisplayParaview dp;
-    std::string res = dp.add_mesh( m );
+    std::string res = dp.add_mesh( m, prefix );
     
     if ( pvsm_file.size() ) {
         std::string t = "paraview --state=" + pvsm_file;

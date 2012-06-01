@@ -31,17 +31,17 @@ namespace LMT {
     Fonction interne
 
 */
-template<class TE,class VarTag,unsigned n,unsigned m>
-void assign_tag_values( TE *e, const Vec<double> &tag_values, const VarTag &vt, Number<n>, Number<m> ) {
+template<class TE,class T,class VarTag,unsigned n,unsigned m>
+void assign_tag_values( TE *e, const Vec<T> &tag_values, const VarTag &vt, Number<n>, Number<m> ) {
     ExtractDM<typename VarTag::template SubType<n>::T> ev;
     ev( *e ) = tag_values[ n ];
     assign_tag_values( e, tag_values, vt, Number<n+1>(), Number<m>() );
 }
-// template<class TE,class VarTag,unsigned n           > void assign_tag_values( TE   *e, const Vec<double> &tag_values, const VarTag &vt, Number<n>, Number<n> ) { e->set_field("tag", tag_values[1]); }
-// template<class TE,class VarTag,unsigned n           > void assign_tag_values( TE   *e, const Vec<double> &tag_values, const VarTag &vt, Number<n>, Number<n> ) { Vec<double, 2> tags = tag_values; e->set_field("tags", tags); }
-template<class TE,class VarTag,unsigned n           > void assign_tag_values( TE   *e, const Vec<double> &tag_values, const VarTag &vt, Number<n>, Number<n> ) { }
-template<         class VarTag,unsigned n,unsigned m> void assign_tag_values( void *e, const Vec<double> &tag_values, const VarTag &vt, Number<n>, Number<m> ) { }
-template<         class VarTag,unsigned n           > void assign_tag_values( void *e, const Vec<double> &tag_values, const VarTag &vt, Number<n>, Number<n> ) { }
+template<class TE,class T,class VarTag,unsigned n           > void assign_tag_values( TE   *e, const Vec<T> &tag_values, const VarTag &vt, Number<n>, Number<n> ) { e->set_field("tag", tag_values[0]); }
+// template<class TE,class T,class VarTag,unsigned n           > void assign_tag_values( TE   *e, const Vec<T> &tag_values, const VarTag &vt, Number<n>, Number<n> ) { Vec<double, 2> tags = tag_values; e->set_field("tags", tags); }
+// template<class TE,class T,class VarTag,unsigned n           > void assign_tag_values( TE   *e, const Vec<T> &tag_values, const VarTag &vt, Number<n>, Number<n> ) { }
+template<         class T, class VarTag,unsigned n,unsigned m> void assign_tag_values( void *e, const Vec<T> &tag_values, const VarTag &vt, Number<n>, Number<m> ) { }
+template<         class T, class VarTag,unsigned n           > void assign_tag_values( void *e, const Vec<T> &tag_values, const VarTag &vt, Number<n>, Number<n> ) { }
 
 /// put gmsh mesh in m
 template<class TM,class VarTag>
@@ -59,7 +59,7 @@ void read_msh_2( TM &m,std::istream &is, unsigned nvi, const VarTag &vt ) throw 
     // correspondance between number in file -> ref in mesh
     map<int,TNode *> map_num_node;
     string type_element;
-    Vec<double> tag_values;
+    Vec<typename TM::Tpos> tag_values;
     //
     while ( 1 ) {
         if ( ! is )
@@ -241,7 +241,7 @@ void read_msh_2_tags_for_nvi( TM &m, const std::string &fic_name, Number<nvi_to_
     unsigned nb_elems = 0;
     is >> nb_elems; //
     getline( is, str );
-    Vec<double> tag_values;
+    Vec<typename TM::Tpos> tag_values;
     for(unsigned i=0;i<nb_elems;++i) {
         static unsigned nb_nodes_elem[] = { 2, 3, 4, 4, 8, 6, 5, 3, 6, 9, 10, 27, 18, 14, 1, 8, 20, 15, 13 };
         static unsigned nvi_elem[] = { 0, 1, 2, 2, 3, 3, 3 };
@@ -293,7 +293,7 @@ void read_msh_2_tags_on_skin( TM &m, const std::string &fic_name, const VarTag &
 
 /// put gid mesh in m
 /*!
-Attention: importe seulement les Bar(), les Triangle(), les Quad(), les Hexa(), les Tetra() et les Wedge(). 
+Attention: importe seulement les Bar(), les Triangle(), les Quad(), les Hexa(), les Tetra() et les Wedge().
 */
 template<class TM>
 void read_msh_2( TM &m,const std::string &fic_name, unsigned nvi = 0 ) throw ( std::runtime_error ) {
@@ -306,12 +306,14 @@ void read_msh_2( TM &m,const std::string &fic_name, unsigned nvi = 0 ) throw ( s
 
 /*!
 put gid mesh in m
-Attention: importe seulement les Bar(), les Triangle(), les Quad(), les Hexa(), les Tetra() et les Wedge(). 
+Attention: importe seulement les Bar(), les Triangle(), les Quad(), les Hexa(), les Tetra() et les Wedge().
+
+read_msh_2( m, "toto.msh", dim, HeteroExplPack<toto_DM,tata_DM>() )
 
 \keyword Maillage/Import
 */
 template<class TM,class VarTag>
-void read_msh_2( TM &m,const std::string &fic_name, unsigned nvi, const VarTag &vt  ) throw ( std::runtime_error ) {
+void read_msh_2( TM &m,const std::string &fic_name, unsigned nvi, const VarTag &vt ) throw ( std::runtime_error ) {
     // ouverture du fichier
     std::ifstream my_file( fic_name.c_str() );
     if ( ! my_file.is_open() )

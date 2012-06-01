@@ -97,7 +97,7 @@ void update_edge_ratio(const Element<Hexa,TN,TNG,TD,NET> &e,TM &m,T &edge_ratio)
 }
 
 template<class TN,class TNG,class TD,unsigned NET>
-typename TNG::T measure( const Element<Hexa,TN,TNG,TD,NET> &elem ) {
+typename TypePromote<Abs,typename TNG::T>::T measure( const Element<Hexa,TN,TNG,TD,NET> &elem ) {
 typedef typename TNG::T T;
 T V = 0.;
     T reg0=0.45412414523193150862*elem.pos(0)[2]; T reg1=0.045875854768068491385*elem.pos(1)[1]; T reg2=0.045875854768068491385*elem.pos(0)[1]; T reg3=0.072362291867717009992*elem.pos(1)[1]; T reg4=0.072362291867717009992*elem.pos(0)[1];
@@ -194,7 +194,7 @@ T V = 0.;
    reg19=reg29+reg19; reg20=reg18-reg20; reg40=0.25*reg40; reg36=0.25*reg36; reg20=reg50+reg20;
    reg19=0.25*reg19; reg36=reg40+reg36; reg20=0.25*reg20; reg19=reg36+reg19; V+=reg19+reg20;
 
-return V;
+return abs(V);
 }
 
 

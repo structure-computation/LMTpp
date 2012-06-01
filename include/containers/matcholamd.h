@@ -138,6 +138,13 @@ public:
     }
 
     ///
+    Mat &operator*=( double v ) {
+        for( int i = 0, nz = beg_row[ nb_rows() ]; i < nz; ++i )
+            x[ i ] *= v;
+        return *this;
+    }
+
+    ///
     bool get_factorization() {
         if ( L )
             return true;

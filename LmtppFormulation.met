@@ -833,8 +833,8 @@ class LmtppFormulationAncestor
         appel_enr := "add_elem_matrix_enriched( f, K_tmp, F_tmp, f.vectors, matrix_is_sym, assemble_mat, assemble_vec, elem, indices );"
         appel_corr:= "add_elem_matrix_enriched_corr( f, f.matrices(Number<0>()), f.sollicitation, f.vectors, matrix_is_sym, assemble_mat, assemble_vec, elem, indices );"
         sum_K := "pthread_mutex_lock(mutex); f.matrices(Number<0>()) += K_tmp; f.sollicitation += F_tmp; pthread_mutex_unlock(mutex);"
-        stream <<< "#ifndef ADD_ELEM_MATRIX_H"
-        stream <<< "#define ADD_ELEM_MATRIX_H"
+        stream <<< "#ifndef ADD_ELEM_MATRIX_$(nb_dim)_$(name)_FOR_ELEMENT_$(pe->name)_H"
+        stream <<< "#define ADD_ELEM_MATRIX_$(nb_dim)_$(name)_FOR_ELEMENT_$(pe->name)_H"
         stream <<< "namespace LMT {"
         for assemble_mat in 0 .. 2
             for assemble_vec in 0 .. 2
@@ -949,8 +949,8 @@ class LmtppFormulationAncestor
         
     #
     def write_add_elem_matrices_eig( stream )
-        stream <<< "#ifndef ADD_ELEM_MATRIX_EIG_H"
-        stream <<< "#define ADD_ELEM_MATRIX_EIG_H"
+        stream <<< "#ifndef ADD_ELEM_MATRIX_EIG_$(nb_dim)_$(name)_FOR_ELEMENT_$(pe->name)_H"
+        stream <<< "#define ADD_ELEM_MATRIX_EIG_$(nb_dim)_$(name)_FOR_ELEMENT_$(pe->name)_H"
         for assemble_mat_A in 0 .. 2
             for assemble_mat_B in 0 .. 2
                 stream <<<<
@@ -1154,8 +1154,8 @@ class LmtppFormulationAncestor
 
     #
     def write_add_elem_matrices_enriched( stream )
-        stream <<< "#ifndef ADD_ELEM_MATRIX_ENRICHED_H"
-        stream <<< "#define ADD_ELEM_MATRIX_ENRICHED_H"
+        stream <<< "#ifndef ADD_ELEM_MATRIX_ENRICHED_$(nb_dim)_$(name)_FOR_ELEMENT_$(pe->name)_H"
+        stream <<< "#define ADD_ELEM_MATRIX_ENRICHED_$(nb_dim)_$(name)_FOR_ELEMENT_$(pe->name)_H"
         stream <<< "namespace LMT {"
         e := child_cast(pe)
         toto := e->point_is_inside([symbol("f.interface.handbooks[f.interface.elem_enrichment_ID[elem.number][j]].pts_gauss_hdbk.pos_and_wei[i].positions[0]") symbol("f.interface.handbooks[f.interface.elem_enrichment_ID[elem.number][j]].pts_gauss_hdbk.pos_and_wei[i].positions[1]")])
@@ -1448,8 +1448,8 @@ class LmtppFormulationAncestor
         
     #
     def write_add_elem_matrices_enriched_corr( stream )
-        stream <<< "#ifndef ADD_ELEM_MATRIX_ENRICHED_CORR_H"
-        stream <<< "#define ADD_ELEM_MATRIX_ENRICHED_CORR_H"
+        stream <<< "#ifndef ADD_ELEM_MATRIX_ENRICHED_CORR_$(nb_dim)_$(name)_FOR_ELEMENT_$(pe->name)_H"
+        stream <<< "#define ADD_ELEM_MATRIX_ENRICHED_CORR_$(nb_dim)_$(name)_FOR_ELEMENT_$(pe->name)_H"
         stream <<< "namespace LMT {"
         #
         if nb_dim == 2
@@ -1536,8 +1536,8 @@ class LmtppFormulationAncestor
     #
     def write_add_elem_matrices_enriched_coupl( stream )
         e := child_cast(pe)
-        stream <<< "#ifndef ADD_ELEM_MATRIX_ENRICHED_COUPL_H"
-        stream <<< "#define ADD_ELEM_MATRIX_ENRICHED_COUPL_H"
+        stream <<< "#ifndef ADD_ELEM_MATRIX_ENRICHED_COUPL_$(nb_dim)_$(name)_FOR_ELEMENT_$(pe->name)_H"
+        stream <<< "#define ADD_ELEM_MATRIX_ENRICHED_COUPL_$(nb_dim)_$(name)_FOR_ELEMENT_$(pe->name)_H"
         stream <<< "namespace LMT {"
         #
         if nb_dim == 2
@@ -1626,13 +1626,13 @@ class LmtppFormulationAncestor
 
     # 
     def write_add_nodal_matrices( stream )
-        stream <<< "#ifndef ADD_NODAL_MATRIX_H"
-        stream <<< "#define ADD_NODAL_MATRIX_H"
+        stream <<< "#ifndef ADD_NODAL_MATRIX_$(nb_dim)_$(name)_H"
+        stream <<< "#define ADD_NODAL_MATRIX_$(nb_dim)_$(name)_H"
         stream <<< "namespace LMT {"
         for assemble_mat in 0 .. 2
             for assemble_vec in 0 .. 2
                 stream <<<<
-                    template<class TM,class TK,class TF,class TV,class T,bool wont_add_nz,unsigned symm>
+                    template<class TM,class TK,class TF,class TV,class T,bool wont_add_nz,unsigned symm,class T_pos,class ND>
                     void add_nodal_matrix(
                         Formulation<TM,$name,DefaultBehavior,T,wont_add_nz> &f,
                         TK &K,
@@ -1641,26 +1641,26 @@ class LmtppFormulationAncestor
                         const Number<symm> &matrix_is_sym,
                         const Number<$assemble_mat> &assemble_mat,
                         const Number<$assemble_vec> &assemble_vec,
-                        const typename TM::TNode &node,
+                        const Node<$nb_dim,T_pos,ND> &node,
                         const unsigned *indices ) {
                         #define PNODE(N) (&node)
                     $( write_mat( K_dN, F_dN, assemble_mat, assemble_vec, want_nodal=true, want_skin_elem=false, want_elem=false, want_global=true ) )
                         #undef PNODE
                     }
-                    template<class TM,class T,bool wont_add_nz,unsigned symm>
+                    template<class TM,class T,bool wont_add_nz,unsigned symm,class T_pos,class ND>
                     void add_nodal_matrix(
                         Formulation<TM,$name,DefaultBehavior,T,wont_add_nz> &f,
                         const Number<symm> &matrix_is_sym,
                         const Number<$assemble_mat> &assemble_mat,
                         const Number<$assemble_vec> &assemble_vec,
-                        const typename TM::TNode &node,
+                        const Node<$nb_dim,T_pos,ND> &node,
                         const unsigned *indices ) {
                         add_nodal_matrix( f, f.matrices(Number<0>()), f.sollicitation, f.vectors, matrix_is_sym, assemble_mat, assemble_vec, node, indices );
                     }
         for assemble_mat_A in 0 .. 2
             for assemble_mat_B in 0 .. 2
                 stream <<<<
-                    template<class TM,class TK,class TV,class T,bool wont_add_nz,unsigned Asymm,unsigned Bsymm>
+                    template<class TM,class TK,class TV,class T,bool wont_add_nz,unsigned Asymm,unsigned Bsymm,class T_pos,class ND>
                     void add_nodal_matrix(
                         Formulation<TM,$name,DefaultBehavior,T,wont_add_nz> &f,
                         TK &A,
@@ -1670,44 +1670,44 @@ class LmtppFormulationAncestor
                         const Number<Bsymm> &matrix_B_is_sym,
                         const Number<$assemble_mat_A> &assemble_mat_A,
                         const Number<$assemble_mat_B> &assemble_mat_B,
-                        const typename TM::TNode &node,
+                        const Node<$nb_dim,T_pos,ND> &node,
                         const unsigned *indices ) {
                         #define PNODE(N) (&node)
                     $( write_mat_eig( A_dN, B_dN, assemble_mat_A, assemble_mat_B, want_nodal=true, want_skin_elem=false, want_elem=false, want_global=true ) )
                         #undef PNODE
                     }
-                    template<class TM,class T,bool wont_add_nz,unsigned Asymm,unsigned Bsymm,unsigned Csymm>
+                    template<class TM,class T,bool wont_add_nz,unsigned Asymm,unsigned Bsymm,unsigned Csymm,class T_pos,class ND>
                     void add_nodal_matrix(
                         Formulation<TM,$name,DefaultBehavior,T,wont_add_nz> &f,
                         const Number<Asymm> &matrix_A_is_sym,
                         const Number<Bsymm> &matrix_B_is_sym,
                         const Number<$assemble_mat_A> &assemble_mat_A,
                         const Number<$assemble_mat_B> &assemble_mat_B,
-                        const typename TM::TNode &node,
+                        const Node<$nb_dim,T_pos,ND> &node,
                         const unsigned *indices ) {
                         add_nodal_matrix( f, f.matrices(Number<1>()), f.matrices(Number<2>()), f.vectors, matrix_A_is_sym, matrix_B_is_sym, assemble_mat_A, assemble_mat_B, node, indices );
                     }
         for assemble_mat in 0 .. 2
             stream <<<<
-                template<class TM,class TK,class TV,class T,bool wont_add_nz,unsigned symm>
+                template<class TM,class TK,class TV,class T,bool wont_add_nz,unsigned symm,class T_pos,class ND>
                 void add_nodal_matrix(
                     Formulation<TM,$name,DefaultBehavior,T,wont_add_nz> &f,
                     TK &C,
                     TV &vectors,
                     const Number<symm> &matrix_is_sym,
                     const Number<$assemble_mat> &assemble_mat,
-                    const typename TM::TNode &node,
+                    const Node<$nb_dim,T_pos,ND> &node,
                     const unsigned *indices ) {
                     #define PNODE(N) (&node)
                 $( write_mat_eq( C_dN, assemble_mat, want_nodal=true, want_skin_elem=false, want_elem=false, want_global=true ) )
                     #undef PNODE
                 }
-                template<class TM,class T,bool wont_add_nz,unsigned symm>
+                template<class TM,class T,bool wont_add_nz,unsigned symm,class T_pos,class ND>
                 void add_nodal_matrix(
                     Formulation<TM,$name,DefaultBehavior,T,wont_add_nz> &f,
                     const Number<symm> &matrix_is_sym,
                     const Number<$assemble_mat> &assemble_mat,
-                    const typename TM::TNode &node,
+                    const Node<$nb_dim,T_pos,ND> &node,
                     const unsigned *indices ) {
                     add_nodal_matrix( f, f.matrices(Number<3>()), f.vectors, matrix_is_sym, assemble_mat, node, indices );
                 }
@@ -1716,13 +1716,13 @@ class LmtppFormulationAncestor
 
     # 
     def write_add_nodal_matrices_eig( stream )
-        stream <<< "#ifndef ADD_NODAL_MATRIX_EIG_H"
-        stream <<< "#define ADD_NODAL_MATRIX_EIG_H"
+        stream <<< "#ifndef ADD_NODAL_MATRIX_EIG_$(nb_dim)_$(name)_H"
+        stream <<< "#define ADD_NODAL_MATRIX_EIG_$(nb_dim)_$(name)_H"
         stream <<< "namespace LMT {"
         for assemble_mat_A in 0 .. 2
             for assemble_mat_B in 0 .. 2
                 stream <<<<
-                    template<class TM,class TK,class TV,class T,bool wont_add_nz,unsigned Asymm,unsigned Bsymm>
+                    template<class TM,class TK,class TV,class T,bool wont_add_nz,unsigned Asymm,unsigned Bsymm,class T_pos,class ND>
                     void add_nodal_matrix(
                         Formulation<TM,$name,DefaultBehavior,T,wont_add_nz> &f,
                         TK &A,
@@ -1732,44 +1732,44 @@ class LmtppFormulationAncestor
                         const Number<Bsymm> &matrix_B_is_sym,
                         const Number<$assemble_mat_A> &assemble_mat_A,
                         const Number<$assemble_mat_B> &assemble_mat_B,
-                        const typename TM::TNode &node,
+                        const Node<$nb_dim,T_pos,ND> &node,
                         const unsigned *indices ) {
                         #define PNODE(N) (&node)
                     $( write_mat_eig( A_dN, B_dN, assemble_mat_A, assemble_mat_B, want_nodal=true, want_skin_elem=false, want_elem=false, want_global=true ) )
                         #undef PNODE
                     }
-                    template<class TM,class T,bool wont_add_nz,unsigned Asymm,unsigned Bsymm,unsigned Csymm>
+                    template<class TM,class T,bool wont_add_nz,unsigned Asymm,unsigned Bsymm,unsigned Csymm,class T_pos,class ND>
                     void add_nodal_matrix(
                         Formulation<TM,$name,DefaultBehavior,T,wont_add_nz> &f,
                         const Number<Asymm> &matrix_A_is_sym,
                         const Number<Bsymm> &matrix_B_is_sym,
                         const Number<$assemble_mat_A> &assemble_mat_A,
                         const Number<$assemble_mat_B> &assemble_mat_B,
-                        const typename TM::TNode &node,
+                        const Node<$nb_dim,T_pos,ND> &node,
                         const unsigned *indices ) {
                         add_nodal_matrix( f, f.matrices(Number<1>()), f.matrices(Number<2>()), f.vectors, matrix_A_is_sym, matrix_B_is_sym, assemble_mat_A, assemble_mat_B, node, indices );
                     }
         for assemble_mat in 0 .. 2
             stream <<<<
-                template<class TM,class TK,class TV,class T,bool wont_add_nz,unsigned symm>
+                template<class TM,class TK,class TV,class T,bool wont_add_nz,unsigned symm,class T_pos,class ND>
                 void add_nodal_matrix(
                     Formulation<TM,$name,DefaultBehavior,T,wont_add_nz> &f,
                     TK &C,
                     TV &vectors,
                     const Number<symm> &matrix_is_sym,
                     const Number<$assemble_mat> &assemble_mat,
-                    const typename TM::TNode &node,
+                    const Node<$nb_dim,T_pos,ND> &node,
                     const unsigned *indices ) {
                     #define PNODE(N) (&node)
                 $( write_mat_eq( C_dN, assemble_mat, want_nodal=true, want_skin_elem=false, want_elem=false, want_global=true ) )
                     #undef PNODE
                 }
-                template<class TM,class T,bool wont_add_nz,unsigned symm>
+                template<class TM,class T,bool wont_add_nz,unsigned symm,class T_pos,class ND>
                 void add_nodal_matrix(
                     Formulation<TM,$name,DefaultBehavior,T,wont_add_nz> &f,
                     const Number<symm> &matrix_is_sym,
                     const Number<$assemble_mat> &assemble_mat,
-                    const typename TM::TNode &node,
+                    const Node<$nb_dim,T_pos,ND> &node,
                     const unsigned *indices ) {
                     add_nodal_matrix( f, f.matrices(Number<3>()), f.vectors, matrix_is_sym, assemble_mat, node, indices );
                 }
@@ -2426,7 +2426,10 @@ def write_legacy_lmtpp_mesh_carac( stream, pb_name, fe_set_by_dim, dim )
         for name_elem in name_elems
             stream <<< "#include <mesh/$name_elem.h>"
     stream <<< "namespace LMT {"
+    stream <<< "#ifndef Mesh_carac_$(pb_name)_HEADER"
+    stream <<< "#define Mesh_carac_$(pb_name)_HEADER"
     stream <<< "template<class TP,unsigned dim> struct Mesh_carac_$(pb_name) {};"
+    stream <<< "#endif // Mesh_carac_$(pb_name)_HEADER"
     
     # mesh data structs
     for v in variable_list
@@ -2439,7 +2442,7 @@ def write_legacy_lmtpp_mesh_carac( stream, pb_name, fe_set_by_dim, dim )
                 stream <<<<
                     #ifndef IFNDEF_$(name)_DM
                     #define IFNDEF_$(name)_DM
-                        struct $(name)_DM {};
+                        struct $(name)_DM { static std::string name() { return "$(name)"; } };
                     #endif // IFNDEF_$(name)_DM
         
     # CARACDMEXTNAMES
@@ -2478,7 +2481,7 @@ def write_legacy_lmtpp_mesh_carac( stream, pb_name, fe_set_by_dim, dim )
         $element_choices
         };
         } // namespace LMT
-        #endif // Mesh_carac_$(pb_name)_HEADER
+        #endif // Mesh_carac_$(pb_name)_$(dim)_HEADER
 
 
 #
@@ -2509,7 +2512,7 @@ def write_legacy_lmtpp_carac_formulation( stream, name_form, fe_set_by_dim_and_n
         namespace LMT {
         #ifndef CARAC_FORMULATION_$(dim)_$(name_form)_H
         #define CARAC_FORMULATION_$(dim)_$(name_form)_H
-            #ifndef STRUCT_FORMULATION_$(name_form)
+        #ifndef STRUCT_FORMULATION_$(name_form)
         #define STRUCT_FORMULATION_$(name_form)
         struct $(name_form) {
             static const char *name() { return "$(name_form)"; }
@@ -2663,9 +2666,12 @@ def write_legacy_lmtpp_problem_h_file( stream, pb_name, fe_set, typeList )
 #~ ~#
 def write_legacy_lmtpp_all_in_one_file( stream, pb_name, fe_set, typeList, list_sup_all_in_one, want_latin )
     stream <<<< 
+        #ifndef all_in_one_$(pb_name)_h
+        #define all_in_one_$(pb_name)_h
         #ifndef all_in_one_h
         #define all_in_one_h
         #include <formulation/formulation.h>
+        #endif
         #include "mesh_carac.h"
     for dim, fe_set_by_dim in fe_set
         for name_form, fe_set_by_dim_and_name in fe_set_by_dim

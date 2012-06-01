@@ -76,19 +76,41 @@ def simplification_projection(P,dim):
    elif dim==1:
       return 1
 
-#loi de hooke isotrope direct 3d
-def hooke_direct_isotrope_3d(E,nu):
-    l = E * nu / (1. + nu) / (1. - 2. * nu)
-    m = E / (1. + nu)
-    H = matrix([
-            [l+m,  l ,  l , 0., 0., 0.],
-            [ l , l+m,  l , 0., 0., 0.],
-            [ l ,  l , l+m, 0., 0., 0.],
-            [ 0.,  0.,  0., m , 0., 0.],
-            [ 0.,  0.,  0., 0., m , 0.],
-            [ 0.,  0.,  0., 0., 0., m ],
-            ])
+#coefficients de lame
+def get_lame_coefficients(E, nu, type='3D'):
+    if (type in ['3D', 'PE']):
+        l = E * nu / (1. + nu) / (1. - 2. * nu)
+    elif (type in ['PS']):
+        l = E * nu / (1. + nu) / (1. - nu)
+    else:
+        print "Type for Lame coefficients must be 3D, PE (plane strain) or PS (plane stress). Aborting."
+        exit()
+    m = E / 2. / (1. + nu)
+    return l, m
+
+#loi de hooke isotrope direct 2d
+def hooke_direct_isotrope_2d(E, nu, type='PS'):
+    l, m = get_lame_coefficients(E, nu, type)
+    H = matrix([[l+2*m,   l  ,   0.],
+                [  l  , l+2*m,   0.],
+                [  0. ,   0. ,  2*m]])
     return H
+
+#loi de hooke isotrope direct 3d
+def hooke_direct_isotrope_3d(E, nu):
+    l, m = get_lame_coefficients(E, nu)
+    H = matrix([[l+2*m,   l  ,   l  ,  0.,  0.,  0.],
+                [  l  , l+2*m,   l  ,  0.,  0.,  0.],
+                [  l  ,   l  , l+2*m,  0.,  0.,  0.],
+                [  0. ,   0. ,   0. , 2*m,  0.,  0.],
+                [  0. ,   0. ,   0. ,  0., 2*m , 0.],
+                [  0. ,   0. ,   0. ,  0.,  0., 2*m]])
+    return H
+
+#loi de hooke isotrope direct
+def hooke_direct_isotrope(E, nu, dim, type='PS'):
+    if   (dim==2): return hooke_direct_isotrope_2d(E, nu, type)
+    elif (dim==3): return hooke_direct_isotrope_3d(E, nu)
 
 #loi de hooke isotrope 3d
 def hooke_isotrope_th_3d(E,nu,alpha):
@@ -109,6 +131,7 @@ def hooke_isotrope_th_3d(E,nu,alpha):
     epsth=vecalpha
     sigth = mul(Kglo,vecalpha)
     return Kglo, Hglo, epsth
+
 
 #loi de hooke isotrope 3d
 def hooke_isotrope_th_3d_endo(E,nu,alpha,d):
@@ -318,7 +341,7 @@ def hooke_matrix_shell(E,nu,h,dim,type_behaviour='membrane'):
 
     else:
         raise 'Shell behaviour only available in 3D'
-    
+
 def trace( sigma ):
     tr = 0
     d = (sigma.size()+1)/2
