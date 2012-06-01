@@ -110,6 +110,26 @@ def hooke_isotrope_th_3d(E,nu,alpha):
     sigth = mul(Kglo,vecalpha)
     return Kglo, Hglo, epsth
 
+#loi de hooke isotrope 3d
+def hooke_isotrope_th_3d_endo(E,nu,alpha,d):
+    """ isotrope """
+    vecalpha=vector([alpha,alpha,alpha,0,0,0])
+    s1 = 1./E/(1-d)
+    s2 = - nu /E/(1-d)
+    s3 = (1.+ nu)/E/(1-d)
+    Hglo = matrix([
+            [s1,s2,s2,0.,0.,0.],
+            [s2,s1,s2,0.,0.,0.],
+            [s2,s2,s1,0.,0.,0.],
+            [0.,0.,0.,s3,0.,0.],
+            [0.,0.,0.,0.,s3,0.],
+            [0.,0.,0.,0.,0.,s3],
+            ])
+    Kglo = Hglo.inverse()
+    epsth=vecalpha
+    sigth = mul(Kglo,vecalpha)
+    return Kglo, Hglo, epsth
+
 #loi de hooke isotrope direct 3d
 def hooke_isotrope_direct_3d(E,nu):
     l = E * nu / (1. + nu) / (1. - 2. * nu)
