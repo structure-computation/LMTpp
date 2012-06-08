@@ -273,10 +273,10 @@ bool subdivision_element(const Element<Triangle,TN,TNG,TD,NET> &e,Vec<TNG> &new_
 }
 
 template<class TN,class TNG,class TD,unsigned NET>
-typename TNG::T measure( const Element<Triangle,TN,TNG,TD,NET> &e ) {
+typename TypePromote<Abs,typename TNG::T>::T measure( const Element<Triangle,TN,TNG,TD,NET> &e ) {
     typename TNG::Pvec P0 = e.node(0)->pos, P1 = e.node(1)->pos, P2 = e.node(2)->pos, N = normalized(P1-P0);
     P2 -= dot(P2-P0,N)*N;
-    return 0.5 * length( P1-P0 ) * length( P2-P0 );
+    return abs( 0.5 * length( P1-P0 ) * length( P2-P0 ) );
 }
 
 

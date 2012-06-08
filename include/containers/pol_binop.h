@@ -214,8 +214,9 @@ struct PolBinOp<Pow,nd,ne,nx> {
     template <class T1, class T2>
     Vec<typename TypePromote<Pow,T1,typename IsScalar<T2>::T>::T,DimPol<nd,nx>::valeur> operator() (const Vec<T1,DimPol<nd,nx>::valeur> &p, const T2 &q) {
         PolUnOp<Log,nd,nx> oplog;
+        Vec<typename TypePromote<Multiplies,T1,T2>::T,DimPol<nd,nx>::valeur> qp = q*oplog(p);
         PolUnOp<Exp,nd,nx> opexp;
-        return opexp(q*oplog(p));
+        return opexp(qp);
     }
 
     template <class T1, class T2>

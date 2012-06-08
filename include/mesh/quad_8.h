@@ -73,7 +73,7 @@ void update_edge_ratio(const Element<Quad_8,TN,TNG,TD,NET> &e,TM &m,T &edge_rati
 
 // --------------------------------------------------------------------------------------------------------
 template<class TN,class TNG,class TD,unsigned NET>
-typename TNG::T measure( const Element<Quad_8,TN,TNG,TD,NET> &e ) {
+typename TypePromote<Abs,typename TNG::T>::T measure( const Element<Quad_8,TN,TNG,TD,NET> &e ) {
     typedef typename TNG::T P_T_pos;
     typename TNG::Pvec P0 = e.node(0)->pos, P1 = e.node(1)->pos, P2 = e.node(2)->pos, P3 = e.node(3)->pos;
     if ( TNG::dim==2 ) {
@@ -85,8 +85,8 @@ typename TNG::T measure( const Element<Quad_8,TN,TNG,TD,NET> &e ) {
         D5 = 0.788675*P0[1]; D8 = D2-D5; D8 = D8+D6; D8 = D8-D10; D9 = D13*D8; D8 = D8*D1; D5 = -D3-D5; D5 = D5+D6; 
         D5 = D5+D11; D6 = D0*D5; D6 = D6-D8; D6 = 0.25*D6; D5 = D4*D5; D8 = 0.211325*P0[1]; D2 = -D2-D8; D2 = D2+D7; 
         D2 = D2+D10; D4 = D2*D4; D0 = D2*D0; D0 = D0-D9; D0 = 0.25*D0; D2 = D3-D8; D2 = D2+D7; D2 = D2-D11; D3 = D13*D2; 
-        D3 = D4-D3; D3 = 0.25*D3; D1 = D1*D2; D1 = D5-D1; D1 = 0.25*D1; D1 = D1+D3; D0 = D1+D0; D0 = D0+D6; D0 = abs(D0); 
-        return D0; 
+        D3 = D4-D3; D3 = 0.25*D3; D1 = D1*D2; D1 = D5-D1; D1 = 0.25*D1; D1 = D1+D3; D0 = D1+D0; D0 = D0+D6; 
+        return typename TypePromote<Abs,typename TNG::T>::T(abs(D0));
     }
     P_T_pos D0 = 0.211325*P0[0]; P_T_pos D1 = 0.788675*P0[0]; P_T_pos D2 = 0.788675*P0[1]; P_T_pos D3 = 0.211325*P0[1]; 
     P_T_pos D4 = 0.211325*P0[2]; P_T_pos D5 = 0.788675*P0[2]; P_T_pos D6 = 0.788675*P1[0]; P_T_pos D7 = -D6-D0; 
@@ -120,7 +120,7 @@ typename TNG::T measure( const Element<Quad_8,TN,TNG,TD,NET> &e ) {
     D9 = pow(D19,2); D10 = pow(D20,2); D9 = D9+D10; D10 = pow(D21,2); D9 = D9+D10; D9 = pow(D9,0.5); D10 = D20/D9; 
     D0 = D0*D10; D11 = D19/D9; D3 = D3*D11; D0 = D0+D3; D3 = D21/D9; D4 = D4*D3; D0 = D0+D4; D0 = D13*D0; D1 = D1*D10; 
     D2 = D2*D11; D1 = D1+D2; D2 = D5*D3; D1 = D1+D2; D1 = D8*D1; D0 = D1-D0; D0 = 0.25*D0; D0 = D0+D7; D0 = D0+D15; 
-    D0 = D0+D6; D0 = abs(D0); return D0; 
+    D0 = D0+D6; return typename TypePromote<Abs,typename TNG::T>::T(abs(D0));
 }
 
 template<class TN,class TNG,class TD,unsigned NET,class TM>

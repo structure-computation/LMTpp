@@ -34,7 +34,7 @@ public:
     virtual const char *name_virtual() const = 0;
     virtual const char *can_directly_be_represented_by_virtual() = 0;
     virtual unsigned num_in_elem_list_virtual() const = 0;
-    virtual T measure_virtual() const = 0;
+    virtual typename TypePromote<Abs,T>::T measure_virtual() const = 0;
     virtual unsigned nb_children_virtual( unsigned nvisubs ) const = 0;
 
     virtual typename TNode::Pvec sample_normal_virtual() const = 0;
@@ -171,7 +171,7 @@ public:
     virtual typename TNode::Pvec sample_tangent_virtual() const {
         return sample_tangent(*this);
     }
-    virtual T measure_virtual() const { return measure( *this ); }
+    virtual typename TypePromote<Abs,T>::T measure_virtual() const { return measure( *this ); }
 
     virtual unsigned nb_children_virtual( unsigned nvisubs ) const {
         switch( nvisubs ) {
@@ -347,7 +347,7 @@ template<class TE,class Pvec,class TVI> void get_var_inter( const TE &elem,const
     }
 }
 
-/** contains res -> true if eq to find var!inter from pos is non linear (recquires iterations) */
+/** contains res -> true if eq to find var_inter from pos is non linear (recquires iterations) */
 template<class NE> struct ElemVarInterFromPosNonLinear { };
 
 /*!

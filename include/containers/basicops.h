@@ -224,7 +224,7 @@ template<class T> int sgn(const T &val) { return ( val>0 ? 1 : -1 ); }
     \friend hugo.leclerc@lmt.ens-cachan.fr
 */
 /// retourne abs(val)
-template<class T> T length(const T &val) { using namespace std; return abs(val); }
+template<class T> T length(const T &val) { return std::abs(val); }
 
 /*
 lst = [

@@ -59,7 +59,7 @@ void update_edge_ratio(const Element<Penta,TN,TNG,TD,NET> &e,TM &m,T &edge_ratio
 }
 // --------------------------------------------------------------------------------------------------------
 template<class TN,class TNG,class TD,unsigned NET>
-typename TNG::T measure( const Element<Penta,TN,TNG,TD,NET> &e ) {
+typename TypePromote<Abs,typename TNG::T>::T measure( const Element<Penta,TN,TNG,TD,NET> &e ) {
 	std::cout << "Error measure not implemented for type Penta - do it if you need it" << std::endl;
 	assert(0);
 }
@@ -67,7 +67,7 @@ typename TNG::T measure( const Element<Penta,TN,TNG,TD,NET> &e ) {
 
 // --------------------------------------------------------------------------------------------------------
 template<class TN,class TNG,class TD,unsigned NET>
-typename TNG::T measure( const Element<Penta,TN,TNG,TD,NET> &e ) {
+typename TypePromote<Abs,typename TNG::T>::T measure( const Element<Penta,TN,TNG,TD,NET> &e ) {
 	std::cout << "Error measure not implemented for type Penta - do it if you need it" << std::endl;
 	assert(0);
 }

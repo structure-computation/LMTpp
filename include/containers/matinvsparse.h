@@ -244,7 +244,7 @@ void incomplete_chol_factorize( Mat<T,Sym<>,SparseLine<> > &m, bool simplified =
             }
     
             T d = m.data[line].data.back() - norm_2_p2( m.data[line].data.begin(), m.data[line].data.size() - 1 );
-            m.data[line].data.back() = T(1) / sqrt( abs( d ) + ( d == T(0) ) );
+            m.data[line].data.back() = typename TypePromote<Sqrt,typename TypePromote<Abs,T>::T>::T(1) / sqrt( abs( d ) + ( d == T(0) ) );
         }
     } else {
         for(unsigned line = 0; line < m.nb_rows(); ++line ) {
@@ -255,7 +255,7 @@ void incomplete_chol_factorize( Mat<T,Sym<>,SparseLine<> > &m, bool simplified =
             }
     
             T d = m.data[line].data.back() - norm_2_p2( m.data[line].data.begin(), m.data[line].data.size() - 1 );
-            m.data[line].data.back() = sqrt( abs( d ) + ( d == T(0) ) );
+            m.data[line].data.back() = T( sqrt( abs( d ) + ( d == T(0) ) ) );
         }        
     }
 }
@@ -451,7 +451,7 @@ template<class T,int s,int s2> void solve_using_chol_factorize( const Mat<T,Herm
 }
 
 template<class T,int s2> 
-int solve_using_incomplete_chol_factorize( const Mat<T,Sym<>,SparseLine<> > &mp, const Mat<T,Sym<>,SparseLine<> > &A, const Vec<T> &b, Vec<T,s2> &x, double crit = 1e-4, bool disp_r = true ) {
+int solve_using_incomplete_chol_factorize( const Mat<T,Sym<>,SparseLine<> > &mp, const Mat<T,Sym<>,SparseLine<> > &A, const Vec<T> &b, Vec<T,s2> &x, T crit = 1e-4, bool disp_r = true ) {
     if ( x.size() <= A.nb_rows() )
         x.resize( A.nb_rows(), T(0) );
     //
@@ -460,7 +460,7 @@ int solve_using_incomplete_chol_factorize( const Mat<T,Sym<>,SparseLine<> > &mp,
     r = b - A * x;
     for(unsigned i=0;;++i) { 
         if ( i==r.size() ) return 0; 
-        if ( abs(r[i]) > crit ) break;
+        if ( abs(r[i]) > abs(crit) ) break;
     }
     solve_using_chol_factorize( mp, r, d );
 
@@ -475,7 +475,7 @@ int solve_using_incomplete_chol_factorize( const Mat<T,Sym<>,SparseLine<> > &mp,
         x += alpha * d;
         // r -= alpha * q;
         r = b - A * x;
-        for(unsigned i=0;;++i) { if ( i==r.size() ) return cpt; if ( abs(r[i]) > crit ) break; }
+        for(unsigned i=0;;++i) { if ( i==r.size() ) return cpt; if ( abs(r[i]) > abs(crit) ) break; }
 
         solve_using_chol_factorize( mp, r, s );
         deltn = dot( r, s );
