@@ -94,7 +94,7 @@ template<class T,class TS> void chol_factorize( Mat<T,TS,SparseLine<> > &m ) {
         }
         // on diag
         if ( m.data[line].data.size() )
-            m.data[line].data.back() = 1.0 / sqrt( m.data[line].data.back() - norm_2_p2( m.data[line].data.begin(), m.data[line].data.size()-1 ) );
+            m.data[line].data.back() = T(1.0) / sqrt( m.data[line].data.back() - norm_2_p2( m.data[line].data.begin(), m.data[line].data.size()-1 ) );
     }
     //PRINT( hash );
 }
