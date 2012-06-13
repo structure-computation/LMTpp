@@ -596,8 +596,8 @@ struct ReaderINP {
         }
         
         void setProperty( EA* ptrEA ) const {
-            ptrEA->set_field( std::string( "v1" ), v1 );
-            ptrEA->set_field( std::string( "v2" ), v2 );
+            ptrEA->set_field( std::string( "v1" ), v1, false );
+            ptrEA->set_field( std::string( "v2" ), v2, false );
         }
         
         /// A revoir l'utilisation de Pvec ????
@@ -615,26 +615,26 @@ struct ReaderINP {
         }
         virtual void setProperty( EA* pea , const double &conversion_factor ) const { 
             if (type == "ISO") {
-                pea->set_field( std::string( "elastic_modulus_1" ), data[ 0 ] );
-                pea->set_field( std::string( "elastic_modulus_2" ), data[ 0 ] );
-                pea->set_field( std::string( "elastic_modulus_3" ), data[ 0 ] );
-                pea->set_field( std::string( "poisson_ratio_12" ), data[ 1 ] );
-                pea->set_field( std::string( "poisson_ratio_13" ), data[ 1 ] );
-                pea->set_field( std::string( "poisson_ratio_23" ), data[ 1 ] );
+                pea->set_field( std::string( "elastic_modulus_1" ), data[ 0 ], false );
+                pea->set_field( std::string( "elastic_modulus_2" ), data[ 0 ], false );
+                pea->set_field( std::string( "elastic_modulus_3" ), data[ 0 ], false );
+                pea->set_field( std::string( "poisson_ratio_12" ), data[ 1 ], false );
+                pea->set_field( std::string( "poisson_ratio_13" ), data[ 1 ], false );
+                pea->set_field( std::string( "poisson_ratio_23" ), data[ 1 ], false );
                 double t = data[ 0 ] / ( 2 * ( 1 + data[ 1 ] ) ); 
-                pea->set_field( std::string( "shear_modulus_12" ), t );
-                pea->set_field( std::string( "shear_modulus_13" ), t );
-                pea->set_field( std::string( "shear_modulus_23" ), t );
+                pea->set_field( std::string( "shear_modulus_12" ), t, false );
+                pea->set_field( std::string( "shear_modulus_13" ), t, false );
+                pea->set_field( std::string( "shear_modulus_23" ), t, false );
             } else {
-                pea->set_field( std::string( "elastic_modulus_1" ), data[ 0 ]/conversion_factor );
-                pea->set_field( std::string( "elastic_modulus_2" ), data[ 1 ]/conversion_factor );
-                pea->set_field( std::string( "elastic_modulus_3" ), data[ 2 ]/conversion_factor );
-                pea->set_field( std::string( "poisson_ratio_12" ), data[ 3 ] );
-                pea->set_field( std::string( "poisson_ratio_13" ), data[ 4 ] );
-                pea->set_field( std::string( "poisson_ratio_23" ), data[ 5 ] );
-                pea->set_field( std::string( "shear_modulus_12" ), data[ 6 ]/conversion_factor );
-                pea->set_field( std::string( "shear_modulus_13" ), data[ 7 ]/conversion_factor );
-                pea->set_field( std::string( "shear_modulus_23" ), data[ 8 ]/conversion_factor );
+                pea->set_field( std::string( "elastic_modulus_1" ), data[ 0 ]/conversion_factor, false );
+                pea->set_field( std::string( "elastic_modulus_2" ), data[ 1 ]/conversion_factor, false );
+                pea->set_field( std::string( "elastic_modulus_3" ), data[ 2 ]/conversion_factor, false );
+                pea->set_field( std::string( "poisson_ratio_12" ), data[ 3 ], false );
+                pea->set_field( std::string( "poisson_ratio_13" ), data[ 4 ], false );
+                pea->set_field( std::string( "poisson_ratio_23" ), data[ 5 ], false );
+                pea->set_field( std::string( "shear_modulus_12" ), data[ 6 ]/conversion_factor, false );
+                pea->set_field( std::string( "shear_modulus_13" ), data[ 7 ]/conversion_factor, false );
+                pea->set_field( std::string( "shear_modulus_23" ), data[ 8 ]/conversion_factor, false );
             }
         }
         
@@ -669,26 +669,26 @@ struct ReaderINP {
         
         virtual void setProperty( EA* pea , const double &conversion_factor ) const { 
             if (type == "ISO") {
-                pea->set_field( std::string( "elastic_modulus_1" ), data[ 0 ] );
-                pea->set_field( std::string( "elastic_modulus_2" ), data[ 0 ] );
-                pea->set_field( std::string( "elastic_modulus_3" ), data[ 0 ] );
-                pea->set_field( std::string( "poisson_ratio_12" ), data[ 1 ] );
-                pea->set_field( std::string( "poisson_ratio_13" ), data[ 1 ] );
-                pea->set_field( std::string( "poisson_ratio_23" ), data[ 1 ] );
+                pea->set_field( std::string( "elastic_modulus_1" ), data[ 0 ], false );
+                pea->set_field( std::string( "elastic_modulus_2" ), data[ 0 ], false );
+                pea->set_field( std::string( "elastic_modulus_3" ), data[ 0 ], false );
+                pea->set_field( std::string( "poisson_ratio_12" ), data[ 1 ], false );
+                pea->set_field( std::string( "poisson_ratio_13" ), data[ 1 ], false );
+                pea->set_field( std::string( "poisson_ratio_23" ), data[ 1 ], false );
                 double t = data[ 0 ] / ( 2 * ( 1 + data[ 1 ] ) ); 
-                pea->set_field( std::string( "shear_modulus_12" ), t );
-                pea->set_field( std::string( "shear_modulus_13" ), t );
-                pea->set_field( std::string( "shear_modulus_23" ), t );
+                pea->set_field( std::string( "shear_modulus_12" ), t, false );
+                pea->set_field( std::string( "shear_modulus_13" ), t, false );
+                pea->set_field( std::string( "shear_modulus_23" ), t, false );
             } else {
-                pea->set_field( std::string( "elastic_modulus_1" ), data[ 0 ]/conversion_factor );
-                pea->set_field( std::string( "elastic_modulus_2" ), data[ 1 ]/conversion_factor );
-                pea->set_field( std::string( "elastic_modulus_3" ), data[ 2 ]/conversion_factor );
-                pea->set_field( std::string( "poisson_ratio_12" ), data[ 3 ] );
-                pea->set_field( std::string( "poisson_ratio_13" ), data[ 4 ] );
-                pea->set_field( std::string( "poisson_ratio_23" ), data[ 5 ] );
-                pea->set_field( std::string( "shear_modulus_12" ), data[ 6 ]/conversion_factor );
-                pea->set_field( std::string( "shear_modulus_13" ), data[ 7 ]/conversion_factor );
-                pea->set_field( std::string( "shear_modulus_23" ), data[ 8 ]/conversion_factor );
+                pea->set_field( std::string( "elastic_modulus_1" ), data[ 0 ]/conversion_factor, false );
+                pea->set_field( std::string( "elastic_modulus_2" ), data[ 1 ]/conversion_factor, false );
+                pea->set_field( std::string( "elastic_modulus_3" ), data[ 2 ]/conversion_factor, false );
+                pea->set_field( std::string( "poisson_ratio_12" ), data[ 3 ], false );
+                pea->set_field( std::string( "poisson_ratio_13" ), data[ 4 ], false );
+                pea->set_field( std::string( "poisson_ratio_23" ), data[ 5 ], false );
+                pea->set_field( std::string( "shear_modulus_12" ), data[ 6 ]/conversion_factor, false );
+                pea->set_field( std::string( "shear_modulus_13" ), data[ 7 ]/conversion_factor, false );
+                pea->set_field( std::string( "shear_modulus_23" ), data[ 8 ]/conversion_factor, false );
             }
         }
         
@@ -1090,13 +1090,13 @@ struct ReaderINP {
                 
                 for( it2 = map_num_element.begin(); it2 != map_num_element.end(); ++it2 )
                     if ( it2->second.ptrEA )
-                        it2->second.ptrEA->set_field( nameTag, 0. );
+                        it2->second.ptrEA->set_field( nameTag, 0., false );
                     else
                         std::cerr << "WARNING ReaderINP : buzzzzzzzzzzz "  << std::endl;
                
                 for( unsigned i = 0; i < surf->indice.size(); ++i )
                     if ( map_num_element[ surf->indice[ i ] ].ptrEA )
-                        map_num_element[ surf->indice[ i ] ].ptrEA->set_field( nameTag, valueTag );
+                        map_num_element[ surf->indice[ i ] ].ptrEA->set_field( nameTag, valueTag, false );
                     else
                         std::cerr << "WARNING ReaderINP : problem to tag the element " << surf->indice[ i ] << std::endl;
             } else
