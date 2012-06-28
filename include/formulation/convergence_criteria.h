@@ -24,7 +24,7 @@ struct Convergence_criterium {};
 /// Example of a convergence criteria
 struct Norm2_is_inf {};
 
-/// Specialization for Norm2_is_sup
+/// Specialization for Norm2_is_inf
 template<class T>
 struct Convergence_criterium<Norm2_is_inf,T> {
     template<class TS>
@@ -39,7 +39,7 @@ struct Convergence_criterium<Norm2_is_inf,T> {
 /// Example of a convergence criteria
 struct Norm1_is_inf {};
 
-/// Specialization for Norm2_is_sup
+/// Specialization for Norm1_is_inf
 template<class T>
 struct Convergence_criterium<Norm1_is_inf,T> {
     template<class TS>

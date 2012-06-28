@@ -34,42 +34,42 @@ public:
     virtual const char *name_virtual() const = 0;
     virtual const char *can_directly_be_represented_by_virtual() = 0;
     virtual unsigned num_in_elem_list_virtual() const = 0;
-    virtual T measure_virtual() const = 0;
+    virtual typename TypePromote<Abs,T>::T measure_virtual() const = 0;
     virtual unsigned nb_children_virtual( unsigned nvisubs ) const = 0;
 
     virtual typename TNode::Pvec sample_normal_virtual() const = 0;
     virtual typename TNode::Pvec sample_tangent_virtual() const = 0;
 
-    virtual void set_field( const std::string field_name, T value ) = 0;
-    virtual void set_field( const std::string field_name, Vec<T,1> value ) = 0;
-    virtual void set_field( const std::string field_name, Vec<T,2> value ) = 0;
-    virtual void set_field( const std::string field_name, Vec<T,3> value ) = 0;
-    virtual void set_field( const std::string field_name, Vec<T,4> value ) = 0;
-    virtual void set_field( const std::string field_name, Vec<T,5> value ) = 0;
-    virtual void set_field( const std::string field_name, Vec<T,6> value ) = 0;
-    virtual void set_field( const std::string field_name, Mat<T,Gen<1, 1> > value ) = 0;
-    virtual void set_field( const std::string field_name, Mat<T,Gen<2, 2> > value ) = 0;
-    virtual void set_field( const std::string field_name, Mat<T,Gen<3, 3> > value ) = 0;
-    virtual void set_field( const std::string field_name, Mat<T,Gen<4, 4> > value ) = 0;
-    virtual void set_field( const std::string field_name, Mat<T,Gen<5, 5> > value ) = 0;
-    virtual void set_field( const std::string field_name, Mat<T,Gen<6, 6> > value ) = 0;
+    virtual void set_field( const std::string field_name, T value, bool disp = true ) = 0;
+    virtual void set_field( const std::string field_name, Vec<T,1> value, bool disp = true ) = 0;
+    virtual void set_field( const std::string field_name, Vec<T,2> value, bool disp = true ) = 0;
+    virtual void set_field( const std::string field_name, Vec<T,3> value, bool disp = true ) = 0;
+    virtual void set_field( const std::string field_name, Vec<T,4> value, bool disp = true ) = 0;
+    virtual void set_field( const std::string field_name, Vec<T,5> value, bool disp = true ) = 0;
+    virtual void set_field( const std::string field_name, Vec<T,6> value, bool disp = true ) = 0;
+    virtual void set_field( const std::string field_name, Mat<T,Gen<1, 1> > value, bool disp = true ) = 0;
+    virtual void set_field( const std::string field_name, Mat<T,Gen<2, 2> > value, bool disp = true ) = 0;
+    virtual void set_field( const std::string field_name, Mat<T,Gen<3, 3> > value, bool disp = true ) = 0;
+    virtual void set_field( const std::string field_name, Mat<T,Gen<4, 4> > value, bool disp = true ) = 0;
+    virtual void set_field( const std::string field_name, Mat<T,Gen<5, 5> > value, bool disp = true ) = 0;
+    virtual void set_field( const std::string field_name, Mat<T,Gen<6, 6> > value, bool disp = true ) = 0;
 
-    virtual T        get_field( const std::string field_name, StructForType<T        > ) const = 0;
-    virtual Vec<T,1> get_field( const std::string field_name, StructForType<Vec<T,1> > ) const = 0;
-    virtual Vec<T,2> get_field( const std::string field_name, StructForType<Vec<T,2> > ) const = 0;
-    virtual Vec<T,3> get_field( const std::string field_name, StructForType<Vec<T,3> > ) const = 0;
-    virtual Vec<T,4> get_field( const std::string field_name, StructForType<Vec<T,4> > ) const = 0;
-    virtual Vec<T,5> get_field( const std::string field_name, StructForType<Vec<T,5> > ) const = 0;
-    virtual Vec<T,6> get_field( const std::string field_name, StructForType<Vec<T,6> > ) const = 0;
-    virtual Mat<T,Gen<1, 1> > get_field( const std::string field_name, StructForType<Mat<T,Gen<1, 1> > > ) const = 0;
-    virtual Mat<T,Gen<2, 2> > get_field( const std::string field_name, StructForType<Mat<T,Gen<2, 2> > > ) const = 0;
-    virtual Mat<T,Gen<3, 3> > get_field( const std::string field_name, StructForType<Mat<T,Gen<3, 3> > > ) const = 0;
-    virtual Mat<T,Gen<4, 4> > get_field( const std::string field_name, StructForType<Mat<T,Gen<4, 4> > > ) const = 0;
-    virtual Mat<T,Gen<5, 5> > get_field( const std::string field_name, StructForType<Mat<T,Gen<5, 5> > > ) const = 0;
-    virtual Mat<T,Gen<6, 6> > get_field( const std::string field_name, StructForType<Mat<T,Gen<6, 6> > > ) const = 0;
-    virtual Mat<T,Sym<1> > get_field( const std::string field_name, StructForType<Mat<T,Sym<1> > > ) const = 0;
-    virtual Mat<T,Sym<2> > get_field( const std::string field_name, StructForType<Mat<T,Sym<2> > > ) const = 0;
-    virtual Mat<T,Sym<3> > get_field( const std::string field_name, StructForType<Mat<T,Sym<3> > > ) const = 0;
+    virtual T        get_field( const std::string field_name, StructForType<T        >, bool disp = true ) const = 0;
+    virtual Vec<T,1> get_field( const std::string field_name, StructForType<Vec<T,1> >, bool disp = true ) const = 0;
+    virtual Vec<T,2> get_field( const std::string field_name, StructForType<Vec<T,2> >, bool disp = true ) const = 0;
+    virtual Vec<T,3> get_field( const std::string field_name, StructForType<Vec<T,3> >, bool disp = true ) const = 0;
+    virtual Vec<T,4> get_field( const std::string field_name, StructForType<Vec<T,4> >, bool disp = true ) const = 0;
+    virtual Vec<T,5> get_field( const std::string field_name, StructForType<Vec<T,5> >, bool disp = true ) const = 0;
+    virtual Vec<T,6> get_field( const std::string field_name, StructForType<Vec<T,6> >, bool disp = true ) const = 0;
+    virtual Mat<T,Gen<1, 1> > get_field( const std::string field_name, StructForType<Mat<T,Gen<1, 1> > >, bool disp = true ) const = 0;
+    virtual Mat<T,Gen<2, 2> > get_field( const std::string field_name, StructForType<Mat<T,Gen<2, 2> > >, bool disp = true ) const = 0;
+    virtual Mat<T,Gen<3, 3> > get_field( const std::string field_name, StructForType<Mat<T,Gen<3, 3> > >, bool disp = true ) const = 0;
+    virtual Mat<T,Gen<4, 4> > get_field( const std::string field_name, StructForType<Mat<T,Gen<4, 4> > >, bool disp = true ) const = 0;
+    virtual Mat<T,Gen<5, 5> > get_field( const std::string field_name, StructForType<Mat<T,Gen<5, 5> > >, bool disp = true ) const = 0;
+    virtual Mat<T,Gen<6, 6> > get_field( const std::string field_name, StructForType<Mat<T,Gen<6, 6> > >, bool disp = true ) const = 0;
+    virtual Mat<T,Sym<1> > get_field( const std::string field_name, StructForType<Mat<T,Sym<1> > >, bool disp = true ) const = 0;
+    virtual Mat<T,Sym<2> > get_field( const std::string field_name, StructForType<Mat<T,Sym<2> > >, bool disp = true ) const = 0;
+    virtual Mat<T,Sym<3> > get_field( const std::string field_name, StructForType<Mat<T,Sym<3> > >, bool disp = true ) const = 0;
 
     unsigned number;
     unsigned absolute_number;
@@ -171,7 +171,7 @@ public:
     virtual typename TNode::Pvec sample_tangent_virtual() const {
         return sample_tangent(*this);
     }
-    virtual T measure_virtual() const { return measure( *this ); }
+    virtual typename TypePromote<Abs,T>::T measure_virtual() const { return measure( *this ); }
 
     virtual unsigned nb_children_virtual( unsigned nvisubs ) const {
         switch( nvisubs ) {
@@ -187,36 +187,36 @@ public:
 
     virtual ~Element() {}
 
-    virtual void set_field( const std::string field_name, T value ) { TData::dm_data_set_field( field_name, value ); }
-    virtual void set_field( const std::string field_name, Vec<T,1> value ) { TData::dm_data_set_field( field_name, value ); }
-    virtual void set_field( const std::string field_name, Vec<T,2> value ) { TData::dm_data_set_field( field_name, value ); }
-    virtual void set_field( const std::string field_name, Vec<T,3> value ) { TData::dm_data_set_field( field_name, value ); }
-    virtual void set_field( const std::string field_name, Vec<T,4> value ) { TData::dm_data_set_field( field_name, value ); }
-    virtual void set_field( const std::string field_name, Vec<T,5> value ) { TData::dm_data_set_field( field_name, value ); }
-    virtual void set_field( const std::string field_name, Vec<T,6> value ) { TData::dm_data_set_field( field_name, value ); }
-    virtual void set_field( const std::string field_name, Mat<T,Gen<1, 1> > value ) { TData::dm_data_set_field( field_name, value ); }
-    virtual void set_field( const std::string field_name, Mat<T,Gen<2, 2> > value ) { TData::dm_data_set_field( field_name, value ); }
-    virtual void set_field( const std::string field_name, Mat<T,Gen<3, 3> > value ) { TData::dm_data_set_field( field_name, value ); }
-    virtual void set_field( const std::string field_name, Mat<T,Gen<4, 4> > value ) { TData::dm_data_set_field( field_name, value ); }
-    virtual void set_field( const std::string field_name, Mat<T,Gen<5, 5> > value ) { TData::dm_data_set_field( field_name, value ); }
-    virtual void set_field( const std::string field_name, Mat<T,Gen<6, 6> > value ) { TData::dm_data_set_field( field_name, value ); }
+    virtual void set_field( const std::string field_name, T value, bool disp = true ) { TData::dm_data_set_field( field_name, value, disp ); }
+    virtual void set_field( const std::string field_name, Vec<T,1> value, bool disp = true ) { TData::dm_data_set_field( field_name, value, disp ); }
+    virtual void set_field( const std::string field_name, Vec<T,2> value, bool disp = true ) { TData::dm_data_set_field( field_name, value, disp ); }
+    virtual void set_field( const std::string field_name, Vec<T,3> value, bool disp = true ) { TData::dm_data_set_field( field_name, value, disp ); }
+    virtual void set_field( const std::string field_name, Vec<T,4> value, bool disp = true ) { TData::dm_data_set_field( field_name, value, disp ); }
+    virtual void set_field( const std::string field_name, Vec<T,5> value, bool disp = true ) { TData::dm_data_set_field( field_name, value, disp ); }
+    virtual void set_field( const std::string field_name, Vec<T,6> value, bool disp = true ) { TData::dm_data_set_field( field_name, value, disp ); }
+    virtual void set_field( const std::string field_name, Mat<T,Gen<1, 1> > value, bool disp = true ) { TData::dm_data_set_field( field_name, value, disp ); }
+    virtual void set_field( const std::string field_name, Mat<T,Gen<2, 2> > value, bool disp = true ) { TData::dm_data_set_field( field_name, value, disp ); }
+    virtual void set_field( const std::string field_name, Mat<T,Gen<3, 3> > value, bool disp = true ) { TData::dm_data_set_field( field_name, value, disp ); }
+    virtual void set_field( const std::string field_name, Mat<T,Gen<4, 4> > value, bool disp = true ) { TData::dm_data_set_field( field_name, value, disp ); }
+    virtual void set_field( const std::string field_name, Mat<T,Gen<5, 5> > value, bool disp = true ) { TData::dm_data_set_field( field_name, value, disp ); }
+    virtual void set_field( const std::string field_name, Mat<T,Gen<6, 6> > value, bool disp = true ) { TData::dm_data_set_field( field_name, value, disp ); }
 
-    virtual T        get_field( const std::string field_name, StructForType<T        > e ) const { return TData::dm_data_get_field( field_name, e ); }
-    virtual Vec<T,1> get_field( const std::string field_name, StructForType<Vec<T,1> > e ) const { return TData::dm_data_get_field( field_name, e ); }
-    virtual Vec<T,2> get_field( const std::string field_name, StructForType<Vec<T,2> > e ) const { return TData::dm_data_get_field( field_name, e ); }
-    virtual Vec<T,3> get_field( const std::string field_name, StructForType<Vec<T,3> > e ) const { return TData::dm_data_get_field( field_name, e ); }
-    virtual Vec<T,4> get_field( const std::string field_name, StructForType<Vec<T,4> > e ) const { return TData::dm_data_get_field( field_name, e ); }
-    virtual Vec<T,5> get_field( const std::string field_name, StructForType<Vec<T,5> > e ) const { return TData::dm_data_get_field( field_name, e ); }
-    virtual Vec<T,6> get_field( const std::string field_name, StructForType<Vec<T,6> > e ) const { return TData::dm_data_get_field( field_name, e ); }
-    virtual Mat<T,Gen<1, 1> > get_field( const std::string field_name, StructForType<Mat<T,Gen<1, 1> > > e ) const { return TData::dm_data_get_field( field_name, e ); }
-    virtual Mat<T,Gen<2, 2> > get_field( const std::string field_name, StructForType<Mat<T,Gen<2, 2> > > e ) const { return TData::dm_data_get_field( field_name, e ); }
-    virtual Mat<T,Gen<3, 3> > get_field( const std::string field_name, StructForType<Mat<T,Gen<3, 3> > > e ) const { return TData::dm_data_get_field( field_name, e ); }
-    virtual Mat<T,Gen<4, 4> > get_field( const std::string field_name, StructForType<Mat<T,Gen<4, 4> > > e ) const { return TData::dm_data_get_field( field_name, e ); }
-    virtual Mat<T,Gen<5, 5> > get_field( const std::string field_name, StructForType<Mat<T,Gen<5, 5> > > e ) const { return TData::dm_data_get_field( field_name, e ); }
-    virtual Mat<T,Gen<6, 6> > get_field( const std::string field_name, StructForType<Mat<T,Gen<6, 6> > > e ) const { return TData::dm_data_get_field( field_name, e ); }
-    virtual Mat<T,Sym<1> > get_field( const std::string field_name, StructForType<Mat<T,Sym<1> > > e ) const { return TData::dm_data_get_field( field_name, e ); }
-    virtual Mat<T,Sym<2> > get_field( const std::string field_name, StructForType<Mat<T,Sym<2> > > e ) const { return TData::dm_data_get_field( field_name, e ); }
-    virtual Mat<T,Sym<3> > get_field( const std::string field_name, StructForType<Mat<T,Sym<3> > > e ) const { return TData::dm_data_get_field( field_name, e ); }
+    virtual T        get_field( const std::string field_name, StructForType<T        > e, bool disp = true ) const { return TData::dm_data_get_field( field_name, e, disp ); }
+    virtual Vec<T,1> get_field( const std::string field_name, StructForType<Vec<T,1> > e, bool disp = true ) const { return TData::dm_data_get_field( field_name, e, disp ); }
+    virtual Vec<T,2> get_field( const std::string field_name, StructForType<Vec<T,2> > e, bool disp = true ) const { return TData::dm_data_get_field( field_name, e, disp ); }
+    virtual Vec<T,3> get_field( const std::string field_name, StructForType<Vec<T,3> > e, bool disp = true ) const { return TData::dm_data_get_field( field_name, e, disp ); }
+    virtual Vec<T,4> get_field( const std::string field_name, StructForType<Vec<T,4> > e, bool disp = true ) const { return TData::dm_data_get_field( field_name, e, disp ); }
+    virtual Vec<T,5> get_field( const std::string field_name, StructForType<Vec<T,5> > e, bool disp = true ) const { return TData::dm_data_get_field( field_name, e, disp ); }
+    virtual Vec<T,6> get_field( const std::string field_name, StructForType<Vec<T,6> > e, bool disp = true ) const { return TData::dm_data_get_field( field_name, e, disp ); }
+    virtual Mat<T,Gen<1, 1> > get_field( const std::string field_name, StructForType<Mat<T,Gen<1, 1> > > e, bool disp = true ) const { return TData::dm_data_get_field( field_name, e, disp ); }
+    virtual Mat<T,Gen<2, 2> > get_field( const std::string field_name, StructForType<Mat<T,Gen<2, 2> > > e, bool disp = true ) const { return TData::dm_data_get_field( field_name, e, disp ); }
+    virtual Mat<T,Gen<3, 3> > get_field( const std::string field_name, StructForType<Mat<T,Gen<3, 3> > > e, bool disp = true ) const { return TData::dm_data_get_field( field_name, e, disp ); }
+    virtual Mat<T,Gen<4, 4> > get_field( const std::string field_name, StructForType<Mat<T,Gen<4, 4> > > e, bool disp = true ) const { return TData::dm_data_get_field( field_name, e, disp ); }
+    virtual Mat<T,Gen<5, 5> > get_field( const std::string field_name, StructForType<Mat<T,Gen<5, 5> > > e, bool disp = true ) const { return TData::dm_data_get_field( field_name, e, disp ); }
+    virtual Mat<T,Gen<6, 6> > get_field( const std::string field_name, StructForType<Mat<T,Gen<6, 6> > > e, bool disp = true ) const { return TData::dm_data_get_field( field_name, e, disp ); }
+    virtual Mat<T,Sym<1> > get_field( const std::string field_name, StructForType<Mat<T,Sym<1> > > e, bool disp = true ) const { return TData::dm_data_get_field( field_name, e, disp ); }
+    virtual Mat<T,Sym<2> > get_field( const std::string field_name, StructForType<Mat<T,Sym<2> > > e, bool disp = true ) const { return TData::dm_data_get_field( field_name, e, disp ); }
+    virtual Mat<T,Sym<3> > get_field( const std::string field_name, StructForType<Mat<T,Sym<3> > > e, bool disp = true ) const { return TData::dm_data_get_field( field_name, e, disp ); }
 
     ///
     TNode *nodes[nb_nodes];
@@ -347,7 +347,7 @@ template<class TE,class Pvec,class TVI> void get_var_inter( const TE &elem,const
     }
 }
 
-/** contains res -> true if eq to find var!inter from pos is non linear (recquires iterations) */
+/** contains res -> true if eq to find var_inter from pos is non linear (recquires iterations) */
 template<class NE> struct ElemVarInterFromPosNonLinear { };
 
 /*!

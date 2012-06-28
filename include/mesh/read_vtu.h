@@ -35,7 +35,7 @@ void cut_char( std::string& s, const char* l) {
             ++i;
     
 }
-     
+
 /*!
 L'objectif de cet objet est de connaître les noms des champs d'un élément ainsi que le nombre de composantes par champs.
 
@@ -54,7 +54,7 @@ struct GetListNamefieldAndCo {
 };
 
 /*!
-    Ce foncteur permet, via l'appel à DM::apply_with_names(), d' assigner une valeur T ou un vecteur Vec<T,s> à un champ nommé field_name. 
+    Ce foncteur permet, via l'appel à DM::apply_with_names(), d' assigner une valeur T ou un vecteur Vec<T,s> à un champ nommé field_name.
     index_node est l'indice du noeud courant et nb_comp est la taille du vecteur des composantes ( nb_comp == s à priori).
 */
 template<class TDATA>
@@ -63,6 +63,14 @@ struct SetFieldByName {
     //     template<class T>
     //     void operator()(unsigned num,const char *name,T &val) const {
     //     }
+
+    template<class T>
+    void operator()( unsigned num, const char *name, T &val ) {
+        if ( name == field_name ) {
+            //std::cout << "======== scalaire a " << nb_comp << " composantes"<< std::endl;
+            val = T( data[ index_elt ] ); /// nb_comp == 1
+        }
+    }
 
     template<class T,int s>
     void operator()( unsigned num, const char *name, Vec<T,s> &val ) {
@@ -73,35 +81,37 @@ struct SetFieldByName {
         }
     }
     
-    template<class T>
-    void operator()( unsigned num, const char *name, T &val ) {
+    template<class T,int s1,int s2>
+    void operator()( unsigned num, const char *name, Vec<Vec<T,s1>,s2> &val ) {
         if ( name == field_name ) {
-            //std::cout << "======== scalaire a " << nb_comp << " composantes"<< std::endl;
-            val = T( data[ index_elt ] ); /// nb_comp == 1
+            //std::cout << "======== vecteur a " << nb_comp << " composantes et s = "<< s << std::endl;
+            for( int i = 0, c = 0; i < s2; ++i )
+                for( int j = 0; j < s1; ++j, ++c )
+                    val[ i ][ j ] = T( data[ index_elt * nb_comp + c ] );
         }
     }
-   
-//     template<class T, class Structure, class O, class OP>
-//     void operator()( unsigned num, const char *name, Mat<T, Structure, O, OP > &val ) {
-//         PRINT( name ); PRINT( nb_comp );
-//         operator() ( num, name, val.data );
-//     }
+
+    //     template<class T, class Structure, class O, class OP>
+    //     void operator()( unsigned num, const char *name, Mat<T, Structure, O, OP > &val ) {
+    //         PRINT( name ); PRINT( nb_comp );
+    //         operator() ( num, name, val.data );
+    //     }
 
     template<class T,int s >
     void operator()( unsigned num, const char *name, Mat<T, Sym<s>, Dense<Col> > &val ) {
         if ( name == field_name ) {
             for( int j = 0; j < val.nb_cols(); ++j ) {
                 for( int i = 0; i <= j; ++i ) {
-                    val( i, j ) = T( data[ index_elt * nb_comp + ( j * ( j + 1 ) ) / 2 + i ] );
+                    val( i, j ) = T( data[ index_elt * nb_comp + j * ( j + 1 ) / 2 + i ] );
                 }
             }
         }
     }
-     
+
     template<class T, int sr, int sc>
     void operator()( unsigned num,const char *name, Mat<T, Gen<sr, sc>, Dense<Col> > &val ) {
         if ( name == field_name ) {
-           for( int i = 0; i < val.nb_rows(); ++i) {
+            for( int i = 0; i < val.nb_rows(); ++i) {
                 for( int j = 0; j < val.nb_cols(); ++j) {
                     val( i, j ) = T( data[ index_elt * nb_comp + i * val.nb_cols() + j ] );
                 }
@@ -117,13 +127,13 @@ struct SetFieldByName {
 };
 
 /*!
-    Ce double foncteur permet, via l'appel apply(Vec< VecElemList<...> > ) puis à DM::appl_with_names(), d' assigner une valeur T ou un vecteur Vec<T,s> à un champ nommé field_name dans un élément. 
+    Ce double foncteur permet, via l'appel apply(Vec< VecElemList<...> > ) puis à DM::appl_with_names(), d' assigner une valeur T ou un vecteur Vec<T,s> à un champ nommé field_name dans un élément.
     index_elt est l'indice de l'élément courant et nb_comp est la taille du vecteur des composantes ( nb_comp == s à priori).
 
     On fait un foncteur différent de SetNodeFieldByName car m.elem_list est un vecteur hétérogène.
 
     Concrètement TDynamicData sera du type DynamicData<int, TM::ElemList::nb_elem_type >
-    Je ne sait pas à quoi sert ce type dans l'appel de apply(Vec< VecElemList<...> > ) ... 
+    Je ne sait pas à quoi sert ce type dans l'appel de apply(Vec< VecElemList<...> > ) ...
  */
 template<class TDATA, class TDynamicData, class TM>
 struct SetElemFieldByName : public SetFieldByName<TDATA> {
@@ -170,7 +180,7 @@ const unsigned char vtkBase64UtilitiesDecodeTable[256] = {
     0x21,0x22,0x23,0x24,0x25,0x26,0x27,0x28,
     0x29,0x2A,0x2B,0x2C,0x2D,0x2E,0x2F,0x30,
     0x31,0x32,0x33,0xFF,0xFF,0xFF,0xFF,0xFF,
-  //-------------------------------------
+    //-------------------------------------
     0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
     0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
     0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
@@ -198,12 +208,12 @@ inline unsigned char vtkBase64UtilitiesDecodeChar(unsigned char c) {
 }
 
 /*!
-  Description:  
+  Description:
   Decode 4 bytes into 3 bytes.
   Return the number of bytes actually decoded
   
   Ce code est récupéré du fichier vtkBase64Utilities.h du programme vtk-5.4.2.
- 
+
 */
 int decodeTriplet(unsigned char i0, unsigned char i1, unsigned char i2, unsigned char i3, unsigned char *o0, unsigned char *o1, unsigned char *o2) {
     unsigned char d0, d1, d2, d3;
@@ -233,33 +243,33 @@ int decodeTriplet(unsigned char i0, unsigned char i1, unsigned char i2, unsigned
 /*!
     Ce code est récupéré du fichier vtkBase64Utilities.cxx du programme vtk-5.4.2.
 
-  // Description:  
-  // Decode bytes from the input buffer and store the decoded stream 
-  // into the output buffer until 'length' bytes have been decoded. 
-  // Return the real length of the decoded stream (which should be equal to 
+  // Description:
+  // Decode bytes from the input buffer and store the decoded stream
+  // into the output buffer until 'length' bytes have been decoded.
+  // Return the real length of the decoded stream (which should be equal to
   // 'length'). Note that the output buffer must be allocated by the caller.
   // If 'max_input_length' is not null, then it specifies the number of
   // encoded bytes that should be at most read from the input buffer. In
-  // that case the 'length' parameter is ignored. This enables the caller 
-  // to decode a stream without actually knowing how much decoded data to 
+  // that case the 'length' parameter is ignored. This enables the caller
+  // to decode a stream without actually knowing how much decoded data to
   // expect (of course, the buffer must be large enough).
 
 
 */
 // unsigned int decode(const unsigned char *input,  unsigned long length, unsigned char *output, unsigned long max_input_length) {
 inline unsigned int decode(const std::string &input, unsigned int offset,  unsigned int ilength, std::string &output ) {
-//     unsigned char optr[9];
+    //     unsigned char optr[9];
     typedef unsigned char* puc;
     unsigned char *ptr = puc(input.c_str()) + offset;
     unsigned int len, i, j, nb_decoded=0;
     unsigned char temp, temp2;
-//     unsigned char *optr = output;
+    //     unsigned char *optr = output;
 
     //ilength = min( ilength, input.size()-offset);
     output.clear();
     output.resize(3./4*double(ilength)+5.);
     
-    /// on décode les 12 premiers octets en base 64 pour récupérer les 9 premiers octets, sachant que les 4 ou 8 premiers sont le nombre d'octets en base 256 encodés... 
+    /// on décode les 12 premiers octets en base 64 pour récupérer les 9 premiers octets, sachant que les 4 ou 8 premiers sont le nombre d'octets en base 256 encodés...
     for( i=0, j=0; i < ilength; i += 4, j+=3) {
         len = decodeTriplet(ptr[i], ptr[i+1], ptr[i+2], ptr[i+3], (puc) &output[j], (puc) &output[j+1], (puc) &output[j+2]);
         nb_decoded += len;
@@ -307,7 +317,7 @@ unsigned sizeTypeVtk (const std::string& type) {
 
 struct DataArray {
     DataArray() : offset(0), numberOfComponents(0), format(0) {}
-    DataArray( const std::string name_, const std::string type_, int format_, int nb_comp, unsigned int offset_, std::string& content_) : name(name_), type(type_), format(format_), numberOfComponents(nb_comp), offset(offset_), content(content_) { 
+    DataArray( const std::string name_, const std::string type_, int format_, int nb_comp, unsigned int offset_, std::string& content_) : name(name_), type(type_), format(format_), numberOfComponents(nb_comp), offset(offset_), content(content_) {
         if (format > 1) {
             const char* delchar = "_\n ";
             cut_char( content, delchar );
@@ -321,7 +331,7 @@ struct DataArray {
      */
     unsigned get_length( unsigned int offset ) {
         int i;
-    
+
         for(i=0; i < ptr_offsets->size(); ++i)
             if ((*ptr_offsets)[i] == offset)
                 break;
@@ -333,14 +343,14 @@ struct DataArray {
     }
     
     /*!
-        ATTENTION : nb_val est le nombre de valeurs à extraire. Si les données sont au format ascii, il est facultatif. Par contre il est obligatoire pour les formats binary et append. 
+        ATTENTION : nb_val est le nombre de valeurs à extraire. Si les données sont au format ascii, il est facultatif. Par contre il est obligatoire pour les formats binary et append.
     */
     template <class T>
     bool extract_content(Vec<T>& v,  unsigned nb_val=0 ) {
         std::string exdata;
         unsigned size_val = sizeTypeVtk(type); // sizeof(T);
         unsigned nb_decoded;
-        unsigned int size_encoded, delay; /// sizeof( unsigned long int ) == 4 or 8 depends on operating system and CPU. delay car sur les premiers octets il est enregistré le nombre d'octets encodés moins la taille de unsigned int qui contient cette taille. Or la taille de unsigned int du système qui a créait le fichier .vtu est inconnue... 
+        unsigned int size_encoded, delay; /// sizeof( unsigned long int ) == 4 or 8 depends on operating system and CPU. delay car sur les premiers octets il est enregistré le nombre d'octets encodés moins la taille de unsigned int qui contient cette taille. Or la taille de unsigned int du système qui a créait le fichier .vtu est inconnue...
         
         v.resize(0);
         if ( type.compare( GetVtkType<T>::res() ) ) {
@@ -350,9 +360,9 @@ struct DataArray {
             std::cerr << " error: unknow format : failure to extract datas of " << name << std::endl;
             return false;
         } else if (format == 1) { /// format ascii
-                    std::istringstream is( content );
-                    is >> v;
-                    //if ( !is ) throw IoException( "Error while reading content of : " + name );
+            std::istringstream is( content );
+            is >> v;
+            //if ( !is ) throw IoException( "Error while reading content of : " + name );
         } else if (format == 2) { /// format binaire
             nb_decoded = decode( content, 0, content.size(), exdata );
 
@@ -360,70 +370,70 @@ struct DataArray {
             memcpy((void*) &size_encoded, (const void*) (exdata.c_str()), 4 );
             /// heuristique
             delay = 4;
-//             if (size_encoded <= nb_decoded + 4 ) 
-//                 delay = 4;
-//             else 
-//                 delay = 8;
-    
+            //             if (size_encoded <= nb_decoded + 4 )
+            //                 delay = 4;
+            //             else
+            //                 delay = 8;
+
             size_encoded = size_val * nb_val + delay;
             if ((size_val) and (nb_decoded > size_encoded)) {
                 T d;
-                    /**
+                /**
                         Pourquoi delay ?
                         Les premiers octets décodés contiennent la taille en octet des données encodés. Seulement suivant le type de système d'exploitation ou CPU, cette taille peut être codée sur 4 ou 8 octets.
                         Comment savoir sur quelque système le fichier a-t-il été généré ?
                      */
-                for (int i=delay; i< size_encoded; i += size_val ) { 
+                for (int i=delay; i< size_encoded; i += size_val ) {
                     memcpy((void*) &d, (const void*) (exdata.c_str()+i), size_val );
-                        //PRINT( d ) ;
+                    //PRINT( d ) ;
                     v.push_back( d );
                 }
             }
         } else if (format == 3) { /// format "tas" ou "append"
             if ((ptr_append == NULL) or (ptr_offsets == NULL)) {
                 std::cerr << " error : ptr_append == NULL or ptr_offsets == NULL " << std::endl;
-                return false;   
+                return false;
             }
             unsigned len = get_length( offset );
             if (len == 0) {
                 std::cerr << " error : problem with the offset " << std::endl;
-                return false;         
-            }   
+                return false;
+            }
             nb_decoded = decode( *ptr_append, offset, len , exdata );
             if ( nb_decoded < 8) {
                 std::cerr << " error : problem to decode. Number of decoded bytes = " << nb_decoded << std::endl;
-                return false;              
+                return false;
             }
             /// i suppose that it's on litteleEndian
             memcpy((void*) &size_encoded, (const void*) (exdata.c_str()), 4 );
             //PRINT( size_encoded );
-            delay = 4;   
+            delay = 4;
             size_encoded = size_val * nb_val + delay;
             //PRINT( nb_decoded ); PRINT( size_encoded ); PRINT( size_val ); PRINT( nb_val );
             if ( ( size_val ) and ( nb_decoded >= size_encoded ) ) {
                 T d;
-                    /**
+                /**
                         Pourquoi delay ?
                         Les premiers octets décodés contiennent la taille en octet des données encodés. Seulement suivant le type de système d'exploitation ou CPU, cette taille peut être codée sur 4 ou 8 octets.
                         Comment savoir sur quelque système le fichier a-t-il été généré ?
                     */
-                for ( int i = delay; i < size_encoded; i += size_val ) { 
+                for ( int i = delay; i < size_encoded; i += size_val ) {
                     memcpy((void*) &d, (const void*) (exdata.c_str()+i), size_val );
                     //PRINT( d );
                     v.push_back( d );
                 }
             }
-        } else 
+        } else
             std::cerr << "error : unknow format; failure to extract datas of " << name << std::endl;
-            
+
         if (v.size() == nb_val)
             return true;
         else
             return false;
-    }    
+    }
     
     void print( std::ostream& os ) const {
-        os << " name = " << name << " type = " << type << " format = " << format << " numberOfComponents = " << numberOfComponents << " offset = " << offset << " content = ||]" << content << "[||";   
+        os << " name = " << name << " type = " << type << " format = " << format << " numberOfComponents = " << numberOfComponents << " offset = " << offset << " content = ||]" << content << "[||";
 
     }
     //static void push_back( unsigned i) { offsets.push_back( i ); }
@@ -433,7 +443,7 @@ struct DataArray {
     std::string name;
     std::string type;
     std::string content;
-    int format; /// 1 pour ascii, 2 pour binary, 3 pour appended et 0 pour un format inconnu 
+    int format; /// 1 pour ascii, 2 pour binary, 3 pour appended et 0 pour un format inconnu
     int numberOfComponents;
     unsigned int offset;
     static std::string* ptr_append;
@@ -476,17 +486,17 @@ void extract_DataArray( std::map< std::string, DataArray > & v, const XmlNode& x
         } else
             of = 0;
         s = xx.get_content();
-        if (xx.has_attribute("Name") )    
-           name = xx.get_attribute( "Name" );
+        if (xx.has_attribute("Name") )
+            name = xx.get_attribute( "Name" );
         else {
-            std::ostringstream oss("Name__"); 
+            std::ostringstream oss("Name__");
             oss << i;
             name = oss.str();
-        } 
+        }
         v[name] = DataArray( name,
-                            (xx.has_attribute("type") ) ? xx.get_attribute( "type" ) : "",  
+                             (xx.has_attribute("type") ) ? xx.get_attribute( "type" ) : "",
                              f,
-                            (xx.has_attribute("NumberOfComponents") ) ? atoi(xx.get_attribute( "NumberOfComponents" ).c_str()) : -1,
+                             (xx.has_attribute("NumberOfComponents") ) ? atoi(xx.get_attribute( "NumberOfComponents" ).c_str()) : -1,
                              of,
                              s ) ;
     }
@@ -494,18 +504,18 @@ void extract_DataArray( std::map< std::string, DataArray > & v, const XmlNode& x
 
 /*!
     Objectif:
-        Lire un fichier au format vtu pour construire un maillage "m". 
+        Lire un fichier au format vtu pour construire un maillage "m".
         
     Paramètres :
         * m est un maillage de la plate-forme. Ces champs doivent correspondre à ceux du fichier vtu. Les champs globaux, nodaux et par éléments sont gérés. ATTENTION : Les champs au points de Gauss ne sont pas validés.
         * filename est le nom du fichier.
-          
+
     Exemple de code :
     \code C/C++
         read_vtu( m, "essai_0_0.vtu" );
         
     WARNING : elle ne marche que pour les champs scalaires ou vectoriels donc pas les matrices symétriques et autres structures plus complexes.
-        
+
     \keyword Maillage/Import
     \friend raphael.pasquier@lmt.ens-cachan.fr
 */
@@ -555,8 +565,8 @@ void read_vtu(TM &m, const char* filename ) {
     //PRINT( pointdatas );
     /// extraction du contenu de CellData
     XmlNode celldata = piece.get_element("CellData");
-    extract_DataArray( celldatas, celldata ); 
-    //PRINT( celldatas );  
+    extract_DataArray( celldatas, celldata );
+    //PRINT( celldatas );
     /// extraction du contenu de Points
     XmlNode point = piece.get_element("Points");
     extract_DataArray( points, point );
@@ -583,7 +593,7 @@ void read_vtu(TM &m, const char* filename ) {
     /// extraction de AppendedData
     XmlNode xappend;
     if (xn.nb_elements("AppendedData")) {
-        xappend = xn.get_element("AppendedData"); 
+        xappend = xn.get_element("AppendedData");
         append = xappend.get_content();
         const char* delchar = "_\n ";
         cut_char( append, delchar );
@@ -646,7 +656,7 @@ void read_vtu(TM &m, const char* filename ) {
     cells["types"].extract_content( typeVtk, nb_elem );
     cells["offsets"].extract_content( offset_elemVtk, nb_elem );
     cells["connectivity"].extract_content( connectivity, offset_elemVtk.back() );
-  
+
     /// génération des éléments
     Vec<TNode*> vn;
     EA* ne;
@@ -658,68 +668,68 @@ void read_vtu(TM &m, const char* filename ) {
             vn.push_back( &(m.node_list[connectivity[j]]) );
         
         switch(typeVtk[i]) {
-            case 5 : 
-                permutation_if_jac_neg ( Triangle(), vn.ptr() );
-                ne = m.add_element( Triangle(),DefaultBehavior(),vn.ptr() );
-                m.elem_list.synchronize_dyn(&dd);
-                m.elem_list.get_data(dd, *ne) = i;
-                break;
-            case 8 : /// VTK_PIXEL 
-                permutation_if_jac_neg ( Quad(), vn.ptr() );
-                ne =  (m.add_element( Quad(),DefaultBehavior(),vn.ptr() ) );
-                m.elem_list.synchronize_dyn(&dd);
-                m.elem_list.get_data(dd, *ne) = i;
-                break;
-            case 9 : 
-                permutation_if_jac_neg ( Quad(), vn.ptr() );
-                ne = (m.add_element( Quad(),DefaultBehavior(),vn.ptr() ) );
-                m.elem_list.synchronize_dyn(&dd);
-                m.elem_list.get_data(dd, *ne) = i;
-                break;
-            case 10 : 
-                permutation_if_jac_neg ( Tetra(), vn.ptr() );
-                ne =  (m.add_element( Tetra(),DefaultBehavior(),vn.ptr() ) );
-                m.elem_list.synchronize_dyn(&dd);
-                m.elem_list.get_data(dd, *ne) = i;
-                break;
-            case 11 : /// VTK_VOXEL 
-                permutation_if_jac_neg ( Hexa(), vn.ptr() );
-                ne =  (m.add_element( Hexa(),DefaultBehavior(),vn.ptr() ) );
-                m.elem_list.synchronize_dyn(&dd);
-                m.elem_list.get_data(dd, *ne) = i;
-                break;
-            case 12 : 
-                permutation_if_jac_neg ( Hexa(), vn.ptr() );
-                ne =  (m.add_element( Hexa(),DefaultBehavior(),vn.ptr() ) );
-                m.elem_list.synchronize_dyn(&dd);
-                m.elem_list.get_data(dd, *ne) = i;
-                break;
-            case 13 : 
-                permutation_if_jac_neg ( Wedge(), vn.ptr() );
-                ne =  (m.add_element( Wedge(),DefaultBehavior(),vn.ptr() ) );
-                m.elem_list.synchronize_dyn(&dd);
-                m.elem_list.get_data(dd, *ne) = i;
-                break;
-            case 14 : 
-                //permutation_if_jac_neg ( Pyramid(), vn.ptr() );
-                ne =  (m.add_element( Pyramid(),DefaultBehavior(),vn.ptr() ) );
-                m.elem_list.synchronize_dyn(&dd);
-                m.elem_list.get_data(dd, *ne) = i;
-                break;
-            case 22 : 
-                permutation_if_jac_neg ( Triangle_6(), vn.ptr() );
-                ne =  ( m.add_element( Triangle_6(),DefaultBehavior(),vn.ptr() ) );
-                m.elem_list.synchronize_dyn(&dd);
-                m.elem_list.get_data(dd, *ne) = i;
-                break;
-            case 23 : 
-                permutation_if_jac_neg ( Quad_8(), vn.ptr() );
-                ne =  ( m.add_element( Quad_8(),DefaultBehavior(),vn.ptr() ) );
-                m.elem_list.synchronize_dyn(&dd);
-                m.elem_list.get_data(dd, *ne) = i;
-                break;
-            default : 
-                std::cerr << "warning : the element number " << typeVtk[i] << " is not implemented." << std::endl;
+        case 5 :
+            permutation_if_jac_neg ( Triangle(), vn.ptr() );
+            ne = m.add_element( Triangle(),DefaultBehavior(),vn.ptr() );
+            m.elem_list.synchronize_dyn(&dd);
+            m.elem_list.get_data(dd, *ne) = i;
+            break;
+        case 8 : /// VTK_PIXEL
+            permutation_if_jac_neg ( Quad(), vn.ptr() );
+            ne =  (m.add_element( Quad(),DefaultBehavior(),vn.ptr() ) );
+            m.elem_list.synchronize_dyn(&dd);
+            m.elem_list.get_data(dd, *ne) = i;
+            break;
+        case 9 :
+            permutation_if_jac_neg ( Quad(), vn.ptr() );
+            ne = (m.add_element( Quad(),DefaultBehavior(),vn.ptr() ) );
+            m.elem_list.synchronize_dyn(&dd);
+            m.elem_list.get_data(dd, *ne) = i;
+            break;
+        case 10 :
+            permutation_if_jac_neg ( Tetra(), vn.ptr() );
+            ne =  (m.add_element( Tetra(),DefaultBehavior(),vn.ptr() ) );
+            m.elem_list.synchronize_dyn(&dd);
+            m.elem_list.get_data(dd, *ne) = i;
+            break;
+        case 11 : /// VTK_VOXEL
+            permutation_if_jac_neg ( Hexa(), vn.ptr() );
+            ne =  (m.add_element( Hexa(),DefaultBehavior(),vn.ptr() ) );
+            m.elem_list.synchronize_dyn(&dd);
+            m.elem_list.get_data(dd, *ne) = i;
+            break;
+        case 12 :
+            permutation_if_jac_neg ( Hexa(), vn.ptr() );
+            ne =  (m.add_element( Hexa(),DefaultBehavior(),vn.ptr() ) );
+            m.elem_list.synchronize_dyn(&dd);
+            m.elem_list.get_data(dd, *ne) = i;
+            break;
+        case 13 :
+            permutation_if_jac_neg ( Wedge(), vn.ptr() );
+            ne =  (m.add_element( Wedge(),DefaultBehavior(),vn.ptr() ) );
+            m.elem_list.synchronize_dyn(&dd);
+            m.elem_list.get_data(dd, *ne) = i;
+            break;
+        case 14 :
+            //permutation_if_jac_neg ( Pyramid(), vn.ptr() );
+            ne =  (m.add_element( Pyramid(),DefaultBehavior(),vn.ptr() ) );
+            m.elem_list.synchronize_dyn(&dd);
+            m.elem_list.get_data(dd, *ne) = i;
+            break;
+        case 22 :
+            permutation_if_jac_neg ( Triangle_6(), vn.ptr() );
+            ne =  ( m.add_element( Triangle_6(),DefaultBehavior(),vn.ptr() ) );
+            m.elem_list.synchronize_dyn(&dd);
+            m.elem_list.get_data(dd, *ne) = i;
+            break;
+        case 23 :
+            permutation_if_jac_neg ( Quad_8(), vn.ptr() );
+            ne =  ( m.add_element( Quad_8(),DefaultBehavior(),vn.ptr() ) );
+            m.elem_list.synchronize_dyn(&dd);
+            m.elem_list.get_data(dd, *ne) = i;
+            break;
+        default :
+            std::cerr << "warning : the element number " << typeVtk[i] << " is not implemented." << std::endl;
         }
         begin = end;
     }
@@ -727,7 +737,7 @@ void read_vtu(TM &m, const char* filename ) {
     /// assignation des attributs des éléments du maillage
     GetListNamefieldAndCo<typename TM::TElemList::template SubType<0>::T> gnf;
     int l;
-        
+
     for ( it = celldatas.begin(); it != celldatas.end(); ++it) {
         //PRINT( it->first ); std::cout << "---------------" << std::endl;
         for( l=0;l < gnf.names.size(); ++l)

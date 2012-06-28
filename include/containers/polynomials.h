@@ -911,7 +911,7 @@ class Pol {
         return *this;
     }
 
-    operator bool() const {return true;}
+//    operator bool() const {return true;}
 
     template <class T2>
     bool operator== (const Pol<nd,nx,T2> &P) const { return coefs==P.coefficients(); }
@@ -1513,6 +1513,7 @@ template<int m, int n,class TT> struct HasTypeInformation<Pol<m,n,TT> > { static
 
 template<class UnaryOp, int m, int n,class TT> struct TypePromote<UnaryOp,Pol<m,n,TT> > { typedef Pol<m,n,typename TypePromote<UnaryOp,TT>::T> T; };
 template<int m, int n,class TT> struct TypePromote<Abs,Pol<m,n,TT> > { typedef typename TypePromote<Abs,TT>::T T; };
+template<int m, int n,class TT> struct TypePromote<AbsIndication,Pol<m,n,TT> > { typedef typename TypePromote<AbsIndication,TT>::T T; };
 
 template<int m, int n,class TT> struct SubComplex<Pol<m,n,TT> > {
     typedef Pol<m,n,TT> TP;

@@ -59,7 +59,7 @@ struct PolUnOp<Exp,nd,nx> {
         res[0]=TC(1);
         puissance[0]=TC(1);
         Vec<TC,DimPol<nd,nx>::valeur> element_somme = res;
-        for (int i=1;max(abs(element_somme))>DimPol<nd,nx>::valeur*std::numeric_limits<TC>::epsilon();i++) {
+        for (int i=1;max(abs(element_somme))>DimPol<nd,nx>::valeur*abs(std::numeric_limits<TC>::epsilon());i++) {
             factorielle *= TC(i);
             puissance = opmul(puissance,p);
             element_somme = puissance/factorielle;
@@ -78,15 +78,15 @@ struct PolUnOp<Log,nd,nx> {
         PolBinOp<Multiplies,nd,nd,nx> opmultiplies;
         PolBinOp<Divides,nd,nd,nx> opdivides;
         Vec<TC,DimPol<nd,nx>::valeur> numerateur = p;
-        numerateur[0]--;
+        numerateur[0]-=TC(1.);
         Vec<TC,DimPol<nd,nx>::valeur> denominateur = p;
-        denominateur[0]++;
+        denominateur[0]+=TC(1.);
         Vec<TC,DimPol<nd,nx>::valeur> fraction = opdivides(numerateur,denominateur);
         Vec<TC,DimPol<nd,nx>::valeur> puissance = fraction;
         Vec<TC,DimPol<nd,nx>::valeur> fraction_carre = opmultiplies(fraction,fraction);
         Vec<TC,DimPol<nd,nx>::valeur> res = puissance;
         Vec<TC,DimPol<nd,nx>::valeur> element_somme = res;
-        for (int i=1;max(abs(element_somme))>DimPol<nd,nx>::valeur*std::numeric_limits<TC>::epsilon();i++) {
+        for (int i=1;max(abs(element_somme))>DimPol<nd,nx>::valeur*abs(std::numeric_limits<TC>::epsilon());i++) {
             puissance = opmultiplies(puissance,fraction_carre);
             element_somme = puissance/TC(2*i+1);
             res+=element_somme;

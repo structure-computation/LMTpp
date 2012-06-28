@@ -60,6 +60,9 @@ struct SepMesh {
     Vec<typename TM::TNode *> created_nodes;
 };
 
+/**
+    front < 0 to cut
+*/
 template<class TM,class TL1,class TL2>
 void sep_mesh( TM &m, const TL1 &ls_crack, const TL2 &ls_front ) {
     m.update_elem_neighbours();

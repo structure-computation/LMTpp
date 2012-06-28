@@ -133,16 +133,16 @@ class MeshCarac:
             else:
                 res += ' '*sup_spaces + '        VOIDDMSET;\n'
             
-            res += '        void dm_data_set_field( const std::string field_name, Tpos value ) { assert(0); /*TODO*/ }\n'
-            res += '        void dm_data_set_field( const std::string field_name, const Vec<Tpos,1> &value ) { assert(0); /*TODO*/ }\n'
-            res += '        void dm_data_set_field( const std::string field_name, const Vec<Tpos,2> &value ) { assert(0); /*TODO*/ }\n'
-            res += '        void dm_data_set_field( const std::string field_name, const Vec<Tpos,3> &value ) { assert(0); /*TODO*/ }\n'
-            res += '        void dm_data_set_field( const std::string field_name, const Vec<Tpos,4> &value ) { assert(0); /*TODO*/ }\n'
-            res += '        void dm_data_set_field( const std::string field_name, const Vec<Tpos,5> &value ) { assert(0); /*TODO*/ }\n'
-            res += '        void dm_data_set_field( const std::string field_name, const Vec<Tpos,6> &value ) { assert(0); /*TODO*/ }\n'
+            res += '        void dm_data_set_field( const std::string field_name, Tpos value, bool disp = true ) { assert(0); /*TODO*/ }\n'
+            res += '        void dm_data_set_field( const std::string field_name, const Vec<Tpos,1> &value, bool disp = true ) { assert(0); /*TODO*/ }\n'
+            res += '        void dm_data_set_field( const std::string field_name, const Vec<Tpos,2> &value, bool disp = true ) { assert(0); /*TODO*/ }\n'
+            res += '        void dm_data_set_field( const std::string field_name, const Vec<Tpos,3> &value, bool disp = true ) { assert(0); /*TODO*/ }\n'
+            res += '        void dm_data_set_field( const std::string field_name, const Vec<Tpos,4> &value, bool disp = true ) { assert(0); /*TODO*/ }\n'
+            res += '        void dm_data_set_field( const std::string field_name, const Vec<Tpos,5> &value, bool disp = true ) { assert(0); /*TODO*/ }\n'
+            res += '        void dm_data_set_field( const std::string field_name, const Vec<Tpos,6> &value, bool disp = true ) { assert(0); /*TODO*/ }\n'
 	    for i in range(7):
-	        res += '        void dm_data_set_field( const std::string field_name, const Mat<double, LMT::Gen<'+str(i)+', '+str(i)+'>, LMT::Dense<LMT::Col> > &value) { assert(0); /*TODO*/ }\n'
-            res += '        template<class __G__> __G__ dm_data_get_field( const std::string field_name, StructForType<__G__> ) const { assert( 0 /*TODO*/ ); return __G__( 0.0 );  }\n'
+	        res += '        void dm_data_set_field( const std::string field_name, const Mat<double, LMT::Gen<'+str(i)+', '+str(i)+'>, LMT::Dense<LMT::Col> > &value, bool disp = true ) { assert(0); /*TODO*/ }\n'
+            res += '        template<class __G__> __G__ dm_data_get_field( const std::string field_name, StructForType<__G__>, bool disp = true ) const { assert( 0 /*TODO*/ ); return __G__( 0.0 );  }\n'
             res += ' '*sup_spaces + '    };\n'
             return res
         carac.nodaldata.append( self.DM( name='pos', dm_type='Pvec', unit='m' ) )
@@ -182,13 +182,13 @@ class MeshCarac:
                     else:
                         tmp += '        typedef VoidDMSet TData;\n'
                     
-                    tmp += '        void dm_data_set_field( const std::string field_name, Tpos value ) { assert(0); /*TODO*/ }\n'
-                    tmp += '        void dm_data_set_field( const std::string field_name, const Vec<Tpos,1> &value ) { assert(0); /*TODO*/ }\n'
-                    tmp += '        void dm_data_set_field( const std::string field_name, const Vec<Tpos,2> &value ) { assert(0); /*TODO*/ }\n'
-                    tmp += '        void dm_data_set_field( const std::string field_name, const Vec<Tpos,3> &value ) { assert(0); /*TODO*/ }\n'
-                    tmp += '        void dm_data_set_field( const std::string field_name, const Vec<Tpos,4> &value ) { assert(0); /*TODO*/ }\n'
-                    tmp += '        void dm_data_set_field( const std::string field_name, const Vec<Tpos,5> &value ) { assert(0); /*TODO*/ }\n'
-                    tmp += '        void dm_data_set_field( const std::string field_name, const Vec<Tpos,6> &value ) { assert(0); /*TODO*/ }\n'
+                    tmp += '        void dm_data_set_field( const std::string field_name, Tpos value, bool disp = true ) { assert(0); /*TODO*/ }\n'
+                    tmp += '        void dm_data_set_field( const std::string field_name, const Vec<Tpos,1> &value, bool disp = true ) { assert(0); /*TODO*/ }\n'
+                    tmp += '        void dm_data_set_field( const std::string field_name, const Vec<Tpos,2> &value, bool disp = true ) { assert(0); /*TODO*/ }\n'
+                    tmp += '        void dm_data_set_field( const std::string field_name, const Vec<Tpos,3> &value, bool disp = true ) { assert(0); /*TODO*/ }\n'
+                    tmp += '        void dm_data_set_field( const std::string field_name, const Vec<Tpos,4> &value, bool disp = true ) { assert(0); /*TODO*/ }\n'
+                    tmp += '        void dm_data_set_field( const std::string field_name, const Vec<Tpos,5> &value, bool disp = true ) { assert(0); /*TODO*/ }\n'
+                    tmp += '        void dm_data_set_field( const std::string field_name, const Vec<Tpos,6> &value, bool disp = true ) { assert(0); /*TODO*/ }\n'
                     tmp += '    };\n'
         res += tmp
         res += '};\n\n'

@@ -87,12 +87,12 @@ return false;
 };
 
 template<class TN,class TNG,class TD,unsigned NET>
-typename TNG::T measure( const Element<PentaPrism,TN,TNG,TD,NET> &e ) {
+typename TypePromote<Abs,typename TNG::T>::T measure( const Element<PentaPrism,TN,TNG,TD,NET> &e ) {
     typedef typename TNG::T P_T_pos;
     typename TNG::Pvec P0 = e.node(0)->pos, P1 = e.node(1)->pos, P2 = e.node(2)->pos, P3 = e.node(3)->pos;
     P_T_pos D0=0.12;
    cout << " measure Non implémentée pour le pentaprism"<< endl;assert(0);
- return D0;
+ return abs(D0);
 }
 
 };

@@ -2323,50 +2323,50 @@ def write_legacy_lmtpp_mesh_dm_data_set_field( res, bn, variable_list, sym_selec
     for n in 0 .. 7
         # dm_data_set_field
         TV := [ "Tpos", "Vec<Tpos,$n>" ][ n > 0 ]
-        res << sp <<< "    void dm_data_set_field( const std::string field_name, $TV value ) {"
+        res << sp <<< "    void dm_data_set_field( const std::string field_name, $TV value, bool disp = true ) {"
         for v in variable_list
             if sym_select( v ) and v->nb_values == n
                 data_if_mat := ".data" * ( v->expr_tensor_order == 2 )
                 res << sp <<< "        if ( field_name == \"$( v->name )\" ) { $( v->name + data_if_mat ) = value; return; }"
-        res << sp <<< "        std::cerr << \"There's no variable named \" << field_name << \" of type $TV in data struct\" << std::endl;"
+        res << sp <<< "        if ( disp == true ) { std::cerr << \"There's no variable named \" << field_name << \" of type $TV in data struct\" << std::endl; }"
         res << sp <<< "    }"
         
         # dm_data_get_field
-        res << sp <<< "    $TV dm_data_get_field( const std::string field_name, StructForType<$TV > ) const {"
+        res << sp <<< "    $TV dm_data_get_field( const std::string field_name, StructForType<$TV >, bool disp = true ) const {"
         for v in variable_list
             if sym_select( v ) and v->nb_values == n
                 data_if_mat := ".data" * ( v->expr_tensor_order == 2 )
                 res << sp <<< "        if ( field_name == \"$( v->name )\" ) { return $( v->name + data_if_mat ); }"
-        res << sp <<< "        std::cerr << \"There's no variable named \" << field_name << \" of type $TV in data struct\" << std::endl;"
+        res << sp <<< "        if ( disp == true ) { std::cerr << \"There's no variable named \" << field_name << \" of type $TV in data struct\" << std::endl; }"
         res << sp <<< "        return 0;"
         res << sp <<< "    }"
 
     # Mat<...,Sym<> >
     for n in 1 .. 4
         TV := "Mat<Tpos,Sym<$n> >"
-        res << sp <<< "    $TV dm_data_get_field( const std::string field_name, StructForType<$TV > ) const {"
+        res << sp <<< "    $TV dm_data_get_field( const std::string field_name, StructForType<$TV >, bool disp = true ) const {"
         for v in variable_list
             if sym_select( v ) and v->expr_tensor_order == 2 and v->nb_values == n * ( n + 1 ) / 2 and v->sym_property
                 res << sp <<< "        if ( field_name == \"$( v->name )\" ) { return $(v->name); }"
-        res << sp <<< "        std::cerr << \"There's no variable named \" << field_name << \" of type $TV in data struct\" << std::endl;"
+        res << sp <<< "        if ( disp == true ) { std::cerr << \"There's no variable named \" << field_name << \" of type $TV in data struct\" << std::endl; }"
         res << sp <<< "        return $TV();"
         res << sp <<< "    }"
 
     # Mat<...,Gen<> >
     for n in 1 .. 7
         TV := "Mat<Tpos,Gen<$n> >"
-        res << sp <<< "    $TV dm_data_get_field( const std::string field_name, StructForType<$TV > ) const {"
+        res << sp <<< "    $TV dm_data_get_field( const std::string field_name, StructForType<$TV >, bool disp = true ) const {"
         for v in variable_list
             if sym_select( v ) and v->expr_tensor_order == 2 and v->nb_values == n * n
                 res << sp <<< "        if ( field_name == \"$( v->name )\" ) { return $(v->name); }"
-        res << sp <<< "        std::cerr << \"There's no variable named \" << field_name << \" of type $TV in data struct\" << std::endl;"
+        res << sp <<< "        if ( disp == true ) { std::cerr << \"There's no variable named \" << field_name << \" of type $TV in data struct\" << std::endl; }"
         res << sp <<< "        return $TV();"
         res << sp <<< "    }"
-        res << sp <<< "    void dm_data_set_field( const std::string field_name, const $TV &value ) {"
+        res << sp <<< "    void dm_data_set_field( const std::string field_name, const $TV &value, bool disp = true ) {"
         for v in variable_list
             if sym_select( v ) and v->expr_tensor_order == 2 and v->nb_values == n * n
                 res << sp <<< "        if ( field_name == \"$( v->name )\" ) { $(v->name) = value; }"
-        res << sp <<< "        std::cerr << \"There's no variable named \" << field_name << \" of type $TV in data struct\" << std::endl;"
+        res << sp <<< "        if ( disp == true ) { std::cerr << \"There's no variable named \" << field_name << \" of type $TV in data struct\" << std::endl; }"
         res << sp <<< "    }"
 
 #
@@ -2666,9 +2666,12 @@ def write_legacy_lmtpp_problem_h_file( stream, pb_name, fe_set, typeList )
 #~ ~#
 def write_legacy_lmtpp_all_in_one_file( stream, pb_name, fe_set, typeList, list_sup_all_in_one, want_latin )
     stream <<<< 
+        #ifndef all_in_one_$(pb_name)_h
+        #define all_in_one_$(pb_name)_h
         #ifndef all_in_one_h
         #define all_in_one_h
         #include <formulation/formulation.h>
+        #endif
         #include "mesh_carac.h"
     for dim, fe_set_by_dim in fe_set
         for name_form, fe_set_by_dim_and_name in fe_set_by_dim

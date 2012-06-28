@@ -15,6 +15,9 @@ install_cron:
 	chmod 777 /etc/cron.daily/integration_continue_LMTpp
 # rsync -r html root@romanee:/home/web-mast/lmtpp
 
+test:
+	metil_comp -Iinclude tests/include/mesh/test_read_vtu.cpp
+
 # sur romanee
 # romanee0=romanee:/home/web-mast # cat /etc/rsync.chinon 
 # #!/bin/sh

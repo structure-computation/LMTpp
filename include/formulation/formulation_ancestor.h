@@ -18,7 +18,6 @@ struct SparseCholMod;
 template<class ScalarType=double>
 class FormulationAncestor {
 public:
-    typedef typename TypePromote<Abs,ScalarType>::T AbsScalarType;
     struct LinearizedConstraint {
         struct Coeff {
             ScalarType val;
@@ -31,13 +30,13 @@ public:
     FormulationAncestor() {
         assume_constant_matrix = false;
         default_iterative_criterium = ScalarType(0);
-        non_linear_iterative_criterium = AbsScalarType(0);
+        non_linear_iterative_criterium = ScalarType(0);
         assume_skin_not_needed = false;
         max_non_linear_iteration = 50;
         premul_KUn_in_sollicitation = ScalarType(1);
         want_amd = false;
         want_rcm = false;
-        levenberg_marquadt = AbsScalarType(0);
+        levenberg_marquadt = ScalarType(0);
         max_diag = ScalarType(0);
         pthread_mutex_init( &mutex_assemble_matrix, NULL );
         nb_threads_assemble_matrix = 1;
@@ -47,7 +46,7 @@ public:
     virtual std::string get_name() const = 0; ///
     virtual void set_mesh( void *m ) = 0; ///
 
-    virtual bool solve( AbsScalarType iterative_criterium=AbsScalarType(0), bool disp_timing=false ) = 0; ///  The all-in-one procedure -> allocate if necessary, assemble, solve, update_variables, call_after_solve
+    virtual bool solve( ScalarType iterative_criterium=ScalarType(0), bool disp_timing=false ) = 0; ///  The all-in-one procedure -> allocate if necessary, assemble, solve, update_variables, call_after_solve
     virtual bool solve_and_get_derivatives( Vec<Vec<ScalarType> > &der, bool der_in_base_node_ordering = false ) = 0;  /// get value and derivative respective to "der_var" defined in SConsruct or in python
     virtual void allocate_matrices(bool allocate_mat=true,bool allocate_vec=true) = 0; /// alloue les matrices
     /*!
@@ -62,7 +61,7 @@ public:
         assemble les matrices et le second membre suivant les valeurs des paramètres assemble_mat et assemble_vec.
     */
     virtual void assemble(bool assemble_mat=true,bool assemble_vec=true) = 0;
-    virtual bool solve_system(AbsScalarType iterative_criterium=AbsScalarType(0),bool disp_timing=false) = 0;
+    virtual bool solve_system(ScalarType iterative_criterium=ScalarType(0),bool disp_timing=false) = 0;
     virtual Vec<ScalarType> get_nodal_forces() = 0;
 
     virtual void assemble_clean_mat(bool assemble_mat=true,bool assemble_vec=true) = 0;
@@ -82,7 +81,7 @@ public:
     virtual void read_material_to_mesh(const XmlNode &) = 0;
 
     virtual void get_precond() = 0;
-    virtual void solve_system_using_precond(AbsScalarType iterative_criterium) = 0;
+    virtual void solve_system_using_precond(ScalarType iterative_criterium) = 0;
 
     virtual void get_factorization_matrix() = 0;
     virtual void solve_system_using_factorization_matrix() = 0;
@@ -196,10 +195,10 @@ public:
      * @return number of constraint (usefull in order to remove it...)
      */
     virtual unsigned add_constraint(const std::string &txt,const ScalarType &penalty_value) = 0;
-    virtual void set_initial_time_step( AbsScalarType ts ) = 0; ///
+    virtual void set_initial_time_step( ScalarType ts ) = 0; ///
     virtual ScalarType get_next_time_step() const = 0; ///
     virtual ScalarType get_time() const = 0; ///
-    virtual void set_time( AbsScalarType ts ) = 0; /// Attention, pilotage a faire soi-meme si utilisation de cette fonction....
+    virtual void set_time( ScalarType ts ) = 0; /// Attention, pilotage a faire soi-meme si utilisation de cette fonction....
     virtual void clean_mats() = 0; /// 0 in all matrices
     virtual void free_matrices() = 0;///free all matrices
     virtual unsigned nb_constraints() const = 0;
@@ -241,14 +240,14 @@ public:
 
     bool assume_constant_matrix; ///
     ScalarType default_iterative_criterium; /// iterative_criterium for conjugate gradient, GMRES, ... based on norm_inf( delta solution )
-    AbsScalarType non_linear_iterative_criterium; /// iterative_criterium for newton-raphson iterations, ... based on norm_inf( delta solution )
-    Vec<AbsScalarType> non_linear_iterative_criterium_vec; /// iterative_criterium for newton-raphson iterations, ... based on norm_inf( delta solution )
+    ScalarType non_linear_iterative_criterium; /// iterative_criterium for newton-raphson iterations, ... based on norm_inf( delta solution )
+    Vec<ScalarType> non_linear_iterative_criterium_vec; /// iterative_criterium for newton-raphson iterations, ... based on norm_inf( delta solution )
     // unsigned order_integration_when_integration_totale;
     bool assume_skin_not_needed;
     unsigned max_non_linear_iteration;
     ScalarType premul_KUn_in_sollicitation;
     bool want_amd, want_rcm;
-    AbsScalarType levenberg_marquadt; /// K += levenberg_marquadt * max( abs( K ) ) * Id; 0 by default
+    ScalarType levenberg_marquadt; /// K += levenberg_marquadt * max( abs( K ) ) * Id; 0 by default
     ScalarType max_diag;
     Vec<unsigned> id;/// indice pour les variables
     unsigned  nb_threads_assemble_matrix;
