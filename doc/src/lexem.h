@@ -61,7 +61,7 @@ inline int is_in_main_block(const Lexem *t) { while( t->prev ) t = t->prev; retu
 inline int need_larg(const Lexem *t) { return t and t->type>=0 and (t->num & 1); }
 inline int need_rarg(const Lexem *t) { return t and t->type>=0 and (t->num & 2); }
 
-void display_graph(const Lexem *t,const char *file_name="res.dot");
+void display_graph( const Lexem *t, const char *file_name="res.dot", const Lexem *avoid = 0 );
 
 /// a,b,c -> [a b c]
 template<class TL> void get_children_of_type(const Lexem *t,int type,TL &res) {
