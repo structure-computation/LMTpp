@@ -1423,7 +1423,8 @@ public:
         return false;
     }
     ///
-    bool solve_system_iterative_block(ScalarType iterative_criterium, Number<nb_nodal_unknowns>, Number<MatCarac<0>::symm>, StructForType<ScalarType>, Number<wont_add_nz>) {
+    template<int nb_n>
+    bool solve_system_iterative_block(ScalarType iterative_criterium, Number<nb_n>, Number<MatCarac<0>::symm>, StructForType<ScalarType>, Number<wont_add_nz>) {
         return false;
     }
     ///
