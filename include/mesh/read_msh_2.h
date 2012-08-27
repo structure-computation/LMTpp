@@ -191,7 +191,14 @@ void read_msh_2( TM &m,std::istream &is, unsigned nvi, const VarTag &vt ) throw 
         read_msh_2_tags_for_nvi( m, "toto.msh", Number<1>(), HeteroExplPack<toto_DM,tata_DM>() )
 
     Soit un maillage de tetra (niveau Number<0> pour rappel).
-    Supposons que soit défini pour chaque sous élément triangle, deux atttributs toto, tata (e.g. densité temperature), la fonction assigne les tags numéros 0 et 1 dans les champs toto et tata (en supposant bien sûr que gmsh à mis au moins 2 tags dans sa liste des sous éléments triangle).
+    Supposons que soit défini pour chaque sous élément triangle, deux atttributs toto, tata
+     -> on aura dans les pour chaque element elem
+        elem.toto = le tag 1
+        elem.tata = le tag 2
+      (e.g. densité temperature), la fonction assigne les tags numéros 0 et 1 dans les champs toto et tata (en supposant bien sûr que gmsh à mis au moins 2 tags dans sa liste des sous éléments triangle).
+
+     Exemple: pour lire les tags des triangle dans un maillage de triangles (Number<0> parce que ne les veux pas dans des sous éléments)
+        read_msh_2_tags_for_nvi( m, "toto.msh", Number<0>(), HeteroExplPack<toto_DM,tata_DM>() )
  */
 // put gid mesh in m
 // corresponding sub mesh must be updated. nvi is nb var inter to subs
