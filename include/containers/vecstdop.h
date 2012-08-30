@@ -1,4 +1,5 @@
 #include "../io/lineoutput.h"
+#include "veccst.h"
 
 namespace LMT {
 
