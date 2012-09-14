@@ -1404,7 +1404,7 @@ public:
             }
             else {
                 #if LDL
-                std::cout << "solveur LDL" << std::endl;
+                std::cout << "Solveur LDL" << std::endl;
                 solver.get_factorization( matrices(Number<0>()), false );
                 vectors[0] = sollicitation;
                 solver.solve( vectors[0] );
