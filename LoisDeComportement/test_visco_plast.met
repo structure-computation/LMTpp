@@ -1,0 +1,35 @@
+import "ConstLaw.met"
+
+class ElastoViscosity inherits ConstitutiveLaw
+    E      := Parameter()
+    nu     := Parameter()
+    sigmay := Parameter()
+    C      := Parameter()
+    K      := Parameter()
+    n      := Parameter()
+
+    Evp    := VariableInterne( "sigma", dim = [ 3, 3 ] )
+    p      := VariableInterne()
+
+    def elasticity( eps_tot )
+        eps   := eps_tot - Evp.val
+
+        bul   := E.val / ( 1.0 - 2.0 * nu.val )
+        g     := E.val / ( 2 * ( 1.0 + nu.val ) )
+        mu    := g / 2.0
+        lamda := ( bul - g ) / 3.0
+        
+        return lamda * trace( eps ) * identity() + 2.0 * mu * eps
+        
+    def yield_surface( sigma )
+        return von_mises( sigma ) - sigmay.val - C.val * p.val
+    
+    def evolution_law( sigma )
+        f := yield_surface( sigma )
+        return [
+            Evp.val.diff( time ) - 3 / 2 * dev( sigma ) / von_mises( sigma ) * ( f / K.val ) ^ n.val
+            p.val.diff( time ) - ( f / K.val ) ^ n.val
+        ]
+    
+e := ElastoViscosity()
+e.write_umat( File( "visco_plast_impl_umat.h", "w" ) )

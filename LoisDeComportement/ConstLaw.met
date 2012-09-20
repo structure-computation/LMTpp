@@ -1,51 +1,78 @@
 class GenericVariable
-    _dat := Vec[Op]()
+    _dat := Vec[Op]() # valeurs au début du pas de temps
+    _dau := Vec[Op]() # valeurs à la fin du pas de temps
     _dlt := Vec[Op]()
     _dim := Vec[Int32]()
     _sym := true
+    time := Op()
 
-    def _init( vec_dlt, file, name )
+    def _init( vec_dlt, file, name, _time, time_dep = false )
+        time = _time
+
+        # methode constructeur : vec_dlt, file, name sont des attributs de la methode
+
+        # vec_dlt est defini dans ConstitutiveLaw 
         name_vec := _name_vec()
 
         if _dim.size == 0
+
+            #_dim est specifie lors de la definition des parametres  ou des variables interners
+            
             file <<< "// $name_vec[ $(vec_dlt.size) ] -> $name"
             _dat.push_back( symbol( "$name_vec[$(vec_dlt.size)]", name ) )
+            if time_dep
+                _dau.push_back( symbol( "$name_vec[$(vec_dlt.size)]", name ) )
+
+            # dans le fichier file (umat) on ecrit les symboles correspondant aux parametres
+            # dans le vecteur _dat on stocke le nombre de parametres existant (push_back) en les ajoutant les uns après les autres  
+
+            #_dat = [props[0],E  props[1],nu   props[2],sigma0] 
 
             sym := symbol( "dlt_$name_vec[$(vec_dlt.size)]", "\Delta " + name )
             vec_dlt.push_back( sym )
             _dlt.push_back( sym )
 
-        if _dim.size == 1
+            # vec_dlt = [dlt_props[0],DE  dlt_props[1],nu  dlt_props[2],sigma0]
+
+        if _dim.size == 1 # (correspond a un vecteur ex: taille du vecteur name_vec = [5]  ==> dim = 1)
             for n in 0 .. _dim[ 0 ]
                 file <<< "// $name_vec[ $(vec_dlt.size) ] -> $name[ $n ]"
                 _dat.push_back( symbol( "$name_vec[$(vec_dlt.size)]", "$name_$n" ) )
+                if time_dep
+                    _dau.push_back( symbol( "$name_vec[$(vec_dlt.size)]", "$name_$n" ) )
+
+                #_dat = [statev[0],Ep_0  statev[1],Ep_1   statev[2],Ep_2 .... ]  
 
                 sym := symbol( "dlt_$name_vec[$(vec_dlt.size)]", "\Delta $name_$n" )
                 vec_dlt.push_back( sym )
-                _dlt.push_back( sym )
+                _dlt.push_back( sym ) 
 
-        if _dim.size == 2
+                #_dlt = [dlt_statev[0],DEp_0  .....]
+
+        if _dim.size == 2 # (correspond a une matrice ex : taille de la matrice name_vec = [3,3]  ==> dim = 2)
             if _sym
                 for n in [ [0,0,0], [1,1,1], [2,2,2], [0,1,3], [0,2,4], [1,2,5] ]
                     file <<< "// $name_vec[ $(vec_dlt.size) ] -> $name[ $(n[0]), $(n[1]) ]"
                     _dat.push_back( symbol( "$name_vec[$(vec_dlt.size)]", "$(name)_{$(n[0]),$(n[1])}" ) )
-
+                    if time_dep
+                        _dau.push_back( symbol( "$name_vec[$(vec_dlt.size)]", "$(name)_{$(n[0]),$(n[1])}" ) )
+                    
                     sym := symbol( "dlt_$name_vec[$(vec_dlt.size)]", "\Delta $(name)_{$(n[0]),$(n[1])}" )
                     vec_dlt.push_back( sym )
                     _dlt.push_back( sym )
 
     def get_val
         if _dim.size == 0
-            return _dat[ 0 ] + _dlt[ 0 ] * type_VariableInterne
+            return _dat[ 0 ] * ( 1 - time ) + ( _dat[ 0 ] + _dlt[ 0 ] * type_VariableInterne ) * time
 
         if _dim.size == 1
-            return _dat + _dlt * type_VariableInterne
+            return _dat * ( 1 - time ) + ( _dau  + _dlt * type_VariableInterne ) * time
 
         if _dim.size == 2
             if _sym
                 res := Mat[Op,Sym[_dim[0]]]()
                 for n in [ [0,0,0], [1,1,1], [2,2,2], [0,1,3], [0,2,4], [1,2,5] ]
-                    res[ n[ 0 ], n[ 1 ] ] = _dat[ n[ 2 ] ] + _dlt[ n[ 2 ] ] * type_VariableInterne
+                    res[ n[ 0 ], n[ 1 ] ] = _dat[ n[ 2 ] ] * ( 1 - time ) + ( _dau[ n[ 2 ] ] + _dlt[ n[ 2 ] ] * type_VariableInterne ) * time
                 return res
 
         assert( 0, "TODO" )
@@ -69,6 +96,8 @@ class GenericVariable
 class Parameter inherits GenericVariable
     property type_Parameter
 
+    #on recupere la dimension des parametres
+
     def init( dim ) when dim.tensor_order == 1
         init_using_default_values( self )
         _dim = dim
@@ -80,6 +109,7 @@ class VariableInterne inherits GenericVariable
     property type_VariableInterne
     _asf  := ""
 
+    #on recupere la dimension et le nom de la force associee (qui est un symbol) 
     def init( associated_force, dim )
         init_using_default_values( self )
         _dim = dim
@@ -96,16 +126,20 @@ class VariableInterne inherits GenericVariable
 
 class ConstitutiveLaw
     sigma := Mat[Op,Sym[3]]()
+    time  := symbol( "time", "t" )
 
     def write_umat( file )
-        vec_dlt := Vec[ Op ]()
+
+        # file sera rempli par plast_impl_umat   
+
+        vec_dlt    := Vec[ Op ]()
         properties := Vec[ Op ]()
 
         for name, val in AttributeExplorer( self )
             if val.type_Parameter
-                val._init( properties, file, name )
+                val._init( properties, file, name, time )
             if val.type_VariableInterne
-                val._init( vec_dlt   , file, name )
+                val._init( vec_dlt   , file, name, time, true )
 
         num_ij := [ 0, 3, 4  3, 1, 5  4, 5, 2 ]
         inv_num_ij := [ [0,0,0], [1,1,1], [2,2,2], [0,1,3], [0,2,4], [1,2,5] ]
@@ -120,9 +154,9 @@ class ConstitutiveLaw
         eps := eps_init + eps_upda
 
         # 
-        sigma = elasticite( eps )
+        sigma = elasticity( eps )
 
-        f := surface_seuil( sigma )
+        f := yield_surface( sigma )
 
 
         file <<<<
@@ -146,12 +180,12 @@ class ConstitutiveLaw
                 typedef double T;
 
         cw := CodeWriterAlt()
-        cw.add( "f", f.subs( vec_dlt, vec_dlt * 0 ) )
+        cw.add( "f", f.subs( vec_dlt, vec_dlt * 0 ).subs( time, 1 ) )
         for n in inv_num_ij
-            cw.add( "stress[$(n[2])]", sigma[ n[ 0 ], n[ 1 ] ].subs( vec_dlt, vec_dlt * 0 ), reassign )
+            cw.add( "stress[$(n[2])]", sigma[ n[ 0 ], n[ 1 ] ].subs( vec_dlt, vec_dlt * 0 ).subs( time, 1 ), reassign )
         for n_sig in inv_num_ij
             for n_eps in inv_num_ij
-                cw.add( "ddsdde[$( 6 * n_sig[ 2 ] + n_eps[ 2 ] )]", sigma[ n_sig[ 0 ], n_sig[ 1 ] ].diff( eps[ n_eps[ 0 ], n_eps[ 1 ] ] ).subs( vec_dlt, vec_dlt * 0 ), reassign )
+                cw.add( "ddsdde[$( 6 * n_sig[ 2 ] + n_eps[ 2 ] )]", sigma[ n_sig[ 0 ], n_sig[ 1 ] ].diff( eps[ n_eps[ 0 ], n_eps[ 1 ] ] ).subs( vec_dlt, vec_dlt * 0 ).subs( time, 1 ), reassign )
 
         file <<< cw.to_string( 4 )
         
@@ -162,17 +196,24 @@ class ConstitutiveLaw
         file <<< "    T dlt_statev[ $(vec_dlt.size) ] = { $( join( ( 0 .. vec_dlt.size ).map( x => "0" ), ", " ) ) };"
         file <<< "    while ( true ) {"
 
-        # calcul de la dissipation
-        dissipation := Op( 0 )
-        for name, variable in AttributeExplorer( self )
-            if variable.type_VariableInterne
-                dissipation += variable.dissipation( self ) 
-
-
         # mise a jour des variables internes
-        lag := symbol( "lag" )
+        ev_law := evolution_law( sigma )
+        sol := Vec[Op]()
+        if ev_law.size 
+            vec := squared_flat( ev_law ).subs( time, 1 )
+            info vec
+            sol := newton_raphson_minimize_iteration( vec, vec_dlt, vec_dlt )
+        else
+            # calcul de la dissipation
+            dissipation := Op( 0 )
+            for name, variable in AttributeExplorer( self )
+                if variable.type_VariableInterne
+                    dissipation += variable.dissipation( self ) 
+            dissipation = dissipation.subs( time, 1 )
 
-        sol := newton_raphson_minimize_iteration( dissipation + lag * f, vec_dlt +++ [ lag ], vec_dlt +++ [ 0 ] )
+            # minimization sous contrainte
+            lag := symbol( "lag" )
+            sol := newton_raphson_minimize_iteration( dissipation + lag * f.subs( time, 1 ), vec_dlt +++ [ lag ], vec_dlt +++ [ 0 ] )
 
         cl := CodeWriterAlt()
         for n in 0 .. vec_dlt.size
@@ -199,12 +240,12 @@ class ConstitutiveLaw
         file <<< "    {"
         cx := CodeWriterAlt()
         for n in inv_num_ij
-            cx.add( "stress[$(n[2])]", sigma[ n[ 0 ], n[ 1 ] ].subs( vec_dlt, vec_dlt * 0 ), reassign )
+            cx.add( "stress[$(n[2])]", sigma[ n[ 0 ], n[ 1 ] ].subs( vec_dlt, vec_dlt * 0 ).subs( time, 1 ), reassign )
         file <<< cx.to_string( 8 )
 
         for n_sig in inv_num_ij
             for n_eps in inv_num_ij
-                cx.add( "ddsdde[$( 6 * n_sig[ 2 ] + n_eps[ 2 ] )]", sigma[ n_sig[ 0 ], n_sig[ 1 ] ].diff( eps[ n_eps[ 0 ], n_eps[ 1 ] ] ).subs( vec_dlt, vec_dlt * 0 ), reassign )
+                cx.add( "ddsdde[$( 6*n_sig[ 2 ] + n_eps[ 2 ] )]", sigma[ n_sig[ 0 ], n_sig[ 1 ] ].diff( eps[ n_eps[ 0 ], n_eps[ 1 ] ] ).subs( vec_dlt, vec_dlt * 0 ).subs( time, 1 ), reassign )
 
         file <<< "    }"
 
@@ -212,6 +253,19 @@ class ConstitutiveLaw
         file <<<<
                 PRINT( f );
             }
+
+    def evolution_law( sigma ) pertinence -1
+        return []
+
+    def squared_flat( x ) when x.tensor_order <= 0
+        return x ^ 2
+
+    def squared_flat( x )
+        res := Op()
+        for v in x.values
+            res += squared_flat( v )
+        return res
+
 
     def identity
         return Mat[Op,Sym[3]]([ 1, 0, 0  0, 1, 0  0, 0, 1 ])
@@ -231,30 +285,25 @@ class ConstitutiveLaw
             return sqrt( 2 * d : d )
 
 
-class ElastoPlasticity inherits ConstitutiveLaw
-    E      := Parameter()
-    nu     := Parameter()
-    sigma0 := Parameter()
+#class ElastoPlasticity inherits ConstitutiveLaw
+    #E      := Parameter()
+    #nu     := Parameter()
+    #sigma0 := Parameter()
 
-    Ep     := VariableInterne( "sigma", dim = [ 3, 3 ] )
+    #Ep     := VariableInterne( "sigma", dim = [ 3, 3 ] )
 
-    def elasticite( eps_tot )
-        eps   := eps_tot - Ep.val
+    #def elasticity( eps_tot )
+        #eps   := eps_tot - Ep.val
 
-        bul   := E.val / ( 1.0 - 2.0 * nu.val )
-        g     := E.val / ( 1.0 + nu.val )
-        mu    := g / 2.0
-        lamda := ( bul - g ) / 3.0
+        #bul   := E.val / ( 1.0 - 2.0 * nu.val )
+        #g     := E.val / ( 2 * ( 1.0 + nu.val ) )
+        #mu    := g / 2.0
+        #lamda := ( bul - g ) / 3.0
         
-        return lamda * trace( eps ) * identity() + 2.0 * mu * eps
+        #return lamda * trace( eps ) * identity() + 2.0 * mu * eps
         
-    def surface_seuil( sigma )
-        return von_mises( sigma ) - sigma0.val
+    #def yield_surface( sigma )
+        #return von_mises( sigma ) - sigma0.val
     
-    def pseudo_potentiel( sigma )
-        f = sigma_equivalent(sigma) - sigma0.val
-        F = f
-        return F
-    
-e := ElastoPlasticity()
-e.write_umat( File( "plast_impl_umat.h", "w" ) )
+#e := ElastoPlasticity()
+#e.write_umat( File( "plast_impl_umat.h", "w" ) )
