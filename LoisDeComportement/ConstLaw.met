@@ -200,9 +200,10 @@ class ConstitutiveLaw
         ev_law := evolution_law( sigma )
         sol := Vec[Op]()
         if ev_law.size 
-            vec := squared_flat( ev_law ).subs( time, 1 )
-            info vec
-            sol := newton_raphson_minimize_iteration( vec, vec_dlt, vec_dlt )
+            sum := squared_flat( ev_law ).subs( time, 1 )
+            info sum.type
+            info vec_dlt
+            sol = newton_raphson_minimize_iteration( sum, vec_dlt, vec_dlt )
         else
             # calcul de la dissipation
             dissipation := Op( 0 )
@@ -213,7 +214,7 @@ class ConstitutiveLaw
 
             # minimization sous contrainte
             lag := symbol( "lag" )
-            sol := newton_raphson_minimize_iteration( dissipation + lag * f.subs( time, 1 ), vec_dlt +++ [ lag ], vec_dlt +++ [ 0 ] )
+            sol = newton_raphson_minimize_iteration( dissipation + lag * f.subs( time, 1 ), vec_dlt +++ [ lag ], vec_dlt +++ [ 0 ] )
 
         cl := CodeWriterAlt()
         for n in 0 .. vec_dlt.size
