@@ -3,6 +3,7 @@ import string
 from vecgenhelp import *
 
 print """
+#include "vecasm_decl.h"
 #include "matlabhelp.h"
 
 namespace LMT {
