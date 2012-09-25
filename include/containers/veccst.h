@@ -1,3 +1,4 @@
+
 #ifndef VECCST_h
 #define VECCST_h
 
@@ -65,3 +66,4 @@ template<int s,class T> Vec<VecCst<T>,s> static_cst_vec(const T &val) { return V
 
 } // namespace LMT
 #endif
+
