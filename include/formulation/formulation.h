@@ -1769,7 +1769,7 @@ private:
         solve_using_lu_factorize( precond_matrix, sollicitation, vectors[0] );
         #endif
         #else
-        std::cout << "solveur LDL dans solve_system_using_factorization_matrix" << std::endl;
+        std::cout << "Solveur LDL dans solve_system_using_factorization_matrix" << std::endl;
         solver.get_factorization( matrices(Number<0>()), false );
         vectors[0] = sollicitation;
         solver.solve( vectors[0] );
@@ -1781,7 +1781,7 @@ private:
         solve_using_chol_factorize( precond_matrix, sollicitation, vectors[0] );
         #endif
         #else
-        std::cout << "solveur LDL dans solve_system_using_factorization_matrix" << std::endl;
+        std::cout << "Solveur LDL dans solve_system_using_factorization_matrix" << std::endl;
         solver.get_factorization( matrices(Number<0>()), false );
         vectors[0] = sollicitation;
         solver.solve( vectors[0] );
