@@ -13,6 +13,9 @@ class ElastoViscosity inherits ConstitutiveLaw
 
     def elasticity( eps_tot )
         eps   := eps_tot - Evp.val
+        infon E.val
+        infon Evp.val
+        infon p.val
 
         bul   := E.val / ( 1.0 - 2.0 * nu.val )
         g     := E.val / ( 2 * ( 1.0 + nu.val ) )

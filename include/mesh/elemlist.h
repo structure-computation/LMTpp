@@ -339,7 +339,7 @@ protected:
     void free() {
         hp.free();
         for(unsigned i=0;i<dyn_data.size();++i) dyn_data[i]->free();
-        for(unsigned i=0;i<nb_hash_val;++i) has_elements_with_hash_val[i].free();
+        for(unsigned i=0;i<has_elements_with_hash_val.size();++i) has_elements_with_hash_val[i].free();
         has_elements_with_hash_val.free();
         nb_hash_val = 0;
     }
