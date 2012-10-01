@@ -1,9 +1,9 @@
 #ifndef SOLVE_LDL_H
 #define SOLVE_LDL_H
 
-#include "containers/mat.h"
+#include "../containers/mat.h"
 //extern "C" {
-#include "amd/amd.h"
+#include "../amd/amd.h"
 //}
 #include "beep.h"
 

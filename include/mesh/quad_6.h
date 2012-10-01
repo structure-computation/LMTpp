@@ -70,10 +70,10 @@ void update_edge_ratio(const Element<Quad_6,TN,TNG,TD,NET> &e,TM &m,T &edge_rati
 }
 
 template<class TN,class TNG,class TD,unsigned NET>
-typename TNG::T measure( const Element<Quad_6,TN,TNG,TD,NET> &e ) {
+typename TypePromote<Abs,typename TNG::T>::T measure( const Element<Quad_6,TN,TNG,TD,NET> &e ) {
     std::cerr << "measure pour Quad_6 n'est pas implémentée" << std::endl;
     assert(0);
-    return (typename TNG::T) -1;
+    return typename TypePromote<Abs,typename TNG::T>::T(-1.);
 }
 
 template<class TV,class T>

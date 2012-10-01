@@ -20,7 +20,7 @@ namespace Private {
         }
     };
 } // namespace Private
-    
+
 /*!
  * Opérateur générique pour la conversion de matrices. Aucune optimisation
 */
@@ -55,14 +55,14 @@ void construct_matrix( Mat<T0,Str0,SparseLine<O0>,void> &res, const Mat<T1,Str1,
 /// conversion Mat< Gen, SparseLine > en Mat< Sym, SparseLine >  plus optimisé
 template<class T0, int size, class T1 >
 void construct_matrix( Mat<T0,Gen<size>, SparseLine<>,void> &res, const Mat<T1,Sym<size>,SparseLine<>,void> &src ) {
-    
+
     if ( size < 0 )
         res.resize( src.nb_rows(), src.nb_cols() );
     //PRINT( "~~~~~~~~~~~~~ conversion Mat<T1,Sym<size>,SparseLine<>,void>" );
-    
-    int *offsets = new int[ src.nb_rows() ]; 
+
+    int *offsets = new int[ src.nb_rows() ];
     memset( offsets, 0, src.nb_rows() * sizeof( int ) );
-    
+
     for( unsigned r = 0; r < src.nb_rows(); ++r )
         for( unsigned c = 0; c < src.data[ r ].indices.size(); ++c )
             if ( src.data[ r ].indices[ c ] != r )
@@ -78,9 +78,9 @@ void construct_matrix( Mat<T0,Gen<size>, SparseLine<>,void> &res, const Mat<T1,S
             res.data[ r ].data[ c ] = src.data[ r ].data[ c ];
         }
     }
-    
+
     for( unsigned r = 0; r < src.nb_rows(); ++r )
-        for( unsigned c = 0; c < src.data[ r ].indices.size(); ++c ) 
+        for( unsigned c = 0; c < src.data[ r ].indices.size(); ++c )
             if ( src.data[ r ].indices[ c ] != r ) {
                 unsigned c2 = offsets[ src.data[ r ].indices[ c ] ];
                 unsigned r2 = src.data[ r ].indices[ c ];
@@ -127,19 +127,19 @@ void construct_matrix( Mat<T0,Str0,Sto0> &res, const Mat<MatMultMat<Mat<T0_,Gen<
 }
 
 /*!***********************  conversion des Gen * Sym *************************************
-    
+
     Le plus simple est de convertir la matrice de droite en Gen puis d'appliquer les conversions précédentes Gen * Gen
 
 */
 
 /// conversion de  Mat< Gen<>, Sto > * Mat< Sym<s,false>, Sto >
 template<class T0,class Str0,class Sto0,class TA,class TB, class StoA, class StoB,int s_r1_, int s_c1_,int sB, class Str2,class Sto2>
-void construct_matrix( Mat<T0,Str0,Sto0> &res, 
+void construct_matrix( Mat<T0,Str0,Sto0> &res,
                        const Mat< MatMultMat< Mat<TA,Gen<s_r1_,s_c1_>,StoA,void >, Mat<TB,Sym<sB,false>,StoB,void > >,Str2,Sto2> &src ) {
     typedef typename TypePromote<Multiplies,TA,TB>::T T;
     const Mat<TA,Gen<s_r1_,s_c1_>,StoA,void> &A = src.m1;
     Mat<TB,Gen<sB,sB>,StoB,void> B( src.m2 );
-    PRINT( "conversion de Mat< Gen<r,c>, Sto > * Mat< Sym<s,false>, Sto > " );
+    //PRINT( "conversion de Mat< Gen<r,c>, Sto > * Mat< Sym<s,false>, Sto > " );
     construct_matrix( res, A * B );
 }
 
@@ -158,7 +158,7 @@ void construct_matrix( Mat<T0,Str0,Sto0> &res, const Mat< MatMultMat< Mat<T0_,Sy
         tmp.set( 0 );
         for( unsigned ca = 0; ca <= ra; ca++ )
             tmp += A( ra, ca ) * B.row( ca );
-        for( unsigned ca = ra + 1; ca < A.nb_cols(); ca++ ) 
+        for( unsigned ca = ra + 1; ca < A.nb_cols(); ca++ )
             tmp += A( ca, ra ) * B.row( ca );
         res.row( ra ) = tmp;
     }
@@ -166,12 +166,12 @@ void construct_matrix( Mat<T0,Str0,Sto0> &res, const Mat< MatMultMat< Mat<T0_,Sy
 
 /// conversion de Mat< Sym<s,false>, Dense<Col> > * Mat< Gen, SparseLine<Col> >
 template<class T0,class Str0,class Sto0,class T0_,int s0_,class T1_,int s_r1_,int s_c1_, class Str2,class Sto2>
-void construct_matrix( Mat<T0,Str0,Sto0> &res, 
+void construct_matrix( Mat<T0,Str0,Sto0> &res,
                        const Mat< MatMultMat< Mat<T0_,Sym<s0_,false>,Dense<Col>,void >, Mat<T1_,Gen<s_r1_,s_c1_>,SparseLine<Col>,void> >, Str2,Sto2> &src ) {
     typedef typename TypePromote<Multiplies,T0_,T1_>::T T;
     const Mat< T0_,Sym<s0_,false>,Dense<Col>,void >   &A = src.m1;
     const Mat< T1_,Gen<s_r1_,s_c1_>,SparseLine<Col>,void > &B = src.m2;
-    
+
     res.resize( A.nb_rows(), B.nb_cols() );
     Vec<T> tmp; tmp.resize( B.nb_cols() );
     //PRINT( "Mat< Sym<s,false>, Dense<Col> > * Mat< Gen, SparseLine<Col> >" );
@@ -192,7 +192,7 @@ void construct_matrix( Mat<T0,Str0,Sto0> &res,
 /// ou
 /// conversion de Mat< Sym, SparseLine<Col> > * Mat< Gen, SparseLine<Col> >
 template<class T0,class Str0,class Sto0,class T0_,int s0_,class T1_,int s_r1_,int s_c1_, class Sto1, class Str2,class Sto2>
-void construct_matrix( Mat<T0,Str0,Sto0> &res, 
+void construct_matrix( Mat<T0,Str0,Sto0> &res,
                        const Mat< MatMultMat< Mat<T0_,Sym<s0_,false>,SparseLine<Col>,void >, Mat<T1_,Gen<s_r1_,s_c1_>,Sto1,void> >, Str2,Sto2> &src ) {
     typedef typename TypePromote<Multiplies,T0_,T1_>::T T;
     const Mat< T0_,Sym<s0_,false>,SparseLine<Col>,void >   &A = src.m1;
@@ -218,7 +218,7 @@ void construct_matrix( Mat<T0,Str0,Sto0> &res,
     }
 }
 
-/*!***********************  conversion des Sym * Sym ************************************* 
+/*!***********************  conversion des Sym * Sym *************************************
 
     Le plus simple est de convertir la matrice de droite en Gen puis d'appliquer les conversions précédentes Sym * Gen
 
@@ -226,7 +226,7 @@ void construct_matrix( Mat<T0,Str0,Sto0> &res,
 
 /// conversion de  Mat< Sym< Sym<s,false>, Sto > * Mat< Sym<s,false>, Sto >
 template<class T0,class Str0,class Sto0,class TA,class TB, class StoA, class StoB,int sA,int sB, class Str2,class Sto2>
-void construct_matrix( Mat<T0,Str0,Sto0> &res, 
+void construct_matrix( Mat<T0,Str0,Sto0> &res,
                        const Mat< MatMultMat< Mat<TA,Sym<sA,false>,StoA,void >, Mat<TB,Sym<sB,false>,StoB,void > >,Str2,Sto2> &src ) {
     typedef typename TypePromote<Multiplies,TA,TB>::T T;
     const Mat<TA,Sym<sA,false>,StoA,void> &A = src.m1;
@@ -238,7 +238,7 @@ void construct_matrix( Mat<T0,Str0,Sto0> &res,
 /*!
     Objectif :
         Cette classe sert à calculer le type de structure du produit de deux matrices.
-        
+
     Les structures possibles d'une matrice sont :
         Gen<sr, sc>
         Sym<sr, is_upper>
@@ -317,7 +317,7 @@ struct MulStruMat< Sym<sr_A,sc_A>, Sym<sc_A,sc_B> > {
 /*!
     Objectif :
         Cette classe sert à calculer le type de stockage du produit de deux matrices.
-        
+
     Les stockages possibles d'une matrice sont :
         Dense<Ori>
         SparseLine<Ori>
@@ -326,9 +326,9 @@ struct MulStruMat< Sym<sr_A,sc_A>, Sym<sc_A,sc_B> > {
         SparseUMFPACK
         SparseCholdMod
         SkyLine<Ori>
-        
+
     où Ori est soit Col soit Row.
-    
+
     On traitera les principaux cas.
 */
 template<class Stru_A, class Stru_B >
@@ -355,10 +355,10 @@ struct MulStoMat< SparseLine<Ori_A>, SparseLine<Ori_B> > {
 /// conversion de A * B * C
 template<class T0,class Str0,class Sto0,class M0, class M1,  class Str1,class Sto1, class M2, class Str2,class Sto2>
 void construct_matrix( Mat<T0,Str0,Sto0> &res, const Mat< MatMultMat< Mat< MatMultMat< M0, M1 >,Str1,Sto1 >, M2 >, Str2, Sto2 > &src ) {
-    //construct_matrix( res, Mat<T0, Str0, Sto0 >( src.m1 ) * src.m2 ); 
-    construct_matrix( res, Mat<T0, 
-                               typename MulStruMat< typename M0::Structure, typename M1::Structure >::T, 
-                               typename MulStoMat< typename M0::Storage, typename M1::Storage >::T >( src.m1 ) * src.m2 ); 
+    //construct_matrix( res, Mat<T0, Str0, Sto0 >( src.m1 ) * src.m2 );
+    construct_matrix( res, Mat<T0,
+                               typename MulStruMat< typename M0::Structure, typename M1::Structure >::T,
+                               typename MulStoMat< typename M0::Storage, typename M1::Storage >::T >( src.m1 ) * src.m2 );
 }
 
 }

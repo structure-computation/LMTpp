@@ -30,8 +30,8 @@ namespace LMTPRIVATE {
     If it's the case, use measure( m, Number<nvi>() )
 */
 template<class TM>
-typename TM::Tpos measure(const TM &m) {
-    typename TM::Tpos res = 0.0;
+typename TypePromote<Abs,typename TM::Tpos>::T measure(const TM &m) {
+    typename TypePromote<Abs,typename TM::Tpos>::T res = 0.0;
     apply( m.elem_list, LMTPRIVATE::GetMeasure(), res );
     return res;
 }
@@ -42,8 +42,8 @@ typename TM::Tpos measure(const TM &m) {
     If it's the case, use measure( m, Number<nvi>() )
 */
 template<class TM,unsigned n>
-typename TM::Tpos measure(const TM &m,const Number<n> &nn) {
-    typename TM::Tpos res = 0.0;
+typename TypePromote<Abs,typename TM::Tpos>::T measure(const TM &m,const Number<n> &nn) {
+    typename TypePromote<Abs,typename TM::Tpos>::T res = 0.0;
     apply( m.elem_list, LMTPRIVATE::GetMeasure(), res, nn );
     return res;
 }

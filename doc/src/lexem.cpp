@@ -159,7 +159,10 @@ const Lexem *rightmost_child(const Lexem *t) {
 }
 
 
-void display_graph_rec( std::ostream &os, const Lexem *t, unsigned level, unsigned &max_level ) {
+void display_graph_rec( std::ostream &os, const Lexem *t, unsigned level, unsigned &max_level, const Lexem *avoid ) {
+    if ( t == avoid )
+        return;
+
     unsigned j;
     max_level = std::max( max_level, level );
     const Lexem *old_t = t;
@@ -197,11 +200,11 @@ void display_graph_rec( std::ostream &os, const Lexem *t, unsigned level, unsign
     }
 }
 
-void display_graph(const Lexem *t,const char *file_name) {
+void display_graph( const Lexem *t, const char *file_name, const Lexem *avoid ) {
     std::ofstream f(file_name);
     f << "digraph popoterie {";
     unsigned max_level = 1;
-    display_graph_rec( f, t, 1, max_level );
+    display_graph_rec( f, t, 1, max_level, avoid );
 
     for(unsigned i=1;i<=max_level;++i)
         f << "  " << i << " [ shape=plaintext ];\n  ";

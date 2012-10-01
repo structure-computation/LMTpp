@@ -240,14 +240,14 @@ template<class MATOP> struct IsMatOp { typedef void T; };
 
     = Divers
 
-        * Le produit de deux matrices A et b, A * B, peut être lent, voire très lent. Cela est dû à une mauvaise disposition des éléments de la matrice B qui sont rangées en lignes alors qu'une disposition en colonne est préférable. Comme à cette heure, on ne peut convertir une matrice stocké en lignes en une matrice stockée en colonne mais qu'il est possible de faire la conversion inverse ( colonne en ligne) et que la fonction transpose transforme une matrice lignes en une matrice colonnes, on contourne le problème en écrivant  A * B = A * trans( TM( trans( B ) ) ) où TM est le type de votre matrice ligne.
+        * Le produit de deux matrices A et B, A * B, peut être lent, voire très lent. Cela est dû à une mauvaise disposition des éléments de la matrice B qui sont rangées en lignes alors qu'une disposition en colonne est préférable. Comme à cette heure, on ne peut convertir une matrice stocké en lignes en une matrice stockée en colonne mais qu'il est possible de faire la conversion inverse ( colonne en ligne) et que la fonction transpose transforme une matrice lignes en une matrice colonnes, on contourne le problème en écrivant  A * B = A * trans( TM( trans( B ) ) ) où TM est le type de votre matrice ligne.
         Un exemple :
         \code C/C++
-           typedef Mat< double, SparseLine<>> TM;
+           typedef Mat< double, SparseLine<> > TM;
            
            TM A, B, RES;
            
-           RES = A * trans( TM( trans( b ) ) ) 
+           RES = A * trans( TM( trans( B ) ) ) 
            
         * Le produit de deux matrices est représenté par un type qui n'est pas une matrice mais une classe qui peut calculer un terme quelconque du produit (A * B)_i_j. C'est très performant pour ensuite faire des produits matrice fois vecteur, ça ne l'est pas si on souhaite faire que des produits de matrices. Il faut alors dans ce cas, faire une conversion explicite en vrai matrice comme par exemple :
         \code C/C++

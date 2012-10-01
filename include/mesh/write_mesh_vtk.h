@@ -1,3 +1,4 @@
+//
 // C++ Interface: write_mesh_vtk
 //
 // Description:
@@ -635,6 +636,12 @@ void write_mesh_vtk(std::ostream &os,const TM &m,const Vec<std::string> &display
 
 }
 
+template<class TM>
+void write_mesh_vtk( std::string file,const TM &m,const Vec<std::string> &display_fields=Vec<std::string>("all")) {
+    std::ofstream os( file.c_str() );
+    write_mesh_vtk<true>( os, m, display_fields );
+}
+
 template<bool binary,class TM>
 void write_mesh_vtk_v2(std::ostream &os,const TM &m,const Vec<std::string> &display_fields=Vec<std::string>("all")) {
     using namespace std;
@@ -689,10 +696,10 @@ void write_mesh_vtk_v2(std::ostream &os,const TM &m,const Vec<std::string> &disp
         for(typename Data_vtk_extract_elem<binary>::Map::const_iterator iter=dve.mapd.begin();iter!=dve.mapd.end();++iter) {
             if ( std::find(display_fields.begin(),display_fields.end(),iter->first)!=display_fields.end() or (display_fields.size()>=1 and display_fields[0]=="all")) {
                 nb_field+=1;
-                cout << iter->first << endl;
+                std::cout << iter->first << endl;
             }
         }
-        cout << nb_field << endl;
+        std::cout << nb_field << endl;
         os << "FIELD FieldData " << nb_field <<endl;
         //2ere passe
         for(typename Data_vtk_extract_elem<binary>::Map::const_iterator iter=dve.mapd.begin();iter!=dve.mapd.end();++iter) {

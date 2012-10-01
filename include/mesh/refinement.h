@@ -373,7 +373,7 @@ namespace LMTPRIVATE {
     C'est-à-dire qu'il est au moins de la forme :
     \code C/C++
         struct MyOp {
-            template<class TE
+            template<class TE>
             RET operator()( TE &e ) const { // e un 1 var_inter (Bar, ...)
                   /// votre code 
             }

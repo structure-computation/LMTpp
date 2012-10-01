@@ -1,6 +1,8 @@
 #ifndef EIGEN_H
 #define EIGEN_H
 
+#include "vec.h"
+
 namespace LMT {
 
 //#include <containers/vec.h>
@@ -33,7 +35,7 @@ namespace LMT {
             Vec <Vec<T,2>,2>  eigenvectors;
 
             get_eigen_values_and_vectors (vec, eigenvalues, eigenvectors);
-            PRINT(eigenvalues);
+            PRINT( eigenvalues );
             PRINT( eigenvectors[0]);
             PRINT( eigenvectors[1]);
             

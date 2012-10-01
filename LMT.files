@@ -658,5 +658,7 @@ tests/include/containers/conjugate_gradient_test.cpp
 tests/include/containers/polynomials_test.cpp
 tests/include/mesh/compilations/pyramid_test.cpp
 tests/include/mesh/pyramid_test.cpp
+tests/include/mesh/test_read_vtu.cpp
 include/mesh/MeshCoulour.h
 include/mesh/make_sub_mesh.h
+include/containers/vecasm_decl.h

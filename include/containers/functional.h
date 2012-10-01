@@ -180,7 +180,7 @@ struct Function<ALGOAssignExt,Op,TB,AssOp,void> {
     template<class P1,class P2> void operator()(const P1 &p1,const P2 &p2) const { assop.op(t, op(p1,p2)); }
     template<class P1,class P2,class P3> void operator()(const P1 &p1,const P2 &p2,const P3 &p3) const { assop.op(t, op(p1,p2,p3)); }
     
-    mutable TB &t;
+    TB &t; // #pragma cpp_flag -fpermissive
     Op op;
     AssOp assop;
 };

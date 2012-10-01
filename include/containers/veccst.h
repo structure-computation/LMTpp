@@ -1,4 +1,7 @@
 
+#ifndef VECCST_h
+#define VECCST_h
+
 namespace LMT {
 template<class T=int> struct VecCst {};
 
@@ -62,4 +65,5 @@ Crée un vecteur constant de taille s à la compilaion
 template<int s,class T> Vec<VecCst<T>,s> static_cst_vec(const T &val) { return Vec<VecCst<T>,s>(val); }
 
 } // namespace LMT
+#endif
 

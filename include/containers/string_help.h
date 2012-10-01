@@ -11,13 +11,19 @@
 //
 #ifndef LMT_string_help_HEADER
 #define LMT_string_help_HEADER
+#include <sstream>
 
 namespace LMT {
 
 template<class T>
-std::string to_string( const T &val, int precision ) {
+std::string to_string( const T &val, int precision, int width = 0, char fill = '0' ) {
     std::ostringstream os;
-    os.precision( precision );
+    if ( precision )
+        os.precision( precision );
+    if ( width ) {
+        os.width( width );
+        os.fill( fill );
+    }
     os << val;
     return os.str();
 }

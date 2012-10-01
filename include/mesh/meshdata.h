@@ -71,11 +71,11 @@ Cette macro permet l'introspection du code C++ pour obtenir par exemple les attr
 /// struct Foo : public VoidDMSet {}; create a DMset with 0 fields
 struct VoidDMSet {
     VOIDDMSET;
-    template<class TT> void dm_data_set_field( const std::string field_name, TT value ) {
-        std::cerr << "There is no variable named " << field_name << " in data struct" << std::endl;
+    template<class TT> void dm_data_set_field( const std::string field_name, TT value, bool disp = true ) {
+        if ( disp ) { std::cerr << "There is no variable named " << field_name << " in data struct" << std::endl; }
     }
-    template<class TT> TT dm_data_get_field( const std::string field_name, StructForType<TT> ) const {
-        std::cerr << "There is no variable named " << field_name << " in data struct" << std::endl;
+    template<class TT> TT dm_data_get_field( const std::string field_name, StructForType<TT>, bool disp = true ) const {
+        if ( disp ) { std::cerr << "There is no variable named " << field_name << " in data struct" << std::endl; }
         return TT();
     }
 };

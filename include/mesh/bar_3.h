@@ -64,8 +64,8 @@ typename TNG::Pvec sample_normal(const Element<Bar_3,TN,TNG,TD,NET> &e) {
 
 /* TODO : exact computation */
 template<class TN,class TNG,class TD,unsigned NET>
-typename TNG::T measure( const Element<Bar_3,TN,TNG,TD,NET> &e ) {
-    return length( e.node(1)->pos - e.node(0)->pos );
+typename TypePromote<Abs,typename TNG::T>::T measure( const Element<Bar_3,TN,TNG,TD,NET> &e ) {
+    return abs( length( e.node(1)->pos - e.node(0)->pos ) );
 }
 
 inline unsigned vtk_num( StructForType<Bar_3> ) { return 21; }

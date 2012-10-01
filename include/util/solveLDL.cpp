@@ -1,6 +1,6 @@
 #include "solveLDL.h"
-#include "containers/simd.h"
-#include "LDL/ldl.h"
+#include "../containers/simd.h"
+#include "../LDL/ldl.h"
 
 #ifdef METIL_COMP_DIRECTIVE
 #pragma src_file solveLDL_semimorse.cpp

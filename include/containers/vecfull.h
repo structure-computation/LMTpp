@@ -1,4 +1,5 @@
 
+#include "vecasm_decl.h"
 #include "matlabhelp.h"
 
 namespace LMT {

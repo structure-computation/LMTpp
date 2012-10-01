@@ -1,6 +1,3 @@
-#ifndef WRITE_AVS_H
-#define WRITE_AVS_H
-
 //
 // C++ Interface: write_avs
 //
@@ -12,13 +9,17 @@
 // Copyright: See COPYING file that comes with this distribution
 //
 //
+#ifndef WRITE_AVS_H
+#define WRITE_AVS_H
+
 //#include<cstdlib>
-#include<fstream>
+#include <fstream>
 #include <iostream>
 #include <exception>
-#include<cstdlib>
+#include <cstdlib>
 
 #include <containers/vec.h>
+#include "write_mesh_vtk.h"
 
 namespace LMT {
 

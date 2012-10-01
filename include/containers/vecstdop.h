@@ -1,4 +1,5 @@
 #include "../io/lineoutput.h"
+#include "veccst.h"
 
 namespace LMT {
 
@@ -274,7 +275,7 @@ inline unsigned index_of_min( const TV &c, const Op &op ) {
     return index;
 }
 
-/** index_of_max
+/** index_of_min
  \relates Vec
   \keyword Vecteur
  */
@@ -365,7 +366,7 @@ inline typename FloatType<typename TypeReduction<Multiplies,Vec<T,s> >::T>::T di
 
 /*!    
     \latex 
-        $ \sqrt{ \sum_i c_i^2 } $
+        $ \sum_i c_i^2 $
     \relates Vec
   \keyword Vecteur
  */
@@ -617,4 +618,6 @@ Vec<typename Vec<T1,s>::template SubType<0>::T,s> getCenterOfInSphere(const Vec<
     return P0 + C01 * P01 + C02 * P02 + C03 * P03;
 }
 
+
 }
+

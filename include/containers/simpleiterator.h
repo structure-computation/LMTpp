@@ -36,6 +36,11 @@ private:
     template<class T2> friend class SimpleConstIterator;
 };
 
+/**
+   for( SimpleConstIterator<...> iter = ...; iter; iter++ ) {
+      ... *iter
+   }
+*/
 template<class T>
 class SimpleConstIterator {
 public:

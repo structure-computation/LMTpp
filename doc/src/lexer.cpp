@@ -53,6 +53,7 @@ Lexer::Lexer( const char *txt, const char *provenance_, ErrorList *error_list_ )
 Lexer::~Lexer() {
 }
 
+
 Lexem *Lexer::app_tok( int type, const char *s, unsigned si, int num ) {
     Lexem *t = tokens.new_elem();
     t->type = type;
