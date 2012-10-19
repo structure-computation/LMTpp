@@ -346,7 +346,6 @@ def trace( sigma ):
     tr = 0
     d = (sigma.size()+1)/2
     for i in range(d): tr += sigma[i]
-    tr /= d
     return tr
 
 def dev( sigma ):
@@ -355,6 +354,10 @@ def dev( sigma ):
     for i in range(d):
         res[i] = sigma[i]
     tr = trace(res)
+    if d == 3:
+        tr /= 2
+    else:
+        tr /= 3
     for i in range((d+1)/2): res[i] -= tr
     return res
 
