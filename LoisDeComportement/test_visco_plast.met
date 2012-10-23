@@ -36,3 +36,4 @@ class ElastoViscosity inherits ConstitutiveLaw
     
 e := ElastoViscosity()
 e.write_umat( File( "visco_plast_impl_umat.h", "w" ) )
+system( "g++ -shared -I../include -o visco_plast_impl_umat.so visco_plast_impl_umat.h" ) 
