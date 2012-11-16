@@ -338,22 +338,6 @@ template<class TV> TV pow_vec_col_with_sqr(const TV &V, const unsigned &p)
     return mat_sym_to_vec_col_with_sqr(pow_mat_sym(vec_col_with_sqr_to_mat_sym(V), p));
 }
 
-/// tens_prod_vec_col
-template<class TV> LMT::Mat<typename LMT::TypeReduction<LMT::Multiplies, TV>::T> tens_prod_vec_col(const TV &V1, const TV &V2) // pour le type on a pas de typename TV::T car les vecteurs peuvent être hétérogènes
-{
-    static const unsigned dim = V1.size();
-
-    LMT::Mat<typename LMT::TypeReduction<LMT::Multiplies, TV>::T> res(dim);
-    for(unsigned i=0; i<dim; ++i)
-    {
-        for (unsigned j=0; j<dim; ++j)
-        {
-            res(i, j) = V1[i] * V2[j];
-        }
-    }
-    return res;
-}
-
 /// tens_prod_vec_col_with_sqr
 template<class TV> LMT::Mat<typename LMT::TypeReduction<LMT::Multiplies, TV>::T> tens_prod_vec_col_with_sqr(const TV &V1, const TV &V2) // pour le type on a pas de typename TV::T car les vecteurs peuvent être hétérogènes
 {
@@ -370,16 +354,22 @@ template<class TV> LMT::Mat<typename LMT::TypeReduction<LMT::Multiplies, TV>::T>
     return res;
 }
 
-/// self_tens_prod_vec_col
-template<class TV> LMT::Mat<typename LMT::TypeReduction<LMT::Multiplies, TV>::T> self_tens_prod_vec_col(const TV &V) // pour le type on a pas de typename TV::T car les vecteurs peuvent être hétérogènes
-{
-    return tens_prod_vec_col(V, V);
-}
-
 /// self_tens_prod_vec_col_with_sqr
 template<class TV> LMT::Mat<typename LMT::TypeReduction<LMT::Multiplies, TV>::T> self_tens_prod_vec_col_with_sqr(const TV &V) // pour le type on a pas de typename TV::T car les vecteurs peuvent être hétérogènes
 {
     return tens_prod_vec_col_with_sqr(V, V);
+}
+
+/// tens_prod_vec_col
+template<class TV> LMT::Mat<typename LMT::TypeReduction<LMT::Multiplies, TV>::T> tens_prod_vec_col(const TV &V1, const TV &V2) // pour le type on a pas de typename TV::T car les vecteurs peuvent être hétérogènes
+{
+    return tens_prod_vec_col_with_sqr(vec_col_to_vec_col_with_sqr(V1), vec_col_to_vec_col_with_sqr(V2));
+}
+
+/// self_tens_prod_vec_col
+template<class TV> LMT::Mat<typename LMT::TypeReduction<LMT::Multiplies, TV>::T> self_tens_prod_vec_col(const TV &V) // pour le type on a pas de typename TV::T car les vecteurs peuvent être hétérogènes
+{
+    return tens_prod_vec_col(V, V);
 }
 
 ///
