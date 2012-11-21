@@ -354,9 +354,9 @@ def dev( sigma ):
     for i in range(d):
         res[i] = sigma[i]
     tr = trace(res)
-    if d == 3:
+    if d == 3: # 2D
         tr /= 2
-    else:
+    else: # 3D
         tr /= 3
     for i in range((d+1)/2): res[i] -= tr
     return res
