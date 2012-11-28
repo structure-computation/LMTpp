@@ -46,7 +46,7 @@ template<class MATOP> struct IsMatOp { typedef void T; };
             = Matrice creuse
                 Les classes qui servent à préciser les types de stockage creux sont \a Sparse , \a SparseCholMod , \a SparseLU , \a SparseLine , \a SparseUMFPACK . Le format \a SparseLU qui sert pour la décomposition LU est traité à la dernière section.
                 A FINIR
-            = Matrice à symétrique
+            = Matrice symétrique
                 Les matrices symétriques se définissent en spécialisant le type \a Mat de base. On a les possibilités \a Sym , \a AntiSym , \a Herm . Pour des détails et des exemples, allez à la FAQ \a #1
             = Matrice spéciale pour la décomposition LU
                 Pour la décomposition LU, il y a un format de stockage particulier spécialisé par la classe \a SparseLU . Pour un tutorial, allez à \a decompositiond'unematrice  et la FAQ \a #17 , \a #18
@@ -577,6 +577,11 @@ void display_structure(const Mat<T,Str,Sto,IO> &mat,const char *name_file="res")
 template <class T, class STR, class STO, class IO>
 Mat<T,Sym<>,STO,IO> sym (const Mat<T,STR,STO,IO> &M) {
     return T(0.5)*(M+trans(M));
+}
+
+template <class T, class STR, class STO, class IO>
+Mat<T,Sym<>,STO,IO> antisym (const Mat<T,STR,STO,IO> &M) {
+    return T(0.5)*(M-trans(M));
 }
 
 template <class T, int s, bool b, class STO, class IO>
