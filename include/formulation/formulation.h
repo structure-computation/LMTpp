@@ -1479,6 +1479,8 @@ public:
 
             if ( not old_vec.size() )
                 old_vec = 0 * vectors[ 0 ];
+            
+            PRINT( norm_inf( old_vec - vectors[0] ) );
 
             if ( boolean_(this->non_linear_iterative_criterium) and norm_inf( old_vec - vectors[0] ) <= abs( this->non_linear_iterative_criterium ) )
                 break;
@@ -1499,9 +1501,6 @@ public:
                 if ( converged )
                     break;
             }
-            PRINT( norm_inf( old_vec ) );
-            PRINT( norm_inf( vectors[ 0 ] ) );
-            PRINT( norm_inf( old_vec - vectors[0] ) );
 
             if ( nb_iterations++ >= this->max_non_linear_iteration )
                 throw SolveException();
