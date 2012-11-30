@@ -48,7 +48,7 @@ public:
 
         r = mat.nb_rows();
         Numeric = NULL;
-        
+
         Ax.reserve( r ); Ap.resize( r+1 );
         Ap[0] = 0;
         for(unsigned i=0;i<mat.nb_rows();++i) {
@@ -98,7 +98,7 @@ public:
         r = mat.r;
         Numeric = NULL; // mat.Numeric;
     }
-    
+
     /// creation of a matrix from a matrix
     Mat(const Mat &mat) {
         Ap = mat.Ap;
@@ -107,7 +107,7 @@ public:
         r = mat.r;
         Numeric = NULL; // mat.Numeric;
     }
-    
+
     /// creation of a matrix from a matrix
     void operator=(const Mat &mat) {
         Ap = mat.Ap;
@@ -116,15 +116,15 @@ public:
         r = mat.r;
         Numeric = NULL; // mat.Numeric;
     }
-    
+
     /// indices must be ordered and lower part...
     void allocate( const Vec<Vec<unsigned> > &indices ) {
         r = indices.size();
-        
+
         unsigned nz = 0;
         for(unsigned i=0;i<indices.size();++i)
             nz += indices[i].size();
-        
+
         Ap.resize( indices.size()+1 );
         Ai.resize( nz );
         Ax.resize( nz, 0.0 );
@@ -141,8 +141,8 @@ public:
         Numeric = NULL;
         allocate( indices );
     }
-    
-    /// 
+
+    ///
     void resize( const unsigned &size ) {
         // modifie la taille d'une matrice vide
         Ap.resize( size+1, 0 );
@@ -160,7 +160,7 @@ public:
     void clear() { Ax.set( 0.0 ); }
 
 	void free() { clear(); }
-	
+
     ///
     #ifdef WITH_UMFPACK
     bool get_factorization() {
@@ -174,7 +174,7 @@ public:
         umfpack_di_free_symbolic(&Symbolic);
         return true;
     }
-    
+
     /// elle libère la mémoire.
     bool free_factorization() {
         if ( Numeric ){
@@ -189,10 +189,10 @@ public:
             return LMT::Vec<double>();
         LMT::Vec<double> res;
         res.resize( vec.size() );
-        if (!Numeric) 
+        if (!Numeric)
             get_factorization();
         umfpack_di_solve(UMFPACK_At, Ap.ptr(), Ai.ptr(), Ax.ptr(), res.ptr(), vec.ptr(), Numeric, NULL, NULL);
-        
+
         return res;
     }
     void print() {
@@ -311,7 +311,7 @@ template<class T> LMT::Vec<T> mul(const Mat<double,Gen<>,SparseUMFPACK> &m,const
         for(int j=m.Ap[line];j<m.Ap[line+1];++j)
             res[ line ] += m.Ax[j] * v[ m.Ai[j] ];
     }
-    
+
     return res;
 }
 
