@@ -157,8 +157,9 @@ public:
         return cholmod_factorize ( A, L, &c );
     }
     /// ...
-    LMT::Vec<double> solve( const LMT::Vec<double> &vec ) {
-        get_factorization();
+    LMT::Vec<double> solve( const LMT::Vec<double> &vec, bool need_factorization = true ) {
+        if ( need_factorization )
+            get_factorization();
 
         // allocate
         cholmod_dense * b = cholmod_allocate_dense (

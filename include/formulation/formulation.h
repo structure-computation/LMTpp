@@ -455,15 +455,15 @@ private:
                 assert( nb_global_unknowns==0 /*not yet implemented*/ );
                 if ( nb_nodal_unknowns ) {
                     unsigned ind[ 2 ] = { ((*f.indice_noda)[f.m->node_list.number(n)]), *f.indice_glob };
-                    add_nodal_matrix( f, K, F, vectors, Number<MatCarac<0>::symm>(), Number<assemble_mat>(), Number<assemble_vec>(), n, ind );
+                    add_nodal_matrix( f, K, F, *vectors, Number<MatCarac<0>::symm>(), Number<assemble_mat>(), Number<assemble_vec>(), n, ind );
                 }
                 else
-                    add_nodal_matrix( f, K, F, vectors, Number<MatCarac<0>::symm>(), Number<assemble_mat>(), Number<assemble_vec>(), n, f.indice_glob );
+                    add_nodal_matrix( f, K, F, *vectors, Number<MatCarac<0>::symm>(), Number<assemble_mat>(), Number<assemble_vec>(), n, f.indice_glob );
             }
             else {
                 unsigned ind[ 2 ] = { ((*f.indice_noda)[f.m->node_list.number(n)]) };
                 //std::cerr << "plip plop ind[ 2 ] " << *ind << std::endl;
-                add_nodal_matrix( f, K, F, vectors, Number<MatCarac<0>::symm>(), Number<assemble_mat>(), Number<assemble_vec>(), n, ind );
+                add_nodal_matrix( f, K, F, *vectors, Number<MatCarac<0>::symm>(), Number<assemble_mat>(), Number<assemble_vec>(), n, ind );
             }
         }
         Vec<Vec<ScalarType> > *vectors;
@@ -1463,8 +1463,8 @@ public:
         shift();
         //
         Vec<ScalarType> old_vec;
-        if ( boolean_(this->non_linear_iterative_criterium) or this->non_linear_iterative_criterium_vec.size() )
-            old_vec.resize( vectors[0].size(), ScalarType(0) );
+        //if ( boolean_(this->non_linear_iterative_criterium) or this->non_linear_iterative_criterium_vec.size() )
+        //    old_vec.resize( vectors[0].size(), ScalarType(0) );
         //
         unsigned nb_iterations = 0;
         while ( true ) {
@@ -1476,6 +1476,10 @@ public:
 
             if ( this->non_linear_iterative_criterium == ScalarType(0.) and this->non_linear_iterative_criterium_vec.size() == 0 ) // assuming linear system
                 break;
+
+            if ( not old_vec.size() )
+                old_vec = 0 * vectors[ 0 ];
+
             if ( boolean_(this->non_linear_iterative_criterium) and norm_inf( old_vec - vectors[0] ) <= abs( this->non_linear_iterative_criterium ) )
                 break;
             if ( this->non_linear_iterative_criterium_vec.size() ) {
@@ -1495,6 +1499,8 @@ public:
                 if ( converged )
                     break;
             }
+            PRINT( norm_inf( old_vec ) );
+            PRINT( norm_inf( vectors[ 0 ] ) );
             PRINT( norm_inf( old_vec - vectors[0] ) );
 
             if ( nb_iterations++ >= this->max_non_linear_iteration )

@@ -1,13 +1,15 @@
 class GenericVariable
-    _dat := Vec[Op]() # valeurs au début du pas de temps
-    _dau := Vec[Op]() # valeurs à la fin du pas de temps
-    _dlt := Vec[Op]()
-    _dim := Vec[Int32]()
-    _sym := true
-    time := Op()
+    _dat  := Vec[Op]() # valeurs au début du pas de temps
+    _dau  := Vec[Op]() # valeurs à la fin du pas de temps
+    _dlt  := Vec[Op]()
+    _dim  := Vec[Int32]()
+    _sym  := true
+    time  := Op()
+    dtime := Op()
 
-    def _init( vec_dlt, file, name, _time, time_dep = false )
+    def _init( vec_dlt, file, name, _time, _dtime, time_dep = false )
         time = _time
+        dtime = _dtime
 
         # methode constructeur : vec_dlt, file, name sont des attributs de la methode
 
@@ -20,8 +22,7 @@ class GenericVariable
             
             file <<< "// $name_vec[ $(vec_dlt.size) ] -> $name"
             _dat.push_back( symbol( "$name_vec[$(vec_dlt.size)]", name ) )
-            if time_dep
-                _dau.push_back( symbol( "$name_vec[$(vec_dlt.size)]", name ) )
+            _dau.push_back( symbol( "$name_vec[$(vec_dlt.size)]", name ) )
 
             # dans le fichier file (umat) on ecrit les symboles correspondant aux parametres
             # dans le vecteur _dat on stocke le nombre de parametres existant (push_back) en les ajoutant les uns après les autres  
@@ -38,8 +39,7 @@ class GenericVariable
             for n in 0 .. _dim[ 0 ]
                 file <<< "// $name_vec[ $(vec_dlt.size) ] -> $name[ $n ]"
                 _dat.push_back( symbol( "$name_vec[$(vec_dlt.size)]", "$name_$n" ) )
-                if time_dep
-                    _dau.push_back( symbol( "$name_vec[$(vec_dlt.size)]", "$name_$n" ) )
+                _dau.push_back( symbol( "$name_vec[$(vec_dlt.size)]", "$name_$n" ) )
 
                 #_dat = [statev[0],Ep_0  statev[1],Ep_1   statev[2],Ep_2 .... ]  
 
@@ -54,8 +54,7 @@ class GenericVariable
                 for n in [ [0,0,0], [1,1,1], [2,2,2], [0,1,3], [0,2,4], [1,2,5] ]
                     file <<< "// $name_vec[ $(vec_dlt.size) ] -> $name[ $(n[0]), $(n[1]) ]"
                     _dat.push_back( symbol( "$name_vec[$(vec_dlt.size)]", "$(name)_{$(n[0]),$(n[1])}" ) )
-                    if time_dep
-                        _dau.push_back( symbol( "$name_vec[$(vec_dlt.size)]", "$(name)_{$(n[0]),$(n[1])}" ) )
+                    _dau.push_back( symbol( "$name_vec[$(vec_dlt.size)]", "$(name)_{$(n[0]),$(n[1])}" ) )
                     
                     sym := symbol( "dlt_$name_vec[$(vec_dlt.size)]", "\Delta $(name)_{$(n[0]),$(n[1])}" )
                     vec_dlt.push_back( sym )
@@ -63,16 +62,16 @@ class GenericVariable
 
     def get_val
         if _dim.size == 0
-            return _dat[ 0 ] * ( 1 - time ) + ( _dat[ 0 ] + _dlt[ 0 ] * type_VariableInterne ) * time
+            return _dat[ 0 ] * ( 1 - time / dtime ) + ( _dau[ 0 ] + _dlt[ 0 ] * type_VariableInterne ) * time / dtime
 
         if _dim.size == 1
-            return _dat * ( 1 - time ) + ( _dau  + _dlt * type_VariableInterne ) * time
+            return _dat * ( 1 - time / dtime ) + ( _dau  + _dlt * type_VariableInterne ) * time / dtime
 
         if _dim.size == 2
             if _sym
                 res := Mat[Op,Sym[_dim[0]]]()
                 for n in [ [0,0,0], [1,1,1], [2,2,2], [0,1,3], [0,2,4], [1,2,5] ]
-                    res[ n[ 0 ], n[ 1 ] ] = _dat[ n[ 2 ] ] * ( 1 - time ) + ( _dau[ n[ 2 ] ] + _dlt[ n[ 2 ] ] * type_VariableInterne ) * time
+                    res[ n[ 0 ], n[ 1 ] ] = _dat[ n[ 2 ] ] * ( 1 - time / dtime ) + ( _dau[ n[ 2 ] ] + _dlt[ n[ 2 ] ] * type_VariableInterne ) * time / dtime
                 return res
 
         assert( 0, "TODO" )
@@ -126,7 +125,8 @@ class VariableInterne inherits GenericVariable
 
 class ConstitutiveLaw
     sigma := Mat[Op,Sym[3]]()
-    time  := symbol( "time", "t" )
+    time  := symbol( "*time", "t" )
+    dtime := symbol( "*dtime", "t" )
 
     def write_umat( file )
 
@@ -137,9 +137,9 @@ class ConstitutiveLaw
 
         for name, val in AttributeExplorer( self )
             if val.type_Parameter
-                val._init( properties, file, name, time )
+                val._init( properties, file, name, time, dtime )
             if val.type_VariableInterne
-                val._init( vec_dlt   , file, name, time, true )
+                val._init( vec_dlt   , file, name, time, dtime, true )
 
         num_ij := [ 0, 3, 4  3, 1, 5  4, 5, 2 ]
         inv_num_ij := [ [0,0,0], [1,1,1], [2,2,2], [0,1,3], [0,2,4], [1,2,5] ]
@@ -162,6 +162,7 @@ class ConstitutiveLaw
         file <<<<
             #include <math.h>
             #include <iostream>
+            #include <containers/vec.h>
             typedef long int integer;
             typedef double doublereal;
             typedef short ftnlen;
@@ -180,12 +181,12 @@ class ConstitutiveLaw
                 typedef double T;
 
         cw := CodeWriterAlt()
-        cw.add( "f", f.subs( vec_dlt, vec_dlt * 0 ).subs( time, 1 ) )
+        cw.add( "f", f.subs( vec_dlt, vec_dlt * 0 ).subs( time, dtime ) )
         for n in inv_num_ij
-            cw.add( "stress[$(n[2])]", sigma[ n[ 0 ], n[ 1 ] ].subs( vec_dlt, vec_dlt * 0 ).subs( time, 1 ), reassign )
+            cw.add( "stress[$(n[2])]", sigma[ n[ 0 ], n[ 1 ] ].subs( vec_dlt, vec_dlt * 0 ).subs( time, dtime ), reassign )
         for n_sig in inv_num_ij
             for n_eps in inv_num_ij
-                cw.add( "ddsdde[$( 6 * n_sig[ 2 ] + n_eps[ 2 ] )]", sigma[ n_sig[ 0 ], n_sig[ 1 ] ].diff( eps[ n_eps[ 0 ], n_eps[ 1 ] ] ).subs( vec_dlt, vec_dlt * 0 ).subs( time, 1 ), reassign )
+                cw.add( "ddsdde[$( 6 * n_sig[ 2 ] + n_eps[ 2 ] )]", sigma[ n_sig[ 0 ], n_sig[ 1 ] ].diff( eps[ n_eps[ 0 ], n_eps[ 1 ] ] ).subs( vec_dlt, vec_dlt * 0 ).subs( time, dtime ), reassign )
 
         file <<< cw.to_string( 4 )
         
@@ -200,7 +201,7 @@ class ConstitutiveLaw
         ev_law := evolution_law( sigma )
         sol := Vec[Op]()
         if ev_law.size 
-            sum := squared_flat( ev_law ).subs( time, 1 )
+            sum := squared_flat( ev_law ).subs( time, dtime )
             info sum.type
             info vec_dlt
             sol = newton_raphson_minimize_iteration( sum, vec_dlt, vec_dlt )
@@ -210,11 +211,11 @@ class ConstitutiveLaw
             for name, variable in AttributeExplorer( self )
                 if variable.type_VariableInterne
                     dissipation += variable.dissipation( self ) 
-            dissipation = dissipation.subs( time, 1 )
+            dissipation = dissipation.subs( time, dtime )
 
             # minimization sous contrainte
             lag := symbol( "lag" )
-            sol = newton_raphson_minimize_iteration( dissipation + lag * f.subs( time, 1 ), vec_dlt +++ [ lag ], vec_dlt +++ [ 0 ] )
+            sol = newton_raphson_minimize_iteration( dissipation + lag * f.subs( time, dtime ), vec_dlt +++ [ lag ], vec_dlt +++ [ 0 ] )
 
         cl := CodeWriterAlt()
         for n in 0 .. vec_dlt.size
@@ -241,12 +242,12 @@ class ConstitutiveLaw
         file <<< "    {"
         cx := CodeWriterAlt()
         for n in inv_num_ij
-            cx.add( "stress[$(n[2])]", sigma[ n[ 0 ], n[ 1 ] ].subs( vec_dlt, vec_dlt * 0 ).subs( time, 1 ), reassign )
+            cx.add( "stress[$(n[2])]", sigma[ n[ 0 ], n[ 1 ] ].subs( vec_dlt, vec_dlt * 0 ).subs( time, dtime ), reassign )
         file <<< cx.to_string( 8 )
 
         for n_sig in inv_num_ij
             for n_eps in inv_num_ij
-                cx.add( "ddsdde[$( 6*n_sig[ 2 ] + n_eps[ 2 ] )]", sigma[ n_sig[ 0 ], n_sig[ 1 ] ].diff( eps[ n_eps[ 0 ], n_eps[ 1 ] ] ).subs( vec_dlt, vec_dlt * 0 ).subs( time, 1 ), reassign )
+                cx.add( "ddsdde[$( 6*n_sig[ 2 ] + n_eps[ 2 ] )]", sigma[ n_sig[ 0 ], n_sig[ 1 ] ].diff( eps[ n_eps[ 0 ], n_eps[ 1 ] ] ).subs( vec_dlt, vec_dlt * 0 ).subs( time, dtime ), reassign )
 
         file <<< "    }"
 
