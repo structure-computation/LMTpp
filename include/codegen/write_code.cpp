@@ -148,7 +148,7 @@ std::string Write_code::to_string() {
     
     lst_var.clear();
     
-//     std::cerr << "end to_string" << std::endl;
+    //     std::cerr << "end to_string" << std::endl;
     return res.str();
 }
 
@@ -183,14 +183,17 @@ const Op *Write_code::set_depth_rec(const Ex &ex,unsigned depth) {
         nodes[ex].ex = ex;
         nodes[ex].depth = depth;
         nodes[ex].nb_times_to_be_used = 0;
-        if ( ex.nb_children()==0 )
-            leaves.insert( & nodes[ex] );
+        if ( ex.nb_children() == 0 and ex.op->type != Op::Solver ) {
+            leaves.insert( &nodes[ex] );
+        }
     }
-    for(unsigned i=0;i<ex.nb_children();++i) {
-        const Op *h = set_depth_rec( ex.child(i), depth + 1 );
-        if ( h )
+    for(unsigned i=0;i<ex.nb_children();++i)
+        if ( const Op *h = set_depth_rec( ex.child(i), depth + 1 ) )
             return h;
-    }
+    if ( ex.op->type == Op::Solver )
+        for( Op **b = ex.op->get_solver_beg(); *b; ++b )
+            if ( const Op *h = set_depth_rec( inc_ref( *b ), depth + 1 ) )
+                 return h;
     return NULL;
 }
 

@@ -240,7 +240,8 @@ Ex new_function_2(const std::string &f,const Ex &a,const Ex &b);
                             
 Ex integration(const Ex &expr,const Ex &v,const Ex &beg,const Ex &end,unsigned max_poly_order=5);
                             
-                            
+Ex make_sub_sol( Op *sol, int i );
+
                             
 };
                             
