@@ -10,7 +10,9 @@
 //
 //
 #include "exvector.h"
+#include "op.h"
 #include <sstream>
+#include <iostream>
 #include <assert.h>
 #include <algorithm>
 
@@ -254,6 +256,31 @@ ExVector vect_prod(const ExVector &v1,const ExVector &v2) {
         );
     return ExVector( v1(0)*v2(1) - v1(1)*v2(0) );
 }
+
+ExVector solve( const ExVector &eqs, const ExVector &unk, const ExVector &beg, const Ex &precision ) {
+    //
+    Op *sol = new Op;
+    sol->type = Op::Solver;
+    sol->p_data = new Op *[ eqs.size() + unk.size() + beg.size() + 4 ];
+    int o = 0;
+    for( int i = 0; i < eqs.size(); ++i )
+        sol->p_data[ o++ ] = inc_ref( eqs[ i ].op );
+    sol->p_data[ o++ ] = 0;
+    for( int i = 0; i < unk.size(); ++i )
+        sol->p_data[ o++ ] = inc_ref( unk[ i ].op );
+    sol->p_data[ o++ ] = 0;
+    for( int i = 0; i < beg.size(); ++i )
+        sol->p_data[ o++ ] = inc_ref( beg[ i ].op );
+    sol->p_data[ o++ ] = 0;
+    sol->p_data[ o++ ] = inc_ref( precision.op );
+
+    //
+    ExVector res( unk.size() );
+    for( int i = 0; i < unk.size(); ++i )
+        res[ i ] = make_sub_sol( sol, i );
+    return res;
+}
+
 
 std::ostream &operator<<(std::ostream &os,const Codegen::ExVector &vec) {
     for(unsigned i=0;i<vec.size();++i)

@@ -145,6 +145,9 @@ Objectif :
 */
 ExVector vect_prod(const ExVector &v1,const ExVector &v2);
 
+ExVector solve( const ExVector &eqs, const ExVector &unk, const ExVector &beg, const Ex &precision );
+
+
 std::ostream &operator<<(std::ostream &os,const Codegen::ExVector &vec);
 
 };

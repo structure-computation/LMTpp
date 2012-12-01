@@ -39,7 +39,9 @@ private:
     std::string tmp_type;
     unsigned nb_registers;
     unsigned nb_exp_to_end_line;
-    
+    unsigned nb_reg_solve;
+    unsigned nb_solve_lab;
+
     void write_end_line(std::ostream &os,const Ex &ex,unsigned *num_reg_children);
     void write_var(std::ostream &os,const Ex &ex,const std::string &end);
     void write_beg_spaces(std::ostream &os);

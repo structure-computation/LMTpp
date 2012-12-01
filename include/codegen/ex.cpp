@@ -10,7 +10,7 @@
 // Copyright: See COPYING file that comes with this distribution
 //
 //
-#include "ex.h"
+#include "exmatrix.h"
 #include "op.h"
 #include "read_ex.h"
 #include "write_graphviz.h"
@@ -133,6 +133,9 @@ void Ex::subs_rec() const {
             }
             Ex tmp( make_function_2( op->type, s1.op , s2.op ) ); ++tmp.op->cptUse;
             op->res_op = tmp.op;
+        }
+        else if ( op->type == Op::Solver ) {
+            assert( 0 ); // TODO
         }
         else
             op->res_op = op;
@@ -274,7 +277,40 @@ Ex Ex::diff(std::map<Ex,Ex,Ex::ExMapCmp> &m) const {
 void Ex::diff_rec() const {
     if ( op->id != current_id ) {
         op->id = current_id;
-        if ( is_a_function_1() ) {
+        if ( op->type == Op::SubSol ) {
+            //            Ex c1( op->data.children[0] ); c1.diff_rec();
+
+            //            op->res_op = op_number(0);
+
+            //            ExVector eqs, unk;
+            //            for( Op **b = op->get_solver_eqs(); *b; ++b )
+            //                eqs.push_back( inc_ref( *b ) );
+            //            for( Op **b = op->get_solver_unk(); *b; ++b )
+            //                unk.push_back( inc_ref( *b ) );
+            //            ExMatrix K( eqs.size(), unk.size() );
+            //            ExVector F( eqs.size() );
+
+            //            std::map<Ex,Ex,Ex::ExMapCmp> sm;
+            //            for( int j = 0; j < unk.size(); ++j )
+            //                sm[ unk[ j ] ] = res[ j ];
+
+            //            for( int i = 0; i < eqs.size(); ++i ) {
+            //                eqs[ i ].diff_rec();
+            //                F( i ) = inc_ref() c1.op->res_op ); //.subs( sm );
+            //                for( int j = 0; j < unk.size(); ++j )
+            //                    K( i, j ) = eqs[ i ].diff( unk[ j ] ).diff( c1.op->res_op ).subs( sm );
+            //            }
+
+            // ExVector delta = K.solve( F );
+
+            //std::cout << "pouet" << std::endl;
+            assert( 0 );
+            //            op->res_op = new Op;
+            //            op->res_op->type == Op::DiffSubSol;
+            //            op->data.children[ 0 ] = inc_ref( op );
+            //            op->data.children[ 1 ] = ;
+        }
+        else if ( is_a_function_1() ) {
             Ex c1( op->data.children[0] ); c1.diff_rec();
             Ex res( diff( op, c1, c1.op->res_op ) ); ++res.op->cptUse;
             op->res_op = res.op;
@@ -548,5 +584,17 @@ Ex integration(const Ex &expr,const Ex &v,const Ex &beg,const Ex &end,unsigned d
     return polynomial_integration( expr, v, beg, end, deg_poly_max );
 }
 
+Ex make_sub_sol( Op *sol, int i ) {
+    for( int j = 0; j < sol->parents.size(); ++j )
+        if ( sol->parents[ j ]->type == Op::SubSol and sol->parents[ j ]->val == i )
+            return inc_ref( sol->parents[ j ] );
+    //
+    Op *s = new Op;
+    s->type = Op::SubSol;
+    s->data.children[ 0 ] = inc_ref( sol );
+    s->data.children[ 1 ] = 0;
+    s->val = i;
+    return inc_ref( s );
+}
 
 };
