@@ -84,7 +84,7 @@ class Formulation:
       'apply_on_elements_after_solve_15' : apply_on_elements_after_solve,
       'options' : options,
       'gauss_points' : [],
-      'user_headers' : [],
+      'user_headers' : []
     }
     execfile( name_file, globals(), self.ind )
     

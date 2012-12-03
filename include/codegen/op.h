@@ -36,33 +36,37 @@ public:
         Number  = 0,
         Symbol  = 1,
         Nothing = 2,
-        
+        Solver  = 3,
+
         // functions with 1 variable
-        Abs = 10,
-        Heavyside = 11,
-        Eqz = 12,
-        Sin = 13,
-        Cos = 14,
-        Sgn = 15,
-        Tan = 16,
-        Log = 17,
-        Neg = 18,
-        Asin = 19,
-        Acos = 20,
-        Atan = 21,
-        Exp = 22,
+        Abs          = 10,
+        Heavyside    = 11,
+        Eqz          = 12,
+        Sin          = 13,
+        Cos          = 14,
+        Sgn          = 15,
+        Tan          = 16,
+        Log          = 17,
+        Neg          = 18,
+        Asin         = 19,
+        Acos         = 20,
+        Atan         = 21,
+        Exp          = 22,
         Heavyside_if = 23,
         
-        Dirac = 24,
-        
+        Dirac        = 24,
+        SubSol       = 25,
+
         // functions with 2 variables
-        Add = 50,
-        Sub = 51,
-        Mul = 52,
-        Div = 53,
-        Pow = 54,
-        Atan2 = 55,
-        
+        Add    = 50,
+        Sub    = 51,
+        Mul    = 52,
+        Div    = 53,
+        Pow    = 54,
+        Atan2  = 55,
+
+        DiffSubSol = 56,
+
         Max = 60,
         Min = 61
     } TypeEx;
@@ -81,7 +85,10 @@ public:
     std::string graphviz_repr() const;
     unsigned node_count_rec(long unsigned current_id) const;
     bool leave() const { return type == Symbol or type == Number; }
-    
+    Op **get_solver_eqs() const;
+    Op **get_solver_unk() const;
+    Op **get_solver_beg() const;
+
 //private:
     mutable long unsigned id;
     mutable const Op *res_op;
@@ -107,12 +114,14 @@ public:
     };
     Value data;
     TypeEx type;
-    mutable void *additional_data; /// only for symbols
-    mutable int movability_level; /// only for symbols
+    mutable Op **p_data; ///< for solve
+    mutable void *additional_data; ///< only for symbols
+    mutable int movability_level; ///< only for symbols
     mutable Cvector<const Op *> parents;
     mutable unsigned cptUse;
     mutable T val; /// available for all kind of ops
     mutable bool val_should_be_updated; /// available for all kind of ops
+    mutable int beg_reg_solve;
 
     
     friend const Op *op_number(T v);
@@ -130,6 +139,11 @@ const Op *op_symbol(const char *std_name,const char *latex_name,void *additional
 const Op *make_function_2(Op::TypeEx t,const Op *a,const Op *b);
 const Op *make_function_1(Op::TypeEx t,const Op *a);
 unsigned nb_children_op(const Op *op);
+
+inline Op *inc_ref( const Op *r ) {
+    ++r->cptUse;
+    return const_cast<Op *>( r );
+}
 
 std::ostream &operator<<(std::ostream &os,const Op &op);
 bool operator==(const Op &a,const Op &b);

@@ -29,7 +29,7 @@ namespace Codegen {
 // static Pool<Op> pool_ex;
 static std::map<Op::T,Op> pool_numbers;
 
-Op::Op():id(0),type(Nothing),cptUse(0) {
+Op::Op() : id( 0 ), type( Nothing ), p_data( 0 ), cptUse( 0 ) {
 }
 
 void Op::removeFromParents(const Op *par) const {
@@ -42,9 +42,7 @@ void Op::decreaseCptUse() const {
     if ( --cptUse == 0 ) {
         if ( type==Number ) {
             //pool_numbers.erase( val );
-            
-        }
-        else {
+        } else {
             if ( type==Symbol ) {
                 free( data.names[0] );
                 free( data.names[1] );
@@ -63,9 +61,20 @@ void Op::decreaseCptUse() const {
 }
 
 Op::~Op() {
+    if ( p_data ) {
+        int nz = 3;
+        for( Op * const *op = p_data; nz; ++op ) {
+            if ( *op )
+                (*op)->decreaseCptUse();
+            else
+                --nz;
+        }
+
+        delete [] p_data;
+    }
 }
 
-const Op *op_number(Op::T v) {
+const Op *op_number( Op::T v ) {
     //if( isnan(v)==false and isinf(v)==false ) {
     //}
     // look if number has not been registered
@@ -134,10 +143,11 @@ Op::T Op::operation(Op::TypeEx type,Op::T a) {
         case Atan:      return atan(a);
         case Log:       return log(a);
         case Exp:       return exp(a);
-        default:    cout << "with type " << type << endl;  assert( 0 );
+        default:        cout << "with type " << type << endl;  assert( 0 );
     }
     return 0;
 }
+
 Op::T Op::operation(Op::TypeEx type,Op::T a,Op::T b) {
     using namespace std;
     switch (type) {
@@ -384,8 +394,10 @@ std::ostream &operator<<(std::ostream &os,const Op &op) {
                 os << op.graphviz_repr() << '(' << *op.data.children[0] << ')';
             else if ( op.is_a_function_2() )
                 os << op.graphviz_repr() << '(' << *op.data.children[0] << ',' << *op.data.children[1] << ')';
+            else if ( op.type == Op::Solver )
+                os << "Solver";
             else
-                os << "Error : type not managed in operator<<.";
+                os << "Error : type (" << op.type << ") not managed in operator<<.";
     }
     return os;
 }
@@ -400,13 +412,15 @@ std::string Op::graphviz_repr() const {
     switch (type) {
         case Number:    return to_string();
         case Symbol:    return data.names[0];
-        
+        case Solver:    return "solver";
+
         case Add:       return "+";
         case Sub:       return "-";
         case Mul:       return "*";
         case Div:       return "/";
         case Pow:       return "**";
-        
+        case SubSol:    return "subsol";
+
         case Abs:       return "abs";
         case Heavyside: return "heavyside";
         case Heavyside_if: return "heavyside_if";
@@ -470,11 +484,20 @@ void Op::depends_on_rec(long unsigned current_id) const {
         if ( is_a_function_1() ) {
             data.children[0]->depends_on_rec(current_id);
             res_op = data.children[0]->res_op;
-        }
-        else if ( is_a_function_2() ) {
+        } else if ( is_a_function_2() ) {
             data.children[0]->depends_on_rec(current_id);
             data.children[1]->depends_on_rec(current_id);
             res_op = ( data.children[0]->res_op or data.children[1]->res_op ? this : NULL );
+        } else if ( type == Solver ) {
+            int nz = 3;
+            for( Op **op = p_data; nz; ++op ) {
+                if ( not *op ) { --nz; continue; }
+                (*op)->depends_on_rec( current_id );
+                if ( (*op)->res_op ) {
+                    res_op = this;
+                    break;
+                }
+            }
         }
         else
             res_op = NULL;
@@ -493,6 +516,26 @@ unsigned Op::node_count_rec(long unsigned current_id) const {
     return 1;
 }
 
+Op **Op::get_solver_eqs() const {
+    return p_data;
+}
+
+Op **Op::get_solver_unk() const {
+    for( Op **op = p_data; ; ++op )
+        if ( *op == 0 )
+            return ++op;
+    return 0;
+}
+
+Op **Op::get_solver_beg() const {
+    int nz = 0;
+    for( Op **op = p_data; ; ++op )
+        if ( *op == 0 and ++nz == 2 )
+            return ++op;
+    return 0;
+}
+
+
 void Op::find_discontinuities( long unsigned current_id, std::vector<const Op *> &lst ) const {
     if ( id != current_id ) {
         id = current_id;
@@ -506,6 +549,8 @@ void Op::find_discontinuities( long unsigned current_id, std::vector<const Op *>
             data.children[0]->find_discontinuities( current_id, lst );
             data.children[1]->find_discontinuities( current_id, lst );
         }
+        else if ( type == Solver )
+            assert( 0 ); // TODO
     }
     // else -> already done
 }

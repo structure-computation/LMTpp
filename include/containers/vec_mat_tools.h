@@ -3,336 +3,190 @@
 
 #include <containers/mat.h>
 
-///                                          ///////////////////////////
-/// ---------------------------------------- /// for normal matrices ///
-///                                          ///////////////////////////
+///                                                  ///////////////////
+/// ------------------------------------------------ /// conventions ///
+///                                                  ///////////////////
 
-/// --------------------------------------------- /// décompositions ///
+/// --------------------------------------------- /// nb_dim, nb_vec ///
 
-template<class TM> TM sym_part_mat(const TM &M)
+constexpr unsigned int get_nb_dim(const unsigned int &nb_vec) { return std::ceil(double(nb_vec)/2);}
+constexpr unsigned int get_nb_vec(const unsigned int &nb_dim) { return nb_dim*(nb_dim+1)/2;}
+
+/// ---------------------------------------------------- /// indices ///
+
+template<unsigned int nb_dim>
+inline unsigned int get_IJ(const unsigned int &i, const unsigned int &j)
 {
-    return (M + LMT::trans(M)) / 2;
-}
-
-template<class TM> TM antisym_part_mat(const TM &M)
-{
-    return (M - LMT::trans(M)) / 2;
-}
-
-/// ------------------------------------------ /// produit contracté ///
-
-template<class TM> typename TM::T prod_contr_mat(const TM &M1, const TM &M2)
-{
-    static const unsigned nb_dim = M1.nb_rows();
-
-    typename TM::T res = 0.;
-    for (unsigned i=0; i<nb_dim; ++i)
+    if (nb_dim == 2)
     {
-        for (unsigned j=0; j<nb_dim; ++j)
-        {
-            res += M1(i,j) * M2(i,j);
-        }
+             if ((i == 0) and (j == 0)) return 0;
+        else if ((i == 1) and (j == 1)) return 1;
+        else if ((i == 0) and (j == 1)) return 2;
+        else if ((i == 1) and (j == 0)) return 2;
+        else assert(0);
     }
-    return res;
-}
-
-template<class TM> typename TM::T self_prod_contr_mat(const TM &M)
-{
-    return prod_contr_mat(M, M);
-}
-
-/// -------------------------------------------------- /// puissance ///
-
-template<class TM> TM pow_mat_sym(TM M, const unsigned &p)
-{
-    static const unsigned nb_dim = M.nb_rows();
-
-    LMT::Mat<typename TM::T, LMT::Sym<> > res; // must be sym because it is then used in mat_sym_to_vec_col
-    res.resize(nb_dim);
-    res.set(0.);
-    res.diag() = 1.;
-    for (unsigned k=0; k<p; ++k)
+    else if (nb_dim == 3)
     {
-        res *= M;
+             if ((i == 0) and (j == 0)) return 0;
+        else if ((i == 1) and (j == 1)) return 1;
+        else if ((i == 2) and (j == 2)) return 2;
+        else if ((i == 0) and (j == 1)) return 3;
+        else if ((i == 1) and (j == 0)) return 3;
+        else if ((i == 0) and (j == 2)) return 4;
+        else if ((i == 2) and (j == 0)) return 4;
+        else if ((i == 1) and (j == 2)) return 5;
+        else if ((i == 2) and (j == 1)) return 5;
+        else assert(0);
     }
-    return res;
+    else assert(0);
+}
+
+template<unsigned int nb_dim>
+inline unsigned int get_i(const unsigned int &IJ)
+{
+    if (nb_dim == 2)
+    {
+             if (IJ == 0) return 0;
+        else if (IJ == 1) return 1;
+        else if (IJ == 2) return 0;
+        else assert(0);
+    }
+    if (nb_dim == 3)
+    {
+             if (IJ == 0) return 0;
+        else if (IJ == 1) return 1;
+        else if (IJ == 2) return 2;
+        else if (IJ == 3) return 0;
+        else if (IJ == 4) return 0;
+        else if (IJ == 5) return 1;
+        else assert(0);
+    }
+    else assert(0);
+}
+
+template<unsigned int nb_dim>
+inline unsigned int get_j(const unsigned int &IJ)
+{
+    if (nb_dim == 2)
+    {
+             if (IJ == 0) return 0;
+        else if (IJ == 1) return 1;
+        else if (IJ == 2) return 1;
+        else assert(0);
+    }
+    if (nb_dim == 3)
+    {
+             if (IJ == 0) return 0;
+        else if (IJ == 1) return 1;
+        else if (IJ == 2) return 2;
+        else if (IJ == 3) return 1;
+        else if (IJ == 4) return 2;
+        else if (IJ == 5) return 2;
+        else assert(0);
+    }
+    else assert(0);
 }
 
 ///      ///////////////////////////////////////////////////////////////
 /// ---- /// for vectors representing second order symmetric tensors ///
 ///      ///////////////////////////////////////////////////////////////
 
-/// ------------------------------------------------ /// conversions ///
+/// ------------------------------------------- /// cleaning vectors ///
 
-template<class TV> TV vec_col_to_vec_col_with_sqr(TV V)
+template<class TV>
+void remove_sqr_vec_col(TV &V)
 {
-    static const unsigned nb_vec = V.size();
-    static const unsigned nb_dim = std::ceil(double(nb_vec)/2);
+    static const unsigned int nb_vec = TV::static_size;
+    static const unsigned int nb_dim = get_nb_dim(nb_vec);
 
-    for (unsigned i=nb_dim; i<nb_vec; ++i)
+    for (unsigned int IJ=nb_dim; IJ<nb_vec; ++IJ) V[IJ] /= sqrt(2.);
+}
+
+template<class TV>
+void add_sqr_vec_col(TV &V)
+{
+    static const unsigned int nb_vec = TV::static_size;
+    static const unsigned int nb_dim = get_nb_dim(nb_vec);
+
+    for (unsigned int IJ=nb_dim; IJ<nb_vec; ++IJ) V[IJ] *= sqrt(2.);
+}
+
+/// ------------------- /// conversions between vectors and matrices ///
+
+template<class TV>
+LMT::Mat<typename LMT::TypeReduction<LMT::Multiplies, TV>::T, LMT::Sym<get_nb_dim(TV::static_size)> > vec_col_to_mat_sym(const TV &V) // pour le type on n'a pas de typename TV::T car les vecteurs peuvent être hétérogènes
+{
+    static const unsigned int nb_vec = TV::static_size;
+    static const unsigned int nb_dim = get_nb_dim(nb_vec);
+
+//     PRINT(V);
+//     PRINT(nb_vec);
+//     PRINT(nb_dim);
+
+    typedef typename LMT::TypeReduction<LMT::Multiplies, TV>::T T;
+    LMT::Mat<T, LMT::Sym<nb_dim> > M;
+//     PRINT(M);
+
+    for (unsigned int IJ=0; IJ<nb_dim; ++IJ)
     {
-        V[i] *= sqrt(2.);
+//         PRINT(IJ);
+//         PRINT(get_i<nb_dim>(IJ));
+//         PRINT(get_j<nb_dim>(IJ));
+        M(get_i<nb_dim>(IJ), get_j<nb_dim>(IJ)) = V[IJ];
     }
+//     PRINT(M);
+
+    for (unsigned int IJ=nb_dim; IJ<nb_vec; ++IJ)
+    {
+//         PRINT(IJ);
+//         PRINT(get_i<nb_dim>(IJ));
+//         PRINT(get_j<nb_dim>(IJ));
+        M(get_i<nb_dim>(IJ), get_j<nb_dim>(IJ)) = V[IJ]/sqrt(2.);
+    }
+//     PRINT(M);
+
+    return M;
+}
+
+template<class TM>
+LMT::Vec<typename TM::T, get_nb_vec(TM::static_rows)> mat_sym_to_vec_col(const TM &M)
+{
+    static const unsigned int nb_dim = TM::static_rows;
+    static const unsigned int nb_vec = get_nb_vec(nb_dim);
+
+    typedef typename TM::T T;
+    LMT::Vec<T, nb_vec> V;
+    for (unsigned int IJ=0;      IJ<nb_dim; ++IJ) V[IJ] = M(get_i<nb_dim>(IJ), get_j<nb_dim>(IJ));
+    for (unsigned int IJ=nb_dim; IJ<nb_vec; ++IJ) V[IJ] = M(get_i<nb_dim>(IJ), get_j<nb_dim>(IJ)) * sqrt(2.);
     return V;
-}
-
-template<class TV> TV vec_col_to_vec_col_with_two(TV V)
-{
-    static const unsigned nb_vec = V.size();
-    static const unsigned nb_dim = std::ceil(double(nb_vec)/2);
-
-    for (unsigned i=nb_dim; i<nb_vec; ++i)
-    {
-        V[i] *= 2.;
-    }
-    return V;
-}
-
-template<class TV> TV vec_col_with_sqr_to_vec_col(TV V)
-{
-    static const unsigned nb_vec = V.size();
-    static const unsigned nb_dim = std::ceil(double(nb_vec)/2);
-
-    for (unsigned i=nb_dim; i<nb_vec; ++i)
-    {
-        V[i] /= sqrt(2.);
-    }
-    return V;
-}
-
-template<class TV> TV vec_col_with_sqr_to_vec_col_with_two(TV V)
-{
-    static const unsigned nb_vec = V.size();
-    static const unsigned nb_dim = std::ceil(double(nb_vec)/2);
-
-    for (unsigned i=nb_dim; i<nb_vec; ++i)
-    {
-        V[i] *= sqrt(2.);
-    }
-    return V;
-}
-
-template<class TV> TV vec_col_with_two_to_vec_col(TV V)
-{
-    static const unsigned nb_vec = V.size();
-    static const unsigned nb_dim = std::ceil(double(nb_vec)/2);
-
-    for (unsigned i=nb_dim; i<nb_vec; ++i)
-    {
-        V[i] /= 2.;
-    }
-    return V;
-}
-
-template<class TV> TV vec_col_with_two_to_vec_col_with_sqr(TV V)
-{
-    static const unsigned nb_vec = V.size();
-    static const unsigned nb_dim = std::ceil(double(nb_vec)/2);
-
-    for (unsigned i=nb_dim; i<nb_vec; ++i)
-    {
-        V[i] /= sqrt(2.);
-    }
-    return V;
-}
-
-template<class TV> LMT::Mat<typename LMT::TypeReduction<LMT::Multiplies, TV>::T, LMT::Sym<> > vec_col_to_mat_sym(const TV &V) // pour le type on n'a pas de typename TV::T car les vecteurs peuvent être hétérogènes
-{
-    static const unsigned nb_vec = V.size();
-
-    LMT::Mat<typename LMT::TypeReduction<LMT::Multiplies, TV>::T, LMT::Sym<> > M;
-
-    if (nb_vec == 3)
-    {
-        M.resize(2);
-        M.set(0.);
-        M(0, 0) = V[0];
-        M(1, 1) = V[1];
-        M(0, 1) = V[2];
-        return M;
-    }
-
-    if (nb_vec == 6)
-    {
-        M.resize(3);
-        M.set(0.);
-        M(0, 0) = V[0];
-        M(1, 1) = V[1];
-        M(2, 2) = V[2];
-        M(0, 1) = V[3];
-        M(0, 2) = V[4];
-        M(1, 2) = V[5];
-        return M;
-    }
-}
-
-template<class TV> LMT::Mat<typename LMT::TypeReduction<LMT::Multiplies, TV>::T, LMT::Sym<> > vec_col_with_sqr_to_mat_sym(const TV &V) // pour le type on n'a pas de typename TV::T car les vecteurs peuvent être hétérogènes
-{
-    static const unsigned nb_vec = V.size();
-
-    LMT::Mat<typename LMT::TypeReduction<LMT::Multiplies, TV>::T, LMT::Sym<> > M;
-
-    if (nb_vec == 3)
-    {
-        M.resize(2);
-        M.set(0.);
-        M(0, 0) = V[0];
-        M(1, 1) = V[1];
-        M(0, 1) = V[2]/sqrt(2.);
-        return M;
-    }
-
-    if (nb_vec == 6)
-    {
-        M.resize(3);
-        M.set(0.);
-        M(0, 0) = V[0];
-        M(1, 1) = V[1];
-        M(2, 2) = V[2];
-        M(0, 1) = V[3]/sqrt(2.);
-        M(0, 2) = V[4]/sqrt(2.);
-        M(1, 2) = V[5]/sqrt(2.);
-        return M;
-    }
-}
-
-template<class TV> LMT::Mat<typename LMT::TypeReduction<LMT::Multiplies, TV>::T, LMT::Sym<> > vec_col_with_two_to_mat_sym(const TV &V) // pour le type on n'a pas de typename TV::T car les vecteurs peuvent être hétérogènes
-{
-    static const unsigned nb_vec = V.size();
-
-    LMT::Mat<typename LMT::TypeReduction<LMT::Multiplies, TV>::T, LMT::Sym<> > M;
-
-    if (nb_vec == 3)
-    {
-        M.resize(2);
-        M.set(0.);
-        M(0, 0) = V[0];
-        M(1, 1) = V[1];
-        M(0, 1) = V[2]/2.;
-        return M;
-    }
-
-    if (nb_vec == 6)
-    {
-        M.resize(3);
-        M.set(0.);
-        M(0, 0) = V[0];
-        M(1, 1) = V[1];
-        M(2, 2) = V[2];
-        M(0, 1) = V[3]/2.;
-        M(0, 2) = V[4]/2.;
-        M(1, 2) = V[5]/2.;
-        return M;
-    }
-}
-
-template<class TM> LMT::Vec<typename TM::T> mat_sym_to_vec_col(const TM &M)
-{
-    static const unsigned nb_dim = M.nb_cols();
-
-    if (nb_dim == 2)
-    {
-        LMT::Vec<typename TM::T> V;
-        V.resize(3);
-        V[0] = M(0, 0);
-        V[1] = M(1, 1);
-        V[2] = M(0, 1);
-        return V;
-    }
-
-    if (nb_dim == 3)
-    {
-        LMT::Vec<typename TM::T> V;
-        V.resize(6);
-        V[0] = M(0, 0);
-        V[1] = M(1, 1);
-        V[2] = M(2, 2);
-        V[3] = M(0, 1);
-        V[4] = M(0, 2);
-        V[5] = M(1, 2);
-        return V;
-    }
-}
-
-template<class TM> LMT::Vec<typename TM::T> mat_sym_to_vec_col_with_sqr(const TM &M)
-{
-    static const unsigned nb_dim = M.nb_cols();
-
-    if (nb_dim == 2)
-    {
-        LMT::Vec<typename TM::T> V;
-        V.resize(3);
-        V[0] = M(0, 0);
-        V[1] = M(1, 1);
-        V[2] = sqrt(2.) * M(0, 1);
-        return V;
-    }
-
-    if (nb_dim == 3)
-    {
-        LMT::Vec<typename TM::T> V;
-        V.resize(6);
-        V[0] = M(0, 0);
-        V[1] = M(1, 1);
-        V[2] = M(2, 2);
-        V[3] = sqrt(2.) * M(0, 1);
-        V[4] = sqrt(2.) * M(0, 2);
-        V[5] = sqrt(2.) * M(1, 2);
-        return V;
-    }
-}
-
-template<class TM> LMT::Vec<typename TM::T> mat_sym_to_vec_col_with_two(const TM &M)
-{
-    static const unsigned nb_dim = M.nb_cols();
-
-    if (nb_dim == 2)
-    {
-        LMT::Vec<typename TM::T> V;
-        V.resize(3);
-        V[0] = M(0, 0);
-        V[1] = M(1, 1);
-        V[2] = 2. * M(0, 1);
-        return V;
-    }
-
-    if (nb_dim == 3)
-    {
-        LMT::Vec<typename TM::T> V;
-        V.resize(6);
-        V[0] = M(0, 0);
-        V[1] = M(1, 1);
-        V[2] = M(2, 2);
-        V[3] = 2. * M(0, 1);
-        V[4] = 2. * M(0, 2);
-        V[5] = 2. * M(1, 2);
-        return V;
-    }
 }
 
 /// ------------------------------------------------------ /// trace ///
 
-template<class TV> typename LMT::TypeReduction<LMT::Multiplies, TV>::T trace_vec_col(const TV &V) // pour le type on n'a pas de typename TV::T car les vecteurs peuvent être hétérogènes
+template<class TV>
+typename LMT::TypeReduction<LMT::Multiplies, TV>::T trace_vec_col(const TV &V) // pour le type on n'a pas de typename TV::T car les vecteurs peuvent être hétérogènes
 {
-    static const unsigned nb_vec = V.size();
-    static const unsigned nb_dim = std::ceil(double(nb_vec)/2);
+    static const unsigned int nb_vec = TV::static_size;
+    static const unsigned int nb_dim = get_nb_dim(nb_vec);
 
-    typename LMT::TypeReduction<LMT::Multiplies, TV>::T res = 0.;
-    for (unsigned i=0; i<nb_dim; ++i)
-    {
-        res += V[i];
-    }
-    return res;
+    typedef typename LMT::TypeReduction<LMT::Multiplies, TV>::T T;
+    T trace = 0.;
+    for (unsigned int i=0; i<nb_dim; ++i) trace += V[i];
+    return trace;
 }
 
-template<class TV> typename LMT::TypeReduction<LMT::Multiplies, TV>::T trace_vec_col_with_sqr(const TV &V) // pour le type on n'a pas de typename TV::T car les vecteurs peuvent être hétérogènes
+/// ------------------------------------------- /// produit scalaire ///
+
+template<class TV>
+typename LMT::TypeReduction<LMT::Multiplies, TV>::T dot_vec_col(const TV &V1, const TV &V2)
 {
-    return trace_vec_col(V);
+    return LMT::dot(V1, V2);
 }
 
-template<class TV> typename LMT::TypeReduction<LMT::Multiplies, TV>::T trace_vec_col_with_two(const TV &V) // pour le type on n'a pas de typename TV::T car les vecteurs peuvent être hétérogènes
+template<class TV>
+typename LMT::TypeReduction<LMT::Multiplies, TV>::T self_dot_vec_col(const TV &V)
 {
-    return trace_vec_col(V);
+    return LMT::dot(V, V);
 }
 
 /// ---------------------------------------------------- /// produit ///
@@ -340,77 +194,147 @@ template<class TV> typename LMT::TypeReduction<LMT::Multiplies, TV>::T trace_vec
 // le produit de deux matrices symétriques n'est symétrique que si les deux matrices commutent
 // ici on ne le définit que pour une matrice avec elle-même, auquel cas le produit est forcément symétrique
 
-template<class TV> TV self_prod_vec_col(const TV &V)
+template<class TV>
+TV self_prod_vec_col(const TV &V)
 {
     return mat_sym_to_vec_col(vec_col_to_mat_sym(V) * vec_col_to_mat_sym(V));
 }
 
+template<class TV>
+TV double_prod_vec_col(const TV &V1, const TV &V2)
+{
+    return mat_sym_to_vec_col(vec_col_to_mat_sym(V2) * vec_col_to_mat_sym(V1) * vec_col_to_mat_sym(V2));
+}
+
 /// -------------------------------------------------- /// puissance ///
 
-template<class TV> TV pow_vec_col(const TV &V, const unsigned &p)
+template<class TM>
+TM pow_mat_sym(const TM &M, const unsigned &p)
+{
+    TM res;
+    res.set(0.);
+    res.diag() = 1.;
+    for (unsigned int k=0; k<p; ++k) res *= M;
+    return res;
+}
+
+template<class TV>
+TV pow_vec_col(const TV &V, const unsigned &p)
 {
     return mat_sym_to_vec_col(pow_mat_sym(vec_col_to_mat_sym(V), p));
 }
 
-template<class TV> TV pow_vec_col_with_sqr(const TV &V, const unsigned &p)
-{
-    return mat_sym_to_vec_col_with_sqr(pow_mat_sym(vec_col_with_sqr_to_mat_sym(V), p));
-}
-
-/// ------------------------------------------ /// produit contracté ///
-
-template<class TV> typename LMT::TypeReduction<LMT::Multiplies, TV>::T prod_contr_vec_col_with_sqr(const TV &V1, const TV &V2)
-{
-    return dot(V1, V2);
-}
-
-template<class TV> typename LMT::TypeReduction<LMT::Multiplies, TV>::T self_prod_contr_vec_col_with_sqr(const TV &V)
-{
-    return prod_contr_vec_col_with_sqr(V, V);
-}
-
-template<class TV> typename LMT::TypeReduction<LMT::Multiplies, TV>::T prod_contr_vec_col(const TV &V1, const TV &V2)
-{
-    return prod_contr_vec_col_with_sqr(vec_col_to_vec_col_with_sqr(V1), vec_col_to_vec_col_with_sqr(V2));
-}
-
-template<class TV> typename LMT::TypeReduction<LMT::Multiplies, TV>::T self_prod_contr_vec_col(const TV &V)
-{
-    return prod_contr_vec_col(V, V);
-}
-
 /// ------------------------------------------ /// produit tensoriel ///
 
-template<class TV> LMT::Mat<typename LMT::TypeReduction<LMT::Multiplies, TV>::T> prod_tens_vec_col(const TV &V1, const TV &V2) // pour le type on n'a pas de typename TV::T car les vecteurs peuvent être hétérogènes
+template<class TV>
+LMT::Mat<typename LMT::TypeReduction<LMT::Multiplies, TV>::T, LMT::Gen<TV::static_size> > tens_prod_vec_col(const TV &V1, const TV &V2) // pour le type on n'a pas de typename TV::T car les vecteurs peuvent être hétérogènes
 {
-    static const unsigned nb_dim = V1.size();
+    static const unsigned int nb_vec = TV::static_size;
 
-    LMT::Mat<typename LMT::TypeReduction<LMT::Multiplies, TV>::T> res(nb_dim);
-    for (unsigned i=0; i<nb_dim; ++i)
+    typedef typename LMT::TypeReduction<LMT::Multiplies, TV>::T T;
+    LMT::Mat<T, LMT::Gen<nb_vec> > M;
+    for (unsigned int IJ=0; IJ<nb_vec; ++IJ)
+    for (unsigned int KL=0; KL<nb_vec; ++KL)
     {
-        for (unsigned j=0; j<nb_dim; ++j)
-        {
-            res(i, j) = V1[i] * V2[j];
-        }
+        M(IJ,KL) = V1[IJ] * V2[KL];
     }
-    return res;
+    return M;
 }
 
-template<class TV> LMT::Mat<typename LMT::TypeReduction<LMT::Multiplies, TV>::T> self_prod_tens_vec_col(const TV &V) // pour le type on n'a pas de typename TV::T car les vecteurs peuvent être hétérogènes
+template<class TV>
+LMT::Mat<typename LMT::TypeReduction<LMT::Multiplies, TV>::T, LMT::Sym<TV::static_size> > self_tens_prod_vec_col(const TV &V) // pour le type on n'a pas de typename TV::T car les vecteurs peuvent être hétérogènes
 {
-    return prod_tens_vec_col(V, V);
+    static const unsigned int nb_vec = TV::static_size;
+
+    typedef typename LMT::TypeReduction<LMT::Multiplies, TV>::T T;
+    LMT::Mat<T, LMT::Sym<nb_vec> > M;
+    for (unsigned int IJ=0; IJ<nb_vec; ++IJ)
+    for (unsigned int KL=IJ; KL<nb_vec; ++KL)
+    {
+        M(IJ,KL) = V[IJ] * V[KL];
+    }
+    return M;
+}
+
+/// -------------------------------- /// produit tensoriel symétrisé ///
+
+template<class TM>
+void add_sqr_mat_col_gen(TM &M)
+{
+    static const unsigned int nb_vec = TM::static_rows;
+    static const unsigned int nb_dim = get_nb_dim(nb_vec);
+
+    for (unsigned int IJ=0;      IJ<nb_vec; ++IJ)
+    for (unsigned int KL=nb_dim; KL<nb_vec; ++KL)
+    {
+        M(IJ,KL) *= sqrt(2.);
+        M(KL,IJ) *= sqrt(2.);
+    }
+}
+
+template<class TM>
+void add_sqr_mat_col_sym(TM &M)
+{
+    static const unsigned int nb_vec = TM::static_rows;
+    static const unsigned int nb_dim = get_nb_dim(nb_vec);
+
+    for (unsigned int IJ=0;      IJ<nb_vec; ++IJ)
+    for (unsigned int KL=nb_dim; KL<nb_vec; ++KL)
+    {
+        if (KL >= IJ) M(IJ,KL) *= sqrt(2.);
+        if (IJ >= KL) M(KL,IJ) *= sqrt(2.);
+    }
+}
+
+template<class TV>
+LMT::Mat<typename LMT::TypeReduction<LMT::Multiplies, TV>::T, LMT::Gen<TV::static_size> > sym_tens_prod_vec_col(const TV &V1, const TV &V2)
+{
+    static const unsigned int nb_vec = TV::static_size;
+    static const unsigned int nb_dim = get_nb_dim(nb_vec);
+
+    typedef typename LMT::TypeReduction<LMT::Multiplies, TV>::T T;
+    LMT::Mat<T, LMT::Gen<nb_vec> > M;
+
+    LMT::Mat<T, LMT::Sym<nb_dim> > MV1 = vec_col_to_mat_sym(V1); // because of the micmac with indices, one has to go back to the matrices
+    LMT::Mat<T, LMT::Sym<nb_dim> > MV2 = vec_col_to_mat_sym(V2);
+
+    for (unsigned int IJ=0; IJ<nb_vec; ++IJ)
+    for (unsigned int KL=0; KL<nb_vec; ++KL)
+    {
+        M(IJ,KL) = (MV1(get_i<nb_dim>(IJ), get_i<nb_dim>(KL)) * MV2(get_j<nb_dim>(KL), get_j<nb_dim>(IJ)) +
+                    MV1(get_i<nb_dim>(IJ), get_j<nb_dim>(KL)) * MV2(get_i<nb_dim>(KL), get_j<nb_dim>(IJ)))/2;
+    }
+    add_sqr_mat_col_gen(M); // and put the sqrt() afterwards
+    return M;
+}
+
+template<class TV>
+LMT::Mat<typename LMT::TypeReduction<LMT::Multiplies, TV>::T, LMT::Sym<TV::static_size> > self_sym_tens_prod_vec_col(const TV &V)
+{
+    static const unsigned int nb_vec = TV::static_size;
+    static const unsigned int nb_dim = get_nb_dim(nb_vec);
+
+    typedef typename LMT::TypeReduction<LMT::Multiplies, TV>::T T;
+    LMT::Mat<T, LMT::Sym<nb_vec> > M;
+
+    LMT::Mat<T, LMT::Sym<nb_dim> > MV = vec_col_to_mat_sym(V); // because of the micmac with indices, one has to go back to the matrices
+
+    for (unsigned int IJ=0;  IJ<nb_vec; ++IJ)
+    for (unsigned int KL=IJ; KL<nb_vec; ++KL)
+    {
+        M(IJ,KL) = (MV(get_i<nb_dim>(IJ), get_i<nb_dim>(KL)) * MV(get_j<nb_dim>(KL), get_j<nb_dim>(IJ)) +
+                    MV(get_i<nb_dim>(IJ), get_j<nb_dim>(KL)) * MV(get_i<nb_dim>(KL), get_j<nb_dim>(IJ)))/2;
+    }
+    add_sqr_mat_col_sym(M); // and put the sqrt() afterwards
+    return M;
 }
 
 /// ----------------------------------------------------- /// normes ///
 
-template<class TV> typename LMT::TypeReduction<LMT::Multiplies, TV>::T norm_2_vec_col(const TV &V) // pour le type on n'a pas de typename TV::T car les vecteurs peuvent être hétérogènes
+template<class TV>
+typename LMT::TypeReduction<LMT::Multiplies, TV>::T norm_2_vec_col(const TV &V) // pour le type on n'a pas de typename TV::T car les vecteurs peuvent être hétérogènes
 {
-    return LMT::sqrt(self_prod_contr_vec_col(V));
-}
-
-template<class TV> typename LMT::TypeReduction<LMT::Multiplies, TV>::T norm_2_vec_col_with_sqr(const TV &V) // pour le type on n'a pas de typename TV::T car les vecteurs peuvent être hétérogènes
-{
-    return LMT::sqrt(self_prod_contr_vec_col_with_sqr(V));
+    return sqrt(self_dot_vec_col(V));
 }
 
 ///     ////////////////////////////////////////////////////////////////
@@ -420,96 +344,74 @@ template<class TV> typename LMT::TypeReduction<LMT::Multiplies, TV>::T norm_2_ve
 // only small symmetries are required for the representation of fourth order tensors as matrices
 // large symmetry implies that the representation matrix is symmetric
 
-/// ---------------------------------------------------- /// produit ///
+/// ------------------------------------------ /// cleaning matrices ///
 
-template<class TM> TM prod_mat_col(const TM &M1, const TM &M2)
+template<class TM>
+void remove_sqr_mat_col_gen(TM &M)
 {
-    static const unsigned nb_vec = M1.nb_rows();
-    static const unsigned nb_dim = std::ceil(double(nb_vec)/2);
+    static const unsigned int nb_vec = TM::static_rows;
+    static const unsigned int nb_dim = get_nb_dim(nb_vec);
 
-    LMT::Mat<typename TM::T> res; // must be gen since the product of two (even completely symmetric) tensors is not always symmetric (small symmetries are induced by the small symmetries of the original tensors, but the large symmetry is not)
-    res.set(0.);
-    for (unsigned i=0; i<nb_vec; ++i)
-    for (unsigned j=0; j<nb_vec; ++j)
+    for (unsigned int IJ=0;      IJ<nb_vec; ++IJ)
+    for (unsigned int KL=nb_dim; KL<nb_vec; ++KL)
     {
-        for (unsigned k=0; k<nb_dim; ++k)
-        {
-            res(i, j) += M1(i,k) * M2(k,j);
-        }
-        for (unsigned k=nb_dim; k<nb_vec; ++k)
-        {
-            res(i, j) += 2. * M1(i,k) * M2(k,j);
-        }
+        M(IJ,KL) /= sqrt(2.);
+        M(KL,IJ) /= sqrt(2.);
+    }
+}
+
+template<class TM>
+void remove_sqr_mat_col_sym(TM &M)
+{
+    static const unsigned int nb_vec = TM::static_rows;
+    static const unsigned int nb_dim = get_nb_dim(nb_vec);
+
+    for (unsigned int IJ=0;      IJ<nb_vec; ++IJ)
+    for (unsigned int KL=nb_dim; KL<nb_vec; ++KL)
+    {
+        if (KL >= IJ) M(IJ,KL) /= sqrt(2.);
+        if (IJ >= KL) M(KL,IJ) /= sqrt(2.);
+    }
+}
+
+/// ------------------------------------------- /// produit scalaire ///
+
+template<class TM>
+typename TM::T dot_mat_col(const TM &M1, const TM &M2)
+{
+    static const unsigned int nb_vec = TM::static_rows;
+
+    typedef typename TM::T T;
+    T res = 0.;
+    for (unsigned int IJ=0; IJ<nb_vec; ++IJ)
+    for (unsigned int KL=0; KL<nb_vec; ++KL)
+    {
+        res += M1(IJ,KL) * M2(IJ,KL);
     }
     return res;
 }
 
-/// ------------------------------- /// produit simplement contracté ///
-
-template<class TM, class TV> TV prod_mat_vec_col(const TM &M, const TV &V)
+template<class TM>
+typename TM::T self_dot_mat_col(const TM &M)
 {
-    static const unsigned nb_vec = V.size();
-    static const unsigned nb_dim = std::ceil(double(nb_vec)/2);
-
-    TV res;
-    res.set(0.);
-    for (unsigned i=0; i<nb_vec; ++i)
-    {
-        for (unsigned k=0; k<nb_dim; ++k)
-        {
-            res[i] += M(i,k) * V[k];
-        }
-        for (unsigned k=nb_dim; k<nb_vec; ++k)
-        {
-            res[i] += 2. * M(i,k) * V[k];
-        }
-    }
-    return res;
+    return dot_mat_col(M, M);
 }
 
-/// ------------------------------- /// produit doublement contracté ///
+/// --------------------------------------------- /// double produit ///
 
-template<class TM> typename TM::T prod_contr_mat_col(const TM &M1, const TM &M2)
+template<class TM, class TV>
+typename TM::T double_prod_mat_vec_col(const TM &M, const TV &V)
 {
-    static const unsigned nb_vec = M1.nb_rows();
-    static const unsigned nb_dim = std::ceil(double(nb_vec)/2);
-
-    typename TM::T res = 0.;
-    for (unsigned i=0; i<nb_dim; ++i)
-    {
-        for (unsigned j=0; j<nb_dim; ++j)
-        {
-            res += M1(i,j) * M2(i,j);
-        }
-        for (unsigned j=nb_dim; j<nb_vec; ++j)
-        {
-            res += 2. * M1(i,j) * M2(i,j);
-        }
-    }
-    for (unsigned i=nb_dim; i<nb_vec; ++i)
-    {
-        for (unsigned j=0; j<nb_dim; ++j)
-        {
-            res += 2. * M1(i,j) * M2(i,j);
-        }
-        for (unsigned j=0; j<nb_dim; ++j)
-        {
-            res += 4. * M1(i,j) * M2(i,j);
-        }
-    }
-    return res;
-}
-
-template<class TM> typename TM::T self_prod_contr_mat_col(const TM &M)
-{
-    return prod_contr_mat_col(M, M);
+    TV tmp = M * V;
+    return dot_vec_col(V, tmp);
 }
 
 /// ----------------------------------------------------- /// normes ///
 
-template<class TM> typename TM::T norm_2_mat_col(const TM &M)
+template<class TM>
+typename TM::T norm_2_mat_col(const TM &M)
 {
-    return LMT::sqrt(self_prod_contr_mat_col(M));
+    return sqrt(self_dot_mat_col(M));
 }
 
 #endif

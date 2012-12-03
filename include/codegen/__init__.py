@@ -7,7 +7,7 @@ from codegen import *
 def matrix(l):
     if ( len(l)==0 ):
         return ExMatrix( 0, 0 )
-    
+
     res = ExMatrix( len(l), len(l[0]) )
     for i in range(len(l)):
         for j in range(len(l[0])):
@@ -31,11 +31,11 @@ def mat_sym_to_vec_col(m):
     else:
         assert 0
     #for d in range(m.nb_rows()):
-        #for e in range(m.nb_rows()-d):
-         #res.append( m[e,d+e] )
+    #   for e in range(m.nb_rows()-d):
+    #     res.append( m[e,d+e] )
     #   for i in range(m.nb_rows()):
     #     res.append( m[i,i] )
-    #   
+    #
     #   for i in range(m.nb_rows()):
     #     for j in range(i):
     #       res.append( m[i,j] )
@@ -50,7 +50,7 @@ def vec_col_to_mat_sym(v):
    elif v.size()==6:
       res=matrix([ [v[0],v[3],v[4]] , [v[3],v[1],v[5]] , [v[4],v[5],v[2]] ])
    return res
-      
+
 def mul(A,B):
   if isinstance(B,ExVector):
     res = []
@@ -60,7 +60,7 @@ def mul(A,B):
         tmp += A[i,j] * B[j]
       res.append( tmp )
     return vector( res )
-    
+
   assert A.nb_cols()==B.nb_rows()
   res = [ [ 0.0 for j in range(B.nb_cols()) ] for i in range(A.nb_rows()) ]
   for i in range(A.nb_rows()):
@@ -86,14 +86,13 @@ def trace_sym_col(sigma,epstest):
     for i in range(dim,epstest.size()): res += 2 * sigma[i] * epstest[i]
     return res
 
-## procedure recursive pour 
+## procedure recursive pour
 #def multivariate_poly( coeffs, variables, cpt_variable = 0 ):
     #res = Ex(0)
 
     #degree,cpt = 0,0
     ##while cpt < len( coeffs ):
-        
-    
+
 def get_taylor_expansion( expr, beg, var, deg_poly_max ):
     res = ExVector()
     r = 1.0
@@ -103,8 +102,6 @@ def get_taylor_expansion( expr, beg, var, deg_poly_max ):
             expr = expr.diff( var )
             r /= i + 1
     return res
-
-
 
 def minimize_iteration( expr, variables, old_values = ExVector() ):
     if type( variables ) != ExVector:
@@ -131,7 +128,7 @@ def minimize_iteration( expr, variables, old_values = ExVector() ):
             V[i] = V[i].subs( variables[n], old_values[n] )
             for j in range( nb_unknowns ):
                 M[i,j] = M[i,j].subs( variables[n], old_values[n] )
-    
+
     return solve_with_lu( lu( M ), V )
     #return M.inverse() * V
 
@@ -147,7 +144,7 @@ def flatten(L):
     R = []
     _flatten(L,R.append)
     return R
-    
+
 def lu( mat ):
     fact = ExMatrix( mat.nb_rows(), mat.nb_cols() )
     for row in range( mat.nb_rows() ):
@@ -241,81 +238,77 @@ def pos_part( e ):
 def clamp( x, m, M ):
     return M - pos_part( M - m - pos_part( x - m ) )
 
-
 # partie positive affectee de l'endommagement d'un vecteur colonne
 # C est la matrice symetrique definie positive de souplesse endommagee
 # S est le vecteur contrainte
-def pos_part_dmg_vec_col(C, S):
-    H = sqr_root_mat_sym(C)
-    S_dmg = mul(H, S)
-    S_dmg_pos = pos_part_vec_col(S_dmg)
-    S_dmg_pos = mul(chol_inv(H), S_dmg_pos)
-    return S_dmg_pos
+#def pos_part_dmg_vec_col(C, S):
+    #H = sqr_root_mat_sym(C)
+    #S_dmg = mul(H, S)
+    #S_dmg_pos = pos_part_vec_col(S_dmg)
+    #S_dmg_pos = mul(chol_inv(H), S_dmg_pos)
+    #return S_dmg_pos
 
 # partie positive d'un vecteur colonne (OK)
-def pos_part_vec_col(V):
-    V_pos = vec_col_to_mat_sym(V)
-    V_pos = pos_part_mat_sym(V_pos)
-    V_pos = mat_sym_to_vec_col(V_pos)
-    return V_pos
+#def pos_part_vec_col(V):
+    #V_pos = vec_col_to_mat_sym(V)
+    #V_pos = pos_part_mat_sym(V_pos)
+    #V_pos = mat_sym_to_vec_col(V_pos)
+    #return V_pos
 
 # partie negative d'un vecteur colonne (OK)
-def neg_part_vec_col(V):
-    V_neg = vec_col_to_mat_sym(V)
-    V_neg = neg_part_mat_sym(V_neg)
-    V_neg = mat_sym_to_vec_col(V_neg)
-    return V_neg
-
+#def neg_part_vec_col(V):
+    #V_neg = vec_col_to_mat_sym(V)
+    #V_neg = neg_part_mat_sym(V_neg)
+    #V_neg = mat_sym_to_vec_col(V_neg)
+    #return V_neg
 
 # partie positive d'une matrice symetrique (OK?)
-def pos_part_mat_sym( M ):
-    M_eigen_values = M.find_eigen_values_sym()
-    M_eigen_vectors = M.find_eigen_vectors_sym(M_eigen_values)
-    DM_pos = diag_mat_from_vec( pos_part( M_eigen_values ) )
-    M_pos = mul( mul( M_eigen_vectors, DM_pos ), M_eigen_vectors.transpose() )
-    return M_pos
+#def pos_part_mat_sym( M ):
+    #M_eigen_values = M.find_eigen_values_sym()
+    #M_eigen_vectors = M.find_eigen_vectors_sym(M_eigen_values)
+    #DM_pos = diag_mat_from_vec( pos_part( M_eigen_values ) )
+    #M_pos = mul( mul( M_eigen_vectors, DM_pos ), M_eigen_vectors.transpose() )
+    #return M_pos
 
 # partie negative d'une matrice symetrique (OK?)
-def neg_part_mat_sym(M):
-    M_eigen_values = M.find_eigen_values_sym()
-    M_eigen_vectors = M.find_eigen_vectors_sym(M_eigen_values)
-    DM_neg = diag_mat_from_vec( neg_part( M_eigen_values ) )
-    M_neg = mul( mul( M_eigen_vectors, DM_neg ), M_eigen_vectors.transpose() )
-    return M_neg
+#def neg_part_mat_sym(M):
+    #M_eigen_values = M.find_eigen_values_sym()
+    #M_eigen_vectors = M.find_eigen_vectors_sym(M_eigen_values)
+    #DM_neg = diag_mat_from_vec( neg_part( M_eigen_values ) )
+    #M_neg = mul( mul( M_eigen_vectors, DM_neg ), M_eigen_vectors.transpose() )
+    #return M_neg
 
 # partie positive d'une matrice diagonale (OK)
-def pos_part_mat_diag(M):
-    dim = M.nb_rows()
-    res = ExMatrix(dim, dim)
-    for i in range(dim):
-        res[i, i] = M(i, i) * heavyside(M(i, i))
-    return res
+#def pos_part_mat_diag(M):
+    #dim = M.nb_rows()
+    #res = ExMatrix(dim, dim)
+    #for i in range(dim):
+        #res[i, i] = M(i, i) * heavyside(M(i, i))
+    #return res
 
 # partie negative d'une matrice diagonale (OK)
-def neg_part_mat_diag(M):
-    dim = M.nb_rows()
-    res = ExMatrix(dim, dim)
-    for i in range(dim):
-        res[i, i] = M(i, i) * (1. - heavyside(M(i, i)))
-    return res
+#def neg_part_mat_diag(M):
+    #dim = M.nb_rows()
+    #res = ExMatrix(dim, dim)
+    #for i in range(dim):
+        #res[i, i] = M(i, i) * (1. - heavyside(M(i, i)))
+    #return res
 
 # racine carree d'une matrice symetrique definie positive (OK?)
-def sqr_root_mat_sym(M):
-    M_eigen_values = M.find_eigen_values_sym()
-    M_eigen_vectors = M.find_eigen_vectors_sym(M_eigen_values)
-    DM_neg = diag_mat_from_vec( sqrt( M_eigen_values ) )
-    M_neg = mul( mul( M_eigen_vectors, DM_neg ), M_eigen_vectors.transpose() )
-    return M_neg
+#def sqr_root_mat_sym(M):
+    #M_eigen_values = M.find_eigen_values_sym()
+    #M_eigen_vectors = M.find_eigen_vectors_sym(M_eigen_values)
+    #DM_neg = diag_mat_from_vec( sqrt( M_eigen_values ) )
+    #M_neg = mul( mul( M_eigen_vectors, DM_neg ), M_eigen_vectors.transpose() )
+    #return M_neg
 
 # racine carree d'une matrice positive (OK)
-def sqr_root_mat_diag(M):
-    dim = M.nb_rows()
-    res = ExMatrix(dim, dim)
-    for i in range(dim):
-        res[i, i] = sqrt(M(i, i))
-    return res
-
-
+#def sqr_root_mat_diag(M):
+    #dim = M.nb_rows()
+    #res = ExMatrix(dim, dim)
+    #for i in range(dim):
+        #res[i, i] = sqrt(M(i, i))
+    #return res
 
 #
 def subs_vec( val, old, new ):

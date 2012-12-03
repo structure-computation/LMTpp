@@ -1,6 +1,9 @@
 #include "write_code_language_cpp.h"
+#include "exmatrix.h"
+#include "op.h"
 #include <sstream>
 #include <iostream>
+#include <assert.h>
 
 using namespace std;
 
@@ -12,17 +15,96 @@ Write_code_language_cpp::Write_code_language_cpp(const std::string tmp_type_,uns
     nb_registers = 0;
     nb_written_lines = 0;
     nb_exp_to_end_line = 5;
+    nb_reg_solve = 0;
+    nb_solve_lab = 0;
 }
 
 void Write_code_language_cpp::write_ex(std::ostream &os,const Ex &ex,unsigned nb_times_ex_will_be_used) {
-    
+
+    //
+    if ( ex.op->type == Op::Solver ) {
+        ex.op->beg_reg_solve = nb_reg_solve;
+
+        // preparation
+        // int nb_unk = 0;
+        ExVector res;
+        for( Op **b = ex.op->get_solver_beg(); *b; ++b ) {
+            int nr = nb_reg_solve++;
+
+            std::ostringstream ss;
+            ss << "_S" << nr;
+            res.push_back( Ex( ss.str().c_str() ) );
+
+            write_beg_spaces( os );
+            os << tmp_type << " _S" << nr << " = ";
+            unsigned num_reg_children[ 2 ];
+            write_end_line( os, inc_ref( *b ), num_reg_children );
+            os << "\n";
+        }
+
+        // loop
+        write_beg_spaces( os );
+        os << "while ( true ) {\n";
+
+        ExVector eqs, unk;
+        for( Op **b = ex.op->get_solver_eqs(); *b; ++b )
+            eqs.push_back( inc_ref( *b ) );
+        for( Op **b = ex.op->get_solver_unk(); *b; ++b )
+            unk.push_back( inc_ref( *b ) );
+        // std::cout << "eqs " << eqs << std::endl;
+        //std::cout << "unk " << unk << std::endl;
+        ExMatrix K( eqs.size(), unk.size() );
+        ExVector F( eqs.size() );
+
+        std::map<Ex,Ex,Ex::ExMapCmp> sm;
+        for( int j = 0; j < unk.size(); ++j )
+            sm[ unk[ j ] ] = res[ j ];
+
+        for( int i = 0; i < eqs.size(); ++i ) {
+            F( i ) = eqs[ i ].subs( sm );
+            for( int j = 0; j < unk.size(); ++j )
+                K( i, j ) = eqs[ i ].diff( unk[ j ] ).subs( sm );
+        }
+
+        ExVector delta = K.solve( F );
+
+        Write_code wc( tmp_type.c_str(), nb_spaces + 4 );
+        for( int i = 0; i < delta.size(); ++i ) {
+            //std::ostringstream ss; ss << res[ i ];
+            std::ostringstream ss; ss << "delta_" << i;
+            wc.add( delta[ i ], ss.str(), Write_code::Declare );
+        }
+        os << wc.to_string();
+
+        // os << res[ i ] << " -= " << "delta_" << i << ";\n";
+        write_beg_spaces( os );
+        os << "    " << tmp_type << " max_delta = 0;\n";
+        for( int i = 0; i < delta.size(); ++i ) {
+            write_beg_spaces( os );
+            os << "    " << res[ i ] << " -= delta_" << i << "; max_delta = max( max_delta, abs( delta_" << i << " ) );\n";
+        }
+
+        write_beg_spaces( os );
+        os << "    if ( max_delta < 1e-6 ) break;\n";
+
+        write_beg_spaces( os );
+        os << "}\n";
+
+        //std::cout << K << std::endl;
+        //std::cout << F << std::endl;
+
+        return;
+    }
+
     // we don't store symbols and number in registers
-    if ( ex.nb_children()==0 ) {
+    if ( ex.nb_children() == 0 ) {
         write_var(os,ex,ex.to_string()+";");
         return;
     }
-        
-    // free preceding registers assigned to child will not be used anymore
+
+
+
+    // free preceding registers assigned to children will not be used anymore
     int freed_reg = -1;
     unsigned num_reg_children[2];
     for(unsigned i=0;i<ex.nb_children();++i) {
@@ -78,14 +160,25 @@ void Write_code_language_cpp::write_ex(std::ostream &os,const Ex &ex,unsigned nb
 }
 
 void Write_code_language_cpp::write_end_line(std::ostream &os,const Ex &ex,unsigned *num_reg_children) {
-    if ( ex.nb_children()==0 ) // hum
+    if ( ex.op->type == Op::Solver ) {
+        // assert( 0 ); // TODO
+        os << "Pouet";
+    }
+    else if ( ex.op->type == Op::SubSol ) {
+        // assert( 0 ); // TODO
+        // os << "Pouet";
+        os << "_S" << ex.op->data.children[ 0 ]->beg_reg_solve + ex.op->val;
+    }
+    else if ( ex.nb_children() == 0 ) // hum
         os << ex.graphviz_repr() << "";
-    else if ( ex.nb_children()==1 ) {
+    else if ( ex.nb_children() == 1 ) {
         std::string gr( ex.graphviz_repr() );
         
         std::ostringstream c;
-        if ( ex.child(0).nb_children()==0 ) c << ex.child(0).to_string();
-        else                                c << "reg" << num_reg_children[0];
+        if ( ex.child(0).nb_children()==0 and ex.child(0).op->type != Op::Solver )
+            c << ex.child(0).to_string();
+        else
+            c << "reg" << num_reg_children[0];
         
         if ( gr=="-" )
             os << "-" << c.str() << "";
