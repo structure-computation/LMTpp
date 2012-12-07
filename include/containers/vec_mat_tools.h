@@ -94,7 +94,7 @@ inline unsigned int get_j(const unsigned int &IJ)
 /// ------------------------------------------- /// cleaning vectors ///
 
 template<class TV>
-void remove_sqr_vec_col(TV &V)
+void rem_sqr_vec_col(TV &V)
 {
     static const unsigned int nb_vec = TV::static_size;
     static const unsigned int nb_dim = get_nb_dim(nb_vec);
@@ -347,7 +347,7 @@ typename LMT::TypeReduction<LMT::Multiplies, TV>::T norm_2_vec_col(const TV &V) 
 /// ------------------------------------------ /// cleaning matrices ///
 
 template<class TM>
-void remove_sqr_mat_col_gen(TM &M)
+void rem_sqr_mat_col_gen(TM &M)
 {
     static const unsigned int nb_vec = TM::static_rows;
     static const unsigned int nb_dim = get_nb_dim(nb_vec);
@@ -361,7 +361,7 @@ void remove_sqr_mat_col_gen(TM &M)
 }
 
 template<class TM>
-void remove_sqr_mat_col_sym(TM &M)
+void rem_sqr_mat_col_sym(TM &M)
 {
     static const unsigned int nb_vec = TM::static_rows;
     static const unsigned int nb_dim = get_nb_dim(nb_vec);
