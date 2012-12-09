@@ -94,7 +94,7 @@ inline unsigned int get_j(const unsigned int &IJ)
 /// ------------------------------------------- /// cleaning vectors ///
 
 template<class TV>
-void remove_sqr_vec_col(TV &V)
+void rem_sqr_vec_col(TV &V)
 {
     static const unsigned int nb_vec = TV::static_size;
     static const unsigned int nb_dim = get_nb_dim(nb_vec);
@@ -159,6 +159,22 @@ LMT::Vec<typename TM::T, get_nb_vec(TM::static_rows)> mat_sym_to_vec_col(const T
     for (unsigned int IJ=0;      IJ<nb_dim; ++IJ) V[IJ] = M(get_i<nb_dim>(IJ), get_j<nb_dim>(IJ));
     for (unsigned int IJ=nb_dim; IJ<nb_vec; ++IJ) V[IJ] = M(get_i<nb_dim>(IJ), get_j<nb_dim>(IJ)) * sqrt(2.);
     return V;
+}
+
+/// ------------------------------------------------------ /// unity ///
+
+template<unsigned int nb_dim>
+inline LMT::Mat<double, LMT::Diag<nb_dim> > I2_mat()
+{
+    LMT::Mat<double, LMT::Diag<nb_dim> > res;
+    res.set(1.);
+    return res;
+}
+
+template<unsigned int nb_dim>
+inline LMT::Vec<double, get_nb_vec(nb_dim)> I2_vec()
+{
+    return mat_sym_to_vec_col(I2_mat<nb_dim>());
 }
 
 /// ------------------------------------------------------ /// trace ///
@@ -374,6 +390,13 @@ void remove_sqr_mat_col_sym(TM &M)
     }
 }
 
+/// ------------------------------------------------------ /// unity ///
+
+template<unsigned int nb_dim>
+inline LMT::Mat<double, LMT::Diag<get_nb_vec(nb_dim)> > I4_mat()
+{
+    return self_sym_tens_prod_vec_col(I2_vec<nb_dim>());
+}
 /// ------------------------------------------- /// produit scalaire ///
 
 template<class TM>
