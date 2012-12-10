@@ -107,6 +107,9 @@ void add_sqr_vec_col(TV &V)
 {
     static const unsigned int nb_vec = TV::static_size;
     static const unsigned int nb_dim = get_nb_dim(nb_vec);
+    
+//     PRINT(nb_vec);
+//     PRINT(nb_dim);
 
     for (unsigned int IJ=nb_dim; IJ<nb_vec; ++IJ) V[IJ] *= sqrt(2.);
 }
