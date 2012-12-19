@@ -387,6 +387,22 @@ template<class TE> typename TE::Pvec sample_tangent( const TE &e ) {
     return typename TE::Pvec(typename TE::T(0));
 }
 
+
+/** permute element if jacobian is < 0 */
+struct PermutationIfJacNeg {
+    template<class TE> void operator()( TE &e ) const {
+        typename TE::TNode *n[ TE::nb_nodes ];
+        for( int i = 0; i < TE::nb_nodes; ++i )
+            n[ i ] = e.nodes[ i ];
+
+        permutation_if_jac_neg( typename TE::NE(), n );
+
+        for( int i = 0; i < TE::nb_nodes; ++i )
+            e.nodes[ i ] = n[ i ];
+    }
+};
+
+
 };
 
 #endif

@@ -54,7 +54,7 @@ void read_msh_2( TM &m,std::istream &is, unsigned nvi, const VarTag &vt ) throw 
     if ( not nvi )
         nvi = TM::nvi;
     //
-    int ctxte=0;
+    int ctxte = 0;
 
     // correspondance between number in file -> ref in mesh
     map<int,TNode *> map_num_node;

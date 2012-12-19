@@ -614,23 +614,23 @@ bool refinement_if_length_sup( TM &m, T max_length, bool spread_cut = false ) {
 */
 template<class TIMG1,class TIMG2=TIMG1>
 struct LevelSetImageRefinement {
-    LevelSetImageRefinement( const TIMG1 &ls_crack, const TIMG2 &ls_front ) : ls_crack( ls_crack ), ls_front( ls_front ) {}
+    LevelSetImageRefinement( const TIMG1 &ls_crack, const TIMG2 &ls_front, double eps = 1e-1 ) : ls_crack( ls_crack ), ls_front( ls_front ), eps( eps ) {}
     template<class TE> double operator()( TE &e ) const {
-        double step = 1.0/measure( e );
-        for(double x=0;x<=1;x+=step) {
-            typename TE::Pvec P0 = e.pos(0) + (e.pos(1)-e.pos(0))*(x-step);
+        double step = 1.0 / measure( e );
+        for(double x = 0; x <= 1; x += step ) {
+            typename TE::Pvec P0 = e.pos(0) + ( e.pos(1) - e.pos(0) ) * ( x - step );
             if ( ls_front( P0 ) > 0 )
                 return 0;
-            typename TE::Pvec P1 = e.pos(0) + (e.pos(1)-e.pos(0))*(x     );
+            typename TE::Pvec P1 = e.pos(0) + ( e.pos(1) - e.pos(0) ) * ( x        );
             bool s1 = ls_crack( P0 ) > 0;
             bool s2 = ls_crack( P1 ) > 0;
             if ( s1 xor s2 ) {
-                if ( x < 0.4 ) {
-                    e.node(0)->pos = P1;
+                if ( x < eps ) {
+                    e.node( 0 )->pos = P1;
                     return 0;
                 }
-                if ( x > 0.6 ) {
-                    e.node(1)->pos = P1;
+                if ( x > 1 - eps ) {
+                    e.node( 1 )->pos = P1;
                     return 0;
                 }
                 return x;
@@ -640,6 +640,7 @@ struct LevelSetImageRefinement {
     }
     const TIMG1 &ls_crack;
     const TIMG2 &ls_front;
+    double eps;
 };
 
 /*!
