@@ -100,7 +100,7 @@ public:
         pvu_name += "_" + to_string( iter ) + ".vtu";
         // std::cout << pvu_name << std::endl;
     
-        pvu_files[ time_step ].push_back( pvu_name );
+        pvu_files[ iter ].push_back( pvu_name );
         std::ofstream f( pvu_name.c_str() );
         
         write_mesh_vtk<true>( f, m, display_fields );
