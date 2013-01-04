@@ -1328,88 +1328,105 @@ public:
     }
     ///
     bool solve_system_(ScalarType iterative_criterium, const Number<1> &n_wont_add_nz, const Number<0> &sym) {
-        #if LDL
-        // PRINT("LDL");
-        solver.get_factorization(matrices(Number<0>()),false);
-        vectors[0] = sollicitation;
-        solver.solve( vectors[0] );
-        #elif WITH_CHOLMOD
-        // PRINT("CHOLMOD");
-        if ( not matrices(Number<0>()).get_factorization() ) {
-            std::cout << "Bing. Inversion error" << std::endl;
-            return false;
-        }
-        vectors[0] = matrices(Number<0>()).solve( sollicitation );
-        #elif WITH_MUMPS
-        // PRINT("MUMPS");
-        solver.get_factorization( matrices(Number<0>()), false, true );
-        vectors[0] = solver.solve( sollicitation );
-        #else
-        // PRINT("LMT");
-      	try {
-            //             std::cout << "Resolution autre " << std::endl;
-            vectors[0] = inv(matrices(Number<0>())) * sollicitation;
+        try {
+            if ( boolean_(iterative_criterium) ) {
+                std::cout << "Solveur iteratif type factorisation de Cholesky incomplete" << std::endl << std::endl;
+                Mat<ScalarType,Sym<>,SparseLine<> > mm = matrices(Number<0>());
+                incomplete_chol_factorize( mm );
+                solve_using_incomplete_chol_factorize( mm, matrices(Number<0>()), sollicitation, vectors[0], iterative_criterium, true );
+            }
+            else {
+                #if WITH_UMFPACK
+                std::cout << "Solveur UMFPACK" << std::endl << std::endl;
+                if ( not matrices(Number<0>()).get_factorization() ) {
+                    std::cout << "Bing. Inversion error" << std::endl << std::endl;
+                    return false;
+                }
+                vectors[0] = matrices(Number<0>()).solve( sollicitation );
+                #elif WITH_MUMPS
+                std::cout << "Solveur MUMPS" << std::endl << std::endl;
+                solver.get_factorization( matrices(Number<0>()), false, true );
+                vectors[0] = solver.solve( sollicitation );
+				#else
+                std::cout << "Solveur Inv" << std::endl << std::endl;
+                vectors[0] = inv(matrices(Number<0>())) * sollicitation;
+				#endif
+            }
+
         } catch(const SolveException &e) { std::cerr << "system not inversible" << std::endl; return false; }
-        #endif
         return true;
     }
     ///
     bool solve_system_(ScalarType iterative_criterium, const Number<1> &n_wont_add_nz, const Number<1> &sym) {
-        #if WITH_CHOLMOD
-        //PRINT("CHOLMOD");
-        if ( not matrices(Number<0>()).get_factorization() ) {
-            std::cout << "Bing. Inversion error" << std::endl;
-            return false;
-        }
-        vectors[0] = matrices(Number<0>()).solve( sollicitation );
-        #elif WITH_MUMPS
-        //PRINT("MUMPS");
-        solver.get_factorization( matrices( Number<0>() ), false, true );
-        vectors[0] = solver.solve( sollicitation );
-        #else
-        //PRINT("LMT");
-        if ( boolean_(iterative_criterium) ) {
-            Mat<ScalarType,Sym<>,SparseLine<> > mm = matrices(Number<0>());
-            incomplete_chol_factorize( mm );
-            solve_using_incomplete_chol_factorize( mm, matrices(Number<0>()), sollicitation, vectors[0], iterative_criterium );
-            return true;
-        }
-        try {
-            vectors[0] = inv(matrices(Number<0>())) * sollicitation;
-        } catch(const SolveException &e) { std::cerr << "system not inversible" << std::endl; return false; }
-        #endif
-        return true;
-    }
-
-    ///
-    bool solve_system_(ScalarType iterative_criterium, const Number<0> &n_wont_add_nz, const Number<0> &sym) {
-        try {
-            //if ( MatCarac<0>::symm and matrices(Number<0>()).nb_rows() > 1000000 ) {
-            //    LDL_solver ls;
-            //    ls.get_factorization( matrices(Number<0>()) );
-            //    ls.solve( vectors[0] );
-            //}
-            //else
-            // PRINT("LMT");
-            vectors[0] = inv(matrices(Number<0>())) * sollicitation;
-        } catch(const SolveException &e) { std::cerr << "system not inversible" << std::endl; return false; }
-        return true;
-    }
-    bool solve_system_(ScalarType iterative_criterium, const Number<0> &n_wont_add_nz, const Number<1> &sym) {
         try {
             if ( boolean_(iterative_criterium) ) {
+                std::cout << "Solveur iteratif type factorisation de Cholesky incomplete" << std::endl << std::endl;
                 Mat<ScalarType,Sym<>,SparseLine<> > mm = matrices(Number<0>());
                 incomplete_chol_factorize( mm );
-                solve_using_incomplete_chol_factorize( mm, matrices(Number<0>()), sollicitation, vectors[0], iterative_criterium );
+                solve_using_incomplete_chol_factorize( mm, matrices(Number<0>()), sollicitation, vectors[0], iterative_criterium, true );
             }
             else {
-                #if LDL
-                std::cout << "Solveur LDL" << std::endl;
+                #if WITH_CHOLMOD
+                std::cout << "Solveur CholMod" << std::endl << std::endl;
+                if ( not matrices(Number<0>()).get_factorization() ) {
+                    std::cout << "Bing. Inversion error" << std::endl << std::endl;
+                    return false;
+                }
+                vectors[0] = matrices(Number<0>()).solve( sollicitation );
+                #elif WITH_MUMPS
+                std::cout << "Solveur MUMPS" << std::endl << std:: endl;
+                solver.get_factorization( matrices( Number<0>() ), false, true );
+                vectors[0] = solver.solve( sollicitation );
+                #elif LDL
+                std::cout << "Solveur LDL" << std::endl << std:: endl;
                 solver.get_factorization( matrices(Number<0>()), false );
                 vectors[0] = sollicitation;
                 solver.solve( vectors[0] );
                 #else
-                // PRINT("LMT");
+                std::cout << "Solveur Inv" << std::endl << std::endl << std:: endl;
+                vectors[0] = inv(matrices(Number<0>())) * sollicitation;
+                #endif
+            }
+        } catch(const SolveException &e) { std::cerr << "system not inversible" << std::endl; return false; }
+        return true;
+    }
+
+    ///
+    bool solve_system_(ScalarType iterative_criterium, const Number<0> &n_wont_add_nz, const Number<0> &sym) { // pas de Cholesky, pas de LDL
+        try {
+            if ( boolean_(iterative_criterium) ) {
+                std::cout << "Solveur iteratif type factorisation de Cholesky incomplete" << std::endl << std::endl;
+                Mat<ScalarType,Sym<>,SparseLine<> > mm = matrices(Number<0>());
+                incomplete_chol_factorize( mm );
+                solve_using_incomplete_chol_factorize( mm, matrices(Number<0>()), sollicitation, vectors[0], iterative_criterium, true );
+            }
+            else {
+                std::cout << "Solveur Inv" << std::endl << std:: endl;
+                vectors[0] = inv(matrices(Number<0>())) * sollicitation;
+            }
+        } catch(const SolveException &e) { std::cerr << "system not inversible" << std::endl; return false; }
+        return true;
+    }
+    bool solve_system_(ScalarType iterative_criterium, const Number<0> &n_wont_add_nz, const Number<1> &sym) { // pas de Cholesky
+        try {
+            if ( boolean_(iterative_criterium) ) {
+                std::cout << "Solveur iteratif type factorisation de Cholesky incomplete" << std::endl << std::endl;
+                Mat<ScalarType,Sym<>,SparseLine<> > mm = matrices(Number<0>());
+                incomplete_chol_factorize( mm );
+                solve_using_incomplete_chol_factorize( mm, matrices(Number<0>()), sollicitation, vectors[0], iterative_criterium, true );
+            }
+            else {
+                #if WITH_MUMPS
+                std::cout << "Solveur MUMPS" << std::endl << std:: endl;
+                solver.get_factorization( matrices( Number<0>() ), false, true );
+                vectors[0] = solver.solve( sollicitation );
+                #elif LDL
+                std::cout << "Solveur LDL" << std::endl << std:: endl;
+                solver.get_factorization( matrices(Number<0>()), false );
+                vectors[0] = sollicitation;
+                solver.solve( vectors[0] );
+                #else
+                std::cout << "Solveur Inv" << std::endl << std:: endl;
                 vectors[0] = inv(matrices(Number<0>())) * sollicitation;
                 #endif
             }
