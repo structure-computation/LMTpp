@@ -135,10 +135,10 @@ public:
     virtual unsigned get_nb_vectors(){ return nb_vectors; }
 
 private:
-#if LDL
-    LDL_solver solver;
-#elif WITH_MUMPS
+#if WITH_MUMPS
     MUMPS_solver solver;
+#elif LDL
+    LDL_solver solver;
 #endif
     template<unsigned nm,unsigned n,unsigned tne> struct MatCaracElem {
         typedef typename TM::TElemList::template SubType<n>::T TE;
@@ -1330,10 +1330,10 @@ public:
     bool solve_system_(ScalarType iterative_criterium, const Number<1> &n_wont_add_nz, const Number<0> &sym) {
         try {
             if ( boolean_(iterative_criterium) ) {
-                std::cout << "Solveur iteratif type factorisation de Cholesky incomplete" << std::endl << std::endl;
-                Mat<ScalarType,Sym<>,SparseLine<> > mm = matrices(Number<0>());
-                incomplete_chol_factorize( mm );
-                solve_using_incomplete_chol_factorize( mm, matrices(Number<0>()), sollicitation, vectors[0], iterative_criterium, true );
+                std::cout << "Solveur iteratif type factorisation LU incomplete" << std::endl << std::endl;
+                Mat<ScalarType, Gen<>, SparseLU > mm = matrices(Number<0>());
+                lu_factorize( mm );
+                solve_using_incomplete_lu_factorize( mm, Mat<ScalarType, Gen<>, SparseLU >(matrices(Number<0>())), sollicitation, vectors[0], iterative_criterium );
             }
             else {
                 #if WITH_UMFPACK
@@ -1363,7 +1363,7 @@ public:
                 std::cout << "Solveur iteratif type factorisation de Cholesky incomplete" << std::endl << std::endl;
                 Mat<ScalarType,Sym<>,SparseLine<> > mm = matrices(Number<0>());
                 incomplete_chol_factorize( mm );
-                solve_using_incomplete_chol_factorize( mm, matrices(Number<0>()), sollicitation, vectors[0], iterative_criterium, true );
+                solve_using_incomplete_chol_factorize( mm, Mat<ScalarType,Sym<>,SparseLine<> >( matrices(Number<0>()) ), sollicitation, vectors[0], iterative_criterium );
             }
             else {
                 #if WITH_CHOLMOD
@@ -1392,13 +1392,13 @@ public:
     }
 
     ///
-    bool solve_system_(ScalarType iterative_criterium, const Number<0> &n_wont_add_nz, const Number<0> &sym) { // pas de Cholesky, pas de LDL
+    bool solve_system_(ScalarType iterative_criterium, const Number<0> &n_wont_add_nz, const Number<0> &sym) {
         try {
             if ( boolean_(iterative_criterium) ) {
-                std::cout << "Solveur iteratif type factorisation de Cholesky incomplete" << std::endl << std::endl;
-                Mat<ScalarType,Sym<>,SparseLine<> > mm = matrices(Number<0>());
-                incomplete_chol_factorize( mm );
-                solve_using_incomplete_chol_factorize( mm, matrices(Number<0>()), sollicitation, vectors[0], iterative_criterium, true );
+                std::cout << "Solveur iteratif type factorisation LU incomplete" << std::endl << std::endl;
+                Mat<ScalarType, Gen<>, SparseLU > mm = matrices(Number<0>());
+                lu_factorize( mm );
+                solve_using_incomplete_lu_factorize( mm, Mat<ScalarType, Gen<>, SparseLU >( matrices(Number<0>()) ), sollicitation, vectors[0], iterative_criterium );
             }
             else {
                 std::cout << "Solveur Inv" << std::endl << std:: endl;
@@ -1407,13 +1407,13 @@ public:
         } catch(const SolveException &e) { std::cerr << "system not inversible" << std::endl; return false; }
         return true;
     }
-    bool solve_system_(ScalarType iterative_criterium, const Number<0> &n_wont_add_nz, const Number<1> &sym) { // pas de Cholesky
+    bool solve_system_(ScalarType iterative_criterium, const Number<0> &n_wont_add_nz, const Number<1> &sym) {
         try {
             if ( boolean_(iterative_criterium) ) {
                 std::cout << "Solveur iteratif type factorisation de Cholesky incomplete" << std::endl << std::endl;
                 Mat<ScalarType,Sym<>,SparseLine<> > mm = matrices(Number<0>());
                 incomplete_chol_factorize( mm );
-                solve_using_incomplete_chol_factorize( mm, matrices(Number<0>()), sollicitation, vectors[0], iterative_criterium, true );
+                solve_using_incomplete_chol_factorize( mm, Mat<ScalarType,Sym<>,SparseLine<> >( matrices(Number<0>()) ), sollicitation, vectors[0], iterative_criterium );
             }
             else {
                 #if WITH_MUMPS
