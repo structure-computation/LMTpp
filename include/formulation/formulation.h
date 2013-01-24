@@ -78,9 +78,16 @@ public:
 };
 
 /*!
-    Pour le choix du solveur : wont_add_nz=false implique utilisation des solveurs internes.
-        wont_add_nz=true implique utilisation de LDL, sauf si "-DWITH_CHOLMOD -DWITH_UMFPACK" sont dans les directives de compilation auquel cas on utilise CholMod (symetrique) ou UMFPACK (non symetrique)
-
+    Pour le choix du solveur :
+    
+    - si wont_add_nz=true (utilisation d'un solveur externe si possible (CholMod si sym=true, UMFPACK si sym=false par exemple), solveur interne (LDL, Inv,...) sinon),
+        - si sym=false (pas CholMod, pas LDL), appel du solveur UMFPACK (si "-DWITH_UMFPACK" dans directive de compil) ou MUMPS (si "-DWITH_MUMPS" dans directive de compil) ou Inv (sinon) -> il faudrait peut-être inverser l'appel entre MUMPS et UMFPACK (si "-DWITH_UMFPACK -DWITH_MUMPS" dans directive de compil), car il me semble que MUMPS est plus rapide que UMFPACK, quand penses-tu Hugal ? Ca vaudrait le coup de faire un test...
+        - si sym=true, appel du solveur CholMod (si "-DWITH_CHOLMOD" dans directive de compil) ou MUMPS (si "-DWITH_MUMPS" dans directive de compil) ou LDL (si "-DLDL" dans directive de compil) ou Inv (sinon) -> OK, cas classique.
+        
+    - si wont_add_nz=false (utilisation d'un solveur interne, donc pas CholMod, pas UMFPACK, pas MUMPS qui font appel à des librairies externes),
+        - si sym=false (pas CholdMod, pas LDL), appel du solveur Inv -> à réfléchir, c'est très lent, pas efficace...
+        - si sym=true, appel du solveur MUMPS (si "-DWITH_MUMPS" dans directive de compil) ou LDL (si "-DLDL" dans directive de compil) ou Inv (sinon) -> là on fait appel au solveur MUMPS bien que ce soit un solveur externe, car si "-DWITH_MUMPS -DLDL" dans directive de compil, on privilegie MUMPS
+        
     Mais qu'est-ce qu'une directive de compilation ?
         cf. CPPFLAGS dans vasoSConstuction
 
@@ -1330,25 +1337,25 @@ public:
     bool solve_system_(ScalarType iterative_criterium, const Number<1> &n_wont_add_nz, const Number<0> &sym) {
         try {
             if ( boolean_(iterative_criterium) ) {
-                std::cout << "Solveur iteratif type factorisation LU incomplete" << std::endl << std::endl;
+//                 std::cout << "Solveur iteratif type factorisation LU incomplete" << std::endl << std::endl;
                 Mat<ScalarType, Gen<>, SparseLU > mm = matrices(Number<0>());
                 lu_factorize( mm );
                 solve_using_incomplete_lu_factorize( mm, Mat<ScalarType, Gen<>, SparseLU >(matrices(Number<0>())), sollicitation, vectors[0], iterative_criterium );
             }
             else {
                 #if WITH_UMFPACK
-                std::cout << "Solveur UMFPACK" << std::endl << std::endl;
+//                 std::cout << "Solveur UMFPACK" << std::endl << std::endl;
                 if ( not matrices(Number<0>()).get_factorization() ) {
                     std::cout << "Bing. Inversion error" << std::endl << std::endl;
                     return false;
                 }
                 vectors[0] = matrices(Number<0>()).solve( sollicitation );
                 #elif WITH_MUMPS
-                std::cout << "Solveur MUMPS" << std::endl << std::endl;
+//                 std::cout << "Solveur MUMPS" << std::endl << std::endl;
                 solver.get_factorization( matrices(Number<0>()), false, true );
                 vectors[0] = solver.solve( sollicitation );
 				#else
-                std::cout << "Solveur Inv" << std::endl << std::endl;
+//                 std::cout << "Solveur Inv" << std::endl << std::endl;
                 vectors[0] = inv(matrices(Number<0>())) * sollicitation;
 				#endif
             }
@@ -1360,30 +1367,30 @@ public:
     bool solve_system_(ScalarType iterative_criterium, const Number<1> &n_wont_add_nz, const Number<1> &sym) {
         try {
             if ( boolean_(iterative_criterium) ) {
-                std::cout << "Solveur iteratif type factorisation de Cholesky incomplete" << std::endl << std::endl;
+//                 std::cout << "Solveur iteratif type factorisation de Cholesky incomplete" << std::endl << std::endl;
                 Mat<ScalarType,Sym<>,SparseLine<> > mm = matrices(Number<0>());
                 incomplete_chol_factorize( mm );
                 solve_using_incomplete_chol_factorize( mm, Mat<ScalarType,Sym<>,SparseLine<> >( matrices(Number<0>()) ), sollicitation, vectors[0], iterative_criterium );
             }
             else {
                 #if WITH_CHOLMOD
-                std::cout << "Solveur CholMod" << std::endl << std::endl;
+//                 std::cout << "Solveur CholMod" << std::endl << std::endl;
                 if ( not matrices(Number<0>()).get_factorization() ) {
                     std::cout << "Bing. Inversion error" << std::endl << std::endl;
                     return false;
                 }
                 vectors[0] = matrices(Number<0>()).solve( sollicitation );
                 #elif WITH_MUMPS
-                std::cout << "Solveur MUMPS" << std::endl << std:: endl;
+//                 std::cout << "Solveur MUMPS" << std::endl << std:: endl;
                 solver.get_factorization( matrices( Number<0>() ), false, true );
                 vectors[0] = solver.solve( sollicitation );
                 #elif LDL
-                std::cout << "Solveur LDL" << std::endl << std:: endl;
+//                 std::cout << "Solveur LDL" << std::endl << std:: endl;
                 solver.get_factorization( matrices(Number<0>()), false );
                 vectors[0] = sollicitation;
                 solver.solve( vectors[0] );
                 #else
-                std::cout << "Solveur Inv" << std::endl << std::endl << std:: endl;
+//                 std::cout << "Solveur Inv" << std::endl << std::endl << std:: endl;
                 vectors[0] = inv(matrices(Number<0>())) * sollicitation;
                 #endif
             }
@@ -1395,13 +1402,13 @@ public:
     bool solve_system_(ScalarType iterative_criterium, const Number<0> &n_wont_add_nz, const Number<0> &sym) {
         try {
             if ( boolean_(iterative_criterium) ) {
-                std::cout << "Solveur iteratif type factorisation LU incomplete" << std::endl << std::endl;
+//                 std::cout << "Solveur iteratif type factorisation LU incomplete" << std::endl << std::endl;
                 Mat<ScalarType, Gen<>, SparseLU > mm = matrices(Number<0>());
                 lu_factorize( mm );
                 solve_using_incomplete_lu_factorize( mm, Mat<ScalarType, Gen<>, SparseLU >( matrices(Number<0>()) ), sollicitation, vectors[0], iterative_criterium );
             }
             else {
-                std::cout << "Solveur Inv" << std::endl << std:: endl;
+//                 std::cout << "Solveur Inv" << std::endl << std:: endl;
                 vectors[0] = inv(matrices(Number<0>())) * sollicitation;
             }
         } catch(const SolveException &e) { std::cerr << "system not inversible" << std::endl; return false; }
@@ -1410,23 +1417,23 @@ public:
     bool solve_system_(ScalarType iterative_criterium, const Number<0> &n_wont_add_nz, const Number<1> &sym) {
         try {
             if ( boolean_(iterative_criterium) ) {
-                std::cout << "Solveur iteratif type factorisation de Cholesky incomplete" << std::endl << std::endl;
+//                 std::cout << "Solveur iteratif type factorisation de Cholesky incomplete" << std::endl << std::endl;
                 Mat<ScalarType,Sym<>,SparseLine<> > mm = matrices(Number<0>());
                 incomplete_chol_factorize( mm );
                 solve_using_incomplete_chol_factorize( mm, Mat<ScalarType,Sym<>,SparseLine<> >( matrices(Number<0>()) ), sollicitation, vectors[0], iterative_criterium );
             }
             else {
                 #if WITH_MUMPS
-                std::cout << "Solveur MUMPS" << std::endl << std:: endl;
+//                 std::cout << "Solveur MUMPS" << std::endl << std:: endl;
                 solver.get_factorization( matrices( Number<0>() ), false, true );
                 vectors[0] = solver.solve( sollicitation );
                 #elif LDL
-                std::cout << "Solveur LDL" << std::endl << std:: endl;
+//                 std::cout << "Solveur LDL" << std::endl << std:: endl;
                 solver.get_factorization( matrices(Number<0>()), false );
                 vectors[0] = sollicitation;
                 solver.solve( vectors[0] );
                 #else
-                std::cout << "Solveur Inv" << std::endl << std:: endl;
+//                 std::cout << "Solveur Inv" << std::endl << std:: endl;
                 vectors[0] = inv(matrices(Number<0>())) * sollicitation;
                 #endif
             }
@@ -1791,7 +1798,7 @@ private:
         solve_using_lu_factorize( precond_matrix, sollicitation, vectors[0] );
         #endif
         #else
-        std::cout << "Solveur LDL dans solve_system_using_factorization_matrix" << std::endl;
+//         std::cout << "Solveur LDL dans solve_system_using_factorization_matrix" << std::endl;
         solver.get_factorization( matrices(Number<0>()), false );
         vectors[0] = sollicitation;
         solver.solve( vectors[0] );
@@ -1803,7 +1810,7 @@ private:
         solve_using_chol_factorize( precond_matrix, sollicitation, vectors[0] );
         #endif
         #else
-        std::cout << "Solveur LDL dans solve_system_using_factorization_matrix" << std::endl;
+//         std::cout << "Solveur LDL dans solve_system_using_factorization_matrix" << std::endl;
         solver.get_factorization( matrices(Number<0>()), false );
         vectors[0] = sollicitation;
         solver.solve( vectors[0] );
