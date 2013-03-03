@@ -12,7 +12,7 @@
 using namespace LMT;
 
 /*!
-    Cette classe encapsule la décomposition LDL? d'une matrice symétrique ou la décomposition LU d'une matrice carré quelconque à l'aide de la librairie [[http://graal.ens-lyon.fr/MUMPS/|mumps]] .
+    Cette classe encapsule la décomposition LDL^T d'une matrice symétrique ou la décomposition LU d'une matrice carré quelconque à l'aide de la librairie [[http://graal.ens-lyon.fr/MUMPS/|mumps]] .
     On l'utilise comme \a LDL_solver :
     \code C/C++
         Mat< double, Sym<>, SparseLine<> > A;

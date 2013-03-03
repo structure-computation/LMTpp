@@ -14,12 +14,12 @@
 
 namespace LMT {
 
-/*! used as parameter of storage styles (Dense, SkyLine, ...) */
+/*! used as parameter of storage styles (Dense, SkyLine, ...) -> C++, python, ... style */
 struct Col {
     static const bool col_oriented = true;
     static const bool diag_oriented = false;
 };
-/*! used as parameter of storage styles (Dense, SkyLine, ...) */
+/*! used as parameter of storage styles (Dense, SkyLine, ...) -> Fortran and Matlab style */
 struct Row {
     static const bool col_oriented = false;
     static const bool diag_oriented = false;
