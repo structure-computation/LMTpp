@@ -253,7 +253,7 @@ class Tests:
         
     def metAjourProduction(self):
         os.system(self.racine_appli)
-        os.system("make pull_and_push_if_valid")
+        os.system("make push_production_if_valid")
         
     def run(self,fileNameReportHtml,fileNameCss):
         if self.path_test!='':

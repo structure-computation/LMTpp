@@ -1,11 +1,11 @@
 all:
 	make -C include/codegen
 
-#pull_and_push_if_valid:
-#	git pull test master
-#	python run_unit_test.py
-#	cd doc; make
-#	git push production master
+pull_and_push_if_valid:
+	git pull test master
+	python run_unit_test.py
+	cd doc; make
+	git push production master
 
 # a executer avec sudo
 install_cron:
@@ -21,7 +21,7 @@ test_%:
 unit_tests:
 	python run_unit_test.py
 
-pull_and_push_if_valid:
+push_production_if_valid :
 	git push production master
 
 # sur romanee
