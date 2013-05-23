@@ -220,9 +220,9 @@ TV self_prod_vec_col(const TV &V)
 }
 
 template<class TV>
-TV double_prod_vec_col(const TV &V1, const TV &V2)
+TV double_prod_vec_col(const TV &V1, const TV &V2, const TV &V3)
 {
-    return mat_sym_to_vec_col(vec_col_to_mat_sym(V2) * vec_col_to_mat_sym(V1) * vec_col_to_mat_sym(V2));
+    return mat_sym_to_vec_col(vec_col_to_mat_sym(V1) * vec_col_to_mat_sym(V2) * vec_col_to_mat_sym(V3));
 }
 
 /// -------------------------------------------------- /// puissance ///
@@ -426,10 +426,10 @@ typename TM::T self_dot_mat_col(const TM &M)
 /// --------------------------------------------- /// double produit ///
 
 template<class TM, class TV>
-typename TM::T double_prod_mat_vec_col(const TM &M, const TV &V)
+typename TM::T double_prod_mat_vec_col(const TV &V1, const TM &M, const TV &V2)
 {
-    TV tmp = M * V;
-    return dot_vec_col(V, tmp);
+    TV tmp = M * V2;
+    return dot_vec_col(V1, tmp);
 }
 
 /// ----------------------------------------------------- /// normes ///
