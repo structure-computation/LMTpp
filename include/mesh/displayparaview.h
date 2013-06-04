@@ -76,16 +76,19 @@ public:
     ~DisplayParaview() {
     }
     
-    template<class TM> std::string add_mesh(const TM &m,const std::string &prefix="paraview",const Vec<std::string> &display_fields=Vec<std::string>("all"),double time_step=0) {
+    template<class TM> std::string add_mesh(const TM &m,const std::string &prefix="paraview",const Vec<std::string> &display_fields=Vec<std::string>("all"),double time_step=0,bool write_mesh=true) {
         std::string pvu_name = prefix;
         //if ( prefix.rfind(".vtu") != prefix.size() - 4 )
         pvu_name += "_" + to_string( time_step ) + "_" + to_string( pvu_files[time_step].size() ) + ".vtu";
         // std::cout << pvu_name << std::endl;
     
         pvu_files[ time_step ].push_back( pvu_name );
-        std::ofstream f( pvu_name.c_str() );
         
-        write_mesh_vtk<true>( f, m, display_fields );
+        if (write_mesh)
+        {
+            std::ofstream f( pvu_name.c_str() );
+            write_mesh_vtk<true>( f, m, display_fields );
+        }
     
         typename TM::Pvec xmi,xma;
         get_min_max( m.node_list, ExtractDM<pos_DM>(), xmi, xma );
