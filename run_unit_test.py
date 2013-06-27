@@ -279,7 +279,7 @@ class Tests:
     def metAjourProduction(self):
         os.chdir( self.racine_appli ) 
         #os.system( ' make push_production_if_valid' )
-	#os.system( ' git push production master ' )	
+	os.system( ' git push production master ' )	
          
     def run(self,fileNameReportHtml,fileNameCss):
         if self.path_test!='':
