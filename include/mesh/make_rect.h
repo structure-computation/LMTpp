@@ -50,7 +50,7 @@ struct Wedge_15;
 
             return 0;
         }
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
     \keyword Maillage/Elément/Opération
 */

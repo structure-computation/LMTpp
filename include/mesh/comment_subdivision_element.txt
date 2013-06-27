@@ -4,7 +4,7 @@
     Cette fonction crée une liste de noeuds à partir d'un élément (Triangle, Tetra...). Ces noeuds sont de même type que ceux de l'élément. Ils sont strictement à l'intérieur de l'élément et placés de façon régulière de façon que la distance d'un noeud à ses voisins soit inférieure à max_dist. 
  
     \keyword Maillage/Elément/Opération
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
     \relates Element 
     \relates length

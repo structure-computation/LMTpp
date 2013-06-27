@@ -5,5 +5,5 @@
     Pour un exemple avec une formulation, reportez-vous aux tutoriaux \a [Exemple de formulation] et \a [Comment résoudre un problème éléments finis de façon générale].
 
     \friend hugo.leclerc@lmt.ens-cachan.fr
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
 */

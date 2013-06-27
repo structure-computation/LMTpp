@@ -7,6 +7,7 @@
 #include <iostream>
 #include <iomanip>
 #include "../../../include/containers/polynomials.h"
+#include "header_linker_test.h"
 
 #define TOTO( a , b ) std::abs( (a) - (b) ) / ( 1e-20 + std::abs( a ) + std::abs( b ) )
 using namespace LMT;

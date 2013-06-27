@@ -170,6 +170,6 @@
     \relates Exemple de formulation
     \keyword Maillage/Equation d'évolution
     \friend hugo.leclerc@lmt.ens-cachan.fr
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
 */
 

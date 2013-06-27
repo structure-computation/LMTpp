@@ -1,9 +1,9 @@
 /*!
-\webpage Metil metil
+\webpage Metil METIL
 
     = Qu'est-ce ?
 
-        Metil est un langage de programmation orienté objet et évaluation paresseuse. Pour la LMT++, il est utilisé par exemple pour générer les formulations en langage C++.
+        METIL est un langage de programmation orienté objet et évaluation paresseuse. Pour la LMT++, il est utilisé par exemple pour générer les formulations en langage C++.
 
     = Récupération et installation
 
@@ -19,10 +19,10 @@
             * readline (commande : sudo apt-get install libreadline5-dev ).
         Créer ensuite les répertoires metil-build, metil-test et metil-bin : 
         \code
-            mkdir metil-buld;mkdir metil-bin;mkdir metil-test
+            mkdir metil-build;mkdir metil-bin;mkdir metil-test
         On se déplace dans le repertoire metil-build pour lancer cmake :
         \code
-            cd metil-buld;cmake -i
+            cd metil-build;cmake -i
          -i pour le mode intéractif. Les choix par défauts sont corrects sauf l'emplacement des binaires. Préférez /usr à /usr/local.  
         Lancer make :
             \code

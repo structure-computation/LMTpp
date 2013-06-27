@@ -74,7 +74,7 @@ struct BigRat {
     Un pire cas pour les fractions continues est le nombre d'or, noté phi,  solution positive de l'équation x^2 = x + 1 soit x = 1 + 1 / x d'où le développement en fraction continue : 1 + 1 / ( 1 + 1 / ( 1 + 1 / ( ...   ))))). Tous les coefficients valent un. Voir la page de wikipedia \a http://fr.wikipedia.org/wiki/Nombre_d'or . C'est pour ce nombre que j'ai choisi une limite de 40 pour la boucle.
     phi = (1+sqrt(5))/2 ~ 1.618033988749894848204586834365638117720309179805.
 
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+
 
     */
     template<class TFLOAT,int base2,class T2,int offset2,bool owning2> void approx(const TFLOAT &val, BigInt<base2,T2,offset2,owning2> &nume, BigInt<base2,T2,offset2,owning2> &deno, int tol=4 ) {

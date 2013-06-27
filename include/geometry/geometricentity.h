@@ -29,7 +29,7 @@ public:
     Cette classe sert à faire de la CAO, par exemple coupe de sphère ou définir des surfaces paramétriques.
 
     \keyword Visualisation/3D
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
 */
 template<class Carac,unsigned _nb_var_inter_>

@@ -18,7 +18,7 @@ namespace LMT {
         .                    0/--- 4----\1
 
     \keyword Maillage/Elément
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
 */
 

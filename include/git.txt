@@ -45,7 +45,7 @@
     = CLONAGE 
         Pour obtenir une version actuelle complète: 
         \verbatim
-            git clone givry:/ul/multi/LMT/ 
+            git clone git@gitosis:LMT
 
         Pour ceux qui veulent cloner depuis le wifi ou l'extérieur, la commande est :
         \verbatim

@@ -178,7 +178,7 @@ namespace LMTPRIVATE {
     \relates apply
     \relates Mesh
     \relates Mat
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
 
 */
@@ -220,7 +220,7 @@ template<class HET1,class HET2,class Op,class P0> void apply_ij(HET1 &het1,HET2 
     \relates apply
     \relates Mesh
     \relates Mat
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
 
 */
@@ -261,7 +261,7 @@ template<class HET1,class HET2,class Op,class P0> void apply_i_supeq_j(HET1 &het
     \relates apply
     \relates Mesh
     \relates Mat
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
 
 */

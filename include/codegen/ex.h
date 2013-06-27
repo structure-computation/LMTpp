@@ -32,7 +32,7 @@ unsigned nb_children_op(const Op *op);
     Ex : cout << (symbol("a",1) + symbol("b",3)).get_val(); gives 4 as result.
 
     \friend hugo.leclerc@lmt.ens-cachan.fr
-    \friend raphael.pasquier@lmt.ens-cachan.fr 
+    \friend samir.amrouche@lmt.ens-cachan.fr
 
     \author LECLERC Hugo
 */

@@ -71,7 +71,7 @@ Les deux fonctions utiles sont add() pour ajouter du code. Son premier paramètr
     * <strong> Return </strong> pour le retour de la fonction ( return ).  
 
 
-\friend raphael.pasquier@lmt.ens-cachan.fr
+\friend samir.amrouche@lmt.ens-cachan.fr
 \friend hugo.leclerc@lmt.ens-cachan.fr
 \relates Ex
 */

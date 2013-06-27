@@ -30,7 +30,7 @@ Objectif :
 Paramètre:
      TM doit être la classe d'un maillage surfacique défini dans l'espace 3D tel que les noeuds aient un champ "normal".
 
-\friend raphael.pasquier@lmt.ens-cachan.fr  
+\friend samir.amrouche@lmt.ens-cachan.fr
 \friend hugo.leclerc@lmt.ens-cachan.fr
 */
 template<class TM>

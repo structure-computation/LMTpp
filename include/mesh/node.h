@@ -26,7 +26,7 @@ template<class Carac,unsigned nvi_to_subs,unsigned skin> class MeshAncestor;
         * TNodalStaticData est la classe stockant les coordonnées cartésiennes du noeud. Pour simplifier l'accès, Node hérite aussi de TNodalStaticData.
 
     \author Hugo LECLERC
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
 */
 template<unsigned _dim_,class _T_,class TNodalStaticData>

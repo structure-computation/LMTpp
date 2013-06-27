@@ -1,4 +1,4 @@
-/*! 
+/*!
 \generic_comment apply_mt
 
     Objectif :
@@ -37,7 +37,7 @@
     Cette fonction s'utilise donc de la même façon que \a apply ( voir sa documentation ).
 
     \keyword Parallélisme
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
     \relates apply 
 */

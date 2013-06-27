@@ -125,7 +125,7 @@ namespace LMT {
 
     \keyword Fonctionalité/Conteneur
     \keyword Vecteur
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
     \keyword Mathématiques/Algèbre linéaire
     \author Hugo Leclerc
@@ -379,7 +379,7 @@ namespace LMT {
 /*!
 \generic_comment apply
 
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
 
     = Description

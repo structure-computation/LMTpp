@@ -20,7 +20,7 @@ namespace LMT {
     A FAIRE : apply_wi a d'autres syntaxes utilisées en interne. J'en parlerai plus tard.
 
     \keyword Fonctionalité/Transformer
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
     \author Hugo Leclerc
 */

@@ -121,7 +121,7 @@ Structure interne à la LMT++
     \relates apply_wi
     \keyword Fonctionalité/Trier
     \friend hugo.leclerc@lmt.ens-cachan.fr
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
 */
 
 /*! 
@@ -131,7 +131,7 @@ Structure interne à la LMT++
     \relates apply
     \relates apply_wi
     \friend hugo.leclerc@lmt.ens-cachan.fr
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
 */
 template<class TL,class Op> void sort(TL &l,const Op &op) {
     apply_wi( l, ALGOPRIVATE::Sort(), l, op );
@@ -140,7 +140,7 @@ template<class TL,class Op> void sort(TL &l,const Op &op) {
      sort elements of l in ascending order, assuming swap is possible between all elements of l
     \relates Vec
     \friend hugo.leclerc@lmt.ens-cachan.fr
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
 */
 template<class TL> void sort(TL &l) { sort(l,Less()); }
 
@@ -184,14 +184,14 @@ namespace ALGOPRIVATE {
     \relates apply_wi
     \keyword Fonctionalité/Trier
     \friend hugo.leclerc@lmt.ens-cachan.fr
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
 */
 
 /*!
     sort elements of l in ascending order, assuming swap is possible between all elements of l
     \relates Vec
     \friend hugo.leclerc@lmt.ens-cachan.fr
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
 */
 template<class TL,class Op> Vec<unsigned> sort_with_index(TL &l,const Op &op) {
     ALGOPRIVATE::SortWithIndex s;
@@ -203,7 +203,7 @@ template<class TL,class Op> Vec<unsigned> sort_with_index(TL &l,const Op &op) {
      sort elements of l in ascending order, assuming swap is possible between all elements of l
     \relates Vec
     \friend hugo.leclerc@lmt.ens-cachan.fr
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
 */
 template<class TL> Vec<unsigned> sort_with_index(TL &l) { return sort_with_index(l,Less()); }
 
@@ -250,7 +250,7 @@ namespace ALGOPRIVATE {
     \relates apply_wi
     \keyword Fonctionalité/Transformer
     \friend hugo.leclerc@lmt.ens-cachan.fr
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
 */
 
 /*! 
@@ -259,7 +259,7 @@ namespace ALGOPRIVATE {
     <strong> this procedure does not keep order of elements </strong>
     \relates Vec
     \friend hugo.leclerc@lmt.ens-cachan.fr
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
 */
 template<class TL,class Op> void remove_doubles(TL &l,const Op &op) {
     ALGOPRIVATE::RemoveDoubles<Op> s; s.op = &op; s.j = 0;
@@ -308,7 +308,7 @@ template<class T> ApproxEqualTo<T> approx_equal(const T &val,const T &geom_prec)
     <strong> this procedure does not keep order of elements </strong>
     \relates Vec
     \friend hugo.leclerc@lmt.ens-cachan.fr
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
 */
 template<class TL> void remove_doubles(TL &l) { remove_doubles(l,ExactlyEqual()); }
 template<class TL,class T> void remove_doubles_approx(TL &l,const T &geom_prec) { remove_doubles(l,ApproxEqual<T>(geom_prec)); }
@@ -353,7 +353,7 @@ struct MinMax {
     \relates apply
     \keyword Fonctionalité/Extraire
     \friend hugo.leclerc@lmt.ens-cachan.fr
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
 */
 template<class TL,class T> void get_min_max(const TL &l,T &mi,T &ma) {
     mi = std::numeric_limits<T>::max();
@@ -440,7 +440,7 @@ struct FillIntersectionPtr {
     \keyword Fonctionalité/Extraire
     \keyword Fonctionalité/Mesh
     \friend hugo.leclerc@lmt.ens-cachan.fr
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
 
 
 */
@@ -479,7 +479,7 @@ template<class TL1,class TL2> typename IntersectionCarac<TL1,TL2>::T intersectio
     \keyword Fonctionalité/Extraire
     \keyword Fonctionalité/Mesh
     \friend hugo.leclerc@lmt.ens-cachan.fr
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
 
 
 */
@@ -556,7 +556,7 @@ namespace ALGOPRIVATE {
     \keyword Fonctionalité/Extraire
     \keyword Fonctionalité/Mesh
     \friend hugo.leclerc@lmt.ens-cachan.fr
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
 */
 
 /*!
@@ -572,7 +572,7 @@ namespace ALGOPRIVATE {
     \keyword Fonctionalité/Extraire
     \keyword Fonctionalité/Mesh
     \friend hugo.leclerc@lmt.ens-cachan.fr
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
 */
 
 /*!
@@ -581,7 +581,7 @@ namespace ALGOPRIVATE {
     \relates apply
     \relates Vec
     \friend hugo.leclerc@lmt.ens-cachan.fr
-    \friend raphael.pasquier@lmt.ens-cachan.fr 
+    \friend samir.amrouche@lmt.ens-cachan.fr
 */
 template<class TL,class Op> typename TypeReduction<Plus,TL>::T max_element(const TL &l,const Op &op) {
     typedef typename TypeReduction<Plus,TL>::T TR;
@@ -601,7 +601,7 @@ template<class TL,class Op> typename TypeReduction<Plus,TL>::T max_element(const
     \relates apply
     \relates Vec
     \friend hugo.leclerc@lmt.ens-cachan.fr
-    \friend raphael.pasquier@lmt.ens-cachan.fr 
+    \friend samir.amrouche@lmt.ens-cachan.fr
 */
 template<class TL,class Op,class TP> typename TypeReduction<Plus,TL>::T max_element(const TL &l,const Op &op,const TP &param) {
     typedef typename TypeReduction<Plus,TL>::T TR;
@@ -620,7 +620,7 @@ template<class TL,class Op,class TP> typename TypeReduction<Plus,TL>::T max_elem
     \relates apply
     \relates Vec
     \friend hugo.leclerc@lmt.ens-cachan.fr
-    \friend raphael.pasquier@lmt.ens-cachan.fr 
+    \friend samir.amrouche@lmt.ens-cachan.fr
 */
 template<class TL> typename TypeReduction<Plus,TL>::T max_element(const TL &l) { return max_element(l,Function<C_1>()); }
 
@@ -631,7 +631,7 @@ template<class TL> typename TypeReduction<Plus,TL>::T max_element(const TL &l) {
     \relates apply
     \relates Vec
     \friend hugo.leclerc@lmt.ens-cachan.fr
-    \friend raphael.pasquier@lmt.ens-cachan.fr 
+    \friend samir.amrouche@lmt.ens-cachan.fr
 */
 template<class TL,class Op> typename TypeReduction<Plus,TL>::T min_element(const TL &l,const Op &op) {
     typedef typename TypeReduction<Plus,TL>::T TR;
@@ -651,7 +651,7 @@ template<class TL,class Op> typename TypeReduction<Plus,TL>::T min_element(const
     \relates apply
     \relates Vec
     \friend hugo.leclerc@lmt.ens-cachan.fr
-    \friend raphael.pasquier@lmt.ens-cachan.fr 
+    \friend samir.amrouche@lmt.ens-cachan.fr
 */
 template<class TL,class Op,class TP> typename TypeReduction<Plus,TL>::T min_element(const TL &l,const Op &op,const TP &param) {
     typedef typename TypeReduction<Plus,TL>::T TR;
@@ -671,7 +671,7 @@ template<class TL,class Op,class TP> typename TypeReduction<Plus,TL>::T min_elem
     \relates apply
     \relates Vec
     \friend hugo.leclerc@lmt.ens-cachan.fr
-    \friend raphael.pasquier@lmt.ens-cachan.fr 
+    \friend samir.amrouche@lmt.ens-cachan.fr
 */
 template<class TL> typename TypeReduction<Plus,TL>::T min_element(const TL &l) { return min_element(l,Function<C_1>()); }
 
@@ -684,7 +684,7 @@ template<class TL> typename TypeReduction<Plus,TL>::T min_element(const TL &l) {
 
     \keyword Fonctionalité/Extraire
     \friend hugo.leclerc@lmt.ens-cachan.fr
-    \friend raphael.pasquier@lmt.ens-cachan.fr 
+    \friend samir.amrouche@lmt.ens-cachan.fr
  */
 template<class VB> Vec<unsigned> find_with_index(const VB &to_check) {
     Vec<unsigned> res; res.reserve( to_check.size() );

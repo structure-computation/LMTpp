@@ -69,7 +69,7 @@ template<class T1,class T2> typename TypePromote<Min,T1,T2>::T min(T1 a,T2 b) {
 
     Fonction clasique à deux ou trois paramètres.
     \keyword Mathématiques/Fonctions classiques
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
 */
 /// max
@@ -145,7 +145,7 @@ inline T pow( const T &x_, int y ) {
 
     Excepté la fonction à deux paramètres, la fonction ceil de la LMT++ correspond à celle de la librairie standard du C.
     \keyword Mathématiques/Fonctions classiques
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
 */
 /// identité.
@@ -176,7 +176,7 @@ inline T floor( T m ) { return std::floor( m ); }
 
     C'est la fonction de Heavyside qui renvoie un si son argument est supérieur ou égal à zéro et zéro sinon.
     \keyword Mathématiques/Fonctions classiques
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
 */
 /// 1 if equal 0
@@ -223,7 +223,7 @@ template<class T> int sgn(const T &val) { return ( val>0 ? 1 : -1 ); }
     \relates abs_indication
     \keyword Mathématiques/Fonctions classiques
     \keyword Fonctionalité/Extraire
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
 */
 /// retourne abs(val)
@@ -277,7 +277,7 @@ for op in lst:
 
     \relates abs
     \relates abs_indication
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
 */
 
@@ -308,7 +308,7 @@ inline int abs(const int &val) { return ( val >= 0 ? val : -val ); }
 /*!
 \generic_comment acos
     fonction réciproque de la la fonction cosinus
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
     \relates asin
     \relates atan
@@ -323,7 +323,7 @@ template<class T> inline typename FloatType<T>::T acos(const T &val) { return st
 /*!
 \generic_comment acos
     fonction réciproque de la la fonction sinus
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
     \relates acos
     \relates atan
@@ -338,7 +338,7 @@ template<class T> inline typename FloatType<T>::T asin(const T &val) { return st
 /*!
 \generic_comment atan
     fonction réciproque de la la fonction cosinus
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
     \relates asin
     \relates acos
@@ -353,7 +353,7 @@ template<class T> inline typename FloatType<T>::T atan(const T &val) { return st
 /*!
 \generic_comment cos
     fonction cosinus
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
 */
 /*!
@@ -366,7 +366,7 @@ template<class T> inline typename FloatType<T>::T cos(const T &val) { return std
 /*!
 \generic_comment cosh
     Fonction cosinus hyperbolique
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
 */
 /*!
@@ -377,7 +377,7 @@ template<class T> inline typename FloatType<T>::T cosh(const T &val) { return st
 /*!
 \generic_comment exp
     Fonction exponentielle
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
 */
 /*!
@@ -388,7 +388,7 @@ template<class T> inline typename FloatType<T>::T exp(const T &val) { return std
 /*!
 \generic_comment log
     Fonction logarithme népérien
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
 */
 /*!
@@ -399,7 +399,7 @@ template<class T> inline typename FloatType<T>::T log(const T &val) { return std
 /*!
 \generic_comment log10
     Fonction logarithme en base 10
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
 */
 /*!
@@ -410,7 +410,7 @@ template<class T> inline typename FloatType<T>::T log10(const T &val) { return s
 /*!
 \generic_comment acos
     Fonction sinus
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
 */
 /*!
@@ -421,7 +421,7 @@ template<class T> inline typename FloatType<T>::T sin(const T &val) { return std
 /*!
 \generic_comment sinh
     Fonction sinus hyperbolique
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
 */
 /*!
@@ -432,7 +432,7 @@ template<class T> inline typename FloatType<T>::T sinh(const T &val) { return st
 /*!
 \generic_comment sqrt
     Fonction racine carrée
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
 */
 /*!
@@ -444,7 +444,7 @@ template<class T> inline typename FloatType<T>::T sqrt(const T &val) { return st
 \generic_comment rsqrt
     Fonction inverse de la fonction racine carré :
     x -> 1/sqrt(x) ou x -> x^(-0.5)
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
 */
 /*!
@@ -455,7 +455,7 @@ template<class T> inline typename FloatType<T>::T rsqrt(const T &val) { return p
 /*!
 \generic_comment tan
     Fonction tangente
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
 */
 /*!
@@ -466,7 +466,7 @@ template<class T> inline typename FloatType<T>::T tan(const T &val) { return std
 /*!
 \generic_comment tanh
     fonction tangente hyperbolique
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
 */
 /*!

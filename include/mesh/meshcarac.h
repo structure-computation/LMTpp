@@ -56,7 +56,7 @@ namespace LMT_DOCUMENTATION {
 
     Pour exemple, on peut consulter [[Exemple de MeshCarac|cet exemple]] , ou  voir le code de \a MeshCaracStd , \a MeshCarac .
 
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
 */
 template<unsigned nvi_to_subs,unsigned skin,unsigned num_sub_element,unsigned inner=0>

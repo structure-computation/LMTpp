@@ -103,7 +103,7 @@ std::ostream &operator<<(std::ostream &os,const ElementAncestor<TNode> &ea) {
         * num_in_elem_list est le numéro de la sous liste du vecteur hétérogène qui contient l'élément.
 
     \keyword Maillage/Elément
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
 */
 
@@ -240,7 +240,7 @@ void append_skin_elements(const T1 &,const T2 &,const T3 &,const Number<nvi_to_s
 /*!
     Cette fonction retourne l'isobarycentre des noeuds de l'élément.
 
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
 */
 template<class NameElem,class NameBehavior,class TNode,class TData,unsigned num_in_elem_list>
@@ -256,7 +256,7 @@ typename TNode::Pvec center(const Element<NameElem,NameBehavior,TNode,TData,num_
     Cette fonction retourne l'isobarycentre des noeuds de l'élément.
 
     \keyword Maillage/Elément/Opération
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
 */
 
@@ -266,7 +266,7 @@ typename TNode::Pvec center(const Element<NameElem,NameBehavior,TNode,TData,num_
     
     ATTENTION : une spécialisation a été faite pour le \a Triangle_6 qui calcule seulement l'isobarycentre des trois sommets du triangle et donc qui ignore les noeuds correspondants aux milieux de ces sommets.
 
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
 */
 template<class TNode>
@@ -281,7 +281,7 @@ typename TNode::Pvec center(const ElementAncestor<TNode> &e) {
     A faire
     A finir de programmer
 
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
 */
 template<class TE>
@@ -293,7 +293,7 @@ typename TE::Pvec sample_normal(const TE &e) {
     A faire
 
 
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
 */
 struct EquElem {
@@ -313,7 +313,7 @@ struct EquElem {
     A faire
 
 
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
 */
 struct DistBetweenElemCenter {
@@ -354,7 +354,7 @@ template<class NE> struct ElemVarInterFromPosNonLinear { };
     La fonction renvoie vrai si pos est à l'intérieur de l'élément avec une tolérance tol.
 
 
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
 */
 template<class TE,class Pvec> bool pos_is_inside( const TE &elem,const Pvec &pos,typename TE::T criterium=1e-4,typename TE::T tol=1e-4) {
@@ -367,7 +367,7 @@ template<class TE,class Pvec> bool pos_is_inside( const TE &elem,const Pvec &pos
     A faire
 
 
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
 */
 template<class TE,class PosNodes,class Pvec > bool is_inside_linear( const TE &elem, const PosNodes &pos_nodes, const Pvec &pos ) {
@@ -379,7 +379,7 @@ template<class TE,class PosNodes,class Pvec > bool is_inside_linear( const TE &e
     A faire
 
 
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
 */
 template<class TE> typename TE::Pvec sample_tangent( const TE &e ) {

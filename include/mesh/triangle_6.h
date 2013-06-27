@@ -122,7 +122,7 @@ typename TypePromote<Abs,typename TNG::T>::T measure( const Element<Triangle_6,T
 /*!
     Cette fonction retourne l'isobarycentre des sommets du triangle.
 
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
 */
 template<class TN,class TNG,class TD,unsigned NET>
