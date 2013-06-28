@@ -21,7 +21,7 @@ namespace LMT {
     \relates Element
     \keyword Maillage/Elément 
     \author Hugo LECLERC
-    \friend rapahel.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
 */
 

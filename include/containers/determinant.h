@@ -21,7 +21,7 @@ namespace LMT {
     \relates Mat
 
     \friend hugo.leclerc@lmt.ens-cachan.fr
-    \friend rapahel.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
     \friend camille.gouttebroze@lmt.ens-cachan.fr
 
     \author Camille Gouttebroze puis Raphaël Pasquier qui se sert de LapacK. 

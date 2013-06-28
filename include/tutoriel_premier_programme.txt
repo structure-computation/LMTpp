@@ -67,6 +67,6 @@
 
     Remarque : la méthode IDE est certes plus compliqué mais lorsque le projet grossit et que le nombre de fichiers sources est conséquent, un IDE devient très utile ( voire indispensable) pour se retrouver dans les lignes de code...
 
-    \friend rapahel.pasquier@lmt.ens-cachan.fr
+
 
 */ 

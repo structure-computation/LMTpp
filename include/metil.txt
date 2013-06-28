@@ -9,7 +9,7 @@
 
         Pour récupérer les sources de METIL, on les extrait du dépot git de l'utilisateur multi en faisant :
         \code 
-            git clone votre-nom@givry:/u/multi/METIL
+            git clone git@gitosis:METIL
 
         Maintenant vous avez une copie dans le répertoire courant.
         On aura besoin des programmes g++, readline, cmake.
