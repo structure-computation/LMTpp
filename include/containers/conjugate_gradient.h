@@ -87,13 +87,13 @@ struct SolveUsingCholFactorize {
 */
 template<class TK>
 struct SolveUsingDotSolve {
-    SolveUsingDotSolve( TK &k ) : K( k ) {}
+    SolveUsingDotSolve( const TK &k ) : K( k ) {}
     typedef double MatrixScalarType;
     template<class TV>
     Vec<typename TypePromote<Multiplies,MatrixScalarType,TV>::T> operator*( const Vec<TV> &v ) const {
-        return K.solve( v );
+        return const_cast<TK &>( K ).solve( v );
     }
-    mutable TK &K;
+    const TK &K;
 };
 
 
