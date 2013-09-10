@@ -41,7 +41,7 @@ struct MeshNbSubMeshes { enum { res = max_sub_meshes ? MIN( Carac::dim+1, max_su
     \friend hugo.leclerc@lmt.ens-cachan.fr
     \keyword Maillage
     \keyword Fonctionalité/Conteneur
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
  */
 
 template<class Carac,unsigned max_sub_meshes=0>

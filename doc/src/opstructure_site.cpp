@@ -18,7 +18,7 @@ using namespace std ;
 
 void OpStructure_site :: initialize() {
 
-    (*ptr_tree)["root"] = "doc/html/" ;
+    (*ptr_tree)["root"] = "html/" ;
     (*ptr_tree)["function"] = (*ptr_tree)["root"] + "function/" ;
     (*ptr_tree)["structure"] = (*ptr_tree)["root"] + "structure/" ;
     (*ptr_tree)["example"] = (*ptr_tree)["root"] + "example/" ;

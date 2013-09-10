@@ -21,8 +21,8 @@ test_%:
 unit_tests:
 	python run_unit_test.py
 
-push_production_if_valid :
-	git push production master
+documentation:
+	cd doc; make
 
 # sur romanee
 # romanee0=romanee:/home/web-mast # cat /etc/rsync.chinon 

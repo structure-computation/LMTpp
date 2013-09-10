@@ -269,7 +269,7 @@ template<class MATOP> struct IsMatOp { typedef void T; };
 
     \keyword Fonctionalité/Conteneur
     \keyword Matrice
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
     \keyword Mathématiques/Algèbre linéaire
     \author Hugo Leclerc
@@ -544,7 +544,7 @@ Mat<TV,Diag<s> > diag(const Vec<TV,s> &vec) {
 
     \keyword Utilitaires
     \keyword Fonctionalité/Affichage
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
     \keyword Mathématiques/Algèbre linéaire/Opération
 */

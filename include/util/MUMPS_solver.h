@@ -56,7 +56,7 @@ using namespace LMT;
     REMARQUE : pour l'instant la classe ne gère pas le calcul sur plusieurs noeuds.
         
     
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
 */
 #ifdef WITH_MUMPS

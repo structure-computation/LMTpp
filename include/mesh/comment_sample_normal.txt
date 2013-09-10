@@ -1,4 +1,4 @@
-/*! 
+/*!
 \generic_comment sample_normal
 
     Cette fonction calcule la normale à un élément quelconque : c'est donc un vecteur qui est de plus normalisé.
@@ -8,7 +8,7 @@
     \relates sample_tangent
 
     \keyword Maillage/Elément/Opération
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
     \relates Element 
     \relates length

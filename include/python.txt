@@ -1,6 +1,13 @@
 /*!
 \webpage python Python
 
-    Page en construction.
+    <strong> Python</strong>   un langage de programmation très puissant qui est de plus en plus utilisé pour développer des applications rapidement. Il est très utilisé dans le monde scientifique pour sa syntaxe aérée.
+
+    <strong>Les principales caractéristiques du langage Python sont :</strong>
+
+        # C'est un langage interprété, c'est-à-dire que le code ne nécessite pas d'être compilé pour être exécuté.
+        # Il est multiplateforme et il est d'ailleurs natif sur tous les systèmes Unix (Mac OS, Linux) et ne nécessite pas d'y être installé.
+        # Il peut être utilisé en tant que langage de script pour exécuter une suite simple de commande mais c'est aussi un langage objet qui permet de développer des applications solidement construites.
+        # Sa syntaxe est très simple et aérée et permet de se libérer de tous les caractères de démarquation des blocs de code.
 
 */

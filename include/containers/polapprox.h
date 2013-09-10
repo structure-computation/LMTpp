@@ -10,7 +10,7 @@ namespace LMT {
 
     PolApprox est une classe qui représente les polynômes de degré fixé à la compilation.
 
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
     \keyword Mathématiques/Objet
 */

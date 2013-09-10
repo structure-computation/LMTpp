@@ -1,4 +1,4 @@
-/*! 
+/*!
 \generic_comment intersection
 
     Cette fonction s'applique dans deux cas distincts :
@@ -7,7 +7,7 @@
 
     \keyword Fonctionalité/Extraire
     \keyword Maillage/Elément/Opération
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
     \relates Element 
     \relates Bar

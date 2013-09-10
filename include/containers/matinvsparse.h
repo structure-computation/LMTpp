@@ -55,7 +55,7 @@ struct HashCH {
     Cette fonction effectue la factorisation de Cholesky. La matrice m, de format spécial \a Mat<T,TS,SparseLine<>> , contient le résultat.
     Pour un exemple d'utilisation, consulter l'exemple \a [Décomposition d'une matrice] .
 
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
     \keyword Mathématiques/Algèbre linéaire/Décomposition de matrices
     \author Hugo Leclerc
@@ -105,7 +105,7 @@ template<class T,class TS> void chol_factorize( Mat<T,TS,SparseLine<> > &m ) {
 
  On utilise l'algorithme de Cholesky-Banachiewicz qui fonctionne par lignes (cf l'article http://en.wikipedia.org/wiki/Cholesky_decomposition )
 
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
 */
 template<class T,class TS> void get_Cholesky( Mat<T,TS,SparseLine<> > &m, Mat<T,TriLower<>,SparseLine<> > & ret ) {
     static const unsigned NN = 16;
@@ -391,7 +391,7 @@ void incomplete_chol_factorize( Mat<T,Sym<>,SparseLine<> > &m, bool simplified =
     sol sontient le second membre et res contiendra la solution.
 
     \keyword Mathématiques/Algèbre linéaire/Décomposition de matrices
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
 */
 template<class T,int s,int s2> void solve_using_chol_factorize( const Mat<T,Sym<s>,SparseLine<> > &mat, const Vec<T> &sol, Vec<T,s2> &res ) {
@@ -425,7 +425,7 @@ template<class T,int s,int s2> void solve_using_chol_factorize( const Mat<T,Sym<
     sol sontient le second membre et res contiendra la solution.
 
     \keyword Mathématiques/Algèbre linéaire/Décomposition de matrices
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
 */
 template<class T,int s,int s2> void solve_using_chol_factorize( const Mat<T,Herm<s>,SparseLine<> > &mat, const Vec<T> &sol, Vec<T,s2> &res ) {

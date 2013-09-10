@@ -25,7 +25,7 @@ namespace LMT {
     \relates Mesh
     \relates Element
     \keyword Maillage/Elément
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
 */
 struct Bar {
@@ -97,7 +97,7 @@ bool divide_element(Element<Bar,TN,TNG,TD,NET> &e,TM &m,TNG **nodes) {
 
     new_nodes are independant nodes created to make a fine grid for integration. Used in TvrcFormulation
     \keyword Elément/Opération
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
     \relates Triangle
     \relates length

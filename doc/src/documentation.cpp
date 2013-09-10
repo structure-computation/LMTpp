@@ -113,7 +113,7 @@ void Documentation::addDirSource( const char* name_dir,vector<string>& listsourc
         } else {
             if (is_regular(itr->status())) {
                 /// on vérifie que le fichier a le bon suffix
-                stmp = suffix( itr->leaf() );
+                stmp = suffix( itr->path().filename().string() );
                 vector<string>::iterator it;
                 if ((it = find(listHeaderSuffix.begin(),listHeaderSuffix.end(),stmp)) != listHeaderSuffix.end())
                     addFileSource(itr->path().string().c_str());
@@ -121,7 +121,7 @@ void Documentation::addDirSource( const char* name_dir,vector<string>& listsourc
                     listsource.push_back( stmp );
                 //op.analyse(itr->path().string());
             } else
-                cerr << " le fichier " << itr->leaf() << " n'est pas régulier " << endl;
+                cerr << " le fichier " << itr->path().filename().string() << " n'est pas régulier " << endl;
 
         }
     }
@@ -781,7 +781,7 @@ void Documentation::generate_index() {
     pageWeb<< "<td><a href=\"list_touteslesclasses.html\">Toutes les classes</a></td>" << std::endl; // CODAGE en DUR   -> pas bien
     stmp = "metil";
     list_webpage.push_back(stmp);
-    stmp2 = "Metil";
+    stmp2 = "METIL";
     list_titre_of_webpage.push_back(stmp2);
     pageWeb<< "<td><a href=\"" << "webpage_"+stmp <<".html\"> " << stmp2 << " </a></td>" << std::endl; // CODAGE en DUR   -> pas bien
     pageWeb<< " </tr>"  << std::endl;
@@ -789,7 +789,11 @@ void Documentation::generate_index() {
     pageWeb<< " <tr>"  << std::endl;
     pageWeb<< "<td><a href=\"list_touslesexemples.html\">Exemples</a></td>" << std::endl;
     pageWeb<< "<td><a href=\"list_touteslesfonctions.html\">Toutes les fonctions</a></td>" << std::endl;
-    pageWeb<< "<td></td>" << std::endl;
+    stmp = "kdevelop";
+    list_webpage.push_back(stmp);
+    stmp2 = "kdevelop";
+    list_titre_of_webpage.push_back(stmp2);
+    pageWeb<< "<td><a href=\"" << "webpage_"+stmp <<".html\"> " << stmp2 << " </a></td>" << std::endl; // CODAGE en DUR   -> pas bien
     pageWeb<< " </tr>"  << std::endl;
 
     pageWeb<< " <tr>"  << std::endl;
@@ -839,7 +843,7 @@ void Documentation::generate_index() {
     pageWeb<< " <tr>"  << std::endl;
     pageWeb<< "<td></td>" << std::endl;
     pageWeb<< "<td></td>" << std::endl;
-    stmp = "report_test__" + name_software + ".html";
+    stmp = "report.html";
     pageWeb<< "<td><a href=\"" << stmp << "\" > Rapport des tests unitaires </a></td>" << std::endl; // CODAGE en DUR   -> pas bien
     pageWeb<< " </tr>"  << std::endl;    
     

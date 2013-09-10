@@ -20,7 +20,7 @@ namespace LMT {
     A FAIRE : apply_wi a d'autres syntaxes utilisées en interne. J'en parlerai plus tard.
 
     \keyword Fonctionalité/Transformer
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
     \author Hugo Leclerc
 */
@@ -42,7 +42,7 @@ namespace LMT {
     \relates Vec
     \keyword Fonctionalité/Transformer
     \friend hugo.leclerc@lmt.ens-cachan.fr
-    \friend raphel.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
 */
 
 /*!
@@ -58,7 +58,7 @@ namespace LMT {
     \keyword Fonctionalité/Extraire
     \relates Vec 
     \friend hugo.leclerc@lmt.ens-cachan.fr
-    \friend rapahel.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
 */
 
 /*!
@@ -74,7 +74,7 @@ namespace LMT {
     \keyword Fonctionalité/Transformer
     \relates Vec 
     \friend hugo.leclerc@lmt.ens-cachan.fr
-    \friend rapahel.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
 */
 
 /*!
@@ -113,7 +113,7 @@ namespace LMT {
     \relates Vec 
     \relates apply
     \friend hugo.leclerc@lmt.ens-cachan.fr
-    \friend rapahel.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
 */
 
 /*!
@@ -165,7 +165,7 @@ namespace LMT {
     \relates Vec 
     \relates apply
     \friend hugo.leclerc@lmt.ens-cachan.fr
-    \friend rapahel.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
 */
 
 

@@ -11,7 +11,7 @@ namespace LMT {
 
     RatPolApprox est une classe qui représente les fonctions rationnelles dont le degré du numérateur et dénominateur sont fixés à la compilation.
 
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
     \keyword Mathématiques/Objet
 */

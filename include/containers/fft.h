@@ -55,7 +55,7 @@ namespace LMT {
         
 
     \relates Vec
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
 */
 class FFT {
 public:

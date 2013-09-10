@@ -1,7 +1,35 @@
 /*!
-\webpage scons scons
+\webpage scons Scons
 
-    Page en construction.
+    <strong> SCons </strong> est un moteur de production libre. SCons est un remplaçant de l'utilitaire classique make avec des fonctionnalités intégrées similaires à autoconf/automake et des caches pour compilateur tels que ccache. En comparaison avec les outils plus anciens, SCons vise à être plus facile à utiliser, plus sûr et plus rapide
+
+    = Fonctionnalités
+        # Les fichiers de configuration sont des scripts Python, ce qui signifie que des constructions écrites par l'utilisateur ont accès à un langage de programmation complet généraliste.
+
+        # Analyse automatique des dépendances pour le C, le C++ et le Fortran. Contrairement à make, aucune commande supplémentaire comme "make depend" ou "make clean" n'est nécessaire pour obtenir toutes les dépendances. L'analyse de dépendances est facilement extensible grâce à des inspecteurs de dépendances définis par l'utilisateur pour d'autres langages ou d'autres types de fichiers. Contrairement à autotools, l'analyseur de dépendances intégré à gcc n'est pas utilisé. À la place, une recherche de "#include" est faite sur tous les fichiers source C/C++ avec une expression rationnelle. Pour une construction basée sur gcc, cela signifie qu'une génération de dépendances peut être plus lente (c'est-à-dire qu'un parcours supplémentaire est toujours requis) et moins sûre (dans le sens que des choses telles que les drapeaux du préprocesseur, comme -DSOMETHING, sont ignorées), mais elle est plus portable étant donné que le même parcours peut être employé pour des compilateurs autres que gcc.
+
+        # Support incorporé du C, C++, D, Java, Fortran, Yacc, Lex, Qt et SWIG, et de la construction de documents TeX et LaTeX. D'autres langages ou types de fichiers peuvent être supportés grâce à des constructeurs définis par l'utilisateur.
+
+        # Construction à partir de dépôts centraux de code source et/ou de cibles pré-construites.
+
+        # Support de la récupération de fichiers source à partir de SCCS, RCS, CVS, BitKeeper et Perforce.
+
+        # Support de Microsoft Visual Studio .NET et des anciennes versions de Visual Studio, incluant la génération de fichiers .dsp, .dsw, .sln et .vcproj.
+
+        # Détection de changements de contenus de fichier avec des signatures MD5; support optionnel et configurable des estampilles traditionnelles.
+
+        # Support des constructions parallèles qui conservent le nombre spécifié de tâches simultanées sans tenir compte de la hiérarchie des répertoires.
+
+        # Support intégré à la autoconf pour trouver les fichiers #include, les bibliothèques, les fonctions et les typedefs.
+
+        # Vue globale de toutes les dépendances, afin que des passes multiples de constructions ou des ré-ordonnancements de cibles ne soient pas nécessaires.
+
+        # Possibilité de partager les fichiers construits dans un cache pour accélérer les constructions multiples - comme ccache mais pour n'importe quel type de fichier cible, pas seulement pour la compilation C/C++.
+
+        # Conçu pour des constructions multi-plateformes, et connu pour fonctionner sous Linux, et d'autres systèmes POSIX (parmi lesquelles AIX, systèmes *BSD, HP/UX, IRIX et Solaris), Windows NT, Mac OS X et OS/2
+
+
+    Pour avoir plus d'informations   [[http://www.scons.org|Le site de SCons]]
     
 
 

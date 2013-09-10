@@ -182,7 +182,7 @@ void display_graph_rec( std::ostream &os, const Lexem *t, unsigned level, unsign
         // children
         for(j=0;j<2;++j) {
             if ( t->children[j] ) {
-                display_graph_rec( os, t->children[j], level+1, max_level );
+                display_graph_rec( os, t->children[j], level+1, max_level, avoid );
                 os << "  node" << t << " -> node" << t->children[j] << ";\n";
             }
         }

@@ -517,7 +517,7 @@ void extract_DataArray( std::map< std::string, DataArray > & v, const XmlNode& x
     WARNING : elle ne marche que pour les champs scalaires ou vectoriels donc pas les matrices symétriques et autres structures plus complexes.
 
     \keyword Maillage/Import
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
 */
 template<class TM>
 void read_vtu(TM &m, const char* filename ) {

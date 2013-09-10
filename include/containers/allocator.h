@@ -54,7 +54,7 @@ extern std::map<std::string,long long> total_allocated;
         et après, disp_alloc("toto"); affichera toto puis une liste de types d'objets et la place qu'ils prennent en mémoire.
         ou sum_alloc(); renvoie la taille totale utilisée par les objets LMTpp
     
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
 */
 inline void disp_alloc(const char *prefix="") {
     long long s = 0;

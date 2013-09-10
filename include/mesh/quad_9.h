@@ -21,7 +21,7 @@ namespace LMT {
     \relates Mesh
     \relates Element
     \keyword Maillage/Elément
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
 */
 struct Quad_9 {

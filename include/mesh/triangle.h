@@ -20,7 +20,7 @@ namespace LMT {
     \keyword Maillage/Elément
     \author Hugo LECLERC
     \friend hugo.leclerc@lmt.ens-cachan.fr
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
 */
 
 // --------------------------------------------------------------------------------------------------------

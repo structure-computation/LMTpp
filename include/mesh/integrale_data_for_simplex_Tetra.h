@@ -18,7 +18,7 @@ namespace LMT {
     
     Le code a été généré à partir de la classe \a Integration_data_of_simplex<dim,T>.
     
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
 */
 inline const double *integration_data_for_order( unsigned order, const Tetra &elem ) { /// order -> degre total du polynome a integrer exactement
     static const unsigned offset[] = { 0, 4, 24, 84, 224, 500, 1000, 1836, 3136, 5092, 7928, 11868 };

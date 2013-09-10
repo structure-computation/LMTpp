@@ -10,7 +10,7 @@
     = Signaler un bug
 
         En fait, la librairie a été beaucoup testé et si votre programme plante ou si les résultats ne sont pas conformes, il est fort probable que vous ayez fait une erreur. La plus courante est un accès en lecture ou en écriture sur des éléments d'un tableau non initialisés. Demandez aussi à vos voisins de vérifier votre code.
-        Sinon, envoyez un exemple simple de code où se situe l'erreur à \a hugo.leclerc@lmt.ens-cachan.fr ou à \a raphael.pasquier@lmt.ens-cachan.fr .
+        Sinon, envoyez un exemple simple de code où se situe l'erreur à \a hugo.leclerc@lmt.ens-cachan.fr ou à \a samir.amrouche@lmt.ens-cachan.fr.
 
     = Ecrire du code
 

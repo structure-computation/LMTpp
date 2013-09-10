@@ -1,7 +1,7 @@
 /*!
 \example Exemples d'utilisation des vecteurs hétérogènes
 
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
 
     = Définition d'un vecteur hétérogène.

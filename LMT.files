@@ -663,4 +663,8 @@ include/mesh/MeshCoulour.h
 include/mesh/make_sub_mesh.h
 include/containers/vecasm_decl.h
 tests/test_Solver.cpp
+<<<<<<< HEAD
 tests/test_Print.cpp
+=======
+tests/include/containers/header_linker_test.h
+>>>>>>> 84970ab377c8efe2513bcdc32b420f113cc95188

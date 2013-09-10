@@ -105,7 +105,7 @@ int load_image( std::string file, Mat &m, int ceil_size = 1, int border_size = 0
 
 
     \keyword Utilitaires
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
     \keyword Mathématiques/Algèbre linéaire/Opération   
     \keyword Fonctionalité/Affichage  

@@ -20,7 +20,7 @@ namespace LMT {
 /*!
     PackedVectorOfVector est un type servant à stocker plusieurs vecteurs les uns après les autres dans un unique vecteur. 
 
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
 */
 template<class T>

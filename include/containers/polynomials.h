@@ -821,7 +821,7 @@ void ret_roots_degree_4( const Vec<T, s>& coefs, Vec< complex<T> >& res) {
                 Vec<complex<T> > V=P.roots(); 
 
     \friend camille.gouttebroze@lmt.ens-cachan.fr
-    \friend raphael.pasquier@lmt.ens-cachan.fr
+    \friend samir.amrouche@lmt.ens-cachan.fr
     \friend hugo.leclerc@lmt.ens-cachan.fr
 
     \brief polynômes à une ou plusieurs indéterminées et de degré quelconque bornés
