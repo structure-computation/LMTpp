@@ -30,12 +30,12 @@ namespace LMT {
 #endif
 #define DEBUGASSERTWC(cond,comm) DEBUGASSERT(cond)
 
-#ifndef PRINT
+// #ifndef PRINT
 #define PRINT( A ) \
     std::cout << "  " << __STRING(A) << std::flush << " -> " << (A) << std::endl
 #define PRINTN( A ) \
     std::cout << "  " << __STRING(A) << std::flush << " ->\n" << (A) << std::endl
-#endif
+// #endif
 
 #define PRINTCERR( A ) \
      std::cerr << "  " << __STRING(A) << std::flush << " -> " << (A) << std::endl
