@@ -3,12 +3,15 @@ dep = Variable( unknown=True, nb_dim=[dim], default_value='0.0', unit='m' )
 dep_sens = Variable( nb_dim=[dim], default_value='0.0', unit='m' )
 dep_sv = Variable( nb_dim=[dim], default_value='0.0', unit='m' )
 dep_sv1 = Variable( nb_dim=[dim], default_value='0.0', unit='m' )
+f_nodal = Variable( nb_dim=[dim], default_value='0.0', unit='m' )
 
 lum = Variable( unknown=True, default_value='1.0', unit='1' )
 
 normal = Variable( nb_dim=[dim], default_value='0.0', unit='1' )
 
 epsilon = Variable( interpolation='der_nodal', default_value='0', nb_dim=[dim*(dim+1)/2], unit='1' )
+sigma      = Variable( interpolation='der_nodal', default_value='0', nb_dim=[dim*(dim+1)/2], unit='N/m^2' )
+sigma_p    = Variable( interpolation='elementary', default_value='0', nb_dim=[dim*(dim+1)/2], unit='N/m^2' )
 
 # --------------------------------------------------------------------------------------------------------------------------------
 def formulation():
@@ -36,6 +39,7 @@ def apply_on_elements_after_solve(unk_subs):
         cw.add( epsilon[i], 'elem.epsilon[0]['+str(i)+']', Write_code.Set )
         
     return cw.to_string()
+
 
 
 

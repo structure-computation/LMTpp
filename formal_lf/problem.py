@@ -15,7 +15,7 @@ class Problem:
             formulations,
             elements,
             dim='nvi',
-            incpaths=['.','LMT/formulations'],
+            incpaths=['.','LMT/formulations','LMTpp/formulations'],
             options={},
             additional_fields = {}):
         self.name = name
@@ -319,7 +319,7 @@ class Problem:
         output.write( '\n' )
         output.write( '#endif // PROBLEM_' + ifndef + '\n' )
 
-def write_pb(name,formulations,elements,dim='nvi',output=sys.stdout,incpaths=['.','LMT/formulations'],options={},additional_fields={},types=['double'],name_der_vars=[]):
+def write_pb(name,formulations,elements,dim='nvi',output=sys.stdout,incpaths=['.','LMT/formulations','LMTpp/formulations','../formulations','../../LMT/formulations'],options={},additional_fields={},types=['double'],name_der_vars=[]):
     """    dim -> for one element, say number of dimension we need
         Ex : write_pb('toto',[...],['Triangle','Tetra'],'3') -> Triangle and Tetra will cohabite in a mesh in 3D
         Ex : write_pb('toto',[...],['Triangle','Tetra'],'nvi') -> 2 meshes will be created. One in 2D with triangles and one in 3D with tetras

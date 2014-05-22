@@ -4,7 +4,7 @@ from include.codegen import *
 import os, math, sys, string
 
 class Element:
-    def __init__(self,name_elem,dim,incpaths=['.','LMT/formulations','formulations'],name_file=None):
+    def __init__(self,name_elem,dim,incpaths=['.','formulations','LMTpp/formulations'],name_file=None):
       """ Formal element """
       if not name_file:
         name_file = 'element_'+name_elem+'.py'
@@ -13,6 +13,7 @@ class Element:
             if os.access( inc+name_file, os.F_OK ):
                 name_file = inc+name_file
                 break
+
         else:
             raise NameError, 'impossible to find %s in %s'%(name_file,incpaths)
 
